@@ -1,5 +1,5 @@
-import { Outlet } from "react-router";
-import type { Route } from "./+types/auth.layout";
+import SectionLayout from "~/components/layouts/sections";
+import type { Route } from "./+types/dashboard";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -14,8 +14,8 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   return (
-    <main className="flex min-h-screen flex-col">
-      <Outlet />
-    </main>
+    <SectionLayout>
+      <h1>New Route</h1>
+    </SectionLayout>
   );
 }

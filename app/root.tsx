@@ -1,4 +1,3 @@
-import { ClerkProvider } from "@clerk/clerk-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   isRouteErrorResponse,
@@ -44,24 +43,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 const queryClient = new QueryClient();
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key");
-}
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
-      <ClerkProvider
-        publishableKey={PUBLISHABLE_KEY}
-        signInUrl={ROUTES.AUTH.LOGIN}
-        signUpUrl={ROUTES.AUTH.REGISTER}
-        afterSignOutUrl={ROUTES.HOME}
-      >
-        <Outlet />
-      </ClerkProvider>
+      <Outlet />
     </QueryClientProvider>
   );
 }

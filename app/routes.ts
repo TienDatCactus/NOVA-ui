@@ -7,18 +7,15 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
-  index("routes/home/home.tsx"),
   ...prefix("auth", [
     route("login", "routes/auth/login.tsx"),
-    route("register", "routes/auth/register.tsx"),
+    route("forgot-password", "routes/auth/forgot-password.tsx"),
+    route("verify-otp", "routes/auth/verify-otp.tsx"),
   ]),
   layout("layouts/auth.layout.tsx", [
-    ...prefix("trip", [
-      layout("layouts/trip.layout.tsx", [
-        index("routes/trip/trip.tsx"),
-        route("new", "routes/trip/trip-create.tsx"),
-        route(":tripId", "routes/trip/trip-detail.tsx"),
-      ]),
+    route("services", "routes/services/services.tsx"),
+    route("dashboard", "layouts/dashboard.layout.tsx", [
+      index("routes/dashboard/dashboard.tsx"),
     ]),
   ]),
 ] satisfies RouteConfig;
