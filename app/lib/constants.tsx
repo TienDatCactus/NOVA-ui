@@ -1,9 +1,16 @@
 import {
+  BadgeQuestionMark,
   Bath,
   ClipboardMinus,
+  HandPlatter,
   Handshake,
+  HousePlus,
   IdCardLanyard,
   LayoutDashboard,
+  ReceiptText,
+  Search,
+  Settings,
+  Users,
   Warehouse,
 } from "lucide-react";
 import type { JSX } from "react";
@@ -69,4 +76,87 @@ const SERVICES_ITEMS: Array<{
   },
 ];
 
-export { NAV_ITEMS, SERVICES_ITEMS };
+const DASHBOARD_ITEMS_RECEPTIONIST: Array<{
+  id: number;
+  title: string;
+  icon: JSX.Element;
+  href: string;
+  children?: Array<{ title: string; href: string }>;
+}> = [
+  {
+    id: 1,
+    title: "Đặt phòng",
+    icon: <HousePlus />,
+    href: "/dashboard/reservation",
+  },
+  {
+    id: 2,
+    title: "Buồng phòng",
+    icon: <Bath />,
+    href: "/dashboard/rooms",
+  },
+  {
+    id: 3,
+    title: "Khách hàng",
+    icon: <Users />,
+    href: "/dashboard/customers",
+  },
+  {
+    id: 4,
+    title: "Dịch vụ",
+    icon: <HandPlatter />,
+    href: "/dashboard/services",
+  },
+  {
+    id: 5,
+    title: "Hóa đơn",
+    icon: <ReceiptText />,
+    href: "/dashboard/invoices",
+  },
+];
+const SUB_DASHBOARD_ITEMS: Array<{
+  id: number;
+  title: string;
+  icon: JSX.Element;
+  href: string;
+}> = [
+  {
+    id: 1,
+    title: "Cài đặt",
+    icon: <Settings />,
+    href: "/dashboard",
+  },
+  {
+    id: 2,
+    title: "Tìm kiếm",
+    icon: <Search />,
+    href: "/dashboard",
+  },
+  {
+    id: 3,
+    title: "Trợ giúp",
+    icon: <BadgeQuestionMark />,
+    href: "/dashboard",
+  },
+];
+
+const ROOM_COUNT = 13;
+const DAYS_COUNT = 7;
+const SUBS_PER_DAY = 2;
+const headerRows = 1;
+const rowHeight = 64; // increased cell height for readability
+const firstColWidth = 220;
+const totalSubCols = DAYS_COUNT * SUBS_PER_DAY;
+export {
+  NAV_ITEMS,
+  SERVICES_ITEMS,
+  DASHBOARD_ITEMS_RECEPTIONIST,
+  SUB_DASHBOARD_ITEMS,
+  ROOM_COUNT,
+  DAYS_COUNT,
+  SUBS_PER_DAY,
+  headerRows,
+  rowHeight,
+  firstColWidth,
+  totalSubCols,
+};

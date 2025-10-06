@@ -1,4 +1,5 @@
-import type { Route } from "./+types/services";
+import RoomWeekScheduler from "~/features/scheduler";
+import type { Route } from "./+types/reservation";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -15,7 +16,7 @@ export default function Component({
   return (
     <div>
       {/* Frontend Code here. */}
-      <h1>New Route</h1>
+      <RoomWeekScheduler />
     </div>
   );
 }

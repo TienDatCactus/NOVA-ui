@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CircleAlert } from "lucide-react";
 import { Link } from "react-router";
 import SectionLayout from "~/components/layouts/sections";
 import { Button } from "~/components/ui/button";
@@ -6,6 +6,7 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -13,6 +14,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import type { Route } from "./+types/forgot-password";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -27,44 +29,44 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   return (
-    <SectionLayout center>
-      <Card className="w-96 ">
-        <CardHeader>
-          <CardTitle>Forgot your account?</CardTitle>
-          <CardAction>
-            <Button asChild variant="ghost" size={"sm"}>
-              <Link to="/auth/login" className="hover:underline">
-                <ArrowLeft />
-                Return
-              </Link>
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <form>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-                <div className="text-sm text-muted-foreground">
-                  Enter your email and we will send you a link to reset your
-                  password.
-                </div>
+    <Card className="w-124 pb-0 max-w-md shadow-none border-none">
+      <CardHeader>
+        <CardTitle>Thay đổi mật khẩu</CardTitle>
+        <CardDescription>
+          <Alert variant="default">
+            <CircleAlert />
+            <AlertTitle>Lưu ý!</AlertTitle>
+            <AlertDescription>
+              Giới hạn gửi yêu cầu thay đổi mật khẩu là 5 lần
+            </AlertDescription>
+          </Alert>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form>
+          <div className="flex flex-col">
+            <div className="grid gap-2">
+              <Input id="email" type="text" placeholder="Mã quản lý" required />
+              <div className="text-sm text-muted-foreground">
+                Gửi yêu cầu thay đổi mật khẩu bằng mã quản lý
               </div>
             </div>
-          </form>
-        </CardContent>
-        <CardFooter className="flex-col gap-2">
-          <Button asChild size={"lg"} type="submit" className="w-full">
-            <Link to="/auth/verify-otp">Send</Link>
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter className="flex-col gap-2">
+        <Button asChild size={"lg"} type="submit" className="w-full">
+          <Link to="/auth/verify-otp">Gửi yêu cầu</Link>
+        </Button>
+        <div className="w-full flex justify-end">
+          <Button asChild variant="ghost" size={"sm"}>
+            <Link to="/auth/login" className="hover:underline ">
+              <ArrowLeft />
+              Quay lại đăng nhập
+            </Link>
           </Button>
-        </CardFooter>
-      </Card>
-    </SectionLayout>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }

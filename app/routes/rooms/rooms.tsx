@@ -1,4 +1,4 @@
-import type { Route } from "./+types/services";
+import type { Route } from "./+types/rooms";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -12,10 +12,5 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return (
-    <div>
-      {/* Frontend Code here. */}
-      <h1>New Route</h1>
-    </div>
-  );
+  return <div>{/* Frontend Code here. */}</div>;
 }

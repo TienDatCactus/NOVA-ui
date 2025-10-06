@@ -2,8 +2,8 @@ import React, { useEffect, useState, type ComponentProps } from "react";
 import { cn } from "~/lib/utils";
 import { Skeleton } from "./skeleton";
 interface ImageProps {
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   src: string;
   alt?: string;
   addBaseUrl?: boolean;
