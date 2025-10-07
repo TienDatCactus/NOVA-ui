@@ -1,7 +1,7 @@
 import { Accessibility, Expand, Minimize, User2 } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
-import { Link, useLocation } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useSearchParams } from "react-router";
 import { Divider } from "~/components/ui/divider";
 import {
   Sidebar,
@@ -211,6 +211,13 @@ function ExpandedSidebar({
 export default function DashboardSidebar() {
   const curPath = useLocation().pathname;
   const [mode, setMode] = useState<"compact" | "expanded">("compact");
+  const [_, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    setSearchParams((prev) => {
+      prev.set("sidebar", mode);
+      return prev;
+    });
+  }, [mode]);
   return (
     <>
       {mode === "expanded" ? (

@@ -14,7 +14,7 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   return (
-    <div>
+    <div className="">
       {/* Frontend Code here. */}
       <RoomWeekScheduler />
     </div>

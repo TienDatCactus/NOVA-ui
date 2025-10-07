@@ -140,6 +140,36 @@ const SUB_DASHBOARD_ITEMS: Array<{
   },
 ];
 
+const RESERVATION_NAV_ITEMS: Array<{
+  icon?: JSX.Element;
+  title: string;
+  href: string;
+  children?: Array<{ title: string; href: string }>;
+}> = [
+  {
+    icon: <HousePlus size={16} />,
+    title: "Lịch đặt phòng",
+    href: "/dashboard/reservation/bookings",
+    children: [
+      { title: "Sơ đồ", href: "/dashboard/reservation/bookings?view=grid" },
+      {
+        title: "Timeline",
+        href: "/dashboard/reservation/bookings?view=timeline",
+      },
+      { title: "Danh sách", href: "/dashboard/reservation/bookings?view=list" },
+    ],
+  },
+  {
+    icon: <ReceiptText size={16} />,
+    title: "Hóa đơn",
+    href: "/dashboard/reservation/new",
+  },
+  {
+    icon: <ClipboardMinus size={16} />,
+    title: "Báo cáo Lễ tân",
+    href: "/dashboard/reservation/new",
+  },
+];
 const ROOM_COUNT = 13;
 const DAYS_COUNT = 7;
 const SUBS_PER_DAY = 2;
@@ -159,4 +189,5 @@ export {
   rowHeight,
   firstColWidth,
   totalSubCols,
+  RESERVATION_NAV_ITEMS,
 };
