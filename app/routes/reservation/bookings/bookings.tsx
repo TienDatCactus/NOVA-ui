@@ -1,4 +1,5 @@
-import type { Route } from "./+types/reservation";
+import RoomWeekScheduler from "~/features/scheduler";
+import type { Route } from "./+types/bookings";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -12,5 +13,10 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return <div className="">{/* Frontend Code here. */}</div>;
+  return (
+    <div>
+      {/* Frontend Code here. */}
+      <RoomWeekScheduler />
+    </div>
+  );
 }

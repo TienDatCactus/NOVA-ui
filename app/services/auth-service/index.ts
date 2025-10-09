@@ -1,6 +1,10 @@
-// const login = ()=> ; http handler
-const refresh = async () => {};
-const login = async () => {};
+const login = async () => {
+  try {
+  } catch (error) {
+    console.error(error);
+  }
+};
 const logout = async () => {};
 const changePassword = async () => {};
-export const AuthService = { refresh, login, logout, changePassword };
+const verifyOTP = async () => {};
+export const AuthService = { verifyOTP, login, logout, changePassword };

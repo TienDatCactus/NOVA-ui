@@ -1,7 +1,6 @@
 import { Accessibility, Expand, Minimize, User2 } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
-import { Link, useLocation, useSearchParams } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Divider } from "~/components/ui/divider";
 import {
   Sidebar,
@@ -20,7 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { useIsMobile } from "~/hooks/use-mobile";
+import { useSidebar } from "~/context/SidebarContext";
 import {
   DASHBOARD_ITEMS_RECEPTIONIST,
   SUB_DASHBOARD_ITEMS,
@@ -32,19 +31,15 @@ type SidebarItem = {
   [key: string]: any;
 };
 interface SidebarItemListProps {
-  mode: "compact" | "expanded";
-  setMode: React.Dispatch<React.SetStateAction<"compact" | "expanded">>;
   items: SidebarItem[];
   renderItem: (item: SidebarItem, focused: boolean) => React.ReactNode;
 }
 function SidebarItemList({
-  mode,
-  setMode,
   items,
   renderItem,
 }: SidebarItemListProps): React.ReactNode {
   const curPath = useLocation().pathname;
-
+  const { setMode } = useSidebar();
   return (
     <ul className={cn("flex  w-fit rounded-full p-2 gap-4 border shadow-s")}>
       {items.map((item) => (
@@ -100,13 +95,7 @@ function SidebarItem({
   );
 }
 
-function CompactSidebar({
-  mode,
-  setMode,
-}: {
-  mode: "compact" | "expanded";
-  setMode: React.Dispatch<React.SetStateAction<"compact" | "expanded">>;
-}) {
+function CompactSidebar() {
   return (
     <div
       className={cn(
@@ -115,8 +104,6 @@ function CompactSidebar({
     >
       <div className={cn("flex bg-white justify-center h-full shadow-sidebar")}>
         <SidebarItemList
-          mode={mode}
-          setMode={setMode}
           items={DASHBOARD_ITEMS_RECEPTIONIST}
           renderItem={(item, focused) => (
             <SidebarItem item={item} focused={focused} />
@@ -129,10 +116,10 @@ function CompactSidebar({
 
 function ExpandedSidebar({
   curPath,
-  setMode,
+  toggle,
 }: {
   curPath: string;
-  setMode: React.Dispatch<React.SetStateAction<"compact" | "expanded">>;
+  toggle: () => void;
 }) {
   return (
     <Sidebar className="h-screen bg-white shadow-s">
@@ -144,7 +131,7 @@ function ExpandedSidebar({
             </SidebarMenuButton>
             <SidebarMenuButton
               className="w-fit cursor-pointer"
-              onClick={() => setMode("compact")}
+              onClick={toggle}
             >
               <Minimize />
             </SidebarMenuButton>
@@ -210,20 +197,13 @@ function ExpandedSidebar({
 }
 export default function DashboardSidebar() {
   const curPath = useLocation().pathname;
-  const [mode, setMode] = useState<"compact" | "expanded">("compact");
-  const [_, setSearchParams] = useSearchParams();
-  useEffect(() => {
-    setSearchParams((prev) => {
-      prev.set("sidebar", mode);
-      return prev;
-    });
-  }, [mode]);
+  const { mode, toggle } = useSidebar();
   return (
     <>
       {mode === "expanded" ? (
-        <ExpandedSidebar setMode={setMode} curPath={curPath} />
+        <ExpandedSidebar toggle={toggle} curPath={curPath} />
       ) : (
-        <CompactSidebar setMode={setMode} mode={mode} />
+        <CompactSidebar />
       )}
     </>
   );
