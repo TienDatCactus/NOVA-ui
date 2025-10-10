@@ -33,28 +33,6 @@ http.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-http.interceptors.response.use(
-  (response) => parseBody(response),
-  async (error) => {
-    if (error) {
-      const originalRequest = error.config;
-      if (error.status === 401) {
-        try {
-          // const rs = await AuthService.refresh();
-          // const { accessToken } = rs.data;
-          // setStorage(STORAGE.TOKEN, accessToken);
-          // http.defaults.headers.common["Authorization"] =
-          //   `Bearer ${accessToken}`;
-          // originalRequest._retry = true;
-          return http(originalRequest);
-        } catch (err) {
-          clearStorage();
-          return Promise.reject(error);
-        }
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+http.interceptors.response.use((response) => parseBody(response));
 
 export default http;

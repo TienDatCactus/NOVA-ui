@@ -11,7 +11,7 @@ export default [
     ...prefix("auth", [
       route("login", "routes/auth/login.tsx"),
       route("forgot-password", "routes/auth/forgot-password.tsx"),
-      route("verify-otp", "routes/auth/verify-otp.tsx"),
+      route("reset-password", "routes/auth/reset-password.tsx"),
     ]),
   ]),
   layout("layouts/dashboard.layout.tsx", [

@@ -10,20 +10,24 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const login = useCallback(async (data: LoginDto) => {
+  const login = async (data: LoginDto) => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await AuthService.login(data);
+      toast.success("Đăng nhập thành công!");
       navigate(DASHBOARD.reservation.index);
       return response;
     } catch (err: any) {
-      setError(err.message || "Login failed. Please check your credentials.");
+      toast.error(
+        err.message && "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin."
+      );
+      setError(err.message);
       throw err;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   const logout = useCallback(() => {
     AuthService.logout();
@@ -31,16 +35,17 @@ export function useAuth() {
   }, []);
 
   const forgotPassword = useCallback(async (email: string) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      setIsLoading;
-      setIsLoading(true);
-      setError(null);
       const response = await AuthService.forgotPassword(email);
       toast.success("Yêu cầu thay đổi mật khẩu đã được gửi!");
-      navigate(AUTH.verifyOtp);
+      navigate(AUTH.resetPassword);
       return response;
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      toast.error(err.message && "Gửi yêu cầu thay đổi mật khẩu thất bại.");
+      setError(err.message);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +60,8 @@ export function useAuth() {
       navigate(AUTH.login);
       return response;
     } catch (err: any) {
-      setError(err.message || "Failed to reset password.");
+      toast.error(err.message && "Thay đổi mật khẩu thất bại.");
+      setError(err.message);
       throw err;
     } finally {
       setIsLoading(false);
