@@ -11,17 +11,21 @@ export default [
     ...prefix("auth", [
       route("login", "routes/auth/login.tsx"),
       route("forgot-password", "routes/auth/forgot-password.tsx"),
-      route("verify-otp", "routes/auth/verify-otp.tsx"),
+      route("reset-password", "routes/auth/reset-password.tsx"),
     ]),
   ]),
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
-      index("routes/dashboard/dashboard.tsx"),
-      route("reservation", "routes/reservation/reservation.tsx"),
+      ...prefix("reservation", [
+        index("routes/reservation/reservation.tsx"),
+        route("bookings", "routes/reservation/bookings/bookings.tsx"),
+        route("invoices", "routes/reservation/invoices/invoices.tsx"),
+      ]),
       route("rooms", "routes/rooms/rooms.tsx"),
       route("services", "routes/services/services.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("customers", "routes/customers/customers.tsx"),
     ]),
   ]),
+  route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;
