@@ -1,4 +1,4 @@
-import type { Route } from "./+types/reservation";
+import type { Route } from "./+types/not-found";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -12,5 +12,5 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return <div className="">{/* Frontend Code here. */}</div>;
+  return <div>404 - Not Found</div>;
 }

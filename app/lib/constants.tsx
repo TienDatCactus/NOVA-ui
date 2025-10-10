@@ -147,6 +147,11 @@ const RESERVATION_NAV_ITEMS: Array<{
   children?: Array<{ title: string; href: string }>;
 }> = [
   {
+    icon: <ClipboardMinus size={16} />,
+    title: "Báo cáo Lễ tân",
+    href: "/dashboard/reservation",
+  },
+  {
     icon: <HousePlus size={16} />,
     title: "Lịch đặt phòng",
     href: "/dashboard/reservation/bookings",
@@ -164,11 +169,16 @@ const RESERVATION_NAV_ITEMS: Array<{
     title: "Hóa đơn",
     href: "/dashboard/reservation/new",
   },
-  {
-    icon: <ClipboardMinus size={16} />,
-    title: "Báo cáo Lễ tân",
-    href: "/dashboard/reservation/new",
-  },
+];
+const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];
+const BOOKING_CHANNEL = [
+  "Agoda",
+  "Booking.com", // Hoặc 'Booking.com' sau khi đã sửa
+  "Expedia",
+  "Ctrip",
+  "BnB",
+  "Direct",
+  "Công Ty",
 ];
 const ROOM_COUNT = 13;
 const DAYS_COUNT = 7;
@@ -190,4 +200,6 @@ export {
   firstColWidth,
   totalSubCols,
   RESERVATION_NAV_ITEMS,
+  ROOM_TYPE,
+  BOOKING_CHANNEL,
 };

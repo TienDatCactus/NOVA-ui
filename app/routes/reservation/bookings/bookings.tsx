@@ -1,5 +1,5 @@
-import SectionLayout from "~/components/layouts/sections";
-import type { Route } from "./+types/dashboard";
+import RoomWeekScheduler from "~/features/scheduler";
+import type { Route } from "./+types/bookings";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -14,8 +14,9 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   return (
-    <SectionLayout>
-      <h1>New Route</h1>
-    </SectionLayout>
+    <div>
+      {/* Frontend Code here. */}
+      <RoomWeekScheduler />
+    </div>
   );
 }

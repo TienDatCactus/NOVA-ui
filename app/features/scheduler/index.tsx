@@ -1,4 +1,5 @@
 // RoomWeekScheduler_shadcnStyle.tsx
+import { addMinutes, format, startOfMinute } from "date-fns";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,6 +12,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   DAYS_COUNT,
   firstColWidth,
@@ -162,8 +164,24 @@ export default function RoomWeekScheduler() {
   const [now, setNow] = useState<Date>(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60000);
-    return () => clearInterval(timer);
+    let timerId: any;
+
+    const currentTime = new Date();
+    const startOfNextMinute = addMinutes(startOfMinute(currentTime), 1);
+    const delay = startOfNextMinute.getTime() - currentTime.getTime();
+
+    const timeoutId = setTimeout(() => {
+      setNow(new Date());
+
+      timerId = setInterval(() => {
+        setNow(new Date());
+      }, 60000);
+    }, delay);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(timerId);
+    };
   }, []);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
@@ -248,10 +266,8 @@ export default function RoomWeekScheduler() {
   const indicatorTop = headerRows * rowHeight;
   const indicatorHeight = ROOM_COUNT * rowHeight;
 
-  /* ---------- Render ---------- */
   return (
     <div className="p-4 ">
-      {/* header controls */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Button
@@ -271,7 +287,7 @@ export default function RoomWeekScheduler() {
       </div>
 
       {/* outer scroll container */}
-      <div className="border rounded shadow-s ">
+      <ScrollArea className="border rounded shadow-s ">
         {/* grid that looks like a table (shadcn-style classes can replace DOM here) */}
         <div
           ref={gridRef}
@@ -412,21 +428,17 @@ export default function RoomWeekScheduler() {
                     left: indicatorLeft,
                     top: indicatorTop - 24,
                     transform: "translateX(-50%)",
-                    zIndex: 60,
                   }}
                 >
                   <Badge className="text-xs px-2 py-0.5 rounded shadow-sm">
-                    {now.toLocaleTimeString("vi-VN", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {format(now, "HH:mm")}
                   </Badge>
                 </div>
               </>
             );
           })()}
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

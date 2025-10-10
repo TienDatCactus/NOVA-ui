@@ -1,6 +1,13 @@
 const Auth = {
-  login: "/login",
-  logout: "/logout",
-  register: "/register",
-  refresh: "/refresh",
+  login: "Auth/login",
+  logout: "Auth/logout",
+  forgotPassword: "Auth/forgot-password",
+  resetPassword: "Auth/reset-password",
 };
+
+const Booking = {
+  create: "Bookings",
+  get: "Bookings",
+};
+
+export { Auth, Booking };

@@ -1,32 +1,82 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import { DASHBOARD, AUTH } from "~/lib/fe-url";
+import { AuthService } from "~/services/auth-service";
+import type { LoginDto, ResetPasswordDto } from "~/services/auth-service/dto";
+import { useAuthStore } from "~/store/auth.store";
 
-function useForgotPassword() {
-  const [loading, setLoading] = useState(false);
-  const sendRequest = useCallback(() => {
+export function useAuth() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { setUser, clearUser } = useAuthStore();
+  const login = useCallback(async (data: LoginDto) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-    } catch (error) {
-      console.error(error);
+      const response = await AuthService.login(data);
+      setUser(response.user);
+      toast.success("Đăng nhập thành công!");
+      navigate(DASHBOARD.reservation.index);
+      return response;
+    } catch (err: any) {
+      toast.error(
+        err.message && "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin."
+      );
+      setError(err.message);
+      throw err;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, []);
-  useEffect(() => {}, []);
-  return { sendRequest, sendRequestLoading: loading };
-}
 
-function useLogin() {
-  const [loading, setLoading] = useState(false);
-  const login = useCallback(() => {
+  const logout = useCallback(() => {
+    AuthService.logout();
+    navigate(AUTH.login);
+    clearUser();
+  }, []);
+
+  const forgotPassword = useCallback(async (email: string) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-    } catch (error) {
-      console.error(error);
+      const response = await AuthService.forgotPassword(email);
+      toast.success("Yêu cầu thay đổi mật khẩu đã được gửi!");
+      navigate(AUTH.resetPassword);
+      return response;
+    } catch (err: any) {
+      toast.error(err.message && "Gửi yêu cầu thay đổi mật khẩu thất bại.");
+      setError(err.message);
+      throw err;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, []);
-  return { login, loginLoading: loading };
-}
 
-export { useForgotPassword, useLogin };
+  const resetPassword = useCallback(async (data: ResetPasswordDto) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await AuthService.resetPassword(data);
+      toast.success("Thay đổi mật khẩu thành công!");
+      navigate(AUTH.login);
+      return response;
+    } catch (err: any) {
+      toast.error(err.message && "Thay đổi mật khẩu thất bại.");
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return {
+    login,
+    logout,
+    resetPassword,
+    forgotPassword,
+    isLoading,
+    error,
+  };
+}
