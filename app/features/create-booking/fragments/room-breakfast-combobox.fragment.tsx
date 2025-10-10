@@ -56,7 +56,6 @@ export function Combobox({
   items: items = frameworks,
   disabled,
 }: ComboboxProps) {
-  console.log(disabled);
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger disabled={disabled} asChild>
