@@ -1,5 +1,4 @@
-import SectionLayout from "~/components/layouts/sections";
-import type { Route } from "./+types/dashboard";
+import type { Route } from "./+types/not-found";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -13,9 +12,5 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return (
-    <SectionLayout>
-      <h1>New Route</h1>
-    </SectionLayout>
-  );
+  return <div>404 - Not Found</div>;
 }

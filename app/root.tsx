@@ -11,7 +11,6 @@ import type { Route } from "./+types/root";
 import "./index.css";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ROUTES } from "./lib/definitions";
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {

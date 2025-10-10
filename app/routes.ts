@@ -16,7 +16,6 @@ export default [
   ]),
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
-      index("routes/dashboard/dashboard.tsx"),
       ...prefix("reservation", [
         index("routes/reservation/reservation.tsx"),
         route("bookings", "routes/reservation/bookings/bookings.tsx"),
@@ -28,4 +27,5 @@ export default [
       route("customers", "routes/customers/customers.tsx"),
     ]),
   ]),
+  route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

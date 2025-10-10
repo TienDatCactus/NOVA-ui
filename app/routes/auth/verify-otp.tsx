@@ -26,7 +26,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 
-export default function Component({
+export default function VerifyOTP({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
