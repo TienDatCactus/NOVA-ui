@@ -1,5 +1,11 @@
 import z from "zod";
 
+const UserSchema = z.object({
+  id: z.string(),
+  userName: z.string(),
+  fullName: z.string().optional(),
+  roles: z.array(z.string()).optional(),
+});
 const LoginSchema = z.object({
   userNameOrEmail: z.union([
     z.email("Email không hợp lệ"),
@@ -33,16 +39,12 @@ const LoginResponseSchema = z.object({
   accessToken: z.string(),
   expiresAtUtc: z.string(),
   tokenType: z.literal("Bearer"),
-  user: z.object({
-    id: z.string(),
-    userName: z.string(),
-    fullName: z.string().optional(),
-    roles: z.array(z.string()).optional(),
-  }),
+  user: UserSchema,
 });
 
 const useAuthSchema = () => {
   return {
+    UserSchema,
     LoginSchema,
     LoginResponseSchema,
     ResetPasswordSchema,

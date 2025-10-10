@@ -25,6 +25,7 @@ import {
   SUB_DASHBOARD_ITEMS,
 } from "~/lib/constants";
 import { cn } from "~/lib/utils";
+import { useAuthStore } from "~/store/auth.store";
 
 type SidebarItem = {
   id: number;
@@ -198,6 +199,7 @@ function ExpandedSidebar({
 export default function DashboardSidebar() {
   const curPath = useLocation().pathname;
   const { mode, toggle } = useSidebar();
+  const { user } = useAuthStore();
   return (
     <>
       {mode === "expanded" ? (

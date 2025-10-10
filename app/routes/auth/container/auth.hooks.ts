@@ -4,17 +4,19 @@ import { toast } from "sonner";
 import { DASHBOARD, AUTH } from "~/lib/fe-url";
 import { AuthService } from "~/services/auth-service";
 import type { LoginDto, ResetPasswordDto } from "~/services/auth-service/dto";
+import { useAuthStore } from "~/store/auth.store";
 
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const login = async (data: LoginDto) => {
+  const { setUser, clearUser } = useAuthStore();
+  const login = useCallback(async (data: LoginDto) => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await AuthService.login(data);
+      setUser(response.user);
       toast.success("Đăng nhập thành công!");
       navigate(DASHBOARD.reservation.index);
       return response;
@@ -27,11 +29,12 @@ export function useAuth() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const logout = useCallback(() => {
     AuthService.logout();
     navigate(AUTH.login);
+    clearUser();
   }, []);
 
   const forgotPassword = useCallback(async (email: string) => {
