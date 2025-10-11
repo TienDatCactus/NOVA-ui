@@ -58,7 +58,7 @@ export function Combobox({
 }: ComboboxProps) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger disabled={disabled} asChild>
+      <PopoverTrigger disabled={!disabled} asChild>
         <Button
           variant="outline"
           role="combobox"

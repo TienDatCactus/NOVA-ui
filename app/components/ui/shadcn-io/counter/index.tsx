@@ -46,7 +46,7 @@ function Counter({
           {...buttonProps}
           onClick={() => setNumber(number - 1)}
           className={cn(
-            "bg-white shadow-s dark:bg-neutral-950 hover:bg-white/70 dark:hover:bg-neutral-950/70 text-neutral-950 dark:text-white text-2xl font-light pb-[3px]",
+            "bg-white shadow-sm dark:bg-neutral-950 hover:bg-white/70 dark:hover:bg-neutral-950/70 text-neutral-950 dark:text-white text-2xl font-light pb-[3px]",
             buttonProps?.className
           )}
         >
@@ -66,7 +66,7 @@ function Counter({
           {...buttonProps}
           onClick={() => setNumber(number + 1)}
           className={cn(
-            "bg-white shadow-s dark:bg-neutral-950 hover:bg-white/70 dark:hover:bg-neutral-950/70 text-neutral-950 dark:text-white text-2xl font-light pb-[3px]",
+            "bg-white shadow-sm dark:bg-neutral-950 hover:bg-white/70 dark:hover:bg-neutral-950/70 text-neutral-950 dark:text-white text-2xl font-light pb-[3px]",
             buttonProps?.className
           )}
         >
