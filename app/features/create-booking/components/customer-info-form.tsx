@@ -138,7 +138,11 @@ function CustomerInfoForm() {
               )}
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div
+              className={cn("grid grid-cols-4 gap-2", {
+                "grid-cols-5": form.watch("bookingChannel") !== "Direct",
+              })}
+            >
               <FormField
                 control={form.control}
                 name="adults"
@@ -178,7 +182,11 @@ function CustomerInfoForm() {
                 control={form.control}
                 name="bookingChannel"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem
+                    className={cn("col-span-2", {
+                      "col-span-1": form.watch("bookingChannel") !== "Direct",
+                    })}
+                  >
                     <FormLabel>Kênh Đặt Phòng</FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -201,6 +209,26 @@ function CustomerInfoForm() {
                   </FormItem>
                 )}
               />
+              {form.watch("bookingChannel") !== "Direct" && (
+                <FormField
+                  control={form.control}
+                  name="bookingCode"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Mã Đặt Phòng</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="ABC123"
+                          className="w-full"
+                        ></Input>
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField

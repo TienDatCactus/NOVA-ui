@@ -9,7 +9,7 @@ import ProgressSteps from "~/components/ui/progress-step";
 import { cn } from "~/lib/utils";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import BookingConfirmation from "./components/booking-confirmation";
-import CustomerInfoForm from "./components/customer-infor-form";
+import CustomerInfoForm from "./components/customer-info-form";
 import RoomSelectionForm from "./components/room-selection-form";
 
 interface CreateBookingDialogProps {

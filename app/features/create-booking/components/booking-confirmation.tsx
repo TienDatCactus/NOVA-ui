@@ -1,18 +1,17 @@
 import { format, intervalToDuration } from "date-fns";
-import { CalendarIcon, CheckCheck, HandPlatter } from "lucide-react";
+import {
+  CalendarIcon,
+  CheckCheck,
+  CirclePlus,
+  HandPlatter,
+} from "lucide-react";
+import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { DialogFooter } from "~/components/ui/dialog";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "~/components/ui/empty";
+
 import {
   Popover,
   PopoverContent,
@@ -20,8 +19,13 @@ import {
 } from "~/components/ui/popover";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
+import ServiceModal from "~/features/service-modal";
 
 function BookingConfirmation() {
+  const [open, setOpen] = useState(false);
+  function toggle() {
+    setOpen(!open);
+  }
   const guestDetails = {
     "Tên khách": "Nguyễn Văn A",
     "Địa chỉ email": "nguyenvana@example.com",
@@ -38,7 +42,7 @@ function BookingConfirmation() {
           <div className="lg:col-span-5 col-span-1 space-y-4">
             <Card>
               <CardHeader>
-                <Alert variant={"success"}>
+                <Alert variant={"info"}>
                   <CheckCheck />
                   <AlertTitle>Đơn đặt phòng đã được lưu lại!</AlertTitle>
                   <AlertDescription>
@@ -59,25 +63,28 @@ function BookingConfirmation() {
                   ))}
                 </ul>
                 <Separator className="mb-4" />
-                <h1 className="font-bold text-lg ">Dịch vụ và tiện nghi</h1>
-                <div className="bg-accent border rounded-md my-4">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon" className="bg-white">
-                        <HandPlatter />
-                      </EmptyMedia>
-                      <EmptyTitle>Chưa có dịch vụ nào</EmptyTitle>
-                      <EmptyDescription>
-                        Bạn chưa thêm dịch vụ nào vào hóa đơn.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                    <EmptyContent>
-                      <div className="flex gap-2">
-                        <Button>Thêm dịch vụ</Button>
-                      </div>
-                    </EmptyContent>
-                  </Empty>
+                <div className="flex items-center justify-between">
+                  <h1 className="font-bold text-lg ">Menu & Dịch vụ</h1>
+                  <div>
+                    <Button onClick={toggle} variant={"gradient"}>
+                      <CirclePlus />
+                      Thêm
+                    </Button>
+                  </div>
                 </div>
+                <ServiceModal open={open} toggle={toggle} />
+                <div className="grid place-items-center bg-background/50 border border-dashed rounded-md h-40 my-4">
+                  <div>
+                    <HandPlatter className="mx-auto mb-2" />
+                    <h3 className="font-medium text-lg text-center">
+                      Chưa có mục nào
+                    </h3>
+                    <p className="text-sm text-muted-foreground text-center">
+                      Nhấn nút Thêm để tham khảo Menu & Dịch vụ
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-primary-foreground border rounded-md my-4"></div>
               </CardContent>
             </Card>
           </div>
@@ -158,7 +165,7 @@ function BookingConfirmation() {
                         Phòng Deluxe 1 giường đôi x 2 phòng
                       </li>
                     </ul>
-                    <Button variant="link" className="p-0 text-purple-800">
+                    <Button variant="link" className="p-0 text-primary">
                       Chỉnh sửa phòng đã chọn
                     </Button>
                   </div>
@@ -179,11 +186,11 @@ function BookingConfirmation() {
                     <span>2.000.000đ</span>
                   </li>
                 </ul>
-                <div className="flex justify-between font-medium text-xl text-green-600">
+                <div className="flex justify-between font-medium text-xl text-primary">
                   <span>Tổng cộng</span>
                   <span className="font-semibold">2.000.000đ</span>
                 </div>
-                <Button className="my-2 w-full " variant={"success"}>
+                <Button className="my-2 w-full " variant={"gradient"}>
                   In hóa đơn tạm tính
                 </Button>
                 <p className="text-sm text-muted-foreground italic text-center">
@@ -195,9 +202,8 @@ function BookingConfirmation() {
         </div>
       </ScrollArea>
       <DialogFooter>
-        <div className="flex gap-2 items-center">
-          <Button variant="outline">Quay lại</Button>
-          <Button variant={"success"}>Hoàn tất</Button>
+        <div>
+          <Button variant={"gradient"}>Hoàn tất</Button>
         </div>
       </DialogFooter>
     </>
