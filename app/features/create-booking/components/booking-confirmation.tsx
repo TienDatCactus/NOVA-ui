@@ -1,12 +1,15 @@
-import { format, intervalToDuration } from "date-fns";
+import { differenceInDays, format, intervalToDuration } from "date-fns";
+import { vi } from "date-fns/locale";
 import {
   CalendarIcon,
   CheckCheck,
   CirclePlus,
   HandPlatter,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
+import { toast } from "sonner";
+import type z from "zod";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -20,15 +23,85 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import ServiceModal from "~/features/service-modal";
+import { formatMoney } from "~/lib/utils";
+import useBookingSchema from "~/schema/booking.schema";
 import { useCreateBookingStore } from "~/store/create-booking.store";
+function useCalculateCost(formData: any) {
+  const rooms = formData.roomSelection?.rooms || [];
+  const checkIn = formData.customerInfo?.checkIn;
+  const checkOut = formData.customerInfo?.checkOut;
+  const services = formData.services || [];
+  let roomCost = 0;
+  let serviceCost = 0;
 
-function BookingConfirmation({ form }: { form: UseFormReturn<any> }) {
+  if (checkIn && checkOut && rooms.length > 0) {
+    const days = differenceInDays(new Date(checkOut), new Date(checkIn)) || 1;
+
+    roomCost = rooms.reduce((total: number, room: any) => {
+      return total + room.price * room.quantity * days;
+    }, 0);
+
+    serviceCost = services.reduce((total: number, service: any) => {
+      return total + service.price * service.quantity;
+    }, 0);
+  }
+
+  const vatCost = (roomCost + serviceCost) * 0.1;
+  const totalCost = roomCost + serviceCost + vatCost;
+
+  return {
+    roomCost,
+    serviceCost,
+    vatCost,
+    totalCost,
+  };
+}
+function BookingConfirmation({
+  form,
+}: {
+  form: UseFormReturn<
+    z.infer<ReturnType<typeof useBookingSchema>["BookingSchema"]>
+  >;
+}) {
   const [open, setOpen] = useState(false);
+  const { formData, updateFormData, prevStep } = useCreateBookingStore();
+  const costs = useCalculateCost(formData);
   function toggle() {
     setOpen(!open);
   }
-  const { formData } = useCreateBookingStore();
+  const handleCheckInChange = (date: Date) => {
+    form.setValue("customerInfo.checkIn", date);
+    const checkOut = form.getValues("customerInfo.checkOut");
+    if (date > checkOut) {
+      form.setValue(
+        "customerInfo.checkOut",
+        new Date(date.getTime() + 24 * 60 * 60 * 1000)
+      );
+    }
+    form.trigger("customerInfo.checkIn");
 
+    updateFormData(form.getValues());
+  };
+
+  const handleCheckOutChange = (date: Date) => {
+    if (date < form.getValues("customerInfo.checkIn")) {
+      form.setValue("customerInfo.checkIn", date);
+      toast.error("Ngày check-out phải sau ngày check-in");
+    }
+    form.setValue("customerInfo.checkOut", date);
+    form.trigger("customerInfo.checkOut");
+    updateFormData(form.getValues());
+  };
+  const handleEditRooms = () => {
+    prevStep();
+  };
+  const handleServiceFinish = (selectedServices: any[]) => {
+    updateFormData({
+      ...formData,
+      services: selectedServices,
+    });
+    toggle();
+  };
   return (
     <ScrollArea className="h-300 min-h-0">
       <div className="grid lg:grid-cols-8 grid-cols-1 gap-4">
@@ -46,15 +119,17 @@ function BookingConfirmation({ form }: { form: UseFormReturn<any> }) {
             <CardContent>
               <h1 className="font-bold text-lg ">Thông tin khách hàng</h1>
               <ul className="grid grid-cols-3 space-y-10 my-4">
-                {Object.entries(formData).map(([key, value]) => (
+                {Object.entries(formData.customerInfo).map(([key, value]) => (
                   <li key={key} className="flex flex-col ">
                     <h3 className="text-muted-foreground font-medium text-sm uppercase">
                       {key}
                     </h3>
                     <p className="font-medium">
-                      {typeof value === "string"
-                        ? value
-                        : JSON.stringify(value)}
+                      {key === "checkIn" || key === "checkOut"
+                        ? format(new Date(value), "PPP", { locale: vi })
+                        : typeof value === "object"
+                          ? JSON.stringify(value)
+                          : value}
                     </p>
                   </li>
                 ))}
@@ -69,19 +144,48 @@ function BookingConfirmation({ form }: { form: UseFormReturn<any> }) {
                   </Button>
                 </div>
               </div>
-              <ServiceModal open={open} toggle={toggle} />
-              <div className="grid place-items-center bg-background/50 border border-dashed rounded-md h-40 my-4">
-                <div>
-                  <HandPlatter className="mx-auto mb-2" />
-                  <h3 className="font-medium text-lg text-center">
-                    Chưa có mục nào
-                  </h3>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Nhấn nút Thêm để tham khảo Menu & Dịch vụ
-                  </p>
+              <ServiceModal
+                open={open}
+                toggle={toggle}
+                onFinish={handleServiceFinish}
+                initialServices={formData.services}
+              />
+              {formData.services!.length > 0 ? (
+                <div className="grid gap-2 mt-4">
+                  {formData.services!.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex items-center justify-between p-2 border rounded-md"
+                    >
+                      <div>
+                        <h3 className="font-medium">{service.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {service.category} - {service.quantity} x{" "}
+                          {formatMoney(service.price).vndFormatted}
+                        </p>
+                      </div>
+                      <div className="font-semibold">
+                        {
+                          formatMoney(service.price * service.quantity)
+                            .vndFormatted
+                        }
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div className="bg-primary-foreground border rounded-md my-4"></div>
+              ) : (
+                <div className="grid place-items-center bg-background/50 border border-dashed rounded-md h-40 my-4">
+                  <div>
+                    <HandPlatter className="mx-auto mb-2" />
+                    <h3 className="font-medium text-lg text-center">
+                      Chưa có mục nào
+                    </h3>
+                    <p className="text-sm text-muted-foreground text-center">
+                      Nhấn nút Thêm để tham khảo Menu & Dịch vụ
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -101,20 +205,21 @@ function BookingConfirmation({ form }: { form: UseFormReturn<any> }) {
                       <PopoverTrigger asChild>
                         <Button
                           variant={"outline"}
-                          className="w-full justify-start"
+                          className="w-full justify-between"
                         >
                           {format(
-                            formData.customerInfo?.checkIn ?? new Date(),
-                            "PPP"
+                            formData.customerInfo?.checkIn!,
+                            "dd MMM, yyyy"
                           )}
                           <CalendarIcon className="ml-2 h-4 w-4" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
+                          required
                           mode="single"
-                          // selected={field.value}
-                          // onSelect={field.onChange}
+                          selected={formData.customerInfo?.checkIn!}
+                          onSelect={handleCheckInChange}
                           disabled={(date) => date < new Date()}
                         />
                       </PopoverContent>
@@ -128,20 +233,21 @@ function BookingConfirmation({ form }: { form: UseFormReturn<any> }) {
                       <PopoverTrigger asChild>
                         <Button
                           variant={"outline"}
-                          className="w-full justify-start"
+                          className="w-full justify-between"
                         >
                           {format(
-                            formData.customerInfo?.checkOut ?? new Date(),
-                            "PPP"
+                            formData.customerInfo?.checkOut!,
+                            "dd MMM, yyyy"
                           )}
                           <CalendarIcon className="ml-2 h-4 w-4" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
+                          required
                           mode="single"
-                          // selected={field.value}
-                          // onSelect={field.onChange}
+                          selected={formData.customerInfo?.checkOut!}
+                          onSelect={handleCheckOutChange}
                           disabled={(date) => date < new Date()}
                         />
                       </PopoverContent>
@@ -160,15 +266,20 @@ function BookingConfirmation({ form }: { form: UseFormReturn<any> }) {
                 </p>
                 <div>
                   <h3 className="text-muted-foreground text-sm uppercase mb-1">
-                    {/* change if only 1 room */}
                     Các phòng đã chọn
                   </h3>
                   <ul className="list-decimal list-inside ">
-                    <li className="font-medium">
-                      Phòng Deluxe 1 giường đôi x 2 phòng
-                    </li>
+                    {formData.roomSelection?.rooms?.map((room: any) => (
+                      <li key={room.roomId} className="font-medium">
+                        {room.roomName} x {room.quantity}
+                      </li>
+                    ))}
                   </ul>
-                  <Button variant="link" className="p-0 text-primary">
+                  <Button
+                    variant="link"
+                    className="p-0 text-primary"
+                    onClick={handleEditRooms}
+                  >
                     Chỉnh sửa phòng đã chọn
                   </Button>
                 </div>
@@ -178,20 +289,22 @@ function BookingConfirmation({ form }: { form: UseFormReturn<any> }) {
               <ul className="*:text-sm space-y-2 my-4 mb-6">
                 <li className="flex justify-between">
                   <span>Phòng :</span>
-                  <span>2.000.000đ</span>
+                  <span>{formatMoney(costs.roomCost).vndFormatted}</span>
                 </li>
                 <li className="flex justify-between">
                   <span>Dịch vụ :</span>
-                  <span>2.000.000đ</span>
+                  <span>{formatMoney(costs.serviceCost).vndFormatted}</span>
                 </li>
                 <li className="flex justify-between">
                   <span>VAT :</span>
-                  <span>2.000.000đ</span>
+                  <span>{formatMoney(costs.vatCost).vndFormatted}</span>
                 </li>
               </ul>
               <div className="flex justify-between font-medium text-xl text-primary">
                 <span>Tổng cộng</span>
-                <span className="font-semibold">2.000.000đ</span>
+                <span className="font-semibold">
+                  {formatMoney(costs.totalCost).vndFormatted}
+                </span>
               </div>
               <Button className="my-2 w-full " variant={"gradient"}>
                 In hóa đơn tạm tính

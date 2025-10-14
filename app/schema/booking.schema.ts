@@ -1,7 +1,9 @@
 import { formatDate } from "date-fns";
 import z from "zod";
 import { BOOKING_CHANNEL, ROOM_TYPE } from "~/lib/constants";
-
+const ServiceCategoryEnum = z.enum(["Dịch vụ", "Thức ăn", "Đồ uống"], {
+  error: "Danh mục dịch vụ không hợp lệ",
+});
 const RoomTypeEnum = z.enum(ROOM_TYPE, {
   error: "Loại phòng không hợp lệ",
 });
@@ -15,13 +17,14 @@ const CustomerBookingInfoSchema = z
         error: "Họ và tên không hợp lệ",
       })
       .min(2, "Họ và tên phải có ít nhất 2 ký tự"),
-    email: z.email("Email không hợp lệ").optional(),
+    email: z.email("Email không hợp lệ").optional().or(z.literal("")),
     phoneNumber: z
       .string({
         error: "Số điện thoại không hợp lệ",
       })
       .min(10, "Số điện thoại phải có ít nhất 10 ký tự")
-      .optional(),
+      .optional()
+      .or(z.literal("")),
     bookingChannel: BookingChannelEnum,
     bookingCode: z.string().optional(),
     adults: z
@@ -43,32 +46,57 @@ const CustomerBookingInfoSchema = z
     path: ["checkOut"],
   });
 
-const SelectedRoomSchema = z.object({
+export const SelectedRoomSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
-  price: z.number(),
+  price: z.number().min(0, "Giá không hợp lệ"),
   roomType: RoomTypeEnum,
-  quantity: z.number().int().min(0, "Số lượng không thể âm."),
+  quantity: z
+    .number()
+    .int()
+    .min(0, "Số lượng không thể âm.")
+    .max(10, "Không thể đặt quá 10 phòng."),
 });
 
-const RoomSchema = z.object({
-  ...SelectedRoomSchema.shape,
+export const RoomSchema = SelectedRoomSchema.extend({
   description: z.string().optional(),
-  images: z.array(z.string()).optional(),
+  images: z.array(z.url()).optional(),
 });
 
-const RoomSelectionSchema = z.object({
-  rooms: z.array(SelectedRoomSchema, {
-    error: "Phải chọn ít nhất 1 phòng.",
-  }),
-  selectedBreakfastDates: z.array(z.string()).optional(),
+export const RoomSelectionSchema = z
+  .object({
+    rooms: z
+      .array(SelectedRoomSchema)
+      .min(1, "Phải chọn ít nhất 1 phòng.")
+      .refine(
+        (rooms) => rooms.some((r) => r.quantity > 0),
+        "Cần chọn ít nhất 1 phòng có số lượng lớn hơn 0."
+      ),
+    selectedBreakfastDates: z.array(z.string()).optional(),
+  })
+  .refine(
+    (data) =>
+      !data.selectedBreakfastDates || data.selectedBreakfastDates.length <= 30,
+    "Không thể chọn bữa sáng quá 30 ngày."
+  );
+
+const ServiceItemSchema = z.object({
+  id: z
+    .uuid("ID dịch vụ không hợp lệ")
+    .or(z.string().min(1, "ID dịch vụ không hợp lệ")),
+  name: z.string().min(1, "Tên dịch vụ không hợp lệ"),
+  price: z.number().min(0, "Giá dịch vụ không hợp lệ"),
+  imageUrl: z.string().url("URL hình ảnh không hợp lệ").optional(),
+  category: z.string().optional(),
+  description: z.string().optional(),
+  quantity: z.number().int().min(1, "Số lượng phải là số nguyên dương"),
 });
 
 const BookingSchema = z
   .object({
     customerInfo: CustomerBookingInfoSchema,
     roomSelection: RoomSelectionSchema,
-    services: z.array(z.string()).optional(),
+    services: z.array(ServiceItemSchema).optional(),
   })
   .superRefine((data, ctx) => {
     const totalRooms = data.roomSelection.rooms.reduce(
@@ -108,6 +136,7 @@ const BookingSchema = z
     });
   });
 
+export type ServiceCategory = "Dịch vụ" | "Thức ăn" | "Đồ uống";
 const useBookingSchema = () => {
   return {
     CustomerBookingInfoSchema,
@@ -117,6 +146,8 @@ const useBookingSchema = () => {
     RoomTypeEnum,
     BookingChannelEnum,
     RoomSchema,
+    ServiceItemSchema,
+    ServiceCategoryEnum,
   };
 };
 export default useBookingSchema;

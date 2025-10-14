@@ -8,16 +8,22 @@ import { Button } from "../../button";
 
 type CounterProps = HTMLMotionProps<"div"> & {
   number: string | number;
-  setNumber: (number: number) => void;
+  setNumber?:
+    | ((number: number) => void)
+    | ((id: string, number: number) => void);
+  itemId?: string;
   slidingNumberProps?: Omit<SlidingNumberProps, "number">;
   buttonProps?: Omit<React.ComponentProps<typeof Button>, "onClick">;
   transition?: Transition;
+  min?: number;
   max?: number;
 };
 
 function Counter({
   number,
   setNumber,
+  itemId,
+  min = 0,
   max,
   className,
   slidingNumberProps,
@@ -25,10 +31,32 @@ function Counter({
   transition = { type: "spring", bounce: 0, stiffness: 300, damping: 30 },
   ...props
 }: CounterProps) {
-  number = Number(number) < 0 ? 0 : Number(number);
-  if (max !== undefined && Number(number) > max) {
-    number = max;
-  }
+  const value = Math.max(
+    min,
+    Math.min(Number(number), max !== undefined ? max : Number.MAX_SAFE_INTEGER)
+  );
+
+  const handleIncrement = () => {
+    if (!setNumber) return;
+    if (value < (max ?? Number.MAX_SAFE_INTEGER)) {
+      if (itemId !== undefined) {
+        (setNumber as (id: string, num: number) => void)(itemId, value + 1);
+      } else {
+        (setNumber as (num: number) => void)(value + 1);
+      }
+    }
+  };
+
+  const handleDecrement = () => {
+    if (!setNumber) return;
+    if (value > min) {
+      if (itemId !== undefined) {
+        (setNumber as (id: string, num: number) => void)(itemId, value - 1);
+      } else {
+        (setNumber as (num: number) => void)(value - 1);
+      }
+    }
+  };
   return (
     <motion.div
       data-slot="counter"
@@ -44,7 +72,7 @@ function Counter({
         <Button
           size="icon"
           {...buttonProps}
-          onClick={() => setNumber(number - 1)}
+          onClick={handleDecrement}
           className={cn(
             "bg-background shadow-sm dark:bg-neutral-950 hover:bg-white/70 dark:hover:bg-neutral-950/70 text-neutral-950 dark:text-white text-2xl font-light pb-[3px]",
             buttonProps?.className
@@ -64,7 +92,7 @@ function Counter({
         <Button
           size="icon"
           {...buttonProps}
-          onClick={() => setNumber(number + 1)}
+          onClick={handleIncrement}
           className={cn(
             "bg-background shadow-sm dark:bg-neutral-950 hover:bg-white/70 dark:hover:bg-neutral-950/70 text-neutral-950 dark:text-white text-2xl font-light pb-[3px]",
             buttonProps?.className

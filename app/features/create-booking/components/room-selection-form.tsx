@@ -1,6 +1,6 @@
 import { eachDayOfInterval } from "date-fns";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import {
   Collapsible,
@@ -8,7 +8,7 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import { Divider } from "~/components/ui/divider";
-import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
+import { Form, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -22,12 +22,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import useBookingSchema from "~/schema/booking.schema";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { Combobox } from "../fragments/room-breakfast-combobox.fragment";
 import RoomDataTable from "../fragments/room-data-table.fragment";
-import useBookingSchema from "~/schema/booking.schema";
-import { toast } from "sonner";
-import { set } from "zod";
+import type z from "zod";
+
 const AVAILABLE_ROOMS = [
   {
     roomId: "1",
@@ -45,53 +45,88 @@ const AVAILABLE_ROOMS = [
 
 const SUGGESTED_ROOMS = [
   {
-    roomId: "1",
-    roomName: "salam",
+    roomId: "3",
+    roomName: "sieu nhan nigger",
     price: 2500000,
     roomType: "Chalet" as const,
     quantity: 1,
   },
 ];
-function RoomSelectionForm({ form }: { form: UseFormReturn<any> }) {
+
+function RoomSelectionForm({
+  form,
+}: {
+  form: UseFormReturn<
+    z.infer<ReturnType<typeof useBookingSchema>["BookingSchema"]>
+  >;
+}) {
   const [breakfast, setBreakfast] = useState(false);
   const [open, setOpen] = useState(false);
-  const { updateFormData, formData } = useCreateBookingStore();
-  const { RoomSelectionSchema, RoomSchema, SelectedRoomSchema } =
-    useBookingSchema();
-  const { fields, update } = useFieldArray({
+  const { formData, updateFormData, nextStep } = useCreateBookingStore();
+  const { SelectedRoomSchema } = useBookingSchema();
+  const dateRange =
+    formData.customerInfo?.checkIn && formData.customerInfo?.checkOut
+      ? eachDayOfInterval({
+          start: formData.customerInfo.checkIn,
+          end: formData.customerInfo.checkOut,
+        })
+      : [];
+
+  const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "roomSelection.rooms",
   });
-  console.log(formData);
-  if (
-    !form.getValues("roomSelection.rooms") ||
-    form.getValues("roomSelection.rooms").length === 0
-  ) {
-    form.setValue(
-      "roomSelection.rooms",
-      AVAILABLE_ROOMS.map((room) => ({ ...room, quantity: 0 }))
-    );
-  }
-  const handleSelectSuggestedRoom = (suggestedRoom: {
-    roomId: string;
-    quantity: number;
-    roomName: string;
-  }) => {
-    const roomIndex = fields.findIndex(
-      (field) => (field as any).roomId === suggestedRoom.roomId
-    );
-    if (roomIndex !== -1) {
-      const currentQuantity =
-        form.getValues(`roomSelection.rooms.${roomIndex}.quantity`) || 0;
-      form.setValue(
-        `roomSelection.rooms.${roomIndex}.quantity`,
-        currentQuantity + suggestedRoom.quantity
-      );
-      toast.success(
-        `Đã thêm ${suggestedRoom.quantity} ${suggestedRoom.roomName} vào đơn đặt!`
-      );
+
+  const handleRoomSelect = (
+    room: z.infer<typeof SelectedRoomSchema>,
+    quantity = 1
+  ) => {
+    const index = fields.findIndex((f) => f.roomId === room.roomId);
+
+    if (index === -1 && quantity > 0) {
+      append({
+        roomId: room.roomId,
+        roomName: room.roomName,
+        price: room.price,
+        roomType: room.roomType,
+        quantity: quantity,
+      });
+
+      const updatedFormData = form.getValues();
+      updateFormData(updatedFormData);
+      return;
     }
+
+    if (index !== -1 && quantity > 0) {
+      update(index, {
+        roomId: room.roomId,
+        roomName: room.roomName,
+        price: room.price,
+        roomType: room.roomType,
+        quantity: quantity,
+      });
+
+      const updatedFormData = form.getValues();
+      updateFormData(updatedFormData);
+      return;
+    }
+
+    if (index !== -1 && quantity === 0) {
+      remove(index);
+
+      const updatedFormData = form.getValues();
+      updateFormData(updatedFormData);
+    }
+
+    form.trigger("roomSelection.rooms");
   };
+
+  useEffect(() => {
+    const currentRooms = form.getValues("roomSelection.rooms");
+    if (!currentRooms) {
+      form.setValue("roomSelection.rooms", []);
+    }
+  }, [form]);
 
   return (
     <ScrollArea className="h-120 min-h-0">
@@ -108,7 +143,9 @@ function RoomSelectionForm({ form }: { form: UseFormReturn<any> }) {
               {/* suggested rooms */}
               <RoomDataTable
                 rooms={SUGGESTED_ROOMS}
-                onRoomSelect={handleSelectSuggestedRoom}
+                onRoomSelect={handleRoomSelect}
+                form={form}
+                nextStep={nextStep}
               />
             </CollapsibleContent>
           </Collapsible>
@@ -125,35 +162,60 @@ function RoomSelectionForm({ form }: { form: UseFormReturn<any> }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {fields.map((field, index) => (
-                    <TableRow key={field.id}>
-                      <TableCell>
-                        <h1>{AVAILABLE_ROOMS[index].roomName}</h1>
-                        <p className="text-sm text-muted-foreground">
-                          {AVAILABLE_ROOMS[index].roomType}
-                        </p>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <data>${AVAILABLE_ROOMS[index].price.toFixed(2)}</data>
-                      </TableCell>
-                      <TableCell className="flex flex-col items-end justify-end">
-                        <div className="w-16">
-                          {/* ✅ Đăng ký input với tên động */}
-                          <Input
-                            type="number"
-                            min={0}
-                            max={10}
-                            {...form.register(
-                              `roomSelection.rooms.${index}.quantity`,
-                              { valueAsNumber: true }
-                            )}
-                          />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {AVAILABLE_ROOMS.map((room) => {
+                    const existingIndex = fields.findIndex(
+                      (f) => f.roomId === room.roomId
+                    );
+                    const existingQuantity =
+                      existingIndex !== -1
+                        ? form.getValues(
+                            `roomSelection.rooms.${existingIndex}.quantity`
+                          )
+                        : 0;
+                    return (
+                      <TableRow key={room.roomId}>
+                        <TableCell>
+                          <h1>{room.roomName}</h1>
+                          <p className="text-sm text-muted-foreground">
+                            {room.roomType}
+                          </p>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <data>${room.price.toFixed(2)}</data>
+                        </TableCell>
+                        <TableCell className="flex flex-col items-end justify-end">
+                          <div className="w-16">
+                            <Input
+                              type="number"
+                              min={0}
+                              max={10}
+                              value={
+                                existingQuantity ||
+                                formData.roomSelection?.rooms?.find(
+                                  (r) => r.roomId === room.roomId
+                                )?.quantity ||
+                                0
+                              }
+                              onChange={(e) => {
+                                const quantity = Number(e.target.value);
+                                handleRoomSelect(
+                                  { ...room, quantity },
+                                  quantity
+                                );
+                              }}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
+              {form.formState.errors.roomSelection?.rooms && (
+                <p className="text-destructive text-sm mt-2">
+                  {form.formState.errors.roomSelection.rooms.message}
+                </p>
+              )}
             </div>
             <div className="md:col-span-1 col-span-1 flex h-full justify-center items-center gap-3 border-l pl-4">
               <div className="space-y-4">
@@ -161,7 +223,15 @@ function RoomSelectionForm({ form }: { form: UseFormReturn<any> }) {
                   <Switch
                     id="breakfast"
                     checked={breakfast}
-                    onCheckedChange={() => setBreakfast(!breakfast)}
+                    onCheckedChange={(checked) => {
+                      setBreakfast(!breakfast);
+                      if (!checked) {
+                        form.setValue(
+                          "roomSelection.selectedBreakfastDates",
+                          []
+                        );
+                      }
+                    }}
                   />
                   <Label htmlFor="breakfast">Bữa sáng</Label>
                 </div>
@@ -175,10 +245,7 @@ function RoomSelectionForm({ form }: { form: UseFormReturn<any> }) {
                         onChange={field.onChange}
                         open={open}
                         onOpenChange={setOpen}
-                        items={eachDayOfInterval({
-                          start: formData.customerInfo?.checkIn!,
-                          end: formData.customerInfo?.checkOut!,
-                        })}
+                        items={dateRange}
                         disabled={breakfast}
                       />
                     </FormItem>

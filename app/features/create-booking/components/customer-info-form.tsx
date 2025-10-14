@@ -1,8 +1,9 @@
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { vi } from "react-day-picker/locale";
 import type { UseFormReturn } from "react-hook-form";
+import type z from "zod";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -32,24 +33,38 @@ import {
 import { Counter } from "~/components/ui/shadcn-io/counter";
 import { BOOKING_CHANNEL } from "~/lib/constants";
 import { cn } from "~/lib/utils";
+import useBookingSchema from "~/schema/booking.schema";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
-function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
+function CustomerInfoForm({
+  form,
+}: {
+  form: UseFormReturn<
+    z.infer<ReturnType<typeof useBookingSchema>["BookingSchema"]>
+  >;
+}) {
   const { formData } = useCreateBookingStore();
   const [contact, setContact] = useState<"email" | "phoneNumber" | "none">(
     () => {
-      const initialEmail = formData.customerInfo?.email;
-      const initialPhone = formData.customerInfo?.phoneNumber;
-
-      if (initialEmail) {
-        return "email";
-      }
-      if (initialPhone) {
-        return "phoneNumber";
-      }
+      const email = formData.customerInfo?.email;
+      const phone = formData.customerInfo?.phoneNumber;
+      if (email) return "email";
+      else if (phone) return "phoneNumber";
       return "none";
     }
   );
+  const email = form.watch("customerInfo.email");
+  const phone = form.watch("customerInfo.phoneNumber");
+  const bookingChannel = form.watch("customerInfo.bookingChannel");
+  const hasContactInfo = !!email || !!phone || contact !== "none";
+
+  useEffect(() => {
+    if (contact === "email") {
+      form.setValue("customerInfo.phoneNumber", "");
+    } else if (contact === "phoneNumber") {
+      form.setValue("customerInfo.email", "");
+    }
+  }, [contact]);
   return (
     <ScrollArea className="h-90 min-h-0">
       <Form {...form}>
@@ -57,38 +72,32 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
           <div className="grid grid-cols-1 gap-2">
             <FormField
               control={form.control}
-              name="fullName"
-              defaultValue={formData.customerInfo?.fullName}
+              name="customerInfo.fullName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Họ và Tên</FormLabel>
                   <FormControl>
-                    <Input className="" placeholder="Nguyễn Văn A" {...field} />
+                    <Input placeholder="Nguyễn Văn A" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+
           <div
             className={cn("grid grid-cols-1 gap-2", {
-              "grid-cols-3":
-                contact !== "none" || form.getValues(contact) !== undefined,
+              "grid-cols-3": hasContactInfo,
             })}
           >
             <FormItem>
               <FormLabel>Phương thức liên lạc</FormLabel>
               <Select
-                defaultValue={
-                  form.getValues("phoneNumber")
-                    ? "phone"
-                    : form.getValues("email")
-                      ? "email"
-                      : contact
-                }
-                onValueChange={(value) =>
-                  setContact(value as "email" | "phoneNumber" | "none")
-                }
+                value={contact}
+                onValueChange={(value) => {
+                  const newContact = value as "email" | "phoneNumber" | "none";
+                  setContact(newContact);
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Chọn phương thức liên lạc" />
@@ -103,15 +112,12 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
                 </SelectContent>
               </Select>
             </FormItem>
-            {(contact !== "none" || form.getValues(contact) !== undefined) && (
+
+            {contact !== "none" && (
               <FormField
+                key={contact}
                 control={form.control}
-                name={contact === "phoneNumber" ? "phoneNumber" : "email"}
-                defaultValue={
-                  contact === "phoneNumber"
-                    ? formData.customerInfo?.phoneNumber
-                    : formData.customerInfo?.email
-                }
+                name={`customerInfo.${contact}`}
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>
@@ -137,22 +143,20 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
 
           <div
             className={cn("grid grid-cols-4 gap-2", {
-              "grid-cols-5":
-                !!form.watch("bookingChannel") &&
-                form.watch("bookingChannel") !== "Direct",
+              "grid-cols-5": bookingChannel && bookingChannel !== "Direct",
             })}
           >
             <FormField
               control={form.control}
-              name="adults"
-              defaultValue={formData.customerInfo?.adults || 0}
+              name="customerInfo.adults"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Số lượng người lớn</FormLabel>
                   <FormControl>
                     <Counter
-                      number={field.value ? field.value : 0}
-                      setNumber={(value) => field.onChange(value)}
+                      id={field.name}
+                      number={field.value ?? 0}
+                      setNumber={field.onChange}
                       max={20}
                     />
                   </FormControl>
@@ -163,15 +167,14 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
 
             <FormField
               control={form.control}
-              name="children"
-              defaultValue={formData.customerInfo?.children || 0}
+              name="customerInfo.children"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Trẻ em ( &lt; 3 tuổi)</FormLabel>
+                  <FormLabel>Trẻ em (&lt; 3 tuổi)</FormLabel>
                   <FormControl>
                     <Counter
-                      number={field.value ? field.value : 0}
-                      setNumber={(value) => field.onChange(value)}
+                      number={field.value ?? 0}
+                      setNumber={field.onChange}
                       max={20}
                     />
                   </FormControl>
@@ -179,22 +182,25 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
-              defaultValue={formData.customerInfo?.bookingChannel || 0}
-              name="bookingChannel"
+              name="customerInfo.bookingChannel"
               render={({ field }) => (
                 <FormItem
                   className={cn("col-span-2", {
-                    "col-span-1":
-                      form.watch("bookingChannel") &&
-                      form.watch("bookingChannel") !== "Direct",
+                    "col-span-1": bookingChannel && bookingChannel !== "Direct",
                   })}
                 >
                   <FormLabel>Kênh Đặt Phòng</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      if (value === "Direct") {
+                        form.setValue("customerInfo.bookingCode", "");
+                      }
+                    }}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -213,34 +219,33 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
                 </FormItem>
               )}
             />
-            {!!form.watch("bookingChannel") &&
-              form.watch("bookingChannel") !== "Direct" && (
-                <FormField
-                  control={form.control}
-                  defaultValue={formData.customerInfo?.bookingCode || ""}
-                  name="bookingCode"
-                  render={({ field }) => (
-                    <FormItem className="col-span-2">
-                      <FormLabel>Mã Đặt Phòng</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="ABC123"
-                          className="w-full"
-                        ></Input>
-                      </FormControl>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+            {bookingChannel && bookingChannel !== "Direct" && (
+              <FormField
+                control={form.control}
+                name="customerInfo.bookingCode"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Mã Đặt Phòng</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="ABC123"
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
+
+          {/* Check-in / Check-out */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              defaultValue={formData.customerInfo?.checkIn}
-              name="checkIn"
+              name="customerInfo.checkIn"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Ngày Nhận Phòng</FormLabel>
@@ -248,17 +253,15 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant="outline"
                           className={cn(
                             "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Chọn ngày</span>
-                          )}
+                          {field.value
+                            ? format(field.value, "PPP")
+                            : "Chọn ngày"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -276,10 +279,10 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
-              defaultValue={formData.customerInfo?.checkOut}
-              name="checkOut"
+              name="customerInfo.checkOut"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Ngày Trả Phòng</FormLabel>
@@ -287,17 +290,15 @@ function CustomerInfoForm({ form }: { form: UseFormReturn<any> }) {
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant="outline"
                           className={cn(
                             "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Chọn ngày</span>
-                          )}
+                          {field.value
+                            ? format(field.value, "PPP")
+                            : "Chọn ngày"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>

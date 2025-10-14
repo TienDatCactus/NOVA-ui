@@ -76,6 +76,7 @@ const SERVICES_ITEMS: Array<{
   },
 ];
 
+const SERVICE_CATEGORIES = ["Dịch vụ", "Thức ăn", "Đồ uống"];
 const DASHBOARD_ITEMS_RECEPTIONIST: Array<{
   id: number;
   title: string;
@@ -170,6 +171,7 @@ const RESERVATION_NAV_ITEMS: Array<{
     href: "/dashboard/reservation/new",
   },
 ];
+
 const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];
 const BOOKING_CHANNEL = [
   "Agoda",
@@ -202,4 +204,5 @@ export {
   RESERVATION_NAV_ITEMS,
   ROOM_TYPE,
   BOOKING_CHANNEL,
+  SERVICE_CATEGORIES,
 };

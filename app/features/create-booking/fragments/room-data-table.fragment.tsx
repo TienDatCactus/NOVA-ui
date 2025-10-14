@@ -23,11 +23,25 @@ const { RoomSchema, SelectedRoomSchema } = useBookingSchema();
 export default function RoomDataTable({
   onRoomSelect,
   rooms,
+  form,
+  nextStep,
   ...props
 }: React.ComponentProps<"table"> & {
-  onRoomSelect: (suggestedRoom: z.infer<typeof RoomSchema>) => void;
+  onRoomSelect: (
+    suggestedRoom: z.infer<typeof RoomSchema>,
+    quantity?: number
+  ) => void;
   rooms: z.infer<typeof RoomSchema>[];
+  form?: any;
+  nextStep?: () => void;
 }) {
+  const handleAddRoom = (room: z.infer<typeof RoomSchema>) => {
+    onRoomSelect(room, room.quantity || 1);
+    if (form) {
+      form.trigger("roomSelection.rooms");
+      nextStep && nextStep();
+    }
+  };
   return (
     <Table {...props}>
       <TableHeader>
@@ -81,7 +95,7 @@ export default function RoomDataTable({
               <TableCell className="text-center">{room.quantity}</TableCell>
               <TableCell className="text-center space-y-2">
                 <data className="block">{room.price}</data>
-                <Button onClick={() => onRoomSelect(room)} className="w-fit">
+                <Button onClick={() => handleAddRoom(room)} className="w-fit">
                   Thêm phòng
                 </Button>
               </TableCell>

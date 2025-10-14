@@ -16,6 +16,7 @@ import useBookingSchema from "~/schema/booking.schema";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type z from "zod";
 
 interface CreateBookingDialogProps {
   close?: () => void;
@@ -28,46 +29,61 @@ export default function CreateBookingDialog({
   ...props
 }: CreateBookingDialogProps) {
   const steps = ["Thông tin khách hàng", "Chọn phòng", "Xác nhận đặt phòng"];
-  const { currentStep, nextStep, prevStep, updateFormData, formData } =
+  const { currentStep, nextStep, prevStep, updateFormData, formData, reset } =
     useCreateBookingStore();
-  const { CustomerBookingInfoSchema, BookingSchema } = useBookingSchema();
-  const form = useForm({
+  const { CustomerBookingInfoSchema, BookingSchema, RoomSelectionSchema } =
+    useBookingSchema();
+  const form = useForm<z.infer<typeof BookingSchema>>({
     resolver: zodResolver(BookingSchema),
     defaultValues: formData,
   });
   const handleNext = async () => {
     const currentFormData = form.getValues();
     if (currentStep === 1) {
-      const result = CustomerBookingInfoSchema.safeParse(currentFormData);
+      const result = CustomerBookingInfoSchema.safeParse(
+        currentFormData.customerInfo
+      );
+      console.log(result);
       if (result.success) {
-        form.clearErrors();
+        form.clearErrors("customerInfo");
         updateFormData({ ...formData, customerInfo: result.data });
         nextStep();
       } else {
         result.error.issues.forEach((err) => {
-          const message = err.message;
-          form.setError(err.path[0] as any, { message });
+          form.setError(`customerInfo.${err.path.join(".")}` as any, {
+            message: err.message,
+          });
         });
       }
     } else if (currentStep === 2) {
-      const result = BookingSchema.safeParse(currentFormData);
+      const result = RoomSelectionSchema.safeParse(
+        currentFormData.roomSelection
+      );
       console.log(result);
       if (result.success) {
-        updateFormData(result.data);
+        form.clearErrors("roomSelection");
+        updateFormData({ ...formData, roomSelection: result.data });
         nextStep();
       } else {
         result.error.issues.forEach((err) => {
-          const fieldName = err.path[0] as string;
-          const message = err.message;
-          form.setError(fieldName as any, {
-            message,
+          form.setError(`roomSelection.${err.path.join(".")}` as any, {
+            message: err.message,
           });
         });
       }
     } else if (currentStep === 3) {
       const result = BookingSchema.safeParse(currentFormData);
-      console.log("Final Data to Submit:", formData);
-      alert("Booking confirmed!");
+      if (result.success) {
+        console.log("Final data to submit:", result.data);
+        alert("Đặt phòng thành công!");
+        close?.();
+      } else {
+        result.error.issues.forEach((err) => {
+          form.setError(err.path.join(".") as any, {
+            message: err.message,
+          });
+        });
+      }
     }
   };
   const StepComponents = [
@@ -111,10 +127,23 @@ export default function CreateBookingDialog({
             ) : (
               <div />
             )}
-
-            <Button onClick={handleNext} disabled={form.formState.isSubmitting}>
-              {currentStep === steps.length ? "Hoàn tất" : "Tiếp theo"}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  reset();
+                  form.reset();
+                }}
+              >
+                Xóa
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={form.formState.isSubmitting}
+              >
+                {currentStep === steps.length ? "Hoàn tất" : "Tiếp theo"}
+              </Button>
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>

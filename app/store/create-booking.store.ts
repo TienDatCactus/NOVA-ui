@@ -56,7 +56,10 @@ export const useCreateBookingStore = create<CreateBookingState>()(
         set((state) => ({
           formData: { ...state.formData, ...data },
         })),
-
+      updateServices: (services: z.infer<typeof BookingSchema>["services"]) =>
+        set((state) => ({
+          formData: { ...state.formData, services },
+        })),
       reset: () => set(initialState),
     }),
     {
