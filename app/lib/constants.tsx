@@ -173,7 +173,7 @@ const RESERVATION_NAV_ITEMS: Array<{
 const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];
 const BOOKING_CHANNEL = [
   "Agoda",
-  "Booking.com", // Hoặc 'Booking.com' sau khi đã sửa
+  "Booking.com",
   "Expedia",
   "Ctrip",
   "BnB",

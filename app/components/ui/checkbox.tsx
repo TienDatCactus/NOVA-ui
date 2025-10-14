@@ -1,8 +1,8 @@
-import * as React from "react"
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { CheckIcon } from "lucide-react"
+import * as React from "react";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { CheckIcon } from "lucide-react";
 
-import { cn } from "~/lib/utils"
+import { cn } from "~/lib/utils";
 
 function Checkbox({
   className,
@@ -21,10 +21,10 @@ function Checkbox({
         data-slot="checkbox-indicator"
         className="flex items-center justify-center text-current transition-none"
       >
-        <CheckIcon className="size-3.5" />
+        <CheckIcon className="size-3.5 text-white" />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
-  )
+  );
 }
 
-export { Checkbox }
+export { Checkbox };
