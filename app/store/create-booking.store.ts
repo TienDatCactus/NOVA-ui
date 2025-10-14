@@ -13,6 +13,7 @@ interface CreateBookingState {
   nextStep: () => void;
   prevStep: () => void;
   updateFormData: (data: Partial<BookingFormData>) => void;
+  updateServices: (services: BookingFormData["services"]) => void;
   reset: () => void;
 }
 

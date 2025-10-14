@@ -97,6 +97,7 @@ const BookingSchema = z
     customerInfo: CustomerBookingInfoSchema,
     roomSelection: RoomSelectionSchema,
     services: z.array(ServiceItemSchema).optional(),
+    note: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     const totalRooms = data.roomSelection.rooms.reduce(
@@ -120,20 +121,6 @@ const BookingSchema = z
         path: ["selectedBreakfastDates"],
       });
     }
-    selectedBreakfastDates.forEach((date) => {
-      if (
-        formatDate(date, "yyyy-MM-dd") <
-          formatDate(data.customerInfo.checkIn, "yyyy-MM-dd") ||
-        formatDate(date, "yyyy-MM-dd") >=
-          formatDate(data.customerInfo.checkOut, "yyyy-MM-dd")
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          message: `Ngày ${formatDate(date, "yyyy-MM-dd")} không hợp lệ cho bữa sáng.`,
-          path: ["selectedBreakfastDates"],
-        });
-      }
-    });
   });
 
 export type ServiceCategory = "Dịch vụ" | "Thức ăn" | "Đồ uống";

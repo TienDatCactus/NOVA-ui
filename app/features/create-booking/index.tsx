@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type z from "zod";
+import { toast } from "sonner";
 
 interface CreateBookingDialogProps {
   close?: () => void;
@@ -72,10 +73,16 @@ export default function CreateBookingDialog({
         });
       }
     } else if (currentStep === 3) {
-      const result = BookingSchema.safeParse(currentFormData);
+      const result = BookingSchema.safeParse({
+        ...currentFormData,
+        services: formData.services || [],
+      });
+      console.log(result);
       if (result.success) {
         console.log("Final data to submit:", result.data);
-        alert("Đặt phòng thành công!");
+        toast.success("Đặt phòng thành công!");
+        form.reset();
+        reset();
         close?.();
       } else {
         result.error.issues.forEach((err) => {

@@ -1,12 +1,12 @@
 import { useLocation } from "react-router";
-import { useSidebar } from "~/context/SidebarContext";
 import { useAuthStore } from "~/store/auth.store";
 import CompactSidebar from "./components/compact.sidebar";
 import ExpandedSidebar from "./components/expanded.sidebar";
+import { useSidebarContext } from "~/context/sidebar.context";
 
 export default function DashboardSidebar() {
   const curPath = useLocation().pathname;
-  const { mode, toggle } = useSidebar();
+  const { mode, toggle } = useSidebarContext();
   const { user } = useAuthStore();
   return (
     <>

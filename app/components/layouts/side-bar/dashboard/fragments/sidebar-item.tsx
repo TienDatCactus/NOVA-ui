@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { useSidebar } from "~/context/SidebarContext";
+import { useSidebarContext } from "~/context/sidebar.context";
 import { cn } from "~/lib/utils";
 export type SidebarItem = {
   id: number;
@@ -51,7 +51,7 @@ function SidebarItemList({
   renderItem,
 }: SidebarItemListProps): React.ReactNode {
   const curPath = useLocation().pathname;
-  const { setMode } = useSidebar();
+  const { setMode } = useSidebarContext();
   return (
     <ul
       className={cn(

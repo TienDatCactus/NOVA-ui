@@ -5,6 +5,8 @@ import {
   CheckCheck,
   CirclePlus,
   HandPlatter,
+  Pen,
+  Trash,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
@@ -14,6 +16,13 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 
 import {
   Popover,
@@ -22,6 +31,7 @@ import {
 } from "~/components/ui/popover";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
+import { Textarea } from "~/components/ui/textarea";
 import ServiceModal from "~/features/service-modal";
 import { formatMoney } from "~/lib/utils";
 import useBookingSchema from "~/schema/booking.schema";
@@ -63,12 +73,24 @@ function BookingConfirmation({
     z.infer<ReturnType<typeof useBookingSchema>["BookingSchema"]>
   >;
 }) {
+  const [note, setNote] = useState(false);
   const [open, setOpen] = useState(false);
   const { formData, updateFormData, prevStep } = useCreateBookingStore();
   const costs = useCalculateCost(formData);
   function toggle() {
     setOpen(!open);
   }
+  const handleRemoveService = (serviceId: string) => {
+    const updatedServices =
+      formData.services?.filter((service) => service.id !== serviceId) || [];
+    form.setValue("services", updatedServices);
+    updateFormData({
+      ...formData,
+      services: updatedServices,
+    });
+    toast.success("Đã xóa dịch vụ");
+  };
+
   const handleCheckInChange = (date: Date) => {
     form.setValue("customerInfo.checkIn", date);
     const checkOut = form.getValues("customerInfo.checkOut");
@@ -96,99 +118,147 @@ function BookingConfirmation({
     prevStep();
   };
   const handleServiceFinish = (selectedServices: any[]) => {
+    form.setValue("services", selectedServices);
     updateFormData({
       ...formData,
       services: selectedServices,
     });
     toggle();
   };
+  const numberOfNights =
+    intervalToDuration({
+      start: formData.customerInfo?.checkIn as unknown as Date,
+      end: formData.customerInfo?.checkOut as unknown as Date,
+    }).days || 0;
+
+  const numberOfBreakfastDays = formData.roomSelection.selectedBreakfastDates
+    ? formData.roomSelection.selectedBreakfastDates.length
+    : 0;
   return (
     <ScrollArea className="h-300 min-h-0">
       <div className="grid lg:grid-cols-8 grid-cols-1 gap-4">
-        <div className="lg:col-span-5 col-span-1 space-y-4">
-          <Card>
-            <CardHeader>
-              <Alert variant={"info"}>
-                <CheckCheck />
-                <AlertTitle>Đơn đặt phòng đã được lưu lại!</AlertTitle>
-                <AlertDescription>
-                  Vui lòng kiểm tra lại thông tin trước khi hoàn tất.
-                </AlertDescription>
-              </Alert>
-            </CardHeader>
-            <CardContent>
-              <h1 className="font-bold text-lg ">Thông tin khách hàng</h1>
-              <ul className="grid grid-cols-3 space-y-10 my-4">
-                {Object.entries(formData.customerInfo).map(([key, value]) => (
-                  <li key={key} className="flex flex-col ">
-                    <h3 className="text-muted-foreground font-medium text-sm uppercase">
-                      {key}
-                    </h3>
-                    <p className="font-medium">
-                      {key === "checkIn" || key === "checkOut"
-                        ? format(new Date(value), "PPP", { locale: vi })
-                        : typeof value === "object"
-                          ? JSON.stringify(value)
-                          : value}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-              <Separator className="mb-4" />
-              <div className="flex items-center justify-between">
-                <h1 className="font-bold text-lg ">Menu & Dịch vụ</h1>
-                <div>
-                  <Button onClick={toggle} variant={"gradient"}>
-                    <CirclePlus />
-                    Thêm
+        <Form {...form}>
+          <div className="lg:col-span-5 col-span-1 space-y-4">
+            <Card>
+              <CardHeader>
+                <Alert variant={"info"}>
+                  <CheckCheck />
+                  <AlertTitle>Đơn đặt phòng đã được lưu lại!</AlertTitle>
+                  <AlertDescription>
+                    Vui lòng kiểm tra lại thông tin trước khi hoàn tất.
+                  </AlertDescription>
+                </Alert>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between mb-4">
+                  <h1 className="font-bold text-lg ">Thông tin khách hàng</h1>
+                  <Button onClick={() => setNote(!note)} variant={"outline"}>
+                    <Pen />
+                    Ghi chú
                   </Button>
                 </div>
-              </div>
-              <ServiceModal
-                open={open}
-                toggle={toggle}
-                onFinish={handleServiceFinish}
-                initialServices={formData.services}
-              />
-              {formData.services!.length > 0 ? (
-                <div className="grid gap-2 mt-4">
-                  {formData.services!.map((service) => (
-                    <div
-                      key={service.id}
-                      className="flex items-center justify-between p-2 border rounded-md"
-                    >
-                      <div>
-                        <h3 className="font-medium">{service.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {service.category} - {service.quantity} x{" "}
-                          {formatMoney(service.price).vndFormatted}
+                {note && (
+                  <FormField
+                    control={form.control}
+                    name="note"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Textarea
+                          {...field}
+                          placeholder="Ghi chú"
+                          onBlur={() => {
+                            form.setValue("note", field.value);
+                          }}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                <ul className="grid grid-cols-3 gap-6 my-4">
+                  {Object.entries(formData.customerInfo).map(([key, value]) =>
+                    value && value.toString().length > 0 ? (
+                      <li key={key} className="flex flex-col">
+                        <h3 className="text-muted-foreground font-medium text-sm uppercase">
+                          {key}
+                        </h3>
+                        <p className="font-medium">
+                          {key === "checkIn" || key === "checkOut"
+                            ? format(new Date(value), "PPP", { locale: vi })
+                            : typeof value === "object"
+                              ? JSON.stringify(value)
+                              : value}
                         </p>
-                      </div>
-                      <div className="font-semibold">
-                        {
-                          formatMoney(service.price * service.quantity)
-                            .vndFormatted
-                        }
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid place-items-center bg-background/50 border border-dashed rounded-md h-40 my-4">
+                      </li>
+                    ) : null
+                  )}
+                </ul>
+
+                <Separator className="mb-4" />
+                <div className="flex items-center justify-between">
+                  <h1 className="font-bold text-lg ">Menu & Dịch vụ</h1>
                   <div>
-                    <HandPlatter className="mx-auto mb-2" />
-                    <h3 className="font-medium text-lg text-center">
-                      Chưa có mục nào
-                    </h3>
-                    <p className="text-sm text-muted-foreground text-center">
-                      Nhấn nút Thêm để tham khảo Menu & Dịch vụ
-                    </p>
+                    <Button onClick={toggle} variant={"gradient"}>
+                      <CirclePlus />
+                      Thêm
+                    </Button>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                <ServiceModal
+                  open={open}
+                  toggle={toggle}
+                  onFinish={handleServiceFinish}
+                  initialServices={formData.services}
+                />
+                {formData.services!.length > 0 ? (
+                  <div className="grid gap-2 mt-4">
+                    {formData.services!.map((service) => (
+                      <div
+                        key={service.id}
+                        className="flex items-center justify-between p-2 border rounded-md group relative"
+                      >
+                        <div>
+                          <h3 className="font-medium">{service.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {service.category} - {service.quantity} x{" "}
+                            {formatMoney(service.price).vndFormatted}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 ">
+                          <div className="font-semibold">
+                            {
+                              formatMoney(service.price * service.quantity)
+                                .vndFormatted
+                            }
+                          </div>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() => handleRemoveService(service.id)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid place-items-center bg-background/50 border border-dashed rounded-md h-40 my-4">
+                    <div>
+                      <HandPlatter className="mx-auto mb-2" />
+                      <h3 className="font-medium text-lg text-center">
+                        Chưa có mục nào
+                      </h3>
+                      <p className="text-sm text-muted-foreground text-center">
+                        Nhấn nút Thêm để tham khảo Menu & Dịch vụ
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </Form>
         <div className="md:col-span-3 col-span-1">
           <Card>
             <CardHeader>
@@ -254,16 +324,22 @@ function BookingConfirmation({
                     </Popover>
                   </div>
                 </div>
-                <h3 className="text-muted-foreground text-sm uppercase mb-1">
-                  Số ngày lưu trú
-                </h3>
-                <p className="font-medium">
-                  {intervalToDuration({
-                    start: formData.customerInfo?.checkIn as unknown as Date,
-                    end: formData.customerInfo?.checkOut as unknown as Date,
-                  }).days || 0}{" "}
-                  ngày
-                </p>
+                <div className="flex justify-between">
+                  <div>
+                    <h3 className="text-muted-foreground text-sm uppercase mb-1">
+                      Số ngày lưu trú
+                    </h3>
+                    <p className="font-medium">{numberOfNights} ngày</p>
+                  </div>
+                  <div>
+                    <h3 className="text-muted-foreground text-sm uppercase mb-1">
+                      Bữa sáng
+                    </h3>
+                    <p className="font-medium">
+                      {numberOfBreakfastDays / numberOfNights} ngày
+                    </p>
+                  </div>
+                </div>
                 <div>
                   <h3 className="text-muted-foreground text-sm uppercase mb-1">
                     Các phòng đã chọn

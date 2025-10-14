@@ -3,11 +3,9 @@ import { Outlet, useSearchParams } from "react-router";
 import DashboardHeader from "~/components/layouts/headers/header.dashboard";
 import DashboardSidebar from "~/components/layouts/side-bar/dashboard/side-bar.dashboard";
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
-import { SidebarToggleProvider } from "~/context/SidebarContext";
+import { SidebarToggleProvider } from "~/context/sidebar.context";
 import { cn } from "~/lib/utils";
 const DashboardLayout: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-
   return (
     <SidebarToggleProvider>
       <SidebarProvider>

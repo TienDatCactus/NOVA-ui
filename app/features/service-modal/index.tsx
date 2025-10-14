@@ -30,6 +30,7 @@ import {
 import { useState } from "react";
 import useBookingSchema from "~/schema/booking.schema";
 import type z from "zod";
+import { useCreateBookingStore } from "~/store/create-booking.store";
 
 export const MOCK_SERVICES = [
   {
@@ -128,6 +129,7 @@ interface ServiceModalProps {
   open: boolean;
   toggle: () => void;
   initialServices?: any[];
+  selectedRoomId?: string;
 }
 
 function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
@@ -136,6 +138,7 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("");
 
+  const { formData } = useCreateBookingStore();
   const { selectedServices, getTotalAmount, getTotalItems, clearCart } =
     useServiceContext();
 
@@ -223,9 +226,11 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
                 <SelectValue placeholder="Chọn phòng" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="101">Phòng 101</SelectItem>
-                <SelectItem value="102">Phòng 102</SelectItem>
-                <SelectItem value="103">Phòng 103</SelectItem>
+                {formData?.roomSelection?.rooms.map((room) => (
+                  <SelectItem key={room.roomId} value={room.roomId}>
+                    {room.roomName}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Button className="" variant="outline" onClick={clearCart}>

@@ -8,7 +8,7 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import { Divider } from "~/components/ui/divider";
-import { Form, FormField, FormItem } from "~/components/ui/form";
+import { Form, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -60,9 +60,11 @@ function RoomSelectionForm({
     z.infer<ReturnType<typeof useBookingSchema>["BookingSchema"]>
   >;
 }) {
-  const [breakfast, setBreakfast] = useState(false);
-  const [open, setOpen] = useState(false);
   const { formData, updateFormData, nextStep } = useCreateBookingStore();
+  const [breakfast, setBreakfast] = useState(() => {
+    return formData.roomSelection?.selectedBreakfastDates?.length! > 0;
+  });
+  const [open, setOpen] = useState(false);
   const { SelectedRoomSchema } = useBookingSchema();
   const dateRange =
     formData.customerInfo?.checkIn && formData.customerInfo?.checkOut
@@ -248,6 +250,7 @@ function RoomSelectionForm({
                         items={dateRange}
                         disabled={breakfast}
                       />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
