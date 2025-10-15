@@ -1,7 +1,6 @@
-import { eachDayOfInterval } from "date-fns";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useFieldArray, type UseFormReturn } from "react-hook-form";
+import { type UseFormReturn } from "react-hook-form";
+import type z from "zod";
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,36 +21,16 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import useBookingSchema from "~/schema/booking.schema";
+import useBookingSchema from "~/services/schema/booking.schema";
 import { useCreateBookingStore } from "~/store/create-booking.store";
+import {
+  AVAILABLE_ROOMS,
+  SUGGESTED_ROOMS,
+  useRoomSelection,
+} from "../container/room-selection.hooks";
 import { Combobox } from "../fragments/room-breakfast-combobox.fragment";
 import RoomDataTable from "../fragments/room-data-table.fragment";
-import type z from "zod";
-
-const AVAILABLE_ROOMS = [
-  {
-    roomId: "1",
-    roomName: "salam",
-    price: 2500000,
-    roomType: "Chalet" as const,
-  },
-  {
-    roomId: "2",
-    roomName: "nigga town",
-    price: 2500000,
-    roomType: "Chalet" as const,
-  },
-];
-
-const SUGGESTED_ROOMS = [
-  {
-    roomId: "3",
-    roomName: "sieu nhan nigger",
-    price: 2500000,
-    roomType: "Chalet" as const,
-    quantity: 1,
-  },
-];
+import { formatMoney } from "~/lib/utils";
 
 function RoomSelectionForm({
   form,
@@ -60,76 +39,16 @@ function RoomSelectionForm({
     z.infer<ReturnType<typeof useBookingSchema>["BookingSchema"]>
   >;
 }) {
-  const { formData, updateFormData, nextStep } = useCreateBookingStore();
-  const [breakfast, setBreakfast] = useState(() => {
-    return formData.roomSelection?.selectedBreakfastDates?.length! > 0;
-  });
-  const [open, setOpen] = useState(false);
-  const { SelectedRoomSchema } = useBookingSchema();
-  const dateRange =
-    formData.customerInfo?.checkIn && formData.customerInfo?.checkOut
-      ? eachDayOfInterval({
-          start: formData.customerInfo.checkIn,
-          end: formData.customerInfo.checkOut,
-        })
-      : [];
-
-  const { fields, append, remove, update } = useFieldArray({
-    control: form.control,
-    name: "roomSelection.rooms",
-  });
-
-  const handleRoomSelect = (
-    room: z.infer<typeof SelectedRoomSchema>,
-    quantity = 1
-  ) => {
-    const index = fields.findIndex((f) => f.roomId === room.roomId);
-
-    if (index === -1 && quantity > 0) {
-      append({
-        roomId: room.roomId,
-        roomName: room.roomName,
-        price: room.price,
-        roomType: room.roomType,
-        quantity: quantity,
-      });
-
-      const updatedFormData = form.getValues();
-      updateFormData(updatedFormData);
-      return;
-    }
-
-    if (index !== -1 && quantity > 0) {
-      update(index, {
-        roomId: room.roomId,
-        roomName: room.roomName,
-        price: room.price,
-        roomType: room.roomType,
-        quantity: quantity,
-      });
-
-      const updatedFormData = form.getValues();
-      updateFormData(updatedFormData);
-      return;
-    }
-
-    if (index !== -1 && quantity === 0) {
-      remove(index);
-
-      const updatedFormData = form.getValues();
-      updateFormData(updatedFormData);
-    }
-
-    form.trigger("roomSelection.rooms");
-  };
-
-  useEffect(() => {
-    const currentRooms = form.getValues("roomSelection.rooms");
-    if (!currentRooms) {
-      form.setValue("roomSelection.rooms", []);
-    }
-  }, [form]);
-
+  const { formData, nextStep } = useCreateBookingStore();
+  const {
+    breakfast,
+    setBreakfast,
+    open,
+    setOpen,
+    fields,
+    dateRange,
+    handleRoomSelect,
+  } = useRoomSelection({ form });
   return (
     <ScrollArea className="h-120 min-h-0">
       <Form {...form}>
@@ -178,12 +97,12 @@ function RoomSelectionForm({
                       <TableRow key={room.roomId}>
                         <TableCell>
                           <h1>{room.roomName}</h1>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground ">
                             {room.roomType}
                           </p>
                         </TableCell>
                         <TableCell className="text-right">
-                          <data>${room.price.toFixed(2)}</data>
+                          <data>{formatMoney(room.price).vndFormatted}</data>
                         </TableCell>
                         <TableCell className="flex flex-col items-end justify-end">
                           <div className="w-16">

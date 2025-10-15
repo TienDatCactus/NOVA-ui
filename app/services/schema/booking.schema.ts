@@ -86,7 +86,7 @@ const ServiceItemSchema = z.object({
     .or(z.string().min(1, "ID dịch vụ không hợp lệ")),
   name: z.string().min(1, "Tên dịch vụ không hợp lệ"),
   price: z.number().min(0, "Giá dịch vụ không hợp lệ"),
-  imageUrl: z.string().url("URL hình ảnh không hợp lệ").optional(),
+  imageUrl: z.url("URL hình ảnh không hợp lệ").optional(),
   category: z.string().optional(),
   description: z.string().optional(),
   quantity: z.number().int().min(1, "Số lượng phải là số nguyên dương"),

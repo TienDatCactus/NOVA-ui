@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 import { vi } from "react-day-picker/locale";
 import type { UseFormReturn } from "react-hook-form";
 import type z from "zod";
@@ -33,8 +32,8 @@ import {
 import { Counter } from "~/components/ui/shadcn-io/counter";
 import { BOOKING_CHANNEL } from "~/lib/constants";
 import { cn } from "~/lib/utils";
-import useBookingSchema from "~/schema/booking.schema";
-import { useCreateBookingStore } from "~/store/create-booking.store";
+import useBookingSchema from "~/services/schema/booking.schema";
+import useCustomerInfoForm from "../container/customer-info-form.hooks";
 
 function CustomerInfoForm({
   form,
@@ -43,28 +42,8 @@ function CustomerInfoForm({
     z.infer<ReturnType<typeof useBookingSchema>["BookingSchema"]>
   >;
 }) {
-  const { formData } = useCreateBookingStore();
-  const [contact, setContact] = useState<"email" | "phoneNumber" | "none">(
-    () => {
-      const email = formData.customerInfo?.email;
-      const phone = formData.customerInfo?.phoneNumber;
-      if (email) return "email";
-      else if (phone) return "phoneNumber";
-      return "none";
-    }
-  );
-  const email = form.watch("customerInfo.email");
-  const phone = form.watch("customerInfo.phoneNumber");
-  const bookingChannel = form.watch("customerInfo.bookingChannel");
-  const hasContactInfo = !!email || !!phone || contact !== "none";
-
-  useEffect(() => {
-    if (contact === "email") {
-      form.setValue("customerInfo.phoneNumber", "");
-    } else if (contact === "phoneNumber") {
-      form.setValue("customerInfo.email", "");
-    }
-  }, [contact]);
+  const { contact, setContact, hasContactInfo, bookingChannel } =
+    useCustomerInfoForm({ form });
   return (
     <ScrollArea className="h-90 min-h-0">
       <Form {...form}>

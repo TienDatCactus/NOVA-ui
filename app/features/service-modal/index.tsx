@@ -28,7 +28,7 @@ import {
   useServiceContext,
 } from "./local-context/service-modal.context";
 import { useState } from "react";
-import useBookingSchema from "~/schema/booking.schema";
+import useBookingSchema from "~/services/schema/booking.schema";
 import type z from "zod";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 

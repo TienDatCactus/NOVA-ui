@@ -1,7 +1,7 @@
 import http from "~/lib/http";
 import STORAGE, { clearStorage, setStorage } from "~/lib/storage";
-import useAuthSchema from "~/schema/auth.schema";
-import { Auth } from "../url";
+import useAuthSchema from "~/services/schema/auth.schema";
+import { Auth } from "../../url";
 import type { LoginDto, LoginResponseDto, ResetPasswordDto } from "./dto";
 const { LoginSchema, LoginResponseSchema, ResetPasswordSchema } =
   useAuthSchema();

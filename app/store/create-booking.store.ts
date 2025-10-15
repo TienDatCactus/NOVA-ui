@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import useBookingSchema from "~/schema/booking.schema";
+import useBookingSchema from "~/services/schema/booking.schema";
 
 const { BookingSchema } = useBookingSchema();
 

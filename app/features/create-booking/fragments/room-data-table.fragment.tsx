@@ -1,4 +1,3 @@
-import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import Image from "~/components/ui/image";
@@ -10,16 +9,17 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import {
-  TableHeader,
-  TableRow,
-  TableHead,
+  Table,
   TableBody,
   TableCell,
-  Table,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "~/components/ui/table";
 import { ROOM_TYPE } from "~/lib/constants";
-import useBookingSchema from "~/schema/booking.schema";
-const { RoomSchema, SelectedRoomSchema } = useBookingSchema();
+import { formatMoney } from "~/lib/utils";
+import useBookingSchema from "~/services/schema/booking.schema";
+import type { Room } from "~/services/types/booking.types";
 export default function RoomDataTable({
   onRoomSelect,
   rooms,
@@ -27,15 +27,12 @@ export default function RoomDataTable({
   nextStep,
   ...props
 }: React.ComponentProps<"table"> & {
-  onRoomSelect: (
-    suggestedRoom: z.infer<typeof RoomSchema>,
-    quantity?: number
-  ) => void;
-  rooms: z.infer<typeof RoomSchema>[];
+  onRoomSelect: (suggestedRoom: Room, quantity?: number) => void;
+  rooms: Room[];
   form?: any;
   nextStep?: () => void;
 }) {
-  const handleAddRoom = (room: z.infer<typeof RoomSchema>) => {
+  const handleAddRoom = (room: Room) => {
     onRoomSelect(room, room.quantity || 1);
     if (form) {
       form.trigger("roomSelection.rooms");
@@ -91,10 +88,12 @@ export default function RoomDataTable({
               <TableCell className="text-center">
                 <Badge variant={"default"}>{room.roomType}</Badge>
               </TableCell>
-              <TableCell className="text-center">trang thai</TableCell>
+              <TableCell className="text-center">{room.status}</TableCell>
               <TableCell className="text-center">{room.quantity}</TableCell>
               <TableCell className="text-center space-y-2">
-                <data className="block">{room.price}</data>
+                <data className="block">
+                  {formatMoney(room.price).vndFormatted}
+                </data>
                 <Button onClick={() => handleAddRoom(room)} className="w-fit">
                   Thêm phòng
                 </Button>

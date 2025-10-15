@@ -1,5 +1,5 @@
 import type z from "zod";
-import useAuthSchema from "~/schema/auth.schema";
+import useAuthSchema from "~/services/schema/auth.schema";
 
 const { LoginSchema, LoginResponseSchema, ResetPasswordSchema } =
   useAuthSchema();

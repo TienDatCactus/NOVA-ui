@@ -1,4 +1,4 @@
-import { differenceInDays, format, intervalToDuration } from "date-fns";
+import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   CalendarIcon,
@@ -7,22 +7,15 @@ import {
   HandPlatter,
   Pen,
   Trash,
+  X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
-import { toast } from "sonner";
 import type z from "zod";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
+import { Form, FormField, FormItem, FormMessage } from "~/components/ui/form";
 
 import {
   Popover,
@@ -34,38 +27,10 @@ import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import ServiceModal from "~/features/service-modal";
 import { formatMoney } from "~/lib/utils";
-import useBookingSchema from "~/schema/booking.schema";
+import useBookingSchema from "~/services/schema/booking.schema";
 import { useCreateBookingStore } from "~/store/create-booking.store";
-function useCalculateCost(formData: any) {
-  const rooms = formData.roomSelection?.rooms || [];
-  const checkIn = formData.customerInfo?.checkIn;
-  const checkOut = formData.customerInfo?.checkOut;
-  const services = formData.services || [];
-  let roomCost = 0;
-  let serviceCost = 0;
+import useBookingConfirmation from "../container/booking-confirmation.hooks";
 
-  if (checkIn && checkOut && rooms.length > 0) {
-    const days = differenceInDays(new Date(checkOut), new Date(checkIn)) || 1;
-
-    roomCost = rooms.reduce((total: number, room: any) => {
-      return total + room.price * room.quantity * days;
-    }, 0);
-
-    serviceCost = services.reduce((total: number, service: any) => {
-      return total + service.price * service.quantity;
-    }, 0);
-  }
-
-  const vatCost = (roomCost + serviceCost) * 0.1;
-  const totalCost = roomCost + serviceCost + vatCost;
-
-  return {
-    roomCost,
-    serviceCost,
-    vatCost,
-    totalCost,
-  };
-}
 function BookingConfirmation({
   form,
 }: {
@@ -73,67 +38,22 @@ function BookingConfirmation({
     z.infer<ReturnType<typeof useBookingSchema>["BookingSchema"]>
   >;
 }) {
-  const [note, setNote] = useState(false);
-  const [open, setOpen] = useState(false);
-  const { formData, updateFormData, prevStep } = useCreateBookingStore();
-  const costs = useCalculateCost(formData);
-  function toggle() {
-    setOpen(!open);
-  }
-  const handleRemoveService = (serviceId: string) => {
-    const updatedServices =
-      formData.services?.filter((service) => service.id !== serviceId) || [];
-    form.setValue("services", updatedServices);
-    updateFormData({
-      ...formData,
-      services: updatedServices,
-    });
-    toast.success("Đã xóa dịch vụ");
-  };
-
-  const handleCheckInChange = (date: Date) => {
-    form.setValue("customerInfo.checkIn", date);
-    const checkOut = form.getValues("customerInfo.checkOut");
-    if (date > checkOut) {
-      form.setValue(
-        "customerInfo.checkOut",
-        new Date(date.getTime() + 24 * 60 * 60 * 1000)
-      );
-    }
-    form.trigger("customerInfo.checkIn");
-
-    updateFormData(form.getValues());
-  };
-
-  const handleCheckOutChange = (date: Date) => {
-    if (date < form.getValues("customerInfo.checkIn")) {
-      form.setValue("customerInfo.checkIn", date);
-      toast.error("Ngày check-out phải sau ngày check-in");
-    }
-    form.setValue("customerInfo.checkOut", date);
-    form.trigger("customerInfo.checkOut");
-    updateFormData(form.getValues());
-  };
-  const handleEditRooms = () => {
-    prevStep();
-  };
-  const handleServiceFinish = (selectedServices: any[]) => {
-    form.setValue("services", selectedServices);
-    updateFormData({
-      ...formData,
-      services: selectedServices,
-    });
-    toggle();
-  };
-  const numberOfNights =
-    intervalToDuration({
-      start: formData.customerInfo?.checkIn as unknown as Date,
-      end: formData.customerInfo?.checkOut as unknown as Date,
-    }).days || 0;
-
-  const numberOfBreakfastDays = formData.roomSelection.selectedBreakfastDates
-    ? formData.roomSelection.selectedBreakfastDates.length
-    : 0;
+  const { formData } = useCreateBookingStore();
+  const {
+    note,
+    setNote,
+    open,
+    toggle,
+    costs,
+    handleRemoveRoom,
+    handleRemoveService,
+    handleCheckInChange,
+    handleCheckOutChange,
+    handleEditRooms,
+    handleServiceFinish,
+    numberOfNights,
+    numberOfBreakfastDays,
+  } = useBookingConfirmation({ form });
   return (
     <ScrollArea className="h-300 min-h-0">
       <div className="grid lg:grid-cols-8 grid-cols-1 gap-4">
@@ -346,9 +266,18 @@ function BookingConfirmation({
                   </h3>
                   <ul className="list-decimal list-inside ">
                     {formData.roomSelection?.rooms?.map((room: any) => (
-                      <li key={room.roomId} className="font-medium">
-                        {room.roomName} x {room.quantity}
-                      </li>
+                      <div className="flex items-center justify-between">
+                        <li key={room.roomId} className="font-medium">
+                          {room.roomName} x {room.quantity}
+                        </li>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleRemoveRoom(room.roomId)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     ))}
                   </ul>
                   <Button
