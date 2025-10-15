@@ -1,13 +1,11 @@
 import React from "react";
 import { Outlet, useSearchParams } from "react-router";
 import DashboardHeader from "~/components/layouts/headers/header.dashboard";
-import DashboardSidebar from "~/components/layouts/side-bar/side-bar.dashboard";
+import DashboardSidebar from "~/components/layouts/side-bar/dashboard/side-bar.dashboard";
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
-import { SidebarToggleProvider } from "~/context/SidebarContext";
+import { SidebarToggleProvider } from "~/context/sidebar.context";
 import { cn } from "~/lib/utils";
 const DashboardLayout: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-
   return (
     <SidebarToggleProvider>
       <SidebarProvider>
@@ -17,7 +15,7 @@ const DashboardLayout: React.FC = () => {
             <DashboardHeader />
             <div
               className={cn(
-                "rounded-md p-4 w-full mx-auto bg-white  h-full overflow-auto"
+                "rounded-md p-4 w-full mx-auto bg-background  h-full overflow-auto"
               )}
             >
               <Outlet />

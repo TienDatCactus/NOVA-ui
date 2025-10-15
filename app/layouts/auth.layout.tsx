@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import type { Route } from "./+types/auth.layout";
-import SectionLayout from "~/components/layouts/sections";
 import authBg from "~/assets/img/pexels-monica-tran-2153311664-34075390.jpg";
+import SectionLayout from "~/components/layouts/sections";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};

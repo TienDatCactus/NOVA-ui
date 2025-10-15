@@ -24,7 +24,7 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
   }
   const curPath = useLocation().pathname;
   return (
-    <header className="h-12 shadow-s py-2 px-6 z-10 bg-white flex items-center w-full sticky top-0   justify-between">
+    <header className="h-12 shadow-sm py-6 px-6 z-10 bg-background flex items-center w-full sticky top-0   justify-between border-b">
       <NavigationMenu viewport={false}>
         <NavigationMenuList>
           {RESERVATION_NAV_ITEMS.map((item) => (
@@ -43,9 +43,9 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
                   <ul className="grid gap-2 w-44">
                     {item.children.map((child) => (
                       <li
+                        key={child.title}
                         className={cn({
-                          "border-b-2 border-accent-foreground":
-                            curPath === child.href,
+                          " bg-accent rounded-sm": curPath === child.href,
                         })}
                       >
                         <NavigationMenuLink asChild>

@@ -39,10 +39,10 @@ const Image: React.FC<ComponentProps<"img"> & ImageProps> = ({
   return (
     <div
       style={{ width, height }}
-      className={`relativeflex items-center justify-center`}
+      className={`relative flex items-center justify-center`}
     >
       {loading && !error && (
-        <Skeleton className="h-full w-full rounded-lg  flex flex-col items-center justify-center">
+        <Skeleton className="h-full w-full rounded-lg absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-base text-muted-foreground">Đang tải...</span>
         </Skeleton>
       )}

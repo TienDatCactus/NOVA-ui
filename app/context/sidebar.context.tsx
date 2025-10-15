@@ -24,7 +24,7 @@ export function SidebarToggleProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useSidebar() {
+export function useSidebarContext() {
   const ctx = useContext(SidebarContext);
   if (!ctx) throw new Error("useSidebar must be used inside SidebarProvider");
   return ctx;

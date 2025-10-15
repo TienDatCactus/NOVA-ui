@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link } from "react-router";
-import SectionLayout from "~/components/layouts/sections";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -17,8 +16,8 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "~/components/ui/input-otp";
-import useAuthSchema from "~/schema/auth.schema";
-import type { ResetPasswordDto } from "~/services/auth-service/dto";
+import useAuthSchema from "~/services/schema/auth.schema";
+import type { ResetPasswordDto } from "~/services/api/auth-service/dto";
 import { useAuth } from "./container/auth.hooks";
 import {
   Form,
@@ -31,6 +30,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import type { Route } from "./+types/reset-password";
+import SectionLayout from "~/components/layouts/sections";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};

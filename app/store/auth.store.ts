@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { z } from "zod";
-import useAuthSchema from "~/schema/auth.schema";
+import useAuthSchema from "~/services/schema/auth.schema";
 const { UserSchema } = useAuthSchema();
 export type User = z.infer<typeof UserSchema>;
 
