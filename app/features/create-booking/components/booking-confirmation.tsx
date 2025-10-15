@@ -256,7 +256,9 @@ function BookingConfirmation({
                       Bữa sáng
                     </h3>
                     <p className="font-medium">
-                      {numberOfBreakfastDays / numberOfNights} ngày
+                      {numberOfNights === 0
+                        ? "0 ngày"
+                        : `${numberOfBreakfastDays / numberOfNights} ngày`}
                     </p>
                   </div>
                 </div>

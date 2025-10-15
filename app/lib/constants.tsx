@@ -157,12 +157,12 @@ const RESERVATION_NAV_ITEMS: Array<{
     title: "Lịch đặt phòng",
     href: "/dashboard/reservation/bookings",
     children: [
-      { title: "Sơ đồ", href: "/dashboard/reservation/bookings?view=grid" },
+      { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
       {
         title: "Timeline",
-        href: "/dashboard/reservation/bookings?view=timeline",
+        href: "/dashboard/reservation/bookings/timeline",
       },
-      { title: "Danh sách", href: "/dashboard/reservation/bookings?view=list" },
+      { title: "Danh sách", href: "/dashboard/reservation/bookings/list" },
     ],
   },
   {

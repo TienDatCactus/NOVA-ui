@@ -43,9 +43,9 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
                   <ul className="grid gap-2 w-44">
                     {item.children.map((child) => (
                       <li
+                        key={child.title}
                         className={cn({
-                          "border-b-2 border-accent-foreground":
-                            curPath === child.href,
+                          " bg-accent rounded-sm": curPath === child.href,
                         })}
                       >
                         <NavigationMenuLink asChild>

@@ -5,7 +5,7 @@ import type z from "zod";
 import useBookingSchema from "~/services/schema/booking.schema";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
-function useCreateBooking() {
+function useCreateBooking({ close }: { close?: () => void }) {
   const steps = ["Thông tin khách hàng", "Chọn phòng", "Xác nhận đặt phòng"];
   const { currentStep, nextStep, updateFormData, formData, reset } =
     useCreateBookingStore();

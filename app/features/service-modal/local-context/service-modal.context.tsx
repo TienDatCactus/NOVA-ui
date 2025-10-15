@@ -4,9 +4,9 @@ import useBookingSchema from "~/services/schema/booking.schema";
 const { ServiceItemSchema, ServiceCategoryEnum } = useBookingSchema();
 
 interface ServiceContextType {
-  selectedServices: any[];
+  selectedServices: ServiceItem[];
   selectedRoom: string | null;
-  addService: (service: any) => void;
+  addService: (service: ServiceItem) => void;
   removeService: (id: string) => void;
   updateQuantity: (idOrQuantity: string | number, quantity?: number) => void;
   setRoom: (roomId: string) => void;
@@ -15,7 +15,7 @@ interface ServiceContextType {
   getTotalItems: () => number;
   isInCart: (id: string) => boolean;
   getQuantity: (id: string) => number;
-  getServicesByCategory: (category: string) => any[];
+  getServicesByCategory: (category: string) => ServiceItem[];
 }
 type ServiceItem = z.infer<typeof ServiceItemSchema>;
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);

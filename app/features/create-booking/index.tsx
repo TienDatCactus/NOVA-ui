@@ -30,7 +30,7 @@ export default function CreateBookingDialog({
   open = false,
   ...props
 }: CreateBookingDialogProps) {
-  const { createBookingForm, handleNext, steps } = useCreateBooking();
+  const { createBookingForm, handleNext, steps } = useCreateBooking({ close });
   const { currentStep, nextStep, reset, prevStep } = useCreateBookingStore();
   const StepComponents = [
     <CustomerInfoForm form={createBookingForm} />,
