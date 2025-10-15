@@ -11,7 +11,7 @@ import { cn } from "~/lib/utils";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import BookingConfirmation from "./components/booking-confirmation";
 import CustomerInfoForm from "./components/customer-info-form";
-import RoomSelectionForm from "./components/room-selection-form";
+import RoomSelectionForm from "./components/room-selection";
 import useBookingSchema from "~/schema/booking.schema";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";

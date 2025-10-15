@@ -7,6 +7,7 @@ import {
   HandPlatter,
   Pen,
   Trash,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
@@ -80,6 +81,20 @@ function BookingConfirmation({
   function toggle() {
     setOpen(!open);
   }
+  const handleRemoveRoom = (roomId: string) => {
+    const updatedRooms =
+      formData.roomSelection?.rooms?.filter(
+        (room: any) => room.roomId !== roomId
+      ) || [];
+    form.setValue("roomSelection.rooms", updatedRooms);
+    updateFormData({
+      ...formData,
+      roomSelection: {
+        ...formData.roomSelection,
+        rooms: updatedRooms,
+      },
+    });
+  };
   const handleRemoveService = (serviceId: string) => {
     const updatedServices =
       formData.services?.filter((service) => service.id !== serviceId) || [];
@@ -118,7 +133,11 @@ function BookingConfirmation({
     prevStep();
   };
   const handleServiceFinish = (selectedServices: any[]) => {
-    form.setValue("services", selectedServices);
+    console.log(selectedServices);
+    form.setValue(
+      "services",
+      selectedServices.map((s) => s.id)
+    );
     updateFormData({
       ...formData,
       services: selectedServices,
@@ -346,9 +365,18 @@ function BookingConfirmation({
                   </h3>
                   <ul className="list-decimal list-inside ">
                     {formData.roomSelection?.rooms?.map((room: any) => (
-                      <li key={room.roomId} className="font-medium">
-                        {room.roomName} x {room.quantity}
-                      </li>
+                      <div className="flex items-center justify-between">
+                        <li key={room.roomId} className="font-medium">
+                          {room.roomName} x {room.quantity}
+                        </li>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleRemoveRoom(room.roomId)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     ))}
                   </ul>
                   <Button
