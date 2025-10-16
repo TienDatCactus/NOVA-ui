@@ -1,7 +1,7 @@
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -12,12 +12,6 @@ import { useCreateBookingStore } from "~/store/create-booking.store";
 import BookingConfirmation from "./components/booking-confirmation";
 import CustomerInfoForm from "./components/customer-info-form";
 import RoomSelectionForm from "./components/room-selection";
-import useBookingSchema from "~/services/schema/booking.schema";
-import { useForm } from "react-hook-form";
-import { Button } from "~/components/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type z from "zod";
-import { toast } from "sonner";
 import useCreateBooking from "./container/create-booking.hooks";
 
 interface CreateBookingDialogProps {
@@ -55,7 +49,7 @@ export default function CreateBookingDialog({
             {steps[currentStep - 1]}
           </DialogTitle>
           <ProgressSteps
-            controlled={true}
+            controlled={false}
             totalSteps={steps.length}
             steps={steps}
             currentStep={currentStep}
