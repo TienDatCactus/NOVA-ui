@@ -21,10 +21,9 @@ export function useAuth() {
       navigate(DASHBOARD.reservation.index);
       return response;
     } catch (err: any) {
-      toast.error(
-        err.message && "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin."
-      );
-      setError(err.message);
+      const errorMessage = err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+      toast.error(errorMessage);
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
@@ -46,8 +45,9 @@ export function useAuth() {
       navigate(AUTH.resetPassword);
       return response;
     } catch (err: any) {
-      toast.error(err.message && "Gửi yêu cầu thay đổi mật khẩu thất bại.");
-      setError(err.message);
+      const errorMessage = err.message || "Gửi yêu cầu thay đổi mật khẩu thất bại.";
+      toast.error(errorMessage);
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
@@ -63,8 +63,9 @@ export function useAuth() {
       navigate(AUTH.login);
       return response;
     } catch (err: any) {
-      toast.error(err.message && "Thay đổi mật khẩu thất bại.");
-      setError(err.message);
+      const errorMessage = err.message || "Thay đổi mật khẩu thất bại.";
+      toast.error(errorMessage);
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
