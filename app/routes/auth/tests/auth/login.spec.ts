@@ -65,6 +65,7 @@ test.describe("Login Page", () => {
 
     // Check if button shows loading text (this will depend on your API response time)
     // You might need to adjust this based on your actual implementation
+
     const loadingText = loginPage.page.getByText("Đang đăng nhập...");
     // Note: This might be flaky if API is too fast, consider mocking API for this test
   });
