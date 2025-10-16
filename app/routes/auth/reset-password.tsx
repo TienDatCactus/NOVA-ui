@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -45,6 +45,8 @@ export default function VerifyOTP({
   actionData,
 }: Route.ComponentProps) {
   const { resetPassword, isLoading, error: apiError } = useAuth();
+  const requestedEmail = useLocation().state.email as string;
+  console.log(requestedEmail);
   const { ResetPasswordSchema } = useAuthSchema();
   const resetPasswordForm = useForm({
     resolver: zodResolver(ResetPasswordSchema),
@@ -79,9 +81,14 @@ export default function VerifyOTP({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Mã quản lý</FormLabel>
+                        <FormLabel>Email quản lý</FormLabel>
                         <FormControl>
-                          <Input placeholder="nova-admin" {...field} />
+                          <Input
+                            placeholder="nova-admin"
+                            defaultValue={requestedEmail}
+                            disabled={!!requestedEmail}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

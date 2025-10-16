@@ -46,7 +46,11 @@ export function useAuth() {
     try {
       const response = await AuthService.forgotPassword(email);
       toast.success("Yêu cầu thay đổi mật khẩu đã được gửi!");
-      navigate(AUTH.resetPassword);
+      navigate(AUTH.resetPassword, {
+        state: {
+          email,
+        },
+      });
       return response;
     } catch (err: any) {
       toast.error(err.message && "Gửi yêu cầu thay đổi mật khẩu thất bại.");
@@ -63,7 +67,9 @@ export function useAuth() {
     try {
       const response = await AuthService.resetPassword(data);
       toast.success("Thay đổi mật khẩu thành công!");
-      navigate(AUTH.login);
+      navigate(AUTH.login, {
+        state: { email: data.email },
+      });
       return response;
     } catch (err: any) {
       toast.error(err.message && "Thay đổi mật khẩu thất bại.");

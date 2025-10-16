@@ -1,0 +1,101 @@
+.loader {
+  width: 150px;
+  height: 40px;
+  border-radius: 50%;
+  position: relative;
+  animation: bounce 5s infinite;
+}
+
+.loader::before {
+  content: "DVD";
+  position: absolute;
+  display: block;
+  left: 5%;
+  bottom: 55%;
+  color: green;
+  font-size: 4em;
+  font-weight: 900;
+  font-style: italic;
+  animation: div-color-change 5s infinite;
+}
+
+.loader::after {
+  content: "NOVA";
+  position: absolute;
+  top: 30%;
+  left: 21%;
+  color: #212121;
+  font-size: 0.5em;
+  font-weight: 800;
+  letter-spacing: 10px;
+  z-index: 1;
+}
+
+@keyframes bounce {
+  0% {
+    background-color: red;
+    transform: translateX(0) translateY(60px);
+    -webkit-transform: translateX(0) translateY(60px);
+    -moz-transform: translateX(0) translateY(60px);
+    -ms-transform: translateX(0) translateY(60px);
+    -o-transform: translateX(0) translateY(60px);
+  }
+
+  25% {
+    background-color: blue;
+    transform: translateX(200px) translateY(0);
+    -webkit-transform: translateX(200px) translateY(0);
+    -moz-transform: translateX(200px) translateY(0);
+    -ms-transform: translateX(200px) translateY(0);
+    -o-transform: translateX(200px) translateY(0);
+  }
+
+  55% {
+    background-color: green;
+    transform: translateX(0) translateY(-200px);
+    -webkit-transform: translateX(0) translateY(-200px);
+    -moz-transform: translateX(0) translateY(-200px);
+    -ms-transform: translateX(0) translateY(-200px);
+    -o-transform: translateX(0) translateY(-200px);
+  }
+
+  75% {
+    background-color: yellow;
+    transform: translateX(-200px) translateY(0);
+    -webkit-transform: translateX(-200px) translateY(0);
+    -moz-transform: translateX(-200px) translateY(0);
+    -ms-transform: translateX(-200px) translateY(0);
+    -o-transform: translateX(-200px) translateY(0);
+  }
+
+  100% {
+    background-color: purple;
+    transform: translateX(0) translateY(200px);
+    -webkit-transform: translateX(0) translateY(200px);
+    -moz-transform: translateX(0) translateY(200px);
+    -ms-transform: translateX(0) translateY(200px);
+    -o-transform: translateX(0) translateY(200px);
+  }
+}
+
+@keyframes div-color-change {
+  0% {
+    color: red;
+  }
+
+  25% {
+    color: blue;
+  }
+
+  55% {
+    color: green;
+  }
+
+  75% {
+    color: yellow;
+  }
+
+  100% {
+    color: purple;
+  }
+}

@@ -43,7 +43,7 @@ Example:
 
 // Custom hook in container/
 function useCreateBooking({ close }: { close?: () => void }) {
-  // Logic and state management
+  // Logic, data fetching with react query and state management
 }
 ```
 

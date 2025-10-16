@@ -1,4 +1,4 @@
-type Room = {
+export type Room = {
   roomId: string;
   roomName: string;
   price: number;
@@ -9,5 +9,8 @@ type Room = {
   quantity: number;
   amenities?: string[];
 };
+export type ServiceCategory = "Dịch vụ" | "Thức ăn" | "Đồ uống";
 
-export type { Room };
+export interface BookingListParams {
+  weekStart?: string;
+}

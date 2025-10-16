@@ -1,21 +1,17 @@
+import { useNavigation } from "react-router";
 import type { Route } from "./+types/list";
-
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+import useBookings from "./container/useBookings";
+import BookingViewLayout from "./layouts/booking-view.layout";
 
 export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
+  const { data, error, isPending } = useBookings();
   return (
-    <div>
+    <BookingViewLayout>
       {/* Frontend Code here. */}
-      <h1>New Route</h1>
-    </div>
+      <h1>{JSON.stringify(data)}</h1>
+    </BookingViewLayout>
   );
 }

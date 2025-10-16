@@ -33,10 +33,17 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
                 isActive={curPath === item.href}
                 hasChildren={!!item?.children}
               >
-                <Link to={item.href} className="flex gap-2 items-center">
-                  {item.icon}
-                  {item.title}
-                </Link>
+                {item.href ? (
+                  <Link to={item.href!} className="flex gap-2 items-center">
+                    {item.icon}
+                    {item.title}
+                  </Link>
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    {item.icon}
+                    {item.title}
+                  </div>
+                )}
               </NavigationMenuTrigger>
               {item?.children && item?.children.length > 0 && (
                 <NavigationMenuContent>

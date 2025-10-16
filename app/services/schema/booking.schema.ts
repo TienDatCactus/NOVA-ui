@@ -45,7 +45,7 @@ const CustomerBookingInfoSchema = z
     path: ["checkOut"],
   });
 
-export const SelectedRoomSchema = z.object({
+const SelectedRoomSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
   price: z.number().min(0, "Giá không hợp lệ"),
@@ -57,12 +57,12 @@ export const SelectedRoomSchema = z.object({
     .max(10, "Không thể đặt quá 10 phòng."),
 });
 
-export const RoomSchema = SelectedRoomSchema.extend({
+const RoomSchema = SelectedRoomSchema.extend({
   description: z.string().optional(),
   images: z.array(z.url()).optional(),
 });
 
-export const RoomSelectionSchema = z
+const RoomSelectionSchema = z
   .object({
     rooms: z
       .array(SelectedRoomSchema)
@@ -122,7 +122,41 @@ const BookingSchema = z
     }
   });
 
-export type ServiceCategory = "Dịch vụ" | "Thức ăn" | "Đồ uống";
+const RoomItemSchema = z.object({
+  roomId: z.string().uuid({ message: "roomId phải là UUID" }),
+  roomName: z.string().optional(),
+  roomTypeId: z.string().optional(),
+  roomTypeName: z.string().optional(),
+  nightlyPrice: z.number("nightlyPrice phải là number").min(0),
+});
+const ServicesSchema = z.object({
+  isBreakfast: z.boolean(),
+  breakfastDays: z.array(z.date()).optional(),
+});
+const BookingItemSchema = z.object({
+  id: z.uuid(),
+  bookingCode: z.string().optional(),
+  status: z.number().int().nonnegative(),
+  checkinDate: z.date(),
+  checkoutDate: z.date(),
+  createdAt: z.date(),
+  note: z.string().optional(),
+  source: z.string().optional(),
+  customerName: z.string().optional(),
+  customerPhone: z.string().optional(),
+  customerEmail: z.string().optional(),
+  adults: z.number().int().min(0),
+  children: z.number().int().min(0).optional(),
+  totalAmount: z.number().min(0),
+  paidAmount: z.number().min(0),
+  paymentStatus: z.string().optional(),
+  rooms: z.array(RoomItemSchema).optional(),
+  services: ServicesSchema.optional(),
+});
+
+const BookingListResponseSchema = z.object({
+  data: z.array(BookingItemSchema).optional(),
+});
 const useBookingSchema = () => {
   return {
     CustomerBookingInfoSchema,
@@ -134,6 +168,10 @@ const useBookingSchema = () => {
     RoomSchema,
     ServiceItemSchema,
     ServiceCategoryEnum,
+    BookingListResponseSchema,
+    BookingItemSchema,
+    RoomItemSchema,
+    ServicesSchema,
   };
 };
 export default useBookingSchema;

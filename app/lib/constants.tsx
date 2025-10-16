@@ -144,7 +144,7 @@ const SUB_DASHBOARD_ITEMS: Array<{
 const RESERVATION_NAV_ITEMS: Array<{
   icon?: JSX.Element;
   title: string;
-  href: string;
+  href?: string;
   children?: Array<{ title: string; href: string }>;
 }> = [
   {
@@ -155,7 +155,6 @@ const RESERVATION_NAV_ITEMS: Array<{
   {
     icon: <HousePlus size={16} />,
     title: "Lịch đặt phòng",
-    href: "/dashboard/reservation/bookings",
     children: [
       { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
       {

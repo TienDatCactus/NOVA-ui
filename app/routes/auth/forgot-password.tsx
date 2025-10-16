@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, CircleAlert } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -36,6 +36,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 
 export default function ForgotPassword() {
   const { forgotPassword, isLoading } = useAuth();
+
   const { ForgotPasswordSchema } = useAuthSchema();
   const forgotPasswordForm = useForm({
     resolver: zodResolver(ForgotPasswordSchema),
@@ -79,7 +80,7 @@ export default function ForgotPassword() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mã quản lý</FormLabel>
+                      <FormLabel>Email quản lý</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
