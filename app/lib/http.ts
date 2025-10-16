@@ -15,7 +15,7 @@ const parseBody = (response: AxiosResponse) => {
     toast.error(message || "An error occurred, please try again later.");
   }
 
-  return response;
+  return response.data;
 };
 
 const http = axios.create({

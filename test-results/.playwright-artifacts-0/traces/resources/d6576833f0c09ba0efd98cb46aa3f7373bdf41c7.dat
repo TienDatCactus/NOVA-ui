@@ -1,0 +1,168 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/@fs/D:\\FPT\\Semester 9\\NOVA-ui\\app\\root.tsx");import.meta.env = {"BASE_URL": "/", "DEV": true, "MODE": "development", "PROD": false, "SSR": false};import RefreshRuntime from "/@id/__x00__virtual:react-router/hmr-runtime";const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;let prevRefreshReg;let prevRefreshSig;if (import.meta.hot && !inWebWorker) {  if (!window.__vite_plugin_react_preamble_installed__) {    throw new Error(      "React Router Vite plugin can't detect preamble. Something is wrong."    );  }  prevRefreshReg = window.$RefreshReg$;  prevRefreshSig = window.$RefreshSig$;  window.$RefreshReg$ = (type, id) => {    RefreshRuntime.register(type, "D:/FPT/Semester 9/NOVA-ui/app/root.tsx" + " " + id)  };  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;}import { UNSAFE_withComponentProps as _UNSAFE_withComponentProps, UNSAFE_withErrorBoundaryProps as _UNSAFE_withErrorBoundaryProps } from "/node_modules/.vite/deps/react-router.js?v=c94af522";
+import __vite__cjsImport3_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=c94af522"; const jsxDEV = __vite__cjsImport3_react_jsxDevRuntime["jsxDEV"];
+import { QueryClient, QueryClientProvider } from "/node_modules/.vite/deps/@tanstack_react-query.js?v=c94af522";
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from "/node_modules/.vite/deps/react-router.js?v=c94af522";
+import "/app/index.css";
+import { ReactQueryDevtools } from "/node_modules/.vite/deps/@tanstack_react-query-devtools.js?v=c94af522";
+import { Toaster } from "/app/components/ui/sonner.tsx";
+export const links = () => [{
+  rel: "preconnect",
+  href: "https://fonts.googleapis.com"
+}, {
+  rel: "preconnect",
+  href: "https://fonts.gstatic.com",
+  crossOrigin: "anonymous"
+}, {
+  rel: "stylesheet",
+  href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+}];
+export function Layout({
+  children
+}) {
+  return /* @__PURE__ */jsxDEV("html", {
+    lang: "en",
+    children: [/* @__PURE__ */jsxDEV("head", {
+      children: [/* @__PURE__ */jsxDEV("meta", {
+        charSet: "utf-8"
+      }, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+        lineNumber: 32,
+        columnNumber: 9
+      }, this), /* @__PURE__ */jsxDEV("meta", {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1"
+      }, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+        lineNumber: 33,
+        columnNumber: 9
+      }, this), /* @__PURE__ */jsxDEV(Meta, {}, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+        lineNumber: 34,
+        columnNumber: 9
+      }, this), /* @__PURE__ */jsxDEV(Links, {}, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+        lineNumber: 35,
+        columnNumber: 9
+      }, this)]
+    }, void 0, true, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+      lineNumber: 31,
+      columnNumber: 7
+    }, this), /* @__PURE__ */jsxDEV("body", {
+      children: [children, /* @__PURE__ */jsxDEV(Toaster, {
+        richColors: true
+      }, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+        lineNumber: 39,
+        columnNumber: 9
+      }, this), /* @__PURE__ */jsxDEV(ScrollRestoration, {}, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+        lineNumber: 40,
+        columnNumber: 9
+      }, this), /* @__PURE__ */jsxDEV(Scripts, {}, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+        lineNumber: 41,
+        columnNumber: 9
+      }, this)]
+    }, void 0, true, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+      lineNumber: 37,
+      columnNumber: 7
+    }, this)]
+  }, void 0, true, {
+    fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+    lineNumber: 30,
+    columnNumber: 5
+  }, this);
+}
+_c = Layout;
+const queryClient = new QueryClient();
+export default _c3 = _UNSAFE_withComponentProps(_c2 = function App() {
+  return /* @__PURE__ */jsxDEV(QueryClientProvider, {
+    client: queryClient,
+    children: [/* @__PURE__ */jsxDEV(ReactQueryDevtools, {
+      initialIsOpen: false,
+      buttonPosition: "bottom-left"
+    }, void 0, false, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+      lineNumber: 51,
+      columnNumber: 7
+    }, this), /* @__PURE__ */jsxDEV(Outlet, {}, void 0, false, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+      lineNumber: 52,
+      columnNumber: 7
+    }, this)]
+  }, void 0, true, {
+    fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+    lineNumber: 50,
+    columnNumber: 5
+  }, this);
+});
+export const ErrorBoundary = _UNSAFE_withErrorBoundaryProps(_c4 = function ErrorBoundary({
+  error
+}) {
+  let message = "Oops!";
+  let details = "An unexpected error occurred.";
+  let stack;
+  if (isRouteErrorResponse(error)) {
+    message = error.status === 404 ? "404" : "Error";
+    details = error.status === 404 ? "The requested page could not be found." : error.statusText || details;
+  } else if (import.meta.env.DEV && error && error instanceof Error) {
+    details = error.message;
+    stack = error.stack;
+  }
+  return /* @__PURE__ */jsxDEV("main", {
+    className: "pt-16 p-4 container mx-auto",
+    children: [/* @__PURE__ */jsxDEV("h1", {
+      children: message
+    }, void 0, false, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+      lineNumber: 75,
+      columnNumber: 7
+    }, this), /* @__PURE__ */jsxDEV("p", {
+      children: details
+    }, void 0, false, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+      lineNumber: 76,
+      columnNumber: 7
+    }, this), stack && /* @__PURE__ */jsxDEV("pre", {
+      className: "w-full p-4 overflow-x-auto",
+      children: /* @__PURE__ */jsxDEV("code", {
+        children: stack
+      }, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+        lineNumber: 79,
+        columnNumber: 11
+      }, this)
+    }, void 0, false, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+      lineNumber: 78,
+      columnNumber: 9
+    }, this)]
+  }, void 0, true, {
+    fileName: "D:/FPT/Semester 9/NOVA-ui/app/root.tsx",
+    lineNumber: 74,
+    columnNumber: 5
+  }, this);
+});
+_c5 = ErrorBoundary;
+var _c, _c2, _c3, _c4, _c5;
+$RefreshReg$(_c, "Layout");
+$RefreshReg$(_c2, "%default%$_UNSAFE_withComponentProps");
+$RefreshReg$(_c3, "%default%");
+$RefreshReg$(_c4, "ErrorBoundary$_UNSAFE_withErrorBoundaryProps");
+$RefreshReg$(_c5, "ErrorBoundary");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/FPT/Semester 9/NOVA-ui/app/root.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      "root" && window.__reactRouterRouteModuleUpdates.set("root", nextExports);
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate(currentExports, nextExports, ["clientAction","clientLoader","unstable_clientMiddleware","handle","meta","links","shouldRevalidate"]);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+//# sourceMappingURL=data:application/json;base64,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QUFBO0VBQUEsT0FRQTtBQUVKO0FBQUE0QixHQUFBLEdBM0JPZixhQUFBO0FBQUEsSUFBQVQsRUFBQSxFQUFBSSxHQUFBLEVBQUFGLEdBQUEsRUFBQVMsR0FBQSxFQUFBYSxHQUFBO0FBQUFDLFlBQUEsQ0FBQXpCLEVBQUE7QUFBQXlCLFlBQUEsQ0FBQXJCLEdBQUE7QUFBQXFCLFlBQUEsQ0FBQXZCLEdBQUE7QUFBQXVCLFlBQUEsQ0FBQWQsR0FBQTtBQUFBYyxZQUFBLENBQUFELEdBQUEiLCJuYW1lcyI6WyJqc3hERVYiLCJRdWVyeUNsaWVudCIsIlF1ZXJ5Q2xpZW50UHJvdmlkZXIiLCJpc1JvdXRlRXJyb3JSZXNwb25zZSIsIkxpbmtzIiwiTWV0YSIsIk91dGxldCIsIlNjcmlwdHMiLCJTY3JvbGxSZXN0b3JhdGlvbiIsIlJlYWN0UXVlcnlEZXZ0b29scyIsIlRvYXN0ZXIiLCJsaW5rcyIsInJlbCIsImhyZWYiLCJjcm9zc09yaWdpbiIsIkxheW91dCIsImNoaWxkcmVuIiwibGFuZyIsImNoYXJTZXQiLCJmaWxlTmFtZSIsImxpbmVOdW1iZXIiLCJjb2x1bW5OdW1iZXIiLCJuYW1lIiwiY29udGVudCIsInJpY2hDb2xvcnMiLCJfYyIsInF1ZXJ5Q2xpZW50IiwiX2MzIiwiX1VOU0FGRV93aXRoQ29tcG9uZW50UHJvcHMiLCJfYzIiLCJBcHAiLCJjbGllbnQiLCJpbml0aWFsSXNPcGVuIiwiYnV0dG9uUG9zaXRpb24iLCJFcnJvckJvdW5kYXJ5IiwiX1VOU0FGRV93aXRoRXJyb3JCb3VuZGFyeVByb3BzIiwiX2M0IiwiZXJyb3IiLCJtZXNzYWdlIiwiZGV0YWlscyIsInN0YWNrIiwic3RhdHVzIiwic3RhdHVzVGV4dCIsImltcG9ydCIsIm1ldGEiLCJlbnYiLCJERVYiLCJFcnJvciIsImNsYXNzTmFtZSIsIl9jNSIsIiRSZWZyZXNoUmVnJCJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJyb290LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBRdWVyeUNsaWVudCwgUXVlcnlDbGllbnRQcm92aWRlciB9IGZyb20gXCJAdGFuc3RhY2svcmVhY3QtcXVlcnlcIjtcclxuaW1wb3J0IHtcclxuICBpc1JvdXRlRXJyb3JSZXNwb25zZSxcclxuICBMaW5rcyxcclxuICBNZXRhLFxyXG4gIE91dGxldCxcclxuICBTY3JpcHRzLFxyXG4gIFNjcm9sbFJlc3RvcmF0aW9uLFxyXG59IGZyb20gXCJyZWFjdC1yb3V0ZXJcIjtcclxuaW1wb3J0IHR5cGUgeyBSb3V0ZSB9IGZyb20gXCIuLyt0eXBlcy9yb290XCI7XHJcbmltcG9ydCBcIi4vaW5kZXguY3NzXCI7XHJcblxyXG5pbXBvcnQgeyBSZWFjdFF1ZXJ5RGV2dG9vbHMgfSBmcm9tIFwiQHRhbnN0YWNrL3JlYWN0LXF1ZXJ5LWRldnRvb2xzXCI7XHJcbmltcG9ydCB7IFRvYXN0ZXIgfSBmcm9tIFwiLi9jb21wb25lbnRzL3VpL3Nvbm5lclwiO1xyXG5leHBvcnQgY29uc3QgbGlua3M6IFJvdXRlLkxpbmtzRnVuY3Rpb24gPSAoKSA9PiBbXHJcbiAgeyByZWw6IFwicHJlY29ubmVjdFwiLCBocmVmOiBcImh0dHBzOi8vZm9udHMuZ29vZ2xlYXBpcy5jb21cIiB9LFxyXG4gIHtcclxuICAgIHJlbDogXCJwcmVjb25uZWN0XCIsXHJcbiAgICBocmVmOiBcImh0dHBzOi8vZm9udHMuZ3N0YXRpYy5jb21cIixcclxuICAgIGNyb3NzT3JpZ2luOiBcImFub255bW91c1wiLFxyXG4gIH0sXHJcbiAge1xyXG4gICAgcmVsOiBcInN0eWxlc2hlZXRcIixcclxuICAgIGhyZWY6IFwiaHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1JbnRlcjppdGFsLG9wc3osd2dodEAwLDE0Li4zMiwxMDAuLjkwMDsxLDE0Li4zMiwxMDAuLjkwMCZkaXNwbGF5PXN3YXBcIixcclxuICB9LFxyXG5dO1xyXG5cclxuZXhwb3J0IGZ1bmN0aW9uIExheW91dCh7IGNoaWxkcmVuIH06IHsgY2hpbGRyZW46IFJlYWN0LlJlYWN0Tm9kZSB9KSB7XHJcbiAgcmV0dXJuIChcclxuICAgIDxodG1sIGxhbmc9XCJlblwiPlxyXG4gICAgICA8aGVhZD5cclxuICAgICAgICA8bWV0YSBjaGFyU2V0PVwidXRmLThcIiAvPlxyXG4gICAgICAgIDxtZXRhIG5hbWU9XCJ2aWV3cG9ydFwiIGNvbnRlbnQ9XCJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MVwiIC8+XHJcbiAgICAgICAgPE1ldGEgLz5cclxuICAgICAgICA8TGlua3MgLz5cclxuICAgICAgPC9oZWFkPlxyXG4gICAgICA8Ym9keT5cclxuICAgICAgICB7Y2hpbGRyZW59XHJcbiAgICAgICAgPFRvYXN0ZXIgcmljaENvbG9ycyAvPlxyXG4gICAgICAgIDxTY3JvbGxSZXN0b3JhdGlvbiAvPlxyXG4gICAgICAgIDxTY3JpcHRzIC8+XHJcbiAgICAgIDwvYm9keT5cclxuICAgIDwvaHRtbD5cclxuICApO1xyXG59XHJcbmNvbnN0IHF1ZXJ5Q2xpZW50ID0gbmV3IFF1ZXJ5Q2xpZW50KCk7XHJcblxyXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBBcHAoKSB7XHJcbiAgcmV0dXJuIChcclxuICAgIDxRdWVyeUNsaWVudFByb3ZpZGVyIGNsaWVudD17cXVlcnlDbGllbnR9PlxyXG4gICAgICA8UmVhY3RRdWVyeURldnRvb2xzIGluaXRpYWxJc09wZW49e2ZhbHNlfSBidXR0b25Qb3NpdGlvbj1cImJvdHRvbS1sZWZ0XCIgLz5cclxuICAgICAgPE91dGxldCAvPlxyXG4gICAgPC9RdWVyeUNsaWVudFByb3ZpZGVyPlxyXG4gICk7XHJcbn1cclxuXHJcbmV4cG9ydCBmdW5jdGlvbiBFcnJvckJvdW5kYXJ5KHsgZXJyb3IgfTogUm91dGUuRXJyb3JCb3VuZGFyeVByb3BzKSB7XHJcbiAgbGV0IG1lc3NhZ2UgPSBcIk9vcHMhXCI7XHJcbiAgbGV0IGRldGFpbHMgPSBcIkFuIHVuZXhwZWN0ZWQgZXJyb3Igb2NjdXJyZWQuXCI7XHJcbiAgbGV0IHN0YWNrOiBzdHJpbmcgfCB1bmRlZmluZWQ7XHJcblxyXG4gIGlmIChpc1JvdXRlRXJyb3JSZXNwb25zZShlcnJvcikpIHtcclxuICAgIG1lc3NhZ2UgPSBlcnJvci5zdGF0dXMgPT09IDQwNCA/IFwiNDA0XCIgOiBcIkVycm9yXCI7XHJcbiAgICBkZXRhaWxzID1cclxuICAgICAgZXJyb3Iuc3RhdHVzID09PSA0MDRcclxuICAgICAgICA/IFwiVGhlIHJlcXVlc3RlZCBwYWdlIGNvdWxkIG5vdCBiZSBmb3VuZC5cIlxyXG4gICAgICAgIDogZXJyb3Iuc3RhdHVzVGV4dCB8fCBkZXRhaWxzO1xyXG4gIH0gZWxzZSBpZiAoaW1wb3J0Lm1ldGEuZW52LkRFViAmJiBlcnJvciAmJiBlcnJvciBpbnN0YW5jZW9mIEVycm9yKSB7XHJcbiAgICBkZXRhaWxzID0gZXJyb3IubWVzc2FnZTtcclxuICAgIHN0YWNrID0gZXJyb3Iuc3RhY2s7XHJcbiAgfVxyXG5cclxuICByZXR1cm4gKFxyXG4gICAgPG1haW4gY2xhc3NOYW1lPVwicHQtMTYgcC00IGNvbnRhaW5lciBteC1hdXRvXCI+XHJcbiAgICAgIDxoMT57bWVzc2FnZX08L2gxPlxyXG4gICAgICA8cD57ZGV0YWlsc308L3A+XHJcbiAgICAgIHtzdGFjayAmJiAoXHJcbiAgICAgICAgPHByZSBjbGFzc05hbWU9XCJ3LWZ1bGwgcC00IG92ZXJmbG93LXgtYXV0b1wiPlxyXG4gICAgICAgICAgPGNvZGU+e3N0YWNrfTwvY29kZT5cclxuICAgICAgICA8L3ByZT5cclxuICAgICAgKX1cclxuICAgIDwvbWFpbj5cclxuICApO1xyXG59XHJcbiJdLCJmaWxlIjoiRDovRlBUL1NlbWVzdGVyIDkvTk9WQS11aS9hcHAvcm9vdC50c3gifQ==
