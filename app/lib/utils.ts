@@ -30,3 +30,15 @@ export function daysBetweenFloor(a: Date, b: Date) {
   const msPerDay = 24 * 60 * 60 * 1000;
   return Math.floor((b.getTime() - a.getTime()) / msPerDay);
 }
+
+export function formatMoney(amount: number) {
+  const usdFormatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+  const vndFormatted = new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(amount);
+  return { usdFormatted, vndFormatted };
+}

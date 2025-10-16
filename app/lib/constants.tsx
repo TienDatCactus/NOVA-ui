@@ -76,6 +76,7 @@ const SERVICES_ITEMS: Array<{
   },
 ];
 
+const SERVICE_CATEGORIES = ["Dịch vụ", "Thức ăn", "Đồ uống"];
 const DASHBOARD_ITEMS_RECEPTIONIST: Array<{
   id: number;
   title: string;
@@ -156,12 +157,12 @@ const RESERVATION_NAV_ITEMS: Array<{
     title: "Lịch đặt phòng",
     href: "/dashboard/reservation/bookings",
     children: [
-      { title: "Sơ đồ", href: "/dashboard/reservation/bookings?view=grid" },
+      { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
       {
         title: "Timeline",
-        href: "/dashboard/reservation/bookings?view=timeline",
+        href: "/dashboard/reservation/bookings/timeline",
       },
-      { title: "Danh sách", href: "/dashboard/reservation/bookings?view=list" },
+      { title: "Danh sách", href: "/dashboard/reservation/bookings/list" },
     ],
   },
   {
@@ -170,10 +171,11 @@ const RESERVATION_NAV_ITEMS: Array<{
     href: "/dashboard/reservation/new",
   },
 ];
+
 const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];
 const BOOKING_CHANNEL = [
   "Agoda",
-  "Booking.com", // Hoặc 'Booking.com' sau khi đã sửa
+  "Booking.com",
   "Expedia",
   "Ctrip",
   "BnB",
@@ -202,4 +204,5 @@ export {
   RESERVATION_NAV_ITEMS,
   ROOM_TYPE,
   BOOKING_CHANNEL,
+  SERVICE_CATEGORIES,
 };

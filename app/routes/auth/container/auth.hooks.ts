@@ -2,8 +2,11 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { DASHBOARD, AUTH } from "~/lib/fe-url";
-import { AuthService } from "~/services/auth-service";
-import type { LoginDto, ResetPasswordDto } from "~/services/auth-service/dto";
+import { AuthService } from "~/services/api/auth-service";
+import type {
+  LoginDto,
+  ResetPasswordDto,
+} from "~/services/api/auth-service/dto";
 import { useAuthStore } from "~/store/auth.store";
 
 export function useAuth() {

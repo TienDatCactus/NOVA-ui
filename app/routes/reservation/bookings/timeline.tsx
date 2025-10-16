@@ -1,5 +1,5 @@
 import RoomWeekScheduler from "~/features/scheduler";
-import type { Route } from "./+types/bookings";
+import type { Route } from "./+types/timeline";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -15,7 +15,6 @@ export default function Component({
 }: Route.ComponentProps) {
   return (
     <div>
-      {/* Frontend Code here. */}
       <RoomWeekScheduler />
     </div>
   );

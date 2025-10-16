@@ -16,29 +16,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Label } from "~/components/ui/label";
 
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-];
 interface ComboboxProps {
   value: string[];
   onChange: (value: string[]) => void;
@@ -53,12 +35,22 @@ export function Combobox({
   onChange,
   open,
   onOpenChange,
-  items: items = frameworks,
+  items,
   disabled,
 }: ComboboxProps) {
+  const isAllSelected = items!.length > 0 && value.length === items!.length;
+
+  const handleToggleAll = () => {
+    if (isAllSelected) {
+      onChange([]);
+    } else {
+      const allItemValues = items!.map((item) => format(item, "yyyy-MM-dd"));
+      onChange(allItemValues);
+    }
+  };
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger disabled={disabled} asChild>
+      <PopoverTrigger disabled={!disabled} asChild>
         <Button
           variant="outline"
           role="combobox"
@@ -71,32 +63,40 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." className="h-9" />
           <CommandList>
             <CommandEmpty>Không có ngày hợp lệ.</CommandEmpty>
             <CommandGroup>
-              {items.map((item: any) => (
-                <CommandItem
-                  key={item.value}
-                  value={item.value}
-                  onSelect={(currentValue) => {
-                    onChange(
-                      !value.includes(currentValue)
-                        ? [...value, currentValue]
-                        : value.filter((v) => v !== currentValue)
-                    );
-                    onOpenChange(false);
-                  }}
-                >
-                  {item.label}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value.includes(item.value) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
+              <CommandItem onSelect={handleToggleAll}>
+                <div className="flex items-start gap-3">
+                  <Checkbox id="toggle" checked={isAllSelected} />
+                  <Label htmlFor="toggle">Chọn tất cả</Label>
+                </div>
+              </CommandItem>
+              {items &&
+                items.length > 0 &&
+                items.map((item: any) => (
+                  <CommandItem
+                    key={format(item, "yyyy-MM-dd")}
+                    value={format(item, "yyyy-MM-dd")}
+                    onSelect={(currentValue) => {
+                      onChange(
+                        !value.includes(currentValue)
+                          ? [...value, currentValue]
+                          : value.filter((v) => v !== currentValue)
+                      );
+                    }}
+                  >
+                    {format(item, "EEEE, dd MMMM/yyyy", { locale: vi })}
+                    <Check
+                      className={cn(
+                        "ml-auto",
+                        value.includes(format(item, "yyyy-MM-dd"))
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
             </CommandGroup>
           </CommandList>
         </Command>

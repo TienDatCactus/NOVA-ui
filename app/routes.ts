@@ -18,7 +18,11 @@ export default [
     ...prefix("dashboard", [
       ...prefix("reservation", [
         index("routes/reservation/reservation.tsx"),
-        route("bookings", "routes/reservation/bookings/bookings.tsx"),
+        ...prefix("bookings", [
+          route("grid", "routes/reservation/bookings/grid.tsx"),
+          route("list", "routes/reservation/bookings/list.tsx"),
+          route("timeline", "routes/reservation/bookings/timeline.tsx"),
+        ]),
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
       ]),
       route("rooms", "routes/rooms/rooms.tsx"),

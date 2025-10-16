@@ -3,7 +3,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { toast } from "sonner";
-import { AuthService } from "~/services/auth-service";
+import { AuthService } from "~/services/api/auth-service";
 import STORAGE, { clearStorage, getStorage } from "./storage";
 
 const parseBody = (response: AxiosResponse) => {
