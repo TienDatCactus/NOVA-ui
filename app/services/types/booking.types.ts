@@ -13,4 +13,16 @@ export type ServiceCategory = "Dịch vụ" | "Thức ăn" | "Đồ uống";
 
 export interface BookingListParams {
   weekStart?: string;
+  date?: string;
+  code?: string;
+}
+export interface ServiceListParams {
+  includeInactive?: boolean;
+  typeCode?: string;
+}
+
+export interface MenuListParams {
+  includeInactive?: boolean;
+  categoryCode?: string;
+  q?: string;
 }

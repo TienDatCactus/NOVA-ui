@@ -16,18 +16,18 @@ async function login(data: LoginDto): Promise<LoginResponseDto> {
     return Promise.reject(err);
   }
 }
-const logout = () => {
+function logout() {
   clearStorage();
-};
-const forgotPassword = async (email: string) => {
+}
+async function forgotPassword(email: string) {
   try {
     const resp = await http.post(Auth.forgotPassword, { email });
     return resp.data;
   } catch (err) {
     return Promise.reject(err);
   }
-};
-const resetPassword = async (data: ResetPasswordDto) => {
+}
+async function resetPassword(data: ResetPasswordDto) {
   try {
     const resp = await http.post(
       Auth.resetPassword,
@@ -38,5 +38,29 @@ const resetPassword = async (data: ResetPasswordDto) => {
   } catch (err) {
     return Promise.reject(err);
   }
+}
+
+async function refresh(refreshToken: string) {
+  try {
+    const resp = await http.post(Auth.refresh, { refreshToken });
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+async function revoke(refreshToken: string) {
+  try {
+    const resp = await http.post(Auth.revoke, { refreshToken });
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+export const AuthService = {
+  forgotPassword,
+  resetPassword,
+  login,
+  logout,
+  refresh,
+  revoke,
 };
-export const AuthService = { forgotPassword, resetPassword, login, logout };

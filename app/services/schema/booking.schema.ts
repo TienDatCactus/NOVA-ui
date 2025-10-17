@@ -1,11 +1,13 @@
 import z from "zod";
 import { BOOKING_CHANNEL, ROOM_TYPE } from "~/lib/constants";
-const ServiceCategoryEnum = z.enum(["Dịch vụ", "Thức ăn", "Đồ uống"], {
-  error: "Danh mục dịch vụ không hợp lệ",
-});
-const RoomTypeEnum = z.enum(ROOM_TYPE, {
-  error: "Loại phòng không hợp lệ",
-});
+import useRoomSchema from "./room.schema";
+import useServiceSchema from "./service.schema";
+/* ------------------- */
+const { RoomItemSchema, RoomSelectionSchema } = useRoomSchema();
+const { ServiceItemSchema, ServicesSchema, ServiceCategoryEnum } =
+  useServiceSchema();
+/* ------------------- */
+
 const BookingChannelEnum = z.enum(BOOKING_CHANNEL, {
   error: "Kênh đặt phòng không hợp lệ",
 });
@@ -17,6 +19,13 @@ const CustomerBookingInfoSchema = z
       })
       .min(2, "Họ và tên phải có ít nhất 2 ký tự"),
     email: z.email("Email không hợp lệ").optional().or(z.literal("")),
+    city: z.string().optional(),
+    country: z.string().optional(),
+    addressLine1: z.string().optional(),
+    addressLine2: z.string().optional(),
+    state: z.string().optional(),
+    postCode: z.string().optional(),
+    howDidYouHearAboutUs: z.string().optional(),
     phoneNumber: z
       .string({
         error: "Số điện thoại không hợp lệ",
@@ -44,52 +53,6 @@ const CustomerBookingInfoSchema = z
     error: "Ngày trả phòng phải sau ngày nhận phòng.",
     path: ["checkOut"],
   });
-
-const SelectedRoomSchema = z.object({
-  roomId: z.string(),
-  roomName: z.string(),
-  price: z.number().min(0, "Giá không hợp lệ"),
-  roomType: RoomTypeEnum,
-  quantity: z
-    .number()
-    .int()
-    .min(0, "Số lượng không thể âm.")
-    .max(10, "Không thể đặt quá 10 phòng."),
-});
-
-const RoomSchema = SelectedRoomSchema.extend({
-  description: z.string().optional(),
-  images: z.array(z.url()).optional(),
-});
-
-const RoomSelectionSchema = z
-  .object({
-    rooms: z
-      .array(SelectedRoomSchema)
-      .min(1, "Phải chọn ít nhất 1 phòng.")
-      .refine(
-        (rooms) => rooms.some((r) => r.quantity > 0),
-        "Cần chọn ít nhất 1 phòng có số lượng lớn hơn 0."
-      ),
-    selectedBreakfastDates: z.array(z.string()).optional(),
-  })
-  .refine(
-    (data) =>
-      !data.selectedBreakfastDates || data.selectedBreakfastDates.length <= 30,
-    "Không thể chọn bữa sáng quá 30 ngày."
-  );
-
-const ServiceItemSchema = z.object({
-  id: z
-    .uuid("ID dịch vụ không hợp lệ")
-    .or(z.string().min(1, "ID dịch vụ không hợp lệ")),
-  name: z.string().min(1, "Tên dịch vụ không hợp lệ"),
-  price: z.number().min(0, "Giá dịch vụ không hợp lệ"),
-  imageUrl: z.url("URL hình ảnh không hợp lệ").optional(),
-  category: z.string().optional(),
-  description: z.string().optional(),
-  quantity: z.number().int().min(1, "Số lượng phải là số nguyên dương"),
-});
 
 const BookingSchema = z
   .object({
@@ -122,17 +85,6 @@ const BookingSchema = z
     }
   });
 
-const RoomItemSchema = z.object({
-  roomId: z.string().uuid({ message: "roomId phải là UUID" }),
-  roomName: z.string().optional(),
-  roomTypeId: z.string().optional(),
-  roomTypeName: z.string().optional(),
-  nightlyPrice: z.number("nightlyPrice phải là number").min(0),
-});
-const ServicesSchema = z.object({
-  isBreakfast: z.boolean(),
-  breakfastDays: z.array(z.date()).optional(),
-});
 const BookingItemSchema = z.object({
   id: z.uuid(),
   bookingCode: z.string().optional(),
@@ -153,25 +105,77 @@ const BookingItemSchema = z.object({
   rooms: z.array(RoomItemSchema).optional(),
   services: ServicesSchema.optional(),
 });
-
+const BookingItemByWeekSchema = z.object({
+  bookingId: z.uuid("bookingId phải là UUID hợp lệ"),
+  bookingCode: z.string().min(1, "bookingCode không được để trống"),
+  status: z.number().int().nonnegative(),
+  checkinDate: z.date(),
+  checkoutDate: z.date(),
+  segmentFrom: z.date(),
+  segmentTo: z.date("segmentTo phải là ngày hợp lệ"),
+});
 const BookingListResponseSchema = z.object({
   data: z.array(BookingItemSchema).optional(),
 });
+
+const BookingListByWeekResponseSchema = z.object({
+  roomId: z.uuid("roomId phải là UUID hợp lệ"),
+  roomName: z.string().min(1, "roomName không được để trống"),
+  roomTypeId: z.uuid("roomTypeId phải là UUID hợp lệ"),
+  roomTypeName: z.string().min(1, "roomTypeName không được để trống"),
+  bookings: z
+    .array(BookingItemByWeekSchema)
+    .default([])
+    .describe("Danh sách các booking thuộc phòng này"),
+});
+/* schema for external booking creation */
+const ExternalCreateBookingSchema = z.object({
+  customerId: z.uuid().optional(),
+  newCustomer: CustomerBookingInfoSchema.optional(),
+  checkinDate: z.date(),
+  checkoutDate: z.date(),
+  adultsAmount: z.number().int().min(0, "Số người lớn không hợp lệ"),
+  childrenAmount: z.number().int().min(0, "Số trẻ em không hợp lệ"),
+  isBreakfastAll: z.boolean(),
+  breakfastDates: z.array(z.date("Ngày bữa sáng không hợp lệ")).optional(),
+  note: z.string().optional(),
+  source: z.string().optional(),
+  otaName: z.string().optional(),
+  otaCode: z.string().optional(),
+  roomTypeRequests: z
+    .array(
+      z.object({
+        roomTypeId: z.uuid({ message: "roomTypeId không hợp lệ" }),
+        quantity: z
+          .number()
+          .int()
+          .min(1, "Phải đặt ít nhất 1 phòng")
+          .max(10, "Không thể đặt quá 10 phòng"),
+      })
+    )
+    .min(1, "Phải có ít nhất 1 loại phòng được chọn"),
+});
+
+const ExternalBookingResponseSchema = z.object({
+  bookingId: z.uuid("bookingId phải là UUID hợp lệ"),
+  bookingCode: z.string().min(1, "bookingCode không được để trống"),
+  status: z.string().min(1, "Trạng thái không được để trống"),
+  totalAmount: z.number().min(0, "Tổng tiền phải >= 0"),
+});
+
 const useBookingSchema = () => {
   return {
     CustomerBookingInfoSchema,
-    SelectedRoomSchema,
-    RoomSelectionSchema,
     BookingSchema,
-    RoomTypeEnum,
     BookingChannelEnum,
-    RoomSchema,
     ServiceItemSchema,
     ServiceCategoryEnum,
     BookingListResponseSchema,
     BookingItemSchema,
-    RoomItemSchema,
     ServicesSchema,
+    ExternalCreateBookingSchema,
+    ExternalBookingResponseSchema,
+    BookingListByWeekResponseSchema,
   };
 };
 export default useBookingSchema;

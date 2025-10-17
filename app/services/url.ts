@@ -3,15 +3,22 @@ const Auth = {
   logout: "Auth/logout",
   forgotPassword: "Auth/forgot-password",
   resetPassword: "Auth/reset-password",
+  refresh: "Auth/refresh",
+  revoke: "Auth/revoke",
 };
 
 const Booking = {
   create: "Bookings",
-  get: "Bookings",
   list: "Bookings/list",
-  detail: (id: string) => `Bookings/${id}`,
-  update: (id: string) => `Bookings/${id}`,
-  delete: (id: string) => `Bookings/${id}`,
+  listByWeek: "Bookings/rooms-week",
+  detail: (code: string) => `Bookings/${code}`,
 };
 
-export { Auth, Booking };
+const Menu = {
+  list: "Menu/list",
+};
+
+const Service = {
+  list: "Services/list",
+};
+export { Auth, Booking, Menu, Service };

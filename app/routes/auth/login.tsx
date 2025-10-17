@@ -21,7 +21,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import useAuthSchema from "~/services/schema/auth.schema";
-import type { LoginDto } from "~/services/api/auth-service/dto";
+import type { LoginDto } from "~/services/api/auth/dto";
 import { useAuth } from "./container/auth.hooks";
 
 export default function Login() {

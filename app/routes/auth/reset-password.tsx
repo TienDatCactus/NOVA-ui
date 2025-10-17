@@ -17,7 +17,7 @@ import {
   InputOTPSlot,
 } from "~/components/ui/input-otp";
 import useAuthSchema from "~/services/schema/auth.schema";
-import type { ResetPasswordDto } from "~/services/api/auth-service/dto";
+import type { ResetPasswordDto } from "~/services/api/auth/dto";
 import { useAuth } from "./container/auth.hooks";
 import {
   Form,
