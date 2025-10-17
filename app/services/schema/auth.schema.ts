@@ -39,6 +39,8 @@ const LoginResponseSchema = z.object({
   accessToken: z.string(),
   expiresAtUtc: z.string(),
   tokenType: z.literal("Bearer"),
+  refreshToken: z.string(),
+  refreshTokenExpiresAtUtc: z.string(),
   user: UserSchema,
 });
 

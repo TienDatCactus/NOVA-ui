@@ -43,10 +43,10 @@ const CustomerBookingInfoSchema = z
       .min(1, "Phải có ít nhất 1 người lớn"),
     children: z.number().int().optional(),
     checkIn: z
-      .date({ error: "Ngày nhận phòng không hợp lệ" })
+      .date("Ngày nhận phòng không hợp lệ")
       .min(new Date(), "Ngày nhận phòng phải là ngày trong tương lai."),
     checkOut: z
-      .date({ error: "Ngày trả phòng không hợp lệ" })
+      .date("Ngày trả phòng không hợp lệ")
       .min(new Date(), "Ngày trả phòng phải là ngày trong tương lai."),
   })
   .refine((data) => data.checkOut > data.checkIn, {
@@ -86,12 +86,12 @@ const BookingSchema = z
   });
 
 const BookingItemSchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   bookingCode: z.string().optional(),
   status: z.number().int().nonnegative(),
-  checkinDate: z.date(),
-  checkoutDate: z.date(),
-  createdAt: z.date(),
+  checkinDate: z.string(),
+  checkoutDate: z.string(),
+  createdAt: z.string(),
   note: z.string().optional(),
   source: z.string().optional(),
   customerName: z.string().optional(),
@@ -106,22 +106,20 @@ const BookingItemSchema = z.object({
   services: ServicesSchema.optional(),
 });
 const BookingItemByWeekSchema = z.object({
-  bookingId: z.uuid("bookingId phải là UUID hợp lệ"),
+  bookingId: z.string("bookingId phải là string hợp lệ"),
   bookingCode: z.string().min(1, "bookingCode không được để trống"),
   status: z.number().int().nonnegative(),
-  checkinDate: z.date(),
-  checkoutDate: z.date(),
-  segmentFrom: z.date(),
-  segmentTo: z.date("segmentTo phải là ngày hợp lệ"),
+  checkinDate: z.string(),
+  checkoutDate: z.string(),
+  segmentFrom: z.string(),
+  segmentTo: z.string(),
 });
-const BookingListResponseSchema = z.object({
-  data: z.array(BookingItemSchema).optional(),
-});
+const BookingListResponseSchema = z.array(BookingItemSchema).optional();
 
 const BookingListByWeekResponseSchema = z.object({
-  roomId: z.uuid("roomId phải là UUID hợp lệ"),
+  roomId: z.string("roomId phải là string hợp lệ"),
   roomName: z.string().min(1, "roomName không được để trống"),
-  roomTypeId: z.uuid("roomTypeId phải là UUID hợp lệ"),
+  roomTypeId: z.string("roomTypeId phải là string hợp lệ"),
   roomTypeName: z.string().min(1, "roomTypeName không được để trống"),
   bookings: z
     .array(BookingItemByWeekSchema)
@@ -130,14 +128,14 @@ const BookingListByWeekResponseSchema = z.object({
 });
 /* schema for external booking creation */
 const ExternalCreateBookingSchema = z.object({
-  customerId: z.uuid().optional(),
+  customerId: z.string().optional(),
   newCustomer: CustomerBookingInfoSchema.optional(),
   checkinDate: z.date(),
   checkoutDate: z.date(),
   adultsAmount: z.number().int().min(0, "Số người lớn không hợp lệ"),
   childrenAmount: z.number().int().min(0, "Số trẻ em không hợp lệ"),
   isBreakfastAll: z.boolean(),
-  breakfastDates: z.array(z.date("Ngày bữa sáng không hợp lệ")).optional(),
+  breakfastDates: z.array(z.string()).optional(),
   note: z.string().optional(),
   source: z.string().optional(),
   otaName: z.string().optional(),
@@ -145,7 +143,7 @@ const ExternalCreateBookingSchema = z.object({
   roomTypeRequests: z
     .array(
       z.object({
-        roomTypeId: z.uuid({ message: "roomTypeId không hợp lệ" }),
+        roomTypeId: z.string({ message: "roomTypeId không hợp lệ" }),
         quantity: z
           .number()
           .int()
@@ -157,7 +155,7 @@ const ExternalCreateBookingSchema = z.object({
 });
 
 const ExternalBookingResponseSchema = z.object({
-  bookingId: z.uuid("bookingId phải là UUID hợp lệ"),
+  bookingId: z.string("bookingId phải là string hợp lệ"),
   bookingCode: z.string().min(1, "bookingCode không được để trống"),
   status: z.string().min(1, "Trạng thái không được để trống"),
   totalAmount: z.number().min(0, "Tổng tiền phải >= 0"),

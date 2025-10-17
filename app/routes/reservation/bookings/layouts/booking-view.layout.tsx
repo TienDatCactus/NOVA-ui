@@ -11,8 +11,7 @@ function BookingViewLayout({ children }: BookingViewLayoutProps) {
       <div className="flex flex-col gap-4">
         <SearchRoom />
       </div>
-
-      <div className="bg-white rounded-md shadow">{children}</div>
+      <main className="rounded-sm">{children}</main>
     </div>
   );
 }

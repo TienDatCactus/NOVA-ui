@@ -4,7 +4,7 @@ import type { Route } from "./+types/grid";
 import SearchRoom from "./fragments/search";
 import BookingViewLayout from "./layouts/booking-view.layout";
 import useBookings from "./container/useBookings";
-import { BookingGrid } from "./components/booking.grid";
+import BookingGrid from "./components/booking.grid";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -18,10 +18,10 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { data, isPending } = useBookings();
+  const { data, isPending, refetch } = useBookings();
   return (
     <BookingViewLayout>
-      <BookingGrid bookings={data?.data} isLoading={isPending} />
+      <BookingGrid bookings={data} isLoading={isPending} refetch={refetch} />
     </BookingViewLayout>
   );
 }

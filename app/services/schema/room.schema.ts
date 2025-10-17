@@ -37,7 +37,7 @@ const RoomSelectionSchema = z
     "Không thể chọn bữa sáng quá 30 ngày."
   );
 const RoomItemSchema = z.object({
-  roomId: z.uuid({ message: "roomId phải là UUID" }),
+  roomId: z.string(),
   roomName: z.string().optional(),
   roomTypeId: z.string().optional(),
   roomTypeName: z.string().optional(),

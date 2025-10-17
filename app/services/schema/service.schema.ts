@@ -13,7 +13,7 @@ const ServiceItemSchema = z.object({
 });
 const ServicesSchema = z.object({
   isBreakfast: z.boolean(),
-  breakfastDays: z.array(z.date()).optional(),
+  breakfastDays: z.array(z.string()).optional(),
 });
 
 const ServiceCategoryEnum = z.enum(["Dịch vụ", "Thức ăn", "Đồ uống"], {

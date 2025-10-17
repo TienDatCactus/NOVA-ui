@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
-import { toast } from "sonner";
 import { DASHBOARD, AUTH } from "~/lib/fe-url";
 import { AuthService } from "~/services/api/auth";
 import type { LoginDto, ResetPasswordDto } from "~/services/api/auth/dto";
@@ -17,13 +16,9 @@ export function useAuth() {
     try {
       const response = await AuthService.login(data);
       setUser(response.user);
-      toast.success("Đăng nhập thành công!");
       navigate(DASHBOARD.reservation.index);
       return response;
     } catch (err: any) {
-      toast.error(
-        err.message && "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin."
-      );
       setError(err.message);
       throw err;
     } finally {
@@ -42,7 +37,6 @@ export function useAuth() {
     setError(null);
     try {
       const response = await AuthService.forgotPassword(email);
-      toast.success("Yêu cầu thay đổi mật khẩu đã được gửi!");
       navigate(AUTH.resetPassword, {
         state: {
           email,
@@ -50,7 +44,6 @@ export function useAuth() {
       });
       return response;
     } catch (err: any) {
-      toast.error(err.message && "Gửi yêu cầu thay đổi mật khẩu thất bại.");
       setError(err.message);
       throw err;
     } finally {
@@ -63,13 +56,11 @@ export function useAuth() {
     setError(null);
     try {
       const response = await AuthService.resetPassword(data);
-      toast.success("Thay đổi mật khẩu thành công!");
       navigate(AUTH.login, {
         state: { email: data.email },
       });
       return response;
     } catch (err: any) {
-      toast.error(err.message && "Thay đổi mật khẩu thất bại.");
       setError(err.message);
       throw err;
     } finally {

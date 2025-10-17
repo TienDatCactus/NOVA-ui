@@ -1,9 +1,17 @@
 import { format } from "date-fns";
-import { CalendarIcon, Users, CreditCard, BedDouble } from "lucide-react";
+import {
+  CalendarIcon,
+  Users,
+  CreditCard,
+  BedDouble,
+  EllipsisVertical,
+} from "lucide-react";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardFooter,
   CardHeader,
@@ -54,14 +62,13 @@ interface BookingCardProps {
 export function BookingCard({ booking, onClick }: BookingCardProps) {
   const statusColor = getBookingStatusColor(booking.status);
   const statusText = getBookingStatusText(booking.status);
-
+  console.log(booking);
   return (
     <Card
       className={cn(
         "h-full flex flex-col transition-all hover:shadow-md cursor-pointer",
         `border-l-4 border-l-${statusColor}-500`
       )}
-      onClick={() => onClick?.(booking)}
     >
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
@@ -81,6 +88,15 @@ export function BookingCard({ booking, onClick }: BookingCardProps) {
             {statusText}
           </Badge>
         </div>
+        <CardAction>
+          <Button
+            size={"icon"}
+            variant={"ghost"}
+            onClick={() => onClick?.(booking)}
+          >
+            <EllipsisVertical />
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent className="flex-1 space-y-3 pt-0">
         <div className="flex gap-2 items-center">

@@ -1,16 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import type z from "zod";
 import useBookingSchema from "~/services/schema/booking.schema";
+import useRoomSchema from "~/services/schema/room.schema";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
 function useCreateBooking({ close }: { close?: () => void }) {
   const steps = ["Thông tin khách hàng", "Chọn phòng", "Xác nhận đặt phòng"];
   const { currentStep, nextStep, updateFormData, formData, reset } =
     useCreateBookingStore();
-  const { CustomerBookingInfoSchema, BookingSchema, RoomSelectionSchema } =
-    useBookingSchema();
+  const { CustomerBookingInfoSchema, BookingSchema } = useBookingSchema();
+  const { RoomSelectionSchema } = useRoomSchema();
   const form = useForm<z.infer<typeof BookingSchema>>({
     resolver: zodResolver(BookingSchema),
     defaultValues: formData,
@@ -57,7 +57,6 @@ function useCreateBooking({ close }: { close?: () => void }) {
       console.log(result);
       if (result.success) {
         console.log("Final data to submit:", result.data);
-        toast.success("Đặt phòng thành công!");
         form.reset();
         reset();
         close?.();

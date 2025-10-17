@@ -1,7 +1,6 @@
 import { differenceInDays, intervalToDuration } from "date-fns";
 import { useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
-import { toast } from "sonner";
 import type z from "zod";
 import type useBookingSchema from "~/services/schema/booking.schema";
 import { useCreateBookingStore } from "~/store/create-booking.store";
@@ -72,7 +71,6 @@ function useBookingConfirmation({
       ...formData,
       services: updatedServices,
     });
-    toast.success("Đã xóa dịch vụ");
   };
 
   const handleCheckInChange = (date: Date) => {
@@ -92,7 +90,6 @@ function useBookingConfirmation({
   const handleCheckOutChange = (date: Date) => {
     if (date < form.getValues("customerInfo.checkIn")) {
       form.setValue("customerInfo.checkIn", date);
-      toast.error("Ngày check-out phải sau ngày check-in");
     }
     form.setValue("customerInfo.checkOut", date);
     form.trigger("customerInfo.checkOut");
