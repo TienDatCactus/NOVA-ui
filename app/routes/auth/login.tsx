@@ -29,6 +29,10 @@ export default function Login() {
   const { LoginSchema } = useAuthSchema();
   const loginForm = useForm({
     resolver: zodResolver(LoginSchema),
+    defaultValues: {
+      userNameOrEmail: "",
+      password: "",
+    },
   });
   const onSubmit: SubmitHandler<LoginDto> = async (data) => {
     try {

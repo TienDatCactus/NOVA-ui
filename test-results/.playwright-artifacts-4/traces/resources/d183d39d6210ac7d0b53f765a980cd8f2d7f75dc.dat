@@ -1,0 +1,131 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/@fs/D:\\FPT\\Semester 9\\NOVA-ui\\app\\layouts\\auth.layout.tsx");import RefreshRuntime from "/@id/__x00__virtual:react-router/hmr-runtime";const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;let prevRefreshReg;let prevRefreshSig;if (import.meta.hot && !inWebWorker) {  if (!window.__vite_plugin_react_preamble_installed__) {    throw new Error(      "React Router Vite plugin can't detect preamble. Something is wrong."    );  }  prevRefreshReg = window.$RefreshReg$;  prevRefreshSig = window.$RefreshSig$;  window.$RefreshReg$ = (type, id) => {    RefreshRuntime.register(type, "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx" + " " + id)  };  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;}import { UNSAFE_withComponentProps as _UNSAFE_withComponentProps } from "/node_modules/.vite/deps/react-router.js?v=c94af522";
+import __vite__cjsImport3_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=c94af522"; const jsxDEV = __vite__cjsImport3_react_jsxDevRuntime["jsxDEV"];
+import { Outlet } from "/node_modules/.vite/deps/react-router.js?v=c94af522";
+import authBg from "/app/assets/img/pexels-monica-tran-2153311664-34075390.jpg?import";
+import SectionLayout from "/app/components/layouts/sections/index.tsx";
+export default _c2 = _UNSAFE_withComponentProps(_c = function Component({
+  loaderData,
+  actionData
+}) {
+  return /* @__PURE__ */jsxDEV(SectionLayout, {
+    children: /* @__PURE__ */jsxDEV("div", {
+      className: "grid grid-cols-5 place-items-center h-full w-full ",
+      children: [/* @__PURE__ */jsxDEV("div", {
+        className: "bg-accent w-full h-full col-span-2 relative ",
+        style: {
+          backgroundImage: `url(${authBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center"
+        },
+        children: [/* @__PURE__ */jsxDEV("div", {
+          className: "absolute inset-0 bg-black/40"
+        }, void 0, false, {
+          fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+          lineNumber: 29,
+          columnNumber: 11
+        }, this), /* @__PURE__ */jsxDEV("div", {
+          className: "absolute p-6 top-0 text-white flex items-center justify-center space-x-2",
+          children: [/* @__PURE__ */jsxDEV("div", {
+            className: "bg-accent p-4 rounded-lg",
+            children: /* @__PURE__ */jsxDEV("span", {
+              className: "text-xl",
+              children: "🏞️"
+            }, void 0, false, {
+              fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+              lineNumber: 32,
+              columnNumber: 15
+            }, this)
+          }, void 0, false, {
+            fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+            lineNumber: 31,
+            columnNumber: 13
+          }, this), /* @__PURE__ */jsxDEV("div", {
+            children: [/* @__PURE__ */jsxDEV("h1", {
+              className: "font-bold text-4xl",
+              children: "NOVA"
+            }, void 0, false, {
+              fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+              lineNumber: 35,
+              columnNumber: 15
+            }, this), /* @__PURE__ */jsxDEV("p", {
+              className: "text-sm text-muted",
+              children: "Network Operation for Vacation Acommodation"
+            }, void 0, false, {
+              fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+              lineNumber: 36,
+              columnNumber: 15
+            }, this)]
+          }, void 0, true, {
+            fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+            lineNumber: 34,
+            columnNumber: 13
+          }, this)]
+        }, void 0, true, {
+          fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+          lineNumber: 30,
+          columnNumber: 11
+        }, this), /* @__PURE__ */jsxDEV("div", {
+          className: "absolute flex-col p-6 bottom-0 space-y-4 text-white flex",
+          children: [/* @__PURE__ */jsxDEV("h2", {
+            className: "text-3xl font-medium",
+            children: '"Lorem ipsum dolor sit amet ?"'
+          }, void 0, false, {
+            fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+            lineNumber: 42,
+            columnNumber: 13
+          }, this), /* @__PURE__ */jsxDEV("p", {
+            children: "- Lorem ipser -"
+          }, void 0, false, {
+            fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+            lineNumber: 45,
+            columnNumber: 13
+          }, this)]
+        }, void 0, true, {
+          fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+          lineNumber: 41,
+          columnNumber: 11
+        }, this)]
+      }, void 0, true, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+        lineNumber: 21,
+        columnNumber: 9
+      }, this), /* @__PURE__ */jsxDEV("div", {
+        className: "col-span-3",
+        children: /* @__PURE__ */jsxDEV(Outlet, {}, void 0, false, {
+          fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+          lineNumber: 49,
+          columnNumber: 11
+        }, this)
+      }, void 0, false, {
+        fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+        lineNumber: 48,
+        columnNumber: 9
+      }, this)]
+    }, void 0, true, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+      lineNumber: 20,
+      columnNumber: 7
+    }, this)
+  }, void 0, false, {
+    fileName: "D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx",
+    lineNumber: 19,
+    columnNumber: 5
+  }, this);
+});
+var _c, _c2;
+$RefreshReg$(_c, "%default%$_UNSAFE_withComponentProps");
+$RefreshReg$(_c2, "%default%");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/FPT/Semester 9/NOVA-ui/app/layouts/auth.layout.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      "layouts/auth.layout" && window.__reactRouterRouteModuleUpdates.set("layouts/auth.layout", nextExports);
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate(currentExports, nextExports, ["clientAction","clientLoader","unstable_clientMiddleware","handle","meta","links","shouldRevalidate"]);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+//# sourceMappingURL=data:application/json;base64,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WyJqc3hERVYiLCJPdXRsZXQiLCJhdXRoQmciLCJTZWN0aW9uTGF5b3V0IiwiX2MyIiwiX1VOU0FGRV93aXRoQ29tcG9uZW50UHJvcHMiLCJfYyIsIkNvbXBvbmVudCIsImxvYWRlckRhdGEiLCJhY3Rpb25EYXRhIiwiY2hpbGRyZW4iLCJjbGFzc05hbWUiLCJzdHlsZSIsImJhY2tncm91bmRJbWFnZSIsImJhY2tncm91bmRTaXplIiwiYmFja2dyb3VuZFBvc2l0aW9uIiwiZmlsZU5hbWUiLCJsaW5lTnVtYmVyIiwiY29sdW1uTnVtYmVyIiwiJFJlZnJlc2hSZWckIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbImF1dGgubGF5b3V0LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBPdXRsZXQgfSBmcm9tIFwicmVhY3Qtcm91dGVyXCI7XHJcbmltcG9ydCB0eXBlIHsgUm91dGUgfSBmcm9tIFwiLi8rdHlwZXMvYXV0aC5sYXlvdXRcIjtcclxuaW1wb3J0IGF1dGhCZyBmcm9tIFwifi9hc3NldHMvaW1nL3BleGVscy1tb25pY2EtdHJhbi0yMTUzMzExNjY0LTM0MDc1MzkwLmpwZ1wiO1xyXG5pbXBvcnQgU2VjdGlvbkxheW91dCBmcm9tIFwifi9jb21wb25lbnRzL2xheW91dHMvc2VjdGlvbnNcIjtcclxuXHJcbmV4cG9ydCBjb25zdCBhY3Rpb24gPSBhc3luYyAoeyByZXF1ZXN0LCBwYXJhbXMgfTogUm91dGUuQWN0aW9uQXJncykgPT4ge1xyXG4gIHJldHVybiB7fTtcclxufTtcclxuXHJcbmV4cG9ydCBjb25zdCBsb2FkZXIgPSBhc3luYyAoeyByZXF1ZXN0LCBwYXJhbXMgfTogUm91dGUuTG9hZGVyQXJncykgPT4ge1xyXG4gIHJldHVybiB7fTtcclxufTtcclxuXHJcbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIENvbXBvbmVudCh7XHJcbiAgbG9hZGVyRGF0YSxcclxuICBhY3Rpb25EYXRhLFxyXG59OiBSb3V0ZS5Db21wb25lbnRQcm9wcykge1xyXG4gIHJldHVybiAoXHJcbiAgICA8U2VjdGlvbkxheW91dD5cclxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy01IHBsYWNlLWl0ZW1zLWNlbnRlciBoLWZ1bGwgdy1mdWxsIFwiPlxyXG4gICAgICAgIDxkaXZcclxuICAgICAgICAgIGNsYXNzTmFtZT1cImJnLWFjY2VudCB3LWZ1bGwgaC1mdWxsIGNvbC1zcGFuLTIgcmVsYXRpdmUgXCJcclxuICAgICAgICAgIHN0eWxlPXt7XHJcbiAgICAgICAgICAgIGJhY2tncm91bmRJbWFnZTogYHVybCgke2F1dGhCZ30pYCxcclxuICAgICAgICAgICAgYmFja2dyb3VuZFNpemU6IFwiY292ZXJcIixcclxuICAgICAgICAgICAgYmFja2dyb3VuZFBvc2l0aW9uOiBcImNlbnRlclwiLFxyXG4gICAgICAgICAgfX1cclxuICAgICAgICA+XHJcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFic29sdXRlIGluc2V0LTAgYmctYmxhY2svNDBcIj48L2Rpdj5cclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYWJzb2x1dGUgcC02IHRvcC0wIHRleHQtd2hpdGUgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgc3BhY2UteC0yXCI+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYmctYWNjZW50IHAtNCByb3VuZGVkLWxnXCI+XHJcbiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC14bFwiPvCfj57vuI88L3NwYW4+XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8ZGl2PlxyXG4gICAgICAgICAgICAgIDxoMSBjbGFzc05hbWU9XCJmb250LWJvbGQgdGV4dC00eGxcIj5OT1ZBPC9oMT5cclxuICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWRcIj5cclxuICAgICAgICAgICAgICAgIE5ldHdvcmsgT3BlcmF0aW9uIGZvciBWYWNhdGlvbiBBY29tbW9kYXRpb25cclxuICAgICAgICAgICAgICA8L3A+XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFic29sdXRlIGZsZXgtY29sIHAtNiBib3R0b20tMCBzcGFjZS15LTQgdGV4dC13aGl0ZSBmbGV4XCI+XHJcbiAgICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LTN4bCBmb250LW1lZGl1bVwiPlxyXG4gICAgICAgICAgICAgIFwiTG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQgP1wiXHJcbiAgICAgICAgICAgIDwvaDI+XHJcbiAgICAgICAgICAgIDxwPi0gTG9yZW0gaXBzZXIgLTwvcD5cclxuICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgIDwvZGl2PlxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiY29sLXNwYW4tM1wiPlxyXG4gICAgICAgICAgPE91dGxldCAvPlxyXG4gICAgICAgIDwvZGl2PlxyXG4gICAgICA8L2Rpdj5cclxuICAgIDwvU2VjdGlvbkxheW91dD5cclxuICApO1xyXG59XHJcbiJdLCJmaWxlIjoiRDovRlBUL1NlbWVzdGVyIDkvTk9WQS11aS9hcHAvbGF5b3V0cy9hdXRoLmxheW91dC50c3gifQ==

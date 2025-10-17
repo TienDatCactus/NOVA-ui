@@ -1,0 +1,20 @@
+import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=c94af522"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import __vite__cjsImport1_react from "/node_modules/.vite/deps/react.js?v=c94af522"; const startTransition = __vite__cjsImport1_react["startTransition"]; const StrictMode = __vite__cjsImport1_react["StrictMode"];
+import __vite__cjsImport2_reactDom_client from "/node_modules/.vite/deps/react-dom_client.js?v=c94af522"; const hydrateRoot = __vite__cjsImport2_reactDom_client["hydrateRoot"];
+import { HydratedRouter } from "/node_modules/.vite/deps/react-router_dom.js?v=c94af522";
+startTransition(() => {
+  hydrateRoot(
+    document,
+    /* @__PURE__ */ jsxDEV(StrictMode, { children: /* @__PURE__ */ jsxDEV(HydratedRouter, {}, void 0, false, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/node_modules/@react-router/dev/dist/config/defaults/entry.client.tsx",
+      lineNumber: 9,
+      columnNumber: 7
+    }, this) }, void 0, false, {
+      fileName: "D:/FPT/Semester 9/NOVA-ui/node_modules/@react-router/dev/dist/config/defaults/entry.client.tsx",
+      lineNumber: 8,
+      columnNumber: 5
+    }, this)
+  );
+});
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImVudHJ5LmNsaWVudC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgc3RhcnRUcmFuc2l0aW9uLCBTdHJpY3RNb2RlIH0gZnJvbSBcInJlYWN0XCI7XG5pbXBvcnQgeyBoeWRyYXRlUm9vdCB9IGZyb20gXCJyZWFjdC1kb20vY2xpZW50XCI7XG5pbXBvcnQgeyBIeWRyYXRlZFJvdXRlciB9IGZyb20gXCJyZWFjdC1yb3V0ZXIvZG9tXCI7XG5cbnN0YXJ0VHJhbnNpdGlvbigoKSA9PiB7XG4gIGh5ZHJhdGVSb290KFxuICAgIGRvY3VtZW50LFxuICAgIDxTdHJpY3RNb2RlPlxuICAgICAgPEh5ZHJhdGVkUm91dGVyIC8+XG4gICAgPC9TdHJpY3RNb2RlPixcbiAgKTtcbn0pO1xuIl0sIm1hcHBpbmdzIjoiQUFRTTtBQVJOLFNBQVMsaUJBQWlCLGtCQUFrQjtBQUM1QyxTQUFTLG1CQUFtQjtBQUM1QixTQUFTLHNCQUFzQjtBQUUvQixnQkFBZ0IsTUFBTTtBQUNwQjtBQUFBLElBQ0U7QUFBQSxJQUNBLHVCQUFDLGNBQ0MsaUNBQUMsb0JBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQUFnQixLQURsQjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBRUE7QUFBQSxFQUNGO0FBQ0YsQ0FBQzsiLCJuYW1lcyI6W10sInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=
