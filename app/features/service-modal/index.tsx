@@ -1,15 +1,14 @@
 import { Receipt, Search, Trash, UtensilsCrossed } from "lucide-react";
+import { useState } from "react";
+import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
-import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import {
@@ -20,104 +19,22 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
-import { Counter } from "~/components/ui/shadcn-io/counter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import useServiceSchema from "~/services/schema/service.schema";
+import { useCreateBookingStore } from "~/store/create-booking.store";
+import useMenu from "./container/useMenu";
+import useServices from "./container/useServices";
 import { ServiceItemGrid, ServiceItemList } from "./fragments/service-item";
 import {
   ServiceProvider,
   useServiceContext,
 } from "./local-context/service-modal.context";
-import { useState } from "react";
-import useBookingSchema from "~/services/schema/booking.schema";
-import type z from "zod";
-import { useCreateBookingStore } from "~/store/create-booking.store";
+import ServiceTab from "./components/service.tab";
+import MenuTab from "./components/menu.tab";
+import { MenuItemList } from "./fragments/menu-item";
 
-export const MOCK_SERVICES = [
-  {
-    id: "sv1",
-    name: "Dọn phòng",
-    price: 200000,
-    category: "Dịch vụ",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Dọn+Phòng",
-    description: "Dọn dẹp phòng theo yêu cầu",
-    quantity: 1,
-  },
-  {
-    id: "sv2",
-    name: "Giặt ủi",
-    price: 150000,
-    category: "Dịch vụ",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Giặt+Ủi",
-    description: "Giặt ủi quần áo",
-    quantity: 1,
-  },
-  {
-    id: "sv3",
-    name: "Spa",
-    price: 500000,
-    category: "Dịch vụ",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Spa",
-    description: "Dịch vụ spa và massage",
-    quantity: 1,
-  },
-  {
-    id: "food1",
-    name: "Phở Bò",
-    price: 75000,
-    category: "Thức ăn",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Phở+Bò",
-    description: "Phở bò truyền thống",
-    quantity: 1,
-  },
-  {
-    id: "food2",
-    name: "Bún chả",
-    price: 85000,
-    category: "Thức ăn",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Bún+Chả",
-    description: "Bún chả Hà Nội",
-    quantity: 1,
-  },
-  {
-    id: "food3",
-    name: "Cơm gà",
-    price: 90000,
-    category: "Thức ăn",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Cơm+Gà",
-    description: "Cơm gà xối mỡ",
-    quantity: 1,
-  },
-  {
-    id: "drink1",
-    name: "Bia",
-    price: 35000,
-    category: "Đồ uống",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Bia",
-    description: "Bia tươi",
-    quantity: 1,
-  },
-  {
-    id: "drink2",
-    name: "Nước ép",
-    price: 45000,
-    category: "Đồ uống",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Nước+Ép",
-    description: "Nước ép trái cây tươi",
-    quantity: 1,
-  },
-  {
-    id: "drink3",
-    name: "Cà phê",
-    price: 30000,
-    category: "Đồ uống",
-    imageUrl: "https://via.placeholder.com/168x100.png?text=Cà+Phê",
-    description: "Cà phê đen/sữa",
-    quantity: 1,
-  },
-];
-
-const { ServiceItemSchema, ServiceCategoryEnum } = useBookingSchema();
-type ServiceItem = z.infer<typeof ServiceItemSchema>;
+const { ServiceItem2Schema, ServiceCategoryEnum } = useServiceSchema();
+type ServiceItem = z.infer<typeof ServiceItem2Schema>;
 type ServiceCategory = z.infer<typeof ServiceCategoryEnum>;
 
 interface ServiceModalContentProps {
@@ -125,7 +42,7 @@ interface ServiceModalContentProps {
 }
 
 interface ServiceModalProps {
-  onFinish?: (services: any[]) => void;
+  onFinish?: (service: ServiceItem[]) => void;
   open: boolean;
   toggle: () => void;
   initialServices?: any[];
@@ -133,8 +50,8 @@ interface ServiceModalProps {
 }
 
 function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
-  const tabs: ServiceCategory[] = ["Dịch vụ", "Thức ăn", "Đồ uống"];
-  const [activeTab, setActiveTab] = useState<ServiceCategory>("Dịch vụ");
+  const tabs: ServiceCategory[] = ["Service", "Menu"];
+  const [activeTab, setActiveTab] = useState<ServiceCategory>("Service");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("");
 
@@ -143,15 +60,8 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
     useServiceContext();
 
   const handleFinish = () => {
-    if (onFinish) onFinish(selectedServices);
+    // if (onFinish) onFinish(selectedServices);
   };
-
-  const filteredServices = MOCK_SERVICES.filter(
-    (item) =>
-      item.category === activeTab &&
-      (searchQuery === "" ||
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
 
   return (
     <>
@@ -186,26 +96,8 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
                 </TabsTrigger>
               ))}
             </TabsList>
-
-            {tabs.map((tab) => (
-              <TabsContent key={tab} value={tab}>
-                <ScrollArea className="h-120 bg-white border rounded-md">
-                  {filteredServices.length > 0 ? (
-                    <ul className="grid p-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {filteredServices.map((item) => (
-                        <ServiceItemGrid key={item.id} item={item} />
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="flex items-center justify-center h-40">
-                      <p className="text-muted-foreground">
-                        Không tìm thấy dịch vụ nào
-                      </p>
-                    </div>
-                  )}
-                </ScrollArea>
-              </TabsContent>
-            ))}
+            <ServiceTab />
+            <MenuTab />
           </Tabs>
         </div>
 
@@ -241,9 +133,15 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
           <ScrollArea className="h-60 my-4">
             {selectedServices.length > 0 ? (
               <ul>
-                {selectedServices.map((item) => (
-                  <ServiceItemList key={item.id} item={item} />
-                ))}
+                {selectedServices.map((item) => {
+                  if (item.type === "service") {
+                    return (
+                      <ServiceItemList key={item.serviceItemId} item={item} />
+                    );
+                  } else {
+                    return <MenuItemList key={item.itemId} item={item} />;
+                  }
+                })}
               </ul>
             ) : (
               <div className="flex items-center justify-center h-40">
@@ -284,6 +182,7 @@ export default function ServiceModal({
   toggle,
   onFinish,
   initialServices = [],
+  selectedRoomId,
 }: ServiceModalProps) {
   return (
     <Dialog onOpenChange={toggle} open={open}>
@@ -292,6 +191,7 @@ export default function ServiceModal({
           <ServiceModalContent
             onFinish={(services) => {
               if (onFinish) onFinish(services);
+              toggle();
             }}
           />
         </DialogContent>

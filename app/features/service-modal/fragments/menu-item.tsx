@@ -6,36 +6,36 @@ import { Counter } from "~/components/ui/shadcn-io/counter";
 import { useServiceContext } from "../local-context/service-modal.context";
 import { cn, formatMoney } from "~/lib/utils";
 import type z from "zod";
-import useServiceSchema from "~/services/schema/service.schema";
+import useMenuSchema from "~/services/schema/menu.schema";
 
-const { ServiceItem2Schema } = useServiceSchema();
-type ServiceItem = z.infer<typeof ServiceItem2Schema> & {
+const { MenuItemSchema } = useMenuSchema();
+type MenuItem = z.infer<typeof MenuItemSchema> & {
   quantity?: number;
   imageUrl?: string;
   category?: string;
 };
 
-interface ServiceItemListProps {
-  item: ServiceItem;
+interface MenuItemListProps {
+  item: MenuItem;
 }
 
-function ServiceItemList({ item }: ServiceItemListProps) {
+function MenuItemList({ item }: MenuItemListProps) {
   const { updateQuantity, removeService, getQuantity } = useServiceContext();
-  const quantity = getQuantity(item.serviceItemId);
+  const quantity = getQuantity(item.itemId);
 
   return (
     <li className="flex items-center justify-between bg-background p-2 border rounded-md my-2">
       <div className="flex-1">
         <h3 className="font-medium">{item.name}</h3>
         <p className="text-muted-foreground text-sm">
-          {formatMoney(item.basePrice).vndFormatted} x ({quantity})
+          {formatMoney(item.price).vndFormatted} x ({quantity})
         </p>
       </div>
       <div className="flex-shrink-0 mx-2">
         <Counter
           number={quantity}
           setNumber={(newQuantity: number) =>
-            updateQuantity(item.serviceItemId, newQuantity)
+            updateQuantity(item.itemId, newQuantity)
           }
           min={1}
           max={99}
@@ -45,7 +45,7 @@ function ServiceItemList({ item }: ServiceItemListProps) {
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => removeService(item.serviceItemId)}
+          onClick={() => removeService(item.itemId)}
         >
           <Trash className="w-4 h-4 mr-1" />
           Xóa
@@ -55,22 +55,22 @@ function ServiceItemList({ item }: ServiceItemListProps) {
   );
 }
 
-interface ServiceItemGridProps {
-  item: ServiceItem;
+interface MenuItemGridProps {
+  item: MenuItem;
 }
 
-function ServiceItemGrid({ item }: ServiceItemGridProps) {
+function MenuItemGrid({ item }: MenuItemGridProps) {
   const { addService, isInCart, getQuantity } = useServiceContext();
-  const inCart = isInCart(item.serviceItemId);
-  const quantity = getQuantity(item.serviceItemId);
+  const inCart = isInCart(item.itemId);
+  const quantity = getQuantity(item.itemId);
 
   const handleAddToCart = () => {
-    // Ensure we add it with the service type designation
-    const serviceItem = {
+    // Ensure we add it with the menu item structure
+    const menuItem = {
       ...item,
       quantity: 1, // Ensure quantity is set
     };
-    addService(serviceItem);
+    addService(menuItem);
   };
 
   return (
@@ -107,11 +107,11 @@ function ServiceItemGrid({ item }: ServiceItemGridProps) {
       <div className="flex items-center justify-between w-full">
         <Badge variant="outline">{item?.category || item?.code}</Badge>
         <span className="font-semibold">
-          {formatMoney(item.basePrice).vndFormatted}
+          {formatMoney(item.price).vndFormatted}
         </span>
       </div>
     </li>
   );
 }
 
-export { ServiceItemList, ServiceItemGrid };
+export { MenuItemGrid, MenuItemList };

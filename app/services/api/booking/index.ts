@@ -21,8 +21,8 @@ async function getBookingList(
 ): Promise<BookingListResponseDto> {
   try {
     const resp = await http.get(Booking.list, { params });
+    console.log(resp);
     const data = BookingListResponseSchema.parseAsync(resp.data);
-    console.log(data);
     return data;
   } catch (err) {
     return Promise.reject(err);

@@ -16,12 +16,12 @@ const ServicesSchema = z.object({
   breakfastDays: z.array(z.string()).optional(),
 });
 
-const ServiceCategoryEnum = z.enum(["Dịch vụ", "Thức ăn", "Đồ uống"], {
+const ServiceCategoryEnum = z.enum(["Service", "Menu"], {
   error: "Danh mục dịch vụ không hợp lệ",
 });
 
 const ServiceItem2Schema = z.object({
-  serviceItemId: z.string().uuid("ID dịch vụ không hợp lệ"),
+  serviceItemId: z.uuid("ID dịch vụ không hợp lệ"),
   code: z.string().min(1, "Mã dịch vụ không hợp lệ"),
   name: z.string().min(1, "Tên dịch vụ không hợp lệ"),
   description: z.string().optional(),
@@ -45,6 +45,7 @@ const useServiceSchema = () => {
     ServicesSchema,
     ServiceCategoryEnum,
     ServiceListResponseSchema,
+    ServiceItem2Schema,
   };
 };
 export default useServiceSchema;

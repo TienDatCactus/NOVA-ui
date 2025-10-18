@@ -18,13 +18,15 @@ const MenuItemSchema = z.object({
   components: z.array(MenuItemComponentsSchema).optional().default([]),
 });
 
-const MenuListResponseSchema = z.object({
-  categoryId: z.uuid("ID danh mục không hợp lệ"),
-  categoryCode: z.string().min(1, "Mã danh mục không hợp lệ"),
-  categoryName: z.string().min(1, "Tên danh mục không hợp lệ"),
-  active: z.boolean(),
-  items: z.array(MenuItemSchema).default([]),
-});
+const MenuListResponseSchema = z.array(
+  z.object({
+    categoryId: z.uuid("ID danh mục không hợp lệ"),
+    categoryCode: z.string().min(1, "Mã danh mục không hợp lệ"),
+    categoryName: z.string().min(1, "Tên danh mục không hợp lệ"),
+    active: z.boolean(),
+    items: z.array(MenuItemSchema).default([]),
+  })
+);
 const useMenuSchema = () => {
   return {
     MenuItemSchema,

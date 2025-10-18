@@ -1,23 +1,48 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import type z from "zod";
-import useBookingSchema from "~/services/schema/booking.schema";
-const { ServiceItemSchema, ServiceCategoryEnum } = useBookingSchema();
+import useMenuSchema from "~/services/schema/menu.schema";
+import useServiceSchema from "~/services/schema/service.schema";
+
+const { ServiceItem2Schema, ServiceCategoryEnum } = useServiceSchema();
+const { MenuItemSchema } = useMenuSchema();
+
+// Type definitions for the items
+type ServiceItem = z.infer<typeof ServiceItem2Schema> & {
+  quantity: number;
+  imageUrl?: string;
+  category?: string;
+};
+
+type MenuItem = z.infer<typeof MenuItemSchema> & {
+  quantity: number;
+  imageUrl?: string;
+  category?: string;
+};
+
+// Define a discriminated union type for cart items
+type CartItem =
+  | ({ type: "service" } & ServiceItem)
+  | ({ type: "menu" } & MenuItem);
+
+// Type guard functions
+const isServiceItem = (item: any): item is ServiceItem =>
+  "serviceItemId" in item;
+const isMenuItem = (item: any): item is MenuItem => "itemId" in item;
 
 interface ServiceContextType {
-  selectedServices: ServiceItem[];
+  selectedServices: CartItem[];
   selectedRoom: string | null;
-  addService: (service: ServiceItem) => void;
-  removeService: (id: string) => void;
-  updateQuantity: (idOrQuantity: string | number, quantity?: number) => void;
+  addService: (service: ServiceItem | MenuItem) => void;
+  removeService: (itemId: string) => void;
+  updateQuantity: (itemId: string, quantity: number) => void;
   setRoom: (roomId: string) => void;
   clearCart: () => void;
   getTotalAmount: () => number;
   getTotalItems: () => number;
-  isInCart: (id: string) => boolean;
-  getQuantity: (id: string) => number;
-  getServicesByCategory: (category: string) => ServiceItem[];
+  isInCart: (itemId: string) => boolean;
+  getQuantity: (itemId: string) => number;
 }
-type ServiceItem = z.infer<typeof ServiceItemSchema>;
+
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 
 export function ServiceProvider({
@@ -25,47 +50,90 @@ export function ServiceProvider({
   initialServices = [],
 }: {
   children: ReactNode;
-  initialServices?: ServiceItem[];
+  initialServices?: CartItem[];
 }) {
   const [selectedServices, setSelectedServices] =
-    useState<ServiceItem[]>(initialServices);
+    useState<CartItem[]>(initialServices);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
 
-  const addService = (service: any) => {
+  const addService = (service: ServiceItem | MenuItem) => {
     setSelectedServices((prev) => {
-      const exists = prev.find((item) => item.id === service.id);
-      if (exists) {
-        return prev.map((item) =>
-          item.id === service.id
-            ? { ...item, quantity: item.quantity + (service.quantity || 1) }
-            : item
-        );
+      // Determine if it's a service item or menu item
+      const isService = isServiceItem(service);
+      const isMenu = isMenuItem(service);
+
+      if (!isService && !isMenu) {
+        console.error("Invalid item type", service);
+        return prev;
       }
-      return [...prev, { ...service, quantity: service.quantity || 1 }];
+
+      const itemId = isService ? service.serviceItemId : service.itemId;
+      const type = isService ? "service" : "menu";
+
+      // Check if item already exists in cart
+      const existingItemIndex = prev.findIndex((item) => {
+        if (item.type === "service" && isService) {
+          return item.serviceItemId === itemId;
+        }
+        if (item.type === "menu" && isMenu) {
+          return item.itemId === itemId;
+        }
+        return false;
+      });
+
+      if (existingItemIndex !== -1) {
+        // Update existing item
+        return prev.map((item, index) => {
+          if (index === existingItemIndex) {
+            return {
+              ...item,
+              quantity: item.quantity + (service.quantity || 1),
+            };
+          }
+          return item;
+        });
+      }
+
+      // Add new item with the appropriate type
+      return [
+        ...prev,
+        {
+          ...service,
+          type,
+          quantity: service.quantity || 1,
+        } as CartItem,
+      ];
     });
   };
 
-  const removeService = (id: string) => {
-    setSelectedServices((prev) => prev.filter((item) => item.id !== id));
+  const removeService = (itemId: string) => {
+    setSelectedServices((prev) =>
+      prev.filter((item) => {
+        if (item.type === "service") {
+          return item.serviceItemId !== itemId;
+        } else {
+          return item.itemId !== itemId;
+        }
+      })
+    );
   };
 
-  const updateQuantity = (
-    idOrQuantity: string | number,
-    maybeQuantity?: number
-  ) => {
-    if (typeof idOrQuantity === "string" && maybeQuantity !== undefined) {
-      const id = idOrQuantity;
-      const quantity = maybeQuantity;
-
-      if (quantity <= 0) {
-        removeService(id);
-        return;
-      }
-
-      setSelectedServices((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, quantity } : item))
-      );
+  const updateQuantity = (itemId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeService(itemId);
+      return;
     }
+
+    setSelectedServices((prev) =>
+      prev.map((item) => {
+        if (item.type === "service" && item.serviceItemId === itemId) {
+          return { ...item, quantity };
+        } else if (item.type === "menu" && item.itemId === itemId) {
+          return { ...item, quantity };
+        }
+        return item;
+      })
+    );
   };
 
   const setRoom = (roomId: string) => {
@@ -77,27 +145,38 @@ export function ServiceProvider({
   };
 
   const getTotalAmount = () => {
-    return selectedServices.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+    return selectedServices.reduce((total, item) => {
+      if (item.type === "service") {
+        return total + item.basePrice * item.quantity;
+      } else {
+        return total + item.price * item.quantity;
+      }
+    }, 0);
   };
 
   const getTotalItems = () => {
     return selectedServices.reduce((total, item) => total + item.quantity, 0);
   };
 
-  const isInCart = (id: string) => {
-    return selectedServices.some((item) => item.id === id);
+  const isInCart = (itemId: string) => {
+    return selectedServices.some((item) => {
+      if (item.type === "service") {
+        return item.serviceItemId === itemId;
+      } else {
+        return item.itemId === itemId;
+      }
+    });
   };
 
-  const getQuantity = (id: string) => {
-    const service = selectedServices.find((item) => item.id === id);
+  const getQuantity = (itemId: string) => {
+    const service = selectedServices.find((item) => {
+      if (item.type === "service") {
+        return item.serviceItemId === itemId;
+      } else {
+        return item.itemId === itemId;
+      }
+    });
     return service ? service.quantity : 0;
-  };
-
-  const getServicesByCategory = (category: string) => {
-    return selectedServices.filter((item) => item.category === category);
   };
 
   return (
@@ -114,7 +193,6 @@ export function ServiceProvider({
         getTotalItems,
         isInCart,
         getQuantity,
-        getServicesByCategory,
       }}
     >
       {children}

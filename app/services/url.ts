@@ -19,6 +19,6 @@ const Menu = {
 };
 
 const Service = {
-  list: "Services/list",
+  list: "Service/list",
 };
 export { Auth, Booking, Menu, Service };

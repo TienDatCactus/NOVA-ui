@@ -16,3 +16,7 @@ async function getServiceList(
     return Promise.reject(error);
   }
 }
+
+export const ServicesService = {
+  getServiceList,
+};
