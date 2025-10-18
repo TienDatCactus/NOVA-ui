@@ -1,5 +1,13 @@
 // RoomWeekScheduler_shadcnStyle.tsx
-import { addMinutes, format, startOfMinute } from "date-fns";
+import {
+  addDays,
+  addMinutes,
+  format,
+  isToday,
+  parseISO,
+  startOfDay,
+  startOfMinute,
+} from "date-fns";
 import {
   ArrowLeft,
   ArrowRight,
@@ -9,7 +17,8 @@ import {
   TriangleAlert,
   UserStar,
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -17,144 +26,89 @@ import {
   DAYS_COUNT,
   firstColWidth,
   headerRows,
-  ROOM_COUNT,
   rowHeight,
   SUBS_PER_DAY,
   totalSubCols,
 } from "~/lib/constants";
 import {
-  addDays,
   cn,
-  dateKey,
   daysBetweenFloor,
   parseDateYMD,
   startOfLocalDay,
 } from "~/lib/utils";
+import useBookingSchema from "~/services/schema/booking.schema";
+import useBookingRoomsWeek from "~/routes/reservation/bookings/container/useBookingRoomsWeek";
 
-type Booking = {
-  id: string;
-  guestName: string;
-  room: number;
-  start: string;
-  end: string;
-  status:
-    | "checked_out"
-    | "reserved"
-    | "reserved_upcoming"
-    | "checkout_alert"
-    | "occupied";
-};
-type MergedBooking = {
-  id: string;
-  guestName: string;
-  room: number;
+// Use API schema types directly - no normalization
+const { BookingItemByWeekSchema } = useBookingSchema();
+type RoomSchedulerData = z.infer<typeof BookingItemByWeekSchema>;
+type BookingInWeek = RoomSchedulerData["bookings"][number];
+
+// Room configuration
+const ROOM_TYPES = [
+  { type: "Traditional", count: 3, startIndex: 0 },
+  { type: "Romantic", count: 7, startIndex: 3 },
+  { type: "Unique", count: 1, startIndex: 10 },
+  { type: "Chalet", count: 2, startIndex: 11 },
+] as const;
+
+const TOTAL_ROOMS = 13;
+
+// Processed booking for display
+type DisplayBooking = {
+  bookingId: string;
+  bookingCode: string;
+  roomId: string;
+  roomIndex: number;
   startSubIndex: number;
   spanSubCount: number;
-  status: Booking["status"];
+  status: BookingInWeek["status"];
   twClasses: { border: string; bgHover: string; bg: string; text: string };
   leftClipped: boolean;
   rightClipped: boolean;
   originalStart: string;
   originalEnd: string;
+  segmentFrom: string;
+  segmentTo: string;
   laneIndex?: number;
 };
 
-const STATUS_TW: Record<
+// Status styling mapping - using API status directly
+const STATUS_STYLES: Record<
   string,
   { border: string; bgHover: string; bg: string; text: string }
 > = {
-  // mapping chosen to approximate requested hex palette; change classes here to adjust theme
-  checked_out: {
-    border: "border-gray-400",
-    bgHover: "hover:bg-gray-400",
-    bg: "bg-gray-400/10",
-    text: "text-gray-700",
-  },
-  reserved: {
-    border: "border-violet-400",
-    bgHover: "hover:bg-violet-400",
-    bg: "bg-violet-400/20",
-    text: "text-violet-700",
-  },
-  reserved_upcoming: {
+  Confirmed: {
     border: "border-blue-400",
     bgHover: "hover:bg-blue-400",
     bg: "bg-blue-400/20",
     text: "text-blue-700",
   },
-  checkout_alert: {
-    border: "border-indigo-400",
-    bgHover: "hover:bg-indigo-400",
-    bg: "bg-indigo-400/20",
-    text: "text-indigo-700",
-  },
-  occupied: {
+  CheckedIn: {
     border: "border-teal-400",
     bgHover: "hover:bg-teal-400",
     bg: "bg-teal-400/20",
     text: "text-teal-700",
   },
+  CheckedOut: {
+    border: "border-gray-400",
+    bgHover: "hover:bg-gray-400",
+    bg: "bg-gray-400/10",
+    text: "text-gray-700",
+  },
+  Pending: {
+    border: "border-violet-400",
+    bgHover: "hover:bg-violet-400",
+    bg: "bg-violet-400/20",
+    text: "text-violet-700",
+  },
+  Cancelled: {
+    border: "border-red-400",
+    bgHover: "hover:bg-red-400",
+    bg: "bg-red-400/20",
+    text: "text-red-700",
+  },
 };
-
-const ANCHOR = startOfLocalDay(new Date());
-const SAMPLE_BOOKINGS_FIXED: Booking[] = [
-  {
-    id: "b1",
-    guestName: "Khách A",
-    room: 1,
-    start: dateKey(addDays(ANCHOR, -2)),
-    end: dateKey(addDays(ANCHOR, 8)),
-    status: "occupied",
-  },
-  {
-    id: "b2",
-    guestName: "Khách B",
-    room: 3,
-    start: dateKey(addDays(ANCHOR, 1)),
-    end: dateKey(addDays(ANCHOR, 2)),
-    status: "reserved",
-  },
-  {
-    id: "b3",
-    guestName: "Khách C",
-    room: 5,
-    start: dateKey(addDays(ANCHOR, -3)),
-    end: dateKey(addDays(ANCHOR, 10)),
-    status: "checkout_alert",
-  },
-  {
-    id: "b4",
-    guestName: "Khách D",
-    room: 2,
-    start: dateKey(addDays(ANCHOR, 3)),
-    end: dateKey(addDays(ANCHOR, 6)),
-    status: "reserved_upcoming",
-  },
-  {
-    id: "b5",
-    guestName: "Khách E",
-    room: 13,
-    start: dateKey(addDays(ANCHOR, 4)),
-    end: dateKey(addDays(ANCHOR, 5)),
-    status: "checked_out",
-  },
-  {
-    id: "b6",
-    guestName: "Khách F",
-    room: 2,
-    start: dateKey(addDays(ANCHOR, 2)),
-    end: dateKey(addDays(ANCHOR, 3)),
-    status: "occupied",
-  },
-  {
-    id: "b7",
-    guestName: "Khách G",
-    room: 2,
-    start: dateKey(addDays(ANCHOR, 7)),
-    end: dateKey(addDays(ANCHOR, 10)),
-    status: "reserved",
-  },
-];
 
 /* ---------- Component ---------- */
 export default function RoomWeekScheduler() {
@@ -162,6 +116,15 @@ export default function RoomWeekScheduler() {
     startOfLocalDay(new Date())
   );
   const [now, setNow] = useState<Date>(new Date());
+
+  // Fetch booking data from API
+  const {
+    data: roomsData,
+    isPending,
+    refetch,
+  } = useBookingRoomsWeek({
+    weekStart: format(currentWeekStart, "yyyy/MM/dd"),
+  });
 
   useEffect(() => {
     let timerId: any;
@@ -186,68 +149,105 @@ export default function RoomWeekScheduler() {
 
   const gridRef = useRef<HTMLDivElement | null>(null);
 
-  // build visible days from currentWeekStart
   const days = Array.from({ length: DAYS_COUNT }).map((_, i) =>
     addDays(currentWeekStart, i)
   );
   const windowStart = currentWeekStart;
   const windowEnd = addDays(currentWeekStart, DAYS_COUNT);
 
-  // create merged bookings clipped to window (start inclusive, end exclusive)
-  const merged: MergedBooking[] = [];
-  for (const b of SAMPLE_BOOKINGS_FIXED) {
-    const bStart = parseDateYMD(b.start);
-    const bEnd = parseDateYMD(b.end);
-    const visStart = bStart < windowStart ? windowStart : bStart;
-    const visEnd = bEnd > windowEnd ? windowEnd : bEnd;
-    if (visStart >= visEnd) continue;
-    const startDayIndex = daysBetweenFloor(windowStart, visStart);
-    const endDayIndexExclusive = daysBetweenFloor(windowStart, visEnd);
-    const startSubIndex = startDayIndex * SUBS_PER_DAY;
-    const spanSubCount = Math.max(
-      1,
-      (endDayIndexExclusive - startDayIndex) * SUBS_PER_DAY
-    );
-    merged.push({
-      id: b.id,
-      guestName: b.guestName,
-      room: b.room,
-      startSubIndex,
-      spanSubCount,
-      status: b.status,
-      twClasses: STATUS_TW[b.status],
-      leftClipped: bStart < windowStart,
-      rightClipped: bEnd > windowEnd,
-      originalStart: b.start,
-      originalEnd: b.end,
+  const displayBookings = useMemo(() => {
+    if (!roomsData || roomsData.length === 0) return [];
+
+    const merged: DisplayBooking[] = [];
+
+    const roomIndexMap = new Map<string, number>();
+    let currentIndex = 0;
+
+    ROOM_TYPES.forEach((roomType) => {
+      for (let i = 0; i < roomType.count; i++) {
+        roomIndexMap.set(`${roomType.type}-${i}`, currentIndex);
+        currentIndex++;
+      }
     });
-  }
+    roomsData.forEach((room) => {
+      const roomTypeInfo = ROOM_TYPES.find(
+        (rt) => rt.type === room.roomTypeName
+      );
+      if (!roomTypeInfo) return;
+
+      const roomNumber = parseInt(room.roomName.replace(/\D/g, "")) || 0;
+      const roomIndex = roomTypeInfo.startIndex + (roomNumber - 1);
+
+      if (roomIndex < 0 || roomIndex >= TOTAL_ROOMS) return;
+
+      room.bookings.forEach((booking) => {
+        const bStart = parseDateYMD(booking.checkinDate);
+        const bEnd = parseDateYMD(booking.checkoutDate);
+        const visStart = bStart < windowStart ? windowStart : bStart;
+        const visEnd = bEnd > windowEnd ? windowEnd : bEnd;
+
+        if (visStart >= visEnd) return;
+
+        const startDayIndex = daysBetweenFloor(windowStart, visStart);
+        const endDayIndexExclusive = daysBetweenFloor(windowStart, visEnd);
+        const startSubIndex = startDayIndex * SUBS_PER_DAY;
+        const spanSubCount = Math.max(
+          1,
+          (endDayIndexExclusive - startDayIndex) * SUBS_PER_DAY
+        );
+
+        merged.push({
+          bookingId: booking.bookingId,
+          bookingCode: booking.bookingCode,
+          roomId: room.roomId,
+          roomIndex,
+          startSubIndex,
+          spanSubCount,
+          status: booking.status,
+          twClasses: STATUS_STYLES[booking.status] || STATUS_STYLES.Pending,
+          leftClipped: bStart < windowStart,
+          rightClipped: bEnd > windowEnd,
+          originalStart: booking.checkinDate,
+          originalEnd: booking.checkoutDate,
+          segmentFrom: booking.segmentFrom,
+          segmentTo: booking.segmentTo,
+        });
+      });
+    });
+
+    return merged;
+  }, [roomsData, currentWeekStart]);
 
   // single-lane per room assignment, overflow counted
-  const byRoom = new Map<number, MergedBooking[]>();
-  for (const m of merged) {
-    if (!byRoom.has(m.room)) byRoom.set(m.room, []);
-    byRoom.get(m.room)!.push(m);
-  }
-  const overflowMap = new Map<number, number>();
-  for (let room = 1; room <= ROOM_COUNT; room++) {
-    const arr = (byRoom.get(room) || []).sort(
-      (a, b) => a.startSubIndex - b.startSubIndex
-    );
-    let laneLastEnd = -1;
-    let overflow = 0;
-    for (const b of arr) {
-      const s = b.startSubIndex;
-      const e = b.startSubIndex + b.spanSubCount;
-      if (laneLastEnd <= s) {
-        b.laneIndex = 0;
-        laneLastEnd = e;
-      } else {
-        overflow += 1;
-      }
+  const { processedBookings, overflowMap } = useMemo(() => {
+    const byRoom = new Map<number, DisplayBooking[]>();
+    for (const m of displayBookings) {
+      if (!byRoom.has(m.roomIndex)) byRoom.set(m.roomIndex, []);
+      byRoom.get(m.roomIndex)!.push(m);
     }
-    overflowMap.set(room, overflow);
-  }
+
+    const overflow = new Map<number, number>();
+    for (let room = 0; room < TOTAL_ROOMS; room++) {
+      const arr = (byRoom.get(room) || []).sort(
+        (a, b) => a.startSubIndex - b.startSubIndex
+      );
+      let laneLastEnd = -1;
+      let overflowCount = 0;
+      for (const b of arr) {
+        const s = b.startSubIndex;
+        const e = b.startSubIndex + b.spanSubCount;
+        if (laneLastEnd <= s) {
+          b.laneIndex = 0;
+          laneLastEnd = e;
+        } else {
+          overflowCount += 1;
+        }
+      }
+      overflow.set(room, overflowCount);
+    }
+
+    return { processedBookings: displayBookings, overflowMap: overflow };
+  }, [displayBookings]);
 
   // compute current-time indicator (absolute position inside grid)
   function computeIndicatorLeftPx() {
@@ -264,7 +264,7 @@ export default function RoomWeekScheduler() {
   }
   const indicatorLeft = Number(computeIndicatorLeftPx());
   const indicatorTop = headerRows * rowHeight;
-  const indicatorHeight = ROOM_COUNT * rowHeight;
+  const indicatorHeight = TOTAL_ROOMS * rowHeight;
 
   return (
     <div className="p-4 ">
@@ -286,9 +286,7 @@ export default function RoomWeekScheduler() {
         </div>
       </div>
 
-      {/* outer scroll container */}
       <ScrollArea className="border rounded shadow-s ">
-        {/* grid that looks like a table (shadcn-style classes can replace DOM here) */}
         <div
           ref={gridRef}
           className="min-w-[1200px] relative"
@@ -298,13 +296,12 @@ export default function RoomWeekScheduler() {
             gridAutoRows: `${rowHeight}px`,
           }}
         >
-          {/* Header: days displayed as image-like cards */}
           <div style={{ gridColumn: "1", gridRow: 1 }} className="bg-gray-50" />
           {days.map((d, di) => {
             const colStart = 2 + di * SUBS_PER_DAY;
             return (
               <div
-                key={dateKey(d)}
+                key={format(d, "yyyy/MM/dd")}
                 style={{
                   gridColumn: `${colStart} / span ${SUBS_PER_DAY}`,
                   gridRow: 1,
@@ -325,26 +322,29 @@ export default function RoomWeekScheduler() {
             );
           })}
 
-          {/* Room rows */}
-          {Array.from({ length: ROOM_COUNT }).map((_, rIndex) => {
-            const roomNumber = rIndex + 1;
-            const row = headerRows + rIndex + 1; // headerRows=1, so first room row = 2
+          {Array.from({ length: TOTAL_ROOMS }).map((_, rIndex) => {
+            const roomType = ROOM_TYPES.find(
+              (rt) =>
+                rIndex >= rt.startIndex && rIndex < rt.startIndex + rt.count
+            )!;
+            const roomNumber = rIndex - roomType.startIndex + 1;
+            const row = headerRows + rIndex + 1;
             return (
-              <React.Fragment key={roomNumber}>
+              <React.Fragment key={rIndex}>
                 <div
                   style={{ gridColumn: 1, gridRow: row }}
                   className="p-3 border-t bg-white text-sm font-medium"
                 >
-                  {/* Shadcn-style: you can replace this with <TableRow> <TableCell> */}
                   <div className="flex flex-col">
                     <div className="text-sm font-semibold">
-                      P.{(100 + roomNumber).toString()}
+                      {roomType.type} {roomNumber}
                     </div>
-                    <div className="text-xs text-muted-foreground">Tầng 2</div>
+                    <div className="text-xs text-muted-foreground">
+                      {roomType.type}
+                    </div>
                   </div>
                 </div>
 
-                {/* background cells for columns (visual grid) */}
                 {Array.from({ length: totalSubCols }).map((_, si) => (
                   <div
                     key={`${roomNumber}-${si}`}
@@ -356,17 +356,25 @@ export default function RoomWeekScheduler() {
             );
           })}
 
-          {/* Booking bars (single lane) */}
-          {merged.map((mb) => {
+          {processedBookings.map((mb) => {
             if (mb.laneIndex === undefined) return null;
-            const roomIdx = mb.room - 1;
             const gridColStart = 2 + mb.startSubIndex;
-            const gridRow = headerRows + roomIdx + 1;
+            const gridRow = headerRows + mb.roomIndex + 1;
             const cls = mb.twClasses;
+
+            const formattedFrom = format(
+              parseISO(mb.segmentFrom),
+              "dd/MM/yyyy HH:mm"
+            );
+            const formattedTo = format(
+              parseISO(mb.segmentTo),
+              "dd/MM/yyyy HH:mm"
+            );
+
             return (
               <div
-                key={mb.id}
-                title={`${mb.guestName} (${mb.originalStart} → ${mb.originalEnd})`}
+                key={mb.bookingId}
+                title={`${mb.bookingCode} (${formattedFrom} → ${formattedTo})`}
                 style={{
                   gridColumn: `${gridColStart} / span ${mb.spanSubCount}`,
                   gridRow: gridRow,
@@ -383,24 +391,22 @@ export default function RoomWeekScheduler() {
                 {mb.leftClipped && (
                   <ChevronLeft className="absolute -left-4 size-4 text-sm text-muted-foreground " />
                 )}
-                <div className="flex items-center  truncate font-medium">
+                <div className="flex items-center truncate font-medium">
                   <Dot size={20} />
-                  {mb.guestName}
+                  {mb.bookingCode}
                 </div>
                 {mb.rightClipped && (
                   <ChevronRight className="absolute -right-4 size-4 text-muted-foreground" />
                 )}
                 <div className="flex gap-2 items-center">
-                  <UserStar size={20} />
-                  {mb.status === "checkout_alert" && (
-                    <TriangleAlert size={20} />
-                  )}
+                  <Badge variant="outline" className="text-xs">
+                    {mb.status}
+                  </Badge>
                 </div>
               </div>
             );
           })}
 
-          {/* Current-time indicator (absolute inside grid) */}
           {(() => {
             if (!gridRef.current) return null;
             if (now < windowStart || now >= windowEnd) return null;

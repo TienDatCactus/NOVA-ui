@@ -14,6 +14,10 @@ const Booking = {
   detail: (code: string) => `Bookings/${code}`,
 };
 
+const Rooms = {
+  detail: (id: string) => `Rooms/${id}/details`,
+  updateStatus: "Rooms/update-status",
+};
 const Menu = {
   list: "Menu/list",
 };
@@ -21,4 +25,4 @@ const Menu = {
 const Service = {
   list: "Service/list",
 };
-export { Auth, Booking, Menu, Service };
+export { Auth, Booking, Menu, Service, Rooms };

@@ -117,8 +117,14 @@ const BookingItemByWeekSchema = z.object({
     .array(
       z.object({
         bookingId: z.string("bookingId phải là string hợp lệ"),
-        bookingCode: z.string().min(1, "bookingCode không được để trống"),
-        status: z.string(),
+        bookingCode: z.string(),
+        status: z.enum([
+          "Confirmed",
+          "CheckedIn",
+          "Cancelled",
+          "Pending",
+          "CheckedOut",
+        ]),
         checkinDate: z.string(),
         checkoutDate: z.string(),
         segmentFrom: z.string(),

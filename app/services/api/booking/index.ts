@@ -9,6 +9,7 @@ import type {
 } from "./dto";
 import type { BookingListParams } from "~/services/types/booking.types";
 import useBookingSchema from "~/services/schema/booking.schema";
+
 const {
   BookingListResponseSchema,
   ExternalBookingResponseSchema,
@@ -16,6 +17,7 @@ const {
   BookingListByWeekResponseSchema,
   BookingItemSchema,
 } = useBookingSchema();
+
 async function getBookingList(
   params: BookingListParams
 ): Promise<BookingListResponseDto> {

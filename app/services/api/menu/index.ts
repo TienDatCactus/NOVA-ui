@@ -1,8 +1,8 @@
-import type { MenuListParams } from "~/services/types/booking.types";
 import type { MenuListResponseDto } from "./dto";
 import { Menu } from "~/services/url";
 import http from "~/lib/http";
 import useMenuSchema from "~/services/schema/menu.schema";
+import type { MenuListParams } from "~/services/types/menu.types";
 const { MenuListResponseSchema } = useMenuSchema();
 
 async function getMenuList(

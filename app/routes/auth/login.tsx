@@ -60,6 +60,7 @@ export default function Login() {
                       <FormLabel>Mã quản lý</FormLabel>
                       <FormControl>
                         <Input
+                          autoFocus
                           type="text"
                           placeholder="nova-admin"
                           {...field}

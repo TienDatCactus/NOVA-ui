@@ -44,12 +44,46 @@ const RoomItemSchema = z.object({
   nightlyPrice: z.number("nightlyPrice phải là number").min(0),
 });
 
+const RoomDetailSchema = z.object({
+  roomId: z.string(),
+  roomName: z.string(),
+  status: z.string(),
+  locked: z.boolean(),
+  roomTypeId: z.string(),
+  roomTypeCode: z.string(),
+  roomTypeName: z.string(),
+  dailyPrice: z.number().nonnegative(),
+  isOccupiedToday: z.boolean(),
+  currentFrom: z.string(),
+  currentTo: z.string(),
+  hasBreakfastToday: z.boolean(),
+  recentBookings: z.array(
+    z.object({
+      bookingRoomId: z.string(),
+      bookingId: z.string(),
+      fromDate: z.string(),
+      toDate: z.string(),
+      anyBreakfast: z.boolean(),
+      breakfastDaysCount: z.number().int().min(0),
+      note: z.string().optional(),
+    })
+  ),
+});
+const UpdateRoomStatusResponseSchema = z.object({
+  roomId: z.string(),
+  roomName: z.string(),
+  oldStatus: z.string(),
+  newStatus: z.string(),
+  updatedAt: z.string(),
+});
 const useRoomSchema = () => {
   return {
     RoomItemSchema,
     RoomSelectionSchema,
     RoomSchema,
     RoomTypeEnum,
+    RoomDetailSchema,
+    UpdateRoomStatusResponseSchema,
   };
 };
 export default useRoomSchema;

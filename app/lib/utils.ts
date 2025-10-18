@@ -13,9 +13,7 @@ export function parseDateYMD(s: string) {
   const [y, m, d] = s.split("-").map(Number);
   return new Date(y, m - 1, d, 0, 0, 0, 0);
 }
-export function dateKey(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+
 export function startOfLocalDay(date = new Date()) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);

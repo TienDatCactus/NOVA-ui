@@ -25,7 +25,6 @@ import {
 } from "~/lib/constants";
 import { cn } from "~/lib/utils";
 import { useAuth } from "~/routes/auth/container/auth.hooks";
-import { AuthService } from "~/services/api/auth";
 import { useAuthStore } from "~/store/auth.store";
 
 function ExpandedSidebar({
@@ -65,10 +64,10 @@ function ExpandedSidebar({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     className={cn({
-                      "shadow-s": curPath === item.href,
+                      "shadow-s": curPath.includes(item.href),
                     })}
                     asChild
-                    isActive={curPath === item.href}
+                    isActive={curPath.includes(item.href)}
                   >
                     <Link to={item.href}>
                       {item.icon}
