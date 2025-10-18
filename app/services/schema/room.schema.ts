@@ -43,6 +43,7 @@ const RoomItemSchema = z.object({
   roomTypeName: z.string().optional(),
   nightlyPrice: z.number("nightlyPrice phải là number").min(0),
 });
+
 const useRoomSchema = () => {
   return {
     RoomItemSchema,

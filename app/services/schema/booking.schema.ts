@@ -105,27 +105,32 @@ const BookingItemSchema = z.object({
   rooms: z.array(RoomItemSchema).optional(),
   services: ServicesSchema.optional(),
 });
-const BookingItemByWeekSchema = z.object({
-  bookingId: z.string("bookingId phải là string hợp lệ"),
-  bookingCode: z.string().min(1, "bookingCode không được để trống"),
-  status: z.number().int().nonnegative(),
-  checkinDate: z.string(),
-  checkoutDate: z.string(),
-  segmentFrom: z.string(),
-  segmentTo: z.string(),
-});
+
 const BookingListResponseSchema = z.array(BookingItemSchema).optional();
 
-const BookingListByWeekResponseSchema = z.object({
+const BookingItemByWeekSchema = z.object({
   roomId: z.string("roomId phải là string hợp lệ"),
   roomName: z.string().min(1, "roomName không được để trống"),
   roomTypeId: z.string("roomTypeId phải là string hợp lệ"),
   roomTypeName: z.string().min(1, "roomTypeName không được để trống"),
   bookings: z
-    .array(BookingItemByWeekSchema)
+    .array(
+      z.object({
+        bookingId: z.string("bookingId phải là string hợp lệ"),
+        bookingCode: z.string().min(1, "bookingCode không được để trống"),
+        status: z.string(),
+        checkinDate: z.string(),
+        checkoutDate: z.string(),
+        segmentFrom: z.string(),
+        segmentTo: z.string(),
+      })
+    )
     .default([])
     .describe("Danh sách các booking thuộc phòng này"),
 });
+
+const BookingListByWeekResponseSchema = z.array(BookingItemByWeekSchema);
+
 /* schema for external booking creation */
 const ExternalCreateBookingSchema = z.object({
   customerId: z.string().optional(),
@@ -171,6 +176,7 @@ const useBookingSchema = () => {
     ExternalCreateBookingSchema,
     ExternalBookingResponseSchema,
     BookingListByWeekResponseSchema,
+    BookingItemByWeekSchema,
   };
 };
 export default useBookingSchema;

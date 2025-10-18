@@ -2,7 +2,6 @@ import { useNavigate } from "react-router";
 import type z from "zod";
 import { Skeleton } from "~/components/ui/skeleton";
 import useBookingSchema from "~/services/schema/booking.schema";
-import { BookingCard } from "../fragments/booking-card.grid";
 import { ArrowUpRightIcon, FolderCode } from "lucide-react";
 import {
   Empty,
@@ -15,10 +14,11 @@ import {
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import CreateBookingDialog from "~/features/create-booking";
-const { BookingItemSchema } = useBookingSchema();
-type BookingItem = z.infer<typeof BookingItemSchema>;
+import RoomCard from "../fragments/room-card.grid";
+const { BookingListByWeekResponseSchema } = useBookingSchema();
+type BookingItem = z.infer<typeof BookingListByWeekResponseSchema>;
 interface BookingGridProps {
-  bookings?: BookingItem[];
+  bookings?: BookingItem;
   isLoading?: boolean;
   refetch: () => void;
 }
@@ -29,10 +29,6 @@ function BookingGrid({
   refetch,
 }: BookingGridProps) {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-  const handleBookingClick = (booking: BookingItem) => {
-    navigate(`/reservation/bookings/${booking.id}`);
-  };
 
   if (isLoading) {
     return (
@@ -87,11 +83,7 @@ function BookingGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ">
       {bookings.map((booking) => (
-        <BookingCard
-          key={booking.id}
-          booking={booking}
-          onClick={handleBookingClick}
-        />
+        <RoomCard key={booking.roomId} booking={booking} />
       ))}
     </div>
   );

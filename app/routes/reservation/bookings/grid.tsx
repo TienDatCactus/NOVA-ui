@@ -5,6 +5,7 @@ import SearchRoom from "./fragments/search";
 import BookingViewLayout from "./layouts/booking-view.layout";
 import useBookings from "./container/useBookings";
 import BookingGrid from "./components/booking.grid";
+import useBookingRoomsWeek from "./container/useBookingRoomsWeek";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -18,7 +19,7 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { data, isPending, refetch } = useBookings();
+  const { data, isPending, refetch } = useBookingRoomsWeek();
   return (
     <BookingViewLayout>
       <BookingGrid bookings={data} isLoading={isPending} refetch={refetch} />
