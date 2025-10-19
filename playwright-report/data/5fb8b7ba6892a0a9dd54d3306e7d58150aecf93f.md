@@ -1,0 +1,41 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - img [ref=e4]
+    - button "Open Tanstack query devtools" [ref=e52] [cursor=pointer]:
+      - img [ref=e53]
+  - main [ref=e102]:
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - generic [ref=e106]:
+          - generic [ref=e107]: 🏞️
+          - generic [ref=e108]:
+            - heading "NOVA" [level=1] [ref=e109]
+            - paragraph [ref=e110]: Network Operation for Vacation Acommodation
+        - generic [ref=e111]:
+          - heading "\"Lorem ipsum dolor sit amet ?\"" [level=2] [ref=e112]
+          - paragraph [ref=e113]: "- Lorem ipser -"
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - generic [ref=e117]: Chào mừng trở lại với NOVA
+          - generic [ref=e118]: Quản lý hệ thống Eco Palm dễ dàng và hiệu quả
+        - generic [ref=e119]:
+          - generic [ref=e121]:
+            - generic [ref=e123]:
+              - generic [ref=e124]: Mã quản lý
+              - textbox "Mã quản lý" [ref=e126]:
+                - /placeholder: nova-admin
+            - generic [ref=e128]:
+              - generic [ref=e129]: Mật khẩu
+              - textbox "Mật khẩu" [ref=e131]:
+                - /placeholder: nova-password
+          - generic [ref=e132]:
+            - button "Đăng nhập" [ref=e133] [cursor=pointer]
+            - generic [ref=e136]: hoặc
+            - button "Đăng nhập với SMS" [ref=e138] [cursor=pointer]
+            - link "Quên mật khẩu?" [ref=e140] [cursor=pointer]:
+              - /url: /auth/forgot-password
+  - region "Notifications alt+T"
+```

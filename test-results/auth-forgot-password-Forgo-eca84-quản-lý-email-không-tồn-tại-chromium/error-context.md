@@ -1,0 +1,41 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - img [ref=e4]
+    - button "Open Tanstack query devtools" [ref=e52] [cursor=pointer]:
+      - img [ref=e53]
+  - main [ref=e102]:
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - generic [ref=e106]:
+          - generic [ref=e107]: 🏞️
+          - generic [ref=e108]:
+            - heading "NOVA" [level=1] [ref=e109]
+            - paragraph [ref=e110]: Network Operation for Vacation Acommodation
+        - generic [ref=e111]:
+          - heading "\"Lorem ipsum dolor sit amet ?\"" [level=2] [ref=e112]
+          - paragraph [ref=e113]: "- Lorem ipser -"
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - generic [ref=e117]: Thay đổi mật khẩu
+          - alert [ref=e119]:
+            - img [ref=e120]
+            - generic [ref=e122]: Lưu ý!
+            - generic [ref=e123]: Gửi yêu cầu thay đổi mật khẩu bằng mã quản lý
+        - generic [ref=e124]:
+          - generic [ref=e128]:
+            - generic [ref=e129]: Mã quản lý
+            - textbox "Mã quản lý" [ref=e131]:
+              - /placeholder: nova-admin
+              - text: nonexistent-admin
+            - paragraph [ref=e132]: Vui lòng nhập mã quản lý để nhận email thay đổi mật khẩu.
+          - generic [ref=e133]:
+            - button "Gửi yêu cầu" [ref=e134] [cursor=pointer]
+            - link "Quay lại đăng nhập" [ref=e136] [cursor=pointer]:
+              - /url: /auth/login
+              - img
+              - text: Quay lại đăng nhập
+  - region "Notifications alt+T"
+```
