@@ -1,5 +1,4 @@
-import type { Route } from "./+types/rooms";
-import RoomsViewLayout from "./layouts/rooms-view.layout";
+import type { Route } from "./+types/prices";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -13,5 +12,10 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return <RoomsViewLayout>dat</RoomsViewLayout>;
+  return (
+    <div>
+      {/* Frontend Code here. */}
+      <h1>New Route</h1>
+    </div>
+  );
 }

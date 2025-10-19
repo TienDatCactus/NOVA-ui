@@ -34,7 +34,7 @@ function BookingList({ bookings, isLoading, refetch }: BookingListProps) {
       </div>
     );
   }
-  if (bookings?.length === 0) {
+  if (bookings?.length === 0 || !!bookings === false) {
     return (
       <Empty>
         <EmptyHeader>

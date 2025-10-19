@@ -17,7 +17,7 @@ export default [
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
       ...prefix("reservation", [
-        index("routes/reservation/reservation.tsx"),
+        index("routes/reservation/reports/reports.tsx"),
         ...prefix("bookings", [
           route("grid", "routes/reservation/bookings/grid.tsx"),
           route("list", "routes/reservation/bookings/list.tsx"),
@@ -25,7 +25,11 @@ export default [
         ]),
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
       ]),
-      route("rooms", "routes/rooms/rooms.tsx"),
+      ...prefix("rooms", [
+        index("routes/rooms/rooms.tsx"),
+        route("types", "routes/rooms/types.tsx"),
+        route("prices", "routes/rooms/prices.tsx"),
+      ]),
       route("services", "routes/services/services.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("customers", "routes/customers/customers.tsx"),

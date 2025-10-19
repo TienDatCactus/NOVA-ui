@@ -15,8 +15,8 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   return (
-    <BookingViewLayout>
+    <>
       <RoomWeekScheduler />
-    </BookingViewLayout>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+
 import {
   CalendarIcon,
   CheckCheck,
@@ -16,7 +16,7 @@ import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Form, FormField, FormItem, FormMessage } from "~/components/ui/form";
-
+import { vi } from "react-day-picker/locale";
 import {
   Popover,
   PopoverContent,
@@ -194,6 +194,7 @@ function BookingConfirmation({
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
+                          disabled
                           variant={"outline"}
                           className="w-full justify-between"
                         >
@@ -222,6 +223,7 @@ function BookingConfirmation({
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
+                          disabled
                           variant={"outline"}
                           className="w-full justify-between"
                         >

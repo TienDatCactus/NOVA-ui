@@ -36,7 +36,6 @@ function ExpandedSidebar({
 }) {
   const { logout } = useAuth();
   const { user } = useAuthStore();
-  console.log(user);
   return (
     <Sidebar className="h-screen bg-background shadow-s">
       <SidebarHeader>

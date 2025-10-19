@@ -1,9 +1,5 @@
-import { Input } from "~/components/ui/input";
 import type { Route } from "./+types/grid";
 
-import SearchRoom from "./fragments/search";
-import BookingViewLayout from "./layouts/booking-view.layout";
-import useBookings from "./container/useBookings";
 import BookingGrid from "./components/booking.grid";
 import useBookingRoomsWeek from "./container/useBookingRoomsWeek";
 
@@ -21,8 +17,8 @@ export default function Component({
 }: Route.ComponentProps) {
   const { data, isPending, refetch } = useBookingRoomsWeek();
   return (
-    <BookingViewLayout>
+    <>
       <BookingGrid bookings={data} isLoading={isPending} refetch={refetch} />
-    </BookingViewLayout>
+    </>
   );
 }

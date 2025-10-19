@@ -101,7 +101,7 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
           </Tabs>
         </div>
 
-        <div className="col-span-3 border rounded-md bg-white p-4 shadow-sm">
+        <div className="col-span-3 border rounded-md bg-white p-4 flex flex-col shadow-sm">
           <div className="flex items-center justify-between">
             <div className="items-center flex gap-2">
               <Receipt className="w-5 h-5" />
@@ -130,7 +130,7 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
             </Button>
           </div>
 
-          <ScrollArea className="h-60 my-4">
+          <ScrollArea className="flex-1 max-h-60 my-4">
             {selectedServices.length > 0 ? (
               <ul>
                 {selectedServices.map((item) => {
@@ -144,7 +144,7 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
                 })}
               </ul>
             ) : (
-              <div className="flex items-center justify-center h-40">
+              <div className="grid place-items-center h-60">
                 <p className="text-muted-foreground">
                   Chưa có dịch vụ nào được chọn
                 </p>

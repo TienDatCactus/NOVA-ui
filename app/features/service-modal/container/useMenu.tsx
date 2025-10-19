@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MenuService } from "~/services/api/menu";
-import type { MenuListParams } from "~/services/types/booking.types";
+import type { MenuListParams } from "~/services/types/menu.types";
 
 function useMenu(params?: MenuListParams) {
   return useQuery({
