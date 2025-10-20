@@ -1,12 +1,8 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
-import { toast } from "sonner";
 import { DASHBOARD, AUTH } from "~/lib/fe-url";
-import { AuthService } from "~/services/api/auth-service";
-import type {
-  LoginDto,
-  ResetPasswordDto,
-} from "~/services/api/auth-service/dto";
+import { AuthService } from "~/services/api/auth";
+import type { LoginDto, ResetPasswordDto } from "~/services/api/auth/dto";
 import { useAuthStore } from "~/store/auth.store";
 
 export function useAuth() {
@@ -20,13 +16,10 @@ export function useAuth() {
     try {
       const response = await AuthService.login(data);
       setUser(response.user);
-      toast.success("Đăng nhập thành công!");
       navigate(DASHBOARD.reservation.index);
       return response;
     } catch (err: any) {
-      const errorMessage = err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
-      toast.error(errorMessage);
-      setError(errorMessage);
+      setError(err.message);
       throw err;
     } finally {
       setIsLoading(false);
@@ -44,13 +37,14 @@ export function useAuth() {
     setError(null);
     try {
       const response = await AuthService.forgotPassword(email);
-      toast.success("Yêu cầu thay đổi mật khẩu đã được gửi!");
-      navigate(AUTH.resetPassword);
+      navigate(AUTH.resetPassword, {
+        state: {
+          email,
+        },
+      });
       return response;
     } catch (err: any) {
-      const errorMessage = err.message || "Gửi yêu cầu thay đổi mật khẩu thất bại.";
-      toast.error(errorMessage);
-      setError(errorMessage);
+      setError(err.message);
       throw err;
     } finally {
       setIsLoading(false);
@@ -62,13 +56,12 @@ export function useAuth() {
     setError(null);
     try {
       const response = await AuthService.resetPassword(data);
-      toast.success("Thay đổi mật khẩu thành công!");
-      navigate(AUTH.login);
+      navigate(AUTH.login, {
+        state: { email: data.email },
+      });
       return response;
     } catch (err: any) {
-      const errorMessage = err.message || "Thay đổi mật khẩu thất bại.";
-      toast.error(errorMessage);
-      setError(errorMessage);
+      setError(err.message);
       throw err;
     } finally {
       setIsLoading(false);

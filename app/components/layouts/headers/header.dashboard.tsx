@@ -1,6 +1,6 @@
 import { Plus, SearchIcon } from "lucide-react";
 import { useState } from "react";
-import { Link, useLocation, useSearchParams } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Kbd } from "~/components/ui/kbd";
@@ -13,30 +13,38 @@ import {
   NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
 import CreateBookingDialog from "~/features/create-booking";
-import { RESERVATION_NAV_ITEMS } from "~/lib/constants";
 import { cn } from "~/lib/utils";
+import { useHeaderNav } from "../side-bar/dashboard/container/useHeader";
 
 interface DashboardHeaderProps extends React.HTMLAttributes<HTMLElement> {}
 export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
   const [open, setOpen] = useState<boolean>(false);
+  const { navItems, currentPath } = useHeaderNav();
   function close() {
     setOpen(false);
   }
-  const curPath = useLocation().pathname;
+  console.log(navItems);
   return (
     <header className="h-12 shadow-sm py-6 px-6 z-10 bg-background flex items-center w-full sticky top-0   justify-between border-b">
       <NavigationMenu viewport={false}>
         <NavigationMenuList>
-          {RESERVATION_NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavigationMenuItem key={item.title}>
               <NavigationMenuTrigger
-                isActive={curPath === item.href}
+                isActive={currentPath === item.href}
                 hasChildren={!!item?.children}
               >
-                <Link to={item.href} className="flex gap-2 items-center">
-                  {item.icon}
-                  {item.title}
-                </Link>
+                {item.href ? (
+                  <Link to={item.href!} className="flex gap-2 items-center">
+                    {item.icon}
+                    {item.title}
+                  </Link>
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    {item.icon}
+                    {item.title}
+                  </div>
+                )}
               </NavigationMenuTrigger>
               {item?.children && item?.children.length > 0 && (
                 <NavigationMenuContent>
@@ -45,7 +53,7 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
                       <li
                         key={child.title}
                         className={cn({
-                          " bg-accent rounded-sm": curPath === child.href,
+                          " bg-accent rounded-sm": currentPath === child.href,
                         })}
                       >
                         <NavigationMenuLink asChild>

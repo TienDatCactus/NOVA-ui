@@ -248,6 +248,7 @@ function CustomerInfoForm({
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
+                        locale={vi}
                         selected={field.value}
                         onSelect={field.onChange}
                         disabled={(date) => date < new Date()}
@@ -285,10 +286,10 @@ function CustomerInfoForm({
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
+                        locale={vi}
                         selected={field.value}
                         onSelect={field.onChange}
                         disabled={(date) => date < new Date()}
-                        locale={vi}
                       />
                     </PopoverContent>
                   </Popover>

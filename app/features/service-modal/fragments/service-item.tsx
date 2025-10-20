@@ -4,33 +4,39 @@ import { Button } from "~/components/ui/button";
 import Image from "~/components/ui/image";
 import { Counter } from "~/components/ui/shadcn-io/counter";
 import { useServiceContext } from "../local-context/service-modal.context";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
+import type z from "zod";
+import useServiceSchema from "~/services/schema/service.schema";
 
-interface ServiceItemProps {
-  item: any;
+const { ServiceItem2Schema } = useServiceSchema();
+type ServiceItem = z.infer<typeof ServiceItem2Schema> & {
+  quantity?: number;
+  imageUrl?: string;
+  category?: string;
+};
+
+interface ServiceItemListProps {
+  item: ServiceItem;
 }
 
-function ServiceItemList({ item }: ServiceItemProps) {
+function ServiceItemList({ item }: ServiceItemListProps) {
   const { updateQuantity, removeService, getQuantity } = useServiceContext();
-  const quantity = getQuantity(item.id);
+  const quantity = getQuantity(item.serviceItemId);
 
   return (
     <li className="flex items-center justify-between bg-background p-2 border rounded-md my-2">
       <div className="flex-1">
         <h3 className="font-medium">{item.name}</h3>
         <p className="text-muted-foreground text-sm">
-          {new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-          }).format(item.price)}{" "}
-          x ({quantity})
+          {formatMoney(item.basePrice).vndFormatted} x ({quantity})
         </p>
       </div>
       <div className="flex-shrink-0 mx-2">
         <Counter
           number={quantity}
-          setNumber={updateQuantity}
-          itemId={item.id}
+          setNumber={(newQuantity: number) =>
+            updateQuantity(item.serviceItemId, newQuantity)
+          }
           min={1}
           max={99}
         />
@@ -39,7 +45,7 @@ function ServiceItemList({ item }: ServiceItemProps) {
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => removeService(item.id)}
+          onClick={() => removeService(item.serviceItemId)}
         >
           <Trash className="w-4 h-4 mr-1" />
           Xóa
@@ -49,10 +55,23 @@ function ServiceItemList({ item }: ServiceItemProps) {
   );
 }
 
-function ServiceItemGrid({ item }: ServiceItemProps) {
+interface ServiceItemGridProps {
+  item: ServiceItem;
+}
+
+function ServiceItemGrid({ item }: ServiceItemGridProps) {
   const { addService, isInCart, getQuantity } = useServiceContext();
-  const inCart = isInCart(item.id);
-  const quantity = getQuantity(item.id);
+  const inCart = isInCart(item.serviceItemId);
+  const quantity = getQuantity(item.serviceItemId);
+
+  const handleAddToCart = () => {
+    // Ensure we add it with the service type designation
+    const serviceItem = {
+      ...item,
+      quantity: 1, // Ensure quantity is set
+    };
+    addService(serviceItem);
+  };
 
   return (
     <li
@@ -62,7 +81,7 @@ function ServiceItemGrid({ item }: ServiceItemProps) {
           "ring-2 ring-primary": inCart,
         }
       )}
-      onClick={() => addService({ ...item, quantity: 1 })}
+      onClick={handleAddToCart}
     >
       <div className="relative w-full">
         <Image
@@ -82,16 +101,13 @@ function ServiceItemGrid({ item }: ServiceItemProps) {
         )}
       </div>
       <h3 className="font-medium">{item.name}</h3>
-      <p className="text-xs text-muted-foreground truncate line-clamp-1">
+      <p className="text-xs text-muted-foreground line-clamp-2">
         {item.description}
       </p>
       <div className="flex items-center justify-between w-full">
-        <Badge variant="outline">{item?.category}</Badge>
+        <Badge variant="outline">{item?.category || item?.code}</Badge>
         <span className="font-semibold">
-          {new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-          }).format(item.price)}
+          {formatMoney(item.basePrice).vndFormatted}
         </span>
       </div>
     </li>

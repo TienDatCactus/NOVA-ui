@@ -1,5 +1,6 @@
 const STORAGE = {
-  TOKEN: "trvlr-token",
+  TOKEN: "nova-access-token",
+  REFRESH_TOKEN: "nova-refresh-token",
 };
 
 export const getStorage = (name: (typeof STORAGE)[keyof typeof STORAGE]) => {

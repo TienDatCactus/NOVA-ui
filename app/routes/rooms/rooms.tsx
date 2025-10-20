@@ -1,4 +1,5 @@
 import type { Route } from "./+types/rooms";
+import RoomsViewLayout from "./layouts/rooms-view.layout";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -12,5 +13,5 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return <div>{/* Frontend Code here. */}</div>;
+  return <RoomsViewLayout>dat</RoomsViewLayout>;
 }

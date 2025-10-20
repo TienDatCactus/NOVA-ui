@@ -1,0 +1,128 @@
+import { Search, X } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { BOOKING_CHANNEL, ROOM_TYPE } from "~/lib/constants";
+
+export interface BookingSearchFilters {
+  searchText: string;
+  status: string;
+  source: string;
+  roomType: string;
+}
+
+interface SearchRoomProps {
+  filters: BookingSearchFilters;
+  onFiltersChange: (filters: BookingSearchFilters) => void;
+  onReset: () => void;
+}
+
+const BOOKING_STATUSES = [
+  { value: "all", label: "Tất cả trạng thái" },
+  { value: "Confirmed", label: "Đã xác nhận" },
+  { value: "CheckedIn", label: "Đã nhận phòng" },
+  { value: "CheckedOut", label: "Đã trả phòng" },
+  { value: "Pending", label: "Chờ xử lý" },
+  { value: "Cancelled", label: "Đã hủy" },
+];
+
+function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
+  const handleSearchTextChange = (value: string) => {
+    onFiltersChange({ ...filters, searchText: value });
+  };
+
+  const handleStatusChange = (value: string) => {
+    onFiltersChange({ ...filters, status: value });
+  };
+
+  const handleSourceChange = (value: string) => {
+    onFiltersChange({ ...filters, source: value });
+  };
+
+  const handleRoomTypeChange = (value: string) => {
+    onFiltersChange({ ...filters, roomType: value });
+  };
+
+  const hasActiveFilters =
+    filters.searchText ||
+    (filters.status && filters.status !== "all") ||
+    (filters.source && filters.source !== "all") ||
+    (filters.roomType && filters.roomType !== "all");
+
+  return (
+    <div className="flex justify-between items-center gap-2">
+      <div className="flex-1 flex items-center gap-2">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="h-9 pl-9"
+            placeholder="Tìm mã booking, tên khách, SĐT..."
+            value={filters.searchText}
+            onChange={(e) => handleSearchTextChange(e.target.value)}
+          />
+        </div>
+
+        <Select value={filters.status} onValueChange={handleStatusChange}>
+          <SelectTrigger className="w-[180px] h-9">
+            <SelectValue placeholder="Trạng thái" />
+          </SelectTrigger>
+          <SelectContent>
+            {BOOKING_STATUSES.map((status) => (
+              <SelectItem key={status.value} value={status.value}>
+                {status.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={filters.source} onValueChange={handleSourceChange}>
+          <SelectTrigger className="w-[180px] h-9">
+            <SelectValue placeholder="Kênh đặt" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả kênh</SelectItem>
+            {BOOKING_CHANNEL.map((channel) => (
+              <SelectItem key={channel} value={channel}>
+                {channel}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={filters.roomType} onValueChange={handleRoomTypeChange}>
+          <SelectTrigger className="w-[180px] h-9">
+            <SelectValue placeholder="Loại phòng" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả loại phòng</SelectItem>
+            {ROOM_TYPE.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {hasActiveFilters && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onReset}
+          className="h-9 gap-1"
+        >
+          <X className="h-4 w-4" />
+          Xóa bộ lọc
+        </Button>
+      )}
+    </div>
+  );
+}
+
+export default SearchRoom;
