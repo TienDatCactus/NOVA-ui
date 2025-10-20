@@ -126,14 +126,10 @@ export function BookingLineChart({ className }: { className?: string }) {
         </ChartContainer>
       </CardContent>
       <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="text-muted-foreground flex items-center gap-2 leading-none">
-              Biểu đồ hiển thị xu hướng phòng trống theo từng hạng phòng để phát
-              hiện hạng phòng nào đang dư/giảm
-            </div>
-          </div>
-        </div>
+        <legend className="text-muted-foreground leading-none text-sm italic">
+          *Biểu đồ hiển thị xu hướng phòng trống theo từng hạng phòng để phát
+          hiện hạng phòng nào đang dư/giảm
+        </legend>
       </CardFooter>
     </Card>
   );

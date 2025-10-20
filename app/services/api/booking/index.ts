@@ -23,8 +23,8 @@ async function getBookingList(
 ): Promise<BookingListResponseDto> {
   try {
     const resp = await http.get(Booking.list, { params });
-    console.log(resp);
     const data = BookingListResponseSchema.parseAsync(resp.data);
+    console.log(data);
     return data;
   } catch (err) {
     return Promise.reject(err);
@@ -57,14 +57,29 @@ async function externalCreateBooking(
   }
 }
 
-async function getBookingByCode(
+async function getBookingById(
   params: BookingListParams
 ): Promise<BookingDetailResponseDto> {
   try {
     if (!params.code) {
       return Promise.reject(new Error("Code is required"));
     }
-    const resp = await http.get(Booking.detail(params.code), {
+    const resp = await http.get(Booking.detailByCode(params.code), {
+      params,
+    });
+    return BookingItemSchema.parse(resp.data);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+async function getBookingByCode(
+  params: BookingListParams
+): Promise<BookingDetailResponseDto> {
+  try {
+    if (!params.id) {
+      return Promise.reject(new Error("Code is required"));
+    }
+    const resp = await http.get(Booking.detailById(params.id), {
       params,
     });
     return BookingItemSchema.parse(resp.data);
@@ -78,4 +93,5 @@ export const BookingService = {
   externalCreateBooking,
   getBookingListByWeek,
   getBookingByCode,
+  getBookingById,
 };

@@ -86,27 +86,38 @@ const BookingSchema = z
   });
 
 const BookingItemSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   bookingCode: z.string().optional(),
   status: z.string(),
   checkinDate: z.string(),
   checkoutDate: z.string(),
-  createdAt: z.string(),
+  createdAt: z.string().optional(),
   note: z.string().optional(),
   source: z.string().optional(),
   customerName: z.string().optional(),
   customerPhone: z.string().optional(),
   customerEmail: z.string().optional(),
-  adults: z.number().int().min(0),
-  children: z.number().int().min(0).optional(),
-  totalAmount: z.number().min(0),
-  paidAmount: z.number().min(0),
+  adults: z.string().min(0),
+  children: z.string().min(0).optional(),
+  totalAmount: z.string().min(0),
+  paidAmount: z.string().min(0),
   paymentStatus: z.string().optional(),
   rooms: z.array(RoomItemSchema).optional(),
   services: ServicesSchema.optional(),
 });
 
-const BookingListResponseSchema = z.array(BookingItemSchema).optional();
+const BookingListResponseSchema = z
+  .array(
+    z.object({
+      bookingCode: z.string().min(1, "bookingCode không được để trống"),
+      customerName: z.string().min(1, "customerName không được để trống"),
+      checkinDate: z.string().min(1, "checkinDate không được để trống"),
+      checkoutDate: z.string().min(1, "checkoutDate không được để trống"),
+      source: z.string().min(1, "source không được để trống"),
+      status: z.string(),
+    })
+  )
+  .optional();
 
 const BookingItemByWeekSchema = z.object({
   roomId: z.string("roomId phải là string hợp lệ"),

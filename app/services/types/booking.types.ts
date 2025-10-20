@@ -15,4 +15,5 @@ export interface BookingListParams {
   weekStart?: string;
   date?: string;
   code?: string;
+  id?: string;
 }

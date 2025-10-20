@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
@@ -97,6 +98,12 @@ export function BookingRadarChart({ className }: { className?: string }) {
           </RadarChart>
         </ChartContainer>
       </CardContent>
+      <CardFooter>
+        <legend className="text-muted-foreground leading-none text-sm italic">
+          *Biểu đồ hiển thị hiệu suất các hạng phòng dựa trên tỷ lệ phòng trống,
+          đặt phòng và check-in
+        </legend>
+      </CardFooter>
     </Card>
   );
 }

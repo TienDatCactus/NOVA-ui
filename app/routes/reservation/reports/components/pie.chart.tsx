@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
@@ -98,6 +99,12 @@ export function BookingPieChart({ className }: { className?: string }) {
           </PieChart>
         </ChartContainer>
       </CardContent>
+      <CardFooter>
+        <legend className="text-muted-foreground leading-none text-sm italic">
+          *Biểu đồ hiển thị phân bổ phòng trống theo hạng phòng cho ngày
+          01/12/2024
+        </legend>
+      </CardFooter>
     </Card>
   );
 }

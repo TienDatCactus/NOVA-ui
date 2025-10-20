@@ -108,10 +108,10 @@ export function BookingStackedBarChart({ className }: { className?: string }) {
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 leading-none font-medium text-muted-foreground">
-          Tổng số phòng được phân bổ theo trạng thái từng ngày
-        </div>
+      <CardFooter>
+        <legend className="text-muted-foreground leading-none text-sm italic">
+          * Tổng số phòng được phân bổ theo trạng thái từng ngày
+        </legend>
       </CardFooter>
     </Card>
   );

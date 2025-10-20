@@ -11,7 +11,8 @@ const Booking = {
   create: "Bookings",
   list: "Bookings/list",
   listByWeek: "Bookings/rooms-week",
-  detail: (code: string) => `Bookings/${code}`,
+  detailById: (id: string) => `Bookings/${id}/details`,
+  detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
 };
 
 const Rooms = {
