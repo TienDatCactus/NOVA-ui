@@ -85,39 +85,50 @@ const BookingSchema = z
     }
   });
 
-const BookingItemSchema = z.object({
-  id: z.string().optional(),
-  bookingCode: z.string().optional(),
-  status: z.string(),
-  checkinDate: z.string(),
-  checkoutDate: z.string(),
-  createdAt: z.string().optional(),
-  note: z.string().optional(),
-  source: z.string().optional(),
-  customerName: z.string().optional(),
-  customerPhone: z.string().optional(),
-  customerEmail: z.string().optional(),
-  adults: z.string().min(0),
-  children: z.string().min(0).optional(),
-  totalAmount: z.string().min(0),
-  paidAmount: z.string().min(0),
-  paymentStatus: z.string().optional(),
-  rooms: z.array(RoomItemSchema).optional(),
-  services: ServicesSchema.optional(),
-});
+const BookingItemSchema = z
+  .object({
+    id: z.string(),
+    bookingCode: z.string(),
+    source: z.string(),
+    status: z.string(),
+    checkinDate: z.string(),
+    checkoutDate: z.string(),
+    adults: z.number().int().nonnegative(),
+    children: z.number().int().nonnegative(),
+    note: z.string(),
+    totalAmount: z.number(),
+    paidAmount: z.number(),
+    paymentStatus: z.string(),
+    paymentMethod: z.string().nullable(),
+    customer: z.object({
+      id: z.string(),
+      fullName: z.string(),
+      phoneNumber: z.string(),
+      email: z.email(),
+    }),
+    rooms: z.array(
+      z.object({
+        roomId: z.string(),
+        roomName: z.string(),
+        roomTypeId: z.string(),
+        roomTypeName: z.string(),
+        fromDate: z.string(),
+        toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+      })
+    ),
+    invoices: z.array(z.any()),
+  })
+  .strict();
 
-const BookingListResponseSchema = z
-  .array(
-    z.object({
-      bookingCode: z.string().min(1, "bookingCode không được để trống"),
-      customerName: z.string().min(1, "customerName không được để trống"),
-      checkinDate: z.string().min(1, "checkinDate không được để trống"),
-      checkoutDate: z.string().min(1, "checkoutDate không được để trống"),
-      source: z.string().min(1, "source không được để trống"),
-      status: z.string(),
-    })
-  )
-  .optional();
+const BookingListItemSchema = z.object({
+  bookingCode: z.string().min(1, "bookingCode không được để trống"),
+  customerName: z.string().min(1, "customerName không được để trống"),
+  checkinDate: z.string().min(1, "checkinDate không được để trống"),
+  checkoutDate: z.string().min(1, "checkoutDate không được để trống"),
+  source: z.string().min(1, "source không được để trống"),
+  status: z.string(),
+});
+const BookingListResponseSchema = z.array(BookingListItemSchema).optional();
 
 const BookingItemByWeekSchema = z.object({
   roomId: z.string("roomId phải là string hợp lệ"),
@@ -194,6 +205,7 @@ const useBookingSchema = () => {
     ExternalBookingResponseSchema,
     BookingListByWeekResponseSchema,
     BookingItemByWeekSchema,
+    BookingListItemSchema,
   };
 };
 export default useBookingSchema;

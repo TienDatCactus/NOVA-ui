@@ -23,7 +23,6 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
   function close() {
     setOpen(false);
   }
-  console.log(navItems);
   return (
     <header className="h-12 shadow-sm py-6 px-6 z-10 bg-background flex items-center w-full sticky top-0   justify-between border-b">
       <NavigationMenu viewport={false}>

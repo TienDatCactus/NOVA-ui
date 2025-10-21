@@ -24,7 +24,6 @@ async function getBookingList(
   try {
     const resp = await http.get(Booking.list, { params });
     const data = BookingListResponseSchema.parseAsync(resp.data);
-    console.log(data);
     return data;
   } catch (err) {
     return Promise.reject(err);
@@ -57,31 +56,23 @@ async function externalCreateBooking(
   }
 }
 
-async function getBookingById(
+async function getBookingDetail(
   params: BookingListParams
 ): Promise<BookingDetailResponseDto> {
   try {
-    if (!params.code) {
-      return Promise.reject(new Error("Code is required"));
+    let resp = null;
+    if (params.code) {
+      resp = await http.get(Booking.detailByCode(params.code), {
+        params,
+      });
+    } else if (!params.id) {
+      resp = await http.get(Booking.detailById(params.id!), {
+        params,
+      });
+    } else {
+      return Promise.reject(new Error("ID/Code is required"));
     }
-    const resp = await http.get(Booking.detailByCode(params.code), {
-      params,
-    });
-    return BookingItemSchema.parse(resp.data);
-  } catch (error) {
-    return Promise.reject(error);
-  }
-}
-async function getBookingByCode(
-  params: BookingListParams
-): Promise<BookingDetailResponseDto> {
-  try {
-    if (!params.id) {
-      return Promise.reject(new Error("Code is required"));
-    }
-    const resp = await http.get(Booking.detailById(params.id), {
-      params,
-    });
+    console.log(resp);
     return BookingItemSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
@@ -92,6 +83,5 @@ export const BookingService = {
   getBookingList,
   externalCreateBooking,
   getBookingListByWeek,
-  getBookingByCode,
-  getBookingById,
+  getBookingDetail,
 };

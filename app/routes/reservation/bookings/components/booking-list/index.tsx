@@ -29,7 +29,7 @@ function BookingList({ bookings, isLoading, refetch }: BookingListProps) {
         {Array(8)
           .fill(0)
           .map((_, index) => (
-            <Skeleton key={index} className="h-8 w-full rounded-sm" />
+            <Skeleton key={index} className="h-10 w-full" />
           ))}
       </div>
     );

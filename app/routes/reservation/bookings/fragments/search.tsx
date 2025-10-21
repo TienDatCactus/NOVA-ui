@@ -14,7 +14,6 @@ export interface BookingSearchFilters {
   searchText: string;
   status: string;
   source: string;
-  roomType: string;
 }
 
 interface SearchRoomProps {
@@ -45,15 +44,10 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
     onFiltersChange({ ...filters, source: value });
   };
 
-  const handleRoomTypeChange = (value: string) => {
-    onFiltersChange({ ...filters, roomType: value });
-  };
-
   const hasActiveFilters =
     filters.searchText ||
     (filters.status && filters.status !== "all") ||
-    (filters.source && filters.source !== "all") ||
-    (filters.roomType && filters.roomType !== "all");
+    (filters.source && filters.source !== "all");
 
   return (
     <div className="flex justify-between items-center gap-2">
@@ -90,20 +84,6 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
             {BOOKING_CHANNEL.map((channel) => (
               <SelectItem key={channel} value={channel}>
                 {channel}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={filters.roomType} onValueChange={handleRoomTypeChange}>
-          <SelectTrigger className="w-[180px] h-9">
-            <SelectValue placeholder="Loại phòng" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả loại phòng</SelectItem>
-            {ROOM_TYPE.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
               </SelectItem>
             ))}
           </SelectContent>
