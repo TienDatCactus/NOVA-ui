@@ -3,7 +3,7 @@ import type { RoomListItemDto } from "~/services/api/rooms/dto";
 
 export interface RoomFilters {
   searchText: string;
-  status: number[];
+  status: string[];
   roomTypes: string[];
   isOccupied?: boolean | null;
   locked?: boolean | null;

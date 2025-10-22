@@ -26,6 +26,7 @@ import {
 import { cn } from "~/lib/utils";
 import { useAuth } from "~/routes/auth/container/auth.hooks";
 import { useAuthStore } from "~/store/auth.store";
+import { SidebarUser } from "../fragments/user.sidebar";
 
 function ExpandedSidebar({
   curPath,
@@ -34,8 +35,6 @@ function ExpandedSidebar({
   curPath: string;
   toggle: () => void;
 }) {
-  const { logout } = useAuth();
-  const { user } = useAuthStore();
   return (
     <Sidebar className="h-screen bg-background shadow-s">
       <SidebarHeader>
@@ -79,8 +78,7 @@ function ExpandedSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
         <Divider weight="thin" />
-        <SidebarGroup>
-          <SidebarGroupLabel>Help</SidebarGroupLabel>
+        <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
               {SUB_DASHBOARD_ITEMS.map((item) => (
@@ -98,28 +96,7 @@ function ExpandedSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                {user && (
-                  <SidebarMenuButton>
-                    <User2 />{" "}
-                    <span>
-                      {user?.fullName} - {user?.roles?.join(", ")}
-                    </span>
-                    <ChevronUp className="ml-auto" />
-                  </SidebarMenuButton>
-                )}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" className="w-40">
-                <DropdownMenuItem onClick={logout}>
-                  <span>Đăng xuất</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarUser />
       </SidebarFooter>
     </Sidebar>
   );

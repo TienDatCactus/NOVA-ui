@@ -58,11 +58,11 @@ const RoomListItemSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
   locked: z.boolean(),
-  status: RoomStatusEnum, // Use enum instead of string
+  status: z.string(),
   roomTypeId: z.string(),
   roomTypeCode: z.string(),
   roomTypeName: z.string(),
-  dailyPrice: z.number().nonnegative(),
+  dailyPrice: z.number(),
   isOccupied: z.boolean(),
 });
 

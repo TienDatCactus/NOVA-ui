@@ -50,34 +50,33 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
     onRowSelectionChange: setRowSelection,
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getRowCanExpand: () => true, // All rows can expand
+    getRowCanExpand: () => true,
   });
 
-  // Fetch room details when row expands
-  useEffect(() => {
-    const expandedRowIds = Object.keys(expanded).filter(
-      (key: any) => expanded[key]
-    );
+  //   useEffect(() => {
+  //     const expandedRowIds = Object.keys(expanded).filter(
+  //       (key: any) => expanded[key]
+  //     );
 
-    expandedRowIds.forEach(async (rowId) => {
-      const row = table.getRow(rowId);
-      const roomId = row.original.roomId;
+  //     expandedRowIds.forEach(async (rowId) => {
+  //       const row = table.getRow(rowId);
+  //       const roomId = row.original.roomId;
 
-      // Skip if already loading or loaded
-      if (loadingDetails[roomId] || roomDetails[roomId]) return;
+  //       // Skip if already loading or loaded
+  //       if (loadingDetails[roomId] || roomDetails[roomId]) return;
 
-      setLoadingDetails((prev) => ({ ...prev, [roomId]: true }));
+  //       setLoadingDetails((prev) => ({ ...prev, [roomId]: true }));
 
-      try {
-        const details = await RoomsService.getRoomDetails(roomId, {});
-        setRoomDetails((prev) => ({ ...prev, [roomId]: details }));
-      } catch (error) {
-        console.error(`Failed to load details for room ${roomId}:`, error);
-      } finally {
-        setLoadingDetails((prev) => ({ ...prev, [roomId]: false }));
-      }
-    });
-  }, [expanded, table]);
+  //       try {
+  //         const details = await RoomsService.getRoomDetails(roomId, {});
+  //         setRoomDetails((prev) => ({ ...prev, [roomId]: details }));
+  //       } catch (error) {
+  //         console.error(`Failed to load details for room ${roomId}:`, error);
+  //       } finally {
+  //         setLoadingDetails((prev) => ({ ...prev, [roomId]: false }));
+  //       }
+  //     });
+  //   }, [expanded, table]);
 
   // Notify parent of selection changes
   useEffect(() => {

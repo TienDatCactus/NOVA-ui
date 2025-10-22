@@ -7,7 +7,7 @@ import useRooms from "./container/useRooms";
 import useRoomFilters from "./container/useRoomFilter";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import BulkActionsToolbar from "./fragments/bulk-action.dialog";
-import CreateRoomDialog from "./fragments/create-room.dialog";
+// import CreateRoomDialog from "./fragments/create-room.dialog";
 import RoomsHeader from "./fragments/rooms-header.layout";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
@@ -105,11 +105,11 @@ export default function Component({
         onSelectionChange={setSelectedRooms}
       />
 
-      <CreateRoomDialog
+      {/* <CreateRoomDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
         onSubmit={handleCreateRoom}
-      />
+      /> */}
     </RoomsViewLayout>
   );
 }

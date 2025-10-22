@@ -244,16 +244,16 @@ const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];
 
 // Room Management Status (Backend Enum 0-6)
 const ROOM_MANAGEMENT_STATUS = {
-  Available: 0, // Còn trống
-  Occupied: 1, // Đã có khách
-  Dirty: 2, // Cần dọn dẹp
-  OutOfService: 3, // Ngưng sử dụng
-  Reserved: 4, // Đã được đặt trước
-  Cleaning: 5, // Đang được dọn dẹp
-  Locked: 6, // Bị khóa
+  Available: "0", // Còn trống
+  Occupied: "1", // Đã có khách
+  Dirty: "2", // Cần dọn dẹp
+  OutOfService: "3", // Ngưng sử dụng
+  Reserved: "4", // Đã được đặt trước
+  Cleaning: "5", // Đang được dọn dẹp
+  Locked: "6", // Bị khóa
 } as const;
 
-const ROOM_MANAGEMENT_STATUS_LABELS: Record<number, string> = {
+const ROOM_MANAGEMENT_STATUS_LABELS: Record<string, string> = {
   [ROOM_MANAGEMENT_STATUS.Available]: "Còn trống",
   [ROOM_MANAGEMENT_STATUS.Occupied]: "Đã có khách",
   [ROOM_MANAGEMENT_STATUS.Dirty]: "Cần dọn dẹp",
@@ -263,7 +263,7 @@ const ROOM_MANAGEMENT_STATUS_LABELS: Record<number, string> = {
   [ROOM_MANAGEMENT_STATUS.Locked]: "Bị khóa",
 } as const;
 
-const ROOM_MANAGEMENT_STATUS_COLORS: Record<number, string> = {
+const ROOM_MANAGEMENT_STATUS_COLORS: Record<string, string> = {
   [ROOM_MANAGEMENT_STATUS.Available]: "bg-green-500 text-white",
   [ROOM_MANAGEMENT_STATUS.Occupied]: "bg-red-500 text-white",
   [ROOM_MANAGEMENT_STATUS.Dirty]: "bg-yellow-500 text-black",
@@ -273,15 +273,6 @@ const ROOM_MANAGEMENT_STATUS_COLORS: Record<number, string> = {
   [ROOM_MANAGEMENT_STATUS.Locked]: "bg-purple-500 text-white",
 } as const;
 
-// Dashboard Room Types (từ data Excel)
-const DASHBOARD_ROOM_TYPES = [
-  "Beach Villa",
-  "Garden View",
-  "Ocean View",
-  "Pool Villa",
-] as const;
-
-// Dashboard Room Status
 const ROOM_STATUS = {
   AVAILABLE: "Phòng trống cả ngày",
   CHECKOUT_EXPECTED: "Phòng dự kiến trả",
@@ -290,7 +281,6 @@ const ROOM_STATUS = {
   OCCUPANCY_RATE: "Công suất sử dụng",
 } as const;
 
-// Room Status Colors
 const ROOM_STATUS_COLORS = {
   "Phòng trống cả ngày": "#22c55e", // Green
   "Phòng dự kiến trả": "#facc15", // Yellow
@@ -312,7 +302,7 @@ const ROOM_COUNT = 13;
 const DAYS_COUNT = 7;
 const SUBS_PER_DAY = 2;
 const headerRows = 1;
-const rowHeight = 64; // increased cell height for readability
+const rowHeight = 64;
 const firstColWidth = 220;
 const totalSubCols = DAYS_COUNT * SUBS_PER_DAY;
 export {
@@ -331,7 +321,6 @@ export {
   ROOM_TYPE,
   BOOKING_CHANNEL,
   SERVICE_CATEGORIES,
-  DASHBOARD_ROOM_TYPES,
   ROOM_STATUS,
   ROOM_STATUS_COLORS,
   ROOM_MANAGEMENT_STATUS,
