@@ -14,7 +14,6 @@ function RoomDetailRow({ roomDetail }: RoomDetailRowProps) {
   return (
     <div className="p-4 bg-muted/30">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Current Booking Info */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">

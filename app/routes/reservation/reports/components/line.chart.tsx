@@ -19,6 +19,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
+import { cn } from "~/lib/utils";
 
 export const description =
   "A line chart showing available rooms trend by room type";
@@ -55,7 +56,7 @@ const chartConfig = {
 
 export function BookingLineChart({ className }: { className?: string }) {
   return (
-    <Card className={className}>
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle>Xu hướng phòng trống theo hạng phòng</CardTitle>
         <CardDescription>

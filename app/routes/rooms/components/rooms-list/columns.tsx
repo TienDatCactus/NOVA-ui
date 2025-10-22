@@ -4,6 +4,7 @@ import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import { Label } from "~/components/ui/label";
 import {
   ROOM_MANAGEMENT_STATUS_LABELS,
   ROOM_MANAGEMENT_STATUS_COLORS,
@@ -18,14 +19,16 @@ export const columns: ColumnDef<RoomListItem>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
+      <div>
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      </div>
     ),
     cell: ({ row }) => (
       <Checkbox
@@ -37,28 +40,7 @@ export const columns: ColumnDef<RoomListItem>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  {
-    id: "expander",
-    header: () => null,
-    cell: ({ row }) => {
-      return row.getCanExpand() ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={row.getToggleExpandedHandler()}
-          className="p-0 h-8 w-8"
-        >
-          {row.getIsExpanded() ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </Button>
-      ) : null;
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
+
   {
     accessorKey: "index",
     header: "STT",
@@ -96,7 +78,7 @@ export const columns: ColumnDef<RoomListItem>[] = [
     accessorKey: "status",
     header: "Trạng thái",
     cell: ({ row }) => {
-      const status = row.original.status;
+      const status: string = row.original.status;
       const label = ROOM_MANAGEMENT_STATUS_LABELS[status];
       const colorClass = ROOM_MANAGEMENT_STATUS_COLORS[status];
 
@@ -119,9 +101,9 @@ export const columns: ColumnDef<RoomListItem>[] = [
     header: "Đang sử dụng",
     cell: ({ row }) => {
       return row.original.isOccupied ? (
-        <Check className="h-5 w-5 text-green-600" />
+        <Badge variant={"success"}>Đang sử dụng</Badge>
       ) : (
-        <X className="h-5 w-5 text-gray-400" />
+        <Badge variant={"info"}>Trống</Badge>
       );
     },
   },

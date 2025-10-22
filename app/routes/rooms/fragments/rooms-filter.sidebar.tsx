@@ -4,14 +4,14 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
+import { Slider } from "~/components/ui/slider";
 import {
-  ROOM_TYPE,
   ROOM_MANAGEMENT_STATUS,
   ROOM_MANAGEMENT_STATUS_LABELS,
+  ROOM_TYPE,
 } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
 import type { RoomFilters } from "../container/useRoomFilter";
-import { Slider } from "~/components/ui/slider";
 
 interface RoomsFilterSidebarProps {
   filters: RoomFilters;
@@ -27,7 +27,7 @@ function RoomsFilterSidebar({
   onFilterChange,
   onResetFilters,
 }: RoomsFilterSidebarProps) {
-  const handleStatusToggle = (statusValue: number) => {
+  const handleStatusToggle = (statusValue: string) => {
     const newStatus = filters.status.includes(statusValue)
       ? filters.status.filter((s) => s !== statusValue)
       : [...filters.status, statusValue];
@@ -50,8 +50,7 @@ function RoomsFilterSidebar({
     (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 5000000 ? 1 : 0);
 
   return (
-    <aside className="w-64 space-y-6">
-      {/* Header with Reset */}
+    <aside className="w-64 flex-shrink-0 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Bộ lọc</h2>
         {activeFiltersCount > 0 && (
@@ -69,7 +68,6 @@ function RoomsFilterSidebar({
 
       <Separator />
 
-      {/* Search */}
       <div className="space-y-2">
         <Label htmlFor="search" className="text-sm font-medium">
           Tìm kiếm
@@ -85,7 +83,6 @@ function RoomsFilterSidebar({
 
       <Separator />
 
-      {/* Status Filter */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">Trạng thái</Label>
         <div className="space-y-2">
@@ -109,7 +106,6 @@ function RoomsFilterSidebar({
 
       <Separator />
 
-      {/* Room Type Filter */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">Hạng phòng</Label>
         <div className="space-y-2">
@@ -133,7 +129,6 @@ function RoomsFilterSidebar({
 
       <Separator />
 
-      {/* Occupied Filter */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">Tình trạng sử dụng</Label>
         <div className="space-y-2">
@@ -172,7 +167,6 @@ function RoomsFilterSidebar({
 
       <Separator />
 
-      {/* Locked Filter */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">Trạng thái khóa</Label>
         <div className="space-y-2">
@@ -211,7 +205,6 @@ function RoomsFilterSidebar({
 
       <Separator />
 
-      {/* Price Range Filter */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">Khoảng giá (VND/đêm)</Label>
         <div className="space-y-4">
