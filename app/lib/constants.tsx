@@ -242,6 +242,37 @@ const TOP_NAV_CONFIG = {
 
 const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];
 
+// Room Management Status (Backend Enum 0-6)
+const ROOM_MANAGEMENT_STATUS = {
+  Available: 0, // Còn trống
+  Occupied: 1, // Đã có khách
+  Dirty: 2, // Cần dọn dẹp
+  OutOfService: 3, // Ngưng sử dụng
+  Reserved: 4, // Đã được đặt trước
+  Cleaning: 5, // Đang được dọn dẹp
+  Locked: 6, // Bị khóa
+} as const;
+
+const ROOM_MANAGEMENT_STATUS_LABELS: Record<number, string> = {
+  [ROOM_MANAGEMENT_STATUS.Available]: "Còn trống",
+  [ROOM_MANAGEMENT_STATUS.Occupied]: "Đã có khách",
+  [ROOM_MANAGEMENT_STATUS.Dirty]: "Cần dọn dẹp",
+  [ROOM_MANAGEMENT_STATUS.OutOfService]: "Ngưng sử dụng",
+  [ROOM_MANAGEMENT_STATUS.Reserved]: "Đã được đặt trước",
+  [ROOM_MANAGEMENT_STATUS.Cleaning]: "Đang được dọn dẹp",
+  [ROOM_MANAGEMENT_STATUS.Locked]: "Bị khóa",
+} as const;
+
+const ROOM_MANAGEMENT_STATUS_COLORS: Record<number, string> = {
+  [ROOM_MANAGEMENT_STATUS.Available]: "bg-green-500 text-white",
+  [ROOM_MANAGEMENT_STATUS.Occupied]: "bg-red-500 text-white",
+  [ROOM_MANAGEMENT_STATUS.Dirty]: "bg-yellow-500 text-black",
+  [ROOM_MANAGEMENT_STATUS.OutOfService]: "bg-gray-500 text-white",
+  [ROOM_MANAGEMENT_STATUS.Reserved]: "bg-blue-500 text-white",
+  [ROOM_MANAGEMENT_STATUS.Cleaning]: "bg-orange-500 text-white",
+  [ROOM_MANAGEMENT_STATUS.Locked]: "bg-purple-500 text-white",
+} as const;
+
 // Dashboard Room Types (từ data Excel)
 const DASHBOARD_ROOM_TYPES = [
   "Beach Villa",
@@ -303,4 +334,7 @@ export {
   DASHBOARD_ROOM_TYPES,
   ROOM_STATUS,
   ROOM_STATUS_COLORS,
+  ROOM_MANAGEMENT_STATUS,
+  ROOM_MANAGEMENT_STATUS_LABELS,
+  ROOM_MANAGEMENT_STATUS_COLORS,
 };

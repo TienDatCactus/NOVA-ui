@@ -13,9 +13,11 @@ import {
 } from "~/components/ui/dropdown-menu";
 import ServiceModal from "~/features/service-modal";
 import useBookingSchema from "~/services/schema/booking.schema";
-const { BookingItemSchema } = useBookingSchema();
-type BookingItem = z.infer<typeof BookingItemSchema>;
-export const ActionCell: React.FC<{ row: Row<BookingItem> }> = ({ row }) => {
+const { BookingListItemSchema } = useBookingSchema();
+type BookingListItem = z.infer<typeof BookingListItemSchema>;
+export const ActionCell: React.FC<{ row: Row<BookingListItem> }> = ({
+  row,
+}) => {
   const [open, setOpen] = useState(false);
 
   return (

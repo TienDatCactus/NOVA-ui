@@ -16,6 +16,7 @@ const Booking = {
 };
 
 const Rooms = {
+  list: "Rooms/list",
   detail: (id: string) => `Rooms/${id}/details`,
   updateStatus: "Rooms/update-status",
 };

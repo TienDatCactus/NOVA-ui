@@ -36,7 +36,7 @@ function BookingGrid({
         {Array(8)
           .fill(0)
           .map((_, index) => (
-            <div key={index} className="h-64">
+            <div key={index} className="h-32">
               <Skeleton className="h-full w-full" />
             </div>
           ))}

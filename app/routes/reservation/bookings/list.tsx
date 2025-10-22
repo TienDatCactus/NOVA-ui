@@ -9,7 +9,6 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   const { data, isPending, refetch } = useBookings();
-  console.log(data);
   const { filters, filteredBookings, handleFiltersChange, handleResetFilters } =
     useSearchBooking(data);
   return (

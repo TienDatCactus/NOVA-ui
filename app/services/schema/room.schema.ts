@@ -1,9 +1,19 @@
 import z from "zod";
-import { ROOM_TYPE } from "~/lib/constants";
+import { ROOM_TYPE, ROOM_MANAGEMENT_STATUS } from "~/lib/constants";
 
 const RoomTypeEnum = z.enum(ROOM_TYPE, {
   error: "Loại phòng không hợp lệ",
 });
+
+const RoomStatusEnum = z.union([
+  z.literal(ROOM_MANAGEMENT_STATUS.Available),
+  z.literal(ROOM_MANAGEMENT_STATUS.Occupied),
+  z.literal(ROOM_MANAGEMENT_STATUS.Dirty),
+  z.literal(ROOM_MANAGEMENT_STATUS.OutOfService),
+  z.literal(ROOM_MANAGEMENT_STATUS.Reserved),
+  z.literal(ROOM_MANAGEMENT_STATUS.Cleaning),
+  z.literal(ROOM_MANAGEMENT_STATUS.Locked),
+]);
 const SelectedRoomSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
@@ -44,6 +54,20 @@ const RoomItemSchema = z.object({
   nightlyPrice: z.number("nightlyPrice phải là number").min(0),
 });
 
+const RoomListItemSchema = z.object({
+  roomId: z.string(),
+  roomName: z.string(),
+  locked: z.boolean(),
+  status: RoomStatusEnum, // Use enum instead of string
+  roomTypeId: z.string(),
+  roomTypeCode: z.string(),
+  roomTypeName: z.string(),
+  dailyPrice: z.number().nonnegative(),
+  isOccupied: z.boolean(),
+});
+
+const RoomListResponseSchema = z.array(RoomListItemSchema);
+
 const RoomDetailSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
@@ -82,8 +106,11 @@ const useRoomSchema = () => {
     RoomSelectionSchema,
     RoomSchema,
     RoomTypeEnum,
+    RoomStatusEnum,
     RoomDetailSchema,
     UpdateRoomStatusResponseSchema,
+    RoomListResponseSchema,
+    RoomListItemSchema,
   };
 };
 export default useRoomSchema;

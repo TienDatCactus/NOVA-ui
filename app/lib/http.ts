@@ -76,8 +76,9 @@ http.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    } else {
+      toast.error("Đã có lỗi xảy ra. Vui lòng thử lại.");
     }
-
     return Promise.reject(error);
   }
 );
