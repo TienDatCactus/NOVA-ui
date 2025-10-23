@@ -7,7 +7,7 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -20,6 +20,10 @@ import { Skeleton } from "~/components/ui/skeleton";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { RoomsService } from "~/services/api/rooms";
 import RoomDetailRow from "../../fragments/rooms-detail.row";
+import useRoomDetail from "../../container/useRoomDetail";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import BookingHistoryRow from "../../fragments/booking-history.row";
+import useRoomBookingHistory from "../../container/useRoomBookingHistory";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -34,11 +38,18 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [expanded, setExpanded] = useState<any>();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [roomDetails, setRoomDetails] = useState<Record<string, any>>({});
-  const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>(
-    {}
-  );
 
+  const { isLoading: roomDetailLoading, data: roomDetailData } = useRoomDetail({
+    id: Object.keys(expanded || {})[0] as string,
+    params: {},
+    expanded,
+  });
+  const { isLoading: roomBookingHistoryLoading, data: roomBookingHistoryData } =
+    useRoomBookingHistory({
+      id: Object.keys(expanded || {})[0] as string,
+      params: {},
+      expanded,
+    });
   const table = useReactTable({
     data,
     columns,
@@ -51,42 +62,8 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getRowCanExpand: () => true,
+    getRowId: (row) => row.roomId,
   });
-
-  //   useEffect(() => {
-  //     const expandedRowIds = Object.keys(expanded).filter(
-  //       (key: any) => expanded[key]
-  //     );
-
-  //     expandedRowIds.forEach(async (rowId) => {
-  //       const row = table.getRow(rowId);
-  //       const roomId = row.original.roomId;
-
-  //       // Skip if already loading or loaded
-  //       if (loadingDetails[roomId] || roomDetails[roomId]) return;
-
-  //       setLoadingDetails((prev) => ({ ...prev, [roomId]: true }));
-
-  //       try {
-  //         const details = await RoomsService.getRoomDetails(roomId, {});
-  //         setRoomDetails((prev) => ({ ...prev, [roomId]: details }));
-  //       } catch (error) {
-  //         console.error(`Failed to load details for room ${roomId}:`, error);
-  //       } finally {
-  //         setLoadingDetails((prev) => ({ ...prev, [roomId]: false }));
-  //       }
-  //     });
-  //   }, [expanded, table]);
-
-  // Notify parent of selection changes
-  useEffect(() => {
-    if (onSelectionChange) {
-      const selectedRows = table
-        .getSelectedRowModel()
-        .rows.map((row) => row.original);
-      onSelectionChange(selectedRows);
-    }
-  }, [rowSelection, table, onSelectionChange]);
 
   return (
     <div className="rounded-md border">
@@ -112,17 +89,9 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => {
-              const roomId = row.original.roomId;
-              const isExpanded = row.getIsExpanded();
-              const isLoading = loadingDetails[roomId];
-              const details = roomDetails[roomId];
-
               return (
-                <>
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
+                <React.Fragment key={row.id}>
+                  <TableRow data-state={row.getIsSelected() && "selected"}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -132,25 +101,45 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                  {isExpanded && (
+                  {row.getIsExpanded() && (
                     <TableRow>
-                      <TableCell colSpan={columns.length} className="p-0">
-                        {isLoading ? (
-                          <div className="p-4 space-y-2">
-                            <Skeleton className="h-20 w-full" />
-                            <Skeleton className="h-20 w-full" />
-                          </div>
-                        ) : details ? (
-                          <RoomDetailRow roomDetail={details} />
-                        ) : (
-                          <div className="p-4 text-center text-muted-foreground">
-                            Không thể tải thông tin chi tiết
-                          </div>
-                        )}
+                      <TableCell colSpan={columns.length} className="p-2">
+                        <Tabs defaultValue="detail">
+                          <TabsList>
+                            <TabsTrigger value="detail">Chi tiết</TabsTrigger>
+                            <TabsTrigger value="booking-history">
+                              Lịch sử đặt phòng
+                            </TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="detail">
+                            {roomDetailData ? (
+                              <RoomDetailRow
+                                roomDetail={roomDetailData}
+                                isLoading={roomDetailLoading}
+                              />
+                            ) : (
+                              <p className="text-center text-sm italic ">
+                                Không có thông tin
+                              </p>
+                            )}
+                          </TabsContent>
+                          <TabsContent value="booking-history">
+                            {roomBookingHistoryData ? (
+                              <BookingHistoryRow
+                                bookings={roomBookingHistoryData}
+                                isLoading={roomBookingHistoryLoading}
+                              />
+                            ) : (
+                              <p className="text-center text-sm italic ">
+                                Không có thông tin
+                              </p>
+                            )}
+                          </TabsContent>
+                        </Tabs>
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </React.Fragment>
               );
             })
           ) : (

@@ -1,5 +1,5 @@
 import { Trash2, Edit } from "lucide-react";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -58,7 +58,7 @@ function BulkActionsToolbar({
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 border-b bg-muted/50">
+    <div className="flex items-center gap-4 p-4 border-b-2 border-primary bg-muted/50">
       <div className="flex-1">
         <p className="text-sm font-medium">
           Đã chọn <span className="text-primary">{selectedRooms.length}</span>{" "}
@@ -67,7 +67,6 @@ function BulkActionsToolbar({
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Bulk Status Change */}
         <div className="flex items-center gap-2">
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="w-[200px]">
@@ -112,7 +111,7 @@ function BulkActionsToolbar({
               <AlertDialogCancel>Hủy</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleBulkDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className={buttonVariants()}
               >
                 Xóa
               </AlertDialogAction>
@@ -120,7 +119,6 @@ function BulkActionsToolbar({
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Clear Selection */}
         <Button variant="ghost" size="sm" onClick={onClearSelection}>
           Bỏ chọn
         </Button>

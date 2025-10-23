@@ -1,13 +1,14 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useForm } from "react-hook-form";
+import type z from "zod";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "~/components/ui/dialog";
 import {
   Form,
@@ -18,7 +19,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -26,55 +26,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Checkbox } from "~/components/ui/checkbox";
-import { Label } from "~/components/ui/label";
 import {
-  ROOM_TYPE,
   ROOM_MANAGEMENT_STATUS,
   ROOM_MANAGEMENT_STATUS_LABELS,
 } from "~/lib/constants";
 import useRoomSchema from "~/services/schema/room.schema";
 
-const { RoomStatusEnum } = useRoomSchema();
+const { CreateRoomResponseSchema } = useRoomSchema();
 
-// Create Room Schema - All fields required
-const CreateRoomSchema = z.object({
-  roomName: z.string().min(1, "Tên phòng là bắt buộc"),
-  roomTypeId: z.string().min(1, "Loại phòng là bắt buộc"),
-  dailyPrice: z.coerce
-    .number("Giá phòng là bắt buộc")
-    .min(0, "Giá phòng phải >= 0"),
-  status: z.coerce
-    .number("Trạng thái là bắt buộc")
-    .int()
-    .min(0)
-    .max(6, "Trạng thái không hợp lệ"),
-  locked: z.boolean().default(false),
+const CreateRoomFormSchema = CreateRoomResponseSchema.pick({
+  roomName: true,
+  roomTypeId: true,
+  status: true,
 });
 
-type CreateRoomFormData = z.infer<typeof CreateRoomSchema>;
+type CreateRoomFormData = z.infer<typeof CreateRoomFormSchema>;
 
 interface CreateRoomDialogProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: CreateRoomFormData) => void;
-  isLoading?: boolean;
 }
 
-function CreateRoomDialog({
-  open,
-  onClose,
-  onSubmit,
-  isLoading = false,
-}: CreateRoomDialogProps) {
+function CreateRoomDialog({ open, onClose, onSubmit }: CreateRoomDialogProps) {
   const form = useForm<CreateRoomFormData>({
-    // resolver: zodResolver(CreateRoomSchema),
+    resolver: zodResolver(CreateRoomFormSchema),
     defaultValues: {
       roomName: "",
       roomTypeId: "",
-      dailyPrice: 0,
-      status: ROOM_MANAGEMENT_STATUS.Available,
-      locked: false,
+      status: ROOM_MANAGEMENT_STATUS.Available.toString(),
     },
   });
 
@@ -124,7 +104,7 @@ function CreateRoomDialog({
               )}
             />
 
-            {/* Room Type */}
+            {/* Room Type - From API */}
             <FormField
               control={form.control}
               name="roomTypeId"
@@ -143,37 +123,16 @@ function CreateRoomDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {ROOM_TYPE.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
+                      {roomTypes.map((type) => (
+                        <SelectItem
+                          key={type.roomTypeId}
+                          value={type.roomTypeId}
+                        >
+                          {type.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Daily Price */}
-            <FormField
-              control={form.control}
-              name="dailyPrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Giá phòng/đêm (VND){" "}
-                    <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="VD: 500000"
-                      min={0}
-                      step={10000}
-                      {...field}
-                    />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -188,10 +147,7 @@ function CreateRoomDialog({
                   <FormLabel>
                     Trạng thái <span className="text-destructive">*</span>
                   </FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value?.toString()}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn trạng thái" />
@@ -208,28 +164,6 @@ function CreateRoomDialog({
                     </SelectContent>
                   </Select>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Locked */}
-            <FormField
-              control={form.control}
-              name="locked"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Khóa phòng</FormLabel>
-                    <p className="text-sm text-muted-foreground">
-                      Phòng bị khóa sẽ không thể đặt được
-                    </p>
-                  </div>
                 </FormItem>
               )}
             />

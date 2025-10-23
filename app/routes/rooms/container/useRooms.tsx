@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { RoomsService } from "~/services/api/rooms";
+import type { RoomListParams } from "~/services/types/room.types";
 
-function useRooms() {
+function useRooms(params?: RoomListParams) {
   return useQuery({
-    queryKey: ["rooms"],
-    queryFn: async () => await RoomsService.getRoomList(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 30000, // Poll every 30 seconds for real-time updates
+    queryKey: ["rooms", params],
+    queryFn: async () => await RoomsService.getRoomList(params || {}),
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: false,

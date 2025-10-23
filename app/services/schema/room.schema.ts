@@ -71,28 +71,23 @@ const RoomListResponseSchema = z.array(RoomListItemSchema);
 const RoomDetailSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
-  status: z.string(),
-  locked: z.boolean(),
   roomTypeId: z.string(),
-  roomTypeCode: z.string(),
   roomTypeName: z.string(),
-  dailyPrice: z.number().nonnegative(),
-  isOccupiedToday: z.boolean(),
-  currentFrom: z.string(),
-  currentTo: z.string(),
-  hasBreakfastToday: z.boolean(),
-  recentBookings: z.array(
-    z.object({
-      bookingRoomId: z.string(),
-      bookingId: z.string(),
-      fromDate: z.string(),
-      toDate: z.string(),
-      anyBreakfast: z.boolean(),
-      breakfastDaysCount: z.number().int().min(0),
-      note: z.string().optional(),
-    })
-  ),
+  dailyPrice: z.number().min(0),
+  status: z.string(),
 });
+const RoomBookingHistorySchema = z.object({
+  bookingRoomId: z.string(),
+  bookingId: z.string(),
+  fromDate: z.string(),
+  toDate: z.string(),
+  anyBreakfast: z.boolean(),
+  breakfastDaysCount: z.number().min(0),
+  note: z.string().optional().nullable(),
+});
+
+const RoomBookingHistoryResponseSchema = z.array(RoomBookingHistorySchema);
+
 const UpdateRoomStatusResponseSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
@@ -100,6 +95,26 @@ const UpdateRoomStatusResponseSchema = z.object({
   newStatus: z.string(),
   updatedAt: z.string(),
 });
+
+const CreateRoomResponseSchema = z.object({
+  roomId: z.string(),
+  roomName: z.string(),
+  roomTypeId: z.string(),
+  roomTypeName: z.string(),
+  dailyPrice: z.number().min(0),
+  status: z.string(),
+  createdAt: z.string(),
+});
+
+const UpdateRoomDetailResponseSchema = z.object({
+  roomId: z.string(),
+  roomName: z.string(),
+  roomTypeId: z.string(),
+  roomTypeName: z.string(),
+  dailyPrice: z.number().min(0),
+  status: z.string(),
+});
+
 const useRoomSchema = () => {
   return {
     RoomItemSchema,
@@ -111,6 +126,10 @@ const useRoomSchema = () => {
     UpdateRoomStatusResponseSchema,
     RoomListResponseSchema,
     RoomListItemSchema,
+    RoomBookingHistorySchema,
+    RoomBookingHistoryResponseSchema,
+    CreateRoomResponseSchema,
+    UpdateRoomDetailResponseSchema,
   };
 };
 export default useRoomSchema;
