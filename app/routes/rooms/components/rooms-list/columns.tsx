@@ -1,24 +1,16 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import {
-  ChevronDown,
-  ChevronRight,
-  EllipsisVertical,
-  Lock,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Lock } from "lucide-react";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+
 import { ROOM_MANAGEMENT_STATUS_COLORS } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
 import useRoomSchema from "~/services/schema/room.schema";
+import { RoomStatus } from "~/services/types/room.types";
+import RoomActionsCell from "../../fragments/room-actions.cell";
+import RoomStatusCell from "../../fragments/room-status.cell";
 
 const { RoomListItemSchema } = useRoomSchema();
 type RoomListItem = z.infer<typeof RoomListItemSchema>;
@@ -63,7 +55,7 @@ export const columns: ColumnDef<RoomListItem>[] = [
       return (
         <div className="flex items-center gap-2">
           <span className="font-semibold">{row.original.roomName}</span>
-          {!row.original.locked && <Lock className="h-3 w-3 text-purple-500" />}
+          {row.original.locked && <Lock className="h-3 w-3 text-red-500" />}
           {row.getCanExpand() && (
             <Button
               variant="ghost"
@@ -99,9 +91,7 @@ export const columns: ColumnDef<RoomListItem>[] = [
     accessorKey: "status",
     header: "Trạng thái",
     cell: ({ row }) => {
-      const status = row.original.status;
-      const colorClass = ROOM_MANAGEMENT_STATUS_COLORS[status];
-      return <Badge className={colorClass}>{status}</Badge>;
+      return <RoomStatusCell room={row.original} />;
     },
   },
   {
@@ -132,26 +122,11 @@ export const columns: ColumnDef<RoomListItem>[] = [
   },
   {
     id: "actions",
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <EllipsisVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem>Make a copy</DropdownMenuItem>
-          <DropdownMenuItem>Favorite</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    header: () => null,
+    cell: ({ row }) => {
+      return <RoomActionsCell room={row.original} />;
+    },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

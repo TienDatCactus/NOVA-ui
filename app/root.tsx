@@ -52,7 +52,7 @@ export default function App() {
   const isNavigating = Boolean(navigation.location);
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" /> */}
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       {isNavigating && (
         <div className="absolute inset-0 flex items-center justify-center z-50 bg-white">
           <GlobalLoader />

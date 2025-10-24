@@ -10,6 +10,8 @@ import BulkActionsToolbar from "./fragments/bulk-action.dialog";
 // import CreateRoomDialog from "./fragments/create-room.dialog";
 import RoomsHeader from "./fragments/rooms-header.layout";
 import CreateRoomDialog from "./fragments/create-room.dialog";
+import useRoomTypes from "./container/useRoomTypes";
+import useCreateRoom from "./container/useCreateRoom";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -24,28 +26,15 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   const { data: rooms, isPending, refetch } = useRooms();
+  const { data: roomTypes } = useRoomTypes();
   const { filters, updateFilter, resetFilters, filterRooms } = useRoomFilters();
   const [selectedRooms, setSelectedRooms] = useState<RoomListItemDto[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  // Filter rooms based on current filters
   const filteredRooms = rooms ? filterRooms(rooms) : [];
 
-  const handleAddRoom = () => {
+  const handleOpenAddRoomDialog = () => {
     setCreateDialogOpen(true);
-  };
-
-  const handleCreateRoom = async (data: any) => {
-    try {
-      // TODO: Call API to create room
-      console.log("Creating room:", data);
-      toast.success("Phòng đã được thêm thành công");
-      setCreateDialogOpen(false);
-      refetch();
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi thêm phòng");
-      console.error(error);
-    }
   };
 
   const handleBulkDelete = async (roomIds: string[]) => {
@@ -66,7 +55,6 @@ export default function Component({
     newStatus: number
   ) => {
     try {
-      // TODO: Call API to update room status
       console.log("Updating room status:", { roomIds, newStatus });
       toast.success(`Đã cập nhật trạng thái cho ${roomIds.length} phòng`);
       setSelectedRooms([]);
@@ -89,7 +77,7 @@ export default function Component({
     >
       <RoomsHeader
         totalRooms={filteredRooms.length}
-        onAddRoom={handleAddRoom}
+        onAddRoom={handleOpenAddRoomDialog}
       />
 
       <BulkActionsToolbar
@@ -102,14 +90,14 @@ export default function Component({
       <RoomsDataTable
         rooms={filteredRooms}
         isLoading={isPending}
-        onAddRoom={handleAddRoom}
+        onAddRoom={handleOpenAddRoomDialog}
         onSelectionChange={setSelectedRooms}
       />
 
       <CreateRoomDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-        onSubmit={handleCreateRoom}
+        roomTypes={roomTypes}
       />
     </RoomsViewLayout>
   );
