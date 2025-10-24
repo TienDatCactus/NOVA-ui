@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
 import {
@@ -30,10 +30,12 @@ import {
   ROOM_MANAGEMENT_STATUS,
   ROOM_MANAGEMENT_STATUS_LABELS,
 } from "~/lib/constants";
+import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
+import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import useRoomSchema from "~/services/schema/room.schema";
+import useCreateRoom from "../container/useCreateRoom";
 
 const { CreateRoomResponseSchema } = useRoomSchema();
-
 const CreateRoomFormSchema = CreateRoomResponseSchema.pick({
   roomName: true,
   roomTypeId: true,
@@ -45,10 +47,15 @@ type CreateRoomFormData = z.infer<typeof CreateRoomFormSchema>;
 interface CreateRoomDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateRoomFormData) => void;
+  roomTypes?: RoomTypesListResponseDto;
 }
 
-function CreateRoomDialog({ open, onClose, onSubmit }: CreateRoomDialogProps) {
+function CreateRoomDialog({
+  open,
+  onClose,
+
+  roomTypes,
+}: CreateRoomDialogProps) {
   const form = useForm<CreateRoomFormData>({
     resolver: zodResolver(CreateRoomFormSchema),
     defaultValues: {
@@ -57,9 +64,10 @@ function CreateRoomDialog({ open, onClose, onSubmit }: CreateRoomDialogProps) {
       status: ROOM_MANAGEMENT_STATUS.Available.toString(),
     },
   });
+  const { mutate, isPending } = useCreateRoom();
 
-  const handleSubmit = (data: CreateRoomFormData) => {
-    onSubmit(data);
+  const handleSubmit: SubmitHandler<CreateRoomFormData> = (data) => {
+    mutate(data);
     form.reset();
   };
 
@@ -84,7 +92,6 @@ function CreateRoomDialog({ open, onClose, onSubmit }: CreateRoomDialogProps) {
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"
           >
-            {/* Room Name */}
             <FormField
               control={form.control}
               name="roomName"
@@ -104,81 +111,78 @@ function CreateRoomDialog({ open, onClose, onSubmit }: CreateRoomDialogProps) {
               )}
             />
 
-            {/* Room Type - From API */}
-            <FormField
-              control={form.control}
-              name="roomTypeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Loại phòng <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn loại phòng" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {roomTypes.map((type) => (
-                        <SelectItem
-                          key={type.roomTypeId}
-                          value={type.roomTypeId}
-                        >
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Status */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Trạng thái <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn trạng thái" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.entries(ROOM_MANAGEMENT_STATUS).map(
-                        ([key, value]) => (
-                          <SelectItem key={value} value={value.toString()}>
-                            {ROOM_MANAGEMENT_STATUS_LABELS[value]}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="roomTypeId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Loại phòng <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Chọn loại phòng" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {roomTypes?.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {type.name}
                           </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
+              {/* Status */}
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Trạng thái <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Chọn trạng thái" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.entries(ROOM_MANAGEMENT_STATUS).map(
+                          ([key, value]) => (
+                            <SelectItem key={value} value={value.toString()}>
+                              {ROOM_MANAGEMENT_STATUS_LABELS[value]}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                disabled={isLoading}
+                disabled={isPending}
               >
                 Hủy
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Đang thêm..." : "Thêm phòng"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Đang thêm..." : "Thêm phòng"}
               </Button>
             </DialogFooter>
           </form>

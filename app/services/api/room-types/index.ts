@@ -17,11 +17,11 @@ const {
 } = useRoomTypesSchema();
 
 async function getRoomTypesList(
-  params: RoomTypesListParams
+  params?: RoomTypesListParams
 ): Promise<RoomTypesListResponseDto> {
   try {
     const resp = await http.get(RoomTypes.list, { params });
-    return RoomTypesListResponseSchema.parse(resp);
+    return RoomTypesListResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -33,7 +33,7 @@ async function getRoomTypesDetail(
 ): Promise<RoomTypesDetailResponseDto> {
   try {
     const resp = await http.get(RoomTypes.detail(id));
-    return RoomTypesDetailResponseSchema.parse(resp);
+    return RoomTypesDetailResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -51,7 +51,7 @@ async function updateRoomTypesDetail(
 ): Promise<UpdateRoomTypesDetailResponseDto> {
   try {
     const resp = await http.patch(RoomTypes.detail(id), data);
-    return UpdateRoomTypesDetailResponseSchema.parse(resp);
+    return UpdateRoomTypesDetailResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -66,7 +66,7 @@ async function createRoomTypes(data: {
 }): Promise<CreateRoomTypesResponseDto> {
   try {
     const resp = await http.post(RoomTypes.create, data);
-    return CreateRoomTypesResponseSchema.parse(resp);
+    return CreateRoomTypesResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

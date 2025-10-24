@@ -3,18 +3,13 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { toast } from "sonner";
-import { success } from "zod";
 import { AuthService } from "~/services/api/auth";
 import STORAGE, { clearStorage, getStorage, setStorage } from "./storage";
 
 const parseBody = (response: AxiosResponse) => {
   const { message } = response.data;
   if (message) {
-    if (!success) {
-      toast.error(message || "Có lỗi xảy ra. Vui lòng thử lại.");
-    } else {
-      toast.success(message);
-    }
+    toast.success(message);
   }
   return response.data;
 };
@@ -49,6 +44,7 @@ http.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
+    const message = error.response?.data.message;
     if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -77,7 +73,7 @@ http.interceptors.response.use(
         isRefreshing = false;
       }
     } else {
-      toast.error("Đã có lỗi xảy ra. Vui lòng thử lại.");
+      toast.error(message);
     }
     return Promise.reject(error);
   }
