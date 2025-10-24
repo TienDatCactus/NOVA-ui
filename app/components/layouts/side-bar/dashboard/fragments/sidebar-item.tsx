@@ -59,7 +59,7 @@ function SidebarItemList({
       )}
     >
       {items.map((item) => (
-        <li key={item.id}>{renderItem(item, item.href == curPath)}</li>
+        <li key={item.id}>{renderItem(item, curPath.includes(item.href))}</li>
       ))}
       <li>
         <div

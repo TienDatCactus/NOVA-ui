@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import type z from "zod";
 import useBookingSchema from "~/services/schema/booking.schema";
+import useRoomSchema from "~/services/schema/room.schema";
 import type { Room } from "~/services/types/booking.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
-const { RoomSchema } = useBookingSchema();
 const AVAILABLE_ROOMS: Room[] = [
   {
     roomId: "R001",
@@ -109,7 +109,7 @@ function useRoomSelection({
     return formData.roomSelection?.selectedBreakfastDates?.length! > 0;
   });
   const [open, setOpen] = useState(false);
-  const { SelectedRoomSchema } = useBookingSchema();
+  const { SelectedRoomSchema } = useRoomSchema();
   const dateRange =
     formData.customerInfo?.checkIn && formData.customerInfo?.checkOut
       ? eachDayOfInterval({
