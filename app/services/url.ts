@@ -16,9 +16,19 @@ const Booking = {
 };
 
 const Rooms = {
-  list: "Rooms/list",
-  detail: (id: string) => `Rooms/${id}/details`,
+  detail: (id: string) => `Rooms/${id}/details-basic`,
+  bookingHistory: (id: string) => `Rooms/${id}/booking-history`,
   updateStatus: "Rooms/update-status",
+  list: "Rooms/list",
+  create: "Rooms",
+  update: (id: string) => `Rooms/${id}`,
+};
+
+const RoomTypes = {
+  list: "RoomTypes/list",
+  detail: (id: string) => `RoomTypes/${id}`,
+  update: (id: string) => `RoomTypes/${id}`,
+  create: "RoomTypes",
 };
 const Menu = {
   list: "Menu/list",
@@ -27,4 +37,4 @@ const Menu = {
 const Service = {
   list: "Service/list",
 };
-export { Auth, Booking, Menu, Service, Rooms };
+export { Auth, Booking, Menu, Service, Rooms, RoomTypes };

@@ -1,14 +1,22 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Lock, Check, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  EllipsisVertical,
+  Lock,
+} from "lucide-react";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import { Label } from "~/components/ui/label";
 import {
-  ROOM_MANAGEMENT_STATUS_LABELS,
-  ROOM_MANAGEMENT_STATUS_COLORS,
-} from "~/lib/constants";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { ROOM_MANAGEMENT_STATUS_COLORS } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
 import useRoomSchema from "~/services/schema/room.schema";
 
@@ -55,7 +63,20 @@ export const columns: ColumnDef<RoomListItem>[] = [
       return (
         <div className="flex items-center gap-2">
           <span className="font-semibold">{row.original.roomName}</span>
-          {row.original.locked && <Lock className="h-3 w-3 text-purple-500" />}
+          {!row.original.locked && <Lock className="h-3 w-3 text-purple-500" />}
+          {row.getCanExpand() && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => row.toggleExpanded()}
+            >
+              {row.getIsExpanded() ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </Button>
+          )}
         </div>
       );
     },
@@ -65,7 +86,7 @@ export const columns: ColumnDef<RoomListItem>[] = [
     header: "Loại phòng",
     cell: ({ row }) => {
       return (
-        <div className="space-y-1">
+        <div className="space-y-1 w-40">
           <p className="font-medium">{row.original.roomTypeName}</p>
           <p className="text-xs text-muted-foreground">
             {row.original.roomTypeCode}
@@ -78,33 +99,59 @@ export const columns: ColumnDef<RoomListItem>[] = [
     accessorKey: "status",
     header: "Trạng thái",
     cell: ({ row }) => {
-      const status: string = row.original.status;
-      const label = ROOM_MANAGEMENT_STATUS_LABELS[status];
+      const status = row.original.status;
       const colorClass = ROOM_MANAGEMENT_STATUS_COLORS[status];
-
-      return <Badge className={colorClass}>{label}</Badge>;
+      return <Badge className={colorClass}>{status}</Badge>;
     },
   },
   {
     accessorKey: "dailyPrice",
-    header: "Giá/đêm",
+    header: () => <p className="text-end">Giá/đêm</p>,
     cell: ({ row }) => {
       return (
-        <span className="font-semibold">
+        <pre className="font-semibold text-end">
           {formatMoney(row.original.dailyPrice).vndFormatted}
-        </span>
+        </pre>
       );
     },
   },
   {
     accessorKey: "isOccupied",
-    header: "Đang sử dụng",
+    header: () => <p className="text-center">Tình trạng phòng</p>,
     cell: ({ row }) => {
-      return row.original.isOccupied ? (
-        <Badge variant={"success"}>Đang sử dụng</Badge>
-      ) : (
-        <Badge variant={"info"}>Trống</Badge>
+      return (
+        <div className="flex justify-center">
+          {row.original.isOccupied ? (
+            <Badge variant={"success"}>Đang sử dụng</Badge>
+          ) : (
+            <Badge variant={"info"}>Trống</Badge>
+          )}
+        </div>
       );
     },
+  },
+  {
+    id: "actions",
+    cell: () => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+            size="icon"
+          >
+            <EllipsisVertical />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-32">
+          <DropdownMenuItem>Edit</DropdownMenuItem>
+          <DropdownMenuItem>Make a copy</DropdownMenuItem>
+          <DropdownMenuItem>Favorite</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
   },
 ];
