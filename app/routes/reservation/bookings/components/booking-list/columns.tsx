@@ -5,7 +5,7 @@ import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import useBookingSchema from "~/services/schema/booking.schema";
 import { ActionCell } from "../../fragments/action-cell.list";
-import BookingDetailDialog from "../../fragments/booking-detail.dialog";
+import BookingDetailDialog from "../booking-detail.dialog";
 const { BookingListItemSchema } = useBookingSchema();
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [

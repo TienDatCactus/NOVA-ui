@@ -19,11 +19,13 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { RoomsService } from "~/services/api/rooms";
-import RoomDetailRow from "../../fragments/rooms-detail.row";
-import useRoomDetail from "../../container/useRoomDetail";
+import RoomDetailRow from "../../fragments/rooms/rooms-detail.row";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import BookingHistoryRow from "../../fragments/booking-history.row";
-import useRoomBookingHistory from "../../container/useRoomBookingHistory";
+import BookingHistoryRow from "../../fragments/rooms/booking-history.row";
+import {
+  useRoomDetail,
+  useRoomBookingHistory,
+} from "../../container/useRoomQuery";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

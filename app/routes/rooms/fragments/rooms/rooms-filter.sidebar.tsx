@@ -11,7 +11,7 @@ import {
   ROOM_TYPE,
 } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
-import type { RoomFilters } from "../container/useRoomFilter";
+import type { RoomFilters } from "../../container/useRoomFilter";
 
 interface RoomsFilterSidebarProps {
   filters: RoomFilters;

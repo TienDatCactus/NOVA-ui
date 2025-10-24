@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { BOOKING_CHANNEL, ROOM_TYPE } from "~/lib/constants";
+import { BOOKING_CHANNEL } from "~/lib/constants";
 
 export interface BookingSearchFilters {
   searchText: string;

@@ -14,17 +14,18 @@ import {
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import CreateBookingDialog from "~/features/create-booking";
-import RoomCard from "../fragments/room-card.grid";
-const { BookingListByWeekResponseSchema } = useBookingSchema();
-type BookingItem = z.infer<typeof BookingListByWeekResponseSchema>;
+import RoomCard from "../fragments/room.card";
+import useRoomSchema from "~/services/schema/room.schema";
+const { RoomListResponseSchema } = useRoomSchema();
+type RoomList = z.infer<typeof RoomListResponseSchema>;
 interface BookingGridProps {
-  bookings?: BookingItem;
+  rooms?: RoomList;
   isLoading?: boolean;
   refetch: () => void;
 }
 
 function BookingGrid({
-  bookings = [],
+  rooms = [],
   isLoading = false,
   refetch,
 }: BookingGridProps) {
@@ -44,7 +45,7 @@ function BookingGrid({
     );
   }
 
-  if (bookings.length === 0) {
+  if (rooms.length === 0) {
     return (
       <Empty>
         <EmptyHeader>
@@ -82,8 +83,8 @@ function BookingGrid({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ">
-      {bookings.map((booking) => (
-        <RoomCard key={booking.roomId} booking={booking} />
+      {rooms.map((room) => (
+        <RoomCard key={room.roomId} room={room} />
       ))}
     </div>
   );

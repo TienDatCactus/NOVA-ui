@@ -3,15 +3,14 @@ import { toast } from "sonner";
 import type { Route } from "./+types/rooms";
 import RoomsViewLayout from "./layouts/rooms-view.layout";
 import RoomsDataTable from "./components/rooms-list";
-import useRooms from "./container/useRooms";
 import useRoomFilters from "./container/useRoomFilter";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import BulkActionsToolbar from "./fragments/bulk-action.dialog";
+import BulkActionsToolbar from "./fragments/room-types/rooms-bulk-action.dialog";
 // import CreateRoomDialog from "./fragments/create-room.dialog";
-import RoomsHeader from "./fragments/rooms-header.layout";
-import CreateRoomDialog from "./fragments/create-room.dialog";
-import useRoomTypes from "./container/useRoomTypes";
-import useCreateRoom from "./container/useCreateRoom";
+import RoomsHeader from "./fragments/rooms/rooms-header.layout";
+import CreateRoomDialog from "./fragments/rooms/create-room.dialog";
+import { useRooms } from "./container/useRoomQuery";
+import { useRoomTypes } from "./container/useRoomTypesQuery";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -32,10 +31,6 @@ export default function Component({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const filteredRooms = rooms ? filterRooms(rooms) : [];
-
-  const handleOpenAddRoomDialog = () => {
-    setCreateDialogOpen(true);
-  };
 
   const handleBulkDelete = async (roomIds: string[]) => {
     try {
@@ -74,12 +69,9 @@ export default function Component({
       filters={filters}
       onFilterChange={updateFilter}
       onResetFilters={resetFilters}
+      totalRooms={filteredRooms.length}
+      onAddRoom={() => setCreateDialogOpen(true)}
     >
-      <RoomsHeader
-        totalRooms={filteredRooms.length}
-        onAddRoom={handleOpenAddRoomDialog}
-      />
-
       <BulkActionsToolbar
         selectedRooms={selectedRooms}
         onBulkDelete={handleBulkDelete}
@@ -90,7 +82,7 @@ export default function Component({
       <RoomsDataTable
         rooms={filteredRooms}
         isLoading={isPending}
-        onAddRoom={handleOpenAddRoomDialog}
+        onAddRoom={() => setCreateDialogOpen(true)}
         onSelectionChange={setSelectedRooms}
       />
 

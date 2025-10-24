@@ -7,9 +7,13 @@ import { AuthService } from "~/services/api/auth";
 import STORAGE, { clearStorage, getStorage, setStorage } from "./storage";
 
 const parseBody = (response: AxiosResponse) => {
-  const { message } = response.data;
+  const { message, success } = response.data;
   if (message) {
-    toast.success(message);
+    if (success) {
+      toast.success(message);
+    } else {
+      toast.error(message);
+    }
   }
   return response.data;
 };
@@ -73,7 +77,7 @@ http.interceptors.response.use(
         isRefreshing = false;
       }
     } else {
-      toast.error(message);
+      toast.error(message || "Đã có lỗi xảy ra. Vui lòng thử lại.");
     }
     return Promise.reject(error);
   }
