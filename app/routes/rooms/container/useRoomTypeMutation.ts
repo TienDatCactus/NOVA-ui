@@ -14,10 +14,6 @@ export function useCreateRoomType() {
     }) => RoomTypesService.createRoomTypes(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room-types"] });
-      toast.success("Tạo hạng phòng thành công");
-    },
-    onError: (error) => {
-      console.error("Create room type error:", error);
     },
   });
 }
@@ -35,10 +31,6 @@ export function useUpdateRoomType() {
     }) => RoomTypesService.updateRoomTypesDetail(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room-types"] });
-      toast.success("Cập nhật hạng phòng thành công");
-    },
-    onError: (error) => {
-      console.error("Update room type error:", error);
     },
   });
 }

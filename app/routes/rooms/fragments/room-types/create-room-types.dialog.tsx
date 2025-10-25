@@ -54,6 +54,7 @@ export function CreateRoomTypeDialog({
   const handleSubmit = (data: CreateRoomTypeFormData) => {
     mutate(data);
     form.reset();
+    onClose();
   };
   const handleClose = () => {
     form.reset();

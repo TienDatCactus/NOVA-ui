@@ -111,7 +111,7 @@ export function UpdateRoomTypeSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="sm:max-w-[500px] overflow-y-auto">
+        <SheetContent className="sm:max-w-[500px] px-4 overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Chỉnh sửa hạng phòng</SheetTitle>
             <SheetDescription>
@@ -119,7 +119,7 @@ export function UpdateRoomTypeSheet({
             </SheetDescription>
           </SheetHeader>
 
-          <div className="mt-6 space-y-4">
+          <div className="space-y-4">
             {roomType && (
               <div className="rounded-lg border p-4 space-y-2 bg-muted/50">
                 <div className="flex items-center justify-between">
