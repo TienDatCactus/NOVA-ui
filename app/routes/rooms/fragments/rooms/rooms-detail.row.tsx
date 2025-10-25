@@ -1,21 +1,11 @@
-import { BedDouble, DollarSign, FileText } from "lucide-react";
+import { DollarSign, FileText } from "lucide-react";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyContent,
-} from "~/components/ui/empty";
 import Image from "~/components/ui/image";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
-import type { RoomDetailResponseDto } from "~/services/api/rooms/dto";
 import useRoomSchema from "~/services/schema/room.schema";
 const { RoomDetailSchema } = useRoomSchema();
 interface RoomDetailRowProps {

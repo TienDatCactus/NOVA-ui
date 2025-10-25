@@ -1,5 +1,5 @@
 import useBookingSchema from "~/services/schema/booking.schema";
-import type { BookingSearchFilters } from "../fragments/search";
+import type { BookingSearchFilters } from "../components/search";
 import { useState } from "react";
 import type z from "zod";
 

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { RoomFilters } from "../container/useRoomFilter";
-import RoomsFilterSidebar from "../fragments/rooms-filter.sidebar";
+import RoomsFilterSidebar from "../fragments/rooms/rooms-filter.sidebar";
+import RoomsHeader from "../fragments/rooms/rooms-header.layout";
 
 interface RoomsViewLayoutProps {
   children: ReactNode;
@@ -10,6 +11,8 @@ interface RoomsViewLayoutProps {
     value: RoomFilters[K]
   ) => void;
   onResetFilters: () => void;
+  totalRooms: number;
+  onAddRoom: () => void;
 }
 
 function RoomsViewLayout({
@@ -17,6 +20,8 @@ function RoomsViewLayout({
   filters,
   onFilterChange,
   onResetFilters,
+  totalRooms,
+  onAddRoom,
 }: RoomsViewLayoutProps) {
   return (
     <div className="flex gap-6">
@@ -25,7 +30,10 @@ function RoomsViewLayout({
         onFilterChange={onFilterChange}
         onResetFilters={onResetFilters}
       />
-      <main className="flex-1 space-y-4">{children}</main>
+      <main className="flex-1 space-y-4">
+        <RoomsHeader totalRooms={totalRooms} onAddRoom={onAddRoom} />
+        {children}
+      </main>
     </div>
   );
 }

@@ -14,7 +14,6 @@ import {
   Clock,
   Receipt,
 } from "lucide-react";
-import useBookingDetail from "../container/useBookingDetail";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import {
@@ -36,6 +35,7 @@ import { Separator } from "~/components/ui/separator";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
+import { useBookingDetail } from "../container/useBookingQuery";
 
 function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
   const [open, setOpen] = useState(false);

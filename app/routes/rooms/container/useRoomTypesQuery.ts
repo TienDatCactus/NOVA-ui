@@ -9,4 +9,4 @@ function useRoomTypes(params?: RoomTypesListParams) {
     staleTime: 10 * 60 * 1000,
   });
 }
-export default useRoomTypes;
+export { useRoomTypes };
