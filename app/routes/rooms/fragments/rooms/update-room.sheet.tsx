@@ -1,7 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
+import { AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -13,6 +24,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -29,28 +41,13 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
-import {
   ROOM_MANAGEMENT_STATUS,
   ROOM_MANAGEMENT_STATUS_LABELS,
 } from "~/lib/constants";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
-import useUpdateRoom from "../container/useUpdateRoom";
-import { useEffect, useState } from "react";
-import useRoomTypes from "../container/useRoomTypes";
-import { Label } from "~/components/ui/label";
-import { AlertCircle } from "lucide-react";
+import { useUpdateRoom } from "../../container/useRoomMutation";
+import { useRoomTypes } from "../../container/useRoomTypesQuery";
 
-// Schema matching updateRoomDetail API
 const UpdateRoomFormSchema = z.object({
   roomName: z.string().min(1, "Tên phòng là bắt buộc"),
   roomTypeId: z.string().min(1, "Loại phòng là bắt buộc"),

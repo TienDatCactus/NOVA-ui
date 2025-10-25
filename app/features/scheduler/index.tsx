@@ -1,23 +1,13 @@
 // RoomWeekScheduler_shadcnStyle.tsx
-import {
-  addDays,
-  addMinutes,
-  format,
-  isToday,
-  parseISO,
-  startOfDay,
-  startOfMinute,
-} from "date-fns";
+import { addDays, addMinutes, format, parseISO, startOfMinute } from "date-fns";
 import {
   ArrowLeft,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
   Dot,
-  TriangleAlert,
-  UserStar,
 } from "lucide-react";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -36,8 +26,8 @@ import {
   parseDateYMD,
   startOfLocalDay,
 } from "~/lib/utils";
+import { useBookingRoomsWeek } from "~/routes/reservation/bookings/container/useBookingQuery";
 import useBookingSchema from "~/services/schema/booking.schema";
-import useBookingRoomsWeek from "~/routes/reservation/bookings/container/useBookingRoomsWeek";
 
 // Use API schema types directly - no normalization
 const { BookingItemByWeekSchema } = useBookingSchema();
@@ -117,7 +107,6 @@ export default function RoomWeekScheduler() {
   );
   const [now, setNow] = useState<Date>(new Date());
 
-  // Fetch booking data from API
   const {
     data: roomsData,
     isPending,

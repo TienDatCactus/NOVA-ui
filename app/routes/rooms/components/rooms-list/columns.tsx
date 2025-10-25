@@ -5,12 +5,10 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 
-import { ROOM_MANAGEMENT_STATUS_COLORS } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
 import useRoomSchema from "~/services/schema/room.schema";
-import { RoomStatus } from "~/services/types/room.types";
-import RoomActionsCell from "../../fragments/room-actions.cell";
-import RoomStatusCell from "../../fragments/room-status.cell";
+import RoomActionsCell from "../../fragments/rooms/room-actions.cell";
+import RoomStatusCell from "../../fragments/rooms/room-status.cell";
 
 const { RoomListItemSchema } = useRoomSchema();
 type RoomListItem = z.infer<typeof RoomListItemSchema>;
@@ -40,7 +38,6 @@ export const columns: ColumnDef<RoomListItem>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-
   {
     accessorKey: "index",
     header: "STT",

@@ -33,7 +33,7 @@ import {
 import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
 import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import useRoomSchema from "~/services/schema/room.schema";
-import useCreateRoom from "../container/useCreateRoom";
+import { useCreateRoom } from "../../container/useRoomMutation";
 
 const { CreateRoomResponseSchema } = useRoomSchema();
 const CreateRoomFormSchema = CreateRoomResponseSchema.pick({
@@ -50,12 +50,7 @@ interface CreateRoomDialogProps {
   roomTypes?: RoomTypesListResponseDto;
 }
 
-function CreateRoomDialog({
-  open,
-  onClose,
-
-  roomTypes,
-}: CreateRoomDialogProps) {
+function CreateRoomDialog({ open, onClose, roomTypes }: CreateRoomDialogProps) {
   const form = useForm<CreateRoomFormData>({
     resolver: zodResolver(CreateRoomFormSchema),
     defaultValues: {

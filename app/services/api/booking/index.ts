@@ -65,7 +65,7 @@ async function getBookingDetail(
       resp = await http.get(Booking.detailByCode(params.code), {
         params,
       });
-    } else if (!params.id) {
+    } else if (params.id) {
       resp = await http.get(Booking.detailById(params.id!), {
         params,
       });

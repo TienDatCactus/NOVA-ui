@@ -1,6 +1,6 @@
 import type { Route } from "./+types/list";
 import BookingList from "./components/booking-list";
-import useBookings from "./container/useBookings";
+import { useBookings } from "./container/useBookingQuery";
 import useSearchBooking from "./container/useSearchBooking";
 import BookingViewLayout from "./layouts/booking-view.layout";
 

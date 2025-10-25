@@ -9,7 +9,7 @@ import {
 } from "~/components/ui/select";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { RoomStatus } from "~/services/types/room.types";
-import useUpdateRoomStatus from "../container/useUpdateRoomStatus";
+import { useUpdateRoomStatus } from "../../container/useRoomMutation";
 interface RoomStatusCellProps {
   room: RoomListItemDto;
 }

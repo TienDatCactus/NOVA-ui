@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import SearchRoom, { type BookingSearchFilters } from "../fragments/search";
+import SearchRoom, { type BookingSearchFilters } from "../components/search";
 
 interface BookingViewLayoutProps {
   children: ReactNode;
