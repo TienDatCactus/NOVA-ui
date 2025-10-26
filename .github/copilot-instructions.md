@@ -285,7 +285,6 @@ daysBetweenFloor(date1, date2); // Days difference
 
 // ~/lib/constants.tsx
 NAV_ITEMS; // Sidebar navigation config
-(BOOKING_CHANNEL, ROOM_TYPE); // Enums for dropdowns
 ```
 
 ## File Naming

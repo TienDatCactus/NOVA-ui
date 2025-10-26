@@ -30,3 +30,5 @@ export interface RoomBookingHistoryParams {
   from?: string;
   to?: string;
 }
+
+export const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];

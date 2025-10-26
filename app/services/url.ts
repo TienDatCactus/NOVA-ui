@@ -15,6 +15,9 @@ const Booking = {
   detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
 };
 
+const OTAInformation = {
+  list: "OTAInformation/list",
+};
 const Rooms = {
   detail: (id: string) => `Rooms/${id}/details-basic`,
   bookingHistory: (id: string) => `Rooms/${id}/booking-history`,
@@ -37,4 +40,4 @@ const Menu = {
 const Service = {
   list: "Service/list",
 };
-export { Auth, Booking, Menu, Service, Rooms, RoomTypes };
+export { Auth, Booking, Menu, Service, Rooms, RoomTypes, OTAInformation };

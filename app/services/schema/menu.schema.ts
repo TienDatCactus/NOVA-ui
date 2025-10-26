@@ -1,5 +1,4 @@
 import z from "zod";
-import { ROOM_TYPE } from "~/lib/constants";
 
 const MenuItemComponentsSchema = z.object({
   itemId: z.uuid("ID thành phần không hợp lệ"),

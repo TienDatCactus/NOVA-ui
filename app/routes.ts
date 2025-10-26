@@ -24,6 +24,7 @@ export default [
           route("timeline", "routes/reservation/bookings/timeline.tsx"),
         ]),
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
+        route("new-booking", "routes/reservation/new-booking/new-booking.tsx"),
       ]),
       ...prefix("rooms", [
         index("routes/rooms/rooms.tsx"),

@@ -1,5 +1,8 @@
 import z from "zod";
+import useRoomSchema from "./room.schema";
 
+const { RoomPaymentSchema } = useRoomSchema();
+// ----------------------
 const ServiceItemSchema = z.object({
   id: z
     .uuid("ID dịch vụ không hợp lệ")
@@ -11,6 +14,14 @@ const ServiceItemSchema = z.object({
   description: z.string().optional(),
   quantity: z.number().int().min(1, "Số lượng phải là số nguyên dương"),
 });
+const ServiceItemBookingSchema = z.object({
+  itemType: z.string(),
+  itemId: z.string(),
+  quantity: z.number().int().min(1, "Số lượng phải >= 1"),
+  scheduledDate: z.date("Ngày không hợp lệ"),
+  note: z.string().optional(),
+});
+
 const ServicesSchema = z.object({
   isBreakfast: z.boolean(),
   breakfastDays: z.array(z.string()).optional(),
@@ -38,7 +49,11 @@ const ServiceListResponseSchema = z.array(
     items: z.array(ServiceItem2Schema).default([]),
   })
 );
-
+const ServicePaymentSchema = RoomPaymentSchema;
+const ServiceOrderSchema = z.object({
+  services: z.array(ServiceItemSchema).optional(),
+  payment: ServicePaymentSchema.optional(),
+});
 const useServiceSchema = () => {
   return {
     ServiceItemSchema,
@@ -46,6 +61,9 @@ const useServiceSchema = () => {
     ServiceCategoryEnum,
     ServiceListResponseSchema,
     ServiceItem2Schema,
+    ServiceItemBookingSchema,
+    ServicePaymentSchema,
+    ServiceOrderSchema,
   };
 };
 export default useServiceSchema;

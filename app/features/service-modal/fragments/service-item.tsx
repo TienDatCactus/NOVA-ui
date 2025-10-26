@@ -2,7 +2,6 @@ import { Trash } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import Image from "~/components/ui/image";
-import { Counter } from "~/components/ui/shadcn-io/counter";
 import { useServiceContext } from "../local-context/service-modal.context";
 import { cn, formatMoney } from "~/lib/utils";
 import type z from "zod";
@@ -31,16 +30,7 @@ function ServiceItemList({ item }: ServiceItemListProps) {
           {formatMoney(item.basePrice).vndFormatted} x ({quantity})
         </p>
       </div>
-      <div className="flex-shrink-0 mx-2">
-        <Counter
-          number={quantity}
-          setNumber={(newQuantity: number) =>
-            updateQuantity(item.serviceItemId, newQuantity)
-          }
-          min={1}
-          max={99}
-        />
-      </div>
+      <div className="flex-shrink-0 mx-2"></div>
       <div className="flex-shrink-0">
         <Button
           variant="destructive"

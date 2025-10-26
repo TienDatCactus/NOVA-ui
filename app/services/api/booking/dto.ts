@@ -3,24 +3,28 @@ import useBookingSchema from "~/services/schema/booking.schema";
 
 const {
   BookingListResponseSchema,
-  ExternalCreateBookingSchema,
-  ExternalBookingResponseSchema,
   BookingListByWeekResponseSchema,
+  StaffCreateBookingResponseSchema,
+  StaffCreateBookingSchema,
   BookingItemSchema,
+  BookingOTAResponseSchema,
 } = useBookingSchema();
 
 type BookingListResponseDto = z.infer<typeof BookingListResponseSchema>;
 type BookingListByWeekResponseDto = z.infer<
   typeof BookingListByWeekResponseSchema
 >;
-type ExternalCreateBookingDto = z.infer<typeof ExternalCreateBookingSchema>;
-type ExternalBookingResponseDto = z.infer<typeof ExternalBookingResponseSchema>;
+type StaffCreateBookingDto = z.infer<typeof StaffCreateBookingSchema>;
+type StaffCreateBookingResponseDto = z.infer<
+  typeof StaffCreateBookingResponseSchema
+>;
 type BookingDetailResponseDto = z.infer<typeof BookingItemSchema>;
-
+type BookingOTAResponseDto = z.infer<typeof BookingOTAResponseSchema>;
 export type {
   BookingListResponseDto,
-  ExternalCreateBookingDto,
-  ExternalBookingResponseDto,
   BookingListByWeekResponseDto,
+  StaffCreateBookingDto,
+  StaffCreateBookingResponseDto,
   BookingDetailResponseDto,
+  BookingOTAResponseDto,
 };

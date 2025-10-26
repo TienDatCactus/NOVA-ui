@@ -79,7 +79,7 @@ function NavigationMenuTrigger({
         navigationMenuTriggerStyle(),
         "group cursor-pointer",
         {
-          "border-b-2 border-accent bg-muted ": isActive == true,
+          "border-b-2 border-primary shadow-s ": isActive == true,
         },
         className
       )}

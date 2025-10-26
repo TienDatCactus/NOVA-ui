@@ -12,17 +12,13 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
-import CreateBookingDialog from "~/features/create-booking";
 import { cn } from "~/lib/utils";
 import { useHeaderNav } from "../side-bar/dashboard/container/useHeader";
 
 interface DashboardHeaderProps extends React.HTMLAttributes<HTMLElement> {}
 export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
-  const [open, setOpen] = useState<boolean>(false);
   const { navItems, currentPath } = useHeaderNav();
-  function close() {
-    setOpen(false);
-  }
+
   return (
     <header className="h-12 shadow-sm py-6 px-6 z-10 bg-background flex items-center w-full sticky top-0   justify-between border-b">
       <NavigationMenu viewport={false}>
@@ -52,7 +48,8 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
                       <li
                         key={child.title}
                         className={cn({
-                          " bg-accent rounded-sm": currentPath === child.href,
+                          " bg-accent border-b-2 border-primary":
+                            currentPath === child.href,
                         })}
                       >
                         <NavigationMenuLink asChild>
@@ -72,10 +69,6 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
         </NavigationMenuList>
       </NavigationMenu>
       <div className="flex gap-4 items-center">
-        <Button size={"sm"} onClick={() => setOpen(true)}>
-          Đặt phòng <Plus />
-        </Button>
-        <CreateBookingDialog open={open} close={close} />
         <Input
           placeholder="Tìm kiếm..."
           className="w-64 h-8 placeholder:text-sm"

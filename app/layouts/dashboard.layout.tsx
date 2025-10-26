@@ -15,7 +15,7 @@ const DashboardLayout: React.FC = () => {
             <DashboardHeader />
             <div
               className={cn(
-                "rounded-md p-4 w-full mx-auto bg-background  h-full overflow-auto"
+                "rounded-md p-4 w-full mx-auto bg-muted  h-full overflow-auto"
               )}
             >
               <Outlet />

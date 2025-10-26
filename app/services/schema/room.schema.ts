@@ -1,19 +1,27 @@
 import z from "zod";
-import { ROOM_TYPE, ROOM_MANAGEMENT_STATUS } from "~/lib/constants";
+import usePaymentSchema from "./payment.schema";
+import { ROOM_TYPE } from "../types/room.types";
+
+const { PaymentMethodEnum } = usePaymentSchema();
+
+// -------------------------------
 
 const RoomTypeEnum = z.enum(ROOM_TYPE, {
   error: "Loại phòng không hợp lệ",
 });
 
-const RoomStatusEnum = z.union([
-  z.literal(ROOM_MANAGEMENT_STATUS.Available),
-  z.literal(ROOM_MANAGEMENT_STATUS.Occupied),
-  z.literal(ROOM_MANAGEMENT_STATUS.Dirty),
-  z.literal(ROOM_MANAGEMENT_STATUS.OutOfService),
-  z.literal(ROOM_MANAGEMENT_STATUS.Reserved),
-  z.literal(ROOM_MANAGEMENT_STATUS.Cleaning),
-  z.literal(ROOM_MANAGEMENT_STATUS.Locked),
-]);
+const RoomStatusEnum = z.enum({
+  Available: "0", // Còn trống
+  Occupied: "1", // Đã có khách
+  Dirty: "2", // Cần dọn dẹp
+  OutOfService: "3", // Ngưng sử dụng
+  Reserved: "4", // Đã được đặt trước
+  Cleaning: "5", // Đang được dọn dẹp
+  Locked: "6",
+});
+
+// -------------------------------
+
 const SelectedRoomSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
@@ -114,7 +122,11 @@ const UpdateRoomDetailResponseSchema = z.object({
   dailyPrice: z.number().min(0),
   status: z.string(),
 });
-
+const RoomPaymentSchema = z.object({
+  paymentMethod: PaymentMethodEnum,
+  paidAmount: z.number().min(0),
+  paymentNote: z.string().optional(),
+});
 const useRoomSchema = () => {
   return {
     RoomItemSchema,
@@ -130,6 +142,7 @@ const useRoomSchema = () => {
     RoomBookingHistoryResponseSchema,
     CreateRoomResponseSchema,
     UpdateRoomDetailResponseSchema,
+    RoomPaymentSchema,
   };
 };
 export default useRoomSchema;

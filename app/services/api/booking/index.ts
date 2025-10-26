@@ -1,21 +1,23 @@
 import http from "~/lib/http";
-import { Booking } from "../../url";
+import useBookingSchema from "~/services/schema/booking.schema";
+import type { BookingListParams } from "~/services/types/booking.types";
+import { Booking, OTAInformation } from "../../url";
 import type {
   BookingDetailResponseDto,
   BookingListByWeekResponseDto,
   BookingListResponseDto,
-  ExternalBookingResponseDto,
-  ExternalCreateBookingDto,
+  BookingOTAResponseDto,
+  StaffCreateBookingDto,
+  StaffCreateBookingResponseDto,
 } from "./dto";
-import type { BookingListParams } from "~/services/types/booking.types";
-import useBookingSchema from "~/services/schema/booking.schema";
 
 const {
   BookingListResponseSchema,
-  ExternalBookingResponseSchema,
-  ExternalCreateBookingSchema,
   BookingListByWeekResponseSchema,
+  StaffCreateBookingResponseSchema,
+  StaffCreateBookingSchema,
   BookingItemSchema,
+  BookingOTAResponseSchema,
 } = useBookingSchema();
 
 async function getBookingList(
@@ -42,15 +44,15 @@ async function getBookingListByWeek(
   }
 }
 
-async function externalCreateBooking(
-  data: ExternalCreateBookingDto
-): Promise<ExternalBookingResponseDto> {
+async function staffCreateBooking(
+  data: StaffCreateBookingDto
+): Promise<StaffCreateBookingResponseDto> {
   try {
     const resp = await http.post(
       Booking.create,
-      ExternalCreateBookingSchema.parse(data)
+      StaffCreateBookingSchema.parse(data)
     );
-    return ExternalBookingResponseSchema.parse(resp.data);
+    return StaffCreateBookingResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -79,9 +81,19 @@ async function getBookingDetail(
   }
 }
 
+async function getBookingOTA(): Promise<BookingOTAResponseDto> {
+  try {
+    const resp = await http.get(OTAInformation.list);
+    return BookingOTAResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const BookingService = {
   getBookingList,
-  externalCreateBooking,
+  staffCreateBooking,
   getBookingListByWeek,
   getBookingDetail,
+  getBookingOTA,
 };

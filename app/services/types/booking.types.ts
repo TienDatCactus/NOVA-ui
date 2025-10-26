@@ -9,7 +9,6 @@ export type Room = {
   quantity: number;
   amenities?: string[];
 };
-export type ServiceCategory = "Dịch vụ" | "Thức ăn" | "Đồ uống";
 
 export interface BookingListParams {
   weekStart?: string;
@@ -17,3 +16,26 @@ export interface BookingListParams {
   code?: string;
   id?: string;
 }
+
+export const BOOKING_STEPS = [
+  "THÔNG TIN KHÁCH",
+  "CHỌN PHÒNG",
+  "DỊCH VỤ THÊM",
+  "XÁC NHẬN / THANH TOÁN",
+] as const;
+
+export const BOOKING_STATUSES = [
+  { value: "all", label: "Tất cả trạng thái" },
+  { value: "Confirmed", label: "Đã xác nhận" },
+  { value: "CheckedIn", label: "Đã nhận phòng" },
+  { value: "CheckedOut", label: "Đã trả phòng" },
+  { value: "Pending", label: "Chờ xử lý" },
+  { value: "Cancelled", label: "Đã hủy" },
+];
+
+export const BOOKING_SOURCE = [
+  "DirectStaff",
+  "DirectCustomer",
+  "OTA",
+  "Agency",
+];

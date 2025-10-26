@@ -1,6 +1,7 @@
 import {
   BadgeQuestionMark,
   Bath,
+  BookMarked,
   ClipboardMinus,
   HandPlatter,
   Handshake,
@@ -161,7 +162,12 @@ const RESERVATION_TOP_NAV_ITEMS: Array<{
   {
     icon: <ReceiptText size={16} />,
     title: "Hóa đơn",
-    href: "/dashboard/reservation/new",
+    href: "/dashboard/reservation/invoices",
+  },
+  {
+    icon: <BookMarked size={16} />,
+    title: "Tạo đơn đặt phòng",
+    href: "/dashboard/reservation/new-booking",
   },
 ];
 const ROOMS_TOP_NAV_ITEMS: Array<{
@@ -240,64 +246,6 @@ const TOP_NAV_CONFIG = {
   "/invoices": INVOICES_TOP_NAV_ITEMS,
 } as const;
 
-const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];
-
-// Room Management Status (Backend Enum 0-6)
-const ROOM_MANAGEMENT_STATUS = {
-  Available: "0", // Còn trống
-  Occupied: "1", // Đã có khách
-  Dirty: "2", // Cần dọn dẹp
-  OutOfService: "3", // Ngưng sử dụng
-  Reserved: "4", // Đã được đặt trước
-  Cleaning: "5", // Đang được dọn dẹp
-  Locked: "6", // Bị khóa
-} as const;
-
-const ROOM_MANAGEMENT_STATUS_LABELS: Record<string, string> = {
-  [ROOM_MANAGEMENT_STATUS.Available]: "Còn trống",
-  [ROOM_MANAGEMENT_STATUS.Occupied]: "Đã có khách",
-  [ROOM_MANAGEMENT_STATUS.Dirty]: "Cần dọn dẹp",
-  [ROOM_MANAGEMENT_STATUS.OutOfService]: "Ngưng sử dụng",
-  [ROOM_MANAGEMENT_STATUS.Reserved]: "Đã được đặt trước",
-  [ROOM_MANAGEMENT_STATUS.Cleaning]: "Đang được dọn dẹp",
-  [ROOM_MANAGEMENT_STATUS.Locked]: "Bị khóa",
-} as const;
-
-const ROOM_MANAGEMENT_STATUS_COLORS: Record<string, string> = {
-  [ROOM_MANAGEMENT_STATUS.Available]: "bg-green-500 text-white",
-  [ROOM_MANAGEMENT_STATUS.Occupied]: "bg-red-500 text-white",
-  [ROOM_MANAGEMENT_STATUS.Dirty]: "bg-yellow-500 text-black",
-  [ROOM_MANAGEMENT_STATUS.OutOfService]: "bg-gray-500 text-white",
-  [ROOM_MANAGEMENT_STATUS.Reserved]: "bg-blue-500 text-white",
-  [ROOM_MANAGEMENT_STATUS.Cleaning]: "bg-orange-500 text-white",
-  [ROOM_MANAGEMENT_STATUS.Locked]: "bg-purple-500 text-white",
-} as const;
-
-const ROOM_STATUS = {
-  AVAILABLE: "Phòng trống cả ngày",
-  CHECKOUT_EXPECTED: "Phòng dự kiến trả",
-  CHECKIN_EXPECTED: "Phòng dự kiến nhận",
-  OCCUPIED: "Phòng đang sử dụng",
-  OCCUPANCY_RATE: "Công suất sử dụng",
-} as const;
-
-const ROOM_STATUS_COLORS = {
-  "Phòng trống cả ngày": "#22c55e", // Green
-  "Phòng dự kiến trả": "#facc15", // Yellow
-  "Phòng dự kiến nhận": "#3b82f6", // Blue
-  "Phòng đang sử dụng": "#ef4444", // Red
-  "Công suất sử dụng": "#8b5cf6", // Purple
-} as const;
-
-const BOOKING_CHANNEL = [
-  "Agoda",
-  "Booking.com",
-  "Expedia",
-  "Ctrip",
-  "BnB",
-  "Direct",
-  "Công Ty",
-];
 const ROOM_COUNT = 13;
 const DAYS_COUNT = 7;
 const SUBS_PER_DAY = 2;
@@ -318,12 +266,5 @@ export {
   firstColWidth,
   totalSubCols,
   TOP_NAV_CONFIG,
-  ROOM_TYPE,
-  BOOKING_CHANNEL,
   SERVICE_CATEGORIES,
-  ROOM_STATUS,
-  ROOM_STATUS_COLORS,
-  ROOM_MANAGEMENT_STATUS,
-  ROOM_MANAGEMENT_STATUS_LABELS,
-  ROOM_MANAGEMENT_STATUS_COLORS,
 };
