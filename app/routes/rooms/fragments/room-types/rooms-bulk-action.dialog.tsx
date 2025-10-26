@@ -18,12 +18,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import {
-  ROOM_MANAGEMENT_STATUS,
-  ROOM_MANAGEMENT_STATUS_LABELS,
-} from "~/lib/constants";
+
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { useState } from "react";
+import { RoomStatusEnum } from "~/services/types/room.types";
 
 interface BulkActionsToolbarProps {
   selectedRooms: RoomListItemDto[];
@@ -73,9 +71,9 @@ function BulkActionsToolbar({
               <SelectValue placeholder="Đổi trạng thái" />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(ROOM_MANAGEMENT_STATUS).map(([key, value]) => (
-                <SelectItem key={value} value={value.toString()}>
-                  {ROOM_MANAGEMENT_STATUS_LABELS[value]}
+              {Object.entries(RoomStatusEnum).map(([key, value]) => (
+                <SelectItem key={key} value={value.toString()}>
+                  {value}
                 </SelectItem>
               ))}
             </SelectContent>

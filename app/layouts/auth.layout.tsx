@@ -2,6 +2,7 @@ import { Outlet } from "react-router";
 import type { Route } from "./+types/auth.layout";
 import authBg from "~/assets/img/pexels-monica-tran-2153311664-34075390.jpg";
 import SectionLayout from "~/components/layouts/sections";
+import { TreePalm } from "lucide-react";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -28,8 +29,8 @@ export default function Component({
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="absolute p-6 top-0 text-white flex items-center justify-center space-x-2">
-            <div className="bg-accent p-4 rounded-lg">
-              <span className="text-xl">🏞️</span>
+            <div className="p-4 rounded-lg">
+              <TreePalm className="size-10" />
             </div>
             <div>
               <h1 className="font-bold text-4xl">NOVA</h1>

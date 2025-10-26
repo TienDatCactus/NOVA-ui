@@ -49,7 +49,12 @@ http.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
     const message = error.response?.data.message;
-    if (status === 401 && !originalRequest._retry) {
+    const curPath = window.location.pathname;
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !curPath.includes("/auth")
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

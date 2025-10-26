@@ -19,12 +19,13 @@ const OTAInformation = {
   list: "OTAInformation/list",
 };
 const Rooms = {
-  detail: (id: string) => `Rooms/${id}/details-basic`,
+  detail: (id: string) => `Rooms/${id}/details`,
   bookingHistory: (id: string) => `Rooms/${id}/booking-history`,
   updateStatus: "Rooms/update-status",
   list: "Rooms/list",
   create: "Rooms",
   update: (id: string) => `Rooms/${id}`,
+  getAvailableRoomsInternal: "Rooms/available-with-details",
 };
 
 const RoomTypes = {

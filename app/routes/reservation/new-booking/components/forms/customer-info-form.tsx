@@ -1,19 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { differenceInDays, startOfDay, addDays } from "date-fns";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, Users, Calendar } from "lucide-react";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
@@ -23,17 +24,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
 
-import { useCreateBookingStore } from "~/store/create-booking.store";
-import useBookingSchema from "~/services/schema/booking.schema";
 import type z from "zod";
 import { DatePicker } from "~/components/ui/date-picker";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { cn } from "~/lib/utils";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/Counter";
+import useBookingSchema from "~/services/schema/booking.schema";
 import useFormSchema from "~/services/schema/forms.schema";
 import type { CustomerInfoFormData } from "~/services/types/forms.types";
+import { useCreateBookingStore } from "~/store/create-booking.store";
+import useCalculateNights from "../../container/useCalculateNights";
 
 export const BOOKING_SOURCES = [
   { value: 0, label: "Trực tiếp (Nhân viên)", key: "DirectStaff" },
@@ -97,16 +97,10 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
     },
   });
 
-  const nights = useMemo(() => {
-    if (form.watch("checkinDate") && form.watch("checkoutDate")) {
-      return differenceInDays(
-        form.watch("checkoutDate"),
-        form.watch("checkinDate")
-      );
-    }
-    return 0;
-  }, [form.watch("checkinDate"), form.watch("checkoutDate")]);
-
+  const nights = useCalculateNights({
+    checkinDate: form.watch("checkinDate"),
+    checkoutDate: form.watch("checkoutDate"),
+  });
   useEffect(() => {
     const subscription = form.watch((values) => {
       const timeout = setTimeout(() => {
@@ -173,12 +167,12 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <Card className="space-y-6 p-6 shadow-s">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Thông tin khách hàng & Lưu trú</h2>
           <p className="text-muted-foreground mt-1">
-            Bước 1/4 - Nhập thông tin liên hệ và thời gian lưu trú
+            Bước 1/3 - Nhập thông tin liên hệ và thời gian lưu trú
           </p>
         </div>
         <Badge variant="default">Bước 1</Badge>
@@ -197,7 +191,7 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="bg-background"
+                      className="bg-secondary"
                       placeholder="Nhập họ và tên khách hàng"
                       {...field}
                     />
@@ -219,7 +213,7 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   <FormControl>
                     <Input
                       type="tel"
-                      className="bg-background"
+                      className="bg-secondary"
                       placeholder="+84 123 456 789"
                       {...field}
                     />
@@ -240,7 +234,7 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="bg-background"
+                      className="bg-secondary"
                       type="email"
                       placeholder="email@example.com"
                       {...field}
@@ -266,6 +260,7 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                       value={field.value}
                       onChange={field.onChange}
                       placeholder="Chọn ngày nhận phòng"
+                      className="bg-secondary"
                     />
                   </FormControl>
                   <FormMessage />
@@ -286,11 +281,7 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                       value={field.value}
                       onChange={field.onChange}
                       placeholder="Chọn ngày trả phòng"
-                      fromDate={
-                        form.watch("checkinDate")
-                          ? addDays(form.watch("checkinDate"), 1)
-                          : startOfDay(new Date())
-                      }
+                      className="bg-secondary"
                     />
                   </FormControl>
                   <FormMessage />
@@ -395,7 +386,7 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full border-primary bg-primary/10 text-primary shadow-none focus-visible:border-primary focus-visible:ring-primary/20 dark:bg-sky-400/10 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:ring-sky-400/40 [&_svg]:!text-primary dark:[&_svg]:!text-sky-400">
+                          <SelectTrigger className="w-full bg-secondary">
                             <SelectValue placeholder="Chọn nền tảng OTA" />
                           </SelectTrigger>
                         </FormControl>
@@ -418,49 +409,32 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                     </FormItem>
                   )}
                 />
-                {/* <FormField
+                <FormField
                   control={form.control}
-                  name=""
+                  name="otaBookingCode"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Chọn OTA</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full border-primary bg-primary/10 text-primary shadow-none focus-visible:border-primary focus-visible:ring-primary/20 dark:bg-sky-400/10 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:ring-sky-400/40 [&_svg]:!text-primary dark:[&_svg]:!text-sky-400">
-                            <SelectValue placeholder="Chọn nền tảng OTA" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {MOCK_OTA_LIST.map((ota) => (
-                            <SelectItem
-                              className="[&_div:focus]:bg-primary/20 [&_div:focus]:text-primary dark:[&_div:focus]:bg-sky-400/20 dark:[&_div:focus]:text-sky-400"
-                              key={ota.id}
-                              value={ota.id}
-                            >
-                              {ota.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+
+                      <Input
+                        {...field}
+                        className="w-full bg-secondary"
+                        placeholder="Mã đặt phòng OTA"
+                      />
                       <FormDescription>
-                        Chọn nền tảng OTA nếu đặt phòng qua trung gian
+                        Mã đặt phòng OTA nếu đặt phòng qua trung gian
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
-                /> */}
+                />
               </>
             )}
           </div>
           {nights > 0 && (
-            <div className=" bg-muted rounded-lg">
-              <p className="text-sm font-medium">
-                Số đêm: <span className="text-primary">{nights} đêm</span>
-              </p>
-            </div>
+            <p className="text-sm font-medium">
+              Số đêm: <span className="text-primary">{nights} đêm</span>
+            </p>
           )}
           <div className="flex items-center justify-between pt-6 border-t">
             <Button
@@ -490,6 +464,6 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
           </div>
         </form>
       </Form>
-    </div>
+    </Card>
   );
 }

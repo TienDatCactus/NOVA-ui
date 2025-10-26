@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { RoomsService } from "~/services/api/rooms";
 import type {
+  GetAvailableRoomsInternalParams,
   RoomBookingHistoryParams,
   RoomDetailParams,
   RoomListParams,
@@ -50,4 +51,18 @@ function useRoomBookingHistory({
     enabled: () => !!id && expanded,
   });
 }
-export { useRooms, useRoomDetail, useRoomBookingHistory };
+
+function useAvailableRoomsInternal(params: GetAvailableRoomsInternalParams) {
+  return useQuery({
+    queryKey: ["available-rooms-internal", params],
+    queryFn: async () => await RoomsService.getAvailableRoomsInternal(params),
+    staleTime: 5 * 60 * 1000,
+    enabled: () => !!params,
+  });
+}
+export {
+  useRooms,
+  useRoomDetail,
+  useRoomBookingHistory,
+  useAvailableRoomsInternal,
+};

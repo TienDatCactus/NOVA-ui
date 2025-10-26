@@ -10,9 +10,21 @@ const PaymentMethodEnum = z.enum({
   OnAccount: 6,
 });
 
+const PaymentStatusEnum = z.enum({
+  Unpaid: 0,
+  DepositOnly: 1,
+  PartiallyPaid: 2,
+  Paid: 3,
+  Overpaid: 4,
+  Refunded: 5,
+  Chargeback: 6,
+  Voided: 7,
+});
+
 const usePaymentSchema = () => {
   return {
     PaymentMethodEnum,
+    PaymentStatusEnum,
   };
 };
 export default usePaymentSchema;

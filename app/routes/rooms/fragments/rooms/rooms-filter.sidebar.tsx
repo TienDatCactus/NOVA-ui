@@ -5,13 +5,10 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Slider } from "~/components/ui/slider";
-import {
-  ROOM_MANAGEMENT_STATUS,
-  ROOM_MANAGEMENT_STATUS_LABELS,
-  ROOM_TYPE,
-} from "~/lib/constants";
+
 import { formatMoney } from "~/lib/utils";
 import type { RoomFilters } from "../../container/useRoomFilter";
+import { RoomStatusEnum } from "~/services/types/room.types";
 
 interface RoomsFilterSidebarProps {
   filters: RoomFilters;
@@ -86,7 +83,7 @@ function RoomsFilterSidebar({
       <div className="space-y-3">
         <Label className="text-sm font-medium">Trạng thái</Label>
         <div className="space-y-2">
-          {Object.entries(ROOM_MANAGEMENT_STATUS).map(([key, value]) => (
+          {Object.entries(RoomStatusEnum).map(([key, value]) => (
             <div key={value} className="flex items-center gap-2">
               <Checkbox
                 id={`status-${value}`}
@@ -97,7 +94,7 @@ function RoomsFilterSidebar({
                 htmlFor={`status-${value}`}
                 className="text-sm font-normal cursor-pointer"
               >
-                {ROOM_MANAGEMENT_STATUS_LABELS[value]}
+                {value}
               </Label>
             </div>
           ))}
@@ -109,7 +106,7 @@ function RoomsFilterSidebar({
       <div className="space-y-3">
         <Label className="text-sm font-medium">Hạng phòng</Label>
         <div className="space-y-2">
-          {ROOM_TYPE.map((roomType) => (
+          {/* {ROOM_TYPE.map((roomType) => (
             <div key={roomType} className="flex items-center gap-2">
               <Checkbox
                 id={`type-${roomType}`}
@@ -123,7 +120,7 @@ function RoomsFilterSidebar({
                 {roomType}
               </Label>
             </div>
-          ))}
+          ))} */}
         </div>
       </div>
 

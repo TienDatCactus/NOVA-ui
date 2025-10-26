@@ -1,7 +1,11 @@
 import { useStep } from "~/hooks/use-step";
 import type { Route } from "./+types/new-booking";
-import { CustomerInfoForm } from "./components/customer-info-form";
+import { CustomerInfoForm } from "./components/forms/customer-info-form";
+import { RoomPickerForm } from "./components/forms/room-picker-form";
+import { ReviewPaymentForm } from "./components/forms/review-payment-form";
 import Steps from "./components/new-booking-stepper";
+import { Card } from "~/components/ui/card";
+import { useCreateBookingStore } from "~/store/create-booking.store";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -15,7 +19,9 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const [currentStep, { goToNextStep, reset }] = useStep(4);
+  const [currentStep, { goToNextStep, reset, goToPrevStep, setStep }] =
+    useStep(4);
+
   const steps = [
     {
       step: 1,
@@ -34,10 +40,22 @@ export default function Component({
     },
   ];
   return (
-    <main className="mx-auto max-w-4xl space-y-10 py-10">
-      <Steps steps={steps} />
+    <main className="mx-auto max-w-5xl space-y-10 py-10">
+      <Card className="p-6 shadow-s">
+        <Steps
+          steps={steps}
+          currentStep={currentStep}
+          goToNextStep={goToNextStep}
+          goToPrevStep={goToPrevStep}
+        />
+      </Card>
       {currentStep === 1 && <CustomerInfoForm onNext={goToNextStep} />}
-      {/* Steps 2, 3, 4... */}
+      {currentStep === 2 && (
+        <RoomPickerForm onNext={goToNextStep} onCancel={goToPrevStep} />
+      )}
+      {currentStep === 3 && (
+        <ReviewPaymentForm onNext={goToNextStep} onBack={goToPrevStep} />
+      )}
     </main>
   );
 }

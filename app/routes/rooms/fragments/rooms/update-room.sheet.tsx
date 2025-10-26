@@ -40,13 +40,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import {
-  ROOM_MANAGEMENT_STATUS,
-  ROOM_MANAGEMENT_STATUS_LABELS,
-} from "~/lib/constants";
+
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { useUpdateRoom } from "../../container/useRoomMutation";
 import { useRoomTypes } from "../../container/useRoomTypesQuery";
+import { RoomStatusEnum } from "~/services/types/room.types";
 
 const UpdateRoomFormSchema = z.object({
   roomName: z.string().min(1, "Tên phòng là bắt buộc"),
@@ -70,24 +68,12 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
   const form = useForm<UpdateRoomFormData>({
     resolver: zodResolver(UpdateRoomFormSchema),
     defaultValues: {
-      roomName: "",
-      roomTypeId: "",
-      status: "",
-      locked: false,
+      roomName: room?.roomName || "",
+      roomTypeId: room?.roomTypeId || "",
+      status: room?.status || "",
+      locked: room?.locked || false,
     },
   });
-
-  // Populate form when room changes
-  useEffect(() => {
-    if (room) {
-      form.reset({
-        roomName: room.roomName,
-        roomTypeId: room.roomTypeId,
-        status: room.status,
-        locked: room.locked,
-      });
-    }
-  }, [room, form]);
 
   const handleSubmit = (data: UpdateRoomFormData) => {
     if (!room) return;
@@ -213,10 +199,10 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.entries(ROOM_MANAGEMENT_STATUS).map(
+                          {Object.entries(RoomStatusEnum).map(
                             ([key, value]) => (
-                              <SelectItem key={value} value={value.toString()}>
-                                {ROOM_MANAGEMENT_STATUS_LABELS[value]}
+                              <SelectItem key={key} value={key}>
+                                {value}
                               </SelectItem>
                             )
                           )}

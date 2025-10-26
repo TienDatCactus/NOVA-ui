@@ -3,66 +3,74 @@ import useRoomSchema from "./room.schema";
 
 const { RoomPaymentSchema } = useRoomSchema();
 // ----------------------
-const ServiceItemSchema = z.object({
-  id: z
-    .uuid("ID dịch vụ không hợp lệ")
-    .or(z.string().min(1, "ID dịch vụ không hợp lệ")),
-  name: z.string().min(1, "Tên dịch vụ không hợp lệ"),
-  price: z.number().min(0, "Giá dịch vụ không hợp lệ"),
-  imageUrl: z.url("URL hình ảnh không hợp lệ").optional(),
-  category: z.string().optional(),
-  description: z.string().optional(),
-  quantity: z.number().int().min(1, "Số lượng phải là số nguyên dương"),
-});
-const ServiceItemBookingSchema = z.object({
-  itemType: z.string(),
-  itemId: z.string(),
-  quantity: z.number().int().min(1, "Số lượng phải >= 1"),
-  scheduledDate: z.date("Ngày không hợp lệ"),
-  note: z.string().optional(),
-});
 
-const ServicesSchema = z.object({
-  isBreakfast: z.boolean(),
-  breakfastDays: z.array(z.string()).optional(),
-});
-
-const ServiceCategoryEnum = z.enum(["Service", "Menu"], {
-  error: "Danh mục dịch vụ không hợp lệ",
-});
-
-const ServiceItem2Schema = z.object({
-  serviceItemId: z.uuid("ID dịch vụ không hợp lệ"),
-  code: z.string().min(1, "Mã dịch vụ không hợp lệ"),
-  name: z.string().min(1, "Tên dịch vụ không hợp lệ"),
-  description: z.string().optional(),
-  unitName: z.string().min(1, "Đơn vị tính không hợp lệ"),
-  basePrice: z.number().min(0, "Giá cơ bản phải >= 0"),
-  active: z.boolean(),
+const ServiceItemListSchema = z.object({
+  serviceItemId: z.string(),
+  code: z.string().min(2).max(100),
+  name: z.string().min(2).max(100),
+  description: z.string().max(500),
+  unitName: z.string().max(100),
+  basePrice: z.number().min(0),
+  active: z.boolean().default(true),
 });
 const ServiceListResponseSchema = z.array(
   z.object({
-    serviceTypeId: z.uuid("ID loại dịch vụ không hợp lệ"),
-    typeCode: z.string().min(1, "Mã loại dịch vụ không hợp lệ"),
-    typeName: z.string().min(1, "Tên loại dịch vụ không hợp lệ"),
-    active: z.boolean(),
-    items: z.array(ServiceItem2Schema).default([]),
+    serviceTypeId: z.string(),
+    typeCode: z.string(),
+    typeName: z.string(),
+    active: z.boolean().default(true),
+    items: z.array(ServiceItemListSchema),
   })
 );
+const ServiceItemSchema = z.object({
+  id: z.string(),
+  serviceTypeId: z.string(),
+  serviceTypeName: z.string(),
+  unitId: z.string(),
+  unitName: z.string(),
+  code: z.string(),
+  name: z.string(),
+  description: z.string(),
+  basePrice: z.number().min(0),
+  active: z.boolean().default(true),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+const ServiceListByTypeResponseSchema = z.array(ServiceItemSchema);
+
+const ServiceItemDetailResponseSchema = ServiceItemSchema;
+
+const EditServiceItemSchema = z.object({
+  serviceTypeId: z.string(),
+  unitId: z.string(),
+  code: z.string().min(2).max(100),
+  name: z.string().min(2).max(100),
+  description: z.string().max(500),
+  basePrice: z.number().min(0),
+  active: z.boolean().default(true),
+});
+const UpdateServiceItemResponseSchema = ServiceItemSchema;
 const ServicePaymentSchema = RoomPaymentSchema;
+const ServiceOrderItemSchema = z.object({
+  itemType: z.string(),
+  itemId: z.string(),
+  quantity: z.number().min(0),
+  scheduledDate: z.string().min(10).max(10),
+  note: z.string().max(500),
+});
 const ServiceOrderSchema = z.object({
-  services: z.array(ServiceItemSchema).optional(),
+  services: z.array(ServiceOrderItemSchema).optional(),
   payment: ServicePaymentSchema.optional(),
 });
 const useServiceSchema = () => {
   return {
     ServiceItemSchema,
-    ServicesSchema,
-    ServiceCategoryEnum,
     ServiceListResponseSchema,
-    ServiceItem2Schema,
-    ServiceItemBookingSchema,
-    ServicePaymentSchema,
+    ServiceListByTypeResponseSchema,
+    ServiceItemDetailResponseSchema,
+    EditServiceItemSchema,
+    UpdateServiceItemResponseSchema,
+    RoomPaymentSchema,
     ServiceOrderSchema,
   };
 };

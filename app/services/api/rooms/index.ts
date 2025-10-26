@@ -1,4 +1,5 @@
 import type {
+  GetAvailableRoomsInternalParams,
   RoomBookingHistoryParams,
   RoomDetailParams,
   RoomListParams,
@@ -10,6 +11,7 @@ import type {
   RoomBookingHistoryResponseDto,
   CreateRoomResponseDto,
   UpdateRoomDetailResponseDto,
+  GetAvailableRoomsInternalResponseDto,
 } from "./dto";
 import http from "~/lib/http";
 import { Rooms } from "~/services/url";
@@ -22,6 +24,7 @@ const {
   RoomBookingHistoryResponseSchema,
   CreateRoomResponseSchema,
   UpdateRoomDetailResponseSchema,
+  GetAvailableRoomsInternalResponseSchema,
 } = useRoomSchema();
 
 async function getRoomList(
@@ -109,6 +112,18 @@ async function updateRoomDetail(
     return Promise.reject(error);
   }
 }
+
+async function getAvailableRoomsInternal(
+  params: GetAvailableRoomsInternalParams
+): Promise<GetAvailableRoomsInternalResponseDto> {
+  try {
+    const resp = await http.get(Rooms.getAvailableRoomsInternal, { params });
+    return GetAvailableRoomsInternalResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const RoomsService = {
   getRoomList,
   getRoomDetails,
@@ -116,4 +131,5 @@ export const RoomsService = {
   getRoomBookingHistory,
   createRoom,
   updateRoomDetail,
+  getAvailableRoomsInternal,
 };

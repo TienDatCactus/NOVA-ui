@@ -6,6 +6,7 @@ import { useServiceContext } from "../local-context/service-modal.context";
 import { cn, formatMoney } from "~/lib/utils";
 import type z from "zod";
 import useServiceSchema from "~/services/schema/service.schema";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 const { ServiceItem2Schema } = useServiceSchema();
 type ServiceItem = z.infer<typeof ServiceItem2Schema> & {
@@ -30,8 +31,12 @@ function ServiceItemList({ item }: ServiceItemListProps) {
           {formatMoney(item.basePrice).vndFormatted} x ({quantity})
         </p>
       </div>
-      <div className="flex-shrink-0 mx-2"></div>
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 flex flex-col gap-2">
+        <Counter
+          value={quantity}
+          className="w-32"
+          onChange={(value) => updateQuantity(item.serviceItemId, value)}
+        />
         <Button
           variant="destructive"
           size="sm"

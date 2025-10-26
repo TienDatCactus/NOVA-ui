@@ -26,13 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import {
-  ROOM_MANAGEMENT_STATUS,
-  ROOM_MANAGEMENT_STATUS_LABELS,
-} from "~/lib/constants";
+
 import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import useRoomSchema from "~/services/schema/room.schema";
+import { RoomStatusEnum } from "~/services/types/room.types";
 import { useCreateRoom } from "../../container/useRoomMutation";
 
 const { CreateRoomResponseSchema } = useRoomSchema();
@@ -56,7 +53,7 @@ function CreateRoomDialog({ open, onClose, roomTypes }: CreateRoomDialogProps) {
     defaultValues: {
       roomName: "",
       roomTypeId: "",
-      status: ROOM_MANAGEMENT_STATUS.Available.toString(),
+      // status: ROOM_MANAGEMENT_STATUS.Available.toString(),
     },
   });
   const { mutate, isPending } = useCreateRoom();
@@ -64,6 +61,7 @@ function CreateRoomDialog({ open, onClose, roomTypes }: CreateRoomDialogProps) {
   const handleSubmit: SubmitHandler<CreateRoomFormData> = (data) => {
     mutate(data);
     form.reset();
+    onClose();
   };
 
   const handleClose = () => {
@@ -153,13 +151,11 @@ function CreateRoomDialog({ open, onClose, roomTypes }: CreateRoomDialogProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.entries(ROOM_MANAGEMENT_STATUS).map(
-                          ([key, value]) => (
-                            <SelectItem key={value} value={value.toString()}>
-                              {ROOM_MANAGEMENT_STATUS_LABELS[value]}
-                            </SelectItem>
-                          )
-                        )}
+                        {Object.entries(RoomStatusEnum).map(([key, value]) => (
+                          <SelectItem key={key} value={key}>
+                            {value}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

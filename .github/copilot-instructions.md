@@ -11,9 +11,54 @@ NOVA-UI is a React-based hotel management system. "NOVA" stands for **N**etwork 
 - **Datetime**: `date-fns` (all datetime operations)
 - **API**: Axios (`~/lib/http`) with interceptors for auth/toasts
 
+## UI/UX Design Philosophy
+
+Phần này định nghĩa triết lý thiết kế của chúng ta. Nó trả lời câu hỏi: "Chúng ta có Shadcn và Tailwind, vậy chúng ta _sử dụng_ chúng như thế nào để tạo ra một giao diện đẹp và hiệu quả?"
+
+Triết lý này dựa trên 4 trụ cột:
+
+### 1\. Nền tảng: Sử dụng Hệ thống (Foundation)
+
+**Triết lý:** Không bao giờ dùng các giá trị "magic number". LUÔN LUÔN sử dụng các giá trị đã được định nghĩa trong hệ thống (theme).
+
+- **Spacing (Khoảng cách):** Luôn sử dụng các tiện ích spacing của Tailwind (`p-4`, `m-2`, `gap-8`). Không dùng các giá trị tùy ý như `margin: 10px`. Điều này đảm bảo tính nhất quán (8pt grid).
+- **Typography (Kiểu chữ):** Sử dụng các kiểu chữ đã định nghĩa của Shadcn (`h1`, `h2`, `p`, `text-sm`).
+- **Colors (Màu sắc):** Nghiêm ngặt tuân thủ bảng màu của theme. Chỉ sử dụng các màu đã định nghĩa (`primary`, `secondary`, `destructive`, `muted`, `card`, `popover`, `background`).
+
+### 2\. Bố cục: Đơn giản & Phân nhóm (Layout)
+
+**Triết lý:** "Thiết kế tốt là thiết kế ít nhất có thể". Giữ giao diện sạch sẽ và tập trung vào nhiệm vụ chính của người dùng.
+
+- **Phân nhóm (Proximity):** Sử dụng khoảng trắng (`gap-4`, `mb-6`) để nhóm các mục liên quan. Ví dụ: một `FormLabel`, `FormControl`, và `FormDescription` phải là một cụm trực quan gắn kết.
+- **Tính nhất quán:** Các component tương tự phải có cấu trúc giống hệt nhau. (Triết lý này được thực thi bởi **Mô hình API Service Layer** và **Component-based** của chúng ta).
+
+### 3\. Cảm nhận: Tạo Chiều sâu (Depth & Feel)
+
+**Triết lý:** Thiết kế "phẳng" (flat) thì "nhàm chán" (boring). Phải sử dụng chiều sâu để tạo cảm giác thực tế và thu hút.
+
+- **Tạo Lớp (Layers):** Sử dụng các sắc thái nền để tạo lớp.
+  - **Quy tắc chuẩn:** Nền trang (page) chính sử dụng `bg-background` (hoặc `bg-muted`).
+  - Các khối nội dung (content) được đặt trên các component có nền `bg-card` (thường là màu trắng) như `Card`, `Popover`, `Dialog`.
+- **Đổ bóng (Shadows):**
+  - Sử dụng `box-shadow` (ví dụ `shadow-md`, `shadow-lg`) để "nâng" (elevate) các yếu tố quan trọng (Card, Button, Dropdown) lên khỏi nền.
+  - Điều này tạo ra độ sâu và tập trung sự chú ý của người dùng vào các yếuD)
+  - Điều này tạo ra độ sâu và tập trung sự chú ý của người dùng vào các yếu tố tương tác.
+
+### 4\. Phân cấp: Dẫn dắt Người dùng (Hierarchy)
+
+**Triết lý:** Điều hướng mắt của người dùng một cách có chủ đích. Không phải mọi thứ đều quan trọng như nhau.
+
+- **Nhấn mạnh (Emphasis):** Sử dụng kích thước, độ đậm và màu sắc (`h1`, `h2`, `font-bold`, `text-primary`) cho thông tin quan trọng nhất (Tiêu đề trang, nút CTA chính).
+- **Làm mờ (De-emphasis):**
+  - **Đây là quy tắc quan trọng nhất:** **Hãy làm cho thông tin phụ trở nên "phụ"**.
+  - Sử dụng `text-muted-foreground` (màu xám nhạt) cho các nhãn (label), mô tả (description), và các dữ liệu không quan trọng.
+  - Việc này làm cho thông tin chính _tự động_ nổi bật mà không cần phải làm cho nó "to" hoặc "ồn ào" hơn.
+
+---
+
 ## Architecture Patterns
 
-### 1. Schema-Driven Development
+### 1\. Schema-Driven Development
 
 **All data structures flow from Zod schemas** in `/app/services/schema/`:
 
@@ -28,8 +73,7 @@ const BookingItemSchema = z.object({
     "CheckedOut",
     "Pending",
     "Cancelled",
-  ]),
-  // ...
+  ]), // ...
 });
 
 // Export as factory function
@@ -51,20 +95,20 @@ const data = BookingItemSchema.parse(response.data);
 
 **Critical**: Never create manual TypeScript interfaces for API data. Always `z.infer<>` from schemas.
 
-### 2. Container/Presentational Split
+### 2\. Container/Presentational Split
 
 Components **must** separate UI from logic:
 
 ```
 /features/create-booking/
-  ├── index.tsx                          # Orchestrator component
-  ├── components/                         # Presentational (pure UI)
-  │   ├── customer-info-form.tsx
-  │   └── booking-confirmation.tsx
-  ├── container/                          # Logic hooks (.hooks.ts)
-  │   ├── create-booking.hooks.ts         # Main orchestration
-  │   └── customer-info-form.hooks.ts     # Component-specific logic
-  └── fragments/                          # Small reusable UI pieces
+  ├── index.tsx                          # Orchestrator component
+  ├── components/                         # Presentational (pure UI)
+  │   ├── customer-info-form.tsx
+  │   └── booking-confirmation.tsx
+  ├── container/                          # Logic hooks (.hooks.ts)
+  │   ├── create-booking.hooks.ts         # Main orchestration
+  │   └── customer-info-form.hooks.ts     # Component-specific logic
+  └── fragments/                          # Small reusable UI pieces
 ```
 
 **Pattern**: Form component receives `form` prop from parent hook:
@@ -72,56 +116,56 @@ Components **must** separate UI from logic:
 ```tsx
 // Container hook manages form
 function useCustomerInfoForm({ form }: { form: UseFormReturn<BookingFormData> }) {
-  const { formData } = useCreateBookingStore();
-  // Logic: watchers, effects, handlers
-  return { contact, setContact, hasContactInfo };
+  const { formData } = useCreateBookingStore();
+  // Logic: watchers, effects, handlers
+  return { contact, setContact, hasContactInfo };
 }
 
 // Presentational component receives both
 export default function CustomerInfoForm({ form }: { form: UseFormReturn<...> }) {
-  const { contact, setContact } = useCustomerInfoForm({ form });
-  return <Form {...form}>{/* UI only */}</Form>;
+  const { contact, setContact } = useCustomerInfoForm({ form });
+  return <Form {...form}>{/* UI only */}</Form>;
 }
 ```
 
-### 3. Multi-Step Form Pattern
+### 3\. Multi-Step Form Pattern
 
 **Three-layer persistence** for complex flows:
 
 ```typescript
 // 1. Zustand store (/store/create-booking.store.ts)
 export const useCreateBookingStore = create<CreateBookingState>()(
-  persist(
-    (set) => ({
-      currentStep: 1,
-      formData: { /* default values */ },
-      nextStep: () => set((state) => ({ currentStep: state.currentStep + 1 })),
-      updateFormData: (data) => set((state) => ({
-        formData: { ...state.formData, ...data }
-      })),
-    }),
-    { name: "create-booking-storage", storage: createJSONStorage(() => localStorage) }
-  )
+  persist(
+    (set) => ({
+      currentStep: 1,
+      formData: { /* default values */ },
+      nextStep: () => set((state) => ({ currentStep: state.currentStep + 1 })),
+      updateFormData: (data) => set((state) => ({
+        formData: { ...state.formData, ...data }
+      })),
+    }),
+    { name: "create-booking-storage", storage: createJSONStorage(() => localStorage) }
+  )
 );
 
 // 2. React Hook Form (ephemeral, for validation)
 const form = useForm<BookingFormData>({
-  resolver: zodResolver(BookingSchema),
-  defaultValues: formData, // Load from Zustand on mount
+  resolver: zodResolver(BookingSchema),
+  defaultValues: formData, // Load from Zustand on mount
 });
 
 // 3. Step navigation in main component
 const StepComponents = [
-  <CustomerInfoForm form={form} />,
-  <RoomSelectionForm form={form} />,
-  <BookingConfirmation form={form} />,
+  <CustomerInfoForm form={form} />,
+  <RoomSelectionForm form={form} />,
+  <BookingConfirmation form={form} />,
 ];
 return StepComponents[currentStep - 1];
 ```
 
 **Flow**: User edits → Form validates → On "Next", sync to Zustand → Load from Zustand on step change.
 
-### 4. API Service Layer
+### 4\. API Service Layer
 
 **Consistent structure** for all services (`/app/services/api/<domain>/`):
 
@@ -161,7 +205,7 @@ export const Booking = {
 };
 ```
 
-### 5. TanStack Query Hooks
+### 5\. TanStack Query Hooks
 
 **One hook per query** in `/routes/<feature>/container/`:
 
@@ -188,7 +232,7 @@ function useBookings(params?: BookingListParams) {
 const { data, isPending, refetch } = useBookings({ date: "2025/10/18" });
 ```
 
-### 6. NO Data Normalization
+### 6\. NO Data Normalization
 
 **Critical constraint**: API response shapes must be preserved as-is:
 
@@ -217,9 +261,10 @@ const flatBookings = roomsData.flatMap((room) =>
 
 ### Date Formatting
 
-- **API date parameters**: `yyyy/MM/dd` (e.g., `"2025/10/14"`)
+- **API date parameters**: `yyyy-MM-dd` (e.g., `"2025-10-14"`)
 - **Display dates**: Use `date-fns` `format()` with Vietnamese locale
-- **Date parsing**: Use `parseISO()` for ISO strings, `parseDateYMD()` for `yyyy-MM-dd`
+
+<!-- end list -->
 
 ```typescript
 import { format, parseISO } from "date-fns";
@@ -259,10 +304,10 @@ All UI text in **Vietnamese**. Follow existing patterns:
 ## Development Workflow
 
 ```bash
-npm run dev          # Start dev server (http://localhost:5173)
-npm run host         # Start with network access
-npm run typecheck    # Validate TypeScript (includes route typegen)
-npm run build        # Production build
+npm run dev          # Start dev server (http://localhost:5173)
+npm run host         # Start with network access
+npm run typecheck    # Validate TypeScript (includes route typegen)
+npm run build        # Production build
 ```
 
 **Route typing**: React Router 7 auto-generates types. Import as:
@@ -280,7 +325,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {}
 // ~/lib/utils.ts
 cn(...classes); // Merge Tailwind classes
 formatMoney(amount); // { usdFormatted, vndFormatted }
-parseDateYMD("2025-10-14"); // Parse yyyy-MM-dd to Date
 daysBetweenFloor(date1, date2); // Days difference
 
 // ~/lib/constants.tsx

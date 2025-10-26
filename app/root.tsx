@@ -9,6 +9,16 @@ import {
   useNavigation,
 } from "react-router";
 import type { Route } from "./+types/root";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
+import { AlertTriangle } from "lucide-react";
 import "./index.css";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -38,7 +48,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <Toaster richColors />
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -63,16 +73,20 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+type RouteErrorBoundaryProps = {
+  error: any;
+};
+
+export function ErrorBoundary({ error }: RouteErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? "404 Not Found" : "Error";
     details =
       error.status === 404
-        ? "The requested page could not be found."
+        ? "The page you're looking for doesn't exist."
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
@@ -80,14 +94,35 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+    <main className="flex min-h-screen overflow-auto w-full items-center justify-center bg-muted p-4">
+      <Card className="w-full max-w-3xl shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2.5 text-2xl text-destructive">
+            <AlertTriangle className="h-7 w-7" />
+            <span>{message}</span>
+          </CardTitle>
+          <CardDescription className="pt-2 text-base">
+            {details}
+          </CardDescription>
+        </CardHeader>
+
+        {stack && (
+          <CardContent className="space-y-4">
+            <h3 className="font-semibold text-muted-foreground">
+              Stack Trace (Development Only)
+            </h3>
+            <pre className="w-full overflow-x-auto rounded-md bg-secondary p-4 text-sm text-secondary-foreground">
+              <code className="line-clamp-6">{stack}</code>
+            </pre>
+          </CardContent>
+        )}
+
+        <CardFooter>
+          <Button asChild className="w-full">
+            <a href="/">Go Back Home</a>
+          </Button>
+        </CardFooter>
+      </Card>
     </main>
   );
 }

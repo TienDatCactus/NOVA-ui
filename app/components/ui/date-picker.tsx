@@ -17,9 +17,6 @@ interface DatePickerProps {
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
   disabled?: boolean;
-  disabledDates?: (date: Date) => boolean;
-  fromDate?: Date;
-  toDate?: Date;
   className?: string;
 }
 
@@ -28,9 +25,6 @@ export function DatePicker({
   onChange,
   placeholder = "Chọn ngày",
   disabled = false,
-  disabledDates,
-  fromDate,
-  toDate,
   className,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
@@ -59,8 +53,10 @@ export function DatePicker({
             onChange?.(date);
             setOpen(false);
           }}
-          disabled={disabledDates}
           locale={vi}
+          disabled={{
+            before: new Date(),
+          }}
         />
       </PopoverContent>
     </Popover>
