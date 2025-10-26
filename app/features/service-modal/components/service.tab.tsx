@@ -13,8 +13,8 @@ function ServiceTab() {
     <TabsContent key={"service"} value={"Service"}>
       <ScrollArea className="h-120 bg-white border rounded-md">
         <ul className="grid p-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data?.map((serviceItem) =>
-            serviceItem.items.map((item) => (
+          {data?.map((serviceType) =>
+            serviceType.items.map((item) => (
               <ServiceItemGrid key={item.serviceItemId} item={item} />
             ))
           )}

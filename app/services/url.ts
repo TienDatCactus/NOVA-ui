@@ -1,3 +1,5 @@
+import { de, se } from "date-fns/locale";
+
 const Auth = {
   login: "Auth/login",
   logout: "Auth/logout",
@@ -35,6 +37,20 @@ const Menu = {
 };
 
 const Service = {
-  list: "Service/list",
+  list: "/Service/list",
+  detail: (id: string) => `Service/items/${id}`,
+  byServiceType: (serviceTypeId: string) =>
+    `Service/items/by-service-type/${serviceTypeId}`,
+  create: "Service/items",
+  update: (id: string) => `Service/items/${id}`,
+  delete: (id: string) => `Service/items/${id}`,
 };
-export { Auth, Booking, Menu, Service, Rooms, RoomTypes };
+
+const ServiceTypes = {
+  list: "ServiceTypes",
+};
+
+const Units = {
+  list: "Units",
+};
+export { Auth, Booking, Menu, Service, Rooms, RoomTypes, ServiceTypes, Units };
