@@ -12,19 +12,16 @@ const ServiceTypeItemSchema = z.object({
 
 const ServiceTypeListResponseSchema = z.array(ServiceTypeItemSchema);
 
-const CreateServiceTypeSchema = z.object({
+const EditServiceTypeRequestSchema = z.object({
   code: z.string(),
   name: z.string(),
   description: z.string(),
   active: z.boolean(),
 });
 
-const UpdateServiceTypeSchema = z.object({
-  code: z.string(),
-  name: z.string(),
-  description: z.string(),
-  active: z.boolean(),
-});
+const UpdateServiceTypeRequestSchema = EditServiceTypeRequestSchema;
+
+const CreateServiceTypeRequestSchema = EditServiceTypeRequestSchema;
 
 const CreateServiceTypeResponseSchema = ServiceTypeItemSchema;
 const ServiceTypeItemDetailSchema = ServiceTypeItemSchema;
@@ -33,10 +30,10 @@ const UpdateServiceTypeResponseSchema = ServiceTypeItemSchema;
 function useServiceTypesSchema() {
   return {
     ServiceTypeListResponseSchema,
-    CreateServiceTypeSchema,
+    CreateServiceTypeRequestSchema,
     CreateServiceTypeResponseSchema,
     ServiceTypeItemDetailSchema,
-    UpdateServiceTypeSchema,
+    UpdateServiceTypeRequestSchema,
     UpdateServiceTypeResponseSchema,
   };
 }

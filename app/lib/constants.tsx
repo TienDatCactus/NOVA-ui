@@ -202,11 +202,12 @@ const SERVICES_TOP_NAV_ITEMS: Array<{
   {
     icon: <ClipboardMinus size={16} />,
     title: "Dịch vụ",
-    href: "/dashboard/reservation",
+    href: "/dashboard/services",
   },
   {
-    icon: <HousePlus size={16} />,
-    title: "Menu",
+    icon: <ClipboardMinus size={16} />,
+    title: "Loại dịch vụ",
+    href: "/dashboard/services/types",
   },
 ];
 const INVOICES_TOP_NAV_ITEMS: Array<{

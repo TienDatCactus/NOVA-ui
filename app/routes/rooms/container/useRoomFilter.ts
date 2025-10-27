@@ -15,7 +15,6 @@ const DEFAULT_FILTERS: RoomFilters = {
   status: [],
   roomTypes: [],
   isOccupied: null,
-  locked: null,
   priceRange: [0, 5000000],
 };
 
@@ -35,7 +34,6 @@ function useRoomFilters() {
 
   const filterRooms = (rooms: RoomListItemDto[]) => {
     return rooms.filter((room) => {
-      // Search filter
       if (filters.searchText) {
         const searchLower = filters.searchText.toLowerCase();
         const matchesSearch =
@@ -44,13 +42,12 @@ function useRoomFilters() {
           room.roomTypeName.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
       }
-
-      // Status filter
+      console.log(filters.status);
+      console.log(room.status);
       if (filters.status.length > 0 && !filters.status.includes(room.status)) {
         return false;
       }
 
-      // Room type filter
       if (
         filters.roomTypes.length > 0 &&
         !filters.roomTypes.includes(room.roomTypeName)
@@ -63,11 +60,6 @@ function useRoomFilters() {
         filters.isOccupied !== null &&
         room.isOccupied !== filters.isOccupied
       ) {
-        return false;
-      }
-
-      // Locked filter
-      if (filters.locked !== null && room.locked !== filters.locked) {
         return false;
       }
 

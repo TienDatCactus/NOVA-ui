@@ -49,7 +49,7 @@ async function staffCreateBooking(
 ): Promise<StaffCreateBookingResponseDto> {
   try {
     const resp = await http.post(
-      Booking.create,
+      Booking.staffCreateBooking,
       StaffCreateBookingSchema.parse(data)
     );
     return StaffCreateBookingResponseSchema.parse(resp.data);

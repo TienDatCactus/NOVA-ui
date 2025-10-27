@@ -8,7 +8,7 @@ const Auth = {
 };
 
 const Booking = {
-  create: "Bookings",
+  staffCreateBooking: "StaffBookings",
   list: "Bookings/list",
   listByWeek: "Bookings/rooms-week",
   detailById: (id: string) => `Bookings/${id}/details`,
@@ -37,8 +37,39 @@ const RoomTypes = {
 const Menu = {
   list: "Menu/list",
 };
-
 const Service = {
-  list: "Service/list",
+  list: "/Service/list",
+  detail: (id: string) => `Service/items/${id}`,
+  byServiceType: (serviceTypeId: string) =>
+    `Service/items/by-service-type/${serviceTypeId}`,
+  create: "Service/items",
+  update: (id: string) => `Service/items/${id}`,
+  delete: (id: string) => `Service/items/${id}`,
 };
-export { Auth, Booking, Menu, Service, Rooms, RoomTypes, OTAInformation };
+
+const ServiceTypes = {
+  list: "ServiceTypes",
+  create: "ServiceTypes",
+  update: (id: string) => `ServiceTypes/${id}`,
+  detail: (id: string) => `ServiceTypes/${id}`,
+  delete: (id: string) => `ServiceTypes/${id}`,
+};
+
+const Units = {
+  list: "Units",
+  create: "Units",
+  detail: (id: string) => `Units/${id}`,
+  update: (id: string) => `Units/${id}`,
+  delete: (id: string) => `Units/${id}`,
+};
+export {
+  Auth,
+  Booking,
+  Menu,
+  Service,
+  Rooms,
+  RoomTypes,
+  OTAInformation,
+  ServiceTypes,
+  Units,
+};

@@ -18,6 +18,7 @@ const ServiceListResponseSchema = z.array(
     serviceTypeId: z.string(),
     typeCode: z.string(),
     typeName: z.string(),
+    imageUrls: z.array(z.string()),
     active: z.boolean().default(true),
     items: z.array(ServiceItemListSchema),
   })
@@ -40,7 +41,7 @@ const ServiceListByTypeResponseSchema = z.array(ServiceItemSchema);
 
 const ServiceItemDetailResponseSchema = ServiceItemSchema;
 
-const EditServiceItemSchema = z.object({
+const EditServiceItemRequestSchema = z.object({
   serviceTypeId: z.string(),
   unitId: z.string(),
   code: z.string().min(2).max(100),
@@ -49,6 +50,9 @@ const EditServiceItemSchema = z.object({
   basePrice: z.number().min(0),
   active: z.boolean().default(true),
 });
+const CreateServiceItemRequestSchema = EditServiceItemRequestSchema;
+const UpdateServiceItemRequestSchema = EditServiceItemRequestSchema;
+const CreateServiceItemResponseSchema = ServiceItemSchema;
 const UpdateServiceItemResponseSchema = ServiceItemSchema;
 const ServicePaymentSchema = RoomPaymentSchema;
 const ServiceOrderItemSchema = z.object({
@@ -68,10 +72,13 @@ const useServiceSchema = () => {
     ServiceListResponseSchema,
     ServiceListByTypeResponseSchema,
     ServiceItemDetailResponseSchema,
-    EditServiceItemSchema,
     UpdateServiceItemResponseSchema,
     RoomPaymentSchema,
     ServiceOrderSchema,
+    CreateServiceItemResponseSchema,
+    UpdateServiceItemRequestSchema,
+    CreateServiceItemRequestSchema,
+    ServiceItemListSchema,
   };
 };
 export default useServiceSchema;

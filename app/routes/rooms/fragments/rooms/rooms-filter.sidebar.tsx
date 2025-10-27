@@ -8,8 +8,11 @@ import { Slider } from "~/components/ui/slider";
 
 import { formatMoney } from "~/lib/utils";
 import type { RoomFilters } from "../../container/useRoomFilter";
-import { RoomStatusEnum } from "~/services/types/room.types";
-
+import { ROOM_TYPE, RoomStatusEnum } from "~/services/types/room.types";
+import useRoomTypesSchema from "~/services/schema/room-types.schema";
+import type z from "zod";
+const { RoomTypesListResponseSchema } = useRoomTypesSchema();
+type RoomTypeList = z.infer<typeof RoomTypesListResponseSchema>;
 interface RoomsFilterSidebarProps {
   filters: RoomFilters;
   onFilterChange: <K extends keyof RoomFilters>(
@@ -17,12 +20,14 @@ interface RoomsFilterSidebarProps {
     value: RoomFilters[K]
   ) => void;
   onResetFilters: () => void;
+  roomTypes: RoomTypeList;
 }
 
 function RoomsFilterSidebar({
   filters,
   onFilterChange,
   onResetFilters,
+  roomTypes,
 }: RoomsFilterSidebarProps) {
   const handleStatusToggle = (statusValue: string) => {
     const newStatus = filters.status.includes(statusValue)
@@ -86,12 +91,12 @@ function RoomsFilterSidebar({
           {Object.entries(RoomStatusEnum).map(([key, value]) => (
             <div key={value} className="flex items-center gap-2">
               <Checkbox
-                id={`status-${value}`}
-                checked={filters.status.includes(value)}
-                onCheckedChange={() => handleStatusToggle(value)}
+                id={`status-${key}`}
+                checked={filters.status.includes(key)}
+                onCheckedChange={() => handleStatusToggle(key)}
               />
               <Label
-                htmlFor={`status-${value}`}
+                htmlFor={`status-${key}`}
                 className="text-sm font-normal cursor-pointer"
               >
                 {value}
@@ -106,21 +111,21 @@ function RoomsFilterSidebar({
       <div className="space-y-3">
         <Label className="text-sm font-medium">Hạng phòng</Label>
         <div className="space-y-2">
-          {/* {ROOM_TYPE.map((roomType) => (
-            <div key={roomType} className="flex items-center gap-2">
+          {roomTypes.map((item) => (
+            <div key={item.id} className="flex items-center gap-2">
               <Checkbox
-                id={`type-${roomType}`}
-                checked={filters.roomTypes.includes(roomType)}
-                onCheckedChange={() => handleRoomTypeToggle(roomType)}
+                id={`type-${item.id}`}
+                checked={filters.roomTypes.includes(item.name)}
+                onCheckedChange={() => handleRoomTypeToggle(item.name)}
               />
               <Label
-                htmlFor={`type-${roomType}`}
+                htmlFor={`type-${item.id}`}
                 className="text-sm font-normal cursor-pointer"
               >
-                {roomType}
+                {item.name}
               </Label>
             </div>
-          ))} */}
+          ))}
         </div>
       </div>
 
@@ -157,44 +162,6 @@ function RoomsFilterSidebar({
               className="text-sm font-normal cursor-pointer"
             >
               Chưa sử dụng
-            </Label>
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Trạng thái khóa</Label>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="locked-yes"
-              checked={filters.locked === true}
-              onCheckedChange={(checked) =>
-                onFilterChange("locked", checked ? true : null)
-              }
-            />
-            <Label
-              htmlFor="locked-yes"
-              className="text-sm font-normal cursor-pointer"
-            >
-              Đã khóa
-            </Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="locked-no"
-              checked={filters.locked === false}
-              onCheckedChange={(checked) =>
-                onFilterChange("locked", checked ? false : null)
-              }
-            />
-            <Label
-              htmlFor="locked-no"
-              className="text-sm font-normal cursor-pointer"
-            >
-              Không khóa
             </Label>
           </div>
         </div>

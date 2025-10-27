@@ -71,7 +71,6 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
       roomName: room?.roomName || "",
       roomTypeId: room?.roomTypeId || "",
       status: room?.status || "",
-      locked: room?.isOccupied || false,
     },
   });
 
@@ -215,39 +214,11 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
               </div>
 
               {/* Locked */}
-              <FormField
-                control={form.control}
-                name="locked"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Label className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
-                        />
-                        <div className="grid gap-1.5 font-normal">
-                          <p className="text-sm leading-none font-medium">
-                            Khóa phòng
-                          </p>
-                          <p className="text-muted-foreground text-sm">
-                            {room.isOccupied && field.value ? (
-                              <span className="text-yellow-600">
-                                <AlertCircle /> Phòng đang được sử dụng
-                              </span>
-                            ) : (
-                              "Phòng bị khóa sẽ không thể đặt được"
-                            )}
-                          </p>
-                        </div>
-                      </Label>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
 
               <SheetFooter className="gap-2 p-0">
+                <Button type="submit" disabled={isPending}>
+                  {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                </Button>{" "}
                 <Button
                   type="button"
                   variant="outline"
@@ -255,9 +226,6 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
                   disabled={isPending}
                 >
                   Hủy
-                </Button>
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Đang lưu..." : "Lưu thay đổi"}
                 </Button>
               </SheetFooter>
             </form>
