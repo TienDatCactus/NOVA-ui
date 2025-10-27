@@ -98,7 +98,7 @@ export function AvailableRoomTypeCard({
             <div className="space-y-2 py-4">
               {roomType.availableRooms.map((room) => {
                 const isSelected = selectedRoomIds.includes(room.roomId);
-                const isAvailable = room.status === "Available";
+                const isAvailable = room.status === "Ready";
 
                 return (
                   <div

@@ -17,7 +17,7 @@ export type SelectedRoomData = {
 // -------------
 interface CreateBookingState {
   data: Partial<CreateBookingInput>;
-  selectedRooms: SelectedRoomData[]; // Full data for display
+  selectedRooms: SelectedRoomData[];
   currentStep: number;
   setData: (data: Partial<CreateBookingInput>) => void;
   setSelectedRooms: (rooms: SelectedRoomData[]) => void;

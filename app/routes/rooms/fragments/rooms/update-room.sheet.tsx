@@ -71,7 +71,7 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
       roomName: room?.roomName || "",
       roomTypeId: room?.roomTypeId || "",
       status: room?.status || "",
-      locked: room?.locked || false,
+      locked: room?.isOccupied || false,
     },
   });
 

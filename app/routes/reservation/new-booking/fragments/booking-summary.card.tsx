@@ -8,8 +8,15 @@ import {
   Coffee,
   DollarSign,
   ChevronDown,
+  PencilLine,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { Input } from "~/components/ui/input";
@@ -24,7 +31,9 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import { Calendar } from "~/components/ui/calendar";
-import { Button } from "react-aria-components";
+import { Textarea } from "~/components/ui/textarea";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
 
 interface BookingSummaryCardProps {
   form: UseFormReturn<ReviewPaymentFormData>;
@@ -43,7 +52,7 @@ export function BookingSummaryCard({
   totalAmount,
 }: BookingSummaryCardProps) {
   const { data } = useCreateBookingStore();
-  console.log(data);
+  const [noteOpen, setNoteOpen] = useState(false);
   const overridePrice = form.watch("overridePrice");
   const nights =
     data.checkinDate && data.checkoutDate
@@ -65,58 +74,85 @@ export function BookingSummaryCard({
   return (
     <div className="space-y-4">
       <Card className="border shadow-s px-4">
-        <div className="space-y-2">
-          <div className="space-y-1 text-sm">
-            <p>
-              <span className="text-muted-foreground">Tên khách:</span>{" "}
-              <span className="font-medium">{data.guestFullName}</span>
-            </p>
-            {data.guestPhone && (
-              <p>
-                <span className="text-muted-foreground">SĐT:</span>{" "}
-                {data.guestPhone}
-              </p>
-            )}
-            {data.guestEmail && (
-              <p>
-                <span className="text-muted-foreground">Email:</span>{" "}
-                {data.guestEmail}
-              </p>
-            )}
-          </div>
-        </div>
+        <CardHeader className="px-0">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="space-y-1 text-sm">
+                <p>
+                  <span className="text-muted-foreground">Tên khách:</span>{" "}
+                  <span className="font-medium">{data.guestFullName}</span>
+                </p>
+                {data.guestPhone && (
+                  <p>
+                    <span className="text-muted-foreground">SĐT:</span>{" "}
+                    {data.guestPhone}
+                  </p>
+                )}
+                {data.guestEmail && (
+                  <p>
+                    <span className="text-muted-foreground">Email:</span>{" "}
+                    {data.guestEmail}
+                  </p>
+                )}
+              </div>
+            </div>
 
-        {/* Stay Info */}
-        <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="space-y-1">
-              <p className="text-muted-foreground text-xs">Nhận phòng</p>
-              <p className="font-medium">
-                {data.checkinDate
-                  ? format(data.checkinDate, "dd/MM/yyyy", { locale: vi })
-                  : "-"}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-muted-foreground text-xs">Trả phòng</p>
-              <p className="font-medium">
-                {data.checkoutDate
-                  ? format(data.checkoutDate, "dd/MM/yyyy", { locale: vi })
-                  : "-"}
-              </p>
+            {/* Stay Info */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-xs">Nhận phòng</p>
+                  <p className="font-medium">
+                    {data.checkinDate
+                      ? format(data.checkinDate, "dd/MM/yyyy", { locale: vi })
+                      : "-"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-xs">Trả phòng</p>
+                  <p className="font-medium">
+                    {data.checkoutDate
+                      ? format(data.checkoutDate, "dd/MM/yyyy", { locale: vi })
+                      : "-"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span>
+                    {data.adultsAmount} người lớn
+                    {data.childrenAmount
+                      ? `, ${data.childrenAmount} trẻ em`
+                      : ""}
+                  </span>
+                </div>
+                <Badge variant="secondary">{nights} đêm</Badge>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span>
-                {data.adultsAmount} người lớn
-                {data.childrenAmount ? `, ${data.childrenAmount} trẻ em` : ""}
-              </span>
-            </div>
-            <Badge variant="secondary">{nights} đêm</Badge>
+          <CardAction>
+            <Button onClick={() => setNoteOpen(!noteOpen)} variant="outline">
+              Ghi chú
+              <PencilLine />
+            </Button>
+          </CardAction>
+        </CardHeader>
+
+        {noteOpen && (
+          <div className="space-y-2">
+            <Label htmlFor="specialRequest">Yêu cầu đặc biệt (tùy chọn)</Label>
+            <Textarea
+              id="specialRequest"
+              placeholder="VD: Phòng tầng cao, view biển, giường đôi..."
+              rows={4}
+              {...form.register("specialRequest")}
+            />
+            <p className="text-xs text-muted-foreground">
+              Yêu cầu sẽ được gửi đến bộ phận phòng
+            </p>
           </div>
-        </div>
+        )}
       </Card>
 
       <Separator />
@@ -218,20 +254,24 @@ export function BookingSummaryCard({
           )}
 
           {/* Override Price Input */}
-          <div className="space-y-2 pt-2">
-            <Label htmlFor="overridePrice" className="text-sm font-medium">
-              Điều chỉnh giá (tùy chọn)
-            </Label>
-            <Input
-              id="overridePrice"
-              type="number"
-              placeholder="Nhập giá điều chỉnh"
-              min={0}
-              {...form.register("overridePrice", { valueAsNumber: true })}
-            />
-            <p className="text-xs text-muted-foreground">
-              Để trống nếu sử dụng giá mặc định
-            </p>
+          <div className="w-full flex justify-between">
+            <div>
+              <Label htmlFor="overridePrice" className="text-sm font-medium">
+                Điều chỉnh giá (tùy chọn)
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Để trống nếu sử dụng giá mặc định
+              </p>
+            </div>
+            <div>
+              <Input
+                id="overridePrice"
+                type="number"
+                placeholder="Nhập giá điều chỉnh"
+                min={0}
+                {...form.register("overridePrice", { valueAsNumber: true })}
+              />
+            </div>
           </div>
 
           <Separator />

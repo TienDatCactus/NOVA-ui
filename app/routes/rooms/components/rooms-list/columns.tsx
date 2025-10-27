@@ -52,7 +52,7 @@ export const columns: ColumnDef<RoomListItem>[] = [
       return (
         <div className="flex items-center gap-2">
           <span className="font-semibold">{row.original.roomName}</span>
-          {row.original.locked && <Lock className="h-3 w-3 text-red-500" />}
+          {row.original.isOccupied && <Lock className="h-3 w-3 text-red-500" />}
           {row.getCanExpand() && (
             <Button
               variant="ghost"

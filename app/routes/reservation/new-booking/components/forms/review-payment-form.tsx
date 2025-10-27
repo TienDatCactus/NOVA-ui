@@ -20,6 +20,7 @@ import { Form } from "~/components/ui/form";
 import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import useCalculateNights from "../../container/useCalculateNights";
+import useCreateBookingMutation from "../../container/useCreateBookingMutation";
 
 interface ReviewPaymentFormProps {
   onNext: () => void;
@@ -34,6 +35,7 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
     setData,
     reset,
   } = useCreateBookingStore();
+  const { mutate } = useCreateBookingMutation();
   const { ReviewPaymentFormSchema } = useFormSchema();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const nights = useCalculateNights({
@@ -99,21 +101,10 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
         isBreakfastAll: storeData.isBreakfastAll ?? false,
       };
 
-      const response = await BookingService.staffCreateBooking(bookingData);
-
-      toast.success(`Đặt phòng thành công! Mã: ${response.bookingCode}`, {
-        description: "Chuyển hướng đến danh sách đặt phòng...",
-        duration: 3000,
-      });
+      mutate(bookingData);
       reset();
-      setTimeout(() => {
-        navigate("/dashboard/reservation/bookings");
-      }, 1500);
     } catch (error) {
       console.error("Booking creation failed:", error);
-      toast.error("Đặt phòng thất bại", {
-        description: "Vui lòng kiểm tra lại thông tin và thử lại",
-      });
     } finally {
       setIsSubmitting(false);
     }
@@ -137,21 +128,6 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
               roomsData={selectedRooms}
               totalAmount={totalAmount}
             />
-
-            <div className="space-y-2">
-              <Label htmlFor="specialRequest">
-                Yêu cầu đặc biệt (tùy chọn)
-              </Label>
-              <Textarea
-                id="specialRequest"
-                placeholder="VD: Phòng tầng cao, view biển, giường đôi..."
-                rows={4}
-                {...form.register("specialRequest")}
-              />
-              <p className="text-xs text-muted-foreground">
-                Yêu cầu sẽ được gửi đến bộ phận phòng
-              </p>
-            </div>
           </div>
 
           {/* Right Column - Payment & Services */}
@@ -188,11 +164,19 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
               Quay lại
             </Button>
           )}
-          <div className="flex-1" />
-          <Button type="submit" disabled={isSubmitting} size="lg">
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Xác nhận đặt phòng
-          </Button>
+          <div>
+            <Button
+              type="submit"
+              variant={"gradient"}
+              disabled={isSubmitting}
+              size="lg"
+            >
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Xác nhận đặt phòng
+            </Button>
+          </div>
         </div>
       </form>
     </Form>
