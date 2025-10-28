@@ -1,8 +1,8 @@
 import type { Route } from "./+types/rooms";
 import CreateRoomDialog from "./components/create-room.dialog";
 import RoomsDataTable from "./components/rooms-list";
-import { useRoomTypes } from "./container/useRoomTypesQuery";
-import useRoomsContainer from "./container/useRoomsContainer";
+import { useRoomTypes } from "./container/room-types-query.hooks";
+import useRoomsContainer from "./container/rooms-container.hooks";
 import BulkActionsToolbar from "./fragments/room-types/rooms-bulk-action.dialog";
 import RoomsViewLayout from "./layouts/rooms-view.layout";
 

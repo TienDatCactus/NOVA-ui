@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Switch } from "~/components/ui/switch";
 import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import { RoomStatusEnum } from "~/services/types/room.types";
-import type { RoomFilters } from "../../container/useRoomFilter";
+import type { RoomFilters } from "../../container/rooms-filter.hooks";
 const { RoomTypesListResponseSchema } = useRoomTypesSchema();
 type RoomTypeList = z.infer<typeof RoomTypesListResponseSchema>;
 interface RoomsFilterSidebarProps {
@@ -45,7 +45,7 @@ function RoomsFilterSidebar({
     (filters.isOccupied !== null ? 1 : 0);
 
   return (
-    <aside className="w-64 flex-shrink-0 space-y-2">
+    <aside className="w-72 flex-shrink-0 space-y-2">
       <div className="flex items-center justify-between">
         <Button variant="light" className="text-xl font-medium">
           Bộ lọc <ListFilterPlus />
@@ -64,7 +64,7 @@ function RoomsFilterSidebar({
       </div>
 
       <Card className="p-4 shadow-s">
-        <CardContent className="px-0 rounded-md">
+        <CardContent className="px-0">
           <div className="space-y-2">
             <Label htmlFor="search" className="text-sm font-medium">
               Tìm kiếm
@@ -82,14 +82,17 @@ function RoomsFilterSidebar({
         <CardContent className="px-0 rounded-md">
           <Collapsible className="space-y-3">
             <CollapsibleTrigger>
-              <Label className="text-sm font-medium">Trạng thái</Label>
+              <Label className="text-sm font-medium" htmlFor="rooms-status">
+                Trạng thái
+              </Label>
               <ChevronDown className="h-4 w-4" />
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2">
               <RadioGroup
+                id="rooms-status"
                 value={filters.status || ""}
                 onValueChange={(value) => {
-                  onFilterChange("status", value === "" ? undefined : value);
+                  onFilterChange("status", value as RoomFilters["status"]);
                 }}
               >
                 <div className="flex items-center gap-2">

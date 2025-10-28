@@ -1,7 +1,5 @@
-import { Plus, SearchIcon } from "lucide-react";
-import { useState } from "react";
-import { Link, useLocation } from "react-router";
-import { Button } from "~/components/ui/button";
+import { SearchIcon } from "lucide-react";
+import { Link } from "react-router";
 import { Input } from "~/components/ui/input";
 import { Kbd } from "~/components/ui/kbd";
 import {
@@ -25,44 +23,47 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
         <NavigationMenuList>
           {navItems.map((item) => (
             <NavigationMenuItem key={item.title}>
-              <NavigationMenuTrigger
-                isActive={currentPath === item.href}
-                hasChildren={!!item?.children}
-              >
-                {item.href ? (
-                  <Link to={item.href!} className="flex gap-2 items-center">
+              {!!item.children ? (
+                <>
+                  <NavigationMenuTrigger className="flex gap-2 items-center">
                     {item.icon}
                     {item.title}
-                  </Link>
-                ) : (
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid gap-2 w-44">
+                      {item.children.map((child) => (
+                        <li
+                          key={child.title}
+                          className={cn({
+                            " bg-accent border-b-2 border-primary":
+                              currentPath === child.href,
+                          })}
+                        >
+                          <NavigationMenuLink asChild>
+                            <Link to={child.href}>
+                              <div className="text-sm leading-none font-medium">
+                                {child.title}
+                              </div>
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </>
+              ) : (
+                <NavigationMenuLink
+                  href={item.href ?? ""}
+                  className={cn({
+                    " bg-accent border-b-2 border-primary":
+                      currentPath === item.href,
+                  })}
+                >
                   <div className="flex gap-2 items-center">
                     {item.icon}
                     {item.title}
                   </div>
-                )}
-              </NavigationMenuTrigger>
-              {item?.children && item?.children.length > 0 && (
-                <NavigationMenuContent>
-                  <ul className="grid gap-2 w-44">
-                    {item.children.map((child) => (
-                      <li
-                        key={child.title}
-                        className={cn({
-                          " bg-accent border-b-2 border-primary":
-                            currentPath === child.href,
-                        })}
-                      >
-                        <NavigationMenuLink asChild>
-                          <Link to={child.href}>
-                            <div className="text-sm leading-none font-medium">
-                              {child.title}
-                            </div>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
+                </NavigationMenuLink>
               )}
             </NavigationMenuItem>
           ))}

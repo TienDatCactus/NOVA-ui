@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 export interface RoomTypeFilters {
   searchText: string;
-  activeFilter: "all" | "active" | "inactive";
+  activeFilter: "active" | "all";
 }
 
 const DEFAULT_FILTERS: RoomTypeFilters = {
@@ -19,16 +19,13 @@ function useRoomTypeFilter() {
   ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
-
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
   };
-  // Client-side filtering
   const filterRoomTypes = (roomTypes: RoomTypesListItemDto[]) => {
     if (!roomTypes) return [];
 
     return roomTypes.filter((roomType) => {
-      // Search filter
       const matchesSearch =
         filters.searchText === "" ||
         roomType.code
@@ -36,13 +33,7 @@ function useRoomTypeFilter() {
           .includes(filters.searchText.toLowerCase()) ||
         roomType.name.toLowerCase().includes(filters.searchText.toLowerCase());
 
-      // Active filter
-      const matchesActive =
-        filters.activeFilter === "all" ||
-        (filters.activeFilter === "active" && roomType.active) ||
-        (filters.activeFilter === "inactive" && !roomType.active);
-
-      return matchesSearch && matchesActive;
+      return matchesSearch;
     });
   };
   return {

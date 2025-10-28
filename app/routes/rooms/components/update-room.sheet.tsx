@@ -1,8 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +12,6 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -24,7 +21,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -45,10 +41,10 @@ import type {
   RoomListItemDto,
   UpdateRoomDetailRequestDto,
 } from "~/services/api/rooms/dto";
-import { useUpdateRoom } from "../container/useRoomMutation";
-import { useRoomTypes } from "../container/useRoomTypesQuery";
-import { RoomStatusEnum } from "~/services/types/room.types";
 import useRoomSchema from "~/services/schema/room.schema";
+import { RoomStatusEnum } from "~/services/types/room.types";
+import { useRoomTypes } from "../container/room-types-query.hooks";
+import { useUpdateRoom } from "../container/rooms-mutation.hooks";
 
 const { UpdateRoomDetailRequestSchema } = useRoomSchema();
 
@@ -176,7 +172,6 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
                   )}
                 />
 
-                {/* Status */}
                 <FormField
                   control={form.control}
                   name="status"
@@ -209,21 +204,20 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
                   )}
                 />
               </div>
-
-              {/* Locked */}
-
-              <SheetFooter className="gap-2 p-0">
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-                </Button>{" "}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClose}
-                  disabled={isPending}
-                >
-                  Hủy
-                </Button>
+              <SheetFooter className="gap-2 p-0 items-end">
+                <div>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                  </Button>{" "}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClose}
+                    disabled={isPending}
+                  >
+                    Hủy
+                  </Button>
+                </div>
               </SheetFooter>
             </form>
           </Form>

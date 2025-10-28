@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import useRoomTypeFilter from "./container/useRoomTypeFilter";
-import { useRoomTypes } from "./container/useRoomTypesQuery";
+import useRoomTypeFilter from "./container/room-types-filter.hooks";
+import { useRoomTypes } from "./container/room-types-query.hooks";
 import { CreateRoomTypeDialog } from "./components/create-room-types.dialog";
 import RoomTypesViewLayout from "./layouts/room-types-view.layout";
 import RoomTypesDataTable from "./components/room-types-list";
@@ -12,11 +12,13 @@ export default function RoomTypesPage() {
     filters,
     updateFilter,
     resetFilters,
-    includeInactive,
     filterRoomTypes,
+    includeInactive,
   } = useRoomTypeFilter();
 
-  const { data: roomTypes, isPending } = useRoomTypes({ includeInactive });
+  const { data: roomTypes, isPending } = useRoomTypes({
+    includeInactive,
+  });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedRoomTypes, setSelectedRoomTypes] = useState<
     RoomTypesListItemDto[]

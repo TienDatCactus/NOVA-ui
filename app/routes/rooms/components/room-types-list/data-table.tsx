@@ -6,6 +6,7 @@ import {
   type ColumnDef,
   type SortingState,
   type RowSelectionState,
+  getExpandedRowModel,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -15,7 +16,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { useState } from "react";
+import React, { useState } from "react";
+import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
+import { Info } from "lucide-react";
+import { useRoomDetail } from "../../container/rooms-query.hooks";
+import { useRoomTypeDetail } from "../../container/room-types-query.hooks";
+import RoomTypesDetailRow from "../../fragments/room-types/room-types-detail.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -23,22 +29,32 @@ interface DataTableProps<TData, TValue> {
   onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RoomTypesListItemDto, TValue>({
   columns,
   data,
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-
+  const [expanded, setExpanded] = useState<any>();
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const { data: roomTypeDetailData, isLoading: roomDetailLoading } =
+    useRoomTypeDetail(Object.keys(expanded || {})[0] as string);
   const table = useReactTable({
     data,
     columns,
+    onExpandedChange: setExpanded,
+    onRowSelectionChange: setRowSelection,
+    getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
+    getRowCanExpand: () => true,
+    getRowId: (row) => row.id,
     state: {
       sorting,
+      expanded,
+      rowSelection,
     },
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -65,16 +81,40 @@ export function DataTable<TData, TValue>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
+              <React.Fragment key={row.id}>
+                <TableRow data-state={row.getIsSelected() && "selected"}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+                {row.getIsExpanded() && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="p-4 space-y-4"
+                    >
+                      <h3 className="text-lg font-medium ">
+                        <Info /> Thông tin chi tiết
+                      </h3>
+                      {roomTypeDetailData ? (
+                        <RoomTypesDetailRow
+                          roomTypeDetail={roomTypeDetailData}
+                          isLoading={roomDetailLoading}
+                        />
+                      ) : (
+                        <p className="text-center text-sm italic ">
+                          Không có thông tin
+                        </p>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
             ))
           ) : (
             <TableRow>

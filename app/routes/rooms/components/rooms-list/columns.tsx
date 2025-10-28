@@ -9,6 +9,11 @@ import { formatMoney } from "~/lib/utils";
 import useRoomSchema from "~/services/schema/room.schema";
 import RoomActionsCell from "../../fragments/rooms/room-actions.cell";
 import RoomStatusCell from "../../fragments/rooms/room-status.cell";
+import { useState } from "react";
+import { Drawer, DrawerTrigger } from "~/components/ui/drawer";
+import RoomDetailDrawer from "../rooms-detail.dialog";
+import { Dialog, DialogTrigger } from "~/components/ui/dialog";
+import RoomDetailDialog from "../rooms-detail.dialog";
 
 const { RoomListItemSchema } = useRoomSchema();
 type RoomListItem = z.infer<typeof RoomListItemSchema>;
@@ -49,23 +54,21 @@ export const columns: ColumnDef<RoomListItem>[] = [
     accessorKey: "roomName",
     header: "Tên phòng",
     cell: ({ row }) => {
+      const [open, setOpen] = useState(false);
       return (
         <div className="flex items-center gap-2">
-          <span className="font-semibold">{row.original.roomName}</span>
-          {row.original.isOccupied && <Lock className="h-3 w-3 text-red-500" />}
-          {row.getCanExpand() && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => row.toggleExpanded()}
-            >
-              {row.getIsExpanded() ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </Button>
-          )}
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button variant="link" className="p-0">
+                {row.original.roomName}
+              </Button>
+            </DialogTrigger>
+            <RoomDetailDialog
+              open={open}
+              onOpenChange={setOpen}
+              roomId={row.original.roomId}
+            />
+          </Dialog>
         </div>
       );
     },
@@ -103,25 +106,14 @@ export const columns: ColumnDef<RoomListItem>[] = [
     },
   },
   {
-    accessorKey: "isOccupied",
-    header: () => <p className="text-center">Tình trạng phòng</p>,
-    cell: ({ row }) => {
-      return (
-        <div className="flex justify-center">
-          {row.original.isOccupied ? (
-            <Badge variant={"success"}>Đang sử dụng</Badge>
-          ) : (
-            <Badge variant={"info"}>Trống</Badge>
-          )}
-        </div>
-      );
-    },
-  },
-  {
     id: "actions",
     header: () => null,
     cell: ({ row }) => {
-      return <RoomActionsCell room={row.original} />;
+      return (
+        <div className="flex justify-end">
+          <RoomActionsCell room={row.original} />
+        </div>
+      );
     },
     enableSorting: false,
     enableHiding: false,

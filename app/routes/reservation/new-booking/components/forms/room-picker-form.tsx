@@ -7,7 +7,7 @@ import { format, differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-import { useAvailableRoomsInternal } from "~/routes/rooms/container/useRoomQuery";
+import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms-query.hooks";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import useFormSchema from "~/services/schema/forms.schema";
 import type { RoomSelectionFormData } from "~/services/types/forms.types";

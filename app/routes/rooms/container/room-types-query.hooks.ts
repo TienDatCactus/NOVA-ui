@@ -9,4 +9,13 @@ function useRoomTypes(params?: RoomTypesListParams) {
     staleTime: 10 * 60 * 1000,
   });
 }
-export { useRoomTypes };
+
+function useRoomTypeDetail(id: string) {
+  return useQuery({
+    queryKey: ["room-type", id],
+    queryFn: async () => await RoomTypesService.getRoomTypesDetail(id),
+    staleTime: 10 * 60 * 1000,
+    enabled: !!id,
+  });
+}
+export { useRoomTypes, useRoomTypeDetail };

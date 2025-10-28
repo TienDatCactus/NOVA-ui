@@ -1,7 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import Image from "~/components/ui/image";
 import { formatMoney } from "~/lib/utils";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 import { RoomTypeActionsCell } from "../../fragments/room-types/room-types-action.cell";
@@ -35,30 +36,28 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
     header: "STT",
     cell: ({ row }) => <div className="w-12">{row.index + 1}</div>,
   },
-  {
-    accessorKey: "image",
-    header: "Hình ảnh",
-    cell: ({ row }) => {
-      return <Image src="" alt="" height={100} width={140} />;
-    },
-  },
+
   {
     accessorKey: "code",
     header: "Mã hạng phòng",
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("code")}</div>
+      <div className="">
+        <Button variant="link" className="p-0 font-medium">
+          {row.original.code}
+        </Button>
+      </div>
     ),
   },
   {
     accessorKey: "name",
     header: "Tên hạng phòng",
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    cell: ({ row }) => <div>{row.original.name}</div>,
   },
   {
     accessorKey: "baseRate",
     header: "Giá cơ bản",
     cell: ({ row }) => {
-      const baseRate = row.getValue("baseRate") as number;
+      const baseRate = row.original.baseRate as number;
       const { vndFormatted } = formatMoney(baseRate);
       return <div className="font-medium">{vndFormatted}</div>;
     },
@@ -67,17 +66,9 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
     accessorKey: "active",
     header: "Trạng thái",
     cell: ({ row }) => {
-      const active = row.getValue("active") as boolean;
-      const roomType = row.original;
-
+      const active = row.original.active;
       return (
         <div className="flex items-center gap-2">
-          {/* <Switch
-            checked={active}
-            onCheckedChange={(checked) =>
-              onToggleActive(roomType.id, checked, roomType)
-            }
-          /> */}
           <Badge variant={active ? "default" : "secondary"}>
             {active ? "Hoạt động" : "Không hoạt động"}
           </Badge>
@@ -87,14 +78,9 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   },
   {
     accessorKey: "roomsCount",
-    header: "Số phòng",
+    header: "Số lượng phòng",
     cell: ({ row }) => {
-      const count = row.getValue("roomsCount") as number;
-      return (
-        <Badge variant="outline" className="font-mono">
-          {count}
-        </Badge>
-      );
+      return <Badge variant="outline">{row.original.roomsCount} phòng</Badge>;
     },
   },
   {

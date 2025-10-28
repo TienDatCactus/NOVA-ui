@@ -6,9 +6,8 @@ export const RoomStatusEnum = {
   Ready: "Có thể sử dụng",
   Dirty: "Bẩn",
   Cleaning: "Đang dọn dẹp",
-  Inspecting: "Đang kiểm tra",
   Maintenance: "Bảo trì",
-  OutOfService: "Ngoài dịch vụ",
+  OutOfService: "Ngừng phục vụ",
   Locked: "Đã khóa",
 };
 

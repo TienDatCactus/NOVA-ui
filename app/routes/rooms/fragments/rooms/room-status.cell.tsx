@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import { useUpdateRoomStatus } from "../../container/useRoomMutation";
+import { useUpdateRoomStatus } from "../../container/rooms-mutation.hooks";
 import { RoomStatusEnum } from "~/services/types/room.types";
 interface RoomStatusCellProps {
   room: RoomListItemDto;

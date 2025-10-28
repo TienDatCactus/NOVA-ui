@@ -3,7 +3,15 @@ import type { RoomListItemDto } from "~/services/api/rooms/dto";
 
 export interface RoomFilters {
   searchText: string;
-  status?: string;
+  status?:
+    | "Available"
+    | "Occupied"
+    | "Dirty"
+    | "OutOfService"
+    | "Reserved"
+    | "Cleaning"
+    | "Locked"
+    | undefined;
   date?: string;
   typeId?: string;
   isOccupied?: boolean | null;
@@ -44,13 +52,6 @@ function useRoomFilters() {
       }
 
       if (filters.status && room.status !== filters.status) {
-        return false;
-      }
-
-      if (
-        filters.isOccupied !== null &&
-        room.isOccupied !== filters.isOccupied
-      ) {
         return false;
       }
 

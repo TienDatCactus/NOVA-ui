@@ -21,34 +21,31 @@ function useRooms(params?: RoomListParams) {
 function useRoomDetail({
   id,
   params,
-  expanded,
 }: {
   id: string;
   params?: RoomDetailParams;
-  expanded: boolean;
 }) {
   return useQuery({
-    queryKey: ["room-detail", id, expanded],
+    queryKey: ["room-detail", id],
     queryFn: async () => RoomsService.getRoomDetails(id, params || {}),
     staleTime: 5 * 60 * 1000,
-    enabled: () => !!id && expanded,
+    enabled: !!id,
   });
 }
 
 function useRoomBookingHistory({
   id,
   params,
-  expanded,
 }: {
   id: string;
-  params: RoomBookingHistoryParams;
-  expanded: boolean;
+  params?: RoomBookingHistoryParams;
 }) {
   return useQuery({
     queryKey: ["room-booking-history", id, params],
-    queryFn: async () => await RoomsService.getRoomBookingHistory(id, params),
+    queryFn: async () =>
+      await RoomsService.getRoomBookingHistory(id, params ?? {}),
     staleTime: 5 * 60 * 1000,
-    enabled: () => !!id && expanded,
+    enabled: () => !!id,
   });
 }
 

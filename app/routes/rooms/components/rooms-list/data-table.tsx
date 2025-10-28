@@ -7,7 +7,9 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { Info } from "lucide-react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -16,17 +18,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Skeleton } from "~/components/ui/skeleton";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import { RoomsService } from "~/services/api/rooms";
-import RoomDetailRow from "../../fragments/rooms/rooms-detail.row";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import BookingHistoryRow from "../../fragments/rooms/booking-history.row";
 import {
-  useRoomDetail,
   useRoomBookingHistory,
-} from "../../container/useRoomQuery";
-import { format } from "date-fns";
+  useRoomDetail,
+} from "../../container/rooms-query.hooks";
+import RoomDetailRow from "../rooms-detail.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -39,44 +36,17 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
   data,
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
-  const [expanded, setExpanded] = useState<any>();
+  const [open, setOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [selectedDate, setSelectedDate] = useState<{
-    from: Date;
-    to: Date;
-  }>({
-    from: new Date(),
-    to: new Date(),
-  });
-  const handleDateChange = (dateRange: { from: Date; to: Date }) => {
-    setSelectedDate(dateRange);
-  };
-  const { isLoading: roomDetailLoading, data: roomDetailData } = useRoomDetail({
-    id: Object.keys(expanded || {})[0] as string,
-    params: {},
-    expanded,
-  });
-  const { isLoading: roomBookingHistoryLoading, data: roomBookingHistoryData } =
-    useRoomBookingHistory({
-      id: Object.keys(expanded || {})[0] as string,
-      params: {
-        from: format(selectedDate.from, "yyyy-MM-dd"),
-        to: format(selectedDate.to, "yyyy-MM-dd"),
-      },
-      expanded,
-    });
+
   const table = useReactTable({
     data,
     columns,
     state: {
-      expanded,
       rowSelection,
     },
-    onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
-    getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getRowCanExpand: () => true,
     getRowId: (row) => row.roomId,
   });
 
@@ -116,46 +86,6 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                  {row.getIsExpanded() && (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className="p-2">
-                        <Tabs defaultValue="detail">
-                          <TabsList>
-                            <TabsTrigger value="detail">Chi tiết</TabsTrigger>
-                            <TabsTrigger value="booking-history">
-                              Lịch sử đặt phòng
-                            </TabsTrigger>
-                          </TabsList>
-                          <TabsContent value="detail">
-                            {roomDetailData ? (
-                              <RoomDetailRow
-                                roomDetail={roomDetailData}
-                                isLoading={roomDetailLoading}
-                              />
-                            ) : (
-                              <p className="text-center text-sm italic ">
-                                Không có thông tin
-                              </p>
-                            )}
-                          </TabsContent>
-                          <TabsContent value="booking-history">
-                            {roomBookingHistoryData ? (
-                              <BookingHistoryRow
-                                date={selectedDate}
-                                onDateChange={handleDateChange}
-                                bookings={roomBookingHistoryData}
-                                isLoading={roomBookingHistoryLoading}
-                              />
-                            ) : (
-                              <p className="text-center text-sm italic ">
-                                Không có thông tin
-                              </p>
-                            )}
-                          </TabsContent>
-                        </Tabs>
-                      </TableCell>
-                    </TableRow>
-                  )}
                 </React.Fragment>
               );
             })

@@ -1,12 +1,14 @@
 import React, { useEffect, useState, type ComponentProps } from "react";
 import { cn } from "~/lib/utils";
 import { Skeleton } from "./skeleton";
+import { ImageOff } from "lucide-react";
 interface ImageProps {
   width?: number;
   height?: number;
   src: string;
   alt?: string;
   addBaseUrl?: boolean;
+  undefined?: boolean;
 }
 const Image: React.FC<ComponentProps<"img"> & ImageProps> = ({
   src,
@@ -15,11 +17,12 @@ const Image: React.FC<ComponentProps<"img"> & ImageProps> = ({
   width,
   height,
   style,
+  undefined,
   ...props
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
+  const [imageSrc, setImageSrc] = useState<string | undefined>(src);
 
   useEffect(() => {
     if (src) {
@@ -36,6 +39,17 @@ const Image: React.FC<ComponentProps<"img"> & ImageProps> = ({
     setLoading(false);
     setError(true);
   };
+  if (undefined || error) {
+    return (
+      <Skeleton
+        style={{ width, height }}
+        className="rounded-lg animate-none  flex flex-col items-center justify-center gap-2"
+      >
+        <ImageOff />
+        <p>Không có hình ảnh</p>
+      </Skeleton>
+    );
+  }
   return (
     <div
       style={{ width, height }}
@@ -47,11 +61,7 @@ const Image: React.FC<ComponentProps<"img"> & ImageProps> = ({
         </Skeleton>
       )}
       <img
-        src={
-          error
-            ? `https://placehold.co/${width}x${height}?text=Image+not+Found`
-            : imageSrc
-        }
+        src={imageSrc}
         alt={alt || "image"}
         onLoad={handleLoad}
         width={width}

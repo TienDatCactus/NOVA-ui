@@ -20,7 +20,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import type z from "zod";
-import { useCreateRoomType } from "../container/useRoomTypeMutation";
+import { useCreateRoomType } from "../container/room-types-mutation.hooks";
 
 const { CreateRoomTypesResponseSchema } = useRoomTypesSchema();
 const CreateRoomTypeFormSchema = CreateRoomTypesResponseSchema.pick({

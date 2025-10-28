@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { RoomTypeFilters } from "../container/useRoomTypeFilter";
+import type { RoomTypeFilters } from "../container/room-types-filter.hooks";
 import { RoomTypesFilterSidebar } from "../fragments/room-types/room-types-filter.sidebar";
 import { RoomTypesHeader } from "../fragments/room-types/room-types-header.layout";
 
