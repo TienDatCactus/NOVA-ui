@@ -8,5 +8,3 @@ export interface ServiceFilters {
   typeCode: string;
   includeInactive: boolean;
 }
-
-export type ServiceDensity = "comfortable" | "compact";

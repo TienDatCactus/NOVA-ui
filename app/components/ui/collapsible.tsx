@@ -1,4 +1,5 @@
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
+import { cn } from "~/lib/utils";
 
 function Collapsible({
   ...props
@@ -12,8 +13,11 @@ function CollapsibleTrigger({
   return (
     <CollapsiblePrimitive.CollapsibleTrigger
       data-slot="collapsible-trigger"
-      className="flex w-full items-center justify-between rounded-md bg-muted px-4 py-2 font-medium [&[data-state=open]>svg]:rotate-180 cursor-pointer hover:shadow"
       {...props}
+      className={cn(
+        "flex w-full items-center justify-between rounded-md bg-muted px-4 py-2 font-medium [&[data-state=open]>svg]:rotate-180 cursor-pointer hover:shadow-sm mb-2",
+        props.className
+      )}
     />
   );
 }

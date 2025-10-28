@@ -47,9 +47,9 @@ const ReviewPaymentFormSchema = z.object({
     .or(z.literal("")),
   overridePrice: StaffCreateBookingSchema.shape.overridePrice
     .optional()
-    .or(z.literal(0)),
-  roomPayment: RoomPaymentSchema.optional(),
-  serviceOrder: ServiceOrderSchema.optional(),
+    .or(z.literal("")),
+  roomPayment: RoomPaymentSchema.optional().nullable(),
+  serviceOrder: ServiceOrderSchema.optional().nullable(),
 });
 
 function useFormSchema() {

@@ -20,7 +20,7 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   const [currentStep, { goToNextStep, reset, goToPrevStep, setStep }] =
-    useStep(4);
+    useStep(3);
 
   const steps = [
     {

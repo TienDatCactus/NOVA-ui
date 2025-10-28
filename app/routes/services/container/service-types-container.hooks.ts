@@ -8,7 +8,7 @@ import { useDeleteServiceType } from "./service-type-mutation.hooks";
 
 export default function useServiceTypesContainer() {
   const { data: serviceTypesData, isPending } = useServiceTypes();
-  const { data: servicesData } = useServices(); // For service count
+  const { data: servicesData } = useServices();
   const { filters, updateFilter, resetFilters, filterServiceTypes } =
     useServiceTypeFilters();
   const [searchQuery, setSearchQuery] = useState("");

@@ -42,7 +42,6 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
       breakfastDates: storeData.breakfastDates || [],
     },
   });
-
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>(
     storeData.roomIds || []
   );

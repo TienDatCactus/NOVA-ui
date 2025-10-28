@@ -2,7 +2,7 @@ import { Pencil } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import UpdateRoomSheet from "./update-room.sheet";
+import UpdateRoomSheet from "../../components/update-room.sheet";
 
 interface RoomActionsCellProps {
   room: RoomListItemDto;

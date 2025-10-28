@@ -56,8 +56,6 @@ export default function CreateServiceTypeDialog({
   const { mutate: createServiceType, isPending } = useCreateServiceType();
 
   const handleSubmit = (data: CreateServiceTypeFormData) => {
-    // TODO: Upload images to backend first, then get URLs
-    // For now, we'll send the form data without images (backend will handle)
     createServiceType(data, {
       onSuccess: () => {
         form.reset();

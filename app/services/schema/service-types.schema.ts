@@ -6,8 +6,8 @@ const ServiceTypeItemSchema = z.object({
   name: z.string(),
   description: z.string().nullable(),
   active: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional().nullable(),
 });
 
 const ServiceTypeListResponseSchema = z.array(ServiceTypeItemSchema);

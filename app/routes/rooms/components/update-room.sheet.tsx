@@ -41,19 +41,16 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 
-import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import { useUpdateRoom } from "../../container/useRoomMutation";
-import { useRoomTypes } from "../../container/useRoomTypesQuery";
+import type {
+  RoomListItemDto,
+  UpdateRoomDetailRequestDto,
+} from "~/services/api/rooms/dto";
+import { useUpdateRoom } from "../container/useRoomMutation";
+import { useRoomTypes } from "../container/useRoomTypesQuery";
 import { RoomStatusEnum } from "~/services/types/room.types";
+import useRoomSchema from "~/services/schema/room.schema";
 
-const UpdateRoomFormSchema = z.object({
-  roomName: z.string().min(1, "Tên phòng là bắt buộc"),
-  roomTypeId: z.string().min(1, "Loại phòng là bắt buộc"),
-  status: z.string().min(1, "Trạng thái là bắt buộc"),
-  locked: z.boolean(),
-});
-
-type UpdateRoomFormData = z.infer<typeof UpdateRoomFormSchema>;
+const { UpdateRoomDetailRequestSchema } = useRoomSchema();
 
 interface UpdateRoomSheetProps {
   open: boolean;
@@ -65,8 +62,8 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
   const { mutate, isPending } = useUpdateRoom();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const { data: roomTypes } = useRoomTypes();
-  const form = useForm<UpdateRoomFormData>({
-    resolver: zodResolver(UpdateRoomFormSchema),
+  const form = useForm<UpdateRoomDetailRequestDto>({
+    resolver: zodResolver(UpdateRoomDetailRequestSchema),
     defaultValues: {
       roomName: room?.roomName || "",
       roomTypeId: room?.roomTypeId || "",
@@ -74,13 +71,13 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
     },
   });
 
-  const handleSubmit = (data: UpdateRoomFormData) => {
+  const handleSubmit = (data: UpdateRoomDetailRequestDto) => {
     if (!room) return;
 
     mutate(
       {
-        roomId: room.roomId,
-        ...data,
+        id: room.roomId,
+        data: data,
       },
       {
         onSuccess: () => {

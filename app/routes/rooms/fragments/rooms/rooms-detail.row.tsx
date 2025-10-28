@@ -22,12 +22,12 @@ function RoomDetailRow({ roomDetail, isLoading }: RoomDetailRowProps) {
       </div>
     );
   return (
-    <div className="p-4 bg-muted/30">
+    <div className="p-4 ">
       <div className="flex gap-4">
         <Card>
           <CardContent className="">
             <Image
-              src=""
+              src={roomDetail.imageUrls[0]}
               alt={roomDetail.roomName}
               width={300}
               height={200}

@@ -18,20 +18,17 @@ import {
 } from "~/components/ui/table";
 import type { ServiceItem } from "~/services/api/services/dto";
 import { cn } from "~/lib/utils";
-import type { ServiceDensity } from "~/services/types/service.types";
 import ServiceDetailRow from "../../fragments/services/service-detail.row";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  density: ServiceDensity;
   onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 export function DataTable<TData extends ServiceItem, TValue>({
   columns,
   data,
-  density,
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [expanded, setExpanded] = useState<ExpandedState>({});
@@ -52,15 +49,12 @@ export function DataTable<TData extends ServiceItem, TValue>({
     getRowId: (row) => row.serviceItemId,
   });
 
-  // Notify parent of selection changes
   useEffect(() => {
     const selectedRows = table
       .getSelectedRowModel()
       .rows.map((row) => row.original);
     onSelectionChange?.(selectedRows);
   }, [rowSelection, onSelectionChange, table]);
-
-  const rowHeight = density === "compact" ? "h-12" : "h-16";
 
   return (
     <div className="rounded-md border bg-card">
@@ -90,7 +84,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
                 <React.Fragment key={row.id}>
                   <TableRow
                     data-state={row.getIsSelected() && "selected"}
-                    className={cn(rowHeight, "transition-all")}
+                    className={cn("h-16", "transition-all")}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

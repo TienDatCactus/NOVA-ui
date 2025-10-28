@@ -25,8 +25,6 @@ export default function Component({
     filters,
     updateFilter,
     resetFilters,
-    density,
-    setDensity,
     searchQuery,
     setSearchQuery,
     selectedServices,
@@ -45,13 +43,32 @@ export default function Component({
     handleExportExcel,
   } = useServicesContainer();
 
+  // Listen for custom events from action cells
+  useEffect(() => {
+    const handleEditEvent = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      handleEdit(customEvent.detail);
+    };
+
+    const handleDeleteEvent = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      handleDelete(customEvent.detail);
+    };
+
+    window.addEventListener("service:edit", handleEditEvent);
+    window.addEventListener("service:delete", handleDeleteEvent);
+
+    return () => {
+      window.removeEventListener("service:edit", handleEditEvent);
+      window.removeEventListener("service:delete", handleDeleteEvent);
+    };
+  }, [handleEdit, handleDelete]);
+
   return (
     <ServicesViewLayout
       filters={filters}
       onFilterChange={updateFilter}
       onResetFilters={resetFilters}
-      density={density}
-      setDensity={setDensity}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
       totalServices={flattenedServices.length}
@@ -64,7 +81,6 @@ export default function Component({
       <ServicesDataTable
         services={flattenedServices}
         isLoading={isPending}
-        density={density}
         onAddService={() => setCreateDialogOpen(true)}
         onSelectionChange={setSelectedServices}
         onEdit={handleEdit}

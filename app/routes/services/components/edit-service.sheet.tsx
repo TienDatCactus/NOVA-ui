@@ -35,6 +35,7 @@ import type { ServiceItem } from "~/services/api/services/dto";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { useUpdateService } from "../container/service-mutation.hooks";
 import { useServices } from "../container/service-query.hooks";
+import { useServiceTypes } from "../container/service-types-query.hooks";
 
 const { UpdateServiceItemRequestSchema } = useServiceSchema();
 
@@ -66,19 +67,7 @@ export default function EditServiceSheet({
 
   const { mutate: updateService, isPending } = useUpdateService();
   const { data: units } = useUnits();
-  const { data: servicesData } = useServices();
-
-  // Extract unique service types
-  const serviceTypes = useMemo(() => {
-    if (!servicesData) return [];
-    return servicesData.map((group) => ({
-      id: group.serviceTypeId,
-      name: group.typeName,
-      code: group.typeCode,
-    }));
-  }, [servicesData]);
-
-  // Populate form when service changes
+  const { data: serviceTypesData } = useServiceTypes();
   useEffect(() => {
     if (service) {
       form.reset({
@@ -142,7 +131,7 @@ export default function EditServiceSheet({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {serviceTypes.map((type) => (
+                      {serviceTypesData!.map((type) => (
                         <SelectItem key={type.id} value={type.id}>
                           {type.name}
                         </SelectItem>

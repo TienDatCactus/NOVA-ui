@@ -6,7 +6,6 @@ import useBookingSchema from "~/services/schema/booking.schema";
 const { StaffCreateBookingSchema } = useBookingSchema();
 type CreateBookingInput = z.infer<typeof StaffCreateBookingSchema>;
 
-// Type for selected rooms (full data for UI)
 export type SelectedRoomData = {
   roomId: string;
   roomName: string;
@@ -43,7 +42,6 @@ export const useCreateBookingStore = create<CreateBookingState>()(
       name: "nova-create-booking",
       partialize: (state) => ({
         data: state.data,
-        selectedRooms: state.selectedRooms,
         currentStep: state.currentStep,
       }),
     }

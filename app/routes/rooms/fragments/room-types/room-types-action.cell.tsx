@@ -9,8 +9,8 @@ import {
 import { Button } from "~/components/ui/button";
 import { MoreHorizontal, Pencil } from "lucide-react";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { UpdateRoomTypeSheet } from "./update-room-types.sheet";
 import { useState } from "react";
+import { UpdateRoomTypeSheet } from "../../components/update-room-types.sheet";
 
 interface RoomTypeActionsCellProps {
   roomType: RoomTypesListItemDto;

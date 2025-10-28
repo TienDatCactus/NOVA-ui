@@ -3,19 +3,19 @@ import type { RoomListItemDto } from "~/services/api/rooms/dto";
 
 export interface RoomFilters {
   searchText: string;
-  status: string[];
-  roomTypes: string[];
+  status?: string;
+  date?: string;
+  typeId?: string;
   isOccupied?: boolean | null;
   locked?: boolean | null;
-  priceRange: [number, number];
 }
 
 const DEFAULT_FILTERS: RoomFilters = {
   searchText: "",
-  status: [],
-  roomTypes: [],
+  date: undefined,
+  status: undefined,
+  typeId: undefined,
   isOccupied: null,
-  priceRange: [0, 5000000],
 };
 
 function useRoomFilters() {
@@ -42,31 +42,14 @@ function useRoomFilters() {
           room.roomTypeName.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
       }
-      console.log(filters.status);
-      console.log(room.status);
-      if (filters.status.length > 0 && !filters.status.includes(room.status)) {
+
+      if (filters.status && room.status !== filters.status) {
         return false;
       }
 
-      if (
-        filters.roomTypes.length > 0 &&
-        !filters.roomTypes.includes(room.roomTypeName)
-      ) {
-        return false;
-      }
-
-      // Occupied filter
       if (
         filters.isOccupied !== null &&
         room.isOccupied !== filters.isOccupied
-      ) {
-        return false;
-      }
-
-      // Price range filter
-      if (
-        room.dailyPrice < filters.priceRange[0] ||
-        room.dailyPrice > filters.priceRange[1]
       ) {
         return false;
       }

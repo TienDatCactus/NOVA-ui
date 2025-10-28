@@ -11,8 +11,6 @@ interface ServiceTypeDetailRowProps {
 export default function ServiceTypeDetailRow({
   type,
 }: ServiceTypeDetailRowProps) {
-  //   const hasImages = type. && type.imageUrls.length > 0;
-
   return (
     <div className="p-6 bg-muted/30 border-l-4 border-l-primary/20 animate-in slide-in-from-top-2 duration-200">
       {/* Image Gallery */}
@@ -76,20 +74,22 @@ export default function ServiceTypeDetailRow({
             </p>
           </DetailSection>
 
-          <DetailSection title="Thời gian">
-            <DetailItem
-              label="Ngày tạo"
-              value={format(new Date(type.createdAt), "dd/MM/yyyy HH:mm", {
-                locale: vi,
-              })}
-            />
-            <DetailItem
-              label="Cập nhật lần cuối"
-              value={format(new Date(type.updatedAt), "dd/MM/yyyy HH:mm", {
-                locale: vi,
-              })}
-            />
-          </DetailSection>
+          {type.createdAt && type.updatedAt && (
+            <DetailSection title="Thời gian">
+              <DetailItem
+                label="Ngày tạo"
+                value={format(new Date(type.createdAt), "dd/MM/yyyy HH:mm", {
+                  locale: vi,
+                })}
+              />
+              <DetailItem
+                label="Cập nhật lần cuối"
+                value={format(new Date(type.updatedAt), "dd/MM/yyyy HH:mm", {
+                  locale: vi,
+                })}
+              />
+            </DetailSection>
+          )}
         </div>
       </div>
     </div>

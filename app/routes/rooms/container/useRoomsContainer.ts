@@ -5,8 +5,16 @@ import useRoomFilters from "./useRoomFilter";
 import { useRooms } from "./useRoomQuery";
 
 function useRoomsContainer() {
-  const { data: rooms, isPending, refetch } = useRooms();
   const { filters, updateFilter, resetFilters, filterRooms } = useRoomFilters();
+  const {
+    data: rooms,
+    isPending,
+    refetch,
+  } = useRooms({
+    date: filters.date,
+    status: filters.status,
+    typeId: filters.typeId,
+  });
   const [selectedRooms, setSelectedRooms] = useState<RoomListItemDto[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 

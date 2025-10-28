@@ -1,5 +1,6 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { RoomsService } from "~/services/api/rooms";
+import type { UpdateRoomDetailRequestDto } from "~/services/api/rooms/dto";
 
 function useCreateRoom() {
   const queryClient = useQueryClient();
@@ -21,22 +22,17 @@ function useCreateRoom() {
   });
 }
 
-interface UpdateRoomData {
-  roomId: string;
-  roomName: string;
-  roomTypeId: string;
-  status: string;
-  locked: boolean;
-}
-
 function useUpdateRoom() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (data: UpdateRoomData) => {
-      const { roomId, ...updateData } = data;
-      return await RoomsService.updateRoomDetail(roomId, updateData);
-    },
+    mutationKey: ["update-room"],
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateRoomDetailRequestDto;
+    }) => await RoomsService.updateRoomDetail(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
     },

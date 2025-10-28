@@ -21,6 +21,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import useCalculateNights from "../../container/useCalculateNights";
 import useCreateBookingMutation from "../../container/useCreateBookingMutation";
+import { useStep } from "~/hooks/use-step";
 
 interface ReviewPaymentFormProps {
   onNext: () => void;
@@ -35,6 +36,7 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
     setData,
     reset,
   } = useCreateBookingStore();
+  const [_, { reset: resetSteps }] = useStep(3);
   const { mutate } = useCreateBookingMutation();
   const { ReviewPaymentFormSchema } = useFormSchema();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +49,7 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
     defaultValues: {
       specialRequest: storeData.specialRequest ?? "",
       overridePrice: storeData.overridePrice,
-      roomPayment: storeData.roomPayment,
+      roomPayment: storeData.roomPayment ?? undefined,
       serviceOrder: storeData.serviceOrder,
     },
   });
@@ -66,27 +68,14 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
       : totalAmount;
   };
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setData({
-        specialRequest: form.watch("specialRequest"),
-        overridePrice: form.watch("overridePrice"),
-        roomPayment: form.watch("roomPayment"),
-        serviceOrder: form.watch("serviceOrder"),
-      });
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [
-    form.watch("specialRequest"),
-    form.watch("overridePrice"),
-    form.watch("roomPayment"),
-    form.watch("serviceOrder"),
-    setData,
-  ]);
-
   const onSubmit = async (data: ReviewPaymentFormData) => {
     setIsSubmitting(true);
+    setData({
+      specialRequest: data.specialRequest,
+      overridePrice: data.overridePrice,
+      roomPayment: data.roomPayment,
+      serviceOrder: data.serviceOrder,
+    });
     try {
       const bookingData = {
         ...storeData,
@@ -100,7 +89,7 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
         guestFullName: storeData.guestFullName!,
         isBreakfastAll: storeData.isBreakfastAll ?? false,
       };
-
+      console.log(bookingData);
       mutate(bookingData);
       reset();
     } catch (error) {
@@ -165,12 +154,7 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
             </Button>
           )}
           <div>
-            <Button
-              type="submit"
-              variant={"gradient"}
-              disabled={isSubmitting}
-              size="lg"
-            >
+            <Button type="submit" disabled={isSubmitting} size="lg">
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}

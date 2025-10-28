@@ -65,7 +65,6 @@ export default function CreateServiceDialog({
   const { data: units } = useUnits();
   const { data: servicesData } = useServices();
 
-  // Extract unique service types from services list
   const serviceTypes = useMemo(() => {
     if (!servicesData) return [];
     return servicesData.map((group) => ({

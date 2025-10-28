@@ -50,19 +50,19 @@ export const StaffCreateBookingSchema = z.object({
     .or(z.literal("")),
 
   specialRequest: z.string().optional(),
-  overridePrice: z.number().min(0).optional(),
-  internalNote: z.string().optional(),
+  overridePrice: z.string().optional().nullable(),
+  internalNote: z.string().optional().nullable(),
 
-  roomPayment: RoomPaymentSchema.optional(),
+  roomPayment: RoomPaymentSchema.optional().nullable(),
   serviceOrder: ServiceOrderSchema.optional(),
 });
 
 const StaffCreateBookingResponseSchema = z.object({
-  bookingId: z.string().uuid("Booking ID không hợp lệ"),
+  bookingId: z.string("Booking ID không hợp lệ"),
   bookingCode: z.string().min(1, "Mã đặt phòng không hợp lệ"),
   status: z.string(),
-  checkinDate: z.string().date("Ngày nhận phòng không hợp lệ"),
-  checkoutDate: z.string().date("Ngày trả phòng không hợp lệ"),
+  checkinDate: z.date("Ngày nhận phòng không hợp lệ"),
+  checkoutDate: z.date("Ngày trả phòng không hợp lệ"),
   totalAmount: z.number().min(0, "Tổng tiền không hợp lệ"),
   roomInvoice: InvoiceSchema.optional(),
   serviceInvoice: InvoiceSchema.optional(),

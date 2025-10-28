@@ -1,11 +1,10 @@
 import type { Route } from "./+types/rooms";
+import CreateRoomDialog from "./components/create-room.dialog";
 import RoomsDataTable from "./components/rooms-list";
-import BulkActionsToolbar from "./fragments/room-types/rooms-bulk-action.dialog";
-import RoomsViewLayout from "./layouts/rooms-view.layout";
-// import CreateRoomDialog from "./fragments/create-room.dialog";
 import { useRoomTypes } from "./container/useRoomTypesQuery";
 import useRoomsContainer from "./container/useRoomsContainer";
-import CreateRoomDialog from "./fragments/rooms/create-room.dialog";
+import BulkActionsToolbar from "./fragments/room-types/rooms-bulk-action.dialog";
+import RoomsViewLayout from "./layouts/rooms-view.layout";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};

@@ -11,7 +11,6 @@ import {
 } from "~/components/ui/select";
 import type {
   ServiceFilters,
-  ServiceDensity,
 } from "~/services/types/service.types";
 import { Badge } from "~/components/ui/badge";
 
@@ -21,8 +20,6 @@ interface ServicesCommandBarProps {
     key: K,
     value: ServiceFilters[K]
   ) => void;
-  density: ServiceDensity;
-  setDensity: (density: ServiceDensity) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedCount: number;
@@ -35,8 +32,6 @@ interface ServicesCommandBarProps {
 export default function ServicesCommandBar({
   filters,
   onFilterChange,
-  density,
-  setDensity,
   searchQuery,
   setSearchQuery,
   selectedCount,
@@ -87,21 +82,6 @@ export default function ServicesCommandBar({
             <SelectItem value="all">Tất cả</SelectItem>
           </SelectContent>
         </Select>
-
-        {/* Density Toggle */}
-        <Tabs
-          value={density}
-          onValueChange={(v) => setDensity(v as ServiceDensity)}
-        >
-          <TabsList>
-            <TabsTrigger value="comfortable">
-              <LayoutGrid className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="compact">
-              <List className="h-4 w-4" />
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
 
         {/* Create Button */}
         <Button onClick={onAddService}>

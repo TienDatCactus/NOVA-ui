@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
-import type {
-  ServiceFilters,
-  ServiceDensity,
-} from "~/services/types/service.types";
+import type { ServiceFilters } from "~/services/types/service.types";
 import ServicesCommandBar from "../fragments/services/service-command.bar";
 
 interface ServicesViewLayoutProps {
@@ -13,8 +10,6 @@ interface ServicesViewLayoutProps {
     value: ServiceFilters[K]
   ) => void;
   onResetFilters: () => void;
-  density: ServiceDensity;
-  setDensity: (density: ServiceDensity) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   totalServices: number;
@@ -29,8 +24,6 @@ export default function ServicesViewLayout({
   children,
   filters,
   onFilterChange,
-  density,
-  setDensity,
   searchQuery,
   setSearchQuery,
   totalServices,
@@ -70,8 +63,6 @@ export default function ServicesViewLayout({
         <ServicesCommandBar
           filters={filters}
           onFilterChange={onFilterChange}
-          density={density}
-          setDensity={setDensity}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           selectedCount={selectedCount}

@@ -5,11 +5,12 @@ import useBookingSchema from "~/services/schema/booking.schema";
 
 const { StaffCreateBookingSchema } = useBookingSchema();
 function useCreateBookingMutation() {
+  const idempotencyKey = crypto.randomUUID();
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["create-booking"],
     mutationFn: async (bookingData: z.infer<typeof StaffCreateBookingSchema>) =>
-      BookingService.staffCreateBooking(bookingData),
+      BookingService.staffCreateBooking(idempotencyKey, bookingData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
     },

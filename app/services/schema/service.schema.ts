@@ -34,8 +34,6 @@ const ServiceItemSchema = z.object({
   description: z.string(),
   basePrice: z.number().min(0),
   active: z.boolean().default(true),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 const ServiceListByTypeResponseSchema = z.array(ServiceItemSchema);
 
@@ -63,8 +61,8 @@ const ServiceOrderItemSchema = z.object({
   note: z.string().max(500),
 });
 const ServiceOrderSchema = z.object({
-  services: z.array(ServiceOrderItemSchema).optional(),
-  payment: ServicePaymentSchema.optional(),
+  services: z.array(ServiceOrderItemSchema).optional().nullable(),
+  payment: ServicePaymentSchema.optional().nullable(),
 });
 const useServiceSchema = () => {
   return {

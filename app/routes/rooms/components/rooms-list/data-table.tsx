@@ -26,6 +26,7 @@ import {
   useRoomDetail,
   useRoomBookingHistory,
 } from "../../container/useRoomQuery";
+import { format } from "date-fns";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -40,7 +41,16 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [expanded, setExpanded] = useState<any>();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-
+  const [selectedDate, setSelectedDate] = useState<{
+    from: Date;
+    to: Date;
+  }>({
+    from: new Date(),
+    to: new Date(),
+  });
+  const handleDateChange = (dateRange: { from: Date; to: Date }) => {
+    setSelectedDate(dateRange);
+  };
   const { isLoading: roomDetailLoading, data: roomDetailData } = useRoomDetail({
     id: Object.keys(expanded || {})[0] as string,
     params: {},
@@ -49,7 +59,10 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
   const { isLoading: roomBookingHistoryLoading, data: roomBookingHistoryData } =
     useRoomBookingHistory({
       id: Object.keys(expanded || {})[0] as string,
-      params: {},
+      params: {
+        from: format(selectedDate.from, "yyyy-MM-dd"),
+        to: format(selectedDate.to, "yyyy-MM-dd"),
+      },
       expanded,
     });
   const table = useReactTable({
@@ -68,8 +81,8 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
   });
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="rounded-md border bg-background">
+      <Table className="">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -128,6 +141,8 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
                           <TabsContent value="booking-history">
                             {roomBookingHistoryData ? (
                               <BookingHistoryRow
+                                date={selectedDate}
+                                onDateChange={handleDateChange}
                                 bookings={roomBookingHistoryData}
                                 isLoading={roomBookingHistoryLoading}
                               />

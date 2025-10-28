@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { ServiceItem } from "~/services/api/services/dto";
-import type { ServiceDensity } from "~/services/types/service.types";
 import useServiceFilters from "./service-filter.hooks";
 import { useDeleteService } from "./service-mutation.hooks";
 import { useServices } from "./service-query.hooks";
@@ -10,7 +9,6 @@ export default function useServicesContainer() {
   const { data: servicesData, isPending } = useServices();
   const { filters, updateFilter, resetFilters, filterServices } =
     useServiceFilters();
-  const [density, setDensity] = useState<ServiceDensity>("comfortable");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedServices, setSelectedServices] = useState<ServiceItem[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -104,8 +102,6 @@ export default function useServicesContainer() {
     filters,
     updateFilter,
     resetFilters,
-    density,
-    setDensity,
     searchQuery,
     setSearchQuery,
     selectedServices,

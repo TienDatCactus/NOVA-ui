@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 import useRoomTypeFilter from "./container/useRoomTypeFilter";
 import { useRoomTypes } from "./container/useRoomTypesQuery";
-import { CreateRoomTypeDialog } from "./fragments/room-types/create-room-types.dialog";
+import { CreateRoomTypeDialog } from "./components/create-room-types.dialog";
 import RoomTypesViewLayout from "./layouts/room-types-view.layout";
 import RoomTypesDataTable from "./components/room-types-list";
 

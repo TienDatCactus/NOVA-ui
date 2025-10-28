@@ -30,7 +30,7 @@ import {
 import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
 import useRoomSchema from "~/services/schema/room.schema";
 import { RoomStatusEnum } from "~/services/types/room.types";
-import { useCreateRoom } from "../../container/useRoomMutation";
+import { useCreateRoom } from "../container/useRoomMutation";
 
 const { CreateRoomResponseSchema } = useRoomSchema();
 const CreateRoomFormSchema = CreateRoomResponseSchema.pick({

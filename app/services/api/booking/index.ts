@@ -45,12 +45,18 @@ async function getBookingListByWeek(
 }
 
 async function staffCreateBooking(
+  idempotencyKey: string,
   data: StaffCreateBookingDto
 ): Promise<StaffCreateBookingResponseDto> {
   try {
     const resp = await http.post(
       Booking.staffCreateBooking,
-      StaffCreateBookingSchema.parse(data)
+      StaffCreateBookingSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
     return StaffCreateBookingResponseSchema.parse(resp.data);
   } catch (error) {

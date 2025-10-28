@@ -1,16 +1,21 @@
-import { Search, X } from "lucide-react";
+import { ChevronDown, ListFilterPlus, Search, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import { Slider } from "~/components/ui/slider";
 
-import { formatMoney } from "~/lib/utils";
-import type { RoomFilters } from "../../container/useRoomFilter";
-import { ROOM_TYPE, RoomStatusEnum } from "~/services/types/room.types";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import type z from "zod";
+import { Card, CardContent } from "~/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { Switch } from "~/components/ui/switch";
+import useRoomTypesSchema from "~/services/schema/room-types.schema";
+import { RoomStatusEnum } from "~/services/types/room.types";
+import type { RoomFilters } from "../../container/useRoomFilter";
 const { RoomTypesListResponseSchema } = useRoomTypesSchema();
 type RoomTypeList = z.infer<typeof RoomTypesListResponseSchema>;
 interface RoomsFilterSidebarProps {
@@ -29,32 +34,22 @@ function RoomsFilterSidebar({
   onResetFilters,
   roomTypes,
 }: RoomsFilterSidebarProps) {
-  const handleStatusToggle = (statusValue: string) => {
-    const newStatus = filters.status.includes(statusValue)
-      ? filters.status.filter((s) => s !== statusValue)
-      : [...filters.status, statusValue];
-    onFilterChange("status", newStatus);
-  };
-
-  const handleRoomTypeToggle = (roomType: string) => {
-    const newRoomTypes = filters.roomTypes.includes(roomType)
-      ? filters.roomTypes.filter((t) => t !== roomType)
-      : [...filters.roomTypes, roomType];
-    onFilterChange("roomTypes", newRoomTypes);
+  const handleRoomTypeToggle = (typeId: string) => {
+    const newRoomType = filters.typeId === typeId ? undefined : typeId;
+    onFilterChange("typeId", newRoomType);
   };
 
   const activeFiltersCount =
     (filters.searchText ? 1 : 0) +
-    filters.status.length +
-    filters.roomTypes.length +
-    (filters.isOccupied !== null ? 1 : 0) +
-    (filters.locked !== null ? 1 : 0) +
-    (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 5000000 ? 1 : 0);
+    (filters.status ? 1 : 0) +
+    (filters.isOccupied !== null ? 1 : 0);
 
   return (
-    <aside className="w-64 flex-shrink-0 space-y-4">
+    <aside className="w-64 flex-shrink-0 space-y-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Bộ lọc</h2>
+        <Button variant="light" className="text-xl font-medium">
+          Bộ lọc <ListFilterPlus />
+        </Button>
         {activeFiltersCount > 0 && (
           <Button
             variant="ghost"
@@ -68,126 +63,129 @@ function RoomsFilterSidebar({
         )}
       </div>
 
-      <Separator />
-
-      <div className="space-y-2">
-        <Label htmlFor="search" className="text-sm font-medium">
-          Tìm kiếm
-        </Label>
-        <Input
-          id="search"
-          placeholder="Tên phòng, mã phòng..."
-          value={filters.searchText}
-          onChange={(e) => onFilterChange("searchText", e.target.value)}
-          endIcon={<Search className="h-4 w-4 text-muted-foreground" />}
-        />
-      </div>
-
-      <Separator />
-
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Trạng thái</Label>
-        <div className="space-y-2">
-          {Object.entries(RoomStatusEnum).map(([key, value]) => (
-            <div key={value} className="flex items-center gap-2">
-              <Checkbox
-                id={`status-${key}`}
-                checked={filters.status.includes(key)}
-                onCheckedChange={() => handleStatusToggle(key)}
-              />
-              <Label
-                htmlFor={`status-${key}`}
-                className="text-sm font-normal cursor-pointer"
-              >
-                {value}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Hạng phòng</Label>
-        <div className="space-y-2">
-          {roomTypes.map((item) => (
-            <div key={item.id} className="flex items-center gap-2">
-              <Checkbox
-                id={`type-${item.id}`}
-                checked={filters.roomTypes.includes(item.name)}
-                onCheckedChange={() => handleRoomTypeToggle(item.name)}
-              />
-              <Label
-                htmlFor={`type-${item.id}`}
-                className="text-sm font-normal cursor-pointer"
-              >
-                {item.name}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Tình trạng sử dụng</Label>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="occupied-yes"
-              checked={filters.isOccupied === true}
-              onCheckedChange={(checked) =>
-                onFilterChange("isOccupied", checked ? true : null)
-              }
-            />
-            <Label
-              htmlFor="occupied-yes"
-              className="text-sm font-normal cursor-pointer"
-            >
-              Đang sử dụng
+      <Card className="p-4 shadow-s">
+        <CardContent className="px-0 rounded-md">
+          <div className="space-y-2">
+            <Label htmlFor="search" className="text-sm font-medium">
+              Tìm kiếm
             </Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="occupied-no"
-              checked={filters.isOccupied === false}
-              onCheckedChange={(checked) =>
-                onFilterChange("isOccupied", checked ? false : null)
-              }
+            <Input
+              id="search"
+              placeholder="Tên phòng, mã phòng..."
+              value={filters.searchText}
+              onChange={(e) => onFilterChange("searchText", e.target.value)}
+              endIcon={<Search className="h-4 w-4 text-muted-foreground" />}
             />
-            <Label
-              htmlFor="occupied-no"
-              className="text-sm font-normal cursor-pointer"
-            >
-              Chưa sử dụng
-            </Label>
           </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Khoảng giá (VND/đêm)</Label>
-        <div className="space-y-4">
-          <Slider
-            value={filters.priceRange}
-            onValueChange={(value) =>
-              onFilterChange("priceRange", value as [number, number])
-            }
-            min={0}
-            max={5000000}
-            step={100000}
-            className="w-full"
-          />
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{formatMoney(filters.priceRange[0]).vndFormatted}</span>
-            <span>{formatMoney(filters.priceRange[1]).vndFormatted}</span>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+        <Separator />
+        <CardContent className="px-0 rounded-md">
+          <Collapsible className="space-y-3">
+            <CollapsibleTrigger>
+              <Label className="text-sm font-medium">Trạng thái</Label>
+              <ChevronDown className="h-4 w-4" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2">
+              <RadioGroup
+                value={filters.status || ""}
+                onValueChange={(value) => {
+                  onFilterChange("status", value === "" ? undefined : value);
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="" id="status-all" />
+                  <Label
+                    htmlFor="status-all"
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    Tất cả
+                  </Label>
+                </div>
+                {Object.entries(RoomStatusEnum).map(([key, value]) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <RadioGroupItem id={`status-${key}`} value={key} />
+                    <Label
+                      htmlFor={`status-${key}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {value}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+        <Separator />
+        <CardContent className="px-0 rounded-md">
+          <Collapsible className="space-y-3">
+            <CollapsibleTrigger>
+              <Label className="text-sm font-medium">Hạng phòng</Label>
+              <ChevronDown className="h-4 w-4" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2">
+              {roomTypes.map((item) => (
+                <div key={item.id} className="flex items-center gap-2">
+                  <Switch
+                    id={`type-${item.id}`}
+                    checked={filters.typeId === item.id}
+                    onCheckedChange={() => handleRoomTypeToggle(item.id)}
+                  />
+                  <Label
+                    htmlFor={`type-${item.id}`}
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    {item.name}
+                  </Label>
+                </div>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+        <Separator />
+        <CardContent className="px-0 rounded-md ">
+          <Collapsible>
+            <CollapsibleTrigger className="">
+              <Label className="text-sm font-medium">Tình trạng sử dụng</Label>
+              <ChevronDown className="h-4 w-4" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="occupied-yes"
+                    checked={filters.isOccupied === true}
+                    onCheckedChange={(checked) =>
+                      onFilterChange("isOccupied", checked ? true : null)
+                    }
+                  />
+                  <Label
+                    htmlFor="occupied-yes"
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    Đang sử dụng
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="occupied-no"
+                    checked={filters.isOccupied === false}
+                    onCheckedChange={(checked) =>
+                      onFilterChange("isOccupied", checked ? false : null)
+                    }
+                  />
+                  <Label
+                    htmlFor="occupied-no"
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    Chưa sử dụng
+                  </Label>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+      </Card>
     </aside>
   );
 }

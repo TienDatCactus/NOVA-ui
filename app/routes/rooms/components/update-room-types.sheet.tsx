@@ -35,7 +35,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { useUpdateRoomType } from "../../container/useRoomTypeMutation";
+import { useUpdateRoomType } from "../container/useRoomTypeMutation";
 
 const { UpdateRoomTypesDetailResponseSchema } = useRoomTypesSchema();
 const EditRoomTypeFormSchema = UpdateRoomTypesDetailResponseSchema.pick({

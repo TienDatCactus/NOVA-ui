@@ -18,6 +18,7 @@ interface DatePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  mode?: "single" | "multiple" | "range";
 }
 
 export function DatePicker({
@@ -26,6 +27,7 @@ export function DatePicker({
   placeholder = "Chọn ngày",
   disabled = false,
   className,
+  mode,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -42,7 +44,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP", { locale: vi }) : placeholder}
+          {value ? format(value, "yyyy-MM-dd", { locale: vi }) : placeholder}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -54,9 +56,7 @@ export function DatePicker({
             setOpen(false);
           }}
           locale={vi}
-          disabled={{
-            before: new Date(),
-          }}
+          disabled={disabled ? { before: new Date() } : undefined}
         />
       </PopoverContent>
     </Popover>

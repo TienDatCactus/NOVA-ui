@@ -34,6 +34,14 @@ import { Calendar } from "~/components/ui/calendar";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "~/components/ui/form";
 
 interface BookingSummaryCardProps {
   form: UseFormReturn<ReviewPaymentFormData>;
@@ -140,18 +148,26 @@ export function BookingSummaryCard({
         </CardHeader>
 
         {noteOpen && (
-          <div className="space-y-2">
-            <Label htmlFor="specialRequest">Yêu cầu đặc biệt (tùy chọn)</Label>
-            <Textarea
-              id="specialRequest"
-              placeholder="VD: Phòng tầng cao, view biển, giường đôi..."
-              rows={4}
-              {...form.register("specialRequest")}
-            />
-            <p className="text-xs text-muted-foreground">
-              Yêu cầu sẽ được gửi đến bộ phận phòng
-            </p>
-          </div>
+          <FormField
+            control={form.control}
+            name="specialRequest"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Yêu cầu đặc biệt (tùy chọn)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="VD: Phòng tầng cao, view biển, giường đôi..."
+                    rows={4}
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription className="text-xs">
+                  Yêu cầu sẽ được gửi đến bộ phận phòng
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
       </Card>
 
@@ -234,7 +250,7 @@ export function BookingSummaryCard({
 
       {/* Pricing */}
       <Card>
-        <CardContent className="space-y-2 inset-shadow-sm">
+        <CardContent className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tạm tính phòng</span>
             <span className="font-medium">
@@ -269,7 +285,7 @@ export function BookingSummaryCard({
                 type="number"
                 placeholder="Nhập giá điều chỉnh"
                 min={0}
-                {...form.register("overridePrice", { valueAsNumber: true })}
+                {...form.register("overridePrice")}
               />
             </div>
           </div>

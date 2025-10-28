@@ -22,14 +22,6 @@ const RoomStatusEnum = z.enum({
 
 // -------------------------------
 
-const RoomItemSchema = z.object({
-  roomId: z.string(),
-  roomName: z.string().optional(),
-  roomTypeId: z.string().optional(),
-  roomTypeName: z.string().optional(),
-  nightlyPrice: z.number("nightlyPrice phải là number").min(0),
-});
-
 const RoomListItemSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
@@ -39,7 +31,6 @@ const RoomListItemSchema = z.object({
   roomTypeName: z.string(),
   imageUrls: z.array(z.string()),
   dailyPrice: z.number().min(0),
-  isOccupied: z.boolean(),
 });
 
 const RoomListResponseSchema = z.array(RoomListItemSchema);
@@ -49,6 +40,7 @@ const RoomDetailSchema = z.object({
   roomName: z.string(),
   roomTypeId: z.string(),
   roomTypeName: z.string(),
+  imageUrls: z.array(z.string()),
   dailyPrice: z.number().min(0),
   status: z.string(),
 });
@@ -63,6 +55,14 @@ const RoomBookingHistorySchema = z.object({
 });
 
 const RoomBookingHistoryResponseSchema = z.array(RoomBookingHistorySchema);
+
+const EditRoomRequestSchema = z.object({
+  roomName: z.string(),
+  roomTypeId: z.string(),
+  status: z.string(),
+});
+const UpdateRoomDetailRequestSchema = EditRoomRequestSchema;
+const CreateRoomRequestSchema = EditRoomRequestSchema;
 
 const UpdateRoomStatusResponseSchema = z.object({
   roomId: z.string(),
@@ -91,8 +91,8 @@ const UpdateRoomDetailResponseSchema = z.object({
   status: z.string(),
 });
 const RoomPaymentSchema = z.object({
-  paymentMethod: PaymentMethodEnum,
-  paidAmount: z.number().min(0),
+  paymentMethod: PaymentMethodEnum.optional(),
+  paidAmount: z.number().min(0).default(0).optional(),
   paymentNote: z.string().optional(),
 });
 
@@ -117,7 +117,6 @@ const GetAvailableRoomsInternalResponseSchema = z.array(
 
 const useRoomSchema = () => {
   return {
-    RoomItemSchema,
     RoomTypeEnum,
     RoomStatusEnum,
     RoomDetailSchema,
@@ -130,6 +129,9 @@ const useRoomSchema = () => {
     UpdateRoomDetailResponseSchema,
     RoomPaymentSchema,
     GetAvailableRoomsInternalResponseSchema,
+    EditRoomRequestSchema,
+    UpdateRoomDetailRequestSchema,
+    CreateRoomRequestSchema,
   };
 };
 export default useRoomSchema;

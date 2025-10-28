@@ -7,7 +7,6 @@ import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
 import ServiceActionsCell from "../../fragments/services/service-actions.cell";
 
-// Color mapping for service types
 const getServiceTypeColor = (typeCode: string) => {
   const colors: Record<string, string> = {
     SPA: "bg-purple-500",

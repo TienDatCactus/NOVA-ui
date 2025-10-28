@@ -12,12 +12,10 @@ import {
 } from "~/components/ui/empty";
 import { Utensils } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import type { ServiceDensity } from "~/services/types/service.types";
 
 interface ServicesDataTableProps {
   services: ServiceItem[];
   isLoading?: boolean;
-  density: ServiceDensity;
   onAddService: () => void;
   onSelectionChange?: (selectedRows: ServiceItem[]) => void;
   onEdit: (service: ServiceItem) => void;
@@ -27,7 +25,6 @@ interface ServicesDataTableProps {
 function ServicesDataTable({
   services,
   isLoading,
-  density,
   onAddService,
   onSelectionChange,
   onEdit,
@@ -69,7 +66,6 @@ function ServicesDataTable({
     <DataTable
       columns={columns}
       data={services}
-      density={density}
       onSelectionChange={onSelectionChange}
     />
   );
