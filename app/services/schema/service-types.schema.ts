@@ -15,7 +15,7 @@ const ServiceTypeListResponseSchema = z.array(ServiceTypeItemSchema);
 const EditServiceTypeRequestSchema = z.object({
   code: z.string(),
   name: z.string(),
-  description: z.string(),
+  description: z.string().nullable().optional(),
   active: z.boolean(),
 });
 

@@ -35,7 +35,11 @@ const RoomTypes = {
   create: "RoomTypes",
 };
 const Menu = {
-  list: "Menu/list",
+  list: "menu-categories",
+  detail: (id: string) => `menu-categories/${id}`,
+  create: "menu-categories",
+  update: (id: string) => `menu-categories/${id}`,
+  delete: (id: string) => `menu-categories/${id}`,
 };
 const Service = {
   list: "/Service/list",
