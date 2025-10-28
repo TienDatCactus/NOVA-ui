@@ -17,16 +17,24 @@ export default [
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
       ...prefix("reservation", [
-        index("routes/reservation/reservation.tsx"),
+        index("routes/reservation/reports/reports.tsx"),
         ...prefix("bookings", [
           route("grid", "routes/reservation/bookings/grid.tsx"),
           route("list", "routes/reservation/bookings/list.tsx"),
           route("timeline", "routes/reservation/bookings/timeline.tsx"),
         ]),
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
+        route("new-booking", "routes/reservation/new-booking/new-booking.tsx"),
       ]),
-      route("rooms", "routes/rooms/rooms.tsx"),
-      route("services", "routes/services/services.tsx"),
+      ...prefix("rooms", [
+        index("routes/rooms/rooms.tsx"),
+        route("types", "routes/rooms/types.tsx"),
+        route("prices", "routes/rooms/prices.tsx"),
+      ]),
+      ...prefix("services", [
+        index("routes/services/services.tsx"),
+        route("types", "routes/services/types.tsx"),
+      ]),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("customers", "routes/customers/customers.tsx"),
     ]),

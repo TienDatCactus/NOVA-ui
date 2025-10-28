@@ -2,13 +2,22 @@ import * as React from "react";
 
 import { cn } from "~/lib/utils";
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+const cardVariants = {
+  default: "",
+  gradient:
+    "from-primary/5 to-card dark:bg-card grid grid-cols-1 gap-4 px-4 bg-gradient-to-t shadow-xs lg:px-6",
+};
+function Card({
+  className,
+  ...props
+}: React.ComponentProps<"div"> & { variant?: keyof typeof cardVariants }) {
   return (
     <div
       data-slot="card"
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-4 rounded-xl border py-6 shadow-sm",
-        className
+        "bg-card text-card-foreground flex flex-col gap-4 rounded-xl border py-6 ",
+        className,
+        cardVariants
       )}
       {...props}
     />

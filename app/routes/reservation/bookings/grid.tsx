@@ -1,7 +1,7 @@
-import { Input } from "~/components/ui/input";
+import { useRooms } from "~/routes/rooms/container/useRoomQuery";
 import type { Route } from "./+types/grid";
 
-import SearchRoom from "./components/search";
+import BookingGrid from "./components/booking.grid";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -15,15 +15,10 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
+  const { data, isPending, refetch } = useRooms();
   return (
-    <main className="mb-4 flex w-full flex-col gap-4">
-      <div className="bg-white py-2 px-4 shadow-sm rounded-md">
-        <h1 className="text-xl font-medium">Room Status Overview</h1>
-        <ul></ul>
-        <div className="max-w-1/2 mx-auto">
-          <SearchRoom />
-        </div>
-      </div>
-    </main>
+    <>
+      <BookingGrid rooms={data} isLoading={isPending} refetch={refetch} />
+    </>
   );
 }

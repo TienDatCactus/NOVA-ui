@@ -7,7 +7,6 @@ import { useSidebarContext } from "~/context/sidebar.context";
 export default function DashboardSidebar() {
   const curPath = useLocation().pathname;
   const { mode, toggle } = useSidebarContext();
-  const { user } = useAuthStore();
   return (
     <>
       {mode === "expanded" ? (

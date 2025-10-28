@@ -1,21 +1,27 @@
 import type { Route } from "./+types/list";
-
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+import BookingList from "./components/booking-list";
+import { useBookings } from "./container/useBookingQuery";
+import useSearchBooking from "./container/useSearchBooking";
+import BookingViewLayout from "./layouts/booking-view.layout";
 
 export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
+  const { data, isPending, refetch } = useBookings();
+  const { filters, filteredBookings, handleFiltersChange, handleResetFilters } =
+    useSearchBooking(data);
   return (
-    <div>
-      {/* Frontend Code here. */}
-      <h1>New Route</h1>
-    </div>
+    <BookingViewLayout
+      filters={filters}
+      onFiltersChange={handleFiltersChange}
+      onResetFilters={handleResetFilters}
+    >
+      <BookingList
+        bookings={filteredBookings}
+        isLoading={isPending}
+        refetch={refetch}
+      />
+    </BookingViewLayout>
   );
 }

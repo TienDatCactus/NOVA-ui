@@ -1,6 +1,12 @@
-import { Accessibility, Minimize, User2 } from "lucide-react";
+import { Accessibility, ChevronUp, Minimize, User2 } from "lucide-react";
 import { Link } from "react-router";
 import { Divider } from "~/components/ui/divider";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +24,9 @@ import {
   SUB_DASHBOARD_ITEMS,
 } from "~/lib/constants";
 import { cn } from "~/lib/utils";
+import { useAuth } from "~/routes/auth/container/auth.hooks";
+import { useAuthStore } from "~/store/auth.store";
+import { SidebarUser } from "../fragments/user.sidebar";
 
 function ExpandedSidebar({
   curPath,
@@ -53,10 +62,10 @@ function ExpandedSidebar({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     className={cn({
-                      "shadow-s": curPath === item.href,
+                      "shadow-s": curPath.includes(item.href),
                     })}
                     asChild
-                    isActive={curPath === item.href}
+                    isActive={curPath.includes(item.href)}
                   >
                     <Link to={item.href}>
                       {item.icon}
@@ -69,8 +78,7 @@ function ExpandedSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
         <Divider weight="thin" />
-        <SidebarGroup>
-          <SidebarGroupLabel>Help</SidebarGroupLabel>
+        <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
               {SUB_DASHBOARD_ITEMS.map((item) => (
@@ -88,14 +96,7 @@ function ExpandedSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <Divider weight="thin" />
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <User2 /> Username
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarUser />
       </SidebarFooter>
     </Sidebar>
   );

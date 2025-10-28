@@ -13,9 +13,5 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return (
-    <div>
-      <RoomWeekScheduler />
-    </div>
-  );
+  return <RoomWeekScheduler />;
 }

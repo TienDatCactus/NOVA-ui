@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -17,7 +17,7 @@ import {
   InputOTPSlot,
 } from "~/components/ui/input-otp";
 import useAuthSchema from "~/services/schema/auth.schema";
-import type { ResetPasswordDto } from "~/services/api/auth-service/dto";
+import type { ResetPasswordDto } from "~/services/api/auth/dto";
 import { useAuth } from "./container/auth.hooks";
 import {
   Form,
@@ -31,20 +31,20 @@ import {
 import { Input } from "~/components/ui/input";
 import type { Route } from "./+types/reset-password";
 import SectionLayout from "~/components/layouts/sections";
-
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+import { toast } from "sonner";
 
 export default function VerifyOTP({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
   const { resetPassword, isLoading, error: apiError } = useAuth();
+  const requestedEmail = useLocation().state.email as string;
+  if (!requestedEmail) {
+    toast.error(
+      "Vui lòng yêu cầu đặt lại mật khẩu trước khi truy cập trang này."
+    );
+    return null;
+  }
   const { ResetPasswordSchema } = useAuthSchema();
   const resetPasswordForm = useForm({
     resolver: zodResolver(ResetPasswordSchema),
@@ -79,9 +79,14 @@ export default function VerifyOTP({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Mã quản lý</FormLabel>
+                        <FormLabel>Email quản lý</FormLabel>
                         <FormControl>
-                          <Input placeholder="nova-admin" {...field} />
+                          <Input
+                            placeholder="nova-admin"
+                            defaultValue={requestedEmail}
+                            disabled={!!requestedEmail}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
