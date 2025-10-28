@@ -14,6 +14,7 @@ export function useCreateMenuCategory() {
       await MenuCategoryService.createMenuCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["menu-list"] }); // Update menu items list
     },
   });
 }
@@ -31,6 +32,7 @@ export function useUpdateMenuCategory() {
     }) => await MenuCategoryService.updateMenuCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["menu-list"] }); // Update menu items list
     },
   });
 }
@@ -43,6 +45,7 @@ export function useDeleteMenuCategory() {
       await MenuCategoryService.deleteMenuCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["menu-list"] }); // Update menu items list
       // Toast already shown by HTTP interceptor
     },
   });
