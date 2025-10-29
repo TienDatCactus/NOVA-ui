@@ -74,7 +74,7 @@ function RoomsFilterSidebar({
               placeholder="Tên phòng, mã phòng..."
               value={filters.searchText}
               onChange={(e) => onFilterChange("searchText", e.target.value)}
-              endIcon={<Search className="h-4 w-4 text-muted-foreground" />}
+              endAddon={<Search className="h-4 w-4 text-muted-foreground" />}
             />
           </div>
         </CardContent>

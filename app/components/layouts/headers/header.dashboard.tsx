@@ -73,8 +73,8 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
         <Input
           placeholder="Tìm kiếm..."
           className="w-64 h-8 placeholder:text-sm"
-          startIcon={<SearchIcon />}
-          endIcon={
+          startAddon={<SearchIcon />}
+          endAddon={
             <Kbd>
               <pre>Ctrl + K</pre>
             </Kbd>

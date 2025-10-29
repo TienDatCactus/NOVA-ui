@@ -35,42 +35,6 @@ import type { CustomerInfoFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import useCalculateNights from "../../container/useCalculateNights";
 
-export const BOOKING_SOURCES = [
-  { value: 0, label: "Trực tiếp (Nhân viên)", key: "DirectStaff" },
-  { value: 1, label: "Trực tiếp (Khách hàng)", key: "DirectCustomer" },
-  { value: 2, label: "OTA", key: "OTA" },
-  { value: 3, label: "Đại lý", key: "Agency" },
-] as const;
-
-export const MOCK_OTA_LIST = [
-  { id: "550e8400-e29b-41d4-a716-446655440000", name: "Booking.com" },
-  { id: "550e8400-e29b-41d4-a716-446655440001", name: "Agoda" },
-  { id: "550e8400-e29b-41d4-a716-446655440002", name: "Expedia" },
-  { id: "550e8400-e29b-41d4-a716-446655440003", name: "Airbnb" },
-  { id: "550e8400-e29b-41d4-a716-446655440004", name: "Traveloka" },
-] as const;
-
-export async function mockCheckAvailability(params: {
-  checkinDate: Date;
-  checkoutDate: Date;
-  adultsAmount: number;
-  childrenAmount: number;
-}): Promise<{ available: boolean; summary: string; count: number }> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 800));
-
-  const nights = Math.ceil(
-    (params.checkoutDate.getTime() - params.checkinDate.getTime()) /
-      (1000 * 60 * 60 * 24)
-  );
-  const mockCount = Math.floor(Math.random() * 10) + 3;
-
-  return {
-    available: mockCount > 0,
-    count: mockCount,
-    summary: `Có ${mockCount} phòng trống cho ${nights} đêm (${params.adultsAmount} người lớn${params.childrenAmount > 0 ? `, ${params.childrenAmount} trẻ em` : ""})`,
-  };
-}
 const { StaffCreateBookingSchema } = useBookingSchema();
 
 interface CustomerInfoFormProps {
@@ -112,47 +76,6 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
 
     return () => subscription.unsubscribe();
   }, [form, setData]);
-
-  const handleCheckAvailability = async () => {
-    const checkinDate = form.getValues("checkinDate");
-    const checkoutDate = form.getValues("checkoutDate");
-    const adultsAmount = form.getValues("adultsAmount");
-    const childrenAmount = form.getValues("childrenAmount");
-
-    if (!checkinDate || !checkoutDate) {
-      toast.error("Vui lòng chọn ngày nhận và trả phòng");
-      return;
-    }
-
-    if (checkoutDate <= checkinDate) {
-      toast.error("Ngày trả phòng phải sau ngày nhận phòng");
-      return;
-    }
-
-    setIsCheckingAvailability(true);
-
-    try {
-      const result = await mockCheckAvailability({
-        checkinDate,
-        checkoutDate,
-        adultsAmount: adultsAmount || 1,
-        childrenAmount: childrenAmount || 0,
-      });
-
-      if (result.available) {
-        toast.success(result.summary, {
-          icon: <CheckCircle2 className="h-4 w-4" />,
-        });
-      } else {
-        toast.warning("Không có phòng trống cho thời gian này");
-      }
-    } catch (error) {
-      console.error("Availability check failed:", error);
-      toast.error("Không thể kiểm tra phòng trống. Vui lòng thử lại.");
-    } finally {
-      setIsCheckingAvailability(false);
-    }
-  };
 
   const onSubmit = async (values: CustomerInfoFormData) => {
     try {
@@ -436,32 +359,12 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
               Số đêm: <span className="text-primary">{nights} đêm</span>
             </p>
           )}
-          <div className="flex items-center justify-between pt-6 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCheckAvailability}
-              disabled={
-                isCheckingAvailability ||
-                !form.watch("checkinDate") ||
-                !form.watch("checkoutDate")
-              }
-            >
-              {isCheckingAvailability && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Kiểm tra phòng trống
+          {onCancel && (
+            <Button type="button" variant="ghost" onClick={onCancel}>
+              Hủy
             </Button>
-
-            <div className="flex gap-2">
-              {onCancel && (
-                <Button type="button" variant="ghost" onClick={onCancel}>
-                  Hủy
-                </Button>
-              )}
-              <Button type="submit">Tiếp theo</Button>
-            </div>
-          </div>
+          )}
+          <Button type="submit">Tiếp theo</Button>
         </form>
       </Form>
     </Card>

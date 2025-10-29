@@ -1,8 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, FileText, ImageIcon, Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import type z from "zod";
 import AlertChanges from "~/components/ui/alert-changes";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -16,7 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import {
@@ -28,16 +23,11 @@ import {
 } from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
-import { useUpdateRoomType } from "../container/room-types-mutation.hooks";
-import { useRoomTypeDetail } from "../container/room-types-query.hooks";
+import { stripHtml } from "~/lib/utils";
 import { DescriptionDialog } from "../fragments/room-types/description.dialog";
 import { ImagePreviewDialog } from "../fragments/room-types/image-preview.dialog";
-import { stripHtml } from "~/lib/utils";
-
-const { UpdateRoomTypesDetailRequestSchema } = useRoomTypesSchema();
-
-type EditRoomTypeFormData = z.infer<typeof UpdateRoomTypesDetailRequestSchema>;
+import { useUpdateRoomTypeSheet } from "../container/update-room-types-container.hooks";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 interface EditRoomTypeSheetProps {
   open: boolean;
@@ -50,164 +40,40 @@ export function UpdateRoomTypeSheet({
   onClose,
   roomType,
 }: EditRoomTypeSheetProps) {
-  const { mutate, isPending } = useUpdateRoomType();
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
-  const [showImagePreviewDialog, setShowImagePreviewDialog] = useState(false);
-  const [descriptionDialogMode, setDescriptionDialogMode] = useState<
-    "preview" | "edit"
-  >("preview");
-  const [imagePreviewDialogMode, setImagePreviewDialogMode] = useState<
-    "existing" | "new"
-  >("existing");
+  const {
+    form,
+    isPending,
+    showCancelDialog,
+    setShowCancelDialog,
+    showDeleteWarning,
+    setShowDeleteWarning,
+    showDescriptionDialog,
+    setShowDescriptionDialog,
+    showImagePreviewDialog,
+    setShowImagePreviewDialog,
+    descriptionDialogMode,
+    imagePreviewDialogMode,
 
-  const { data: roomTypeDetail } = useRoomTypeDetail({
-    id: roomType?.id || "",
-    open: open && !!roomType,
-  });
+    // Computed values
+    removeMediaIds,
+    newImageFiles,
+    existingImages,
+    remainingImages,
+    totalImagesAfterSubmit,
 
-  const form = useForm<EditRoomTypeFormData>({
-    resolver: zodResolver(UpdateRoomTypesDetailRequestSchema),
-    defaultValues: {
-      code: "",
-      name: "",
-      description: "",
-      baseRate: 0,
-      maxOccupancy: 1,
-      active: true,
-      images: [],
-      removeMediaIds: [],
-    },
-  });
-
-  const removeMediaIds = form.watch("removeMediaIds") || [];
-  const newImageFiles = form.watch("images") || [];
-
-  useEffect(() => {
-    if (roomTypeDetail) {
-      form.reset({
-        code: roomTypeDetail.code,
-        name: roomTypeDetail.name,
-        description: roomTypeDetail.description || "",
-        baseRate: roomTypeDetail.baseRate,
-        maxOccupancy: roomTypeDetail.maxOccupancy || 1,
-        active: roomTypeDetail.active,
-        images: [],
-        removeMediaIds: [],
-      });
-    }
-  }, [roomTypeDetail, form]);
-
-  const handleClose = () => {
-    if (
-      form.formState.isDirty ||
-      newImageFiles.length > 0 ||
-      removeMediaIds.length > 0
-    ) {
-      setShowCancelDialog(true);
-    } else {
-      onClose(false);
-      form.reset();
-    }
-  };
-
-  const handleConfirmClose = () => {
-    setShowCancelDialog(false);
-    onClose(false);
-    form.reset();
-  };
-
-  const handleRemoveNewFile = (index: number) => {
-    const currentFiles = form.getValues("images") || [];
-    form.setValue(
-      "images",
-      currentFiles.filter((_, i) => i !== index),
-      { shouldDirty: true }
-    );
-  };
-
-  const handleMarkForDeletion = (mediaId: string) => {
-    const currentRemoveIds = form.getValues("removeMediaIds") || [];
-    if (currentRemoveIds.includes(mediaId)) {
-      form.setValue(
-        "removeMediaIds",
-        currentRemoveIds.filter((id) => id !== mediaId),
-        { shouldDirty: true }
-      );
-    } else {
-      form.setValue("removeMediaIds", [...currentRemoveIds, mediaId], {
-        shouldDirty: true,
-      });
-    }
-  };
-
-  const existingImages = roomTypeDetail?.images || [];
-  const remainingImages = existingImages.filter(
-    (img) => !removeMediaIds.includes(img.mediaId)
-  );
-  const totalImagesAfterSubmit = remainingImages.length + newImageFiles.length;
-
-  const handleSubmit = (data: EditRoomTypeFormData) => {
-    if (totalImagesAfterSubmit === 0 && existingImages.length > 0) {
-      setShowDeleteWarning(true);
-      return;
-    }
-
-    submitForm(data);
-  };
-
-  const submitForm = (data: EditRoomTypeFormData) => {
-    if (!roomType) return;
-
-    mutate(
-      {
-        id: roomType.id,
-        data: {
-          ...data,
-          images: data.images || [],
-          removeMediaIds: data.removeMediaIds || [],
-        },
-      },
-      {
-        onSuccess: () => {
-          onClose(false);
-          form.reset();
-        },
-      }
-    );
-  };
-
-  const handleDescriptionSave = (content: string) => {
-    form.setValue("description", content, { shouldDirty: true });
-  };
-
-  const handleOpenDescriptionPreview = () => {
-    setDescriptionDialogMode("preview");
-    setShowDescriptionDialog(true);
-  };
-
-  const handleOpenDescriptionEdit = () => {
-    setDescriptionDialogMode("edit");
-    setShowDescriptionDialog(true);
-  };
-
-  const handleOpenImagePreview = () => {
-    setImagePreviewDialogMode("existing");
-    setShowImagePreviewDialog(true);
-  };
-
-  const handleOpenImageEdit = () => {
-    setImagePreviewDialogMode("new");
-    setShowImagePreviewDialog(true);
-  };
-
-  const handleAddImages = (files: File[]) => {
-    const currentFiles = form.getValues("images") || [];
-    form.setValue("images", [...currentFiles, ...files], {
-      shouldDirty: true,
-    });
-  };
+    // Handlers
+    handleClose,
+    handleConfirmClose,
+    handleRemoveNewFile,
+    handleMarkForDeletion,
+    handleAddImages,
+    handleSubmit,
+    handleDescriptionSave,
+    handleOpenDescriptionPreview,
+    handleOpenDescriptionEdit,
+    handleOpenImagePreview,
+    handleOpenImageEdit,
+  } = useUpdateRoomTypeSheet({ open, onClose, roomType });
 
   if (!roomType) return null;
 
@@ -284,14 +150,11 @@ export function UpdateRoomTypeSheet({
                       <FormItem>
                         <FormLabel>Giá cơ bản (VNĐ) *</FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="VD: 1000000"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number.parseFloat(e.target.value))
-                            }
-                            disabled={isPending}
+                          <Counter
+                            minValue={0}
+                            value={field.value}
+                            onChange={field.onChange}
+                            isDisabled={form.formState.isSubmitting}
                           />
                         </FormControl>
                         <FormMessage />
@@ -306,15 +169,12 @@ export function UpdateRoomTypeSheet({
                       <FormItem>
                         <FormLabel>Sức chứa tối đa</FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="VD: 4"
-                            min={1}
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number.parseInt(e.target.value))
-                            }
-                            disabled={isPending}
+                          <Counter
+                            minValue={0}
+                            maxValue={10}
+                            value={field.value}
+                            onChange={field.onChange}
+                            isDisabled={form.formState.isSubmitting}
                           />
                         </FormControl>
                         <FormMessage />

@@ -48,7 +48,7 @@ export function RoomTypesFilterSidebar({
             value={filters.searchText}
             onChange={(e) => onFilterChange("searchText", e.target.value)}
             className="pl-9"
-            startIcon={<Search className=" h-4 w-4 text-muted-foreground" />}
+            startAddon={<Search className=" h-4 w-4 text-muted-foreground" />}
           />
         </CardContent>
 

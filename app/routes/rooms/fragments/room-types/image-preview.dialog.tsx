@@ -53,6 +53,7 @@ interface ImagePreviewDialogProps {
   onAddImages?: (files: File[]) => void;
   onRemoveNewImage?: (index: number) => void;
   onMarkForDeletion?: (mediaId: string) => void;
+  operation?: "create" | "edit";
 }
 
 export function ImagePreviewDialog({
@@ -66,6 +67,7 @@ export function ImagePreviewDialog({
   onAddImages,
   onRemoveNewImage,
   onMarkForDeletion,
+  operation,
 }: ImagePreviewDialogProps) {
   const [activeTab, setActiveTab] = useState<"existing" | "new">(initialTab);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -205,14 +207,20 @@ export function ImagePreviewDialog({
           onValueChange={(v) => setActiveTab(v as "existing" | "new")}
           className="flex flex-col "
         >
-          <TabsList className="grid w-full grid-cols-2 flex-shrink-0">
-            <TabsTrigger value="existing" className="gap-2">
-              <ImageIcon className="h-4 w-4" />
-              Ảnh hiện tại
-              <Badge variant="outline" className="text-xs">
-                {activeExistingImages.length}
-              </Badge>
-            </TabsTrigger>
+          <TabsList
+            className={cn("grid w-full grid-cols-2 flex-shrink-0", {
+              "grid-cols-1": operation === "create",
+            })}
+          >
+            {operation != "create" && (
+              <TabsTrigger value="existing" className="gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Ảnh hiện tại
+                <Badge variant="outline" className="text-xs">
+                  {activeExistingImages.length}
+                </Badge>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="new" className="gap-2">
               <FileImage className="h-4 w-4" />
               Ảnh mới

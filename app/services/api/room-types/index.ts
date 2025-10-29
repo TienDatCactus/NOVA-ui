@@ -93,10 +93,33 @@ async function createRoomTypes(
   data: CreateRoomTypesRequestDto
 ): Promise<CreateRoomTypesResponseDto> {
   try {
-    const resp = await http.post(
-      RoomTypes.create,
-      CreateRoomTypesRequestSchema.parse(data)
+    const validatedData = CreateRoomTypesRequestSchema.parse(data);
+
+    const formData = new FormData();
+    formData.append("code", validatedData.code);
+    formData.append("name", validatedData.name);
+    formData.append("baseRate", validatedData.baseRate.toString());
+    formData.append("active", validatedData.active.toString());
+
+    if (validatedData.description) {
+      formData.append("description", validatedData.description);
+    }
+    if (validatedData.maxOccupancy !== undefined) {
+      formData.append("maxOccupancy", validatedData.maxOccupancy.toString());
+    }
+
+    const validFiles = validatedData.images?.filter(
+      (file): file is File => file instanceof File
     );
+    validFiles?.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    const resp = await http.post(RoomTypes.create, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return CreateRoomTypesResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);

@@ -72,7 +72,7 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
           </div>
           <div className="pr-4">
             <Input
-              startIcon={<Search />}
+              startAddon={<Search />}
               placeholder="Tìm kiếm dịch vụ"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

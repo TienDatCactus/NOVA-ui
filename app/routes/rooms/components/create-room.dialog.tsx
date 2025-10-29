@@ -53,7 +53,7 @@ function CreateRoomDialog({ open, onClose, roomTypes }: CreateRoomDialogProps) {
     defaultValues: {
       roomName: "",
       roomTypeId: "",
-      // status: ROOM_MANAGEMENT_STATUS.Available.toString(),
+      status: "Ready",
     },
   });
   const { mutate, isPending } = useCreateRoom();
