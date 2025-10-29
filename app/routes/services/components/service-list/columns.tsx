@@ -4,7 +4,10 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { cn, formatMoney } from "~/lib/utils";
-import type { ServiceItem } from "~/services/api/services/dto";
+import type {
+  ServiceItem,
+  ServiceListResponseDto,
+} from "~/services/api/services/dto";
 import ServiceActionsCell from "../../fragments/services/service-actions.cell";
 
 const getServiceTypeColor = (typeCode: string) => {
@@ -68,7 +71,7 @@ export const columns: ColumnDef<ServiceItem>[] = [
 
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-semibold truncate">{service.name}</span>
+              <span className="font-semibold truncate">{service.typeName}</span>
               {!service.active && (
                 <Badge variant="secondary" className="text-xs">
                   Ngưng hoạt động
@@ -76,7 +79,7 @@ export const columns: ColumnDef<ServiceItem>[] = [
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              {service.code}
+              {service.typeCode}
             </p>
           </div>
 
@@ -113,31 +116,10 @@ export const columns: ColumnDef<ServiceItem>[] = [
     },
   },
   {
-    accessorKey: "description",
-    header: "Mô tả",
+    accessorKey: "active",
+    header: () => <p className="text-end">Trạng thái</p>,
     cell: ({ row }) => {
-      const description = row.original.description;
-      return (
-        <p className="text-sm text-muted-foreground truncate max-w-xs">
-          {description || "—"}
-        </p>
-      );
-    },
-  },
-  {
-    accessorKey: "basePrice",
-    header: () => <p className="text-end">Đơn giá</p>,
-    cell: ({ row }) => {
-      return (
-        <div className="text-end space-y-1">
-          <p className="font-semibold">
-            {formatMoney(row.original.basePrice).vndFormatted}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            /{row.original.unitName}
-          </p>
-        </div>
-      );
+      return <Badge className="ml-auto"></Badge>;
     },
   },
   {

@@ -3,28 +3,40 @@ import { vi } from "date-fns/locale";
 import {
   Bath,
   Calendar,
+  Calendar1,
   DollarSign,
   FileText,
   FolderCode,
   ImageIcon,
   Info,
   Users,
+  ZoomIn,
 } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import Image from "~/components/ui/image";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { formatMoney } from "~/lib/utils";
 import { useRoomTypeDetail } from "../container/room-types-query.hooks";
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-  EmptyDescription,
 } from "~/components/ui/empty";
+import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Button } from "~/components/ui/button";
 
 interface RoomTypesDetailDialogProps {
   roomTypeId: string;
@@ -41,6 +53,7 @@ function RoomTypesDetailDialog({
     id: roomTypeId,
     open: !!open,
   });
+
   if (!roomTypeDetail) {
     return (
       <Empty>
@@ -74,18 +87,26 @@ function RoomTypesDetailDialog({
   );
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <Bath className="h-5 w-5" />
-                {roomTypeDetail.name}
-                <p className="text-sm text-muted-foreground  font-mono">
-                  {roomTypeDetail.code}
-                </p>
-              </CardTitle>
+    <ScrollArea className="flex flex-col max-h-[calc(90vh-8rem)]">
+      <DialogHeader className="px-2 mb-0">
+        <DialogTitle>Chi tiết hạng phòng</DialogTitle>
+        <div className="flex-shrink-0  ">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <Button variant="gradient" className="w-10 h-10">
+                <Bath className="h-5 w-5 " />
+              </Button>
+              <div>
+                <div className="flex gap-1">
+                  <h3 className="text-xl font-semibold">
+                    {roomTypeDetail.name}
+                  </h3>
+                  <sub className="text-xs text-muted-foreground">
+                    {roomTypeDetail.code}
+                  </sub>
+                </div>
+                <Badge variant={"outline"}>{roomTypeDetail.id}</Badge>
+              </div>
             </div>
             <Badge
               variant={roomTypeDetail.active ? "default" : "secondary"}
@@ -94,142 +115,149 @@ function RoomTypesDetailDialog({
               {roomTypeDetail.active ? "Đang hoạt động" : "Tạm ngừng"}
             </Badge>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {roomTypeDetail.description && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Info className="h-4 w-4" />
-                <span>Mô tả</span>
-              </div>
-              <p className="text-sm leading-relaxed pl-6">
-                {roomTypeDetail.description}
-              </p>
-            </div>
-          )}
+        </div>
+      </DialogHeader>
+      <Separator className="my-4" />
+      <Tabs defaultValue="info" className="flex-1 px-2 flex flex-col ">
+        <TabsList className="grid w-full grid-cols-2 flex-shrink-0">
+          <TabsTrigger value="info" className="gap-2">
+            <Info className="h-4 w-4" />
+            Thông tin
+          </TabsTrigger>
+          <TabsTrigger value="gallery" className="gap-2">
+            <ImageIcon className="h-4 w-4" />
+            Thư viện ảnh ({sortedImages.length})
+          </TabsTrigger>
+        </TabsList>
 
-          <Separator />
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2 border p-4 shadow-s rounded-lg">
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <DollarSign className="h-4 w-4" />
-                <span>Giá cơ bản/đêm</span>
-              </div>
-              <p className="text-xl font-bold text-primary">
-                {formatMoney(roomTypeDetail.baseRate).vndFormatted}
-              </p>
-            </div>
-
-            <div className="space-y-2 border  shadow-s p-4 rounded-lg">
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Users className="h-4 w-4" />
-                <span>Sức chứa tối đa</span>
-              </div>
-              <p className="text-xl font-bold">
-                {roomTypeDetail.maxOccupancy} người
-              </p>
-            </div>
-
-            <div className="space-y-2 border shadow-s p-4 rounded-lg">
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Calendar className="h-4 w-4" />
-                <span>Ngày tạo</span>
-              </div>
-              <p className="text-sm font-medium pt-1.5">
-                {format(parseISO(roomTypeDetail.createdAt), "dd/MM/yyyy", {
-                  locale: vi,
-                })}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {sortedImages.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" />
-              Thư viện ảnh ({sortedImages.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {sortedImages.length === 1 ? (
-              <div className="relative group">
-                <Image
-                  src={sortedImages[0].url}
-                  alt={sortedImages[0].caption || roomTypeDetail.name}
-                  width={800}
-                  height={400}
-                  className="w-full h-64 object-cover rounded-lg shadow-md"
-                />
-                {sortedImages[0].caption && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 rounded-b-lg">
-                    <p className="text-xs text-center">
-                      {sortedImages[0].caption}
+        <TabsContent
+          value="info"
+          className="flex-1 overflow-y-auto space-y-4 pr-1"
+        >
+          <div className="grid md:grid-cols-3 grid-cols-1 gap-2">
+            <div className="flex flex-col gap-2 col-span-1">
+              <Card className="bg-secondary p-4">
+                <CardContent className="p-0">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar1 className="h-4 w-4" />
+                      <span>Ngày tạo</span>
+                    </div>
+                    <p className="text-xl font-bold text-primary">
+                      {format(roomTypeDetail.createdAt, "hh:mm yyyy/MM/dd", {
+                        locale: vi,
+                      })}
                     </p>
                   </div>
-                )}
-              </div>
-            ) : (
-              <ScrollArea className="w-full whitespace-nowrap">
-                <div className="flex gap-4 pb-4">
-                  {sortedImages.map((image, index) => (
-                    <div
-                      key={image.mediaId}
-                      className="relative inline-block flex-shrink-0 group"
-                    >
-                      <div className="relative">
-                        <Image
-                          src={image.url}
-                          alt={
-                            image.caption ||
-                            `${roomTypeDetail.name} ${index + 1}`
-                          }
-                          width={300}
-                          height={200}
-                          className="w-[300px] h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
-                        />
-                        {/* Display Order Badge */}
-                        <Badge
-                          variant="secondary"
-                          className="absolute top-2 left-2 text-xs"
-                        >
-                          #{image.displayOrder}
-                        </Badge>
-                      </div>
-                      {image.caption && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                          <p className="text-xs text-center truncate">
-                            {image.caption}
-                          </p>
-                        </div>
-                      )}
+                </CardContent>
+              </Card>
+              <Card className="bg-secondary p-4">
+                <CardContent className="p-0">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <DollarSign className="h-4 w-4" />
+                      <span>Giá cơ bản/đêm</span>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-
-            {/* Image Info */}
-            <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-              <span>
-                {sortedImages.length > 1 && "Cuộn ngang để xem thêm ảnh"}
-              </span>
-              <span>ID: {roomTypeDetail.id}</span>
+                    <p className="text-xl font-bold text-primary">
+                      {formatMoney(roomTypeDetail.baseRate).vndFormatted}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-secondary p-4">
+                <CardContent className="p-0">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4 " />
+                      <span>Sức chứa</span>
+                    </div>
+                    <p className="text-xl font-bold text-primary">
+                      {roomTypeDetail.maxOccupancy} người
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      )}
 
-      {sortedImages.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-lg border-2  border-dashed py-12 text-muted-foreground">
-          <ImageIcon className="h-12 w-12 opacity-30" />
-          <p className="text-sm">Chưa có ảnh cho loại phòng này</p>
-        </div>
-      )}
-    </div>
+            {roomTypeDetail.description && (
+              // 1. Use a simple `div` with the layered styling.
+              // We use `bg-secondary` to create a distinct layer.
+              <div className="col-span-2 space-y-3 rounded-lg bg-secondary p-4">
+                {/* 2. Simplified Header */}
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <FileText className="h-4 w-4" />
+                  <span>Mô tả</span>
+                </div>
+
+                {/* 3. Prose Content */}
+                {/* We keep pl-6 to indent the content relative to the title */}
+                <div
+                  className="prose prose-sm max-w-none text-sm leading-relaxed pl-6"
+                  dangerouslySetInnerHTML={{
+                    __html: roomTypeDetail.description,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent
+          value="gallery"
+          className="flex-1 overflow-y-auto mt-4 pr-1"
+        >
+          {sortedImages.length === 0 ? (
+            <Empty className="py-12">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <ImageIcon />
+                </EmptyMedia>
+                <EmptyTitle>Chưa có ảnh</EmptyTitle>
+                <EmptyDescription>
+                  Loại phòng này chưa có hình ảnh nào
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {sortedImages.map((image, index) => (
+                <div
+                  key={image.mediaId}
+                  className="group relative aspect-video cursor-pointer overflow-hidden border shadow-sm hover:shadow-md transition-all"
+                >
+                  <ImageZoom>
+                    <Image
+                      src={image.url}
+                      alt={
+                        image.caption || `${roomTypeDetail.name} ${index + 1}`
+                      }
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </ImageZoom>
+
+                  {/* Display order badge */}
+                  <Badge
+                    variant="secondary"
+                    className="absolute top-2 left-2 text-xs"
+                  >
+                    #{image.displayOrder}
+                  </Badge>
+
+                  {/* Caption on hover */}
+                  {image.caption && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-xs text-white line-clamp-2">
+                        {image.caption}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </ScrollArea>
   );
 }
 

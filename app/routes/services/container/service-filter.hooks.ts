@@ -1,10 +1,14 @@
 import { useMemo, useState } from "react";
 import type { ServiceFilters } from "~/services/types/service.types";
-import type { ServiceItem } from "~/services/api/services/dto";
+import type {
+  ServiceItem,
+  ServiceListResponseDto,
+} from "~/services/api/services/dto";
 
 const defaultFilters: ServiceFilters = {
-  typeCode: "all",
+  typeCode: "",
   includeInactive: false,
+  searchText: "",
 };
 
 export default function useServiceFilters() {
@@ -22,14 +26,15 @@ export default function useServiceFilters() {
   };
 
   const filterServices = useMemo(
-    () => (services: ServiceItem[]) => {
+    () => (services: ServiceListResponseDto) => {
       return services.filter((service) => {
-        // Filter by active status
-        if (!filters.includeInactive && !service.active) {
-          return false;
-        }
+        const matchesSearch =
+          filters.searchText === "" ||
+          service.typeName
+            .toLowerCase()
+            .includes(filters.searchText.toLowerCase());
 
-        return true;
+        return matchesSearch;
       });
     },
     [filters]

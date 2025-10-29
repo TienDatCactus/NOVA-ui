@@ -11,7 +11,7 @@ import type {
   RoomBookingHistoryResponseDto,
   CreateRoomResponseDto,
   UpdateRoomDetailResponseDto,
-  GetAvailableRoomsInternalResponseDto,
+  AvailableRoomsInternalResponseDto,
   UpdateRoomDetailRequestDto,
   CreateRoomRequestDto,
 } from "./dto";
@@ -26,7 +26,7 @@ const {
   RoomBookingHistoryResponseSchema,
   CreateRoomResponseSchema,
   UpdateRoomDetailResponseSchema,
-  GetAvailableRoomsInternalResponseSchema,
+  AvailableRoomsInternalResponseSchema,
   CreateRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
 } = useRoomSchema();
@@ -118,10 +118,10 @@ async function updateRoomDetail(
 
 async function getAvailableRoomsInternal(
   params: GetAvailableRoomsInternalParams
-): Promise<GetAvailableRoomsInternalResponseDto> {
+): Promise<AvailableRoomsInternalResponseDto> {
   try {
     const resp = await http.get(Rooms.getAvailableRoomsInternal, { params });
-    return GetAvailableRoomsInternalResponseSchema.parse(resp.data);
+    return AvailableRoomsInternalResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

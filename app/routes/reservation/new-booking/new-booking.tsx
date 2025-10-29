@@ -40,7 +40,7 @@ export default function Component({
     },
   ];
   return (
-    <main className="mx-auto max-w-5xl space-y-10 py-10">
+    <main className="mx-auto max-w-5xl space-y-10 py-4">
       <Card className="p-6 shadow-s">
         <Steps
           steps={steps}
@@ -54,7 +54,11 @@ export default function Component({
         <RoomPickerForm onNext={goToNextStep} onCancel={goToPrevStep} />
       )}
       {currentStep === 3 && (
-        <ReviewPaymentForm onNext={goToNextStep} onBack={goToPrevStep} />
+        <ReviewPaymentForm
+          onNext={goToNextStep}
+          onBack={goToPrevStep}
+          onResetSteps={reset}
+        />
       )}
     </main>
   );

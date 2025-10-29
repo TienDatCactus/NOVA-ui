@@ -92,28 +92,27 @@ const UpdateRoomDetailResponseSchema = z.object({
 });
 const RoomPaymentSchema = z.object({
   paymentMethod: PaymentMethodEnum.optional(),
-  paidAmount: z.number().min(0).default(0).optional(),
+  paidAmount: z.number().optional(),
   paymentNote: z.string().optional(),
 });
 
-const GetAvailableRoomsInternalResponseSchema = z.array(
-  z.object({
-    roomTypeId: z.string(),
-    roomTypeCode: z.string(),
-    roomTypeName: z.string(),
-    baseRatePerNight: z.number().min(0),
-    maxOccupancy: z.number().min(0),
-    totalRooms: z.number().min(0),
-    availableCount: z.number().min(0),
-    availableRooms: z.array(
-      z.object({
-        roomId: z.string(),
-        roomName: z.string(),
-        status: z.string(),
-      })
-    ),
-  })
-);
+const AvailableRoomItemSchema = z.object({
+  roomTypeId: z.string(),
+  roomTypeCode: z.string(),
+  roomTypeName: z.string(),
+  baseRatePerNight: z.number().min(0),
+  maxOccupancy: z.number().min(0),
+  totalRooms: z.number().min(0),
+  availableCount: z.number().min(0),
+  availableRooms: z.array(
+    z.object({
+      roomId: z.string(),
+      roomName: z.string(),
+      status: z.string(),
+    })
+  ),
+});
+const AvailableRoomsInternalResponseSchema = z.array(AvailableRoomItemSchema);
 
 const useRoomSchema = () => {
   return {
@@ -128,10 +127,11 @@ const useRoomSchema = () => {
     CreateRoomResponseSchema,
     UpdateRoomDetailResponseSchema,
     RoomPaymentSchema,
-    GetAvailableRoomsInternalResponseSchema,
     EditRoomRequestSchema,
     UpdateRoomDetailRequestSchema,
     CreateRoomRequestSchema,
+    AvailableRoomsInternalResponseSchema,
+    AvailableRoomItemSchema,
   };
 };
 export default useRoomSchema;

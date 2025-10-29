@@ -10,12 +10,8 @@ const { ServiceOrderSchema } = useServiceSchema();
 const CustomerInfoFormSchema = z
   .object({
     guestFullName: StaffCreateBookingSchema.shape.guestFullName,
-    guestPhone: StaffCreateBookingSchema.shape.guestPhone
-      .optional()
-      .or(z.literal("")),
-    guestEmail: StaffCreateBookingSchema.shape.guestEmail
-      .optional()
-      .or(z.literal("")),
+    guestPhone: StaffCreateBookingSchema.shape.guestPhone.optional(),
+    guestEmail: StaffCreateBookingSchema.shape.guestEmail.optional(),
     checkinDate: StaffCreateBookingSchema.shape.checkinDate,
     checkoutDate: StaffCreateBookingSchema.shape.checkoutDate,
     adultsAmount: StaffCreateBookingSchema.shape.adultsAmount,
@@ -48,8 +44,8 @@ const ReviewPaymentFormSchema = z.object({
   overridePrice: StaffCreateBookingSchema.shape.overridePrice
     .optional()
     .or(z.literal("")),
-  roomPayment: RoomPaymentSchema.optional().nullable(),
-  serviceOrder: ServiceOrderSchema.optional().nullable(),
+  roomPayment: RoomPaymentSchema.optional(),
+  serviceOrder: ServiceOrderSchema.optional(),
 });
 
 function useFormSchema() {

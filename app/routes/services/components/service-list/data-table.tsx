@@ -16,7 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import type { ServiceItem } from "~/services/api/services/dto";
+import type {
+  ServiceItem,
+  ServiceListResponseDto,
+} from "~/services/api/services/dto";
 import { cn } from "~/lib/utils";
 import ServiceDetailRow from "../../fragments/services/service-detail.row";
 
@@ -26,7 +29,7 @@ interface DataTableProps<TData, TValue> {
   onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
-export function DataTable<TData extends ServiceItem, TValue>({
+export function DataTable<TData extends ServiceListResponseDto, TValue>({
   columns,
   data,
   onSelectionChange,
@@ -46,15 +49,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getRowCanExpand: () => true,
-    getRowId: (row) => row.serviceItemId,
   });
-
-  useEffect(() => {
-    const selectedRows = table
-      .getSelectedRowModel()
-      .rows.map((row) => row.original);
-    onSelectionChange?.(selectedRows);
-  }, [rowSelection, onSelectionChange, table]);
 
   return (
     <div className="rounded-md border bg-card">

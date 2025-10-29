@@ -20,51 +20,7 @@ export default function useServicesContainer() {
 
   const { mutate: deleteService } = useDeleteService();
 
-  // Flatten services from grouped structure
-  const flattenedServices = useMemo(() => {
-    if (!servicesData) return [];
-
-    const all: ServiceItem[] = [];
-    servicesData.forEach((group) => {
-      group.items.forEach((item) => {
-        all.push({
-          ...item,
-          serviceTypeName: group.typeName,
-          serviceTypeCode: group.typeCode,
-        } as ServiceItem);
-      });
-    });
-    return all;
-  }, [servicesData]);
-
-  // Apply filters and search
-  const filteredServices = useMemo(() => {
-    let result = flattenedServices;
-
-    // Apply type filter
-    if (filters.typeCode && filters.typeCode !== "all") {
-      result = result.filter(
-        (s) => (s as any).serviceTypeCode === filters.typeCode
-      );
-    }
-
-    // Apply active filter
-    result = filterServices(result);
-
-    // Apply search
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (s) =>
-          s.name.toLowerCase().includes(query) ||
-          s.code.toLowerCase().includes(query) ||
-          s.description?.toLowerCase().includes(query)
-      );
-    }
-
-    return result;
-  }, [flattenedServices, filters, filterServices, searchQuery]);
-
+  const filteredServices = servicesData ? filterServices(servicesData) : [];
   const handleEdit = (service: ServiceItem) => {
     setEditingService(service);
     setEditSheetOpen(true);
@@ -75,9 +31,6 @@ export default function useServicesContainer() {
   };
 
   const handleBulkEdit = (data: { basePrice?: number; active?: boolean }) => {
-    // TODO: Implement bulk edit API call
-    console.log("Bulk edit:", data, selectedServices);
-    toast.success(`Đã cập nhật ${selectedServices.length} dịch vụ`);
     setSelectedServices([]);
     setBulkEditDialogOpen(false);
   };
@@ -92,12 +45,11 @@ export default function useServicesContainer() {
       return;
     }
 
-    // TODO: Backend will implement Excel export API
     toast.info("Tính năng xuất Excel sẽ được cập nhật sau");
   };
 
   return {
-    flattenedServices: filteredServices,
+    filteredServices,
     isPending,
     filters,
     updateFilter,

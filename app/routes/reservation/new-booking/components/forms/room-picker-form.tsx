@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +16,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { AvailableRoomTypeCard } from "../../fragments/available-room.card";
 import { BreakfastSelection } from "../../fragments/breakfast-selection";
 import { SelectedRoomsSummary } from "../../fragments/selected-rooms";
-import useCalculateNights from "../../container/useCalculateNights";
+import { useCalculateNights } from "~/lib/utils";
 
 interface RoomPickerFormProps {
   onNext: () => void;
@@ -39,12 +37,20 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
     defaultValues: {
       roomIds: storeData.roomIds || [],
       isBreakfastAll: storeData.isBreakfastAll ?? false,
-      breakfastDates: storeData.breakfastDates || [],
+      breakfastDates: storeData.breakfastDates
+        ? storeData.breakfastDates.map((d) =>
+            d instanceof Date ? d : new Date(d)
+          )
+        : [],
     },
   });
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>(
     storeData.roomIds || []
   );
+
+  useEffect(() => {
+    form.setValue("roomIds", selectedRoomIds);
+  }, [selectedRoomIds, form]);
 
   const nights = useCalculateNights({
     checkinDate: storeData.checkinDate,
@@ -56,18 +62,19 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
     CheckOutDate: format(storeData.checkoutDate!, "yyyy-MM-dd"),
     Guests: Number(storeData.adultsAmount!) + Number(storeData.childrenAmount!),
   });
-
   const selectedRooms = useMemo(() => {
     if (!availableRooms) return [];
 
     return selectedRoomIds
       .map((roomId) => {
         for (const roomType of availableRooms) {
-          const room = roomType.availableRooms.find((r) => r.roomId === roomId);
-          if (room) {
+          const matchingRoom = roomType.availableRooms.find(
+            (r) => r.roomId === roomId
+          );
+          if (matchingRoom) {
             return {
-              roomId: room.roomId,
-              roomName: room.roomName,
+              roomId: matchingRoom.roomId,
+              roomName: matchingRoom.roomName,
               roomTypeName: roomType.roomTypeName,
               baseRatePerNight: roomType.baseRatePerNight,
             };
@@ -95,52 +102,45 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
     setSelectedRoomIds((prev) => prev.filter((id) => id !== roomId));
   };
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setData({
-        roomIds: selectedRoomIds,
-        isBreakfastAll: form.watch("isBreakfastAll"),
-        breakfastDates: form.watch("breakfastDates") || [],
-      });
-      // Also save full room data
-      setSelectedRooms(selectedRooms);
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [
-    selectedRoomIds,
-    selectedRooms,
-    form.watch("isBreakfastAll"),
-    form.watch("breakfastDates"),
-    setData,
-    setSelectedRooms,
-  ]);
-
   const onSubmit = (data: RoomSelectionFormData) => {
     if (selectedRoomIds.length === 0) {
       toast.error("Vui lòng chọn ít nhất một phòng");
       return;
     }
 
-    // Save both roomIds and full room data
     setData({
       roomIds: selectedRoomIds,
       isBreakfastAll: data.isBreakfastAll,
-      breakfastDates: data.breakfastDates || [],
+      breakfastDates: data.breakfastDates?.map((i) => new Date(i)) || [],
     });
     setSelectedRooms(selectedRooms);
-
     setStep(3);
     onNext();
   };
 
+  const onError = (errors: any) => {
+    toast.error("Vui lòng kiểm tra lại thông tin đã nhập", errors);
+    console.log("Validation errors:", errors);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onError)}
+        className="space-y-6"
+      >
         <div>
           <h2 className="text-2xl font-bold">Lựa chọn phòng</h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground my-1">
             Bước 2/3 - Chọn phòng phù hợp cho {nights} đêm lưu trú
+          </p>
+          <p className="text-sm text-muted-foreground italic">
+            Tìm thấy tổng cộng{" "}
+            {availableRooms?.reduce(
+              (total, curr) => total + curr.availableCount,
+              0
+            ) || 0}{" "}
+            phòng trống
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

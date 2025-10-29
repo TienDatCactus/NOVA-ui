@@ -40,10 +40,6 @@ export const useCreateBookingStore = create<CreateBookingState>()(
     }),
     {
       name: "nova-create-booking",
-      partialize: (state) => ({
-        data: state.data,
-        currentStep: state.currentStep,
-      }),
     }
   )
 );

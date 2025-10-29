@@ -11,32 +11,30 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
+import type { DayPicker } from "react-day-picker";
 
 interface DatePickerProps {
   value?: Date;
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
-  disabled?: boolean;
   className?: string;
-  mode?: "single" | "multiple" | "range";
+  disablePast?: boolean;
 }
 
 export function DatePicker({
   value,
   onChange,
   placeholder = "Chọn ngày",
-  disabled = false,
   className,
+  disablePast = false,
   mode,
-}: DatePickerProps) {
+}: DatePickerProps & React.ComponentProps<typeof DayPicker>) {
   const [open, setOpen] = React.useState(false);
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          disabled={disabled}
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && "text-muted-foreground",
@@ -56,7 +54,7 @@ export function DatePicker({
             setOpen(false);
           }}
           locale={vi}
-          disabled={disabled ? { before: new Date() } : undefined}
+          disabled={disablePast ? { before: new Date() } : undefined}
         />
       </PopoverContent>
     </Popover>

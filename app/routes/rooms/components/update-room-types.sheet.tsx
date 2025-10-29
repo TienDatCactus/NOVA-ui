@@ -72,7 +72,7 @@ export function UpdateRoomTypeSheet({
     handleOpenDescriptionPreview,
     handleOpenDescriptionEdit,
     handleOpenImagePreview,
-    handleOpenImageEdit,
+    handleDeleteRoomType,
   } = useUpdateRoomTypeSheet({ open, onClose, roomType });
 
   if (!roomType) return null;
@@ -283,7 +283,7 @@ export function UpdateRoomTypeSheet({
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={handleOpenImagePreview}
+                          onClick={() => handleOpenImagePreview("new")}
                           className="flex-1"
                           disabled={
                             existingImages.length === 0 &&
@@ -297,7 +297,7 @@ export function UpdateRoomTypeSheet({
                           type="button"
                           variant="default"
                           size="sm"
-                          onClick={handleOpenImageEdit}
+                          onClick={() => handleOpenImagePreview("existing")}
                           className="flex-1"
                         >
                           <Pencil className="h-3.5 w-3.5 mr-1.5" />
@@ -330,20 +330,28 @@ export function UpdateRoomTypeSheet({
                   )}
                 />
 
-                <Separator className="my-6" />
+                <Separator className="my-4" />
 
-                <div className="flex justify-end gap-2 pt-4">
+                <div className="flex justify-between items-center">
                   <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleClose}
-                    disabled={isPending}
+                    variant={"destructive"}
+                    onClick={() => handleDeleteRoomType(roomType.id)}
                   >
-                    Hủy
+                    Xóa hạng phòng
                   </Button>
-                  <Button type="submit" disabled={isPending}>
-                    {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleClose}
+                      disabled={isPending}
+                    >
+                      Hủy
+                    </Button>
+                    <Button type="submit" disabled={isPending}>
+                      {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                    </Button>
+                  </div>
                 </div>
               </form>
             </Form>

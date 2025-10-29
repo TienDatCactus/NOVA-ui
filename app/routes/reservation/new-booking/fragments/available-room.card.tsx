@@ -1,5 +1,6 @@
 import { BedDouble, ChevronDown, ChevronRight, Users } from "lucide-react";
 import { useState } from "react";
+import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardHeader } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -10,10 +11,13 @@ import {
 } from "~/components/ui/collapsible";
 import { Label } from "~/components/ui/label";
 import { cn, formatMoney } from "~/lib/utils";
-import type { GetAvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
+import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
+import useRoomSchema from "~/services/schema/room.schema";
+const { AvailableRoomItemSchema } = useRoomSchema();
+type AvailableRoomItem = z.infer<typeof AvailableRoomItemSchema>;
 
 interface AvailableRoomTypeCardProps {
-  roomType: GetAvailableRoomsInternalResponseDto[number];
+  roomType: AvailableRoomItem;
   selectedRoomIds: string[];
   onToggleRoom: (roomId: string) => void;
   nights: number;
@@ -48,7 +52,7 @@ export function AvailableRoomTypeCard({
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
-                <span>Tối đa {roomType.maxOccupancy} người</span>
+                <span>Tối đa {roomType.maxOccupancy} người / phòng</span>
               </div>
               <div>
                 <Badge
@@ -96,48 +100,48 @@ export function AvailableRoomTypeCard({
 
           <CollapsibleContent className="px-2 border-t bg-muted/30">
             <div className="space-y-2 py-4">
-              {roomType.availableRooms.map((room) => {
-                const isSelected = selectedRoomIds.includes(room.roomId);
-                const isAvailable = room.status === "Ready";
+              {roomType.availableRooms.map(
+                (room: AvailableRoomItem["availableRooms"][0]) => {
+                  const isSelected = selectedRoomIds.includes(room.roomId);
+                  const isAvailable = room.status === "Ready";
 
-                return (
-                  <div
-                    key={room.roomId}
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-md border transition-colors",
-                      isSelected
-                        ? "bg-primary/10 border-primary"
-                        : "bg-card hover:bg-accent",
-                      !isAvailable && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => onToggleRoom(room.roomId)}
-                        disabled={!isAvailable}
-                        id={room.roomId}
-                      />
+                  return (
+                    <div className="space-y-2" key={room.roomId}>
                       <Label
                         htmlFor={room.roomId}
                         className={cn(
-                          "font-medium cursor-pointer select-none",
+                          "hover:bg-accent/50 flex items-center justify-between rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950 ",
                           !isAvailable && "cursor-not-allowed"
                         )}
                       >
-                        {room.roomName}
+                        <div className="flex items-center justify-between gap-2">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => onToggleRoom(room.roomId)}
+                            disabled={!isAvailable}
+                            id={room.roomId}
+                            className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
+                          />
+                          <div className="grid gap-1.5 font-normal">
+                            <p className="text-sm leading-none font-medium">
+                              Tên phòng :
+                            </p>
+                            <p className="text-muted-foreground text-sm">
+                              {room.roomName}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={isAvailable ? "success" : "secondary"}
+                          className="text-xs"
+                        >
+                          {isAvailable ? "Có sẵn" : "Không khả dụng"}
+                        </Badge>
                       </Label>
                     </div>
-
-                    <Badge
-                      variant={isAvailable ? "success" : "secondary"}
-                      className="text-xs"
-                    >
-                      {isAvailable ? "Có sẵn" : "Không khả dụng"}
-                    </Badge>
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
             </div>
           </CollapsibleContent>
         </Collapsible>

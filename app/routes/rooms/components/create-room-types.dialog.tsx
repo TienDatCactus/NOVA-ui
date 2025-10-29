@@ -22,7 +22,7 @@ import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { stripHtml } from "~/lib/utils";
-import { useCreateRoomTypeDialog } from "../container/create-room-type.hooks";
+import { useCreateRoomTypeDialog } from "../container/create-room-type-container.hooks";
 import { DescriptionDialog } from "../fragments/room-types/description.dialog";
 import { ImagePreviewDialog } from "../fragments/room-types/image-preview.dialog";
 import { Card, CardContent } from "~/components/ui/card";

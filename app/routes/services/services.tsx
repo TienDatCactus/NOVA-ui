@@ -20,7 +20,7 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   const {
-    flattenedServices,
+    filteredServices,
     isPending,
     filters,
     updateFilter,
@@ -43,27 +43,6 @@ export default function Component({
     handleExportExcel,
   } = useServicesContainer();
 
-  // Listen for custom events from action cells
-  useEffect(() => {
-    const handleEditEvent = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      handleEdit(customEvent.detail);
-    };
-
-    const handleDeleteEvent = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      handleDelete(customEvent.detail);
-    };
-
-    window.addEventListener("service:edit", handleEditEvent);
-    window.addEventListener("service:delete", handleDeleteEvent);
-
-    return () => {
-      window.removeEventListener("service:edit", handleEditEvent);
-      window.removeEventListener("service:delete", handleDeleteEvent);
-    };
-  }, [handleEdit, handleDelete]);
-
   return (
     <ServicesViewLayout
       filters={filters}
@@ -71,7 +50,7 @@ export default function Component({
       onResetFilters={resetFilters}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
-      totalServices={flattenedServices.length}
+      totalServices={filteredServices.length}
       selectedCount={selectedServices.length}
       onAddService={() => setCreateDialogOpen(true)}
       onBulkEdit={() => setBulkEditDialogOpen(true)}
@@ -79,7 +58,7 @@ export default function Component({
       onClearSelection={handleClearSelection}
     >
       <ServicesDataTable
-        services={flattenedServices}
+        services={filteredServices}
         isLoading={isPending}
         onAddService={() => setCreateDialogOpen(true)}
         onSelectionChange={setSelectedServices}

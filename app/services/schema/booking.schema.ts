@@ -140,12 +140,13 @@ const BookingItemSchema = z
   })
   .strict();
 
-const BookingOTAResponseSchema = z.object({
+const BookingOTAItem = z.object({
   id: z.string(),
   code: z.string(),
   name: z.string(),
   note: z.string(),
 });
+const BookingOTAResponseSchema = z.array(BookingOTAItem);
 
 const useBookingSchema = () => {
   return {

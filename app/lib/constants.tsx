@@ -164,11 +164,6 @@ const RESERVATION_TOP_NAV_ITEMS: Array<{
     title: "Hóa đơn",
     href: "/dashboard/reservation/invoices",
   },
-  {
-    icon: <BookMarked size={16} />,
-    title: "Tạo đơn đặt phòng",
-    href: "/dashboard/reservation/new-booking",
-  },
 ];
 const ROOMS_TOP_NAV_ITEMS: Array<{
   icon?: JSX.Element;

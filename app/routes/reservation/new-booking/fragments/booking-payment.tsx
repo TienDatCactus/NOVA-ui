@@ -2,7 +2,6 @@
 
 import { Wallet, CreditCard, Building2, Globe, Receipt } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import {
@@ -12,11 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  FormDescription,
+} from "~/components/ui/form";
 import { Separator } from "~/components/ui/separator";
 import { Badge } from "~/components/ui/badge";
 import { formatMoney, cn } from "~/lib/utils";
 import type { UseFormReturn } from "react-hook-form";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
 
 interface BookingPaymentProps {
   form: UseFormReturn<ReviewPaymentFormData>;
@@ -24,23 +32,13 @@ interface BookingPaymentProps {
   sourceType?: number;
 }
 
-const PAYMENT_METHODS = [
-  { value: "0", label: "Chưa xác định", icon: Receipt, disabled: true },
-  { value: "1", label: "Tiền mặt", icon: Wallet },
-  { value: "2", label: "Thẻ", icon: CreditCard },
-  { value: "3", label: "Chuyển khoản", icon: Building2 },
-  { value: "4", label: "OTA thu hộ", icon: Globe },
-  { value: "5", label: "OTA trả trước", icon: Globe },
-  { value: "6", label: "Ghi nợ", icon: Receipt },
-];
-
 export function BookingPayment({
   form,
   totalAmount,
   sourceType,
 }: BookingPaymentProps) {
   const paymentMethod = form.watch("roomPayment.paymentMethod");
-  const paidAmount = form.watch("roomPayment.paidAmount") ?? 0;
+  const paidAmount = Number(form.watch("roomPayment.paidAmount") ?? 0);
 
   const remaining = totalAmount - paidAmount;
   const change = paidAmount > totalAmount ? paidAmount - totalAmount : 0;
@@ -58,70 +56,101 @@ export function BookingPayment({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Payment Method */}
-        <div className="space-y-2">
-          <Label htmlFor="paymentMethod">Phương thức thanh toán</Label>
-          <Select
-            value={paymentMethod?.toString() ?? defaultPaymentMethod}
-            onValueChange={(value) => {
-              form.setValue(
-                "roomPayment.paymentMethod",
-                Number(value) as 0 | 1 | 2 | 3 | 4 | 5 | 6
-              );
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Chọn phương thức" />
-            </SelectTrigger>
-            <SelectContent>
-              {PAYMENT_METHODS.map((method) => {
-                const Icon = method.icon;
-                return (
-                  <SelectItem
-                    key={method.value}
-                    value={method.value}
-                    disabled={method.disabled}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4" />
-                      {method.label}
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            {sourceType === 2 && "Đặt phòng qua OTA - khuyến nghị OTA thu hộ"}
-            {sourceType === 3 && "Đặt qua đại lý - khuyến nghị ghi nợ"}
-          </p>
-        </div>
+        <FormField
+          control={form.control}
+          name="roomPayment.paymentMethod"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phương thức thanh toán</FormLabel>
+              <Select
+                value={field.value?.toString() ?? defaultPaymentMethod}
+                onValueChange={(value) => {
+                  field.onChange(Number(value) as 0 | 1 | 2 | 3 | 4 | 5 | 6);
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn phương thức" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {PAYMENT_METHODS.map((method) => {
+                    const Icon = method.icon;
+                    return (
+                      <SelectItem
+                        key={method.value}
+                        value={method.value}
+                        disabled={method.disabled}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          {method.label}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              {sourceType === 2 && (
+                <FormDescription>
+                  Đặt phòng qua OTA - khuyến nghị OTA thu hộ
+                </FormDescription>
+              )}
+              {sourceType === 3 && (
+                <FormDescription>
+                  Đặt qua đại lý - khuyến nghị ghi nợ
+                </FormDescription>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="paidAmount">Số tiền thanh toán (VNĐ)</Label>
-          <Input
-            id="paidAmount"
-            type="number"
-            placeholder="0"
-            min={0}
-            {...form.register("roomPayment.paidAmount", {
-              valueAsNumber: true,
-            })}
-          />
-          <p className="text-xs text-muted-foreground">
-            Để trống hoặc nhập 0 nếu chưa thanh toán
-          </p>
-        </div>
+        <FormField
+          control={form.control}
+          name="roomPayment.paidAmount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Số tiền thanh toán (VNĐ)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  min={0}
+                  {...field}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const num = Number(value);
+                    field.onChange(isNaN(num) || value === "" ? 0 : num);
+                  }}
+                />
+              </FormControl>
+              <FormDescription>
+                Để trống hoặc nhập 0 nếu chưa thanh toán
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Payment Note */}
-        <div className="space-y-2">
-          <Label htmlFor="paymentNote">Ghi chú thanh toán (tùy chọn)</Label>
-          <Textarea
-            id="paymentNote"
-            placeholder="VD: Đặt cọc 50%, thanh toán khi check-in"
-            rows={3}
-            {...form.register("roomPayment.paymentNote")}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="roomPayment.paymentNote"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ghi chú thanh toán (tùy chọn)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="VD: Đặt cọc 50%, thanh toán khi check-in"
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Separator />
 

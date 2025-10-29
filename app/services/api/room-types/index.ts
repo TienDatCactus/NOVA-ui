@@ -126,9 +126,18 @@ async function createRoomTypes(
     return Promise.reject(error);
   }
 }
+async function deleteRoomTypes(id: string) {
+  try {
+    await http.delete(RoomTypes.delete(id));
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const RoomTypesService = {
   getRoomTypesList,
   getRoomTypesDetail,
   updateRoomTypesDetail,
   createRoomTypes,
+  deleteRoomTypes,
 };

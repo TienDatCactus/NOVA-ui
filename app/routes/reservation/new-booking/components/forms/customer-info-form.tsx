@@ -1,6 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -25,58 +23,70 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
-import type z from "zod";
 import { DatePicker } from "~/components/ui/date-picker";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import { cn } from "~/lib/utils";
-import useBookingSchema from "~/services/schema/booking.schema";
+import { cn, useCalculateNights } from "~/lib/utils";
 import useFormSchema from "~/services/schema/forms.schema";
+import { BOOKING_SOURCES } from "~/services/types/booking.types";
 import type { CustomerInfoFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
-import useCalculateNights from "../../container/useCalculateNights";
-
-const { StaffCreateBookingSchema } = useBookingSchema();
+import { useOTAInfo } from "../../container/create-booking-query.hooks";
+import { useEffect, useState } from "react";
+import { Spinner } from "~/components/ui/shadcn-io/spinner";
 
 interface CustomerInfoFormProps {
   onNext: () => void;
-  onCancel?: () => void;
 }
 
-export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
+export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
   const { data: storeData, setData, setStep } = useCreateBookingStore();
-  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const { CustomerInfoFormSchema } = useFormSchema();
+
   const form = useForm({
     resolver: zodResolver(CustomerInfoFormSchema),
     defaultValues: {
-      guestFullName: storeData.guestFullName || "",
-      guestPhone: storeData.guestPhone || "",
-      guestEmail: storeData.guestEmail || "",
-      checkinDate: storeData.checkinDate,
-      checkoutDate: storeData.checkoutDate,
-      adultsAmount: storeData.adultsAmount || 1,
-      childrenAmount: storeData.childrenAmount || 0,
+      guestFullName: storeData.guestFullName,
+      guestPhone: storeData.guestPhone,
+      guestEmail: storeData.guestEmail,
+      checkinDate: storeData.checkinDate
+        ? new Date(storeData.checkinDate)
+        : undefined,
+      childrenAmount: storeData.childrenAmount,
+      checkoutDate: storeData.checkoutDate
+        ? new Date(storeData.checkoutDate)
+        : undefined,
+      adultsAmount: storeData.adultsAmount,
       source: storeData.source,
       otaInformationId: storeData.otaInformationId,
+      otaBookingCode: storeData.otaBookingCode || "",
     },
   });
-
+  useEffect(() => {
+    if (!storeData) return;
+    form.reset({
+      guestFullName: storeData.guestFullName ?? "",
+      guestPhone: storeData.guestPhone ?? "",
+      guestEmail: storeData.guestEmail ?? "",
+      checkinDate: storeData.checkinDate
+        ? new Date(storeData.checkinDate)
+        : undefined,
+      checkoutDate: storeData.checkoutDate
+        ? new Date(storeData.checkoutDate)
+        : undefined,
+      adultsAmount: storeData.adultsAmount ?? 0,
+      childrenAmount: storeData.childrenAmount ?? 0,
+      source: storeData.source ?? 1,
+      otaInformationId: storeData.otaInformationId ?? undefined,
+      otaBookingCode: storeData.otaBookingCode ?? "",
+    });
+  }, [storeData]);
+  const { data: otaList } = useOTAInfo({
+    selection: form.watch("source") === 2 ? true : false,
+  });
   const nights = useCalculateNights({
     checkinDate: form.watch("checkinDate"),
     checkoutDate: form.watch("checkoutDate"),
   });
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      const timeout = setTimeout(() => {
-        setData(values as Partial<z.infer<typeof StaffCreateBookingSchema>>);
-      }, 500);
-
-      return () => clearTimeout(timeout);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [form, setData]);
-
   const onSubmit = async (values: CustomerInfoFormData) => {
     try {
       setData(values);
@@ -88,7 +98,10 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
-
+  const onError = (errors: any) => {
+    toast.error("Vui lòng kiểm tra lại thông tin đã nhập", errors);
+    console.log("Validation errors:", errors);
+  };
   return (
     <Card className="space-y-6 p-6 shadow-s">
       <div className="flex items-center justify-between">
@@ -102,7 +115,10 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 ">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, onError)}
+          className="space-y-6 "
+        >
           <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
             <FormField
               control={form.control}
@@ -114,9 +130,9 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <Input
+                      {...field}
                       className="bg-secondary"
                       placeholder="Nhập họ và tên khách hàng"
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -135,10 +151,10 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <Input
+                      {...field}
                       type="tel"
                       className="bg-secondary"
                       placeholder="+84 123 456 789"
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -157,10 +173,10 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <Input
+                      {...field}
                       className="bg-secondary"
                       type="email"
                       placeholder="email@example.com"
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -180,8 +196,9 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <DatePicker
+                      {...field}
                       value={field.value}
-                      onChange={field.onChange}
+                      disablePast
                       placeholder="Chọn ngày nhận phòng"
                       className="bg-secondary"
                     />
@@ -201,8 +218,9 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <DatePicker
+                      {...field}
                       value={field.value}
-                      onChange={field.onChange}
+                      disablePast
                       placeholder="Chọn ngày trả phòng"
                       className="bg-secondary"
                     />
@@ -224,10 +242,9 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <Counter
+                      {...field}
                       minValue={0}
                       maxValue={10}
-                      value={field.value}
-                      onChange={field.onChange}
                       isDisabled={form.formState.isSubmitting}
                     />
                   </FormControl>
@@ -249,10 +266,9 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                   </FormLabel>
                   <FormControl>
                     <Counter
+                      {...field}
                       minValue={0}
                       maxValue={10}
-                      value={field.value}
-                      onChange={field.onChange}
                       isDisabled={form.formState.isSubmitting}
                     />
                   </FormControl>
@@ -314,7 +330,7 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {MOCK_OTA_LIST.map((ota) => (
+                          {otaList?.map((ota) => (
                             <SelectItem
                               className="[&_div:focus]:bg-primary/20 [&_div:focus]:text-primary dark:[&_div:focus]:bg-sky-400/20 dark:[&_div:focus]:text-sky-400"
                               key={ota.id}
@@ -354,17 +370,15 @@ export function CustomerInfoForm({ onNext, onCancel }: CustomerInfoFormProps) {
               </>
             )}
           </div>
-          {nights > 0 && (
-            <p className="text-sm font-medium">
-              Số đêm: <span className="text-primary">{nights} đêm</span>
-            </p>
-          )}
-          {onCancel && (
-            <Button type="button" variant="ghost" onClick={onCancel}>
-              Hủy
-            </Button>
-          )}
-          <Button type="submit">Tiếp theo</Button>
+          <div className="flex items-center justify-between mt-4">
+            {nights > 0 && (
+              <p className="text-sm font-medium">
+                Số đêm: <span className="text-primary">{nights} đêm</span>
+              </p>
+            )}
+
+            <Button type="submit">Tiếp theo</Button>
+          </div>
         </form>
       </Form>
     </Card>

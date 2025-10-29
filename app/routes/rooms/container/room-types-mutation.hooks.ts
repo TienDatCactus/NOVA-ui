@@ -39,3 +39,13 @@ export function useUpdateRoomType() {
     },
   });
 }
+
+export function useDeleteRoomType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => RoomTypesService.deleteRoomTypes(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["room-types"] });
+    },
+  });
+}

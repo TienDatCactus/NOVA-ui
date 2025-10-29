@@ -33,6 +33,7 @@ const RoomTypes = {
   detail: (id: string) => `RoomTypes/${id}`,
   update: (id: string) => `RoomTypes/${id}`,
   create: "RoomTypes",
+  delete: (id: string) => `RoomTypes/${id}`,
 };
 const Menu = {
   list: "Menu/list",

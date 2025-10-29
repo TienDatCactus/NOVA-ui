@@ -1,34 +1,36 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 
-import { useCreateBookingStore } from "~/store/create-booking.store";
-import { BookingService } from "~/services/api/booking";
 import useFormSchema from "~/services/schema/forms.schema";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
+import { useCreateBookingStore } from "~/store/create-booking.store";
 
-import { BookingSummaryCard } from "../../fragments/booking-summary.card";
-import { BookingPayment } from "../../fragments/booking-payment";
-import { ServiceOrder } from "../../fragments/service-order";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { Textarea } from "~/components/ui/textarea";
-import { Label } from "~/components/ui/label";
-import useCalculateNights from "../../container/useCalculateNights";
-import useCreateBookingMutation from "../../container/useCreateBookingMutation";
 import { useStep } from "~/hooks/use-step";
+import { useCalculateNights } from "~/lib/utils";
+import useCreateBookingMutation from "../../container/create-booking-mutation.hooks";
+import { BookingPayment } from "../../fragments/booking-payment";
+import { BookingSummaryCard } from "../../fragments/booking-summary.card";
+import { ServiceOrder } from "../../fragments/service-order";
+import { toast } from "sonner";
 
 interface ReviewPaymentFormProps {
   onNext: () => void;
   onBack?: () => void;
+  onResetSteps?: () => void;
 }
 
-export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
+export function ReviewPaymentForm({
+  onNext,
+  onBack,
+  onResetSteps,
+}: ReviewPaymentFormProps) {
   const navigate = useNavigate();
   const {
     data: storeData,
@@ -36,7 +38,6 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
     setData,
     reset,
   } = useCreateBookingStore();
-  const [_, { reset: resetSteps }] = useStep(3);
   const { mutate } = useCreateBookingMutation();
   const { ReviewPaymentFormSchema } = useFormSchema();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +68,10 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
       ? Number(override)
       : totalAmount;
   };
-
+  const onError = (errors: any) => {
+    toast.error("Vui lòng kiểm tra lại thông tin đã nhập", errors);
+    console.log("Validation errors:", errors);
+  };
   const onSubmit = async (data: ReviewPaymentFormData) => {
     setIsSubmitting(true);
     setData({
@@ -89,9 +93,9 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
         guestFullName: storeData.guestFullName!,
         isBreakfastAll: storeData.isBreakfastAll ?? false,
       };
-      console.log(bookingData);
       mutate(bookingData);
       reset();
+      onResetSteps && onResetSteps();
     } catch (error) {
       console.error("Booking creation failed:", error);
     } finally {
@@ -101,7 +105,10 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onError)}
+        className="space-y-6"
+      >
         <div>
           <h2 className="text-2xl font-bold">
             Xác nhận đặt phòng & thanh toán
@@ -146,7 +153,6 @@ export function ReviewPaymentForm({ onNext, onBack }: ReviewPaymentFormProps) {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-between gap-3 pt-6 border-t">
           {onBack && (
             <Button type="button" variant="outline" onClick={onBack}>

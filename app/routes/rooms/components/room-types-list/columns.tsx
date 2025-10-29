@@ -62,10 +62,11 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
           </Button>
 
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Chi tiết hạng phòng</DialogTitle>
-              </DialogHeader>
+            <DialogContent
+              onInteractOutside={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
+              className="max-w-5xl"
+            >
               <RoomTypesDetailDialog
                 roomTypeId={row.original.id}
                 open={open}
