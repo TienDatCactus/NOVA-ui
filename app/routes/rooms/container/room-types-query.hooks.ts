@@ -10,12 +10,15 @@ function useRoomTypes(params?: RoomTypesListParams) {
   });
 }
 
-function useRoomTypeDetail(id: string) {
+function useRoomTypeDetail(params?: { id: string; open: boolean }) {
   return useQuery({
-    queryKey: ["room-type", id],
-    queryFn: async () => await RoomTypesService.getRoomTypesDetail(id),
+    queryKey: ["room-type", params?.id],
+    queryFn: async () => {
+      if (!params?.id) throw new Error("Room type ID is required");
+      return await RoomTypesService.getRoomTypesDetail(params.id);
+    },
     staleTime: 10 * 60 * 1000,
-    enabled: !!id,
+    enabled: !!params?.id && params?.open === true,
   });
 }
 export { useRoomTypes, useRoomTypeDetail };

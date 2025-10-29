@@ -22,8 +22,8 @@ import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import type z from "zod";
 import { useCreateRoomType } from "../container/room-types-mutation.hooks";
 
-const { CreateRoomTypesResponseSchema } = useRoomTypesSchema();
-const CreateRoomTypeFormSchema = CreateRoomTypesResponseSchema.pick({
+const { CreateRoomTypesRequestSchema } = useRoomTypesSchema();
+const CreateRoomTypeFormSchema = CreateRoomTypesRequestSchema.pick({
   code: true,
   name: true,
   baseRate: true,

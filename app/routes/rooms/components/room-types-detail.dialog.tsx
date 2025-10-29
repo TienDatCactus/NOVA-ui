@@ -1,34 +1,62 @@
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
-  Users,
+  Bath,
+  Calendar,
   DollarSign,
   FileText,
-  Calendar,
+  FolderCode,
   ImageIcon,
   Info,
+  Users,
 } from "lucide-react";
-import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import Image from "~/components/ui/image";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { formatMoney } from "~/lib/utils";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
+import { useRoomTypeDetail } from "../container/room-types-query.hooks";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "~/components/ui/empty";
 
-const { RoomTypesDetailResponseSchema } = useRoomTypesSchema();
-
-interface RoomTypesDetailRowProps {
-  roomTypeDetail: z.infer<typeof RoomTypesDetailResponseSchema>;
-  isLoading: boolean;
+interface RoomTypesDetailDialogProps {
+  roomTypeId: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-function RoomTypesDetailRow({
-  roomTypeDetail,
-  isLoading,
-}: RoomTypesDetailRowProps) {
+function RoomTypesDetailDialog({
+  roomTypeId,
+  open,
+  onOpenChange,
+}: RoomTypesDetailDialogProps) {
+  const { data: roomTypeDetail, isLoading } = useRoomTypeDetail({
+    id: roomTypeId,
+    open: !!open,
+  });
+  if (!roomTypeDetail) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FolderCode />
+          </EmptyMedia>
+          <EmptyTitle>Không có thông tin</EmptyTitle>
+          <EmptyDescription>
+            Không có thông tin chi tiết cho loại phòng này. Hãy thử một phòng
+            khác.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -47,17 +75,17 @@ function RoomTypesDetailRow({
 
   return (
     <div className="space-y-4">
-      <Card className="border-2">
-        <CardHeader className="pb-4">
+      <Card>
+        <CardHeader>
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <CardTitle className="text-xl flex items-center gap-2">
-                <FileText className="h-5 w-5" />
+                <Bath className="h-5 w-5" />
                 {roomTypeDetail.name}
+                <p className="text-sm text-muted-foreground  font-mono">
+                  {roomTypeDetail.code}
+                </p>
               </CardTitle>
-              <p className="text-sm text-muted-foreground font-mono">
-                {roomTypeDetail.code}
-              </p>
             </div>
             <Badge
               variant={roomTypeDetail.active ? "default" : "secondary"}
@@ -82,34 +110,33 @@ function RoomTypesDetailRow({
 
           <Separator />
 
-          {/* Key Info Grid */}
-          <div className="grid grid-cols-3 gap-6">
-            <div className="space-y-2">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2 border p-4 shadow-s rounded-lg">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <DollarSign className="h-4 w-4" />
                 <span>Giá cơ bản/đêm</span>
               </div>
-              <p className="text-xl font-bold text-primary pl-6">
+              <p className="text-xl font-bold text-primary">
                 {formatMoney(roomTypeDetail.baseRate).vndFormatted}
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 border  shadow-s p-4 rounded-lg">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Users className="h-4 w-4" />
                 <span>Sức chứa tối đa</span>
               </div>
-              <p className="text-xl font-bold pl-6">
+              <p className="text-xl font-bold">
                 {roomTypeDetail.maxOccupancy} người
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 border shadow-s p-4 rounded-lg">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Calendar className="h-4 w-4" />
                 <span>Ngày tạo</span>
               </div>
-              <p className="text-sm font-medium pl-6">
+              <p className="text-sm font-medium pt-1.5">
                 {format(parseISO(roomTypeDetail.createdAt), "dd/MM/yyyy", {
                   locale: vi,
                 })}
@@ -119,7 +146,6 @@ function RoomTypesDetailRow({
         </CardContent>
       </Card>
 
-      {/* Images Gallery Card */}
       {sortedImages.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
@@ -130,14 +156,13 @@ function RoomTypesDetailRow({
           </CardHeader>
           <CardContent>
             {sortedImages.length === 1 ? (
-              // Single Image - Full Width
               <div className="relative group">
                 <Image
                   src={sortedImages[0].url}
                   alt={sortedImages[0].caption || roomTypeDetail.name}
                   width={800}
                   height={400}
-                  className="w-full h-64 object-cover rounded-lg"
+                  className="w-full h-64 object-cover rounded-lg shadow-md"
                 />
                 {sortedImages[0].caption && (
                   <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 rounded-b-lg">
@@ -148,9 +173,8 @@ function RoomTypesDetailRow({
                 )}
               </div>
             ) : (
-              // Multiple Images - Horizontal Scroll Gallery
               <ScrollArea className="w-full whitespace-nowrap">
-                <div className="flex gap-3 pb-4">
+                <div className="flex gap-4 pb-4">
                   {sortedImages.map((image, index) => (
                     <div
                       key={image.mediaId}
@@ -165,7 +189,7 @@ function RoomTypesDetailRow({
                           }
                           width={300}
                           height={200}
-                          className="w-[300px] h-48 object-cover rounded-lg border-2 hover:border-primary transition-colors"
+                          className="w-[300px] h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                         />
                         {/* Display Order Badge */}
                         <Badge
@@ -175,7 +199,6 @@ function RoomTypesDetailRow({
                           #{image.displayOrder}
                         </Badge>
                       </div>
-                      {/* Caption Overlay */}
                       {image.caption && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
                           <p className="text-xs text-center truncate">
@@ -200,19 +223,14 @@ function RoomTypesDetailRow({
         </Card>
       )}
 
-      {/* Empty State for No Images */}
       {sortedImages.length === 0 && (
-        <Card>
-          <CardContent className="py-8">
-            <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-              <ImageIcon className="h-12 w-12 opacity-20" />
-              <p className="text-sm">Chưa có ảnh cho loại phòng này</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center gap-2 rounded-lg border-2  border-dashed py-12 text-muted-foreground">
+          <ImageIcon className="h-12 w-12 opacity-30" />
+          <p className="text-sm">Chưa có ảnh cho loại phòng này</p>
+        </div>
       )}
     </div>
   );
 }
 
-export default RoomTypesDetailRow;
+export default RoomTypesDetailDialog;

@@ -1,16 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -37,6 +27,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 
+import AlertChanges from "~/components/ui/alert-changes";
 import type {
   RoomListItemDto,
   UpdateRoomDetailRequestDto,
@@ -225,24 +216,11 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
       </Sheet>
 
       {/* Cancel Confirmation Dialog */}
-      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Hủy thay đổi?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có thay đổi chưa được lưu. Bạn có chắc chắn muốn hủy?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowCancelDialog(false)}>
-              Tiếp tục chỉnh sửa
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmClose}>
-              Hủy thay đổi
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AlertChanges
+        showCancelDialog={showCancelDialog}
+        setShowCancelDialog={setShowCancelDialog}
+        handleConfirmClose={handleConfirmClose}
+      />
     </>
   );
 }

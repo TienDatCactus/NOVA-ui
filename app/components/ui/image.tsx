@@ -67,6 +67,7 @@ const Image: React.FC<ComponentProps<"img"> & ImageProps> = ({
         width={width}
         height={height}
         onError={handleError}
+        loading="lazy"
         className={cn(
           `w-full h-full object-cover rounded-lg transition-opacity duration-300`,
           {

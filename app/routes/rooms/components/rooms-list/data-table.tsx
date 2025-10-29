@@ -1,14 +1,10 @@
 import {
   type ColumnDef,
-  type ExpandedState,
   type RowSelectionState,
   flexRender,
   getCoreRowModel,
-  getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { format } from "date-fns";
-import { Info } from "lucide-react";
 import React, { useState } from "react";
 import {
   Table,
@@ -19,11 +15,6 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import {
-  useRoomBookingHistory,
-  useRoomDetail,
-} from "../../container/rooms-query.hooks";
-import RoomDetailRow from "../rooms-detail.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,7 +27,6 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
   data,
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
-  const [open, setOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({

@@ -1,23 +1,7 @@
 import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
-import {
-  Calendar,
-  CircleOff,
-  ClipboardClock,
-  Coffee,
-  FileText,
-  StickyNote,
-} from "lucide-react";
+import { Calendar, CircleOff, Coffee, StickyNote } from "lucide-react";
 import { useState } from "react";
-import type z from "zod";
 import { Badge } from "~/components/ui/badge";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 import { DatePicker } from "~/components/ui/date-picker";
 import {
   Empty,
@@ -41,7 +25,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import useRoomSchema from "~/services/schema/room.schema";
 import { useRoomBookingHistory } from "../../container/rooms-query.hooks";
 
 interface BookingHistoryRowProps {
@@ -53,7 +36,7 @@ function BookingHistory({ roomId }: BookingHistoryRowProps) {
     from: Date;
     to: Date;
   }>({
-    from: new Date(),
+    from: new Date("2024-12-01"),
     to: new Date(),
   });
   const { data: bookings, isLoading } = useRoomBookingHistory({

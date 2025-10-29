@@ -1,19 +1,15 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Lock } from "lucide-react";
 import type z from "zod";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 
+import { useState } from "react";
+import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import { formatMoney } from "~/lib/utils";
 import useRoomSchema from "~/services/schema/room.schema";
-import RoomActionsCell from "../../fragments/rooms/room-actions.cell";
-import RoomStatusCell from "../../fragments/rooms/room-status.cell";
-import { useState } from "react";
-import { Drawer, DrawerTrigger } from "~/components/ui/drawer";
-import RoomDetailDrawer from "../rooms-detail.dialog";
-import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import RoomDetailDialog from "../rooms-detail.dialog";
+import RoomActionsCell from "../../fragments/rooms/actions.cell";
+import RoomStatusCell from "../../fragments/rooms/status.cell";
 
 const { RoomListItemSchema } = useRoomSchema();
 type RoomListItem = z.infer<typeof RoomListItemSchema>;

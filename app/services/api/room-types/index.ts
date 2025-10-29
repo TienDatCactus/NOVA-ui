@@ -1,8 +1,10 @@
 import type { RoomTypesListParams } from "~/services/types/room-types.types";
 import type {
+  CreateRoomTypesRequestDto,
   CreateRoomTypesResponseDto,
   RoomTypesDetailResponseDto,
   RoomTypesListResponseDto,
+  UpdateRoomTypesDetailRequestDto,
   UpdateRoomTypesDetailResponseDto,
 } from "./dto";
 import useRoomTypesSchema from "~/services/schema/room-types.schema";
@@ -12,8 +14,10 @@ import http from "~/lib/http";
 const {
   RoomTypesListResponseSchema,
   RoomTypesDetailResponseSchema,
-  UpdateRoomTypesDetailResponseSchema,
+  UpdateRoomTypesDetailRequestSchema,
+  CreateRoomTypesRequestSchema,
   CreateRoomTypesResponseSchema,
+  UpdateRoomTypesDetailResponseSchema,
 } = useRoomTypesSchema();
 
 async function getRoomTypesList(
@@ -42,15 +46,42 @@ async function getRoomTypesDetail(
 
 async function updateRoomTypesDetail(
   id: string,
-  data: {
-    code: string;
-    name: string;
-    baseRate: number;
-    active: boolean;
-  }
+  data: UpdateRoomTypesDetailRequestDto
 ): Promise<UpdateRoomTypesDetailResponseDto> {
   try {
-    const resp = await http.patch(RoomTypes.detail(id), data);
+    const validatedData = UpdateRoomTypesDetailRequestSchema.parse(data);
+    const formData = new FormData();
+    formData.append("code", validatedData.code);
+    formData.append("name", validatedData.name);
+    formData.append("baseRate", validatedData.baseRate.toString());
+    formData.append("active", validatedData.active.toString());
+    if (validatedData.description) {
+      formData.append("description", validatedData.description);
+    }
+    if (validatedData.maxOccupancy !== undefined) {
+      formData.append("maxOccupancy", validatedData.maxOccupancy.toString());
+    }
+    const validFiles = validatedData.images?.filter(
+      (file): file is File => file instanceof File
+    );
+    validFiles?.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    if (
+      validatedData.removeMediaIds &&
+      validatedData.removeMediaIds.length > 0
+    ) {
+      validatedData.removeMediaIds.forEach((id) =>
+        formData.append("removeMediaIds", id)
+      );
+    }
+    const resp = await http.patch(RoomTypes.detail(id), formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
     return UpdateRoomTypesDetailResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -58,14 +89,14 @@ async function updateRoomTypesDetail(
   }
 }
 
-async function createRoomTypes(data: {
-  code: string;
-  name: string;
-  baseRate: number;
-  active: boolean;
-}): Promise<CreateRoomTypesResponseDto> {
+async function createRoomTypes(
+  data: CreateRoomTypesRequestDto
+): Promise<CreateRoomTypesResponseDto> {
   try {
-    const resp = await http.post(RoomTypes.create, data);
+    const resp = await http.post(
+      RoomTypes.create,
+      CreateRoomTypesRequestSchema.parse(data)
+    );
     return CreateRoomTypesResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);

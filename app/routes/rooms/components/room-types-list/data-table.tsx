@@ -1,13 +1,14 @@
 import {
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
-  type SortingState,
   type RowSelectionState,
-  getExpandedRowModel,
+  type SortingState,
 } from "@tanstack/react-table";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -16,12 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import React, { useState } from "react";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { Info } from "lucide-react";
-import { useRoomDetail } from "../../container/rooms-query.hooks";
-import { useRoomTypeDetail } from "../../container/room-types-query.hooks";
-import RoomTypesDetailRow from "../../fragments/room-types/room-types-detail.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -37,8 +33,7 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [expanded, setExpanded] = useState<any>();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const { data: roomTypeDetailData, isLoading: roomDetailLoading } =
-    useRoomTypeDetail(Object.keys(expanded || {})[0] as string);
+
   const table = useReactTable({
     data,
     columns,
@@ -92,28 +87,6 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
                     </TableCell>
                   ))}
                 </TableRow>
-                {row.getIsExpanded() && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="p-4 space-y-4"
-                    >
-                      <h3 className="text-lg font-medium ">
-                        <Info /> Thông tin chi tiết
-                      </h3>
-                      {roomTypeDetailData ? (
-                        <RoomTypesDetailRow
-                          roomTypeDetail={roomTypeDetailData}
-                          isLoading={roomDetailLoading}
-                        />
-                      ) : (
-                        <p className="text-center text-sm italic ">
-                          Không có thông tin
-                        </p>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )}
               </React.Fragment>
             ))
           ) : (

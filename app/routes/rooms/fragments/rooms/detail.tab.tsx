@@ -41,7 +41,7 @@ function RoomDetailTab({ roomId }: RoomDetailTabProps) {
           </EmptyMedia>
           <EmptyTitle>Không có thông tin</EmptyTitle>
           <EmptyDescription>
-            Không có thông tin chi tiết phòng nào. Hãy tạo mới một phòng.
+            Không có thông tin chi tiết cho phòng này. Hãy thử một phòng khác.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

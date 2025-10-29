@@ -3,9 +3,17 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import { formatMoney } from "~/lib/utils";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { RoomTypeActionsCell } from "../../fragments/room-types/room-types-action.cell";
+import RoomTypesDetailDialog from "../room-types-detail.dialog";
+import { useState } from "react";
+import { RoomTypeActionsCell } from "../../fragments/room-types/action.cell";
 
 export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   {
@@ -40,13 +48,34 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   {
     accessorKey: "code",
     header: "Mã hạng phòng",
-    cell: ({ row }) => (
-      <div className="">
-        <Button variant="link" className="p-0 font-medium">
-          {row.original.code}
-        </Button>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const [open, setOpen] = useState(false);
+
+      return (
+        <>
+          <Button
+            variant="link"
+            className="p-0 font-medium"
+            onClick={() => setOpen(true)}
+          >
+            {row.original.code}
+          </Button>
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Chi tiết hạng phòng</DialogTitle>
+              </DialogHeader>
+              <RoomTypesDetailDialog
+                roomTypeId={row.original.id}
+                open={open}
+                onOpenChange={setOpen}
+              />
+            </DialogContent>
+          </Dialog>
+        </>
+      );
+    },
   },
   {
     accessorKey: "name",

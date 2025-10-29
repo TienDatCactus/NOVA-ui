@@ -1,20 +1,5 @@
-import { DollarSign, FileText, FolderCode } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "~/components/ui/empty";
-import Image from "~/components/ui/image";
-import { Separator } from "~/components/ui/separator";
-import { Skeleton } from "~/components/ui/skeleton";
-import { formatMoney } from "~/lib/utils";
-import { useRoomDetail } from "../container/rooms-query.hooks";
 import {
   DialogContent,
   DialogDescription,
@@ -24,7 +9,7 @@ import {
 } from "~/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import BookingHistory from "../fragments/rooms/booking-history.tab";
-import RoomDetailTab from "../fragments/rooms/room-detail.tab";
+import RoomDetailTab from "../fragments/rooms/detail.tab";
 interface RoomDetailRowProps {
   roomId: string;
   open?: boolean;
@@ -33,7 +18,7 @@ interface RoomDetailRowProps {
 
 function RoomDetailDialog({ roomId, onOpenChange, open }: RoomDetailRowProps) {
   return (
-    <DialogContent>
+    <DialogContent className="max-w-4xl">
       <DialogHeader>
         <DialogTitle>Thông tin phòng</DialogTitle>
         <DialogDescription>Tổng hợp thông tin chi tiết.</DialogDescription>
