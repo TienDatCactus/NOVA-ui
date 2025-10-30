@@ -219,6 +219,11 @@ const SERVICES_TOP_NAV_ITEMS: Array<{
     title: "Thực đơn",
     href: "/dashboard/services/menu-items",
   },
+  {
+    icon: <Warehouse size={16} />,
+    title: "Đơn vị tính",
+    href: "/dashboard/services/units",
+  },
 ];
 const INVOICES_TOP_NAV_ITEMS: Array<{
   icon?: JSX.Element;

@@ -51,18 +51,26 @@ async function updateUnit(
   data: UpdateUnitRequestDto
 ): Promise<UpdateUnitResponseDto> {
   try {
-    const resp = await http.put(
-      Units.update(id),
-      UpdateUnitRequestSchema.parse(data)
-    );
-    return UpdateUnitResponseSchema.parse(resp.data);
+    const resp = await http.put(Units.update(id), data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
+
+async function deleteUnit(id: string): Promise<void> {
+  try {
+    await http.delete(Units.delete(id));
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const UnitsService = {
   getUnitList,
   createUnit,
   updateUnit,
+  deleteUnit,
 };

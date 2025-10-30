@@ -8,8 +8,11 @@ const UnitItemSchema = z.object({
 });
 
 const EditUnitRequestSchema = z.object({
-  code: z.string().min(1, "Mã đơn vị không hợp lệ"),
-  name: z.string().min(1, "Tên đơn vị không hợp lệ"),
+  code: z
+    .string()
+    .min(1, "Mã đơn vị không được để trống")
+    .max(10, "Mã đơn vị không được quá 10 ký tự"),
+  name: z.string().min(1, "Tên đơn vị không được để trống"),
   active: z.boolean(),
 });
 const CreateUnitRequestSchema = EditUnitRequestSchema;
