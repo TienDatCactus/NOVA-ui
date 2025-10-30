@@ -8,36 +8,25 @@ import type { UseFormReturn } from "react-hook-form";
 export function useRoomTypeFormDialogs() {
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
   const [showImagePreviewDialog, setShowImagePreviewDialog] = useState(false);
-  const [descriptionDialogMode, setDescriptionDialogMode] = useState<
-    "preview" | "edit"
-  >("edit");
+  const [dialogMode, setDialogMode] = useState<"preview" | "edit">("edit");
 
-  const handleOpenDescriptionPreview = () => {
-    setDescriptionDialogMode("preview");
+  const handleOpenDescription = (type: "preview" | "edit") => {
+    setDialogMode(type);
     setShowDescriptionDialog(true);
   };
-
-  const handleOpenDescriptionEdit = () => {
-    setDescriptionDialogMode("edit");
-    setShowDescriptionDialog(true);
-  };
-
-  const handleOpenImageEdit = () => {
+  const handleOpenImagePreview = (type: "preview" | "edit") => {
+    setDialogMode(type);
     setShowImagePreviewDialog(true);
   };
-
   return {
+    dialogMode,
+    handleOpenImagePreview,
+    handleOpenDescription,
     // State
     showDescriptionDialog,
     setShowDescriptionDialog,
     showImagePreviewDialog,
     setShowImagePreviewDialog,
-    descriptionDialogMode,
-
-    // Handlers
-    handleOpenDescriptionPreview,
-    handleOpenDescriptionEdit,
-    handleOpenImageEdit,
   };
 }
 

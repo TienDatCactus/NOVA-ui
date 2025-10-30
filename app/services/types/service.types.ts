@@ -6,6 +6,6 @@ export type ServiceCategory = "Dịch vụ" | "Thức ăn" | "Đồ uống";
 
 export interface ServiceFilters {
   typeCode: string;
-  includeInactive: boolean;
+  activeFilter: "" | "active" | "all";
   searchText: string;
 }

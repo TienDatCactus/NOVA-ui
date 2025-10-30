@@ -4,34 +4,41 @@ import useRoomSchema from "./room.schema";
 const { RoomPaymentSchema } = useRoomSchema();
 // ----------------------
 
-const ServiceItemSchema = z.object({
+// general CRUD ops
+const ServiceListItemSchema = z.object({
   serviceItemId: z.string(),
-  code: z.string().min(2).max(100),
-  name: z.string().min(2).max(100),
-  description: z.string().max(500),
+  code: z.string().min(2),
+  name: z.string().min(2),
+  description: z.string(),
   unitName: z.string().max(100),
   basePrice: z.number().min(0),
   active: z.boolean().default(true),
 });
-const ServiceItemListSchema = z.object({
+
+const ServiceItemSchema = z.object({
+  id: z.string(),
   serviceTypeId: z.string(),
-  typeCode: z.string(),
-  typeName: z.string(),
-  imageUrls: z.array(z.string()),
+  serviceTypeName: z.string(),
+  unitId: z.string(),
+  unitName: z.string(),
+  code: z.string().min(2),
+  name: z.string().min(2),
+  description: z.string().max(500),
+  basePrice: z.number().min(0),
   active: z.boolean().default(true),
-  items: z.array(ServiceItemSchema),
+  createdAt: z.string().min(10).max(10),
+  updatedAt: null,
 });
-const ServiceListResponseSchema = z.array(ServiceItemListSchema);
 
 const ServiceListByTypeResponseSchema = z.array(ServiceItemSchema);
-
+const ServiceListResponseSchema = z.array(ServiceListItemSchema);
 const ServiceItemDetailResponseSchema = ServiceItemSchema;
 
 const EditServiceItemRequestSchema = z.object({
   serviceTypeId: z.string(),
   unitId: z.string(),
-  code: z.string().min(2).max(100),
-  name: z.string().min(2).max(100),
+  code: z.string().min(2),
+  name: z.string().min(2),
   description: z.string().max(500),
   basePrice: z.number().min(0),
   active: z.boolean().default(true),
@@ -40,6 +47,8 @@ const CreateServiceItemRequestSchema = EditServiceItemRequestSchema;
 const UpdateServiceItemRequestSchema = EditServiceItemRequestSchema;
 const CreateServiceItemResponseSchema = ServiceItemSchema;
 const UpdateServiceItemResponseSchema = ServiceItemSchema;
+
+// for create booking
 const ServicePaymentSchema = RoomPaymentSchema;
 const ServiceOrderItemSchema = z.object({
   itemType: z.string(),
@@ -52,6 +61,7 @@ const ServiceOrderSchema = z.object({
   services: z.array(ServiceOrderItemSchema).optional().nullable(),
   payment: ServicePaymentSchema.optional().nullable(),
 });
+
 const useServiceSchema = () => {
   return {
     ServiceItemSchema,
@@ -64,7 +74,7 @@ const useServiceSchema = () => {
     CreateServiceItemResponseSchema,
     UpdateServiceItemRequestSchema,
     CreateServiceItemRequestSchema,
-    ServiceItemListSchema,
+    ServiceListItemSchema,
   };
 };
 export default useServiceSchema;

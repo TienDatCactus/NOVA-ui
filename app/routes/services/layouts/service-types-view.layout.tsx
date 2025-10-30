@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { ServiceTypeFilters } from "../container/service-types-filter.hooks";
-import ServiceTypesCommandBar from "../fragments/service-types/service-types-command-bar";
+import ServiceTypesCommandBar from "../fragments/service-types/command-bar";
 
 interface ServiceTypesViewLayoutProps {
   children: ReactNode;
@@ -9,39 +9,36 @@ interface ServiceTypesViewLayoutProps {
     key: K,
     value: ServiceTypeFilters[K]
   ) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   totalTypes: number;
   selectedCount: number;
   onAddType: () => void;
   onExportExcel: () => void;
   onClearSelection: () => void;
+  onResetFilters: () => void;
 }
 
 export default function ServiceTypesViewLayout({
   children,
   filters,
   onFilterChange,
-  searchQuery,
-  setSearchQuery,
   totalTypes,
   selectedCount,
   onAddType,
   onExportExcel,
   onClearSelection,
+  onResetFilters,
 }: ServiceTypesViewLayoutProps) {
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="border-b bg-card">
-        <div className="p-6 pb-4">
+    <div className="flex flex-col space-y-2 h-full">
+      <div className="border-b ">
+        <div className=" pb-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
-                Quản lý loại dịch vụ
+                Quản lý các loại dịch vụ
               </h1>
               <p className="text-muted-foreground mt-1">
-                Quản lý các loại dịch vụ và danh mục của khách sạn
+                Quản lý các loại dịch vụ và sản phẩm của khách sạn
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -50,7 +47,7 @@ export default function ServiceTypesViewLayout({
                 <span className="font-semibold text-foreground">
                   {totalTypes}
                 </span>{" "}
-                loại dịch vụ
+                dịch vụ
               </div>
             </div>
           </div>
@@ -60,17 +57,15 @@ export default function ServiceTypesViewLayout({
         <ServiceTypesCommandBar
           filters={filters}
           onFilterChange={onFilterChange}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
           selectedCount={selectedCount}
           onAddType={onAddType}
           onExportExcel={onExportExcel}
           onClearSelection={onClearSelection}
+          onResetFilters={onResetFilters}
         />
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6 overflow-auto bg-background">{children}</main>
+      <main className="flex-1 ">{children}</main>
     </div>
   );
 }

@@ -25,11 +25,14 @@ import { formatMoney, cn } from "~/lib/utils";
 import type { UseFormReturn } from "react-hook-form";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import useBookingSchema from "~/services/schema/booking.schema";
+import type z from "zod";
+const { BookingSourceEnum } = useBookingSchema();
 
 interface BookingPaymentProps {
   form: UseFormReturn<ReviewPaymentFormData>;
   totalAmount: number;
-  sourceType?: number;
+  sourceType?: z.infer<typeof BookingSourceEnum>;
 }
 
 export function BookingPayment({
@@ -37,14 +40,13 @@ export function BookingPayment({
   totalAmount,
   sourceType,
 }: BookingPaymentProps) {
-  const paymentMethod = form.watch("roomPayment.paymentMethod");
   const paidAmount = Number(form.watch("roomPayment.paidAmount") ?? 0);
 
   const remaining = totalAmount - paidAmount;
   const change = paidAmount > totalAmount ? paidAmount - totalAmount : 0;
 
   const defaultPaymentMethod =
-    sourceType === 2 ? "4" : sourceType === 3 ? "6" : "1";
+    sourceType === "OTA" ? "4" : sourceType === "Agency" ? "6" : "1";
 
   return (
     <Card>
@@ -69,7 +71,7 @@ export function BookingPayment({
                 }}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Chọn phương thức" />
                   </SelectTrigger>
                 </FormControl>
@@ -91,12 +93,12 @@ export function BookingPayment({
                   })}
                 </SelectContent>
               </Select>
-              {sourceType === 2 && (
+              {sourceType === "OTA" && (
                 <FormDescription>
                   Đặt phòng qua OTA - khuyến nghị OTA thu hộ
                 </FormDescription>
               )}
-              {sourceType === 3 && (
+              {sourceType === "Agency" && (
                 <FormDescription>
                   Đặt qua đại lý - khuyến nghị ghi nợ
                 </FormDescription>

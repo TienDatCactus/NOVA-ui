@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Upload, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
 import type z from "zod";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -21,12 +23,16 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import { Switch } from "~/components/ui/switch";
+import { Textarea } from "~/components/ui/textarea";
 import useServiceTypesSchema from "~/services/schema/service-types.schema";
-import { X, Upload } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
 import { useCreateServiceType } from "../container/service-type-mutation.hooks";
+import {
+  Dropzone,
+  DropzoneContent,
+  DropzoneEmptyState,
+} from "~/components/ui/shadcn-io/dropzone";
+import Image from "~/components/ui/image";
 
 const { CreateServiceTypeRequestSchema } = useServiceTypesSchema();
 
@@ -41,7 +47,8 @@ export default function CreateServiceTypeDialog({
   open,
   onClose,
 }: CreateServiceTypeDialogProps) {
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
 
   const form = useForm<CreateServiceTypeFormData>({
     resolver: zodResolver(CreateServiceTypeRequestSchema),
@@ -56,40 +63,53 @@ export default function CreateServiceTypeDialog({
   const { mutate: createServiceType, isPending } = useCreateServiceType();
 
   const handleSubmit = (data: CreateServiceTypeFormData) => {
-    createServiceType(data, {
-      onSuccess: () => {
-        form.reset();
-        setImageUrls([]);
-        onClose();
+    createServiceType(
+      {
+        ...data,
+        images: files,
       },
-    });
+      {
+        onSuccess: () => {
+          form.reset();
+          setFiles([]);
+          setPreviews([]);
+          onClose();
+        },
+      }
+    );
   };
 
   const handleClose = () => {
     form.reset();
-    setImageUrls([]);
+    setFiles([]);
+    setPreviews([]);
     onClose();
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  useEffect(() => {
+    form.setValue("images", files as any);
+  }, [files, form]);
 
-    // Preview images (local URLs)
-    const newUrls = Array.from(files).map((file) => URL.createObjectURL(file));
-    setImageUrls((prev) => [...prev, ...newUrls]);
+  useEffect(() => {
+    const urls = files.map((f) => URL.createObjectURL(f));
+    setPreviews(urls);
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [files]);
 
-    // TODO: Upload to backend and get real URLs
+  const onDropFiles = (accepted: File[]) => {
+    setFiles((prev) => [...prev, ...accepted]);
   };
 
   const removeImage = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] flex flex-col overflow-hidden gap-0 p-0">
+        <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle>Thêm loại dịch vụ mới</DialogTitle>
           <DialogDescription>
             Điền thông tin chi tiết cho loại dịch vụ mới. Tất cả các trường đánh
@@ -97,170 +117,165 @@ export default function CreateServiceTypeDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-            {/* Code */}
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Mã loại dịch vụ <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="VD: SPA, FOOD, DRINK" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Mã duy nhất để nhận diện loại dịch vụ
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div className="flex-1 min-h-0 overflow-y-auto p-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Mã loại dịch vụ{" "}
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="VD: SPA, FOOD, DRINK" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Mã duy nhất để nhận diện loại dịch vụ
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Tên loại dịch vụ <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="VD: Spa & Massage, Ẩm thực, Đồ uống"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mô tả</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Mô tả chi tiết về loại dịch vụ..."
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Image Upload */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Hình ảnh</label>
-              <div className="border-2 border-dashed rounded-lg p-4 hover:border-primary/50 transition-colors">
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <div className="text-center">
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <span className="text-sm text-primary hover:underline">
-                        Chọn file
-                      </span>
-                      <input
-                        id="image-upload"
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageChange}
-                      />
-                    </label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, GIF tối đa 10MB
-                    </p>
-                  </div>
-                </div>
+                {/* Name */}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Tên loại dịch vụ{" "}
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="VD: Spa & Massage, Ẩm thực, Đồ uống"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              {/* Image Preview */}
-              {imageUrls.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {imageUrls.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={url}
-                        alt={`Preview ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-md border"
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mô tả</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Mô tả chi tiết về loại dịch vụ..."
+                        className="resize-none"
+                        rows={3}
+                        {...field}
+                        value={field.value || ""}
                       />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImage(index)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                <Badge variant="secondary" className="mr-2">
-                  Lưu ý
-                </Badge>
-                Chức năng upload hình ảnh đang được phát triển. Hình ảnh sẽ được
-                lưu sau khi backend hoàn thiện API.
-              </p>
-            </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Active Status */}
-            <FormField
-              control={form.control}
-              name="active"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Trạng thái hoạt động
-                    </FormLabel>
-                    <FormDescription>
-                      Bật để loại dịch vụ có thể được sử dụng ngay
-                    </FormDescription>
+              {/* Image Upload with Dropzone */}
+              <div className="space-y-3">
+                <FormLabel>Hình ảnh</FormLabel>
+                <Dropzone
+                  accept={{ "image/*": [] }}
+                  maxFiles={8}
+                  onDrop={onDropFiles}
+                  src={files}
+                  className="border-2 border-dashed"
+                >
+                  <DropzoneEmptyState />
+                  <DropzoneContent />
+                </Dropzone>
+
+                {/* Image Preview */}
+                {previews.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {previews.map((url, index) => (
+                      <div key={index} className="relative group border">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <Image
+                          src={url}
+                          width={100}
+                          height={100}
+                          alt={`Preview ${index + 1}`}
+                          className="object-cover "
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => removeImage(index)}
+                          aria-label="Xóa ảnh"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Cho phép PNG, JPG, GIF. Tối đa 8 ảnh.
+                </p>
+              </div>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={isPending}
-              >
-                Hủy
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Đang thêm..." : "Thêm loại dịch vụ"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              {/* Active Status */}
+              <FormField
+                control={form.control}
+                name="active"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">
+                        Trạng thái hoạt động
+                      </FormLabel>
+                      <FormDescription>
+                        Bật để loại dịch vụ có thể được sử dụng ngay
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
+        </div>
+        <DialogFooter className="p-6 pt-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isPending}
+          >
+            Hủy
+          </Button>
+          <Button
+            type="submit"
+            onClick={form.handleSubmit(handleSubmit)}
+            disabled={isPending}
+          >
+            {isPending ? "Đang thêm..." : "Thêm loại dịch vụ"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

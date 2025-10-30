@@ -1,7 +1,4 @@
-import type {
-  ServiceItem,
-  ServiceListResponseDto,
-} from "~/services/api/services/dto";
+import type { ServiceItem } from "~/services/api/services/dto";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -17,20 +14,20 @@ import { Utensils } from "lucide-react";
 import { Button } from "~/components/ui/button";
 
 interface ServicesDataTableProps {
-  services: ServiceListResponseDto;
+  services: ServiceItem[];
   isLoading?: boolean;
-  onAddService: () => void;
-  onSelectionChange?: (selectedRows: ServiceListResponseDto) => void;
-  onEdit: (service: ServiceItem) => void;
+
+  onSelectionChange?: (selectedRows: ServiceItem[]) => void;
+
   onDelete: (service: ServiceItem) => void;
 }
 
 function ServicesDataTable({
   services,
   isLoading,
-  onAddService,
+
   onSelectionChange,
-  onEdit,
+
   onDelete,
 }: ServicesDataTableProps) {
   if (isLoading) {
@@ -58,9 +55,6 @@ function ServicesDataTable({
             dịch vụ đầu tiên.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onAddService}>Thêm dịch vụ đầu tiên</Button>
-        </EmptyContent>
       </Empty>
     );
   }

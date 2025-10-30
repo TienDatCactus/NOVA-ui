@@ -1,17 +1,22 @@
 import { useMemo, useState } from "react";
-import type { ServiceTypeItem } from "~/services/api/service-types/dto";
+import type {
+  ServiceTypeItem,
+  ServiceTypeListResponseDto,
+} from "~/services/api/service-types/dto";
 
 export interface ServiceTypeFilters {
-  includeInactive: boolean;
+  activeFilter: "" | "all" | "active";
+  searchText: string;
 }
 
 const defaultFilters: ServiceTypeFilters = {
-  includeInactive: false,
+  activeFilter: "",
+  searchText: "",
 };
 
 export default function useServiceTypeFilters() {
   const [filters, setFilters] = useState<ServiceTypeFilters>(defaultFilters);
-
+  const includeInactive = filters.activeFilter !== "active";
   const updateFilter = <K extends keyof ServiceTypeFilters>(
     key: K,
     value: ServiceTypeFilters[K]
@@ -24,14 +29,18 @@ export default function useServiceTypeFilters() {
   };
 
   const filterServiceTypes = useMemo(
-    () => (types: ServiceTypeItem[]) => {
+    () => (types: ServiceTypeListResponseDto) => {
       return types.filter((type) => {
-        // Filter by active status
-        if (!filters.includeInactive && !type.active) {
-          return false;
-        }
+        const matchesSearch =
+          filters.searchText === "" ||
+          type.name.toLowerCase().includes(filters.searchText.toLowerCase()) ||
+          type.code.toLowerCase().includes(filters.searchText.toLowerCase()) ||
+          (type.description &&
+            type.description
+              .toLowerCase()
+              .includes(filters.searchText.toLowerCase()));
 
-        return true;
+        return matchesSearch;
       });
     },
     [filters]
@@ -42,5 +51,6 @@ export default function useServiceTypeFilters() {
     updateFilter,
     resetFilters,
     filterServiceTypes,
+    includeInactive,
   };
 }

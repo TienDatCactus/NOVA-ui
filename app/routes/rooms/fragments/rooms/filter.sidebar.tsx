@@ -16,6 +16,7 @@ import { Switch } from "~/components/ui/switch";
 import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import { RoomStatusEnum } from "~/services/types/room.types";
 import type { RoomFilters } from "../../container/rooms-filter.hooks";
+import { Slider } from "~/components/ui/slider";
 const { RoomTypesListResponseSchema } = useRoomTypesSchema();
 type RoomTypeList = z.infer<typeof RoomTypesListResponseSchema>;
 interface RoomsFilterSidebarProps {
@@ -47,9 +48,6 @@ function RoomsFilterSidebar({
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
       <div className="flex items-center justify-between">
-        <Button variant="light" className="text-xl font-medium">
-          Bộ lọc <ListFilterPlus />
-        </Button>
         {activeFiltersCount > 0 && (
           <Button
             variant="ghost"
@@ -145,8 +143,7 @@ function RoomsFilterSidebar({
             </CollapsibleContent>
           </Collapsible>
         </CardContent>
-        <Separator />
-        <CardContent className="px-0 rounded-md ">
+        {/* <CardContent className="px-0 rounded-md ">
           <Collapsible>
             <CollapsibleTrigger className="">
               <Label className="text-sm font-medium">Tình trạng sử dụng</Label>
@@ -155,13 +152,7 @@ function RoomsFilterSidebar({
             <CollapsibleContent>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Switch
-                    id="occupied-yes"
-                    checked={filters.isOccupied === true}
-                    onCheckedChange={(checked) =>
-                      onFilterChange("isOccupied", checked ? true : null)
-                    }
-                  />
+                  <Slider id="price-range" />
                   <Label
                     htmlFor="occupied-yes"
                     className="text-sm font-normal cursor-pointer"
@@ -169,25 +160,10 @@ function RoomsFilterSidebar({
                     Đang sử dụng
                   </Label>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="occupied-no"
-                    checked={filters.isOccupied === false}
-                    onCheckedChange={(checked) =>
-                      onFilterChange("isOccupied", checked ? false : null)
-                    }
-                  />
-                  <Label
-                    htmlFor="occupied-no"
-                    className="text-sm font-normal cursor-pointer"
-                  >
-                    Chưa sử dụng
-                  </Label>
-                </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
-        </CardContent>
+        </CardContent> */}
       </Card>
     </aside>
   );

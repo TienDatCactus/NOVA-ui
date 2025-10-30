@@ -19,8 +19,8 @@ interface BreakfastSelectionProps {
   breakfastDates: Date[];
   onToggleAll: (value: boolean) => void;
   onSelectDates: (dates: Date[]) => void;
-  checkinDate: Date;
-  checkoutDate: Date;
+  checkinDate: string | Date;
+  checkoutDate: string | Date;
   nights: number;
 }
 
@@ -80,7 +80,6 @@ export function BreakfastSelection({
           />
         </div>
 
-        {/* Specific dates selection (only show if NOT all) */}
         {!isBreakfastAll && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -115,10 +114,8 @@ export function BreakfastSelection({
                   selected={breakfastDates}
                   onSelect={(dates) => onSelectDates(dates || [])}
                   disabled={(date) =>
-                    date < checkinDate || date >= checkoutDate
+                    date <= checkinDate || date >= checkoutDate
                   }
-                  fromDate={checkinDate}
-                  toDate={checkoutDate}
                   locale={vi}
                 />
               </PopoverContent>
@@ -129,7 +126,7 @@ export function BreakfastSelection({
                 {breakfastDates.map((date) => (
                   <Badge
                     key={format(date, "yyyy-MM-dd")}
-                    variant="outline"
+                    variant="info"
                     className="text-xs"
                   >
                     {format(date, "dd/MM", { locale: vi })}

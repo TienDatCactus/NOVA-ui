@@ -18,7 +18,11 @@ interface RoomDetailRowProps {
 
 function RoomDetailDialog({ roomId, onOpenChange, open }: RoomDetailRowProps) {
   return (
-    <DialogContent className="max-w-4xl">
+    <DialogContent
+      className="max-w-4xl"
+      onInteractOutside={(e) => e.preventDefault()}
+      onEscapeKeyDown={(e) => e.preventDefault()}
+    >
       <DialogHeader>
         <DialogTitle>Thông tin phòng</DialogTitle>
         <DialogDescription>Tổng hợp thông tin chi tiết.</DialogDescription>
@@ -37,7 +41,7 @@ function RoomDetailDialog({ roomId, onOpenChange, open }: RoomDetailRowProps) {
       </Tabs>
 
       <DialogFooter>
-        <Button variant={"destructive"} onClick={() => onOpenChange?.(false)}>
+        <Button variant={"outline"} onClick={() => onOpenChange?.(false)}>
           Thoát
         </Button>
       </DialogFooter>

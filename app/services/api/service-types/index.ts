@@ -1,5 +1,7 @@
+import http from "~/lib/http";
 import useServiceTypesSchema from "~/services/schema/service-types.schema";
 import type { ServiceTypeListParams } from "~/services/types/service-types.types";
+import { ServiceTypes } from "~/services/url";
 import type {
   CreateServiceTypeRequestDto,
   CreateServiceTypeResponseDto,
@@ -8,8 +10,6 @@ import type {
   UpdateServiceTypeRequestDto,
   UpdateServiceTypeResponseDto,
 } from "./dto";
-import http from "~/lib/http";
-import { ServiceTypes } from "~/services/url";
 
 const {
   CreateServiceTypeResponseSchema,
@@ -37,7 +37,28 @@ async function updateServiceType(
   data: UpdateServiceTypeRequestDto
 ): Promise<UpdateServiceTypeResponseDto> {
   try {
-    const resp = await http.put(ServiceTypes.update(id), data);
+    const parsed = UpdateServiceTypeRequestSchema.parse(data);
+
+    // Build multipart form to support newImages and removeMediaIds
+    const formData = new FormData();
+    formData.append("code", parsed.code);
+    formData.append("name", parsed.name);
+    formData.append("description", parsed.description);
+    formData.append("active", String(parsed.active));
+    if (Array.isArray(parsed.newImages)) {
+      parsed.newImages.forEach((f) => {
+        if (f instanceof File) formData.append("newImages", f);
+      });
+    }
+    if (Array.isArray(parsed.removeMediaIds)) {
+      parsed.removeMediaIds.forEach((id) =>
+        formData.append("removeMediaIds", id)
+      );
+    }
+
+    const resp = await http.put(ServiceTypes.update(id), formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return UpdateServiceTypeResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -49,7 +70,21 @@ async function createServiceType(
   data: CreateServiceTypeRequestDto
 ): Promise<CreateServiceTypeResponseDto> {
   try {
-    const resp = await http.post(ServiceTypes.create, data);
+    const parsed = CreateServiceTypeRequestSchema.parse(data);
+    const formData = new FormData();
+    formData.append("code", parsed.code);
+    formData.append("name", parsed.name);
+    formData.append("description", parsed.description);
+    formData.append("active", String(parsed.active));
+    if (Array.isArray(parsed.images)) {
+      parsed.images.forEach((f) => {
+        if (f instanceof File) formData.append("images", f);
+      });
+    }
+
+    const resp = await http.post(ServiceTypes.create, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return CreateServiceTypeResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);

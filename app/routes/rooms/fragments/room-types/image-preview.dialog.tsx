@@ -48,7 +48,7 @@ interface ImagePreviewDialogProps {
   existingImages: UpdateRoomTypesDetailResponseDto["images"];
   newImages: (File | undefined)[];
   removeMediaIds: string[];
-  initialTab?: "existing" | "new";
+  mode?: "preview" | "edit";
   roomTypeCode?: string;
   onAddImages?: (files: File[]) => void;
   onRemoveNewImage?: (index: number) => void;
@@ -62,14 +62,14 @@ export function ImagePreviewDialog({
   existingImages,
   newImages,
   removeMediaIds,
-  initialTab = "existing",
+  mode = "preview",
   roomTypeCode = "",
   onAddImages,
   onRemoveNewImage,
   onMarkForDeletion,
   operation,
 }: ImagePreviewDialogProps) {
-  const [activeTab, setActiveTab] = useState<"existing" | "new">(initialTab);
+  const [activeTab, setActiveTab] = useState<"preview" | "edit">(mode);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -103,11 +103,11 @@ export function ImagePreviewDialog({
 
   useEffect(() => {
     if (open) {
-      setActiveTab(initialTab);
+      setActiveTab(mode);
       setIsSelectionMode(false);
       setSelectedImages(new Set());
     }
-  }, [open, initialTab]);
+  }, [open, mode]);
 
   const handleToggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
@@ -204,7 +204,7 @@ export function ImagePreviewDialog({
 
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "existing" | "new")}
+          onValueChange={(v) => setActiveTab(v as "preview" | "edit")}
           className="flex flex-col "
         >
           <TabsList
@@ -213,7 +213,7 @@ export function ImagePreviewDialog({
             })}
           >
             {operation != "create" && (
-              <TabsTrigger value="existing" className="gap-2">
+              <TabsTrigger value="preview" className="gap-2">
                 <ImageIcon className="h-4 w-4" />
                 Ảnh hiện tại
                 <Badge variant="outline" className="text-xs">
@@ -221,7 +221,7 @@ export function ImagePreviewDialog({
                 </Badge>
               </TabsTrigger>
             )}
-            <TabsTrigger value="new" className="gap-2">
+            <TabsTrigger value="edit" className="gap-2">
               <FileImage className="h-4 w-4" />
               Ảnh mới
               <Badge variant="outline" className="text-xs">
@@ -229,7 +229,7 @@ export function ImagePreviewDialog({
               </Badge>
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="existing" className="flex flex-col">
+          <TabsContent value="preview" className="flex flex-col">
             {existingImages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-[400px] text-muted-foreground">
                 <ImageIcon className="h-12 w-12 mb-3 opacity-20" />
@@ -282,7 +282,7 @@ export function ImagePreviewDialog({
                             <Image
                               src={img.url}
                               alt={img.caption || `Image ${index + 1}`}
-                              height={120}
+                              height={126}
                               className="w-full object-contain aspect-square"
                             />
                           </ImageZoom>
@@ -320,15 +320,15 @@ export function ImagePreviewDialog({
                     {markedForDeletionImages.map((img, index) => (
                       <div
                         key={img.mediaId}
-                        className="relative bg-muted rounded-lg overflow-hidden group opacity-40 border-2 border-destructive"
+                        className="relative bg-muted rounded-lg overflow-hidden group opacity-40 border-2 h-32 border-destructive"
                       >
                         <Image
                           src={img.url}
+                          width={200}
                           alt={img.caption || `Image ${index + 1}`}
-                          className="w-full h-full object-cover aspect-square grayscale"
+                          className="h-32 object-contain"
                         />
 
-                        {/* Restore Button */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -403,7 +403,7 @@ export function ImagePreviewDialog({
           </TabsContent>
 
           <TabsContent
-            value="new"
+            value="edit"
             className="h-[400px] flex flex-col justify-between"
           >
             <Dropzone
@@ -496,7 +496,6 @@ export function ImagePreviewDialog({
             )}
           </TabsContent>
         </Tabs>
-        {/* Confirmation Dialog */}
         <AlertDialog
           open={showDeleteConfirm}
           onOpenChange={setShowDeleteConfirm}

@@ -1,5 +1,15 @@
 import { Eye, FileText, ImageIcon, Pencil } from "lucide-react";
 import AlertChanges from "~/components/ui/alert-changes";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -14,6 +24,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import {
   Sheet,
   SheetContent,
@@ -22,12 +33,11 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
+import { onError, stripHtml } from "~/lib/utils";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { stripHtml } from "~/lib/utils";
+import { useUpdateRoomTypeSheet } from "../container/update-room-types-container.hooks";
 import { DescriptionDialog } from "../fragments/room-types/description.dialog";
 import { ImagePreviewDialog } from "../fragments/room-types/image-preview.dialog";
-import { useUpdateRoomTypeSheet } from "../container/update-room-types-container.hooks";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 interface EditRoomTypeSheetProps {
   open: boolean;
@@ -45,14 +55,10 @@ export function UpdateRoomTypeSheet({
     isPending,
     showCancelDialog,
     setShowCancelDialog,
-    showDeleteWarning,
-    setShowDeleteWarning,
     showDescriptionDialog,
     setShowDescriptionDialog,
     showImagePreviewDialog,
     setShowImagePreviewDialog,
-    descriptionDialogMode,
-    imagePreviewDialogMode,
 
     // Computed values
     removeMediaIds,
@@ -69,14 +75,12 @@ export function UpdateRoomTypeSheet({
     handleAddImages,
     handleSubmit,
     handleDescriptionSave,
-    handleOpenDescriptionPreview,
-    handleOpenDescriptionEdit,
+    handleOpenDescription,
+    dialogMode,
     handleOpenImagePreview,
     handleDeleteRoomType,
   } = useUpdateRoomTypeSheet({ open, onClose, roomType });
-
   if (!roomType) return null;
-
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
@@ -100,7 +104,7 @@ export function UpdateRoomTypeSheet({
           <div className="space-y-4 px-4">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(handleSubmit)}
+                onSubmit={form.handleSubmit(handleSubmit, onError)}
                 className="space-y-4"
               >
                 <div className="grid grid-cols-3 gap-4">
@@ -152,8 +156,7 @@ export function UpdateRoomTypeSheet({
                         <FormControl>
                           <Counter
                             minValue={0}
-                            value={field.value}
-                            onChange={field.onChange}
+                            {...field}
                             isDisabled={form.formState.isSubmitting}
                           />
                         </FormControl>
@@ -172,8 +175,7 @@ export function UpdateRoomTypeSheet({
                           <Counter
                             minValue={0}
                             maxValue={10}
-                            value={field.value}
-                            onChange={field.onChange}
+                            {...field}
                             isDisabled={form.formState.isSubmitting}
                           />
                         </FormControl>
@@ -206,7 +208,7 @@ export function UpdateRoomTypeSheet({
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={handleOpenDescriptionPreview}
+                          onClick={() => handleOpenDescription("preview")}
                           className="flex-1"
                         >
                           <Eye className="h-3.5 w-3.5 mr-1.5" />
@@ -216,7 +218,7 @@ export function UpdateRoomTypeSheet({
                           type="button"
                           variant="default"
                           size="sm"
-                          onClick={handleOpenDescriptionEdit}
+                          onClick={() => handleOpenDescription("edit")}
                           className="flex-1"
                         >
                           <Pencil className="h-3.5 w-3.5 mr-1.5" />
@@ -283,7 +285,7 @@ export function UpdateRoomTypeSheet({
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => handleOpenImagePreview("new")}
+                          onClick={() => handleOpenImagePreview("preview")}
                           className="flex-1"
                           disabled={
                             existingImages.length === 0 &&
@@ -297,7 +299,7 @@ export function UpdateRoomTypeSheet({
                           type="button"
                           variant="default"
                           size="sm"
-                          onClick={() => handleOpenImagePreview("existing")}
+                          onClick={() => handleOpenImagePreview("edit")}
                           className="flex-1"
                         >
                           <Pencil className="h-3.5 w-3.5 mr-1.5" />
@@ -321,9 +323,9 @@ export function UpdateRoomTypeSheet({
                       </div>
                       <FormControl>
                         <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isPending}
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(checked)}
+                          disabled={field.disabled}
                         />
                       </FormControl>
                     </FormItem>
@@ -358,25 +360,30 @@ export function UpdateRoomTypeSheet({
           </div>
         </SheetContent>
       </Sheet>
-
-      <AlertChanges
-        showCancelDialog={showCancelDialog}
-        setShowCancelDialog={setShowCancelDialog}
-        handleConfirmClose={handleConfirmClose}
-      />
-
-      <AlertChanges
-        showCancelDialog={showDeleteWarning}
-        setShowCancelDialog={setShowDeleteWarning}
-        handleConfirmClose={handleConfirmClose}
-      />
+      {/* cancel dialog for dirty form */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Có thay đổi chưa được lưu</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn đóng? Tất cả thay đổi sẽ bị mất.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Tiếp tục chỉnh sửa</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmClose}>
+              Đóng
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <DescriptionDialog
         open={showDescriptionDialog}
         onClose={setShowDescriptionDialog}
         initialContent={form.watch("description") || ""}
         roomTypeCode={roomType.code}
-        mode={descriptionDialogMode}
+        mode={dialogMode}
         onSave={handleDescriptionSave}
       />
 
@@ -386,7 +393,7 @@ export function UpdateRoomTypeSheet({
         existingImages={existingImages}
         newImages={newImageFiles}
         removeMediaIds={removeMediaIds}
-        initialTab={imagePreviewDialogMode}
+        mode={dialogMode}
         roomTypeCode={roomType.code}
         onAddImages={handleAddImages}
         onRemoveNewImage={handleRemoveNewFile}

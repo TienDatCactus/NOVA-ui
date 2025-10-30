@@ -60,7 +60,7 @@ export function BookingSummaryCard({
   totalAmount,
 }: BookingSummaryCardProps) {
   const { data } = useCreateBookingStore();
-  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(true);
   const overridePrice = form.watch("overridePrice");
   const nights =
     data.checkinDate && data.checkoutDate
@@ -109,7 +109,9 @@ export function BookingSummaryCard({
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="space-y-1">
-                  <p className="text-muted-foreground text-xs">Nhận phòng</p>
+                  <p className="text-muted-foreground text-xs">
+                    Ngày nhận phòng
+                  </p>
                   <p className="font-medium">
                     {data.checkinDate
                       ? format(data.checkinDate, "dd/MM/yyyy", { locale: vi })
@@ -117,7 +119,9 @@ export function BookingSummaryCard({
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-muted-foreground text-xs">Trả phòng</p>
+                  <p className="text-muted-foreground text-xs">
+                    Ngày trả phòng
+                  </p>
                   <p className="font-medium">
                     {data.checkoutDate
                       ? format(data.checkoutDate, "dd/MM/yyyy", { locale: vi })
@@ -175,7 +179,7 @@ export function BookingSummaryCard({
 
       {/* Rooms */}
       <div className="flex gap-4">
-        <Card className="space-y-2 p-2  flex-1 bg-background">
+        <Card className="space-y-2 p-2  flex-1 bg-white">
           <Collapsible defaultOpen>
             <CollapsibleTrigger>
               <h4 className="font-medium text-sm flex items-center gap-2">
@@ -212,13 +216,17 @@ export function BookingSummaryCard({
 
         {(data.isBreakfastAll ||
           (data.breakfastDates && data.breakfastDates.length > 0)) && (
-          <>
-            <div className="space-y-2">
-              <h4 className="font-semibold text-sm flex items-center gap-2">
-                <Coffee className="h-4 w-4" />
-                Bữa sáng
-              </h4>
-              <div className="relative">
+          <Card className="space-y-2">
+            <CardContent>
+              <CardHeader>
+                <CardTitle>
+                  <h4 className="font-semibold text-sm flex items-center gap-2">
+                    <Coffee className="h-4 w-4" />
+                    Bữa sáng
+                  </h4>
+                </CardTitle>
+              </CardHeader>
+              {/* <div className="relative">
                 <Calendar
                   mode="range"
                   disabled={{
@@ -227,22 +235,39 @@ export function BookingSummaryCard({
                   locale={vi}
                   selected={{
                     from: data.isBreakfastAll
-                      ? data.checkinDate
+                      ? new Date(!!data.checkinDate ? data.checkinDate : "")
                       : data.breakfastDates
                         ? data.breakfastDates[0]
                         : undefined,
                     to: data.isBreakfastAll
-                      ? data.checkoutDate
+                      ? new Date(!!data.checkoutDate ? data.checkoutDate : "")
                       : data.breakfastDates
-                        ? data.breakfastDates[data.breakfastDates.length - 1]
+                        ? new Date(
+                            data.breakfastDates[data.breakfastDates.length - 1]
+                          )
                         : undefined,
                   }}
                   className="rounded-lg border shadow-sm"
                 />
                 <div className="absolute inset-0 cursor-not-allowed" />
-              </div>
-            </div>
-          </>
+              </div> */}
+              {data.isBreakfastAll ? (
+                <div className="flex justify-between text-sm">
+                  <span>Tất cả các ngày ({nights} ngày)</span>
+                </div>
+              ) : (
+                data.breakfastDates && (
+                  <div className="space-y-1 text-sm">
+                    {data.breakfastDates.map((date) => (
+                      <div key={format(date, "yyyy-MM-dd")}>
+                        {format(date, "dd/MM", { locale: vi })}
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </CardContent>
+          </Card>
         )}
       </div>
 
@@ -284,15 +309,17 @@ export function BookingSummaryCard({
                 id="overridePrice"
                 type="number"
                 placeholder="Nhập giá điều chỉnh"
+                defaultValue={0}
                 min={0}
-                {...form.register("overridePrice")}
+                {...form.register("overridePrice", {
+                  valueAsNumber: true,
+                })}
               />
             </div>
           </div>
 
           <Separator />
 
-          {/* Final Total */}
           <div className="flex justify-between font-bold text-lg">
             <span>Tổng cộng</span>
             <span className="text-primary">

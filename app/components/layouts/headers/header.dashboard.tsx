@@ -13,14 +13,15 @@ import {
 import { cn } from "~/lib/utils";
 import { useHeaderNav } from "../side-bar/dashboard/container/useHeader";
 import { Button } from "~/components/ui/button";
+import { useIsMobile } from "~/hooks/use-mobile";
 
 interface DashboardHeaderProps extends React.HTMLAttributes<HTMLElement> {}
 export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
   const { navItems, currentPath } = useHeaderNav();
-
+  const isMobile = useIsMobile();
   return (
-    <header className="h-12 shadow-sm py-6 px-6 z-10 bg-background flex items-center w-full sticky top-0   justify-between border-b">
-      <NavigationMenu viewport={false}>
+    <header className="h-12 shadow-sm py-6 px-4 z-10 bg-white flex items-center w-full sticky top-0   justify-between border-b">
+      <NavigationMenu viewport={isMobile}>
         <NavigationMenuList>
           {navItems.map((item) => (
             <NavigationMenuItem key={item.title}>
@@ -40,12 +41,10 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
                               currentPath === child.href,
                           })}
                         >
-                          <NavigationMenuLink asChild>
-                            <Link to={child.href}>
-                              <div className="text-sm leading-none font-medium">
-                                {child.title}
-                              </div>
-                            </Link>
+                          <NavigationMenuLink href={child.href}>
+                            <div className="text-sm leading-none font-medium">
+                              {child.title}
+                            </div>
                           </NavigationMenuLink>
                         </li>
                       ))}
@@ -54,13 +53,13 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
                 </>
               ) : (
                 <NavigationMenuLink
-                  href={item.href ?? ""}
+                  href={item.href}
                   className={cn({
                     " bg-accent border-b-2 border-primary":
                       currentPath === item.href,
                   })}
                 >
-                  <div className="flex gap-2 items-center">
+                  <div className="flex gap-2 items-center font-medium ">
                     {item.icon}
                     {item.title}
                   </div>
@@ -77,6 +76,10 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
             Tạo đơn đặt phòng
           </Button>
         </Link>
+        <Button variant={"success"}>
+          <BookMarked size={16} />
+          Kiểm tra phòng trống
+        </Button>
         <Input
           placeholder="Tìm kiếm..."
           className="w-64 h-8 placeholder:text-sm"

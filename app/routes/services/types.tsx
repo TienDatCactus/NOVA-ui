@@ -23,8 +23,6 @@ export default function Component({
     isPending,
     filters,
     updateFilter,
-    searchQuery,
-    setSearchQuery,
     selectedTypes,
     setSelectedTypes,
     createDialogOpen,
@@ -36,40 +34,19 @@ export default function Component({
     handleDelete,
     handleClearSelection,
     handleExportExcel,
+    resetFilters,
   } = useServiceTypesContainer();
-
-  // Listen for custom events from action cells
-  useEffect(() => {
-    const handleEditEvent = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      handleEdit(customEvent.detail);
-    };
-
-    const handleDeleteEvent = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      handleDelete(customEvent.detail);
-    };
-
-    window.addEventListener("service-type:edit", handleEditEvent);
-    window.addEventListener("service-type:delete", handleDeleteEvent);
-
-    return () => {
-      window.removeEventListener("service-type:edit", handleEditEvent);
-      window.removeEventListener("service-type:delete", handleDeleteEvent);
-    };
-  }, [handleEdit, handleDelete]);
 
   return (
     <ServiceTypesViewLayout
       filters={filters}
       onFilterChange={updateFilter}
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
       totalTypes={filteredTypes.length}
       selectedCount={selectedTypes.length}
       onAddType={() => setCreateDialogOpen(true)}
       onExportExcel={handleExportExcel}
       onClearSelection={handleClearSelection}
+      onResetFilters={resetFilters}
     >
       <ServiceTypesDataTable
         types={filteredTypes}
@@ -83,12 +60,6 @@ export default function Component({
       <CreateServiceTypeDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-      />
-
-      <EditServiceTypeSheet
-        open={editSheetOpen}
-        onClose={() => setEditSheetOpen(false)}
-        type={editingType}
       />
     </ServiceTypesViewLayout>
   );

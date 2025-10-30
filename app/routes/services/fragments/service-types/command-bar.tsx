@@ -1,4 +1,4 @@
-import { Search, Plus, Download } from "lucide-react";
+import { Search, Plus, Download, RotateCcw } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -17,47 +17,46 @@ interface ServiceTypesCommandBarProps {
     key: K,
     value: ServiceTypeFilters[K]
   ) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   selectedCount: number;
-  onAddType: () => void;
   onExportExcel: () => void;
   onClearSelection: () => void;
+  onAddType: () => void;
+  onResetFilters: () => void;
 }
 
 export default function ServiceTypesCommandBar({
   filters,
   onFilterChange,
-  searchQuery,
-  setSearchQuery,
   selectedCount,
-  onAddType,
   onExportExcel,
   onClearSelection,
+  onAddType,
+  onResetFilters,
 }: ServiceTypesCommandBarProps) {
+  const activeFiltersCount =
+    (filters.searchText !== "" ? 1 : 0) + (filters.activeFilter !== "" ? 1 : 0);
   return (
-    <div className="flex flex-col gap-4 p-4 bg-card border-b">
+    <div className="flex flex-col gap-4 p-4 shadow-md  bg-white/50 border rounded-md">
       <div className="flex items-center gap-4">
-        {/* Search */}
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm loại dịch vụ theo tên, mã hoặc mô tả..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        <Input
+          placeholder="Tìm kiếm dịch vụ theo tên, mã hoặc mô tả..."
+          value={filters.searchText}
+          className="bg-white"
+          onChange={(e) => onFilterChange("searchText", e.target.value)}
+          startAddon={<Search className="text-muted-foreground" />}
+        />
 
-        {/* Active Filter */}
         <Select
-          value={filters.includeInactive ? "all" : "active"}
+          value={filters.activeFilter}
           onValueChange={(value) =>
-            onFilterChange("includeInactive", value === "all")
+            onFilterChange(
+              "activeFilter",
+              value as ServiceTypeFilters["activeFilter"]
+            )
           }
         >
-          <SelectTrigger className="w-40">
-            <SelectValue />
+          <SelectTrigger className="shadow-md bg-white">
+            <SelectValue placeholder="Chọn trạng thái" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="active">Đang hoạt động</SelectItem>
@@ -65,11 +64,16 @@ export default function ServiceTypesCommandBar({
           </SelectContent>
         </Select>
 
-        {/* Create Button */}
         <Button onClick={onAddType}>
           <Plus className="h-4 w-4 mr-2" />
           Thêm loại dịch vụ
         </Button>
+        {activeFiltersCount > 0 && (
+          <Button variant={"outline"} onClick={onResetFilters}>
+            <RotateCcw />
+            Đặt lại bộ lọc
+          </Button>
+        )}
       </div>
 
       {/* Selection Bar */}

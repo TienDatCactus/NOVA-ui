@@ -6,6 +6,7 @@ import type {
   RoomDetailParams,
   RoomListParams,
 } from "~/services/types/room.types";
+import type { RoomDetailResponseDto } from "~/services/api/rooms/dto";
 
 function useRooms(params?: RoomListParams) {
   return useQuery({
@@ -57,9 +58,20 @@ function useAvailableRoomsInternal(params: GetAvailableRoomsInternalParams) {
     enabled: () => !!params,
   });
 }
+
+function useRoomsDetailsByIds(ids: string[]) {
+  return useQuery<RoomDetailResponseDto[]>({
+    queryKey: ["rooms-details", ids],
+    queryFn: async () =>
+      await Promise.all(ids.map((id) => RoomsService.getRoomDetails(id, {}))),
+    enabled: Array.isArray(ids) && ids.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+}
 export {
   useRooms,
   useRoomDetail,
   useRoomBookingHistory,
   useAvailableRoomsInternal,
+  useRoomsDetailsByIds,
 };

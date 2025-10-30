@@ -12,13 +12,12 @@ import { useCreateBookingStore } from "~/store/create-booking.store";
 
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { useStep } from "~/hooks/use-step";
-import { useCalculateNights } from "~/lib/utils";
+import { onError, useCalculateNights } from "~/lib/utils";
+import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms-query.hooks";
 import useCreateBookingMutation from "../../container/create-booking-mutation.hooks";
 import { BookingPayment } from "../../fragments/booking-payment";
 import { BookingSummaryCard } from "../../fragments/booking-summary.card";
 import { ServiceOrder } from "../../fragments/service-order";
-import { toast } from "sonner";
 
 interface ReviewPaymentFormProps {
   onNext: () => void;
@@ -32,13 +31,8 @@ export function ReviewPaymentForm({
   onResetSteps,
 }: ReviewPaymentFormProps) {
   const navigate = useNavigate();
-  const {
-    data: storeData,
-    selectedRooms,
-    setData,
-    reset,
-  } = useCreateBookingStore();
-  const { mutate } = useCreateBookingMutation();
+  const { data: storeData, setData, reset } = useCreateBookingStore();
+  const { mutate, isError } = useCreateBookingMutation();
   const { ReviewPaymentFormSchema } = useFormSchema();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const nights = useCalculateNights({
@@ -55,6 +49,24 @@ export function ReviewPaymentForm({
     },
   });
 
+  const roomIds = storeData.roomIds ?? [];
+  const { data: selectedRoomDetails } = useRoomsDetailsByIds(roomIds);
+  const selectedRooms = useMemo(() => {
+    if (!selectedRoomDetails || selectedRoomDetails.length === 0)
+      return [] as {
+        roomId: string;
+        roomName: string;
+        roomTypeName: string;
+        baseRatePerNight: number;
+      }[];
+    return selectedRoomDetails.map((d) => ({
+      roomId: d.roomId,
+      roomName: d.roomName,
+      roomTypeName: d.roomTypeName,
+      baseRatePerNight: d.dailyPrice,
+    }));
+  }, [selectedRoomDetails]);
+
   const totalAmount = useMemo(() => {
     return selectedRooms.reduce(
       (sum, room) => sum + room.baseRatePerNight * nights,
@@ -68,10 +80,7 @@ export function ReviewPaymentForm({
       ? Number(override)
       : totalAmount;
   };
-  const onError = (errors: any) => {
-    toast.error("Vui lòng kiểm tra lại thông tin đã nhập", errors);
-    console.log("Validation errors:", errors);
-  };
+
   const onSubmit = async (data: ReviewPaymentFormData) => {
     setIsSubmitting(true);
     setData({
@@ -96,6 +105,7 @@ export function ReviewPaymentForm({
       mutate(bookingData);
       reset();
       onResetSteps && onResetSteps();
+      navigate("/dashboard/reservation/new-booking");
     } catch (error) {
       console.error("Booking creation failed:", error);
     } finally {
@@ -137,9 +147,7 @@ export function ReviewPaymentForm({
 
               <ServiceOrder
                 services={form.watch("serviceOrder.services") ?? []}
-                onAddService={() => {
-                  // Placeholder - service modal
-                }}
+                onAddService={() => {}}
                 onRemoveService={(index) => {
                   const currentServices =
                     form.watch("serviceOrder.services") ?? [];

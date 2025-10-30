@@ -44,9 +44,9 @@ export function useCreateRoomTypeDialog({
     setShowDescriptionDialog,
     showImagePreviewDialog,
     setShowImagePreviewDialog,
-    descriptionDialogMode,
-    handleOpenDescriptionEdit,
-    handleOpenImageEdit,
+    dialogMode,
+    handleOpenDescription,
+    handleOpenImagePreview,
   } = useRoomTypeFormDialogs();
 
   const { handleAddImages, handleRemoveNewFile } =
@@ -89,7 +89,7 @@ export function useCreateRoomTypeDialog({
     setShowDescriptionDialog,
     showImagePreviewDialog,
     setShowImagePreviewDialog,
-    descriptionDialogMode,
+    dialogMode,
 
     // Computed values
     newImageFiles,
@@ -98,8 +98,8 @@ export function useCreateRoomTypeDialog({
     handleClose,
     handleSubmit,
     handleDescriptionSave,
-    handleOpenDescriptionEdit,
-    handleOpenImageEdit,
+    handleOpenDescription,
+    handleOpenImagePreview,
     handleAddImages,
     handleRemoveNewFile,
     handleConfirmClose,

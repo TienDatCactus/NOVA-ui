@@ -42,7 +42,7 @@ async function getServicesByType(
     const resp = await http.get(Service.byServiceType(serviceTypeId), {
       params,
     });
-    return ServiceListByTypeResponseSchema.parse(resp);
+    return ServiceListByTypeResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -57,7 +57,7 @@ async function createService(
       Service.create,
       CreateServiceItemRequestSchema.parse(data)
     );
-    return CreateServiceItemResponseSchema.parse(resp);
+    return CreateServiceItemResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -73,7 +73,7 @@ async function updateService(
       Service.update(id),
       UpdateServiceItemRequestSchema.parse(params)
     );
-    return UpdateServiceItemResponseSchema.parse(resp);
+    return UpdateServiceItemResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -94,7 +94,7 @@ async function getServiceDetail(
 ): Promise<ServiceItemDetailResponseDto> {
   try {
     const resp = await http.get(Service.detail(id));
-    return ServiceItemDetailResponseSchema.parse(resp);
+    return ServiceItemDetailResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

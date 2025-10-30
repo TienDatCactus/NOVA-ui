@@ -2,26 +2,33 @@ import z from "zod";
 
 const ServiceTypeItemSchema = z.object({
   id: z.string(),
-  code: z.string(),
-  name: z.string(),
-  description: z.string().nullable(),
+  code: z.string().min(2).max(100),
+  name: z.string().min(2).max(100),
+  description: z.string().min(2).max(500).nullable(),
   active: z.boolean(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional().nullable(),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
+  imageUrls: z.array(z.url()),
 });
 
 const ServiceTypeListResponseSchema = z.array(ServiceTypeItemSchema);
 
-const EditServiceTypeRequestSchema = z.object({
+const UpdateServiceTypeRequestSchema = z.object({
   code: z.string(),
   name: z.string(),
   description: z.string(),
   active: z.boolean(),
+  newImages: z.array(z.instanceof(File).optional()),
+  removeMediaIds: z.array(z.string()).optional(),
 });
 
-const UpdateServiceTypeRequestSchema = EditServiceTypeRequestSchema;
-
-const CreateServiceTypeRequestSchema = EditServiceTypeRequestSchema;
+const CreateServiceTypeRequestSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  description: z.string(),
+  active: z.boolean(),
+  images: z.array(z.instanceof(File).optional()),
+});
 
 const CreateServiceTypeResponseSchema = ServiceTypeItemSchema;
 const ServiceTypeItemDetailSchema = ServiceTypeItemSchema;

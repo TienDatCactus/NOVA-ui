@@ -8,7 +8,7 @@ const {
   UpdateServiceItemRequestSchema,
   UpdateServiceItemResponseSchema,
   ServiceItemDetailResponseSchema,
-  ServiceItemListSchema,
+  ServiceListItemSchema,
 } = useServiceSchema();
 type ServiceListResponseDto = z.infer<typeof ServiceListResponseSchema>;
 type ServiceListByTypeResponseDto = z.infer<
@@ -21,7 +21,7 @@ type UpdateServiceResponseDto = z.infer<typeof UpdateServiceItemResponseSchema>;
 type ServiceItemDetailResponseDto = z.infer<
   typeof ServiceItemDetailResponseSchema
 >;
-type ServiceItem = z.infer<typeof ServiceItemListSchema>;
+type ServiceItem = z.infer<typeof ServiceListItemSchema>;
 type ServiceTypeGroup = z.infer<typeof ServiceListResponseSchema>[number];
 
 export type {

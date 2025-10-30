@@ -23,12 +23,13 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { formatMoney } from "~/lib/utils";
 import { useRoomDetail } from "../../container/rooms-query.hooks";
+import { RoomStatusEnum } from "~/services/types/room.types";
+import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 interface RoomDetailTabProps {
   roomId: string;
 }
 
 function RoomDetailTab({ roomId }: RoomDetailTabProps) {
-  console.log(roomId);
   const { data: roomDetail, isLoading } = useRoomDetail({
     id: roomId,
   });
@@ -57,26 +58,27 @@ function RoomDetailTab({ roomId }: RoomDetailTabProps) {
   return (
     <div className="flex gap-4">
       <Card>
-        <CardContent className="">
-          <Image
-            src={roomDetail.imageUrls[0]}
-            alt={roomDetail.roomName}
-            width={300}
-            height={200}
-            className="w-full h-full object-cover rounded-md"
-          />
+        <CardContent>
+          <ImageZoom>
+            <Image
+              src={roomDetail.imageUrls[0]}
+              alt={roomDetail.roomName}
+              width={300}
+              height={240}
+              className="w-full h-full object-cover rounded-md"
+            />
+          </ImageZoom>
         </CardContent>
       </Card>
 
       <Card className="flex-1">
         <CardHeader>
-          <CardTitle className="text-sm flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+          <CardTitle className="text-muted-foreground uppercase font-medium ">
             Chi tiết phòng : {roomDetail.roomName}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <CardContent className="flex flex-col justify-between flex-1">
+          <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="space-y-1">
               <span className="text-muted-foreground">Loại phòng:</span>
               <p className="font-semibold">{roomDetail.roomTypeName}</p>
@@ -84,7 +86,7 @@ function RoomDetailTab({ roomId }: RoomDetailTabProps) {
 
             <div className="space-y-1">
               <span className="text-muted-foreground">Mã loại phòng:</span>
-              <p className="font-mono">{roomDetail.roomTypeId}</p>
+              <p className="font-mono ">{roomDetail.roomTypeId}</p>
             </div>
 
             <div className="space-y-1">
@@ -105,12 +107,13 @@ function RoomDetailTab({ roomId }: RoomDetailTabProps) {
 
           <Separator />
 
-          {/* Status Info */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
               Trạng thái hiện tại:
             </span>
-            <Badge variant="info">{roomDetail.status}</Badge>
+            <Badge variant="info">
+              {RoomStatusEnum[roomDetail.status as keyof typeof RoomStatusEnum]}
+            </Badge>
           </div>
         </CardContent>
       </Card>

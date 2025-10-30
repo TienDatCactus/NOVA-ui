@@ -1,16 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
 import {
   Form,
   FormControl,
@@ -21,13 +14,28 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
+import {
+  Dropzone,
+  DropzoneContent,
+  DropzoneEmptyState,
+} from "~/components/ui/shadcn-io/dropzone";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
-import useServiceTypesSchema from "~/services/schema/service-types.schema";
+import { Textarea } from "~/components/ui/textarea";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
-import { X, Upload } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
+import useServiceTypesSchema from "~/services/schema/service-types.schema";
 import { useUpdateServiceType } from "../container/service-type-mutation.hooks";
+import { Checkbox } from "~/components/ui/checkbox";
+import { cn } from "~/lib/utils";
+import { Label } from "~/components/ui/label";
+import Image from "~/components/ui/image";
 
 const { UpdateServiceTypeRequestSchema } = useServiceTypesSchema();
 
@@ -44,8 +52,11 @@ export default function EditServiceTypeSheet({
   onClose,
   type,
 }: EditServiceTypeSheetProps) {
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
+  const [removeMediaIds, setRemoveMediaIds] = useState<string[]>([]);
+  console.log(type);
   const form = useForm<UpdateServiceTypeFormData>({
     resolver: zodResolver(UpdateServiceTypeRequestSchema),
     defaultValues: {
@@ -57,8 +68,6 @@ export default function EditServiceTypeSheet({
   });
 
   const { mutate: updateServiceType, isPending } = useUpdateServiceType();
-
-  // Populate form when type changes
   useEffect(() => {
     if (type) {
       form.reset({
@@ -67,16 +76,25 @@ export default function EditServiceTypeSheet({
         description: type.description || "",
         active: type.active,
       });
-      //   setImageUrls(type.imageUrls || []);
+      setExistingImageUrls(type.imageUrls || []);
+      setRemoveMediaIds([]);
+      setNewFiles([]);
+      setNewPreviews([]);
     }
   }, [type, form]);
 
   const handleSubmit = (data: UpdateServiceTypeFormData) => {
     if (!type) return;
 
-    // TODO: Handle image updates
     updateServiceType(
-      { id: type.id, data },
+      {
+        id: type.id,
+        data: {
+          ...data,
+          newImages: newFiles,
+          removeMediaIds,
+        } as UpdateServiceTypeFormData,
+      },
       {
         onSuccess: () => {
           onClose();
@@ -87,193 +105,255 @@ export default function EditServiceTypeSheet({
 
   const handleClose = () => {
     form.reset();
-    setImageUrls([]);
+    setExistingImageUrls([]);
+    setRemoveMediaIds([]);
+    setNewFiles([]);
+    setNewPreviews([]);
     onClose();
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  useEffect(() => {
+    form.setValue("newImages", newFiles as any);
+    form.setValue("removeMediaIds", removeMediaIds);
+  }, [newFiles, removeMediaIds, form]);
 
-    const newUrls = Array.from(files).map((file) => URL.createObjectURL(file));
-    setImageUrls((prev) => [...prev, ...newUrls]);
+  useEffect(() => {
+    const urls = newFiles.map((f) => URL.createObjectURL(f));
+    setNewPreviews(urls);
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [newFiles]);
 
-    // TODO: Upload to backend
+  const onDropNewFiles = (accepted: File[]) => {
+    setNewFiles((prev) => [...prev, ...accepted]);
   };
 
-  const removeImage = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+  const removeNewFile = (index: number) => {
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const toggleRemoveExisting = (id: string) => {
+    setRemoveMediaIds((prev) =>
+      prev.includes(id) ? prev.filter((id) => id !== id) : [...prev, id]
+    );
   };
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="sm:max-w-[600px] overflow-y-auto">
-        <SheetHeader>
+      <SheetContent className="sm:max-w-[600px] p-0 flex flex-col gap-0">
+        <SheetHeader className="p-6 pb-4 border-b">
           <SheetTitle>Chỉnh sửa loại dịch vụ</SheetTitle>
           <SheetDescription>
             Cập nhật thông tin cho loại dịch vụ. Nhấn lưu khi hoàn tất.
           </SheetDescription>
         </SheetHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 mt-6"
-          >
-            {/* Code */}
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Mã loại dịch vụ <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="VD: SPA, FOOD, DRINK" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div className="flex-1 overflow-y-auto p-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4 mt-6"
+            >
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Mã loại dịch vụ{" "}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="VD: SPA, FOOD, DRINK" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Tên loại dịch vụ <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="VD: Spa & Massage, Ẩm thực, Đồ uống"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mô tả</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Mô tả chi tiết về loại dịch vụ..."
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Image Management */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Hình ảnh</label>
-              <div className="border-2 border-dashed rounded-lg p-4 hover:border-primary/50 transition-colors">
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <div className="text-center">
-                    <label
-                      htmlFor="edit-image-upload"
-                      className="cursor-pointer"
-                    >
-                      <span className="text-sm text-primary hover:underline">
-                        Thêm hình ảnh
-                      </span>
-                      <input
-                        id="edit-image-upload"
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageChange}
+              {/* Name */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tên loại dịch vụ{" "}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="VD: Spa & Massage, Ẩm thực, Đồ uống"
+                        {...field}
                       />
-                    </label>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mô tả</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Mô tả chi tiết về loại dịch vụ..."
+                        className="resize-none"
+                        rows={3}
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="space-y-2">
+                <FormLabel>Hình ảnh hiện có</FormLabel>
+                {existingImageUrls.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Không có hình ảnh
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {existingImageUrls.map((url) => {
+                      const marked = removeMediaIds.includes(url);
+                      return (
+                        <Label
+                          key={url}
+                          className={cn(
+                            "relative group rounded-md border cursor-pointer transition-all",
+                            {
+                              "ring-2 ring-destructive/60 border-destructive/50":
+                                marked,
+                              "border-border hover:border-primary/30": !marked,
+                            }
+                          )}
+                          title={marked ? "Bỏ đánh dấu xóa" : "Đánh dấu để xóa"}
+                        >
+                          <div className="absolute top-2 left-2 z-10">
+                            <Checkbox
+                              checked={marked}
+                              onCheckedChange={() => toggleRemoveExisting(url)}
+                            />
+                          </div>
+                          <Image
+                            src={url}
+                            alt="existing"
+                            width={100}
+                            height={100}
+                            className="object-cover rounded-md"
+                          />
+
+                          {marked && (
+                            <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold text-destructive-foreground">
+                              Sẽ xóa
+                            </span>
+                          )}
+                        </Label>
+                      );
+                    })}
                   </div>
-                </div>
+                )}
+                {removeMediaIds.length > 0 && (
+                  <p className="text-xs text-destructive">
+                    Đã đánh dấu xóa {removeMediaIds.length} ảnh
+                  </p>
+                )}
               </div>
 
-              {imageUrls.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {imageUrls.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={url}
-                        alt={`Preview ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-md border"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImage(index)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                <Badge variant="secondary" className="mr-2">
-                  Lưu ý
-                </Badge>
-                Chức năng upload hình ảnh đang được phát triển.
-              </p>
-            </div>
+              <div className="space-y-2">
+                <FormLabel>Thêm hình ảnh</FormLabel>
+                <Dropzone
+                  accept={{ "image/*": [] }}
+                  maxFiles={8}
+                  onDrop={(accepted) => onDropNewFiles(accepted)}
+                  src={newFiles}
+                  className="border-2 border-dashed"
+                >
+                  <DropzoneEmptyState />
+                  <DropzoneContent />
+                </Dropzone>
 
-            {/* Active Status */}
-            <FormField
-              control={form.control}
-              name="active"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Trạng thái hoạt động
-                    </FormLabel>
-                    <FormDescription>
-                      Tắt nếu muốn tạm ngừng loại dịch vụ này
-                    </FormDescription>
+                {newPreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {newPreviews.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <Image
+                          src={url}
+                          alt={`new-${index}`}
+                          width={100}
+                          height={100}
+                          className="object-cover  border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => removeNewFile(index)}
+                          aria-label="Xóa ảnh mới"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Có thể tải lên tối đa 8 ảnh. Ảnh sẽ được lưu khi bạn nhấn Lưu
+                  thay đổi.
+                </p>
+              </div>
 
-            <SheetFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={isPending}
-              >
-                Hủy
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-              </Button>
-            </SheetFooter>
-          </form>
-        </Form>
+              <FormField
+                control={form.control}
+                name="active"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">
+                        Trạng thái hoạt động
+                      </FormLabel>
+                      <FormDescription>
+                        Tắt nếu muốn tạm ngừng loại dịch vụ này
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
+        </div>
+        <SheetFooter className="p-6 pt-4 border-t gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isPending}
+          >
+            Hủy
+          </Button>
+          <Button
+            type="submit"
+            onClick={form.handleSubmit(handleSubmit)}
+            disabled={isPending}
+          >
+            {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

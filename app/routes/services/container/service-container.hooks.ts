@@ -6,25 +6,23 @@ import { useDeleteService } from "./service-mutation.hooks";
 import { useServices } from "./service-query.hooks";
 
 export default function useServicesContainer() {
-  const { data: servicesData, isPending } = useServices();
-  const { filters, updateFilter, resetFilters, filterServices } =
-    useServiceFilters();
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedServices, setSelectedServices] = useState<ServiceItem[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [bulkEditDialogOpen, setBulkEditDialogOpen] = useState(false);
-  const [editingService, setEditingService] = useState<ServiceItem | null>(
-    null
-  );
-
+  const {
+    filters,
+    updateFilter,
+    resetFilters,
+    filterServices,
+    includeInactive,
+  } = useServiceFilters();
+  const { data: servicesData, isPending } = useServices({
+    includeInactive,
+    typeCode: filters.typeCode,
+  });
   const { mutate: deleteService } = useDeleteService();
 
   const filteredServices = servicesData ? filterServices(servicesData) : [];
-  const handleEdit = (service: ServiceItem) => {
-    setEditingService(service);
-    setEditSheetOpen(true);
-  };
 
   const handleDelete = (service: ServiceItem) => {
     deleteService(service.serviceItemId);
@@ -54,18 +52,12 @@ export default function useServicesContainer() {
     filters,
     updateFilter,
     resetFilters,
-    searchQuery,
-    setSearchQuery,
     selectedServices,
     setSelectedServices,
     createDialogOpen,
     setCreateDialogOpen,
-    editSheetOpen,
-    setEditSheetOpen,
     bulkEditDialogOpen,
     setBulkEditDialogOpen,
-    editingService,
-    handleEdit,
     handleDelete,
     handleBulkEdit,
     handleClearSelection,

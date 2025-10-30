@@ -13,12 +13,8 @@ export function useCreateServiceType() {
     mutationFn: async (data: CreateServiceTypeRequestDto) =>
       await ServiceTypesService.createServiceType(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-types"] });
-      queryClient.invalidateQueries({ queryKey: ["services"] }); // Refresh services too
-      toast.success("Thêm loại dịch vụ thành công");
-    },
-    onError: () => {
-      toast.error("Có lỗi xảy ra khi thêm loại dịch vụ");
+      queryClient.refetchQueries({ queryKey: ["service-types"] });
+      queryClient.refetchQueries({ queryKey: ["services"] });
     },
   });
 }
@@ -35,12 +31,8 @@ export function useUpdateServiceType() {
       data: UpdateServiceTypeRequestDto;
     }) => await ServiceTypesService.updateServiceType(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-types"] });
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-      toast.success("Cập nhật loại dịch vụ thành công");
-    },
-    onError: () => {
-      toast.error("Có lỗi xảy ra khi cập nhật loại dịch vụ");
+      queryClient.refetchQueries({ queryKey: ["service-types"] });
+      queryClient.refetchQueries({ queryKey: ["services"] });
     },
   });
 }
@@ -52,12 +44,8 @@ export function useDeleteServiceType() {
     mutationFn: async (id: string) =>
       await ServiceTypesService.deleteServiceType(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-types"] });
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-      toast.success("Xóa loại dịch vụ thành công");
-    },
-    onError: () => {
-      toast.error("Có lỗi xảy ra khi xóa loại dịch vụ");
+      queryClient.refetchQueries({ queryKey: ["service-types"] });
+      queryClient.refetchQueries({ queryKey: ["services"] });
     },
   });
 }

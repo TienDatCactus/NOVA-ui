@@ -249,6 +249,9 @@ const headerRows = 1;
 const rowHeight = 64;
 const firstColWidth = 220;
 const totalSubCols = DAYS_COUNT * SUBS_PER_DAY;
+
+const CHECK_IN_TIME = "13:00 PM";
+const CHECK_OUT_TIME = "11:00 AM";
 export {
   NAV_ITEMS,
   SERVICES_ITEMS,
@@ -263,4 +266,6 @@ export {
   totalSubCols,
   TOP_NAV_CONFIG,
   SERVICE_CATEGORIES,
+  CHECK_IN_TIME,
+  CHECK_OUT_TIME,
 };

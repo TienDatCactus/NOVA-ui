@@ -10,15 +10,14 @@ const RoomTypeEnum = z.enum(ROOM_TYPE, {
   error: "Loại phòng không hợp lệ",
 });
 
-const RoomStatusEnum = z.enum({
-  Available: "0", // Còn trống
-  Occupied: "1", // Đã có khách
-  Dirty: "2", // Cần dọn dẹp
-  OutOfService: "3", // Ngưng sử dụng
-  Reserved: "4", // Đã được đặt trước
-  Cleaning: "5", // Đang được dọn dẹp
-  Locked: "6",
-});
+const RoomStatusEnum = z.enum([
+  "Ready",
+  "Dirty",
+  "Cleaning",
+  "Maintenance",
+  "OutOfService",
+  "Locked",
+]);
 
 // -------------------------------
 
@@ -29,7 +28,7 @@ const RoomListItemSchema = z.object({
   roomTypeId: z.string(),
   roomTypeCode: z.string(),
   roomTypeName: z.string(),
-  imageUrls: z.array(z.string()),
+  imageUrls: z.array(z.url()),
   dailyPrice: z.number().min(0),
 });
 

@@ -24,9 +24,6 @@ export function RoomTypesFilterSidebar({
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
       <div className="flex items-center justify-between">
-        <Button variant="light" className="text-xl font-medium">
-          Bộ lọc <ListFilterPlus />
-        </Button>
         {activeFiltersCount > 0 && (
           <Button
             variant="ghost"
@@ -47,7 +44,6 @@ export function RoomTypesFilterSidebar({
             placeholder="Tìm kiếm..."
             value={filters.searchText}
             onChange={(e) => onFilterChange("searchText", e.target.value)}
-            className="pl-9"
             startAddon={<Search className=" h-4 w-4 text-muted-foreground" />}
           />
         </CardContent>

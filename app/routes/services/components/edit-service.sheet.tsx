@@ -1,15 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Power } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
 import {
   Form,
   FormControl,
@@ -27,14 +21,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Textarea } from "~/components/ui/textarea";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
-import useServiceSchema from "~/services/schema/service.schema";
-import { useMemo, useEffect } from "react";
-import type { ServiceItem } from "~/services/api/services/dto";
+import { Textarea } from "~/components/ui/textarea";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
+import type { ServiceItem } from "~/services/api/services/dto";
+import useServiceSchema from "~/services/schema/service.schema";
 import { useUpdateService } from "../container/service-mutation.hooks";
-import { useServices } from "../container/service-query.hooks";
 import { useServiceTypes } from "../container/service-types-query.hooks";
 
 const { UpdateServiceItemRequestSchema } = useServiceSchema();
@@ -44,7 +44,7 @@ type UpdateServiceFormData = z.infer<typeof UpdateServiceItemRequestSchema>;
 interface EditServiceSheetProps {
   open: boolean;
   onClose: () => void;
-  service: ServiceItem | null;
+  service: ServiceItem;
 }
 
 export default function EditServiceSheet({
@@ -73,9 +73,7 @@ export default function EditServiceSheet({
       form.reset({
         code: service.code,
         name: service.name,
-        description: service.description || "",
-        serviceTypeId: (service as any).serviceTypeId || "",
-        unitId: (service as any).unitId || "",
+        description: service.description,
         basePrice: service.basePrice,
         active: service.active,
       });
@@ -84,15 +82,8 @@ export default function EditServiceSheet({
 
   const handleSubmit = (data: UpdateServiceFormData) => {
     if (!service) return;
-
-    updateService(
-      { id: service.serviceItemId, data },
-      {
-        onSuccess: () => {
-          onClose();
-        },
-      }
-    );
+    updateService({ id: service.serviceItemId, data });
+    handleClose();
   };
 
   const handleClose = () => {
@@ -102,134 +93,117 @@ export default function EditServiceSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="sm:max-w-[600px] px-4 overflow-y-auto">
-        <SheetHeader>
+      <SheetContent className="sm:max-w-[600px] p-0 flex flex-col gap-0">
+        <SheetHeader className="p-6 pb-4 border-b">
           <SheetTitle>Chỉnh sửa dịch vụ</SheetTitle>
           <SheetDescription>
             Cập nhật thông tin cho dịch vụ. Nhấn lưu khi hoàn tất.
           </SheetDescription>
         </SheetHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 mt-6"
-          >
-            {/* Service Type */}
-            <FormField
-              control={form.control}
-              name="serviceTypeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Loại dịch vụ <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn loại dịch vụ" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {serviceTypesData!.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Code */}
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Mã dịch vụ <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="VD: SPA001, FOOD001" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Tên dịch vụ <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="VD: Massage body, Bữa sáng buffet"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mô tả</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Mô tả chi tiết về dịch vụ..."
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              {/* Unit */}
-              <FormField
-                control={form.control}
-                name="unitId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Đơn vị tính <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+        <div className="flex-1 overflow-y-auto p-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="serviceTypeId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Loại dịch vụ <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full" size="lg">
+                            <SelectValue placeholder="Chọn loại dịch vụ" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {serviceTypesData!.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="unitId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Đơn vị tính <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full" size="lg">
+                            <SelectValue placeholder="Chọn đơn vị" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {units?.map((unit) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {unit.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Mã dịch vụ <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn đơn vị" />
-                        </SelectTrigger>
+                        <Input placeholder="VD: SPA001, FOOD001" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {units?.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {unit.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Base Price */}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Tên dịch vụ <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="VD: Massage body, Bữa sáng buffet"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="basePrice"
@@ -250,47 +224,71 @@ export default function EditServiceSheet({
                   </FormItem>
                 )}
               />
-            </div>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mô tả</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Mô tả chi tiết về dịch vụ..."
+                        className="resize-none"
+                        rows={3}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Active Status */}
-            <FormField
-              control={form.control}
-              name="active"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Trạng thái hoạt động
-                    </FormLabel>
-                    <FormDescription>
-                      Tắt nếu muốn tạm ngừng cung cấp dịch vụ này
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <SheetFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={isPending}
-              >
-                Hủy
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-              </Button>
-            </SheetFooter>
-          </form>
-        </Form>
+              <FormField
+                control={form.control}
+                name="active"
+                render={({ field }) => (
+                  <FormItem className=" has-data-[state=checked]:border-primary/50 relative flex w-full items-start gap-2 rounded-md border-2 border-dashed p-4 shadow-xs outline-none">
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="order-1 h-4 w-6 after:absolute after:inset-0 [&_span]:size-3 data-[state=checked]:[&_span]:translate-x-2.5 data-[state=checked]:[&_span]:rtl:-translate-x-2.5"
+                      />
+                    </FormControl>
+                    <div className="flex grow items-center gap-3">
+                      <Power />
+                      <div className="grid grow gap-2">
+                        <FormLabel className="text-base">
+                          Trạng thái hoạt động
+                        </FormLabel>
+                        <FormDescription>
+                          Tắt nếu muốn tạm ngừng cung cấp dịch vụ này
+                        </FormDescription>
+                      </div>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
+        </div>
+        <SheetFooter className="p-6 pt-4 border-t gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isPending}
+          >
+            Hủy
+          </Button>
+          <Button
+            type="submit"
+            onClick={form.handleSubmit(handleSubmit)}
+            disabled={isPending}
+          >
+            {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

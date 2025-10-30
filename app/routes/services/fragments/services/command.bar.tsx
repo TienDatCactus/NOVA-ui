@@ -1,7 +1,7 @@
-import { Search, Plus, Download, Edit, LayoutGrid, List } from "lucide-react";
+import { Download, Edit, Plus, RotateCcw, Search } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -9,10 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type {
-  ServiceFilters,
-} from "~/services/types/service.types";
-import { Badge } from "~/components/ui/badge";
+import type { ServiceTypeListResponseDto } from "~/services/api/service-types/dto";
+import type { ServiceFilters } from "~/services/types/service.types";
 
 interface ServicesCommandBarProps {
   filters: ServiceFilters;
@@ -20,62 +18,69 @@ interface ServicesCommandBarProps {
     key: K,
     value: ServiceFilters[K]
   ) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   selectedCount: number;
   onAddService: () => void;
   onBulkEdit: () => void;
   onExportExcel: () => void;
   onClearSelection: () => void;
+  serviceTypes: ServiceTypeListResponseDto;
+  onResetFilters: () => void;
 }
 
 export default function ServicesCommandBar({
+  serviceTypes,
   filters,
   onFilterChange,
-  searchQuery,
-  setSearchQuery,
   selectedCount,
   onAddService,
   onBulkEdit,
   onExportExcel,
   onClearSelection,
+  onResetFilters,
 }: ServicesCommandBarProps) {
+  const activeFiltersCount =
+    (filters.searchText !== "" ? 1 : 0) +
+    (filters.activeFilter !== "" ? 1 : 0) +
+    (filters.typeCode !== "" ? 1 : 0);
   return (
-    <div className="flex flex-col gap-4 p-4 bg-card border-b">
+    <div className="flex flex-col gap-4 p-4 shadow-md bg-white/50 border rounded-md">
       <div className="flex items-center gap-4">
-        {/* Search */}
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm dịch vụ theo tên, mã hoặc mô tả..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        <Input
+          placeholder="Tìm kiếm dịch vụ theo tên, mã hoặc mô tả..."
+          value={filters.searchText}
+          className="bg-white"
+          onChange={(e) => onFilterChange("searchText", e.target.value)}
+          startAddon={<Search className="text-muted-foreground" />}
+        />
 
-        {/* Service Type Filter - Segmented Control */}
-        <Tabs
-          value={filters.typeCode}
+        <Select
+          value={filters.typeCode || ""}
           onValueChange={(value) => onFilterChange("typeCode", value)}
         >
-          <TabsList>
-            <TabsTrigger value="all">Tất cả</TabsTrigger>
-            <TabsTrigger value="SPA">Spa</TabsTrigger>
-            <TabsTrigger value="FOOD">Thức ăn</TabsTrigger>
-            <TabsTrigger value="DRINK">Đồ uống</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        {/* Active Filter */}
+          <SelectTrigger className="shadow-md bg-white">
+            <SelectValue placeholder="Chọn loại dịch vụ" />
+          </SelectTrigger>
+          <SelectContent>
+            {!!serviceTypes &&
+              serviceTypes.length > 0 &&
+              serviceTypes.map((type) => (
+                <SelectItem key={type.id} value={type.code}>
+                  {type.name}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
         <Select
-          value={filters.includeInactive ? "all" : "active"}
+          value={filters.activeFilter}
           onValueChange={(value) =>
-            onFilterChange("includeInactive", value === "all")
+            onFilterChange(
+              "activeFilter",
+              value as ServiceFilters["activeFilter"]
+            )
           }
         >
-          <SelectTrigger className="w-40">
-            <SelectValue />
+          <SelectTrigger className="shadow-md bg-white">
+            <SelectValue placeholder="Chọn trạng thái" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="active">Đang hoạt động</SelectItem>
@@ -83,14 +88,18 @@ export default function ServicesCommandBar({
           </SelectContent>
         </Select>
 
-        {/* Create Button */}
         <Button onClick={onAddService}>
           <Plus className="h-4 w-4 mr-2" />
           Thêm dịch vụ
         </Button>
+        {activeFiltersCount > 0 && (
+          <Button variant={"outline"} onClick={onResetFilters}>
+            <RotateCcw />
+            Đặt lại bộ lọc
+          </Button>
+        )}
       </div>
 
-      {/* Bulk Actions Bar */}
       {selectedCount > 0 && (
         <div className="flex items-center justify-between p-3 bg-muted rounded-md animate-in slide-in-from-top-2">
           <div className="flex items-center gap-2">

@@ -50,7 +50,9 @@ export function CreateRoomTypeDialog({
     setShowDescriptionDialog,
     showImagePreviewDialog,
     setShowImagePreviewDialog,
-    descriptionDialogMode,
+    dialogMode,
+    handleOpenDescription,
+    handleOpenImagePreview,
 
     // Computed values
     newImageFiles,
@@ -59,8 +61,6 @@ export function CreateRoomTypeDialog({
     handleClose,
     handleSubmit,
     handleDescriptionSave,
-    handleOpenDescriptionEdit,
-    handleOpenImageEdit,
     handleAddImages,
     handleRemoveNewFile,
     handleConfirmClose,
@@ -214,7 +214,7 @@ export function CreateRoomTypeDialog({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={handleOpenDescriptionEdit}
+                        onClick={() => handleOpenDescription("edit")}
                         className="flex-shrink-0"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -251,7 +251,7 @@ export function CreateRoomTypeDialog({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={handleOpenImageEdit}
+                        onClick={() => handleOpenImagePreview("edit")}
                         className="flex-shrink-0"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -289,7 +289,7 @@ export function CreateRoomTypeDialog({
         onClose={setShowDescriptionDialog}
         initialContent={form.watch("description") || ""}
         roomTypeCode={form.watch("code") || "MỚI"}
-        mode={descriptionDialogMode}
+        mode={dialogMode}
         onSave={handleDescriptionSave}
       />
 
@@ -299,7 +299,7 @@ export function CreateRoomTypeDialog({
         existingImages={[]}
         newImages={newImageFiles}
         removeMediaIds={[]}
-        initialTab="new"
+        mode={dialogMode}
         roomTypeCode={form.watch("code") || "MỚI"}
         onAddImages={handleAddImages}
         onRemoveNewImage={handleRemoveNewFile}

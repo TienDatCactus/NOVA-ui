@@ -1,8 +1,6 @@
 import { Badge } from "~/components/ui/badge";
 import { formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 
 interface ServiceDetailRowProps {
   service: ServiceItem;

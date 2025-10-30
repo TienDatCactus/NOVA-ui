@@ -13,7 +13,7 @@ export function useCreateRoomType() {
     mutationFn: (data: CreateRoomTypesRequestDto) =>
       RoomTypesService.createRoomTypes(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["room-types"] });
+      queryClient.refetchQueries({ queryKey: ["room-types"] });
     },
   });
 }
@@ -30,12 +30,8 @@ export function useUpdateRoomType() {
       data: UpdateRoomTypesDetailRequestDto;
     }) => RoomTypesService.updateRoomTypesDetail(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["room-types"] });
-      queryClient.invalidateQueries({ queryKey: ["room-type"] });
-      toast.success("Cập nhật hạng phòng thành công");
-    },
-    onError: () => {
-      toast.error("Có lỗi xảy ra khi cập nhật hạng phòng");
+      queryClient.refetchQueries({ queryKey: ["room-types"] });
+      queryClient.refetchQueries({ queryKey: ["room-type"] });
     },
   });
 }
@@ -45,7 +41,8 @@ export function useDeleteRoomType() {
   return useMutation({
     mutationFn: (id: string) => RoomTypesService.deleteRoomTypes(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["room-types"] });
+      queryClient.refetchQueries({ queryKey: ["room-types"] });
+      queryClient.refetchQueries({ queryKey: ["room-type"] });
     },
   });
 }

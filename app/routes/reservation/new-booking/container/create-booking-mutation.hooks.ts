@@ -12,7 +12,7 @@ function useCreateBookingMutation() {
     mutationFn: async (bookingData: z.infer<typeof StaffCreateBookingSchema>) =>
       BookingService.staffCreateBooking(idempotencyKey, bookingData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.refetchQueries({ queryKey: ["bookings"] });
     },
   });
 }

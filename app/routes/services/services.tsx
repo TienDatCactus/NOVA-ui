@@ -25,18 +25,12 @@ export default function Component({
     filters,
     updateFilter,
     resetFilters,
-    searchQuery,
-    setSearchQuery,
     selectedServices,
     setSelectedServices,
     createDialogOpen,
     setCreateDialogOpen,
-    editSheetOpen,
-    setEditSheetOpen,
     bulkEditDialogOpen,
     setBulkEditDialogOpen,
-    editingService,
-    handleEdit,
     handleDelete,
     handleBulkEdit,
     handleClearSelection,
@@ -48,8 +42,6 @@ export default function Component({
       filters={filters}
       onFilterChange={updateFilter}
       onResetFilters={resetFilters}
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
       totalServices={filteredServices.length}
       selectedCount={selectedServices.length}
       onAddService={() => setCreateDialogOpen(true)}
@@ -60,21 +52,13 @@ export default function Component({
       <ServicesDataTable
         services={filteredServices}
         isLoading={isPending}
-        onAddService={() => setCreateDialogOpen(true)}
         onSelectionChange={setSelectedServices}
-        onEdit={handleEdit}
         onDelete={handleDelete}
       />
 
       <CreateServiceDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-      />
-
-      <EditServiceSheet
-        open={editSheetOpen}
-        onClose={() => setEditSheetOpen(false)}
-        service={editingService}
       />
 
       <BulkEditDialog

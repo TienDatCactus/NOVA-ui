@@ -6,7 +6,7 @@ const {
   BookingListByWeekResponseSchema,
   StaffCreateBookingResponseSchema,
   StaffCreateBookingSchema,
-  BookingItemSchema,
+  BookingDetailItemSchema,
   BookingOTAResponseSchema,
 } = useBookingSchema();
 
@@ -18,7 +18,7 @@ type StaffCreateBookingDto = z.infer<typeof StaffCreateBookingSchema>;
 type StaffCreateBookingResponseDto = z.infer<
   typeof StaffCreateBookingResponseSchema
 >;
-type BookingDetailResponseDto = z.infer<typeof BookingItemSchema>;
+type BookingDetailResponseDto = z.infer<typeof BookingDetailItemSchema>;
 type BookingOTAResponseDto = z.infer<typeof BookingOTAResponseSchema>;
 export type {
   BookingListResponseDto,

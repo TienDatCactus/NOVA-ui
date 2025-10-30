@@ -16,8 +16,8 @@ function useCreateRoom() {
         roomTypeId: data.roomTypeId,
         status: data.status,
       }),
-    onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["rooms"] });
     },
   });
 }
@@ -34,7 +34,7 @@ function useUpdateRoom() {
       data: UpdateRoomDetailRequestDto;
     }) => await RoomsService.updateRoomDetail(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      queryClient.refetchQueries({ queryKey: ["rooms"] });
     },
   });
 }
@@ -46,7 +46,7 @@ function useUpdateRoomStatus() {
     mutationFn: async (data: { roomId: string; status: string }) =>
       await RoomsService.updateRoomStatus(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      queryClient.refetchQueries({ queryKey: ["rooms"] });
     },
   });
 }

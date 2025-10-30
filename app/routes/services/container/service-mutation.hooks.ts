@@ -8,12 +8,11 @@ import type {
 
 export function useCreateService() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: CreateServiceRequestDto) =>
       await ServicesService.createService(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.refetchQueries({ queryKey: ["services"] });
     },
   });
 }
@@ -30,7 +29,7 @@ export function useUpdateService() {
       data: UpdateServiceRequestDto;
     }) => await ServicesService.updateService(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.refetchQueries({ queryKey: ["services"] });
     },
   });
 }
@@ -41,7 +40,7 @@ export function useDeleteService() {
   return useMutation({
     mutationFn: async (id: string) => await ServicesService.deleteService(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.refetchQueries({ queryKey: ["services"] });
     },
   });
 }

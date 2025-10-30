@@ -6,19 +6,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import type { ServiceTypeItem } from "~/services/api/service-types/dto";
+import type { ServiceItem } from "~/services/api/services/dto";
 import { useState } from "react";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
+import EditServiceSheet from "../../components/edit-service.sheet";
 
-interface ServiceTypeActionsCellProps {
-  type: ServiceTypeItem;
+interface ServiceActionsCellProps {
+  service: ServiceItem;
 }
 
-export default function ServiceTypeActionsCell({
-  type,
-}: ServiceTypeActionsCellProps) {
+export default function ServiceActionsCell({
+  service,
+}: ServiceActionsCellProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
   return (
     <>
       <DropdownMenu>
@@ -29,14 +30,7 @@ export default function ServiceTypeActionsCell({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => {
-              const event = new CustomEvent("service-type:edit", {
-                detail: type,
-              });
-              window.dispatchEvent(event);
-            }}
-          >
+          <DropdownMenuItem onClick={() => setEditSheetOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
             Chỉnh sửa
           </DropdownMenuItem>
@@ -53,7 +47,12 @@ export default function ServiceTypeActionsCell({
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        type={type}
+        service={service}
+      />
+      <EditServiceSheet
+        open={editSheetOpen}
+        onClose={() => setEditSheetOpen(false)}
+        service={service}
       />
     </>
   );

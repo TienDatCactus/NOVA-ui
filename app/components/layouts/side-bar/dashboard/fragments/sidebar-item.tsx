@@ -55,7 +55,7 @@ function SidebarItemList({
   return (
     <ul
       className={cn(
-        "flex bg-background w-fit rounded-full p-2 gap-4 border shadow-sm"
+        "flex bg-white w-fit rounded-full p-2 gap-4 border shadow-sm"
       )}
     >
       {items.map((item) => (

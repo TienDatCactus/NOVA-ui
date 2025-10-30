@@ -1,13 +1,12 @@
 import {
   type ColumnDef,
-  type ExpandedState,
   type RowSelectionState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -16,12 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import type {
-  ServiceItem,
-  ServiceListResponseDto,
-} from "~/services/api/services/dto";
-import { cn } from "~/lib/utils";
-import ServiceDetailRow from "../../fragments/services/service-detail.row";
+import type { ServiceItem } from "~/services/api/services/dto";
+import ServiceDetailRow from "../../fragments/services/detail.row";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,26 +24,24 @@ interface DataTableProps<TData, TValue> {
   onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
-export function DataTable<TData extends ServiceListResponseDto, TValue>({
+export function DataTable<TData extends ServiceItem, TValue>({
   columns,
   data,
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
-  const [expanded, setExpanded] = useState<ExpandedState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({
     data,
     columns,
     state: {
-      expanded,
       rowSelection,
     },
-    onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getRowCanExpand: () => true,
+    getRowCanExpand: (row) => true,
+    getRowId: (row) => row.serviceItemId,
   });
 
   return (
@@ -74,32 +67,31 @@ export function DataTable<TData extends ServiceListResponseDto, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => {
-              return (
-                <React.Fragment key={row.id}>
-                  <TableRow
-                    data-state={row.getIsSelected() && "selected"}
-                    className={cn("h-16", "transition-all")}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
+            table.getRowModel().rows.map((row) => (
+              <>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="h-16"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+                {row.getIsExpanded() && (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="p-0">
+                      <ServiceDetailRow service={row.original} />
+                    </TableCell>
                   </TableRow>
-                  {row.getIsExpanded() && (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className="p-0">
-                        <ServiceDetailRow service={row.original} />
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </React.Fragment>
-              );
-            })
+                )}
+              </>
+            ))
           ) : (
             <TableRow>
               <TableCell

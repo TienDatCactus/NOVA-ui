@@ -1,5 +1,6 @@
 import http from "~/lib/http";
 import useBookingSchema from "~/services/schema/booking.schema";
+import { format, parseISO } from "date-fns";
 import type { BookingListParams } from "~/services/types/booking.types";
 import { Booking, OTAInformation } from "../../url";
 import type {
@@ -10,13 +11,14 @@ import type {
   StaffCreateBookingDto,
   StaffCreateBookingResponseDto,
 } from "./dto";
+import { toYMD } from "~/lib/utils";
 
 const {
   BookingListResponseSchema,
   BookingListByWeekResponseSchema,
   StaffCreateBookingResponseSchema,
   StaffCreateBookingSchema,
-  BookingItemSchema,
+  BookingDetailItemSchema,
   BookingOTAResponseSchema,
 } = useBookingSchema();
 
@@ -25,8 +27,7 @@ async function getBookingList(
 ): Promise<BookingListResponseDto> {
   try {
     const resp = await http.get(Booking.list, { params });
-    const data = BookingListResponseSchema.parseAsync(resp.data);
-    return data;
+    return BookingListResponseSchema.parseAsync(resp.data);
   } catch (err) {
     return Promise.reject(err);
   }
@@ -49,15 +50,22 @@ async function staffCreateBooking(
   data: StaffCreateBookingDto
 ): Promise<StaffCreateBookingResponseDto> {
   try {
-    const resp = await http.post(
-      Booking.staffCreateBooking,
-      StaffCreateBookingSchema.parse(data),
-      {
-        headers: {
-          "Idempotency-Key": idempotencyKey,
-        },
-      }
-    );
+    const parsed = StaffCreateBookingSchema.parse(data);
+
+    const payload = {
+      ...parsed,
+      checkinDate: toYMD(parsed.checkinDate),
+      checkoutDate: toYMD(parsed.checkoutDate),
+      breakfastDates: Array.isArray(parsed.breakfastDates)
+        ? parsed.breakfastDates.map((bd) => toYMD(bd)).filter(Boolean)
+        : undefined,
+    };
+
+    const resp = await http.post(Booking.staffCreateBooking, payload, {
+      headers: {
+        "Idempotency-Key": idempotencyKey,
+      },
+    });
     return StaffCreateBookingResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
@@ -68,21 +76,21 @@ async function getBookingDetail(
   params: BookingListParams
 ): Promise<BookingDetailResponseDto> {
   try {
-    let resp = null;
-    if (params.code) {
-      resp = await http.get(Booking.detailByCode(params.code), {
-        params,
-      });
-    } else if (params.id) {
-      resp = await http.get(Booking.detailById(params.id!), {
-        params,
-      });
-    } else {
+    const code = params.code?.trim();
+    const id = params.id?.trim();
+    const url = code
+      ? Booking.detailByCode(code)
+      : id
+        ? Booking.detailById(id)
+        : null;
+
+    if (!url) {
       return Promise.reject(new Error("ID/Code is required"));
     }
-    console.log(resp);
-    return BookingItemSchema.parse(resp.data);
+    const resp = await http.get(url);
+    return await BookingDetailItemSchema.parseAsync(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }

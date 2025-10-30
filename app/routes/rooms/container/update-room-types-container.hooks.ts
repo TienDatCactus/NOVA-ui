@@ -34,38 +34,47 @@ export function useUpdateRoomTypeSheet({
   const { mutate, isPending } = useUpdateRoomType();
   const { mutate: deleteRoomType } = useDeleteRoomType();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  const [imagePreviewDialogMode, setImagePreviewDialogMode] = useState<
-    "existing" | "new"
-  >("existing");
 
   const { data: roomTypeDetail } = useRoomTypeDetail({
     id: roomType?.id || "",
     open: open && !!roomType,
   });
-
   const form = useForm<EditRoomTypeFormData>({
     resolver: zodResolver(UpdateRoomTypesDetailRequestSchema),
     defaultValues: {
-      code: "",
-      name: "",
-      description: "",
-      baseRate: 0,
-      maxOccupancy: 1,
-      active: true,
-      images: [],
+      code: roomType?.code,
+      name: roomType?.name,
+      description: roomTypeDetail?.description,
+      baseRate: roomTypeDetail?.baseRate,
+      maxOccupancy: roomTypeDetail?.maxOccupancy,
+      active: roomTypeDetail?.active,
+      images: [], //! should use roomtypetDetail?.images here
       removeMediaIds: [],
     },
   });
+
+  useEffect(() => {
+    if (!roomType || !roomTypeDetail) return;
+    form.reset({
+      code: roomType.code,
+      name: roomType.name,
+      description: roomTypeDetail.description ?? "",
+      baseRate: roomTypeDetail.baseRate,
+      maxOccupancy: roomTypeDetail.maxOccupancy,
+      active: roomType.active,
+      images: [],
+      removeMediaIds: [],
+    });
+  }, [roomType, roomTypeDetail, form]);
 
   const {
     showDescriptionDialog,
     setShowDescriptionDialog,
     showImagePreviewDialog,
     setShowImagePreviewDialog,
-    descriptionDialogMode,
-    handleOpenDescriptionPreview,
-    handleOpenDescriptionEdit,
+    dialogMode,
+    handleOpenDescription,
+    handleOpenImagePreview,
   } = useRoomTypeFormDialogs();
 
   const { handleAddImages, handleRemoveNewFile } =
@@ -96,6 +105,7 @@ export function useUpdateRoomTypeSheet({
 
   const handleMarkForDeletion = (mediaId: string) => {
     const currentRemoveIds = form.getValues("removeMediaIds") || [];
+    console.log(currentRemoveIds);
     if (currentRemoveIds.includes(mediaId)) {
       form.setValue(
         "removeMediaIds",
@@ -106,20 +116,11 @@ export function useUpdateRoomTypeSheet({
       form.setValue("removeMediaIds", [...currentRemoveIds, mediaId], {
         shouldDirty: true,
       });
+      console.log(form.getValues("removeMediaIds"));
     }
-  };
-
-  const handleOpenImagePreview = (type: "existing" | "new") => {
-    setImagePreviewDialogMode(type);
-    setShowImagePreviewDialog(true);
   };
 
   const handleSubmit = (data: EditRoomTypeFormData) => {
-    if (totalImagesAfterSubmit === 0 && existingImages.length > 0) {
-      setShowDeleteWarning(true);
-      return;
-    }
-
     submitForm(data);
   };
 
@@ -155,14 +156,13 @@ export function useUpdateRoomTypeSheet({
     // State
     showCancelDialog,
     setShowCancelDialog,
-    showDeleteWarning,
-    setShowDeleteWarning,
     showDescriptionDialog,
     setShowDescriptionDialog,
     showImagePreviewDialog,
     setShowImagePreviewDialog,
-    descriptionDialogMode,
-    imagePreviewDialogMode,
+    dialogMode,
+    handleOpenDescription,
+    handleOpenImagePreview,
 
     // Computed values
     removeMediaIds,
@@ -180,8 +180,5 @@ export function useUpdateRoomTypeSheet({
     handleAddImages,
     handleSubmit,
     handleDescriptionSave,
-    handleOpenDescriptionPreview,
-    handleOpenDescriptionEdit,
-    handleOpenImagePreview,
   };
 }

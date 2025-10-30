@@ -24,7 +24,7 @@ function ServiceItemList({ item }: ServiceItemListProps) {
   const quantity = getQuantity(item.serviceItemId);
 
   return (
-    <li className="flex items-center justify-between bg-background p-2 border rounded-md my-2">
+    <li className="flex items-center justify-between bg-white p-2 border rounded-md my-2">
       <div className="flex-1">
         <h3 className="font-medium">{item.name}</h3>
         <p className="text-muted-foreground text-sm">
@@ -71,7 +71,7 @@ function ServiceItemGrid({ item }: ServiceItemGridProps) {
   return (
     <li
       className={cn(
-        "flex flex-col items-start gap-2 justify-between bg-background p-2 border rounded-md cursor-pointer hover:shadow-md transition-all",
+        "flex flex-col items-start gap-2 justify-between bg-white p-2 border rounded-md cursor-pointer hover:shadow-md transition-all",
         {
           "ring-2 ring-primary": inCart,
         }

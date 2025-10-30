@@ -14,7 +14,7 @@ import { cn } from "~/lib/utils";
 import type { DayPicker } from "react-day-picker";
 
 interface DatePickerProps {
-  value?: Date;
+  value?: string | Date;
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
   className?: string;
@@ -48,7 +48,9 @@ export function DatePicker({
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
-          selected={value}
+          selected={
+            value instanceof Date ? value : value ? new Date(value) : undefined
+          }
           onSelect={(date) => {
             onChange?.(date);
             setOpen(false);

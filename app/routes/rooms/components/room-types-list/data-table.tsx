@@ -53,7 +53,7 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
   });
 
   return (
-    <div className="rounded-md border bg-background">
+    <div className="rounded-md border bg-white">
       <Table className="">
         <TableHeader className="h-16">
           {table.getHeaderGroups().map((headerGroup) => (

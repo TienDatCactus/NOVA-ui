@@ -1,8 +1,7 @@
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   Bath,
-  Calendar,
   Calendar1,
   DollarSign,
   FileText,
@@ -10,23 +9,11 @@ import {
   ImageIcon,
   Info,
   Users,
-  ZoomIn,
 } from "lucide-react";
-import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
-import Image from "~/components/ui/image";
-import { Separator } from "~/components/ui/separator";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { formatMoney } from "~/lib/utils";
-import { useRoomTypeDetail } from "../container/room-types-query.hooks";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
+import { DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import {
   Empty,
   EmptyDescription,
@@ -34,9 +21,13 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
+import Image from "~/components/ui/image";
+import { Separator } from "~/components/ui/separator";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { formatMoney } from "~/lib/utils";
+import { useRoomTypeDetail } from "../container/room-types-query.hooks";
 
 interface RoomTypesDetailDialogProps {
   roomTypeId: string;
@@ -87,7 +78,7 @@ function RoomTypesDetailDialog({
   );
 
   return (
-    <ScrollArea className="flex flex-col max-h-[calc(90vh-8rem)]">
+    <div className="flex flex-col overflow-y-auto">
       <DialogHeader className="px-2 mb-0">
         <DialogTitle>Chi tiết hạng phòng</DialogTitle>
         <div className="flex-shrink-0  ">
@@ -223,7 +214,7 @@ function RoomTypesDetailDialog({
               {sortedImages.map((image, index) => (
                 <div
                   key={image.mediaId}
-                  className="group relative aspect-video cursor-pointer overflow-hidden border shadow-sm hover:shadow-md transition-all"
+                  className="group relative aspect-video cursor-pointer overflow-hidden border shadow-sm hover:shadow-md rounded-md transition-all"
                 >
                   <ImageZoom>
                     <Image
@@ -231,11 +222,10 @@ function RoomTypesDetailDialog({
                       alt={
                         image.caption || `${roomTypeDetail.name} ${index + 1}`
                       }
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-md"
                     />
                   </ImageZoom>
 
-                  {/* Display order badge */}
                   <Badge
                     variant="secondary"
                     className="absolute top-2 left-2 text-xs"
@@ -243,9 +233,8 @@ function RoomTypesDetailDialog({
                     #{image.displayOrder}
                   </Badge>
 
-                  {/* Caption on hover */}
                   {image.caption && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute rounded-e-md bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                       <p className="text-xs text-white line-clamp-2">
                         {image.caption}
                       </p>
@@ -257,7 +246,7 @@ function RoomTypesDetailDialog({
           )}
         </TabsContent>
       </Tabs>
-    </ScrollArea>
+    </div>
   );
 }
 

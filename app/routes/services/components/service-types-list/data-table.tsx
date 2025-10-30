@@ -18,7 +18,7 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
-import ServiceTypeDetailRow from "../../fragments/service-types/service-type-detail.row";
+import ServiceTypeDetailRow from "../../fragments/service-types/detail.row";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
@@ -33,17 +33,14 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
   data,
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
-  const [expanded, setExpanded] = useState<ExpandedState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({
     data,
     columns,
     state: {
-      expanded,
       rowSelection,
     },
-    onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
@@ -51,7 +48,6 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
     getRowId: (row) => row.id,
   });
 
-  // Notify parent of selection changes
   useEffect(() => {
     const selectedRows = table
       .getSelectedRowModel()

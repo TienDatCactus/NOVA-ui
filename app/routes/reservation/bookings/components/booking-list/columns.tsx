@@ -5,7 +5,7 @@ import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import useBookingSchema from "~/services/schema/booking.schema";
 import { ActionCell } from "../../fragments/action-cell.list";
-import BookingDetailDialog from "../booking-detail.dialog";
+import BookingDetailDialog from "../booking-detail.sheet";
 const { BookingListItemSchema } = useBookingSchema();
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [
@@ -33,11 +33,11 @@ export const columns: ColumnDef<BookingListItem>[] = [
   },
   {
     accessorKey: "checkinDate",
-    header: "Giờ nhận",
+    header: "Thời gian nhận phòng",
     cell: ({ row }) => {
       return (
         <span>
-          {format(row.original.checkinDate, "dd MMMM/yyyy", {
+          {format(row.original.checkinDate, "dd/MM/yyyy", {
             locale: vi,
           })}
         </span>
@@ -46,11 +46,11 @@ export const columns: ColumnDef<BookingListItem>[] = [
   },
   {
     accessorKey: "checkoutDate",
-    header: "Giờ trả",
+    header: "Thời gian trả phòng",
     cell: ({ row }) => {
       return (
         <span>
-          {format(row.original.checkoutDate, "dd MMMM/yyyy", {
+          {format(row.original.checkoutDate, "dd/MM/yyyy", {
             locale: vi,
           })}
         </span>

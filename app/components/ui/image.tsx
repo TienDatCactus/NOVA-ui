@@ -56,7 +56,7 @@ const Image: React.FC<ComponentProps<"img"> & ImageProps> = ({
       className={`relative flex items-center justify-center`}
     >
       {loading && !error && (
-        <Skeleton className="h-full w-full rounded-lg absolute inset-0 flex flex-col items-center justify-center">
+        <Skeleton className="h-full w-full rounded-md absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-base text-muted-foreground">Đang tải...</span>
         </Skeleton>
       )}
@@ -69,7 +69,7 @@ const Image: React.FC<ComponentProps<"img"> & ImageProps> = ({
         onError={handleError}
         loading="lazy"
         className={cn(
-          `w-full h-full object-cover rounded-lg transition-opacity duration-300`,
+          `w-full h-full object-cover rounded-md transition-opacity duration-300`,
           {
             "opacity-0": loading,
             "opacity-100": !loading,

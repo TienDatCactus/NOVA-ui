@@ -7,9 +7,12 @@ export function useServiceTypes(params?: ServiceTypeListParams) {
     queryKey: ["service-types", params],
     queryFn: async () =>
       await ServiceTypesService.getServiceTypeList(params || {}),
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
+  });
+}
+
+export function useServiceTypeDetails(id: string) {
+  return useQuery({
+    queryKey: ["service-types-detail", id],
+    queryFn: async () => await ServiceTypesService.getServiceTypeDetail(id),
   });
 }

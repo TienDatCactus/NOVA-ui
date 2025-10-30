@@ -1,24 +1,11 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { ChevronDown } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { cn, formatMoney } from "~/lib/utils";
-import type {
-  ServiceItem,
-  ServiceListResponseDto,
-} from "~/services/api/services/dto";
-import ServiceActionsCell from "../../fragments/services/service-actions.cell";
-
-const getServiceTypeColor = (typeCode: string) => {
-  const colors: Record<string, string> = {
-    SPA: "bg-purple-500",
-    FOOD: "bg-orange-500",
-    DRINK: "bg-blue-500",
-    default: "bg-primary",
-  };
-  return colors[typeCode] || colors.default;
-};
+import type { ServiceItem } from "~/services/api/services/dto";
+import ServiceActionsCell from "../../fragments/services/actions.cell";
+import { Button } from "~/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 export const columns: ColumnDef<ServiceItem>[] = [
   {
@@ -57,21 +44,12 @@ export const columns: ColumnDef<ServiceItem>[] = [
     header: "Tên dịch vụ",
     cell: ({ row }) => {
       const service = row.original;
-      const typeCode = (service as any).serviceTypeCode || "";
 
       return (
         <div className="flex items-center gap-3">
-          {/* Color-coded type indicator */}
-          <div
-            className={cn(
-              "w-1 h-10 rounded-full flex-shrink-0",
-              getServiceTypeColor(typeCode)
-            )}
-          />
-
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-semibold truncate">{service.typeName}</span>
+              <span className="font-semibold truncate">{service.name}</span>
               {!service.active && (
                 <Badge variant="secondary" className="text-xs">
                   Ngưng hoạt động
@@ -79,11 +57,9 @@ export const columns: ColumnDef<ServiceItem>[] = [
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              {service.typeCode}
+              {service.code}
             </p>
           </div>
-
-          {/* Expand button */}
           {row.getCanExpand() && (
             <Button
               variant="ghost"
@@ -104,22 +80,49 @@ export const columns: ColumnDef<ServiceItem>[] = [
     },
   },
   {
-    accessorKey: "serviceTypeName",
-    header: "Loại dịch vụ",
+    accessorKey: "description",
+    header: "Mô tả",
     cell: ({ row }) => {
-      const typeName = (row.original as any).serviceTypeName || "—";
+      const description = row.original.description || "—";
       return (
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{typeName}</span>
-        </div>
+        <p className="text-sm text-muted-foreground truncate max-w-xs">
+          {description}
+        </p>
       );
+    },
+  },
+  {
+    accessorKey: "basePrice",
+    header: () => <p className="text-end">Giá cơ bản</p>,
+    cell: ({ row }) => {
+      const price = row.original.basePrice;
+      return (
+        <p className="text-end font-semibold">
+          {formatMoney(price).vndFormatted}
+        </p>
+      );
+    },
+  },
+  {
+    accessorKey: "unitName",
+    header: "Đơn vị",
+    cell: ({ row }) => {
+      const unitName = row.original.unitName || "—";
+      return <span className="text-sm text-muted-foreground">{unitName}</span>;
     },
   },
   {
     accessorKey: "active",
     header: () => <p className="text-end">Trạng thái</p>,
     cell: ({ row }) => {
-      return <Badge className="ml-auto"></Badge>;
+      const isActive = row.original.active;
+      return (
+        <div className="flex justify-end">
+          <Badge variant={isActive ? "success" : "secondary"}>
+            {isActive ? "Hoạt động" : "Ngưng"}
+          </Badge>
+        </div>
+      );
     },
   },
   {

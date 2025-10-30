@@ -25,7 +25,7 @@ import {
 
 import { DatePicker } from "~/components/ui/date-picker";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import { cn, useCalculateNights } from "~/lib/utils";
+import { cn, onError, useCalculateNights } from "~/lib/utils";
 import useFormSchema from "~/services/schema/forms.schema";
 import { BOOKING_SOURCES } from "~/services/types/booking.types";
 import type { CustomerInfoFormData } from "~/services/types/forms.types";
@@ -75,13 +75,13 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
         : undefined,
       adultsAmount: storeData.adultsAmount ?? 0,
       childrenAmount: storeData.childrenAmount ?? 0,
-      source: storeData.source ?? 1,
+      source: storeData.source,
       otaInformationId: storeData.otaInformationId ?? undefined,
       otaBookingCode: storeData.otaBookingCode ?? "",
     });
   }, [storeData]);
   const { data: otaList } = useOTAInfo({
-    selection: form.watch("source") === 2 ? true : false,
+    selection: form.watch("source") === "OTA" ? true : false,
   });
   const nights = useCalculateNights({
     checkinDate: form.watch("checkinDate"),
@@ -98,10 +98,7 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
-  const onError = (errors: any) => {
-    toast.error("Vui lòng kiểm tra lại thông tin đã nhập", errors);
-    console.log("Validation errors:", errors);
-  };
+
   return (
     <Card className="space-y-6 p-6 shadow-s">
       <div className="flex items-center justify-between">
@@ -284,10 +281,8 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
                 <FormItem>
                   <FormLabel>Kênh đặt phòng</FormLabel>
                   <Select
-                    onValueChange={(value) =>
-                      field.onChange(Number.parseInt(value))
-                    }
-                    value={field.value?.toString()}
+                    onValueChange={(value) => field.onChange(value)}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full border-primary bg-primary/10 text-primary shadow-none focus-visible:border-primary focus-visible:ring-primary/20 dark:bg-sky-400/10 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:ring-sky-400/40 [&_svg]:!text-primary dark:[&_svg]:!text-sky-400">
@@ -298,8 +293,8 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
                       {BOOKING_SOURCES.map((source) => (
                         <SelectItem
                           className="[&_div:focus]:bg-primary/20 [&_div:focus]:text-primary dark:[&_div:focus]:bg-sky-400/20 dark:[&_div:focus]:text-sky-400"
-                          key={source.value}
-                          value={source.value.toString()}
+                          key={source.key}
+                          value={source.key}
                         >
                           {source.label}
                         </SelectItem>
@@ -312,7 +307,7 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
             />
           </div>
           <div className={cn("grid md:grid-cols-2 grid-cols-1 gap-4")}>
-            {form.watch("source") === 2 && (
+            {form.watch("source") === "OTA" && (
               <>
                 <FormField
                   control={form.control}

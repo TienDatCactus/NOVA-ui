@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { ServiceFilters } from "~/services/types/service.types";
-import ServicesCommandBar from "../fragments/services/service-command.bar";
+import { useServiceTypes } from "../container/service-types-query.hooks";
+import ServicesCommandBar from "../fragments/services/command.bar";
 
 interface ServicesViewLayoutProps {
   children: ReactNode;
@@ -10,8 +11,6 @@ interface ServicesViewLayoutProps {
     value: ServiceFilters[K]
   ) => void;
   onResetFilters: () => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   totalServices: number;
   selectedCount: number;
   onAddService: () => void;
@@ -24,20 +23,19 @@ export default function ServicesViewLayout({
   children,
   filters,
   onFilterChange,
-  searchQuery,
-  setSearchQuery,
   totalServices,
   selectedCount,
   onAddService,
   onBulkEdit,
   onExportExcel,
   onClearSelection,
+  onResetFilters,
 }: ServicesViewLayoutProps) {
+  const { data: serviceTypes } = useServiceTypes();
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="border-b bg-card">
-        <div className="p-6 pb-4">
+    <div className="flex flex-col space-y-2 h-full">
+      <div className="border-b ">
+        <div className=" pb-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
@@ -59,22 +57,20 @@ export default function ServicesViewLayout({
           </div>
         </div>
 
-        {/* Command Bar */}
         <ServicesCommandBar
+          serviceTypes={serviceTypes || []}
           filters={filters}
           onFilterChange={onFilterChange}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
           selectedCount={selectedCount}
           onAddService={onAddService}
           onBulkEdit={onBulkEdit}
           onExportExcel={onExportExcel}
           onClearSelection={onClearSelection}
+          onResetFilters={onResetFilters}
         />
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6 overflow-auto bg-background">{children}</main>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

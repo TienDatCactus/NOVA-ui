@@ -5,7 +5,10 @@ import { format, differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms-query.hooks";
+import {
+  useAvailableRoomsInternal,
+  useRoomsDetailsByIds,
+} from "~/routes/rooms/container/rooms-query.hooks";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import useFormSchema from "~/services/schema/forms.schema";
 import type { RoomSelectionFormData } from "~/services/types/forms.types";
@@ -24,18 +27,13 @@ interface RoomPickerFormProps {
 }
 
 export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
-  const {
-    data: storeData,
-    setData,
-    setStep,
-    setSelectedRooms,
-  } = useCreateBookingStore();
+  const { data: storeData, setData, setStep } = useCreateBookingStore();
   const { RoomSelectionFormSchema } = useFormSchema();
 
   const form = useForm<RoomSelectionFormData>({
     resolver: zodResolver(RoomSelectionFormSchema),
     defaultValues: {
-      roomIds: storeData.roomIds || [],
+      roomIds: storeData.roomIds ?? [],
       isBreakfastAll: storeData.isBreakfastAll ?? false,
       breakfastDates: storeData.breakfastDates
         ? storeData.breakfastDates.map((d) =>
@@ -44,13 +42,7 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
         : [],
     },
   });
-  const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>(
-    storeData.roomIds || []
-  );
-
-  useEffect(() => {
-    form.setValue("roomIds", selectedRoomIds);
-  }, [selectedRoomIds, form]);
+  const selectedRoomIds = form.watch("roomIds") || [];
 
   const nights = useCalculateNights({
     checkinDate: storeData.checkinDate,
@@ -62,9 +54,17 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
     CheckOutDate: format(storeData.checkoutDate!, "yyyy-MM-dd"),
     Guests: Number(storeData.adultsAmount!) + Number(storeData.childrenAmount!),
   });
+  const { data: selectedRoomDetails } = useRoomsDetailsByIds(selectedRoomIds);
   const selectedRooms = useMemo(() => {
+    if (selectedRoomDetails && selectedRoomDetails.length > 0) {
+      return selectedRoomDetails.map((d) => ({
+        roomId: d.roomId,
+        roomName: d.roomName,
+        roomTypeName: d.roomTypeName,
+        baseRatePerNight: d.dailyPrice,
+      }));
+    }
     if (!availableRooms) return [];
-
     return selectedRoomIds
       .map((roomId) => {
         for (const roomType of availableRooms) {
@@ -88,32 +88,34 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
       roomTypeName: string;
       baseRatePerNight: number;
     }>;
-  }, [selectedRoomIds, availableRooms]);
+  }, [selectedRoomIds, selectedRoomDetails, availableRooms]);
 
   const handleToggleRoom = (roomId: string) => {
-    setSelectedRoomIds((prev) =>
-      prev.includes(roomId)
-        ? prev.filter((id) => id !== roomId)
-        : [...prev, roomId]
-    );
+    const current = form.getValues("roomIds") || [];
+    const set = new Set(current as string[]);
+    if (set.has(roomId)) set.delete(roomId);
+    else set.add(roomId);
+    form.setValue("roomIds", Array.from(set), {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   const handleRemoveRoom = (roomId: string) => {
-    setSelectedRoomIds((prev) => prev.filter((id) => id !== roomId));
+    const current = form.getValues("roomIds") || [];
+    form.setValue(
+      "roomIds",
+      (current as string[]).filter((id) => id !== roomId),
+      { shouldValidate: true, shouldDirty: true }
+    );
   };
 
   const onSubmit = (data: RoomSelectionFormData) => {
-    if (selectedRoomIds.length === 0) {
-      toast.error("Vui lòng chọn ít nhất một phòng");
-      return;
-    }
-
     setData({
-      roomIds: selectedRoomIds,
+      roomIds: form.getValues("roomIds") || [],
       isBreakfastAll: data.isBreakfastAll,
       breakfastDates: data.breakfastDates?.map((i) => new Date(i)) || [],
     });
-    setSelectedRooms(selectedRooms);
     setStep(3);
     onNext();
   };
@@ -144,7 +146,8 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-2">
+            {/* Bind roomIds to form and show validation message */}
             {isPending ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -158,17 +161,24 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {availableRooms.map((roomType) => (
-                  <AvailableRoomTypeCard
-                    key={roomType.roomTypeId}
-                    roomType={roomType}
-                    selectedRoomIds={selectedRoomIds}
-                    onToggleRoom={handleToggleRoom}
-                    nights={nights}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="space-y-4">
+                  {availableRooms.map((roomType) => (
+                    <AvailableRoomTypeCard
+                      key={roomType.roomTypeId}
+                      roomType={roomType}
+                      selectedRoomIds={selectedRoomIds}
+                      onToggleRoom={handleToggleRoom}
+                      nights={nights}
+                    />
+                  ))}
+                </div>
+                {form.formState.errors.roomIds && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.roomIds.message as string}
+                  </p>
+                )}
+              </>
             )}
           </div>
 

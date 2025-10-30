@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import type { ServiceItem } from "~/services/api/services/dto";
+import { useDeleteService } from "../../container/service-mutation.hooks";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -21,9 +22,9 @@ export default function DeleteConfirmDialog({
   onClose,
   service,
 }: DeleteConfirmDialogProps) {
+  const { mutate: deleteService } = useDeleteService();
   const handleConfirm = () => {
-    const event = new CustomEvent("service:delete", { detail: service });
-    window.dispatchEvent(event);
+    deleteService(service.serviceItemId);
     onClose();
   };
 
