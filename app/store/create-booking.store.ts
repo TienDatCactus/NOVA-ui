@@ -1,71 +1,34 @@
-import { z } from "zod";
+import type z from "zod";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 import useBookingSchema from "~/services/schema/booking.schema";
 
-const { BookingSchema } = useBookingSchema();
+const { StaffCreateBookingSchema } = useBookingSchema();
+type CreateBookingInput = z.infer<typeof StaffCreateBookingSchema>;
 
-type BookingFormData = z.infer<typeof BookingSchema>;
-
+// -------------
 interface CreateBookingState {
+  data: Partial<CreateBookingInput>;
   currentStep: number;
-  formData: BookingFormData;
-  nextStep: () => void;
-  prevStep: () => void;
-  updateFormData: (data: Partial<BookingFormData>) => void;
-  updateServices: (services: BookingFormData["services"]) => void;
+  setData: (data: Partial<CreateBookingInput>) => void;
+  setStep: (step: number) => void;
   reset: () => void;
 }
 
-const initialState = {
-  currentStep: 1,
-  formData: {
-    customerInfo: {
-      fullName: "",
-      phoneNumber: "",
-      adults: 1,
-      children: 0,
-      bookingChannel: "",
-      checkIn: new Date(),
-      checkOut: new Date(),
-      bookingCode: "",
-      email: "",
-    },
-    roomSelection: { rooms: [], selectedBreakfastDates: [] },
-
-    services: [],
-  },
-};
-
-const TOTAL_STEPS = 3;
-
 export const useCreateBookingStore = create<CreateBookingState>()(
   persist(
-    (set) => ({
-      ...initialState,
-
-      nextStep: () =>
-        set((state) => ({
-          currentStep: Math.min(state.currentStep + 1, TOTAL_STEPS),
-        })),
-      prevStep: () =>
-        set((state) => ({
-          currentStep: Math.max(state.currentStep - 1, 1),
-        })),
-
-      updateFormData: (data) =>
-        set((state) => ({
-          formData: { ...state.formData, ...data },
-        })),
-      updateServices: (services: z.infer<typeof BookingSchema>["services"]) =>
-        set((state) => ({
-          formData: { ...state.formData, services },
-        })),
-      reset: () => set(initialState),
+    (set, get) => ({
+      data: {},
+      currentStep: 1,
+      setData: (data) =>
+        set({
+          data: { ...get().data, ...data },
+        }),
+      setStep: (step: number) => set({ currentStep: step }),
+      reset: () => set({ data: {}, currentStep: 1 }),
     }),
     {
-      name: "create-booking-storage",
-      storage: createJSONStorage(() => localStorage),
+      name: "nova-create-booking",
     }
   )
 );

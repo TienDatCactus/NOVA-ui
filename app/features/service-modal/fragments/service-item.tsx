@@ -2,11 +2,11 @@ import { Trash } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import Image from "~/components/ui/image";
-import { Counter } from "~/components/ui/shadcn-io/counter";
 import { useServiceContext } from "../local-context/service-modal.context";
 import { cn, formatMoney } from "~/lib/utils";
 import type z from "zod";
 import useServiceSchema from "~/services/schema/service.schema";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 const { ServiceItem2Schema } = useServiceSchema();
 type ServiceItem = z.infer<typeof ServiceItem2Schema> & {
@@ -24,24 +24,19 @@ function ServiceItemList({ item }: ServiceItemListProps) {
   const quantity = getQuantity(item.serviceItemId);
 
   return (
-    <li className="flex items-center justify-between bg-background p-2 border rounded-md my-2">
+    <li className="flex items-center justify-between bg-white p-2 border rounded-md my-2">
       <div className="flex-1">
         <h3 className="font-medium">{item.name}</h3>
         <p className="text-muted-foreground text-sm">
           {formatMoney(item.basePrice).vndFormatted} x ({quantity})
         </p>
       </div>
-      <div className="flex-shrink-0 mx-2">
+      <div className="flex-shrink-0 flex flex-col gap-2">
         <Counter
-          number={quantity}
-          setNumber={(newQuantity: number) =>
-            updateQuantity(item.serviceItemId, newQuantity)
-          }
-          min={1}
-          max={99}
+          value={quantity}
+          className="w-32"
+          onChange={(value) => updateQuantity(item.serviceItemId, value)}
         />
-      </div>
-      <div className="flex-shrink-0">
         <Button
           variant="destructive"
           size="sm"
@@ -76,7 +71,7 @@ function ServiceItemGrid({ item }: ServiceItemGridProps) {
   return (
     <li
       className={cn(
-        "flex flex-col items-start gap-2 justify-between bg-background p-2 border rounded-md cursor-pointer hover:shadow-md transition-all",
+        "flex flex-col items-start gap-2 justify-between bg-white p-2 border rounded-md cursor-pointer hover:shadow-md transition-all",
         {
           "ring-2 ring-primary": inCart,
         }

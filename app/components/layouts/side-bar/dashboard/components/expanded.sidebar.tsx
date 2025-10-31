@@ -36,7 +36,7 @@ function ExpandedSidebar({
   toggle: () => void;
 }) {
   return (
-    <Sidebar className="h-screen bg-background shadow-s">
+    <Sidebar className="h-screen bg-white shadow-s">
       <SidebarHeader>
         <SidebarMenu>
           <div className="flex justify-between">

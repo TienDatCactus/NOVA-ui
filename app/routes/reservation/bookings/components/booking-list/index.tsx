@@ -11,7 +11,6 @@ import {
   EmptyTitle,
 } from "~/components/ui/empty";
 import { FolderCode, ArrowUpRightIcon } from "lucide-react";
-import CreateBookingDialog from "~/features/create-booking";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 
@@ -22,7 +21,6 @@ interface BookingListProps {
 }
 
 function BookingList({ bookings, isLoading, refetch }: BookingListProps) {
-  const [open, setOpen] = useState(false);
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2">
@@ -49,8 +47,7 @@ function BookingList({ bookings, isLoading, refetch }: BookingListProps) {
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
-            <Button onClick={() => setOpen(true)}>Tạo đơn đặt phòng</Button>
-            <CreateBookingDialog open={open} close={() => setOpen(false)} />
+            <Button>Tạo đơn đặt phòng</Button>
             <Button variant="outline" onClick={refetch}>
               Tải lại
             </Button>

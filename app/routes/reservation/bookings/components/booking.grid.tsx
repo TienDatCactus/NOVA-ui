@@ -13,7 +13,6 @@ import {
 } from "~/components/ui/empty";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
-import CreateBookingDialog from "~/features/create-booking";
 import RoomCard from "../fragments/room.card";
 import useRoomSchema from "~/services/schema/room.schema";
 const { RoomListResponseSchema } = useRoomSchema();
@@ -29,8 +28,6 @@ function BookingGrid({
   isLoading = false,
   refetch,
 }: BookingGridProps) {
-  const [open, setOpen] = useState(false);
-
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -60,8 +57,7 @@ function BookingGrid({
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
-            <Button onClick={() => setOpen(true)}>Tạo đơn đặt phòng</Button>
-            <CreateBookingDialog open={open} close={() => setOpen(false)} />
+            <Button>Tạo đơn đặt phòng</Button>
             <Button variant="outline" onClick={refetch}>
               Tải lại
             </Button>

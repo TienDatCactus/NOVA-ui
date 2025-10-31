@@ -1,13 +1,11 @@
 import {
   type ColumnDef,
-  type ExpandedState,
   type RowSelectionState,
   flexRender,
   getCoreRowModel,
-  getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -16,16 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Skeleton } from "~/components/ui/skeleton";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import { RoomsService } from "~/services/api/rooms";
-import RoomDetailRow from "../../fragments/rooms/rooms-detail.row";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import BookingHistoryRow from "../../fragments/rooms/booking-history.row";
-import {
-  useRoomDetail,
-  useRoomBookingHistory,
-} from "../../container/useRoomQuery";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,38 +27,22 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
   data,
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
-  const [expanded, setExpanded] = useState<any>();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const { isLoading: roomDetailLoading, data: roomDetailData } = useRoomDetail({
-    id: Object.keys(expanded || {})[0] as string,
-    params: {},
-    expanded,
-  });
-  const { isLoading: roomBookingHistoryLoading, data: roomBookingHistoryData } =
-    useRoomBookingHistory({
-      id: Object.keys(expanded || {})[0] as string,
-      params: {},
-      expanded,
-    });
   const table = useReactTable({
     data,
     columns,
     state: {
-      expanded,
       rowSelection,
     },
-    onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
-    getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getRowCanExpand: () => true,
     getRowId: (row) => row.roomId,
   });
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="rounded-md border bg-white">
+      <Table className="">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -103,44 +76,6 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                  {row.getIsExpanded() && (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className="p-2">
-                        <Tabs defaultValue="detail">
-                          <TabsList>
-                            <TabsTrigger value="detail">Chi tiết</TabsTrigger>
-                            <TabsTrigger value="booking-history">
-                              Lịch sử đặt phòng
-                            </TabsTrigger>
-                          </TabsList>
-                          <TabsContent value="detail">
-                            {roomDetailData ? (
-                              <RoomDetailRow
-                                roomDetail={roomDetailData}
-                                isLoading={roomDetailLoading}
-                              />
-                            ) : (
-                              <p className="text-center text-sm italic ">
-                                Không có thông tin
-                              </p>
-                            )}
-                          </TabsContent>
-                          <TabsContent value="booking-history">
-                            {roomBookingHistoryData ? (
-                              <BookingHistoryRow
-                                bookings={roomBookingHistoryData}
-                                isLoading={roomBookingHistoryLoading}
-                              />
-                            ) : (
-                              <p className="text-center text-sm italic ">
-                                Không có thông tin
-                              </p>
-                            )}
-                          </TabsContent>
-                        </Tabs>
-                      </TableCell>
-                    </TableRow>
-                  )}
                 </React.Fragment>
               );
             })

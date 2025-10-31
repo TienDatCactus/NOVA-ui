@@ -1,4 +1,5 @@
 import { Search, X } from "lucide-react";
+import type z from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -8,7 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { BOOKING_CHANNEL } from "~/lib/constants";
+import useBookingSchema from "~/services/schema/booking.schema";
+import {
+  BOOKING_SOURCES,
+  BOOKING_STATUSES,
+} from "~/services/types/booking.types";
 
 export interface BookingSearchFilters {
   searchText: string;
@@ -21,15 +26,6 @@ interface SearchRoomProps {
   onFiltersChange: (filters: BookingSearchFilters) => void;
   onReset: () => void;
 }
-
-const BOOKING_STATUSES = [
-  { value: "all", label: "Tất cả trạng thái" },
-  { value: "Confirmed", label: "Đã xác nhận" },
-  { value: "CheckedIn", label: "Đã nhận phòng" },
-  { value: "CheckedOut", label: "Đã trả phòng" },
-  { value: "Pending", label: "Chờ xử lý" },
-  { value: "Cancelled", label: "Đã hủy" },
-];
 
 function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
   const handleSearchTextChange = (value: string) => {
@@ -53,9 +49,9 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
     <div className="flex justify-between items-center gap-2">
       <div className="flex-1 flex items-center gap-2">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10" />
           <Input
-            className="h-9 pl-9"
+            className="h-9 pl-9 bg-white shadow-s"
             placeholder="Tìm mã booking, tên khách, SĐT..."
             value={filters.searchText}
             onChange={(e) => handleSearchTextChange(e.target.value)}
@@ -63,7 +59,7 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
         </div>
 
         <Select value={filters.status} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-[180px] h-9">
+          <SelectTrigger className="w-[180px] h-9 bg-white shadow-s">
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
@@ -76,14 +72,14 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
         </Select>
 
         <Select value={filters.source} onValueChange={handleSourceChange}>
-          <SelectTrigger className="w-[180px] h-9">
+          <SelectTrigger className="w-[180px] h-9  bg-white shadow-s">
             <SelectValue placeholder="Kênh đặt" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả kênh</SelectItem>
-            {BOOKING_CHANNEL.map((channel) => (
-              <SelectItem key={channel} value={channel}>
-                {channel}
+            {BOOKING_SOURCES.map((channel) => (
+              <SelectItem key={channel.key} value={channel.value + ""}>
+                {channel.label}
               </SelectItem>
             ))}
           </SelectContent>

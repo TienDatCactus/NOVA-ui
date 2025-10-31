@@ -31,14 +31,7 @@ import {
 import { Input } from "~/components/ui/input";
 import type { Route } from "./+types/reset-password";
 import SectionLayout from "~/components/layouts/sections";
-
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+import { toast } from "sonner";
 
 export default function VerifyOTP({
   loaderData,
@@ -46,7 +39,12 @@ export default function VerifyOTP({
 }: Route.ComponentProps) {
   const { resetPassword, isLoading, error: apiError } = useAuth();
   const requestedEmail = useLocation().state.email as string;
-  console.log(requestedEmail);
+  if (!requestedEmail) {
+    toast.error(
+      "Vui lòng yêu cầu đặt lại mật khẩu trước khi truy cập trang này."
+    );
+    return null;
+  }
   const { ResetPasswordSchema } = useAuthSchema();
   const resetPasswordForm = useForm({
     resolver: zodResolver(ResetPasswordSchema),

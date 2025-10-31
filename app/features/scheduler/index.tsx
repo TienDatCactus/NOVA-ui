@@ -275,7 +275,7 @@ export default function RoomWeekScheduler() {
         </div>
       </div>
 
-      <ScrollArea className="border rounded shadow-s ">
+      <div className="border rounded shadow-s ">
         <div
           ref={gridRef}
           className="min-w-[1200px] relative"
@@ -433,7 +433,7 @@ export default function RoomWeekScheduler() {
             );
           })()}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

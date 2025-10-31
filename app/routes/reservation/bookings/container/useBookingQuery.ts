@@ -15,16 +15,16 @@ function useBookingDetail({
   enabled = true,
 }: UseBookingDetailProps) {
   return useQuery({
-    queryKey: ["bookings-detail", bookingCode, bookingId],
+    queryKey: [
+      "bookings-detail",
+      bookingCode && bookingCode,
+      bookingId && bookingId,
+    ],
     queryFn: async () =>
       await BookingService.getBookingDetail({
         code: bookingCode,
         id: bookingId,
       }),
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
     enabled: enabled && (!!bookingCode || !!bookingId),
   });
 }

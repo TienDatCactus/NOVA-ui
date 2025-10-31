@@ -1,4 +1,5 @@
 import type {
+  GetAvailableRoomsInternalParams,
   RoomBookingHistoryParams,
   RoomDetailParams,
   RoomListParams,
@@ -10,6 +11,9 @@ import type {
   RoomBookingHistoryResponseDto,
   CreateRoomResponseDto,
   UpdateRoomDetailResponseDto,
+  AvailableRoomsInternalResponseDto,
+  UpdateRoomDetailRequestDto,
+  CreateRoomRequestDto,
 } from "./dto";
 import http from "~/lib/http";
 import { Rooms } from "~/services/url";
@@ -22,6 +26,9 @@ const {
   RoomBookingHistoryResponseSchema,
   CreateRoomResponseSchema,
   UpdateRoomDetailResponseSchema,
+  AvailableRoomsInternalResponseSchema,
+  CreateRoomRequestSchema,
+  UpdateRoomDetailRequestSchema,
 } = useRoomSchema();
 
 async function getRoomList(
@@ -78,13 +85,14 @@ async function updateRoomStatus(data: {
     return Promise.reject(error);
   }
 }
-async function createRoom(data: {
-  roomName: string;
-  roomTypeId: string;
-  status: string;
-}): Promise<CreateRoomResponseDto> {
+async function createRoom(
+  data: CreateRoomRequestDto
+): Promise<CreateRoomResponseDto> {
   try {
-    const resp = await http.post(Rooms.create, data);
+    const resp = await http.post(
+      Rooms.create,
+      CreateRoomRequestSchema.parse(data)
+    );
     return CreateRoomResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -94,16 +102,26 @@ async function createRoom(data: {
 
 async function updateRoomDetail(
   id: string,
-  data: {
-    roomName: string;
-    roomTypeId: string;
-    status: string;
-    locked: boolean;
-  }
+  data: UpdateRoomDetailRequestDto
 ): Promise<UpdateRoomDetailResponseDto> {
   try {
-    const resp = await http.patch(Rooms.update(id), data);
+    const resp = await http.patch(
+      Rooms.update(id),
+      UpdateRoomDetailRequestSchema.parse(data)
+    );
     return UpdateRoomDetailResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function getAvailableRoomsInternal(
+  params: GetAvailableRoomsInternalParams
+): Promise<AvailableRoomsInternalResponseDto> {
+  try {
+    const resp = await http.get(Rooms.getAvailableRoomsInternal, { params });
+    return AvailableRoomsInternalResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -116,4 +134,5 @@ export const RoomsService = {
   getRoomBookingHistory,
   createRoom,
   updateRoomDetail,
+  getAvailableRoomsInternal,
 };

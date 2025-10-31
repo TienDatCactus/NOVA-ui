@@ -33,7 +33,6 @@ import ServiceTab from "./components/service.tab";
 import MenuTab from "./components/menu.tab";
 import { MenuItemList } from "./fragments/menu-item";
 
-const { ServiceItem2Schema, ServiceCategoryEnum } = useServiceSchema();
 type ServiceItem = z.infer<typeof ServiceItem2Schema>;
 type ServiceCategory = z.infer<typeof ServiceCategoryEnum>;
 
@@ -55,7 +54,7 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("");
 
-  const { formData } = useCreateBookingStore();
+  const { data: formData } = useCreateBookingStore();
   const { selectedServices, getTotalAmount, getTotalItems, clearCart } =
     useServiceContext();
 
@@ -73,7 +72,7 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
           </div>
           <div className="pr-4">
             <Input
-              startIcon={<Search />}
+              startAddon={<Search />}
               placeholder="Tìm kiếm dịch vụ"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -118,11 +117,11 @@ function ServiceModalContent({ onFinish }: ServiceModalContentProps) {
                 <SelectValue placeholder="Chọn phòng" />
               </SelectTrigger>
               <SelectContent>
-                {formData?.roomSelection?.rooms.map((room) => (
+                {/* {formData?.roomIds?.rooms.map((room) => (
                   <SelectItem key={room.roomId} value={room.roomId}>
                     {room.roomName}
                   </SelectItem>
-                ))}
+                ))} */}
               </SelectContent>
             </Select>
             <Button className="" variant="outline" onClick={clearCart}>
