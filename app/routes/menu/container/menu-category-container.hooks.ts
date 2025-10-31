@@ -6,7 +6,9 @@ import useMenuCategoryFilters from "./menu-category-filter.hooks";
 import { useDeleteMenuCategory } from "./menu-category-mutation.hooks";
 
 export default function useMenuCategoriesContainer() {
-  const { data: menuCategoriesData, isPending } = useMenuCategories();
+  const { data: menuCategoriesData, isPending } = useMenuCategories({
+    includeInactive: true,
+  });
   const { filters, updateFilter, resetFilters, filterMenuCategories } =
     useMenuCategoryFilters();
   const [searchQuery, setSearchQuery] = useState("");

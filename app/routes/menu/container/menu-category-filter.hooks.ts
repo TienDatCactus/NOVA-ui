@@ -3,10 +3,12 @@ import type { MenuCategoryItem } from "~/services/api/menu-category/dto";
 
 export interface MenuCategoryFilters {
   includeInactive: boolean;
+  activeStatus?: "all" | "active" | "inactive";
 }
 
 const defaultFilters: MenuCategoryFilters = {
-  includeInactive: false,
+  includeInactive: true,
+  activeStatus: "all",
 };
 
 export default function useMenuCategoryFilters() {
@@ -27,9 +29,13 @@ export default function useMenuCategoryFilters() {
     () => (categories: MenuCategoryItem[]) => {
       return categories.filter((category) => {
         // Filter by active status
-        if (!filters.includeInactive && !category.active) {
+        if (filters.activeStatus === "active" && !category.active) {
           return false;
         }
+        if (filters.activeStatus === "inactive" && category.active) {
+          return false;
+        }
+        // "all" shows everything
 
         return true;
       });

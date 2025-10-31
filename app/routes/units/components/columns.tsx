@@ -41,14 +41,14 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Thao tác</div>,
+    header: () => <div className="text-center">Thao tác</div>,
     cell: ({ row, table }) => {
       const unit = row.original;
       const onEdit = (table.options.meta as any)?.onEdit;
       const onDelete = (table.options.meta as any)?.onDelete;
 
       return (
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">

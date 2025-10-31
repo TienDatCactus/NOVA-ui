@@ -21,7 +21,7 @@ export default function MenuItemsHeaderLayout({
       <div className="p-6 pb-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Hàng hóa</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Thực đơn</h1>
             <p className="text-muted-foreground mt-1">
               Quản lý món ăn và thức uống
             </p>

@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { ChevronDown, ChevronRight, Package } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronLeft, Package } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import type { MenuItem } from "~/services/api/menu-item/dto";
@@ -30,6 +30,19 @@ interface DataTableProps<TData, TValue> {
 function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
   const hasComponents = menuItem.components && menuItem.components.length > 0;
   const [activeTab, setActiveTab] = useState("details");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageHovered, setIsImageHovered] = useState(false);
+
+  const images = menuItem.imageUrls || [];
+  const hasMultipleImages = images.length > 1;
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   return (
     <TableRow>
@@ -71,29 +84,71 @@ function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
             {/* Chi tiết Tab */}
             {activeTab === "details" && (
               <div className="p-6">
-                <div className="grid gap-8 lg:grid-cols-2">
-                  {/* Left: Image Container - Fixed Height */}
-                  <div className="rounded-lg border bg-card p-4">
-                    <div className="flex h-full min-h-[400px] items-center justify-center overflow-hidden rounded-md border bg-muted/30">
-                      {menuItem.imageUrls && menuItem.imageUrls.length > 0 ? (
-                        <img
-                          src={menuItem.imageUrls[0]}
-                          alt={menuItem.name}
-                          className="max-h-full max-w-full object-contain"
-                        />
+                <div className="grid gap-8 lg:grid-cols-3">
+                  {/* Left: Image Gallery Container - 1/3 width */}
+                  <div className="lg:col-span-1">
+                    <div className="rounded-lg border bg-card p-4">
+                      <div 
+                      className="relative flex items-center justify-center overflow-hidden rounded-md border bg-muted/30"
+                      onMouseEnter={() => setIsImageHovered(true)}
+                      onMouseLeave={() => setIsImageHovered(false)}
+                    >
+                      {images.length > 0 ? (
+                        <>
+                          <img
+                            src={images[currentImageIndex]}
+                            alt={`${menuItem.name} - ${currentImageIndex + 1}`}
+                            className="h-auto max-h-[400px] w-auto max-w-full cursor-pointer object-contain transition-transform hover:scale-105"
+                            onClick={() => window.open(images[currentImageIndex], '_blank')}
+                          />
+                          
+                          {/* Navigation Arrows - Only show if multiple images and hovered */}
+                          {hasMultipleImages && isImageHovered && (
+                            <>
+                              <Button
+                                variant="secondary"
+                                size="icon"
+                                className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-black/60 text-white shadow-lg hover:bg-black/80"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  prevImage();
+                                }}
+                              >
+                                <ChevronLeft className="h-5 w-5" />
+                              </Button>
+                              <Button
+                                variant="secondary"
+                                size="icon"
+                                className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-black/60 text-white shadow-lg hover:bg-black/80"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  nextImage();
+                                }}
+                              >
+                                <ChevronRight className="h-5 w-5" />
+                              </Button>
+                              
+                              {/* Image Counter */}
+                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white">
+                                {currentImageIndex + 1} / {images.length}
+                              </div>
+                            </>
+                          )}
+                        </>
                       ) : (
-                        <div className="flex h-full items-center justify-center text-muted-foreground">
+                        <div className="flex h-[300px] items-center justify-center text-muted-foreground">
                           <div className="text-center">
                             <Package className="mx-auto mb-3 h-16 w-16 opacity-30" />
-                            <p className="text-sm">Đang tải...</p>
+                            <p className="text-sm">Chưa có ảnh</p>
                           </div>
                         </div>
                       )}
                     </div>
+                    </div>
                   </div>
 
-                  {/* Right: Details */}
-                  <div className="space-y-5">
+                  {/* Right: Details - 2/3 width */}
+                  <div className="lg:col-span-2 space-y-5">
                     <div className="border-b pb-4">
                       <h3 className="text-2xl font-semibold">{menuItem.name}</h3>
                       <p className="mt-1.5 text-sm text-muted-foreground">

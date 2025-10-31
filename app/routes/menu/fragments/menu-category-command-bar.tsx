@@ -51,17 +51,18 @@ export default function MenuCategoryCommandBar({
 
         {/* Active Filter */}
         <Select
-          value={filters.includeInactive ? "all" : "active"}
-          onValueChange={(value) =>
-            onFilterChange("includeInactive", value === "all")
-          }
+          value={filters.activeStatus || "all"}
+          onValueChange={(value: "all" | "active" | "inactive") => {
+            onFilterChange("activeStatus", value);
+          }}
         >
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="active">Đang hoạt động</SelectItem>
             <SelectItem value="all">Tất cả</SelectItem>
+            <SelectItem value="active">Đang hoạt động</SelectItem>
+            <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
           </SelectContent>
         </Select>
 

@@ -52,8 +52,8 @@ export default function MenuItemsFilterSidebar({
 
       {/* Category Filter */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <Label className="text-sm font-medium flex items-center gap-2 flex-shrink-0">
             <Filter className="h-4 w-4" />
             Danh mục thực đơn
           </Label>
@@ -62,9 +62,24 @@ export default function MenuItemsFilterSidebar({
               variant="ghost"
               size="sm"
               onClick={onClearFilters}
-              className="h-auto p-0 text-xs"
+              className="h-6 w-6 p-0 flex-shrink-0"
+              title="Xóa bộ lọc"
             >
-              Xóa bộ lọc
+              <span className="sr-only">Xóa bộ lọc</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </Button>
           )}
         </div>

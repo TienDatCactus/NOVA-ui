@@ -54,18 +54,7 @@ export const columns: ColumnDef<MenuCategoryItem>[] = [
     cell: ({ row }) => {
       const category = row.original;
 
-      return (
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{category.name}</span>
-            {!category.active && (
-              <Badge variant="secondary" className="text-xs">
-                Ngưng hoạt động
-              </Badge>
-            )}
-          </div>
-        </div>
-      );
+      return <span className="font-semibold">{category.name}</span>;
     },
   },
   {
