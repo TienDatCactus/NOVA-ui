@@ -204,6 +204,16 @@ const SERVICES_TOP_NAV_ITEMS: Array<{
     title: "Loại dịch vụ",
     href: "/dashboard/services/types",
   },
+  {
+    icon: <BookMarked size={16} />,
+    title: "Danh mục thực đơn",
+    href: "/dashboard/services/menu-categories",
+  },
+  {
+    icon: <HandPlatter size={16} />,
+    title: "Thực đơn",
+    href: "/dashboard/services/menu-items",
+  },
 ];
 const INVOICES_TOP_NAV_ITEMS: Array<{
   icon?: JSX.Element;

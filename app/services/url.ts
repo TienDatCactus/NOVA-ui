@@ -35,9 +35,22 @@ const RoomTypes = {
   create: "RoomTypes",
   delete: (id: string) => `RoomTypes/${id}`,
 };
-const Menu = {
-  list: "Menu/list",
+const MenuCategory = {
+  list: "menu-categories",
+  detail: (id: string) => `menu-categories/${id}`,
+  create: "menu-categories",
+  update: (id: string) => `menu-categories/${id}`,
+  delete: (id: string) => `menu-categories/${id}`,
 };
+
+const MenuItem = {
+  list: "Menu/list",
+  detail: (id: string) => `Menu/items/${id}`,
+  create: "Menu/items",
+  update: (id: string) => `Menu/items/${id}`,
+  delete: (id: string) => `Menu/items/${id}`,
+};
+
 const Service = {
   list: "/Service/list",
   detail: (id: string) => `Service/items/${id}`,
@@ -66,7 +79,8 @@ const Units = {
 export {
   Auth,
   Booking,
-  Menu,
+  MenuCategory,
+  MenuItem,
   Service,
   Rooms,
   RoomTypes,
