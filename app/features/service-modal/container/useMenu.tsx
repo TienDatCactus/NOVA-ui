@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { MenuService } from "~/services/api/menu";
-import type { MenuListParams } from "~/services/types/menu.types";
+import { MenuItemService } from "~/services/api/menu-item";
 
-function useMenu(params?: MenuListParams) {
+function useMenu() {
   return useQuery({
-    queryKey: ["menu", params],
-    queryFn: async () => await MenuService.getMenuList(params || {}),
+    queryKey: ["menu"],
+    queryFn: async () => await MenuItemService.getMenuList(),
   });
 }
 

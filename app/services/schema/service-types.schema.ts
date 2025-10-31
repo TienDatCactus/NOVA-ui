@@ -16,7 +16,7 @@ const ServiceTypeListResponseSchema = z.array(ServiceTypeItemSchema);
 const UpdateServiceTypeRequestSchema = z.object({
   code: z.string(),
   name: z.string(),
-  description: z.string(),
+  description: z.string().nullable().optional(),
   active: z.boolean(),
   newImages: z.array(z.instanceof(File).optional()),
   removeMediaIds: z.array(z.string()).optional(),
