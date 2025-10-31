@@ -34,8 +34,8 @@ import type {
 } from "~/services/api/rooms/dto";
 import useRoomSchema from "~/services/schema/room.schema";
 import { RoomStatusEnum } from "~/services/types/room.types";
-import { useRoomTypes } from "../container/room-types-query.hooks";
-import { useUpdateRoom } from "../container/rooms-mutation.hooks";
+import { useRoomTypes } from "../container/room-types/query.hooks";
+import { useUpdateRoom } from "../container/rooms/mutation.hooks";
 
 const { UpdateRoomDetailRequestSchema } = useRoomSchema();
 

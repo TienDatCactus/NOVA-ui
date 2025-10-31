@@ -25,7 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { useRoomBookingHistory } from "../../container/rooms-query.hooks";
+import { useRoomBookingHistory } from "../../container/rooms/query.hooks";
 
 interface BookingHistoryRowProps {
   roomId: string;

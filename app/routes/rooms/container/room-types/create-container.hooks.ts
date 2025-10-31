@@ -2,13 +2,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type z from "zod";
 import useRoomTypesSchema from "~/services/schema/room-types.schema";
-import { useCreateRoomType } from "./room-types-mutation.hooks";
 import {
   useRoomTypeFormDialogs,
   useRoomTypeImageHandlers,
   useRoomTypeDescriptionHandler,
   useRoomTypeCloseHandler,
-} from "./room-type-form.hooks";
+} from "./form.hooks";
+import { useCreateRoomType } from "./mutation.hooks";
 
 const { CreateRoomTypesRequestSchema } = useRoomTypesSchema();
 

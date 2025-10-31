@@ -216,17 +216,16 @@ export function BookingSummaryCard({
 
         {(data.isBreakfastAll ||
           (data.breakfastDates && data.breakfastDates.length > 0)) && (
-          <Card className="space-y-2">
-            <CardContent>
-              <CardHeader>
-                <CardTitle>
-                  <h4 className="font-semibold text-sm flex items-center gap-2">
-                    <Coffee className="h-4 w-4" />
-                    Bữa sáng
-                  </h4>
-                </CardTitle>
-              </CardHeader>
-              {/* <div className="relative">
+          <Card className="flex flex-col gap-1 w-50">
+            <CardHeader>
+              <CardTitle>
+                <h4 className="font-semibold text-sm flex items-center justify-center gap-2">
+                  <Coffee className="h-4 w-4" />
+                  Bữa sáng
+                </h4>
+              </CardTitle>
+            </CardHeader>
+            {/* <div className="relative">
                 <Calendar
                   mode="range"
                   disabled={{
@@ -251,19 +250,24 @@ export function BookingSummaryCard({
                 />
                 <div className="absolute inset-0 cursor-not-allowed" />
               </div> */}
+            <CardContent className=" p-2">
               {data.isBreakfastAll ? (
-                <div className="flex justify-between text-sm">
+                <div className="flex items-center justify-center text-sm">
                   <span>Tất cả các ngày ({nights} ngày)</span>
                 </div>
               ) : (
                 data.breakfastDates && (
-                  <div className="space-y-1 text-sm">
+                  <ul className="flex gap- justify-center flex-wrap text-sm ">
                     {data.breakfastDates.map((date) => (
-                      <div key={format(date, "yyyy-MM-dd")}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        key={format(date, "yyyy-MM-dd")}
+                      >
                         {format(date, "dd/MM", { locale: vi })}
-                      </div>
+                      </Button>
                     ))}
-                  </div>
+                  </ul>
                 )
               )}
             </CardContent>

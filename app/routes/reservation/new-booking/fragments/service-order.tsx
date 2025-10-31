@@ -6,32 +6,31 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { formatMoney } from "~/lib/utils";
-import { toast } from "sonner";
+import { useState } from "react";
+import AddServiceDialog from "~/features/service-order-dialog";
+import type z from "zod";
+import useServiceSchema from "~/services/schema/service.schema";
+
+const { ServiceOrderItemSchema } = useServiceSchema();
+type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
 
 interface ServiceOrderProps {
-  services?: Array<{
-    itemType: string;
-    itemId: string;
-    quantity: number;
-    scheduledDate: string;
-    note?: string;
-  }>;
-  onAddService?: () => void;
+  services?: ServiceOrderItemDto[];
+  onAddServices?: (services: ServiceOrderItemDto[]) => void;
   onRemoveService?: (index: number) => void;
 }
 
 export function ServiceOrder({
   services = [],
-  onAddService,
+  onAddServices,
   onRemoveService,
 }: ServiceOrderProps) {
-  const handleAddServiceClick = () => {
-    // Service modal đang bị lỗi - placeholder
-    toast.info("Service Modal đang được sửa chữa. Vui lòng thử lại sau.");
-    // onAddService?.();
+  const [openServiceDialog, setOpenServiceDialog] = useState(false);
+
+  const handleConfirmServices = (newServices: ServiceOrderItemDto[]) => {
+    onAddServices?.(newServices);
   };
 
-  // Mock service total (sẽ tính từ actual service data)
   const serviceTotal = 0;
 
   return (
@@ -53,12 +52,16 @@ export function ServiceOrder({
           type="button"
           variant="outline"
           className="w-full"
-          onClick={handleAddServiceClick}
+          onClick={() => setOpenServiceDialog(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
           Thêm dịch vụ
         </Button>
-
+        <AddServiceDialog
+          open={openServiceDialog}
+          onOpenChange={setOpenServiceDialog}
+          onConfirm={handleConfirmServices}
+        />
         {/* Services List */}
         {services.length > 0 ? (
           <>

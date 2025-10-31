@@ -44,21 +44,22 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
 
   const form = useForm({
     resolver: zodResolver(CustomerInfoFormSchema),
+    // Provide initial defaults to avoid transient undefined, then keep reset for hydration updates
     defaultValues: {
-      guestFullName: storeData.guestFullName,
-      guestPhone: storeData.guestPhone,
-      guestEmail: storeData.guestEmail,
+      guestFullName: storeData.guestFullName ?? "",
+      guestPhone: storeData.guestPhone ?? "",
+      guestEmail: storeData.guestEmail ?? "",
       checkinDate: storeData.checkinDate
         ? new Date(storeData.checkinDate)
         : undefined,
-      childrenAmount: storeData.childrenAmount,
       checkoutDate: storeData.checkoutDate
         ? new Date(storeData.checkoutDate)
         : undefined,
-      adultsAmount: storeData.adultsAmount,
+      adultsAmount: storeData.adultsAmount ?? 0,
+      childrenAmount: storeData.childrenAmount ?? 0,
       source: storeData.source,
-      otaInformationId: storeData.otaInformationId,
-      otaBookingCode: storeData.otaBookingCode || "",
+      otaInformationId: storeData.otaInformationId ?? undefined,
+      otaBookingCode: storeData.otaBookingCode ?? "",
     },
   });
   useEffect(() => {
@@ -277,33 +278,35 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
             <FormField
               control={form.control}
               name="source"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Kênh đặt phòng</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(value)}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full border-primary bg-primary/10 text-primary shadow-none focus-visible:border-primary focus-visible:ring-primary/20 dark:bg-sky-400/10 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:ring-sky-400/40 [&_svg]:!text-primary dark:[&_svg]:!text-sky-400">
-                        <SelectValue placeholder="Chọn kênh đặt phòng" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {BOOKING_SOURCES.map((source) => (
-                        <SelectItem
-                          className="[&_div:focus]:bg-primary/20 [&_div:focus]:text-primary dark:[&_div:focus]:bg-sky-400/20 dark:[&_div:focus]:text-sky-400"
-                          key={source.key}
-                          value={source.key}
-                        >
-                          {source.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Kênh đặt phòng</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value)}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full border-primary bg-primary/10 text-primary shadow-none focus-visible:border-primary focus-visible:ring-primary/20 dark:bg-sky-400/10 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:ring-sky-400/40 [&_svg]:!text-primary dark:[&_svg]:!text-sky-400">
+                          <SelectValue placeholder="Chọn kênh đặt phòng" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {BOOKING_SOURCES.map((source) => (
+                          <SelectItem
+                            className="[&_div:focus]:bg-primary/20 [&_div:focus]:text-primary dark:[&_div:focus]:bg-sky-400/20 dark:[&_div:focus]:text-sky-400"
+                            key={source.key}
+                            value={source.key}
+                          >
+                            {source.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
           <div className={cn("grid md:grid-cols-2 grid-cols-1 gap-4")}>

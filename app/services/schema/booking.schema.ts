@@ -69,12 +69,18 @@ export const StaffCreateBookingSchema = z.object({
 const StaffCreateBookingResponseSchema = z.object({
   bookingId: z.string("Booking ID không hợp lệ"),
   bookingCode: z.string().min(1, "Mã đặt phòng không hợp lệ"),
-  status: z.string(),
-  checkinDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/i, "Expected YYYY-MM-DD"),
-  checkoutDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/i, "Expected YYYY-MM-DD"),
-  totalAmount: z.number().min(0, "Tổng tiền không hợp lệ"),
-  roomInvoice: RoomInvoiceSchema.optional(),
-  serviceInvoice: ServiceInvoiceSchema.optional(),
+  status: z.string().optional(),
+  checkinDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/i, "Expected YYYY-MM-DD")
+    .optional(),
+  checkoutDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/i, "Expected YYYY-MM-DD")
+    .optional(),
+  totalAmount: z.number().min(0, "Tổng tiền không hợp lệ").optional(),
+  roomInvoice: RoomInvoiceSchema.optional().nullable(),
+  serviceInvoice: ServiceInvoiceSchema.optional().nullable(),
 });
 const BookingListItemSchema = z.object({
   bookingCode: z.string().min(1, "bookingCode không được để trống"),
@@ -123,7 +129,7 @@ const BookingDetailItemSchema = z.object({
   checkoutDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
   adults: z.number().int().nonnegative(),
   children: z.number().int().optional(),
-  note: z.string().optional(),
+  note: z.string().optional().nullable(),
   totalAmount: z.number(),
   paidAmount: z.number().optional().default(0),
   paymentStatus: z.string(),
@@ -131,8 +137,8 @@ const BookingDetailItemSchema = z.object({
   customer: z.object({
     id: z.string(),
     fullName: z.string(),
-    phoneNumber: z.string().optional(),
-    email: z.email().optional(),
+    phoneNumber: z.string().optional().nullable(),
+    email: z.email().optional().nullable(),
   }),
   rooms: z.array(
     z.object({

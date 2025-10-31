@@ -4,17 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type z from "zod";
 import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import {
-  useDeleteRoomType,
-  useUpdateRoomType,
-} from "./room-types-mutation.hooks";
-import { useRoomTypeDetail } from "./room-types-query.hooks";
+
 import {
   useRoomTypeFormDialogs,
   useRoomTypeImageHandlers,
   useRoomTypeDescriptionHandler,
   useRoomTypeCloseHandler,
-} from "./room-type-form.hooks";
+} from "./form.hooks";
+import { useRoomTypeDetail } from "./query.hooks";
+import { useUpdateRoomType, useDeleteRoomType } from "./mutation.hooks";
 
 const { UpdateRoomTypesDetailRequestSchema } = useRoomTypesSchema();
 

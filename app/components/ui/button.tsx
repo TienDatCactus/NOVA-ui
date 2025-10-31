@@ -19,9 +19,11 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        success: "bg-green-600 text-white hover:bg-green-600/90",
-        warning: "bg-warning-500 text-white hover:bg-warning-500/90",
-        info: "bg-blue-500 text-white hover:bg-blue-500/90",
+        success:
+          "bg-emerald-500 text-primary-foreground hover:bg-emerald-600 focus-visible:ring-emerald-500/30",
+        warning:
+          "bg-amber-500 text-primary-foreground hover:bg-amber-600 focus-visible:ring-amber-500/30",
+        info: "bg-sky-500 text-primary-foreground hover:bg-sky-600 focus-visible:ring-sky-500/30",
         light: "bg-light-500 text-light-foreground hover:bg-light-500/90",
         dark: "bg-dark-500 text-dark-foreground hover:bg-dark-500/90",
         transparent: "bg-transparent hover:bg-accent/50",

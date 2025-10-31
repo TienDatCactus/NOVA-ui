@@ -11,15 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import ServiceModal from "~/features/service-modal";
 import useBookingSchema from "~/services/schema/booking.schema";
 const { BookingListItemSchema } = useBookingSchema();
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const ActionCell: React.FC<{ row: Row<BookingListItem> }> = ({
   row,
 }) => {
-  const [open, setOpen] = useState(false);
-
   return (
     <div className="flex items-center justify-center">
       <DropdownMenu>
@@ -32,16 +29,12 @@ export const ActionCell: React.FC<{ row: Row<BookingListItem> }> = ({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Tiện ích</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setOpen(true)}>
-            Thêm sản phẩm, dịch vụ
-          </DropdownMenuItem>
+          <DropdownMenuItem>Thêm sản phẩm, dịch vụ</DropdownMenuItem>
           <DropdownMenuItem>Đổi phòng</DropdownMenuItem>
           <DropdownMenuItem>Sửa đặt phòng</DropdownMenuItem>
           <DropdownMenuItem>Hủy đặt phòng</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <ServiceModal open={open} toggle={() => setOpen(!open)} />
     </div>
   );
 };

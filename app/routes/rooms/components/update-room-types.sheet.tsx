@@ -35,9 +35,9 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { onError, stripHtml } from "~/lib/utils";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { useUpdateRoomTypeSheet } from "../container/update-room-types-container.hooks";
 import { DescriptionDialog } from "../fragments/room-types/description.dialog";
 import { ImagePreviewDialog } from "../fragments/room-types/image-preview.dialog";
+import { useUpdateRoomTypeSheet } from "../container/room-types/update-container.hooks";
 
 interface EditRoomTypeSheetProps {
   open: boolean;

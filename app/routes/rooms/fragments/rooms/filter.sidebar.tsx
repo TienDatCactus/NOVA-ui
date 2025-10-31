@@ -15,8 +15,8 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Switch } from "~/components/ui/switch";
 import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import { RoomStatusEnum } from "~/services/types/room.types";
-import type { RoomFilters } from "../../container/rooms-filter.hooks";
 import { Slider } from "~/components/ui/slider";
+import type { RoomFilters } from "../../container/rooms/filter.hooks";
 const { RoomTypesListResponseSchema } = useRoomTypesSchema();
 type RoomTypeList = z.infer<typeof RoomTypesListResponseSchema>;
 interface RoomsFilterSidebarProps {

@@ -5,10 +5,6 @@ import { format, differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-import {
-  useAvailableRoomsInternal,
-  useRoomsDetailsByIds,
-} from "~/routes/rooms/container/rooms-query.hooks";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import useFormSchema from "~/services/schema/forms.schema";
 import type { RoomSelectionFormData } from "~/services/types/forms.types";
@@ -20,6 +16,10 @@ import { AvailableRoomTypeCard } from "../../fragments/available-room.card";
 import { BreakfastSelection } from "../../fragments/breakfast-selection";
 import { SelectedRoomsSummary } from "../../fragments/selected-rooms";
 import { useCalculateNights } from "~/lib/utils";
+import {
+  useAvailableRoomsInternal,
+  useRoomsDetailsByIds,
+} from "~/routes/rooms/container/rooms/query.hooks";
 
 interface RoomPickerFormProps {
   onNext: () => void;
@@ -212,10 +212,10 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
         </div>
 
         {/* Action buttons */}
-        <div className="flex justify-end gap-3 pt-6 border-t">
+        <div className="flex justify-between gap-3 pt-6 border-t">
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              Hủy
+              Quay lại
             </Button>
           )}
           <Button

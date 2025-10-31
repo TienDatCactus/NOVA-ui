@@ -13,11 +13,11 @@ import { useCreateBookingStore } from "~/store/create-booking.store";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { onError, useCalculateNights } from "~/lib/utils";
-import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms-query.hooks";
 import useCreateBookingMutation from "../../container/create-booking-mutation.hooks";
 import { BookingPayment } from "../../fragments/booking-payment";
 import { BookingSummaryCard } from "../../fragments/booking-summary.card";
 import { ServiceOrder } from "../../fragments/service-order";
+import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
 
 interface ReviewPaymentFormProps {
   onNext: () => void;
@@ -32,7 +32,7 @@ export function ReviewPaymentForm({
 }: ReviewPaymentFormProps) {
   const navigate = useNavigate();
   const { data: storeData, setData, reset } = useCreateBookingStore();
-  const { mutate, isError } = useCreateBookingMutation();
+  const { mutateAsync, data: bookingResponseData } = useCreateBookingMutation();
   const { ReviewPaymentFormSchema } = useFormSchema();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const nights = useCalculateNights({
@@ -102,10 +102,16 @@ export function ReviewPaymentForm({
         guestFullName: storeData.guestFullName!,
         isBreakfastAll: storeData.isBreakfastAll ?? false,
       };
-      mutate(bookingData);
-      reset();
-      onResetSteps && onResetSteps();
-      navigate("/dashboard/reservation/new-booking");
+      mutateAsync(bookingData, {
+        onSuccess: (data) => {
+          reset();
+          onResetSteps && onResetSteps();
+          navigate("/dashboard/reservation/new-booking");
+        },
+      });
+      // reset();
+      // onResetSteps && onResetSteps();
+      // navigate("/dashboard/reservation/new-booking");
     } catch (error) {
       console.error("Booking creation failed:", error);
     } finally {
@@ -147,7 +153,12 @@ export function ReviewPaymentForm({
 
               <ServiceOrder
                 services={form.watch("serviceOrder.services") ?? []}
-                onAddService={() => {}}
+                onAddServices={(newServices) => {
+                  form.setValue("serviceOrder.services", newServices, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                }}
                 onRemoveService={(index) => {
                   const currentServices =
                     form.watch("serviceOrder.services") ?? [];

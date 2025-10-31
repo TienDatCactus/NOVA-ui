@@ -1,4 +1,4 @@
-import { useRooms } from "~/routes/rooms/container/rooms-query.hooks";
+import { useRooms } from "~/routes/rooms/container/rooms/query.hooks";
 import type { Route } from "./+types/grid";
 
 import BookingGrid from "./components/booking.grid";

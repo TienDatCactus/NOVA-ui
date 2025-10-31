@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import type { RoomFilters } from "../container/rooms-filter.hooks";
 
-import { useRoomTypes } from "../container/room-types-query.hooks";
 import RoomsHeader from "../fragments/rooms/header.layout";
 import RoomsFilterSidebar from "../fragments/rooms/filter.sidebar";
+import type { RoomFilters } from "../container/rooms/filter.hooks";
+import { useRoomTypes } from "../container/room-types/query.hooks";
 
 interface RoomsViewLayoutProps {
   children: ReactNode;

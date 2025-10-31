@@ -1,5 +1,7 @@
 import { BookMarked, SearchIcon } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router";
+import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Kbd } from "~/components/ui/kbd";
 import {
@@ -10,14 +12,21 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { useHeaderNav } from "../side-bar/dashboard/container/useHeader";
-import { Button } from "~/components/ui/button";
-import { useIsMobile } from "~/hooks/use-mobile";
+import { QuickRoomAvailabilityDialog } from "~/features/check-available-rooms";
 
 interface DashboardHeaderProps extends React.HTMLAttributes<HTMLElement> {}
 export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
   const { navItems, currentPath } = useHeaderNav();
+  const [checkAvailableDialogOpen, setCheckAvailableDialogOpen] =
+    useState(false);
   const isMobile = useIsMobile();
   return (
     <header className="h-12 shadow-sm py-6 px-4 z-10 bg-white flex items-center w-full sticky top-0   justify-between border-b">
@@ -70,16 +79,28 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
         </NavigationMenuList>
       </NavigationMenu>
       <div className="flex gap-4 items-center">
-        <Link to="/dashboard/reservation/new-booking">
-          <Button variant={"gradient"} className="w-46 h-8">
-            <BookMarked size={16} />
-            Tạo đơn đặt phòng
-          </Button>
-        </Link>
-        <Button variant={"success"}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link to="/dashboard/reservation/new-booking">
+              <Button variant={"gradient"} className="w-46 h-8">
+                <BookMarked size={16} />
+              </Button>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>Tạo đặt phòng mới</TooltipContent>
+        </Tooltip>
+
+        <Button
+          variant={"success"}
+          onClick={() => setCheckAvailableDialogOpen(true)}
+        >
           <BookMarked size={16} />
-          Kiểm tra phòng trống
         </Button>
+
+        <QuickRoomAvailabilityDialog
+          onOpenChange={(open) => setCheckAvailableDialogOpen(open)}
+          open={checkAvailableDialogOpen}
+        />
         <Input
           placeholder="Tìm kiếm..."
           className="w-64 h-8 placeholder:text-sm"

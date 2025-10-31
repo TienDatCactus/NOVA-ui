@@ -4,7 +4,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import type { RoomTypeFilters } from "../../container/room-types-filter.hooks";
+import type { RoomTypeFilters } from "../../container/room-types/filter.hooks";
 
 interface RoomTypesFilterSidebarProps {
   filters: RoomTypeFilters;

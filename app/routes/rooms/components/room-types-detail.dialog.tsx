@@ -27,7 +27,7 @@ import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { formatMoney } from "~/lib/utils";
-import { useRoomTypeDetail } from "../container/room-types-query.hooks";
+import { useRoomTypeDetail } from "../container/room-types/query.hooks";
 
 interface RoomTypesDetailDialogProps {
   roomTypeId: string;

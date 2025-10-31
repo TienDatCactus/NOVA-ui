@@ -70,6 +70,7 @@ const useServiceSchema = () => {
     ServiceItemDetailResponseSchema,
     UpdateServiceItemResponseSchema,
     RoomPaymentSchema,
+    ServiceOrderItemSchema,
     ServiceOrderSchema,
     CreateServiceItemResponseSchema,
     UpdateServiceItemRequestSchema,

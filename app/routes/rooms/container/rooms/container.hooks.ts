@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import useRoomFilters from "./rooms-filter.hooks";
-import { useRooms } from "./rooms-query.hooks";
+import { useRooms } from "./query.hooks";
+import useRoomFilters from "./filter.hooks";
 
 function useRoomsContainer() {
   const { filters, updateFilter, resetFilters, filterRooms } = useRoomFilters();
