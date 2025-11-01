@@ -329,3 +329,10 @@ body {
 body {
   -ms-overflow-style: scrollbar; /* Giữ hành vi scroll mặc định */
 }
+
+/* Button shimmer animation */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

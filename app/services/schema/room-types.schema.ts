@@ -67,16 +67,13 @@ const EditRoomTypesResponseSchema = z.object({
 });
 const UpdateRoomTypesDetailResponseSchema = EditRoomTypesResponseSchema;
 const CreateRoomTypesResponseSchema = EditRoomTypesResponseSchema;
-const useRoomTypesSchema = () => {
-  return {
-    RoomTypesListItem,
-    RoomTypesListResponseSchema,
-    RoomTypesDetailResponseSchema,
-    UpdateRoomTypesDetailRequestSchema,
-    CreateRoomTypesRequestSchema,
-    UpdateRoomTypesDetailResponseSchema,
-    CreateRoomTypesResponseSchema,
-  };
-};
 
-export default useRoomTypesSchema;
+export const RoomTypesSchema = {
+  RoomTypesListItem,
+  RoomTypesListResponseSchema,
+  RoomTypesDetailResponseSchema,
+  UpdateRoomTypesDetailRequestSchema,
+  CreateRoomTypesRequestSchema,
+  UpdateRoomTypesDetailResponseSchema,
+  CreateRoomTypesResponseSchema,
+};

@@ -7,9 +7,9 @@ import type {
   UpdateRoomTypesDetailRequestDto,
   UpdateRoomTypesDetailResponseDto,
 } from "./dto";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import { RoomTypes } from "~/services/url";
 import http from "~/lib/http";
+import { RoomTypesSchema } from "~/services/schema/room-types.schema";
 
 const {
   RoomTypesListResponseSchema,
@@ -18,7 +18,7 @@ const {
   CreateRoomTypesRequestSchema,
   CreateRoomTypesResponseSchema,
   UpdateRoomTypesDetailResponseSchema,
-} = useRoomTypesSchema();
+} = RoomTypesSchema;
 
 async function getRoomTypesList(
   params?: RoomTypesListParams

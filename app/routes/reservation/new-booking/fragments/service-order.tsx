@@ -7,11 +7,11 @@ import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { formatMoney } from "~/lib/utils";
 import { useState } from "react";
-import AddServiceDialog from "~/features/service-order-dialog";
 import type z from "zod";
-import useServiceSchema from "~/services/schema/service.schema";
+import AddServiceDialog from "~/features/order-dialog";
+import { OrderSchema } from "~/services/schema/order.schema";
 
-const { ServiceOrderItemSchema } = useServiceSchema();
+const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
 
 interface ServiceOrderProps {

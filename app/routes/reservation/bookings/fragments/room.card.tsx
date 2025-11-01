@@ -12,10 +12,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import useBookingSchema from "~/services/schema/booking.schema";
-import useRoomSchema from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/schema/room.schema";
 
-const { RoomListItemSchema } = useRoomSchema();
+const { RoomListItemSchema } = RoomSchema;
 type RoomCardProps = {
   room: z.infer<typeof RoomListItemSchema>;
 };

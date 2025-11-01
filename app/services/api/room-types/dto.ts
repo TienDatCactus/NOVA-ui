@@ -1,5 +1,5 @@
 import type z from "zod";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
+import { RoomTypesSchema } from "~/services/schema/room-types.schema";
 
 const {
   RoomTypesListItem,
@@ -9,7 +9,7 @@ const {
   CreateRoomTypesRequestSchema,
   CreateRoomTypesResponseSchema,
   UpdateRoomTypesDetailResponseSchema,
-} = useRoomTypesSchema();
+} = RoomTypesSchema;
 
 type RoomTypesListItemDto = z.infer<typeof RoomTypesListItem>;
 type RoomTypesListResponseDto = z.infer<typeof RoomTypesListResponseSchema>;
@@ -24,11 +24,11 @@ type CreateRoomTypesRequestDto = z.infer<typeof CreateRoomTypesRequestSchema>;
 type CreateRoomTypesResponseDto = z.infer<typeof CreateRoomTypesResponseSchema>;
 
 export type {
+  CreateRoomTypesRequestDto,
+  CreateRoomTypesResponseDto,
+  RoomTypesDetailResponseDto,
   RoomTypesListItemDto,
   RoomTypesListResponseDto,
-  RoomTypesDetailResponseDto,
   UpdateRoomTypesDetailRequestDto,
-  CreateRoomTypesResponseDto,
   UpdateRoomTypesDetailResponseDto,
-  CreateRoomTypesRequestDto,
 };

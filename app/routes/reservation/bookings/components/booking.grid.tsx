@@ -1,21 +1,18 @@
-import { useNavigate } from "react-router";
-import type z from "zod";
-import { Skeleton } from "~/components/ui/skeleton";
-import useBookingSchema from "~/services/schema/booking.schema";
 import { ArrowUpRightIcon, FolderCode } from "lucide-react";
+import type z from "zod";
+import { Button } from "~/components/ui/button";
 import {
   Empty,
+  EmptyContent,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-  EmptyDescription,
-  EmptyContent,
 } from "~/components/ui/empty";
-import { Button } from "~/components/ui/button";
-import { useState } from "react";
+import { Skeleton } from "~/components/ui/skeleton";
+import { RoomSchema } from "~/services/schema/room.schema";
 import RoomCard from "../fragments/room.card";
-import useRoomSchema from "~/services/schema/room.schema";
-const { RoomListResponseSchema } = useRoomSchema();
+const { RoomListResponseSchema } = RoomSchema;
 type RoomList = z.infer<typeof RoomListResponseSchema>;
 interface BookingGridProps {
   rooms?: RoomList;

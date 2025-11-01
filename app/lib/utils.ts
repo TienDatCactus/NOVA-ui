@@ -74,7 +74,6 @@ export const onError = (errors: any) => {
 export const toYMD = (d: unknown) => {
   if (d instanceof Date) return format(d, "yyyy-MM-dd");
   if (typeof d === "string") {
-    // If already yyyy-MM-dd, keep; else try to parse and format
     if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
     const dt = parseISO(d);
     if (!isNaN(dt.getTime())) return format(dt, "yyyy-MM-dd");

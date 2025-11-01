@@ -1,11 +1,11 @@
 import type z from "zod";
-import useFormSchema from "../schema/forms.schema";
+import { FormSchema } from "../schema/forms.schema";
 
 const {
   CustomerInfoFormSchema,
   RoomSelectionFormSchema,
   ReviewPaymentFormSchema,
-} = useFormSchema();
+} = FormSchema;
 
 export type CustomerInfoFormData = z.infer<typeof CustomerInfoFormSchema>;
 export type RoomSelectionFormData = z.infer<typeof RoomSelectionFormSchema>;

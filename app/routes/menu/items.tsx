@@ -1,159 +1,149 @@
-import { useState } from "react";
+import type { Route } from "./+types/items";
 import useMenuItemsContainer from "./container/use-menu-items-container.hooks";
 import useDeleteMenuItem from "./container/use-delete-menu-item.hooks";
 import useUpdateMenuItem from "./container/use-update-menu-item.hooks";
+import useMenuItemDetail from "./container/use-menu-item-detail.hooks";
+import useMenuCategoryList from "./container/use-menu-category-list.hooks";
 import { useUnits } from "../units/container/unit-query.hooks";
 import MenuItemsList from "./components/menu-items-list";
 import MenuItemsViewLayout from "./layouts/menu-items-view.layout";
 import CreateMenuItemDialog from "./components/create-menu-item.dialog";
 import EditMenuItemSheet from "./components/edit-menu-item.sheet";
 import DeleteMenuItemDialog from "./components/delete-menu-item.dialog";
-import { Skeleton } from "~/components/ui/skeleton";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyMedia,
-} from "~/components/ui/empty";
-import { Package } from "lucide-react";
-import type { UpdateMenuItemRequestDto } from "~/services/api/menu-item/dto";
+import type {
+  UpdateMenuItemRequestDto,
+  MenuItem,
+} from "~/services/api/menu-item/dto";
 
-export function clientLoader() {
-  return { title: "Thực đơn - NOVA" };
-}
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  return {};
+};
 
-export default function MenuItems() {
+export default function Component({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const {
-    data,
-    categories,
+    filteredMenuItems,
     isPending,
-    menuItemDetail,
-    isLoadingDetail,
-    totalItems,
-    selectedCount,
-    searchQuery,
-    setSearchQuery,
-    selectedCategories,
-    handleCategoryToggle,
-    handleSelectAll,
-    handleClearFilters,
-    showInactive,
-    setShowInactive,
-    handleAddItem,
-    handleEditItem,
-    handleDeleteItem,
-    handleImport,
-    handleExport,
-    showCreateDialog,
-    setShowCreateDialog,
-    showEditSheet,
-    setShowEditSheet,
-    showDeleteDialog,
-    setShowDeleteDialog,
+    filters,
+    updateFilter,
+    resetFilters,
+    selectedMenuItems,
+    setSelectedMenuItems,
+    createDialogOpen,
+    setCreateDialogOpen,
+    editSheetOpen,
+    setEditSheetOpen,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
     selectedMenuItem,
+    handleAddItem,
+    handleDeleteItem,
+    handleClearSelection,
+    handleExportExcel,
     refetch,
   } = useMenuItemsContainer();
 
+  const { data: menuCategories = [] } = useMenuCategoryList();
   const { data: units = [] } = useUnits();
   const { mutate: deleteMenuItem, isPending: isDeleting } = useDeleteMenuItem();
+
+  // Fetch detail when editing
+  const { data: menuItemDetail, isPending: isLoadingDetail } =
+    useMenuItemDetail(editSheetOpen ? selectedMenuItem?.itemId || null : null);
+
   const { mutate: updateMenuItem, isPending: isUpdating } = useUpdateMenuItem(
     menuItemDetail?.id || ""
   );
 
+  // Flatten all items for total count
+  const allItems = filteredMenuItems.flatMap((category) => category.items);
+
   const handleConfirmDelete = () => {
     if (!selectedMenuItem) return;
-    
+
     deleteMenuItem(selectedMenuItem.itemId, {
       onSuccess: () => {
-        setShowDeleteDialog(false);
+        setDeleteDialogOpen(false);
         refetch();
       },
     });
   };
 
-  const handleUpdateSubmit = (itemId: string, formData: Omit<UpdateMenuItemRequestDto, 'components'>) => {
-    // Convert form data to UpdateMenuItemRequestDto
+  const handleUpdateSubmit = (
+    itemId: string,
+    formData: Omit<UpdateMenuItemRequestDto, "components">
+  ) => {
     const data: UpdateMenuItemRequestDto = {
       ...formData,
-      components: [], // Keep existing components empty for now
+      components: [],
     };
 
     updateMenuItem(data, {
       onSuccess: () => {
-        setShowEditSheet(false);
+        setEditSheetOpen(false);
         refetch();
       },
     });
   };
 
-  return (
-    <>
-      <MenuItemsViewLayout
-        totalItems={totalItems}
-        selectedCount={selectedCount}
-        onAddItem={handleAddItem}
-        onImport={handleImport}
-        onExport={handleExport}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        categories={categories}
-        selectedCategories={selectedCategories}
-        onCategoryToggle={handleCategoryToggle}
-        onSelectAll={handleSelectAll}
-        onClearFilters={handleClearFilters}
-        showInactive={showInactive}
-        onToggleInactive={setShowInactive}
-      >
-        {isPending ? (
-          <div className="space-y-4">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-64 w-full" />
-          </div>
-        ) : data.length === 0 ? (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Package />
-              </EmptyMedia>
-              <EmptyTitle>Không có món ăn nào</EmptyTitle>
-              <EmptyDescription>
-                Bắt đầu thêm món ăn vào thực đơn của bạn
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <MenuItemsList 
-            data={data} 
-            onEdit={handleEditItem}
-            onDelete={handleDeleteItem}
-          />
-        )}
-      </MenuItemsViewLayout>
+  const handleEditItem = (menuItem: MenuItem) => {
+    setSelectedMenuItems([menuItem]);
+    setEditSheetOpen(true);
+  };
 
-      {/* Dialogs */}
+  // Transform menuCategories to match the expected format for EditMenuItemSheet
+  const categoriesForEdit = menuCategories.map((cat) => ({
+    categoryId: cat.id,
+    categoryCode: cat.code,
+    categoryName: cat.name,
+    active: cat.active,
+    items: [],
+  }));
+
+  return (
+    <MenuItemsViewLayout
+      filters={filters}
+      onFilterChange={updateFilter}
+      onResetFilters={resetFilters}
+      totalItems={allItems.length}
+      selectedCount={selectedMenuItems.length}
+      onAddItem={handleAddItem}
+      onExportExcel={handleExportExcel}
+      onClearSelection={handleClearSelection}
+      categories={filteredMenuItems}
+    >
+      <MenuItemsList
+        data={allItems}
+        isLoading={isPending}
+        onSelectionChange={setSelectedMenuItems}
+        onEdit={handleEditItem}
+        onDelete={handleDeleteItem}
+      />
+
       <CreateMenuItemDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
       />
 
       <EditMenuItemSheet
-        open={showEditSheet}
-        onOpenChange={setShowEditSheet}
+        open={editSheetOpen}
+        onOpenChange={setEditSheetOpen}
         menuItemDetail={menuItemDetail || null}
-        categories={categories}
+        categories={categoriesForEdit}
         units={units}
         onSubmit={handleUpdateSubmit}
         isPending={isUpdating || isLoadingDetail}
       />
 
       <DeleteMenuItemDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
         menuItem={selectedMenuItem}
         onConfirm={handleConfirmDelete}
         isPending={isDeleting}
       />
-    </>
+    </MenuItemsViewLayout>
   );
 }

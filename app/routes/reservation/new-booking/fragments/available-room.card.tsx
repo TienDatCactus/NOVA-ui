@@ -11,9 +11,8 @@ import {
 } from "~/components/ui/collapsible";
 import { Label } from "~/components/ui/label";
 import { cn, formatMoney } from "~/lib/utils";
-import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
-import useRoomSchema from "~/services/schema/room.schema";
-const { AvailableRoomItemSchema } = useRoomSchema();
+import { RoomSchema } from "~/services/schema/room.schema";
+const { AvailableRoomItemSchema } = RoomSchema;
 type AvailableRoomItem = z.infer<typeof AvailableRoomItemSchema>;
 
 interface AvailableRoomTypeCardProps {

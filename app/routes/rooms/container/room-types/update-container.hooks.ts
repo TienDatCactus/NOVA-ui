@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type z from "zod";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 
 import {
@@ -13,8 +12,9 @@ import {
 } from "./form.hooks";
 import { useRoomTypeDetail } from "./query.hooks";
 import { useUpdateRoomType, useDeleteRoomType } from "./mutation.hooks";
+import { RoomTypesSchema } from "~/services/schema/room-types.schema";
 
-const { UpdateRoomTypesDetailRequestSchema } = useRoomTypesSchema();
+const { UpdateRoomTypesDetailRequestSchema } = RoomTypesSchema;
 
 type EditRoomTypeFormData = z.infer<typeof UpdateRoomTypesDetailRequestSchema>;
 

@@ -1,10 +1,9 @@
 import http from "~/lib/http";
 import STORAGE, { clearStorage, getStorage, setStorage } from "~/lib/storage";
-import useAuthSchema from "~/services/schema/auth.schema";
 import { Auth } from "../../url";
 import type { LoginDto, LoginResponseDto, ResetPasswordDto } from "./dto";
-const { LoginSchema, LoginResponseSchema, ResetPasswordSchema } =
-  useAuthSchema();
+import { AuthSchema } from "~/services/schema/auth.schema";
+const { LoginSchema, LoginResponseSchema, ResetPasswordSchema } = AuthSchema;
 
 async function login(data: LoginDto): Promise<LoginResponseDto> {
   try {

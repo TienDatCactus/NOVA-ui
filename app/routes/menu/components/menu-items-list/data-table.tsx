@@ -7,8 +7,9 @@ import {
   type ColumnDef,
   getExpandedRowModel,
   type Row,
+  type RowSelectionState,
 } from "@tanstack/react-table";
-import { useState, Fragment } from "react";
+import { useState, Fragment, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -25,6 +26,7 @@ import type { MenuItem } from "~/services/api/menu-item/dto";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
@@ -95,20 +97,31 @@ function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
                   {/* Right: Details */}
                   <div className="space-y-5">
                     <div className="border-b pb-4">
-                      <h3 className="text-2xl font-semibold">{menuItem.name}</h3>
+                      <h3 className="text-2xl font-semibold">
+                        {menuItem.name}
+                      </h3>
                       <p className="mt-1.5 text-sm text-muted-foreground">
-                        Mã: <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{menuItem.code}</code>
+                        Mã:{" "}
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
+                          {menuItem.code}
+                        </code>
                       </p>
                     </div>
 
                     <div className="space-y-4">
                       <div className="flex items-baseline justify-between border-b pb-3">
-                        <span className="text-sm font-medium text-muted-foreground">Đơn vị:</span>
-                        <span className="text-base font-semibold">{menuItem.unitName}</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Đơn vị:
+                        </span>
+                        <span className="text-base font-semibold">
+                          {menuItem.unitName}
+                        </span>
                       </div>
 
                       <div className="flex items-baseline justify-between border-b pb-3">
-                        <span className="text-sm font-medium text-muted-foreground">Giá bán:</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Giá bán:
+                        </span>
                         <span className="text-2xl font-bold text-primary">
                           {new Intl.NumberFormat("vi-VN", {
                             style: "currency",
@@ -118,8 +131,13 @@ function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
                       </div>
 
                       <div className="flex items-center justify-between border-b pb-3">
-                        <span className="text-sm font-medium text-muted-foreground">Trạng thái:</span>
-                        <Badge variant={menuItem.active ? "default" : "secondary"} className="font-semibold">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Trạng thái:
+                        </span>
+                        <Badge
+                          variant={menuItem.active ? "default" : "secondary"}
+                          className="font-semibold"
+                        >
                           {menuItem.active ? "Đang bán" : "Ngừng bán"}
                         </Badge>
                       </div>
@@ -129,7 +147,9 @@ function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
                           <div className="mb-2 text-sm font-semibold text-muted-foreground">
                             Mô tả:
                           </div>
-                          <p className="text-sm leading-relaxed text-foreground/90">{menuItem.description}</p>
+                          <p className="text-sm leading-relaxed text-foreground/90">
+                            {menuItem.description}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -145,13 +165,17 @@ function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
                   <div className="flex h-64 items-center justify-center text-muted-foreground">
                     <div className="text-center">
                       <Package className="mx-auto mb-3 h-16 w-16 opacity-30" />
-                      <p className="text-sm font-medium">Không có nguyên liệu</p>
+                      <p className="text-sm font-medium">
+                        Không có nguyên liệu
+                      </p>
                     </div>
                   </div>
                 ) : (
                   <div>
                     <div className="mb-4">
-                      <h4 className="text-lg font-semibold">Danh sách nguyên liệu tiêu hao</h4>
+                      <h4 className="text-lg font-semibold">
+                        Danh sách nguyên liệu tiêu hao
+                      </h4>
                       <p className="text-sm text-muted-foreground">
                         Tổng số: {menuItem.components.length} nguyên liệu
                       </p>
@@ -160,10 +184,18 @@ function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-muted/40 hover:bg-muted/40">
-                            <TableHead className="h-11 w-16 text-center font-semibold">STT</TableHead>
-                            <TableHead className="h-11 w-40 font-semibold">Mã hàng hóa</TableHead>
-                            <TableHead className="h-11 font-semibold">Tên nguyên liệu tiêu hao</TableHead>
-                            <TableHead className="h-11 font-semibold">Ghi chú</TableHead>
+                            <TableHead className="h-11 w-16 text-center font-semibold">
+                              STT
+                            </TableHead>
+                            <TableHead className="h-11 w-40 font-semibold">
+                              Mã hàng hóa
+                            </TableHead>
+                            <TableHead className="h-11 font-semibold">
+                              Tên nguyên liệu tiêu hao
+                            </TableHead>
+                            <TableHead className="h-11 font-semibold">
+                              Ghi chú
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -202,9 +234,10 @@ function MenuItemExpandedRow({ menuItem }: { menuItem: MenuItem }) {
 export function MenuItemsDataTable<TData extends MenuItem, TValue>({
   columns,
   data,
+  onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState({});
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const table = useReactTable({
@@ -215,11 +248,22 @@ export function MenuItemsDataTable<TData extends MenuItem, TValue>({
     getExpandedRowModel: getExpandedRowModel(),
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
+    getRowId: (row) => row.itemId,
     state: {
       sorting,
       rowSelection,
     },
   });
+
+  // Notify parent of selection changes
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selectedRows = table
+        .getSelectedRowModel()
+        .rows.map((row) => row.original);
+      onSelectionChange(selectedRows);
+    }
+  }, [rowSelection, onSelectionChange, table]);
 
   const toggleRow = (rowId: string) => {
     setExpanded((prev) => ({
@@ -289,7 +333,10 @@ export function MenuItemsDataTable<TData extends MenuItem, TValue>({
             })
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length + 1} className="h-24 text-center">
+              <TableCell
+                colSpan={columns.length + 1}
+                className="h-24 text-center"
+              >
                 Không có dữ liệu
               </TableCell>
             </TableRow>

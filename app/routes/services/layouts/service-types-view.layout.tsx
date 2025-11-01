@@ -53,7 +53,6 @@ export default function ServiceTypesViewLayout({
           </div>
         </div>
 
-        {/* Command Bar */}
         <ServiceTypesCommandBar
           filters={filters}
           onFilterChange={onFilterChange}

@@ -26,11 +26,10 @@ import {
   parseDateYMD,
   startOfLocalDay,
 } from "~/lib/utils";
-import { useBookingRoomsWeek } from "~/routes/reservation/bookings/container/useBookingQuery";
-import useBookingSchema from "~/services/schema/booking.schema";
+import { useBookingRoomsWeek } from "~/routes/reservation/bookings/container/booking-query.hooks";
+import { BookingSchema } from "~/services/schema/booking.schema";
 
-// Use API schema types directly - no normalization
-const { BookingItemByWeekSchema } = useBookingSchema();
+const { BookingItemByWeekSchema } = BookingSchema;
 type RoomSchedulerData = z.infer<typeof BookingItemByWeekSchema>;
 type BookingInWeek = RoomSchedulerData["bookings"][number];
 

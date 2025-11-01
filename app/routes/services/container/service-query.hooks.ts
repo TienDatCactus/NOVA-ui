@@ -8,3 +8,9 @@ export function useServices(params?: ServiceListParams) {
     queryFn: async () => await ServicesService.getServiceList(params || {}),
   });
 }
+export function useServiceDetail(serviceId: string) {
+  return useQuery({
+    queryKey: ["service-detail", serviceId],
+    queryFn: async () => await ServicesService.getServiceDetail(serviceId),
+  });
+}

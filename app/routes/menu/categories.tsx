@@ -19,8 +19,6 @@ export default function Component() {
     isPending,
     filters,
     updateFilter,
-    searchQuery,
-    setSearchQuery,
     selectedCategories,
     setSelectedCategories,
     createDialogOpen,
@@ -34,33 +32,10 @@ export default function Component() {
     handleExportExcel,
   } = useMenuCategoriesContainer();
 
-  // Listen for custom events from action cells
-  useEffect(() => {
-    const handleEditEvent = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      handleEdit(customEvent.detail);
-    };
-
-    const handleDeleteEvent = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      handleDelete(customEvent.detail);
-    };
-
-    window.addEventListener("menu-category:edit", handleEditEvent);
-    window.addEventListener("menu-category:delete", handleDeleteEvent);
-
-    return () => {
-      window.removeEventListener("menu-category:edit", handleEditEvent);
-      window.removeEventListener("menu-category:delete", handleDeleteEvent);
-    };
-  }, [handleEdit, handleDelete]);
-
   return (
     <MenuCategoriesViewLayout
       filters={filters}
       onFilterChange={updateFilter}
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
       totalCategories={filteredCategories.length}
       selectedCount={selectedCategories.length}
       onAddCategory={() => setCreateDialogOpen(true)}

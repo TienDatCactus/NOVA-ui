@@ -9,6 +9,9 @@ const Auth = {
 
 const Booking = {
   staffCreateBooking: "StaffBookings",
+  preview: "StaffBookings/preview", // this is for the money calculation preview
+  update: (id: string) => `StaffBookings/${id}`,
+  cancel: (id: string) => `StaffBookings/${id}/cancel`,
   list: "Bookings/list",
   listByWeek: "Bookings/rooms-week",
   detailById: (id: string) => `Bookings/${id}/details`,
@@ -76,6 +79,11 @@ const Units = {
   update: (id: string) => `Units/${id}`,
   delete: (id: string) => `Units/${id}`,
 };
+
+const Reports = {
+  reservationReports: (date: string) =>
+    `Reports/daily-booking-dashboard?date=${date}`,
+};
 export {
   Auth,
   Booking,
@@ -87,4 +95,5 @@ export {
   OTAInformation,
   ServiceTypes,
   Units,
+  Reports,
 };

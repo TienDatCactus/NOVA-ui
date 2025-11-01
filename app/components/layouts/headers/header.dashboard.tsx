@@ -1,4 +1,4 @@
-import { BookMarked, SearchIcon } from "lucide-react";
+import { BookDown, BookMarked, CalendarPlus, SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -78,24 +78,29 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
           ))}
         </NavigationMenuList>
       </NavigationMenu>
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-2 items-center">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={"gradient-success"}
+              size={"icon"}
+              onClick={() => setCheckAvailableDialogOpen(true)}
+            >
+              <CalendarPlus />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Kiểm tra phòng trống</TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <Link to="/dashboard/reservation/new-booking">
-              <Button variant={"gradient"} className="w-46 h-8">
-                <BookMarked size={16} />
+              <Button variant={"gradient-ocean"} size={"icon"}>
+                <BookDown />
               </Button>
             </Link>
           </TooltipTrigger>
           <TooltipContent>Tạo đặt phòng mới</TooltipContent>
         </Tooltip>
-
-        <Button
-          variant={"success"}
-          onClick={() => setCheckAvailableDialogOpen(true)}
-        >
-          <BookMarked size={16} />
-        </Button>
 
         <QuickRoomAvailabilityDialog
           onOpenChange={(open) => setCheckAvailableDialogOpen(open)}

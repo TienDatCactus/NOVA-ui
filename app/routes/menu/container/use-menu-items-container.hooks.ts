@@ -1,99 +1,79 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import useMenuList from "./use-menu-list.hooks";
 import useMenuItemFilter from "./use-menu-item-filter.hooks";
-import useMenuItemDetail from "./use-menu-item-detail.hooks";
 import type { MenuItem } from "~/services/api/menu-item/dto";
 
 export default function useMenuItemsContainer() {
-  const { data, isPending, refetch } = useMenuList();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showEditSheet, setShowEditSheet] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedMenuItems, setSelectedMenuItems] = useState<MenuItem[]>([]);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(
     null
   );
 
-  // Fetch detail when editing
-  const { data: menuItemDetail, isPending: isLoadingDetail } =
-    useMenuItemDetail(showEditSheet ? selectedMenuItem?.itemId || null : null);
-
   const {
-    searchQuery,
-    setSearchQuery,
-    selectedCategories,
-    handleCategoryToggle,
-    handleSelectAll,
-    handleClearFilters,
-    showInactive,
-    setShowInactive,
-    filteredData,
-    flattenedItems,
-    categories,
-  } = useMenuItemFilter(data);
+    filters,
+    updateFilter,
+    resetFilters,
+    filterMenuItems,
+    includeInactive,
+  } = useMenuItemFilter();
+
+  const { data: menuData, isPending, refetch } = useMenuList();
+
+  const filteredMenuItems = menuData ? filterMenuItems(menuData) : [];
 
   const handleAddItem = () => {
-    setShowCreateDialog(true);
+    setCreateDialogOpen(true);
   };
 
   const handleEditItem = (menuItem: MenuItem) => {
     setSelectedMenuItem(menuItem);
-    setShowEditSheet(true);
+    setEditSheetOpen(true);
   };
 
   const handleDeleteItem = (menuItem: MenuItem) => {
     setSelectedMenuItem(menuItem);
-    setShowDeleteDialog(true);
+    setDeleteDialogOpen(true);
   };
 
-  const handleImport = () => {
-    // TODO: Implement import
-    console.log("Import clicked");
+  const handleClearSelection = () => {
+    setSelectedMenuItems([]);
   };
 
-  const handleExport = () => {
-    // TODO: Implement export
-    console.log("Export clicked");
+  const handleExportExcel = () => {
+    if (filteredMenuItems.length === 0) {
+      toast.error("Không có dữ liệu để xuất");
+      return;
+    }
+
+    toast.info("Tính năng xuất Excel sẽ được cập nhật sau");
   };
 
   return {
-    // Data
-    data: flattenedItems,
-    categories,
-    filteredCategories: filteredData,
+    filteredMenuItems,
     isPending,
-    menuItemDetail,
-    isLoadingDetail,
-
-    // Stats
-    totalItems: flattenedItems.length,
-    selectedCount: 0, // TODO: Implement from table selection
-
-    // Filters
-    searchQuery,
-    setSearchQuery,
-    selectedCategories,
-    handleCategoryToggle,
-    handleSelectAll,
-    handleClearFilters,
-    showInactive,
-    setShowInactive,
-
-    // Actions
+    filters,
+    updateFilter,
+    resetFilters,
+    includeInactive,
+    selectedMenuItems,
+    setSelectedMenuItems,
+    createDialogOpen,
+    setCreateDialogOpen,
+    editSheetOpen,
+    setEditSheetOpen,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    selectedMenuItem,
+    setSelectedMenuItem,
     handleAddItem,
     handleEditItem,
     handleDeleteItem,
-    handleImport,
-    handleExport,
-
-    // Dialog states
-    showCreateDialog,
-    setShowCreateDialog,
-    showEditSheet,
-    setShowEditSheet,
-    showDeleteDialog,
-    setShowDeleteDialog,
-    selectedMenuItem,
-
+    handleClearSelection,
+    handleExportExcel,
     refetch,
   };
 }

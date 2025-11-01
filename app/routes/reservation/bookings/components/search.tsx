@@ -1,5 +1,4 @@
 import { Search, X } from "lucide-react";
-import type z from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -9,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import useBookingSchema from "~/services/schema/booking.schema";
 import {
   BOOKING_SOURCES,
   BOOKING_STATUSES,

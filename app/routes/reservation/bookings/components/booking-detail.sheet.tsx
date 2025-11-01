@@ -28,8 +28,9 @@ import {
 } from "~/components/ui/sheet";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn, formatMoney } from "~/lib/utils";
-import { useBookingDetail } from "../container/useBookingQuery";
 import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
+import { PAYMENT_STATUSES } from "~/services/types/payment.types";
+import { useBookingDetail } from "../container/booking-query.hooks";
 
 function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
   const [open, setOpen] = useState(false);
@@ -39,29 +40,6 @@ function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
   });
 
   if (!bookingCode) return null;
-
-  const getStatusVariant = (status: string) => {
-    const variants: Record<
-      string,
-      "default" | "secondary" | "destructive" | "outline"
-    > = {
-      Confirmed: "default",
-      CheckedIn: "secondary",
-      CheckedOut: "outline",
-      Pending: "secondary",
-      Cancelled: "destructive",
-    };
-    return variants[status] || "default";
-  };
-
-  const getPaymentStatusVariant = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive"> = {
-      Paid: "default",
-      Unpaid: "destructive",
-      Partial: "secondary",
-    };
-    return variants[status] || "secondary";
-  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -87,11 +65,13 @@ function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
             </div>
             {data && (
               <div className="flex gap-2">
-                <Badge variant={getStatusVariant(data.status)}>
-                  {data.status}
-                </Badge>
-                <Badge variant={getPaymentStatusVariant(data.paymentStatus)}>
-                  {data.paymentStatus}
+                <Badge variant="warning">{data.status}</Badge>
+                <Badge variant="warning">
+                  {
+                    PAYMENT_STATUSES.find(
+                      (status) => status.key === data.paymentStatus
+                    )?.label
+                  }
                 </Badge>
               </div>
             )}

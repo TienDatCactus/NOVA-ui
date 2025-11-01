@@ -31,11 +31,11 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
-import useServiceSchema from "~/services/schema/service.schema";
+import { ServiceSchema } from "~/services/schema/service.schema";
 import { useCreateService } from "../container/service-mutation.hooks";
 import { useServiceTypes } from "../container/service-types-query.hooks";
 
-const { CreateServiceItemRequestSchema } = useServiceSchema();
+const { CreateServiceItemRequestSchema } = ServiceSchema;
 
 type CreateServiceFormData = z.infer<typeof CreateServiceItemRequestSchema>;
 

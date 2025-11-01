@@ -1,21 +1,23 @@
 import { Badge } from "~/components/ui/badge";
 import { formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
+import { useServiceDetail } from "../../container/service-query.hooks";
+import { DetailItem, DetailSection } from "~/components/ui/section-detail";
 
 interface ServiceDetailRowProps {
   service: ServiceItem;
 }
 
 export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
+  const { data: serviceItemDetail } = useServiceDetail(service.serviceItemId);
   return (
     <div className="grid grid-cols-2 gap-6 p-6 bg-muted/30 border-l-4 border-l-primary/20 animate-in slide-in-from-top-2 duration-200">
-      {/* Left Column */}
       <div className="space-y-4">
         <DetailSection title="Thông tin cơ bản">
           <DetailItem label="Mã dịch vụ" value={service.code} />
           <DetailItem
             label="Loại dịch vụ"
-            value={(service as any).serviceTypeName || "—"}
+            value={serviceItemDetail?.serviceTypeName || "—"}
           />
           <DetailItem label="Đơn vị tính" value={service.unitName} />
           <DetailItem
@@ -40,7 +42,6 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
               </span>
             }
           />
-          <DetailItem label="Đơn vị tính" value={service.unitName} />
         </DetailSection>
 
         <DetailSection title="Mô tả">
@@ -68,37 +69,6 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
           </DetailSection>
         )} */}
       </div>
-    </div>
-  );
-}
-
-// Helper components
-function DetailSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-3">
-      <h4 className="font-semibold text-sm">{title}</h4>
-      <div className="space-y-2">{children}</div>
-    </div>
-  );
-}
-
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="flex justify-between items-center">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm font-medium">{value}</span>
     </div>
   );
 }

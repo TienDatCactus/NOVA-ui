@@ -207,9 +207,10 @@ const BookingItemSchema = z.object({
 });
 
 // Export as factory function
-export default function useBookingSchema() {
-  return { BookingItemSchema, BookingListResponseSchema };
-}
+export const BookingSchema = {
+  BookingItemSchema,
+  BookingListResponseSchema,
+};
 
 // Use everywhere - API DTOs (dto.ts)
 type BookingItem = z.infer<typeof BookingItemSchema>;
@@ -302,10 +303,10 @@ return StepComponents[currentStep - 1];
 ```typescript
 // index.ts - Service functions
 import http from "~/lib/http";
-import useBookingSchema from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/schema/booking.schema";
 import type { BookingListResponseDto } from "./dto";
 
-const { BookingListResponseSchema } = useBookingSchema();
+const { BookingListResponseSchema } = BookingSchema;
 
 async function getBookingList(
   params: BookingListParams
@@ -322,9 +323,9 @@ export const BookingService = { getBookingList };
 
 // dto.ts - Type exports (z.infer only)
 import type z from "zod";
-import useBookingSchema from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/schema/booking.schema";
 
-const { BookingListResponseSchema } = useBookingSchema();
+const { BookingListResponseSchema } = BookingSchema();
 export type BookingListResponseDto = z.infer<typeof BookingListResponseSchema>;
 
 // url.ts - Endpoint paths

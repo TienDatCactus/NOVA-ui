@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -13,7 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Dropzone,
   DropzoneContent,
@@ -29,15 +32,12 @@ import {
 } from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import type { ServiceTypeItem } from "~/services/api/service-types/dto";
-import useServiceTypesSchema from "~/services/schema/service-types.schema";
-import { useUpdateServiceType } from "../container/service-type-mutation.hooks";
-import { Checkbox } from "~/components/ui/checkbox";
 import { cn } from "~/lib/utils";
-import { Label } from "~/components/ui/label";
-import Image from "~/components/ui/image";
+import type { ServiceTypeItem } from "~/services/api/service-types/dto";
+import { ServiceTypesSchema } from "~/services/schema/service-types.schema";
+import { useUpdateServiceType } from "../container/service-type-mutation.hooks";
 
-const { UpdateServiceTypeRequestSchema } = useServiceTypesSchema();
+const { UpdateServiceTypeRequestSchema } = ServiceTypesSchema;
 
 type UpdateServiceTypeFormData = z.infer<typeof UpdateServiceTypeRequestSchema>;
 

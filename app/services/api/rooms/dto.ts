@@ -1,5 +1,5 @@
 import type z from "zod";
-import useRoomSchema from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/schema/room.schema";
 
 const {
   RoomBookingHistoryResponseSchema,
@@ -12,7 +12,7 @@ const {
   CreateRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
   AvailableRoomsInternalResponseSchema,
-} = useRoomSchema();
+} = RoomSchema;
 
 type RoomDetailResponseDto = z.infer<typeof RoomDetailSchema>;
 type RoomBookingHistoryResponseDto = z.infer<
@@ -34,14 +34,14 @@ type AvailableRoomsInternalResponseDto = z.infer<
 type CreateRoomRequestDto = z.infer<typeof CreateRoomRequestSchema>;
 type UpdateRoomDetailRequestDto = z.infer<typeof UpdateRoomDetailRequestSchema>;
 export type {
+  AvailableRoomsInternalResponseDto,
+  CreateRoomRequestDto,
+  CreateRoomResponseDto,
+  RoomBookingHistoryResponseDto,
   RoomDetailResponseDto,
   RoomListItemDto,
   RoomListResponseDto,
-  UpdateRoomStatusResponseDto,
-  RoomBookingHistoryResponseDto,
-  CreateRoomResponseDto,
-  UpdateRoomDetailResponseDto,
-  AvailableRoomsInternalResponseDto,
-  CreateRoomRequestDto,
   UpdateRoomDetailRequestDto,
+  UpdateRoomDetailResponseDto,
+  UpdateRoomStatusResponseDto,
 };

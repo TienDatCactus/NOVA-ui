@@ -3,10 +3,10 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
-import useBookingSchema from "~/services/schema/booking.schema";
 import { ActionCell } from "../../fragments/action-cell.list";
 import BookingDetailDialog from "../booking-detail.sheet";
-const { BookingListItemSchema } = useBookingSchema();
+import { BookingSchema } from "~/services/schema/booking.schema";
+const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [
   {

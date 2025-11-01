@@ -17,7 +17,7 @@ import type {
 } from "./dto";
 import http from "~/lib/http";
 import { Rooms } from "~/services/url";
-import useRoomSchema from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/schema/room.schema";
 
 const {
   RoomDetailSchema,
@@ -29,7 +29,7 @@ const {
   AvailableRoomsInternalResponseSchema,
   CreateRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
-} = useRoomSchema();
+} = RoomSchema;
 
 async function getRoomList(
   params: RoomListParams

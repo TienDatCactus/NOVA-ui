@@ -8,10 +8,8 @@ const MenuCategoryItemSchema = z.object({
   active: z.boolean(),
 });
 
-// List Response
 const MenuCategoryListResponseSchema = z.array(MenuCategoryItemSchema);
 
-// Detail Response (same as item for this simple entity)
 const MenuCategoryDetailSchema = MenuCategoryItemSchema;
 
 // Edit/Create Request Schema

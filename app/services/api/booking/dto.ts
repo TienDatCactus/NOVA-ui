@@ -1,5 +1,5 @@
 import type z from "zod";
-import useBookingSchema from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/schema/booking.schema";
 
 const {
   BookingListResponseSchema,
@@ -8,7 +8,28 @@ const {
   StaffCreateBookingSchema,
   BookingDetailItemSchema,
   BookingOTAResponseSchema,
-} = useBookingSchema();
+  StaffBookingPricePreviewRequestSchema,
+  StaffBookingPricePreviewResponseSchema,
+  StaffUpdateBookingRequestSchema,
+  StaffUpdateBookingResponseSchema,
+  StaffCancelBookingResponseSchema,
+} = BookingSchema;
+
+type StaffBookingPricePreviewRequestDto = z.infer<
+  typeof StaffBookingPricePreviewRequestSchema
+>;
+type StaffBookingPricePreviewResponseDto = z.infer<
+  typeof StaffBookingPricePreviewResponseSchema
+>;
+type StaffUpdateBookingRequestDto = z.infer<
+  typeof StaffUpdateBookingRequestSchema
+>;
+type StaffUpdateBookingResponseDto = z.infer<
+  typeof StaffUpdateBookingResponseSchema
+>;
+type StaffCancelBookingResponseDto = z.infer<
+  typeof StaffCancelBookingResponseSchema
+>;
 
 type BookingListResponseDto = z.infer<typeof BookingListResponseSchema>;
 type BookingListByWeekResponseDto = z.infer<
@@ -27,4 +48,9 @@ export type {
   StaffCreateBookingResponseDto,
   BookingDetailResponseDto,
   BookingOTAResponseDto,
+  StaffBookingPricePreviewRequestDto,
+  StaffBookingPricePreviewResponseDto,
+  StaffUpdateBookingRequestDto,
+  StaffUpdateBookingResponseDto,
+  StaffCancelBookingResponseDto,
 };

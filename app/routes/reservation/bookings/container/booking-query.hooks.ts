@@ -1,7 +1,10 @@
 // useBookingDetail.ts
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { BookingService } from "~/services/api/booking";
 import type { BookingListParams } from "~/services/types/booking.types";
+import { RoomsService } from "~/services/api/rooms";
+import type { GetAvailableRoomsInternalParams } from "~/services/types/room.types";
 
 interface UseBookingDetailProps {
   bookingCode?: string;
@@ -50,4 +53,43 @@ function useBookings(params?: BookingListParams) {
   });
 }
 
-export { useBookingDetail, useBookingRoomsWeek, useBookings };
+interface UseAvailableRoomsParams {
+  checkinDate: Date | string;
+  checkoutDate: Date | string;
+  guests?: number;
+  enabled?: boolean;
+}
+
+function useAvailableRooms({
+  checkinDate,
+  checkoutDate,
+  guests = 1,
+  enabled = true,
+}: UseAvailableRoomsParams) {
+  const params: GetAvailableRoomsInternalParams = {
+    CheckInDate:
+      checkinDate instanceof Date
+        ? format(checkinDate, "yyyy-MM-dd")
+        : checkinDate,
+    CheckOutDate:
+      checkoutDate instanceof Date
+        ? format(checkoutDate, "yyyy-MM-dd")
+        : checkoutDate,
+    Guests: guests,
+  };
+
+  return useQuery({
+    queryKey: ["available-rooms", params],
+    queryFn: async () => await RoomsService.getAvailableRoomsInternal(params),
+    enabled: enabled && !!checkinDate && !!checkoutDate,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+  });
+}
+
+export {
+  useAvailableRooms,
+  useBookingDetail,
+  useBookingRoomsWeek,
+  useBookings,
+};

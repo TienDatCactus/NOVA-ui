@@ -14,6 +14,7 @@ export default [
       route("reset-password", "routes/auth/reset-password.tsx"),
     ]),
   ]),
+  route("buttons", "components/ui/button-showcase.tsx"),
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
       ...prefix("reservation", [

@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 
-import useFormSchema from "~/services/schema/forms.schema";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
@@ -18,6 +17,7 @@ import { BookingPayment } from "../../fragments/booking-payment";
 import { BookingSummaryCard } from "../../fragments/booking-summary.card";
 import { ServiceOrder } from "../../fragments/service-order";
 import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
+import { FormSchema } from "~/services/schema/forms.schema";
 
 interface ReviewPaymentFormProps {
   onNext: () => void;
@@ -33,7 +33,7 @@ export function ReviewPaymentForm({
   const navigate = useNavigate();
   const { data: storeData, setData, reset } = useCreateBookingStore();
   const { mutateAsync, data: bookingResponseData } = useCreateBookingMutation();
-  const { ReviewPaymentFormSchema } = useFormSchema();
+  const { ReviewPaymentFormSchema } = FormSchema;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const nights = useCalculateNights({
     checkinDate: storeData.checkinDate,

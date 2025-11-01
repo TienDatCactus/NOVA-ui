@@ -6,6 +6,7 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import Image from "~/components/ui/image";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { useServiceTypeDetails } from "../../container/service-types-query.hooks";
+import { DetailItem, DetailSection } from "~/components/ui/section-detail";
 
 interface ServiceTypeDetailRowProps {
   type: ServiceTypeItem;
@@ -21,37 +22,31 @@ export default function ServiceTypeDetailRow({
     return <div>Đang tải chi tiết...</div>;
   }
   return (
-    <div className="p-6 bg-muted/30 border-l-4 border-l-primary/20 animate-in slide-in-from-top-2 duration-200">
+    <div className="p-6 bg-muted/30 border-l-4 border-l-primary/20 animate-in slide-in-from-top-2 duration-200 grid md:grid-cols-3 grid-cols-1 gap-4">
       {hasImages && (
-        <div className="mb-6">
+        <div className="mb-6 col-span-1">
           <h4 className="font-semibold text-sm mb-3">Hình ảnh</h4>
-          <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-            <div className="flex gap-4 p-4">
-              {type.imageUrls.map((url, index) => (
-                <div
-                  key={index}
-                  className="relative rounded-lg overflow-hidden border-2 border-border flex-shrink-0"
-                >
-                  <ImageZoom>
-                    <Image
-                      src={url}
-                      width={200}
-                      height={200}
-                      alt={`${type.name} - ${index + 1}`}
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                    />
-                  </ImageZoom>
-                </div>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          <div className="flex flex-col max-h-[300px] overflow-y-auto gap-4 ">
+            {type.imageUrls.map((url, index) => (
+              <div
+                key={index}
+                className="relative rounded-lg overflow-hidden border-2 border-border flex-shrink-0"
+              >
+                <ImageZoom>
+                  <Image
+                    src={url}
+                    height={200}
+                    alt={`${type.name} - ${index + 1}`}
+                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                  />
+                </ImageZoom>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Details Grid */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Left Column */}
+      <div className="grid grid-cols-1 col-span-2">
         <div className="space-y-4">
           <DetailSection title="Thông tin cơ bản">
             <DetailItem label="Mã loại dịch vụ" value={type.code} />
@@ -67,7 +62,6 @@ export default function ServiceTypeDetailRow({
           </DetailSection>
         </div>
 
-        {/* Right Column */}
         <div className="space-y-4">
           <DetailSection title="Mô tả">
             <p className="text-sm text-muted-foreground">
@@ -93,37 +87,6 @@ export default function ServiceTypeDetailRow({
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-// Helper components
-function DetailSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-3">
-      <h4 className="font-semibold text-sm">{title}</h4>
-      <div className="space-y-2">{children}</div>
-    </div>
-  );
-}
-
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="flex justify-between items-center">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm font-medium">{value}</span>
     </div>
   );
 }

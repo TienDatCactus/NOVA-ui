@@ -1,9 +1,19 @@
 "use client";
 
-import { Wallet, CreditCard, Building2, Globe, Receipt } from "lucide-react";
+import { Wallet } from "lucide-react";
+import type { UseFormReturn } from "react-hook-form";
+import type z from "zod";
+import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -11,23 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
-} from "~/components/ui/form";
 import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
-import { formatMoney, cn } from "~/lib/utils";
-import type { UseFormReturn } from "react-hook-form";
+import { Textarea } from "~/components/ui/textarea";
+import { formatMoney } from "~/lib/utils";
+import { BookingSchema } from "~/services/schema/booking.schema";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import useBookingSchema from "~/services/schema/booking.schema";
-import type z from "zod";
-const { BookingSourceEnum } = useBookingSchema();
+const { BookingSourceEnum } = BookingSchema;
 
 interface BookingPaymentProps {
   form: UseFormReturn<ReviewPaymentFormData>;

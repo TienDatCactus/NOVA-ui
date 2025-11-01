@@ -1,8 +1,6 @@
 import z from "zod";
-import useRoomSchema from "./room.schema";
-
-const { RoomPaymentSchema } = useRoomSchema();
-// ----------------------
+import { PaymentSchema } from "./payment.schema";
+import { RoomSchema } from "./room.schema";
 
 // general CRUD ops
 const ServiceListItemSchema = z.object({
@@ -26,8 +24,8 @@ const ServiceItemSchema = z.object({
   description: z.string().max(500),
   basePrice: z.number().min(0),
   active: z.boolean().default(true),
-  createdAt: z.string().min(10).max(10),
-  updatedAt: null,
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
 });
 
 const ServiceListByTypeResponseSchema = z.array(ServiceItemSchema);
@@ -48,34 +46,14 @@ const UpdateServiceItemRequestSchema = EditServiceItemRequestSchema;
 const CreateServiceItemResponseSchema = ServiceItemSchema;
 const UpdateServiceItemResponseSchema = ServiceItemSchema;
 
-// for create booking
-const ServicePaymentSchema = RoomPaymentSchema;
-const ServiceOrderItemSchema = z.object({
-  itemType: z.string(),
-  itemId: z.string(),
-  quantity: z.number().min(0),
-  scheduledDate: z.string().min(10).max(10),
-  note: z.string().max(500),
-});
-const ServiceOrderSchema = z.object({
-  services: z.array(ServiceOrderItemSchema).optional().nullable(),
-  payment: ServicePaymentSchema.optional().nullable(),
-});
-
-const useServiceSchema = () => {
-  return {
-    ServiceItemSchema,
-    ServiceListResponseSchema,
-    ServiceListByTypeResponseSchema,
-    ServiceItemDetailResponseSchema,
-    UpdateServiceItemResponseSchema,
-    RoomPaymentSchema,
-    ServiceOrderItemSchema,
-    ServiceOrderSchema,
-    CreateServiceItemResponseSchema,
-    UpdateServiceItemRequestSchema,
-    CreateServiceItemRequestSchema,
-    ServiceListItemSchema,
-  };
+export const ServiceSchema = {
+  ServiceItemSchema,
+  ServiceListResponseSchema,
+  ServiceListByTypeResponseSchema,
+  ServiceItemDetailResponseSchema,
+  UpdateServiceItemResponseSchema,
+  CreateServiceItemResponseSchema,
+  UpdateServiceItemRequestSchema,
+  CreateServiceItemRequestSchema,
+  ServiceListItemSchema,
 };
-export default useServiceSchema;

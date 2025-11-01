@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type z from "zod";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
 import {
   useRoomTypeFormDialogs,
   useRoomTypeImageHandlers,
@@ -9,8 +8,9 @@ import {
   useRoomTypeCloseHandler,
 } from "./form.hooks";
 import { useCreateRoomType } from "./mutation.hooks";
+import { RoomTypesSchema } from "~/services/schema/room-types.schema";
 
-const { CreateRoomTypesRequestSchema } = useRoomTypesSchema();
+const { CreateRoomTypesRequestSchema } = RoomTypesSchema;
 
 type CreateRoomTypeFormData = z.infer<typeof CreateRoomTypesRequestSchema>;
 

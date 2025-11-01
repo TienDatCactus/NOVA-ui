@@ -1,9 +1,9 @@
 import type z from "zod";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import useBookingSchema from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/schema/booking.schema";
 
-const { StaffCreateBookingSchema } = useBookingSchema();
+const { StaffCreateBookingSchema } = BookingSchema;
 type CreateBookingInput = z.infer<typeof StaffCreateBookingSchema>;
 
 // -------------

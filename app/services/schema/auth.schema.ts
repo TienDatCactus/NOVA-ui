@@ -44,14 +44,10 @@ const LoginResponseSchema = z.object({
   user: UserSchema,
 });
 
-const useAuthSchema = () => {
-  return {
-    UserSchema,
-    LoginSchema,
-    LoginResponseSchema,
-    ResetPasswordSchema,
-    ForgotPasswordSchema,
-  };
+export const AuthSchema = {
+  UserSchema,
+  LoginSchema,
+  LoginResponseSchema,
+  ResetPasswordSchema,
+  ForgotPasswordSchema,
 };
-
-export default useAuthSchema;

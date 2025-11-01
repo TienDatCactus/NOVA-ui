@@ -17,8 +17,6 @@ interface MenuCategoryCommandBarProps {
     key: K,
     value: MenuCategoryFilters[K]
   ) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   selectedCount: number;
   onAddCategory: () => void;
   onExportExcel: () => void;
@@ -28,8 +26,6 @@ interface MenuCategoryCommandBarProps {
 export default function MenuCategoryCommandBar({
   filters,
   onFilterChange,
-  searchQuery,
-  setSearchQuery,
   selectedCount,
   onAddCategory,
   onExportExcel,
@@ -44,8 +40,7 @@ export default function MenuCategoryCommandBar({
           <Input
             placeholder="Tìm kiếm danh mục thực đơn theo tên, mã..."
             className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => onFilterChange("searchQuery", e.target.value)}
           />
         </div>
 

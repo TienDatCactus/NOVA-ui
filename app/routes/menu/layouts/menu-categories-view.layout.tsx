@@ -9,8 +9,6 @@ interface MenuCategoriesViewLayoutProps {
     key: K,
     value: MenuCategoryFilters[K]
   ) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   totalCategories: number;
   selectedCount: number;
   onAddCategory: () => void;
@@ -22,8 +20,6 @@ export default function MenuCategoriesViewLayout({
   children,
   filters,
   onFilterChange,
-  searchQuery,
-  setSearchQuery,
   totalCategories,
   selectedCount,
   onAddCategory,
@@ -60,8 +56,6 @@ export default function MenuCategoriesViewLayout({
         <MenuCategoryCommandBar
           filters={filters}
           onFilterChange={onFilterChange}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
           selectedCount={selectedCount}
           onAddCategory={onAddCategory}
           onExportExcel={onExportExcel}

@@ -1,9 +1,9 @@
-import useBookingSchema from "~/services/schema/booking.schema";
 import type { BookingSearchFilters } from "../components/search";
 import { useState } from "react";
 import type z from "zod";
+import { BookingSchema } from "~/services/schema/booking.schema";
 
-const { BookingListItemSchema } = useBookingSchema();
+const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 
 const INITIAL_FILTERS: BookingSearchFilters = {

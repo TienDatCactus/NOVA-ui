@@ -1,28 +1,27 @@
 import z from "zod";
-import useBookingSchema from "./booking.schema";
-import useRoomSchema from "./room.schema";
-import useServiceSchema from "./service.schema";
-
-const { StaffCreateBookingSchema } = useBookingSchema();
-const { RoomPaymentSchema } = useRoomSchema();
-const { ServiceOrderSchema } = useServiceSchema();
+import { BookingSchema } from "./booking.schema";
+import { OrderSchema } from "./order.schema";
+import { PaymentSchema } from "./payment.schema";
 
 const CustomerInfoFormSchema = z
   .object({
-    guestFullName: StaffCreateBookingSchema.shape.guestFullName,
-    guestPhone: StaffCreateBookingSchema.shape.guestPhone.optional(),
-    guestEmail: StaffCreateBookingSchema.shape.guestEmail.optional(),
-    checkinDate: StaffCreateBookingSchema.shape.checkinDate,
-    checkoutDate: StaffCreateBookingSchema.shape.checkoutDate,
-    adultsAmount: StaffCreateBookingSchema.shape.adultsAmount,
-    childrenAmount: StaffCreateBookingSchema.shape.childrenAmount
+    guestFullName: BookingSchema.StaffCreateBookingSchema.shape.guestFullName,
+    guestPhone:
+      BookingSchema.StaffCreateBookingSchema.shape.guestPhone.optional(),
+    guestEmail:
+      BookingSchema.StaffCreateBookingSchema.shape.guestEmail.optional(),
+    checkinDate: BookingSchema.StaffCreateBookingSchema.shape.checkinDate,
+    checkoutDate: BookingSchema.StaffCreateBookingSchema.shape.checkoutDate,
+    adultsAmount: BookingSchema.StaffCreateBookingSchema.shape.adultsAmount,
+    childrenAmount: BookingSchema.StaffCreateBookingSchema.shape.childrenAmount
       .optional()
       .or(z.literal(0)),
-    source: StaffCreateBookingSchema.shape.source,
-    otaInformationId: StaffCreateBookingSchema.shape.otaInformationId
-      .optional()
-      .or(z.literal("")),
-    otaBookingCode: StaffCreateBookingSchema.shape.otaBookingCode
+    source: BookingSchema.StaffCreateBookingSchema.shape.source,
+    otaInformationId:
+      BookingSchema.StaffCreateBookingSchema.shape.otaInformationId
+        .optional()
+        .or(z.literal("")),
+    otaBookingCode: BookingSchema.StaffCreateBookingSchema.shape.otaBookingCode
       .optional()
       .or(z.literal("")),
   })
@@ -33,25 +32,23 @@ const CustomerInfoFormSchema = z
 
 const RoomSelectionFormSchema = z.object({
   roomIds: z.array(z.string()).min(1, "Phải chọn ít nhất 1 phòng"),
-  isBreakfastAll: StaffCreateBookingSchema.shape.isBreakfastAll.optional(),
-  breakfastDates: StaffCreateBookingSchema.shape.breakfastDates.optional(),
+  isBreakfastAll:
+    BookingSchema.StaffCreateBookingSchema.shape.isBreakfastAll.optional(),
+  breakfastDates:
+    BookingSchema.StaffCreateBookingSchema.shape.breakfastDates.optional(),
 });
 
 const ReviewPaymentFormSchema = z.object({
-  specialRequest: StaffCreateBookingSchema.shape.specialRequest
+  specialRequest: BookingSchema.StaffCreateBookingSchema.shape.specialRequest
     .optional()
     .or(z.literal("")),
-  overridePrice: StaffCreateBookingSchema.shape.overridePrice,
-  roomPayment: RoomPaymentSchema.optional(),
-  serviceOrder: ServiceOrderSchema.optional(),
+  overridePrice: BookingSchema.StaffCreateBookingSchema.shape.overridePrice,
+  roomPayment: PaymentSchema.RoomPaymentSchema.optional(),
+  serviceOrder: OrderSchema.ServiceOrderSchema.optional(),
 });
 
-function useFormSchema() {
-  return {
-    CustomerInfoFormSchema,
-    RoomSelectionFormSchema,
-    ReviewPaymentFormSchema,
-  };
-}
-
-export default useFormSchema;
+export const FormSchema = {
+  CustomerInfoFormSchema,
+  RoomSelectionFormSchema,
+  ReviewPaymentFormSchema,
+};

@@ -1,65 +1,50 @@
 import z from "zod";
 
-// Component Schema (nguyên liệu trong món ăn)
 const MenuItemComponentSchema = z.object({
-  itemId: z.string().uuid(),
-  itemName: z.string(),
-  quantity: z.number().min(0),
+  itemId: z.string(),
+  itemCode: z.string(),
+  itemName: z.number(),
   notes: z.string(),
 });
 
-// Component Schema for Detail/Response (có thêm id và menuItemId)
-const MenuItemComponentDetailSchema = z.object({
-  id: z.string().uuid(),
-  menuItemId: z.string().uuid(),
-  itemId: z.string().uuid(),
-  itemName: z.string(),
-  quantity: z.number().min(0),
-  notes: z.string(),
-});
-
-// Menu Item Schema (món ăn trong list)
 const MenuItemSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.string(),
   code: z.string(),
   name: z.string(),
   description: z.string(),
-  imageUrls: z.array(z.string()).optional().nullable(),
+  imageUrls: z.array(z.url()).optional().nullable(),
   unitName: z.string(),
   price: z.number().min(0),
   active: z.boolean(),
   components: z.array(MenuItemComponentSchema),
 });
 
-// Menu Category with Items (danh mục + món ăn)
-const MenuCategoryWithItemsSchema = z.object({
-  categoryId: z.string().uuid(),
-  categoryCode: z.string(),
+const MenuListItemSchema = z.object({
+  categoryId: z.string(),
+  categoryCode: z.strictObject,
   categoryName: z.string(),
-  active: z.boolean(),
+  active: true,
   items: z.array(MenuItemSchema),
 });
 
-// List Response
-const MenuListResponseSchema = z.array(MenuCategoryWithItemsSchema);
+const MenuListResponseSchema = z.array(MenuListItemSchema);
 
 // Menu Item Detail (chi tiết món ăn)
 const MenuItemDetailSchema = z.object({
-  id: z.string().uuid(),
-  categoryId: z.string().uuid(),
+  id: z.string(),
+  categoryId: z.string(),
   categoryName: z.string(),
   code: z.string(),
   name: z.string(),
   description: z.string(),
-  imageUrls: z.array(z.string()).optional().nullable(),
-  unitId: z.string().uuid(),
+  unitId: z.string(),
   unitName: z.string(),
   price: z.number().min(0),
-  active: z.boolean(),
-  components: z.array(MenuItemComponentDetailSchema),
+  active: z.boolean,
+  imageUrls: z.array(z.url()).optional().nullable(),
+  components: z.array(MenuItemComponentSchema),
 });
 
-// Create/Update Request Schema
 const CreateMenuItemRequestSchema = z.object({
   categoryId: z.string().uuid(),
   code: z.string().min(1, "Mã món ăn không được để trống"),
@@ -90,8 +75,6 @@ const useMenuSchema = () => {
   return {
     MenuItemSchema,
     MenuItemComponentSchema,
-    MenuItemComponentDetailSchema,
-    MenuCategoryWithItemsSchema,
     MenuListResponseSchema,
     MenuItemDetailSchema,
     CreateMenuItemRequestSchema,

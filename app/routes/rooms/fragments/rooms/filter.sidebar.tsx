@@ -1,4 +1,4 @@
-import { ChevronDown, ListFilterPlus, Search, X } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -13,11 +13,10 @@ import {
 } from "~/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Switch } from "~/components/ui/switch";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
+import { RoomTypesSchema } from "~/services/schema/room-types.schema";
 import { RoomStatusEnum } from "~/services/types/room.types";
-import { Slider } from "~/components/ui/slider";
 import type { RoomFilters } from "../../container/rooms/filter.hooks";
-const { RoomTypesListResponseSchema } = useRoomTypesSchema();
+const { RoomTypesListResponseSchema } = RoomTypesSchema;
 type RoomTypeList = z.infer<typeof RoomTypesListResponseSchema>;
 interface RoomsFilterSidebarProps {
   filters: RoomFilters;

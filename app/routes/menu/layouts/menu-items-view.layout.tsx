@@ -1,76 +1,74 @@
 import type { ReactNode } from "react";
-import MenuItemsHeaderLayout from "../fragments/menu-items/menu-items-header.layout";
-import MenuItemsFilterSidebar from "../fragments/menu-items/menu-items-filter.sidebar";
+import type { MenuItemFilters } from "../container/use-menu-item-filter.hooks";
 import type { MenuCategoryWithItems } from "~/services/api/menu-item/dto";
+import MenuItemsCommandBar from "../fragments/menu-items/menu-items-command-bar";
 
 interface MenuItemsViewLayoutProps {
   children: ReactNode;
+  filters: MenuItemFilters;
+  onFilterChange: <K extends keyof MenuItemFilters>(
+    key: K,
+    value: MenuItemFilters[K]
+  ) => void;
+  onResetFilters: () => void;
   totalItems: number;
   selectedCount: number;
   onAddItem: () => void;
-  onImport: () => void;
-  onExport: () => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  onExportExcel: () => void;
+  onClearSelection: () => void;
   categories: MenuCategoryWithItems[];
-  selectedCategories: string[];
-  onCategoryToggle: (categoryCode: string) => void;
-  onSelectAll: () => void;
-  onClearFilters: () => void;
-  showInactive: boolean;
-  onToggleInactive: (checked: boolean) => void;
 }
 
 export default function MenuItemsViewLayout({
   children,
+  filters,
+  onFilterChange,
   totalItems,
   selectedCount,
   onAddItem,
-  onImport,
-  onExport,
-  searchQuery,
-  setSearchQuery,
+  onExportExcel,
+  onClearSelection,
+  onResetFilters,
   categories,
-  selectedCategories,
-  onCategoryToggle,
-  onSelectAll,
-  onClearFilters,
-  showInactive,
-  onToggleInactive,
 }: MenuItemsViewLayoutProps) {
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <MenuItemsHeaderLayout
-        totalItems={totalItems}
-        selectedCount={selectedCount}
-        onAddItem={onAddItem}
-        onImport={onImport}
-        onExport={onExport}
-      />
-
-      {/* Main Content with Sidebar */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-64 shrink-0 overflow-y-auto">
-          <MenuItemsFilterSidebar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            categories={categories}
-            selectedCategories={selectedCategories}
-            onCategoryToggle={onCategoryToggle}
-            onSelectAll={onSelectAll}
-            onClearFilters={onClearFilters}
-            showInactive={showInactive}
-            onToggleInactive={onToggleInactive}
-          />
+    <div className="flex flex-col space-y-2 h-full">
+      <div className="border-b">
+        <div className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Quản lý thực đơn
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Quản lý các món ăn và đồ uống của khách sạn
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground">
+                Tổng số:{" "}
+                <span className="font-semibold text-foreground">
+                  {totalItems}
+                </span>{" "}
+                món ăn
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Main Table */}
-        <main className="flex-1 p-6 overflow-auto bg-background">
-          {children}
-        </main>
+        <MenuItemsCommandBar
+          categories={categories}
+          filters={filters}
+          onFilterChange={onFilterChange}
+          selectedCount={selectedCount}
+          onAddItem={onAddItem}
+          onExportExcel={onExportExcel}
+          onClearSelection={onClearSelection}
+          onResetFilters={onResetFilters}
+        />
       </div>
+
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

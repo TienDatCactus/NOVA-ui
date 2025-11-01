@@ -1,6 +1,7 @@
 import http from "~/lib/http";
-import useBookingSchema from "~/services/schema/booking.schema";
-import { format, parseISO } from "date-fns";
+
+import { toYMD } from "~/lib/utils";
+import { BookingSchema } from "~/services/schema/booking.schema";
 import type { BookingListParams } from "~/services/types/booking.types";
 import { Booking, OTAInformation } from "../../url";
 import type {
@@ -8,10 +9,14 @@ import type {
   BookingListByWeekResponseDto,
   BookingListResponseDto,
   BookingOTAResponseDto,
+  StaffBookingPricePreviewRequestDto,
+  StaffBookingPricePreviewResponseDto,
+  StaffCancelBookingResponseDto,
   StaffCreateBookingDto,
   StaffCreateBookingResponseDto,
+  StaffUpdateBookingRequestDto,
+  StaffUpdateBookingResponseDto,
 } from "./dto";
-import { toYMD } from "~/lib/utils";
 
 const {
   BookingListResponseSchema,
@@ -20,7 +25,12 @@ const {
   StaffCreateBookingSchema,
   BookingDetailItemSchema,
   BookingOTAResponseSchema,
-} = useBookingSchema();
+  StaffBookingPricePreviewRequestSchema,
+  StaffBookingPricePreviewResponseSchema,
+  StaffUpdateBookingRequestSchema,
+  StaffUpdateBookingResponseSchema,
+  StaffCancelBookingResponseSchema,
+} = BookingSchema;
 
 async function getBookingList(
   params: BookingListParams
@@ -72,6 +82,54 @@ async function staffCreateBooking(
   }
 }
 
+async function staffBookingPricePreview(
+  idempotencyKey: string,
+  data: StaffBookingPricePreviewRequestDto
+): Promise<StaffBookingPricePreviewResponseDto> {
+  try {
+    const resp = await http.post(
+      Booking.preview,
+      StaffBookingPricePreviewRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+    return StaffBookingPricePreviewResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffUpdateBookingDetail(
+  id: string,
+  data: StaffUpdateBookingRequestDto
+): Promise<StaffUpdateBookingResponseDto> {
+  try {
+    const resp = await http.put(
+      Booking.update(id),
+      StaffUpdateBookingRequestSchema.parse(data)
+    );
+    return StaffUpdateBookingResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCancelBooking(
+  id: string
+): Promise<StaffCancelBookingResponseDto> {
+  try {
+    const resp = await http.post(Booking.cancel(id));
+    return StaffCancelBookingResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 async function getBookingDetail(
   params: BookingListParams
 ): Promise<BookingDetailResponseDto> {
@@ -110,4 +168,7 @@ export const BookingService = {
   getBookingListByWeek,
   getBookingDetail,
   getBookingOTA,
+  staffBookingPricePreview,
+  staffUpdateBookingDetail,
+  staffCancelBooking,
 };

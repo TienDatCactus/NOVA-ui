@@ -34,14 +34,11 @@ const CreateServiceTypeResponseSchema = ServiceTypeItemSchema;
 const ServiceTypeItemDetailSchema = ServiceTypeItemSchema;
 const UpdateServiceTypeResponseSchema = ServiceTypeItemSchema;
 
-function useServiceTypesSchema() {
-  return {
-    ServiceTypeListResponseSchema,
-    CreateServiceTypeRequestSchema,
-    CreateServiceTypeResponseSchema,
-    ServiceTypeItemDetailSchema,
-    UpdateServiceTypeRequestSchema,
-    UpdateServiceTypeResponseSchema,
-  };
-}
-export default useServiceTypesSchema;
+export const ServiceTypesSchema = {
+  ServiceTypeListResponseSchema,
+  CreateServiceTypeRequestSchema,
+  CreateServiceTypeResponseSchema,
+  ServiceTypeItemDetailSchema,
+  UpdateServiceTypeRequestSchema,
+  UpdateServiceTypeResponseSchema,
+};

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import { useCreateBookingStore } from "~/store/create-booking.store";
-import useFormSchema from "~/services/schema/forms.schema";
 import type { RoomSelectionFormData } from "~/services/types/forms.types";
 
 import { Button } from "~/components/ui/button";
@@ -20,6 +19,7 @@ import {
   useAvailableRoomsInternal,
   useRoomsDetailsByIds,
 } from "~/routes/rooms/container/rooms/query.hooks";
+import { FormSchema } from "~/services/schema/forms.schema";
 
 interface RoomPickerFormProps {
   onNext: () => void;
@@ -28,7 +28,7 @@ interface RoomPickerFormProps {
 
 export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
   const { data: storeData, setData, setStep } = useCreateBookingStore();
-  const { RoomSelectionFormSchema } = useFormSchema();
+  const { RoomSelectionFormSchema } = FormSchema;
 
   const form = useForm<RoomSelectionFormData>({
     resolver: zodResolver(RoomSelectionFormSchema),
