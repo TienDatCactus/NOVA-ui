@@ -1,36 +1,23 @@
-import z from "zod";
+import { z } from "zod";
 
-const MenuItemComponentSchema = z.object({
+export const MenuItemComponentSchema = z.object({
   itemId: z.string(),
   itemCode: z.string(),
-  itemName: z.number(),
-  notes: z.string(),
+  itemName: z.string(),
+  quantity: z.number().nonnegative(),
+  notes: z.string().nullish(),
 });
 
-const MenuItemSchema = z.object({
+const MenuItemComponentDetailSchema = z.object({
+  id: z.string(),
+  menuItemId: z.string(),
   itemId: z.string(),
-  code: z.string(),
-  name: z.string(),
-  description: z.string(),
-  imageUrls: z.array(z.url()).optional().nullable(),
-  unitName: z.string(),
-  price: z.number().min(0),
-  active: z.boolean(),
-  components: z.array(MenuItemComponentSchema),
+  itemName: z.string(),
+  quantity: z.number().nonnegative(),
+  notes: z.string().nullish(),
 });
 
-const MenuListItemSchema = z.object({
-  categoryId: z.string(),
-  categoryCode: z.strictObject,
-  categoryName: z.string(),
-  active: true,
-  items: z.array(MenuItemSchema),
-});
-
-const MenuListResponseSchema = z.array(MenuListItemSchema);
-
-// Menu Item Detail (chi tiết món ăn)
-const MenuItemDetailSchema = z.object({
+export const MenuItemDetailSchema = z.object({
   id: z.string(),
   categoryId: z.string(),
   categoryName: z.string(),
@@ -40,48 +27,65 @@ const MenuItemDetailSchema = z.object({
   unitId: z.string(),
   unitName: z.string(),
   price: z.number().min(0),
-  active: z.boolean,
-  imageUrls: z.array(z.url()).optional().nullable(),
+  active: z.boolean(),
+  createdAt: z.string().optional().nullable(),
+  updatedAt: z.string().optional().nullable(),
+  imageUrls: z.array(z.string()),
+  components: z.array(MenuItemComponentDetailSchema),
+});
+
+export const MenuListItemSchema = z.object({
+  itemId: z.string(),
+  code: z.string(),
+  name: z.string(),
+  description: z.string(),
+  imageUrls: z.array(z.string()),
+  unitName: z.string(),
+  price: z.number().min(0),
+  active: z.boolean(),
   components: z.array(MenuItemComponentSchema),
 });
 
-const CreateMenuItemRequestSchema = z.object({
-  categoryId: z.string().uuid(),
-  code: z.string().min(1, "Mã món ăn không được để trống"),
-  name: z.string().min(1, "Tên món ăn không được để trống"),
-  description: z.string().optional(),
-  unitId: z.string().uuid(),
-  price: z.number().min(0, "Giá phải lớn hơn hoặc bằng 0"),
-  active: z.boolean().default(true),
-  components: z
-    .array(
-      z.object({
-        itemId: z.string().uuid(),
-        quantity: z.number().min(0),
-        notes: z.string().optional().default(""),
-      })
-    )
-    .optional()
-    .default([]),
+export const MenuListResponseSchema = z.array(MenuListItemSchema);
+export const MenuListByCategoryResponseSchema = z.array(MenuListItemSchema);
+
+export const CreateMenuItemRequestSchema = z.object({
+  CategoryId: z.string(),
+  Code: z.string(),
+  Name: z.string(),
+  Description: z.string(),
+  UnitId: z.string(),
+  Price: z.number().min(0),
+  Active: z.boolean().default(true),
+  Images: z.array(z.instanceof(File)).optional(),
+  Components: z.array(MenuItemComponentSchema),
 });
 
-const UpdateMenuItemRequestSchema = CreateMenuItemRequestSchema;
+export const CreateMenuItemResponseSchema = MenuItemDetailSchema;
 
-// Create/Update Response Schema
-const CreateMenuItemResponseSchema = MenuItemDetailSchema;
-const UpdateMenuItemResponseSchema = MenuItemDetailSchema;
+export const UpdateMenuItemRequestSchema = z.object({
+  CategoryId: z.string(),
+  Code: z.string(),
+  Name: z.string(),
+  Description: z.string(),
+  UnitId: z.string(),
+  Price: z.number().min(0),
+  Active: z.boolean().default(true),
+  RemoveMediaIds: z.array(z.string()).default([]),
+  NewImages: z.array(z.instanceof(File)).optional(),
+  Components: z.array(MenuItemComponentSchema),
+});
 
-const useMenuSchema = () => {
-  return {
-    MenuItemSchema,
-    MenuItemComponentSchema,
-    MenuListResponseSchema,
-    MenuItemDetailSchema,
-    CreateMenuItemRequestSchema,
-    CreateMenuItemResponseSchema,
-    UpdateMenuItemRequestSchema,
-    UpdateMenuItemResponseSchema,
-  };
+export const UpdateMenuItemResponseSchema = MenuItemDetailSchema;
+
+export const MenuSchema = {
+  MenuItemComponentSchema,
+  MenuItemDetailSchema,
+  MenuListItemSchema,
+  MenuListResponseSchema,
+  MenuListByCategoryResponseSchema,
+  CreateMenuItemRequestSchema,
+  CreateMenuItemResponseSchema,
+  UpdateMenuItemRequestSchema,
+  UpdateMenuItemResponseSchema,
 };
-
-export default useMenuSchema;

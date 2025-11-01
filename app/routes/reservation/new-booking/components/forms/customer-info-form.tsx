@@ -26,13 +26,13 @@ import {
 import { DatePicker } from "~/components/ui/date-picker";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { cn, onError, useCalculateNights } from "~/lib/utils";
-import useFormSchema from "~/services/schema/forms.schema";
 import { BOOKING_SOURCES } from "~/services/types/booking.types";
 import type { CustomerInfoFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { useOTAInfo } from "../../container/create-booking-query.hooks";
 import { useEffect, useState } from "react";
 import { Spinner } from "~/components/ui/shadcn-io/spinner";
+import { FormSchema } from "~/services/schema/forms.schema";
 
 interface CustomerInfoFormProps {
   onNext: () => void;
@@ -40,7 +40,7 @@ interface CustomerInfoFormProps {
 
 export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
   const { data: storeData, setData, setStep } = useCreateBookingStore();
-  const { CustomerInfoFormSchema } = useFormSchema();
+  const { CustomerInfoFormSchema } = FormSchema;
 
   const form = useForm({
     resolver: zodResolver(CustomerInfoFormSchema),

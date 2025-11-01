@@ -22,7 +22,7 @@ export function RoomTypeActionsCell({ roomType }: RoomTypeActionsCellProps) {
   return (
     <>
       <Button
-        variant={"gradient"}
+        variant={"outline"}
         className="w-fit"
         onClick={() => setUpdateSheetOpen(true)}
       >

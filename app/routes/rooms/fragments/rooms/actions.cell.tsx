@@ -14,7 +14,7 @@ function RoomActionsCell({ room }: RoomActionsCellProps) {
   return (
     <>
       <Button
-        variant={"gradient"}
+        variant={"info-outline"}
         className="w-fit"
         onClick={() => setUpdateSheetOpen(true)}
       >

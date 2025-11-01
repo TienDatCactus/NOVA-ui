@@ -79,28 +79,18 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
         </NavigationMenuList>
       </NavigationMenu>
       <div className="flex gap-2 items-center">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant={"gradient-success"}
-              size={"icon"}
-              onClick={() => setCheckAvailableDialogOpen(true)}
-            >
-              <CalendarPlus />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Kiểm tra phòng trống</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link to="/dashboard/reservation/new-booking">
-              <Button variant={"gradient-ocean"} size={"icon"}>
-                <BookDown />
-              </Button>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>Tạo đặt phòng mới</TooltipContent>
-        </Tooltip>
+        <Button
+          variant={"info-outline"}
+          onClick={() => setCheckAvailableDialogOpen(true)}
+        >
+          Kiểm tra phòng trống <CalendarPlus />
+        </Button>
+
+        <Button asChild variant={"pink-outline"}>
+          <Link to="/dashboard/reservation/new-booking">
+            Đặt phòng <BookDown />
+          </Link>
+        </Button>
 
         <QuickRoomAvailabilityDialog
           onOpenChange={(open) => setCheckAvailableDialogOpen(open)}

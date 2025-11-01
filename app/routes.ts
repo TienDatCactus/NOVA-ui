@@ -35,8 +35,7 @@ export default [
       ...prefix("services", [
         index("routes/services/services.tsx"),
         route("types", "routes/services/types.tsx"),
-        route("menu-categories", "routes/menu/categories.tsx"),
-        route("menu-items", "routes/menu/items.tsx"),
+        route("menu", "routes/menu/menu.tsx"),
       ]),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("customers", "routes/customers/customers.tsx"),

@@ -21,9 +21,6 @@ import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn, formatMoney } from "~/lib/utils";
-import { useMenuCategories } from "~/routes/menu/container/menu-category-query.hooks";
-import useMenuFilter from "~/routes/menu/container/use-menu-item-filter.hooks";
-import useMenuList from "~/routes/menu/container/use-menu-list.hooks";
 import useServiceFilters from "~/routes/services/container/service-filter.hooks";
 import { useServices } from "~/routes/services/container/service-query.hooks";
 import { useServiceTypes } from "~/routes/services/container/service-types-query.hooks";
@@ -46,7 +43,7 @@ export default function AddServiceDialog({
 }: AddServiceDialogProps) {
   const [activeTab, setActiveTab] = useState<"service" | "menu">("service");
   const { data: serviceTypes = [] } = useServiceTypes();
-  const { data: menuCategories = [] } = useMenuCategories();
+  // const { data: menuCategories = [] } = useMenuCategories();
   const {
     updateFilter: updateServiceFilter,
     filterServices,
@@ -68,17 +65,17 @@ export default function AddServiceDialog({
     typeCode: serviceFilters.typeCode,
   });
 
-  const {
-    filters: menuFilters,
-    updateFilter: updateMenuFilter,
-    filterMenuItems,
-    resetFilters: resetMenuFilters,
-  } = useMenuFilter();
-  const { data: menuItems } = useMenuList();
+  // const {
+  //   filters: menuFilters,
+  //   updateFilter: updateMenuFilter,
+  //   filterMenuItems,
+  //   resetFilters: resetMenuFilters,
+  // } = useMenuFilter();
+  // const { data: menuItems } = useMenuList();
 
   useEffect(() => {
     if (activeTab === "service") {
-      updateMenuFilter("searchText", "");
+      // updateMenuFilter("searchText", "");
     } else {
       updateServiceFilter("searchText", "");
     }
@@ -110,9 +107,9 @@ export default function AddServiceDialog({
   const filteredServiceItems = useMemo(() => {
     return filterServices(serviceItems);
   }, [serviceItems, serviceFilters]);
-  const filteredMenuItems = useMemo(() => {
-    return filterMenuItems(menuItems || []);
-  }, [menuItems, menuFilters]);
+  // const filteredMenuItems = useMemo(() => {
+  //   return filterMenuItems(menuItems || []);
+  // }, [menuItems, menuFilters]);
 
   const totalSelected = form.getValues("services")?.length || 0;
 
@@ -158,7 +155,7 @@ export default function AddServiceDialog({
                   >
                     Menu
                     <Badge className="h-5 min-w-5 rounded-full px-1 tabular-nums">
-                      {filteredMenuItems.length}
+                      {/* {filteredMenuItems.length} */}
                     </Badge>
                   </TabsTrigger>
                 </TabsList>
@@ -214,7 +211,7 @@ export default function AddServiceDialog({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        resetMenuFilters();
+                        // resetMenuFilters();
                       }}
                     >
                       <RotateCcw /> Đặt lại
@@ -222,12 +219,12 @@ export default function AddServiceDialog({
                   </div>
                   <RadioGroup
                     className="w-full max-w-96 justify-items-center sm:grid-cols-2"
-                    value={menuFilters.categoryCode}
+                    // value={menuFilters.categoryCode}
                     onValueChange={(value) => {
                       updateServiceFilter("typeCode", value);
                     }}
                   >
-                    {menuCategories.map((m) => (
+                    {/* {menuCategories.map((m) => (
                       <div className="border-input shadow-s has-data-[state=checked]:border-primary/50 relative flex w-full max-w-50  items-center gap-3 rounded-md border p-4 cursor-pointer outline-none">
                         <RadioGroupItem
                           value={m.code}
@@ -245,7 +242,7 @@ export default function AddServiceDialog({
                           </Label>
                         </div>
                       </div>
-                    ))}
+                    ))} */}
                   </RadioGroup>
                 </TabsContent>
               </Tabs>
@@ -262,7 +259,7 @@ export default function AddServiceDialog({
                   onChange={(e) => {
                     if (activeTab === "service")
                       updateServiceFilter("searchText", e.target.value);
-                    else updateMenuFilter("searchText", e.target.value);
+                    // else updateMenuFilter("searchText", e.target.value);
                   }}
                   className="w-60"
                   endAddon={<Search />}
@@ -270,8 +267,8 @@ export default function AddServiceDialog({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-0 h-[60vh] overflow-y-auto">
-                {activeTab === "service" ? (
-                  serviceItems.length === 0 ? (
+                {activeTab === "service" &&
+                  (serviceItems.length === 0 ? (
                     <div className="text-center text-muted-foreground col-span-2">
                       Không có dịch vụ
                     </div>
@@ -310,40 +307,40 @@ export default function AddServiceDialog({
                         </div>
                       </Card>
                     ))
-                  )
-                ) : filteredMenuItems.length === 0 ? (
-                  <div className="text-center text-muted-foreground col-span-2">
-                    Không có món ăn
-                  </div>
-                ) : (
-                  filteredMenuItems?.map((item: any) => (
-                    <Card
-                      key={item.itemId}
-                      className={cn(
-                        "p-3 border cursor-pointer",
-                        isSelected(item.itemId) && "ring-2 ring-primary"
-                      )}
-                      onClick={() => toggleSelectItem(item.itemId, "menu")}
-                    >
-                      <div className="space-y-2">
-                        <div className="h-28 bg-muted rounded-md flex items-center justify-center">
-                          {" "}
-                        </div>
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {item.description}
-                          </p>
-                          <p className="text-sm font-semibold text-primary mt-1">
-                            {item.price
-                              ? formatMoney(item.price).vndFormatted
-                              : ""}
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
                   ))
-                )}
+                  // ) : filteredMenuItems.length === 0 ? (
+                  //   <div className="text-center text-muted-foreground col-span-2">
+                  //     Không có món ăn
+                  //   </div>
+                  // ) : (
+                  //   filteredMenuItems?.map((item: any) => (
+                  //     <Card
+                  //       key={item.itemId}
+                  //       className={cn(
+                  //         "p-3 border cursor-pointer",
+                  //         isSelected(item.itemId) && "ring-2 ring-primary"
+                  //       )}
+                  //       onClick={() => toggleSelectItem(item.itemId, "menu")}
+                  //     >
+                  //       <div className="space-y-2">
+                  //         <div className="h-28 bg-muted rounded-md flex items-center justify-center">
+                  //           {" "}
+                  //         </div>
+                  //         <div>
+                  //           <p className="font-medium">{item.name}</p>
+                  //           <p className="text-xs text-muted-foreground line-clamp-2">
+                  //             {item.description}
+                  //           </p>
+                  //           <p className="text-sm font-semibold text-primary mt-1">
+                  //             {item.price
+                  //               ? formatMoney(item.price).vndFormatted
+                  //               : ""}
+                  //           </p>
+                  //         </div>
+                  //       </div>
+                  //     </Card>
+                  //   ))
+                }
               </div>
             </div>
 
@@ -374,13 +371,14 @@ export default function AddServiceDialog({
                       <div className="flex items-start gap-3">
                         <div className="flex-1">
                           <p className="font-medium">
-                            {f.itemType === "service"
-                              ? serviceItems.find(
-                                  (s: any) => s.serviceItemId === f.itemId
-                                )?.name || f.itemId
-                              : menuItems?.find(
-                                  (m: any) => m.itemId === f.itemId
-                                )?.categoryName || f.itemId}
+                            {(f.itemType === "service" &&
+                              serviceItems.find(
+                                (s: any) => s.serviceItemId === f.itemId
+                              )?.name) ||
+                              f.itemId}
+                            {/* // : menuItems?.find(
+                              //     (m: any) => m.itemId === f.itemId
+                              //   )?.categoryName || f.itemId} */}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             <Button
@@ -428,7 +426,7 @@ export default function AddServiceDialog({
                           </div>
                           <div className="mt-2">
                             <Label className="text-xs">Ghi chú</Label>
-                            <Input
+                            {/* <Input
                               value={form.getValues(`services.${idx}.note`)}
                               onChange={(e) =>
                                 form.setValue(
@@ -436,7 +434,7 @@ export default function AddServiceDialog({
                                   e.target.value
                                 )
                               }
-                            />
+                            /> */}
                           </div>
                         </div>
                         <div className="shrink-0">

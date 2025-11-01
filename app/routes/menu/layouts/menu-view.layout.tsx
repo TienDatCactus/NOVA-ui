@@ -1,36 +1,40 @@
 import type { ReactNode } from "react";
-import type { MenuItemFilters } from "../container/use-menu-item-filter.hooks";
-import type { MenuCategoryWithItems } from "~/services/api/menu-item/dto";
-import MenuItemsCommandBar from "../fragments/menu-items/menu-items-command-bar";
+import type { MenuFilters } from "~/services/types/menu.types";
+import MenuCommandBar from "../fragments/command-bar";
+import { useQuery } from "@tanstack/react-query";
+import { MenuCategoryService } from "~/services/api/menu-category";
 
-interface MenuItemsViewLayoutProps {
+interface MenuViewLayoutProps {
   children: ReactNode;
-  filters: MenuItemFilters;
-  onFilterChange: <K extends keyof MenuItemFilters>(
+  filters: MenuFilters;
+  onFilterChange: <K extends keyof MenuFilters>(
     key: K,
-    value: MenuItemFilters[K]
+    value: MenuFilters[K]
   ) => void;
   onResetFilters: () => void;
-  totalItems: number;
+  totalMenuItems: number;
   selectedCount: number;
-  onAddItem: () => void;
+  onAddMenuItem: () => void;
   onExportExcel: () => void;
   onClearSelection: () => void;
-  categories: MenuCategoryWithItems[];
 }
 
-export default function MenuItemsViewLayout({
+export default function MenuViewLayout({
   children,
   filters,
   onFilterChange,
-  totalItems,
+  totalMenuItems,
   selectedCount,
-  onAddItem,
+  onAddMenuItem,
   onExportExcel,
   onClearSelection,
   onResetFilters,
-  categories,
-}: MenuItemsViewLayoutProps) {
+}: MenuViewLayoutProps) {
+  const { data: menuCategories } = useQuery({
+    queryKey: ["menu-categories"],
+    queryFn: async () => await MenuCategoryService.getMenuCategoryList(),
+  });
+
   return (
     <div className="flex flex-col space-y-2 h-full">
       <div className="border-b">
@@ -41,27 +45,27 @@ export default function MenuItemsViewLayout({
                 Quản lý thực đơn
               </h1>
               <p className="text-muted-foreground mt-1">
-                Quản lý các món ăn và đồ uống của khách sạn
+                Quản lý các món ăn và đồ uống của nhà hàng
               </p>
             </div>
             <div className="flex items-center gap-2">
               <div className="text-sm text-muted-foreground">
                 Tổng số:{" "}
                 <span className="font-semibold text-foreground">
-                  {totalItems}
+                  {totalMenuItems}
                 </span>{" "}
-                món ăn
+                món
               </div>
             </div>
           </div>
         </div>
 
-        <MenuItemsCommandBar
-          categories={categories}
+        <MenuCommandBar
+          menuCategories={menuCategories || []}
           filters={filters}
           onFilterChange={onFilterChange}
           selectedCount={selectedCount}
-          onAddItem={onAddItem}
+          onAddMenuItem={onAddMenuItem}
           onExportExcel={onExportExcel}
           onClearSelection={onClearSelection}
           onResetFilters={onResetFilters}

@@ -46,12 +46,14 @@ const MenuCategory = {
   delete: (id: string) => `menu-categories/${id}`,
 };
 
-const MenuItem = {
+const Menu = {
   list: "Menu/list",
   detail: (id: string) => `Menu/items/${id}`,
   create: "Menu/items",
   update: (id: string) => `Menu/items/${id}`,
   delete: (id: string) => `Menu/items/${id}`,
+  listByCategory: (categoryId: string) =>
+    `Menu/items/by-category/${categoryId}`,
 };
 
 const Service = {
@@ -84,11 +86,23 @@ const Reports = {
   reservationReports: (date: string) =>
     `Reports/daily-booking-dashboard?date=${date}`,
 };
+
+const Orders = {
+  createPOS: "PosOrders",
+  addItemsToPOS: (id: string) => `PosOrders/${id}/items`,
+  deleteItemFromPOS: (orderId: string, itemId: string) =>
+    `PosOrders/${orderId}/items/${itemId}`,
+  cancelPOSOrder: (id: string) => `PosOrders/${id}/cancel`,
+  completePOSOrder: (id: string) => `PosOrders/${id}/complete`,
+  detailPOS: (id: string) => `PosOrders/${id}/details`,
+  listPOSbyInvoice: (invoiceId: string) => `PosOrders/invoice/${invoiceId}`,
+  printPOSorder: (id: string) => `PosOrders/${id}/print-data`,
+};
 export {
   Auth,
   Booking,
   MenuCategory,
-  MenuItem,
+  Menu,
   Service,
   Rooms,
   RoomTypes,
@@ -96,4 +110,5 @@ export {
   ServiceTypes,
   Units,
   Reports,
+  Orders,
 };

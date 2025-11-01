@@ -64,7 +64,7 @@ function useAvailableRooms({
   checkinDate,
   checkoutDate,
   guests = 1,
-  enabled = true,
+  enabled = false,
 }: UseAvailableRoomsParams) {
   const params: GetAvailableRoomsInternalParams = {
     CheckInDate:
@@ -81,9 +81,8 @@ function useAvailableRooms({
   return useQuery({
     queryKey: ["available-rooms", params],
     queryFn: async () => await RoomsService.getAvailableRoomsInternal(params),
-    enabled: enabled && !!checkinDate && !!checkoutDate,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
+    enabled: enabled,
   });
 }
 

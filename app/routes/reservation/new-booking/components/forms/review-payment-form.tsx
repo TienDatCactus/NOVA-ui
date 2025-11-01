@@ -106,7 +106,7 @@ export function ReviewPaymentForm({
         onSuccess: (data) => {
           reset();
           onResetSteps && onResetSteps();
-          navigate("/dashboard/reservation/new-booking");
+          navigate("/dashboard/reservation/bookings/list");
         },
       });
       // reset();
