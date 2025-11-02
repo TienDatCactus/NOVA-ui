@@ -23,6 +23,7 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
+import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
 import { BookingSchema } from "~/services/schema/booking.schema";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
@@ -33,12 +34,14 @@ interface BookingPaymentProps {
   form: UseFormReturn<ReviewPaymentFormData>;
   totalAmount: number;
   sourceType?: z.infer<typeof BookingSourceEnum>;
+  isLoadingPrice?: boolean;
 }
 
 export function BookingPayment({
   form,
   totalAmount,
   sourceType,
+  isLoadingPrice = false,
 }: BookingPaymentProps) {
   const paidAmount = Number(form.watch("roomPayment.paidAmount") ?? 0);
 
@@ -163,9 +166,13 @@ export function BookingPayment({
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Tổng tiền</span>
-              <span className="font-bold">
-                {formatMoney(totalAmount).vndFormatted}
-              </span>
+              {isLoadingPrice ? (
+                <Skeleton className="h-5 w-24" />
+              ) : (
+                <span className="font-bold">
+                  {formatMoney(totalAmount).vndFormatted}
+                </span>
+              )}
             </div>
 
             <div className="flex justify-between">
@@ -183,12 +190,18 @@ export function BookingPayment({
               <div className="flex justify-between items-center">
                 <span className="font-medium">Còn lại</span>
                 <div className="text-right">
-                  <p className="font-bold text-orange-600">
-                    {formatMoney(remaining).vndFormatted}
-                  </p>
-                  <Badge variant="warning" className="text-xs mt-1">
-                    Chưa thanh toán
-                  </Badge>
+                  {isLoadingPrice ? (
+                    <Skeleton className="h-5 w-24" />
+                  ) : (
+                    <>
+                      <p className="font-bold text-orange-600">
+                        {formatMoney(remaining).vndFormatted}
+                      </p>
+                      <Badge variant="warning" className="text-xs mt-1">
+                        Chưa thanh toán
+                      </Badge>
+                    </>
+                  )}
                 </div>
               </div>
             )}

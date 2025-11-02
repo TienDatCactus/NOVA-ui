@@ -31,8 +31,6 @@ export function ServiceOrder({
     onAddServices?.(newServices);
   };
 
-  const serviceTotal = 0;
-
   return (
     <Card>
       <CardHeader>
@@ -76,7 +74,9 @@ export function ServiceOrder({
                   className="flex items-start justify-between p-3 rounded-md border bg-muted/30"
                 >
                   <div className="flex-1 space-y-1">
-                    <p className="font-medium text-sm">{service.itemType}</p>
+                    <p className="font-medium text-sm uppercase">
+                      {service.itemType}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       Số lượng: {service.quantity}
                     </p>
@@ -107,12 +107,6 @@ export function ServiceOrder({
             <Separator />
 
             {/* Service Total */}
-            <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-              <span className="font-medium text-sm">Tổng tiền dịch vụ</span>
-              <span className="font-bold text-primary">
-                {formatMoney(serviceTotal).vndFormatted}
-              </span>
-            </div>
           </>
         ) : (
           <div className="text-center py-8 text-sm text-muted-foreground">

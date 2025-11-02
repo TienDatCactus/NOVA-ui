@@ -19,11 +19,14 @@ export function useMenuListByCategory(categoryId: string) {
   });
 }
 
-export function useMenuItemDetail(itemId: string) {
+export function useMenuItemDetail(
+  itemId: string,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["menu-item-detail", itemId],
     queryFn: async () => await MenuService.getMenuItemDetail(itemId),
-    enabled: !!itemId,
+    enabled: options?.enabled ?? !!itemId,
     staleTime: 2 * 60 * 1000,
   });
 }

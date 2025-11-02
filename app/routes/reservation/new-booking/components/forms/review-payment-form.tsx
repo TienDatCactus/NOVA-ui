@@ -2,22 +2,26 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { onError, useCalculateNights } from "~/lib/utils";
+import { onError } from "~/lib/utils";
 import useCreateBookingMutation from "../../container/create-booking-mutation.hooks";
 import { BookingPayment } from "../../fragments/booking-payment";
 import { BookingSummaryCard } from "../../fragments/booking-summary.card";
 import { ServiceOrder } from "../../fragments/service-order";
 import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
 import { FormSchema } from "~/services/schema/forms.schema";
+import { usePreviewBookingPrice } from "../../container/create-booking-query.hooks";
+import type { StaffBookingPricePreviewRequestDto } from "~/services/api/booking/dto";
+import { format } from "date-fns";
 
 interface ReviewPaymentFormProps {
   onNext: () => void;
@@ -35,10 +39,7 @@ export function ReviewPaymentForm({
   const { mutateAsync, data: bookingResponseData } = useCreateBookingMutation();
   const { ReviewPaymentFormSchema } = FormSchema;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const nights = useCalculateNights({
-    checkinDate: storeData.checkinDate,
-    checkoutDate: storeData.checkoutDate,
-  });
+
   const form = useForm<ReviewPaymentFormData>({
     resolver: zodResolver(ReviewPaymentFormSchema),
     defaultValues: {
@@ -50,7 +51,23 @@ export function ReviewPaymentForm({
   });
 
   const roomIds = storeData.roomIds ?? [];
-  const { data: selectedRoomDetails } = useRoomsDetailsByIds(roomIds);
+  const { data: selectedRoomDetails, isError: isRoomDetailsError } =
+    useRoomsDetailsByIds(roomIds);
+
+  // Validate room IDs - alert if any rooms failed to load
+  useEffect(() => {
+    if (
+      isRoomDetailsError ||
+      (roomIds.length > 0 &&
+        selectedRoomDetails &&
+        selectedRoomDetails.length < roomIds.length)
+    ) {
+      toast.error(
+        "Một số phòng đã chọn không hợp lệ. Vui lòng quay lại bước 2 để chọn lại phòng."
+      );
+    }
+  }, [roomIds, selectedRoomDetails, isRoomDetailsError]);
+
   const selectedRooms = useMemo(() => {
     if (!selectedRoomDetails || selectedRoomDetails.length === 0)
       return [] as {
@@ -58,27 +75,71 @@ export function ReviewPaymentForm({
         roomName: string;
         roomTypeName: string;
         baseRatePerNight: number;
+        roomTypeId: string;
       }[];
     return selectedRoomDetails.map((d) => ({
       roomId: d.roomId,
       roomName: d.roomName,
       roomTypeName: d.roomTypeName,
       baseRatePerNight: d.dailyPrice,
+      roomTypeId: d.roomTypeId,
     }));
   }, [selectedRoomDetails]);
 
-  const totalAmount = useMemo(() => {
-    return selectedRooms.reduce(
-      (sum, room) => sum + room.baseRatePerNight * nights,
-      0
+  const selectedServices = form.watch("serviceOrder.services") || [];
+
+  const previewRequest = useMemo<StaffBookingPricePreviewRequestDto>(() => {
+    const roomTypeMap = new Map<string, number>();
+    selectedRooms.forEach((room) => {
+      const count = roomTypeMap.get(room.roomTypeId) || 0;
+      roomTypeMap.set(room.roomTypeId, count + 1);
+    });
+
+    const roomTypes = Array.from(roomTypeMap.entries()).map(
+      ([roomTypeId, quantity]) => ({
+        roomTypeId,
+        quantity,
+      })
     );
-  }, [selectedRooms, nights]);
+
+    return {
+      checkinDate: format(storeData.checkinDate || new Date(), "yyyy-MM-dd"),
+      checkoutDate: format(storeData.checkoutDate || new Date(), "yyyy-MM-dd"),
+      adultsAmount: storeData.adultsAmount || 1,
+      childrenAmount: storeData.childrenAmount || 0,
+      roomTypes,
+      isBreakfastAll: storeData.isBreakfastAll || false,
+      breakfastDates: storeData.breakfastDates,
+      services: selectedServices.map((s) => ({
+        itemType: s.itemType == "menu" ? "MenuItem" : "ServiceItem",
+        itemId: s.itemId,
+        quantity: s.quantity,
+        scheduledDate: s.scheduledDate,
+        note: s.note || "",
+      })),
+    };
+  }, [
+    storeData.checkinDate,
+    storeData.checkoutDate,
+    storeData.adultsAmount,
+    storeData.childrenAmount,
+    storeData.isBreakfastAll,
+    storeData.breakfastDates,
+    selectedRooms,
+    selectedServices,
+  ]);
+
+  const { data: pricePreview, isLoading: isLoadingPrice } =
+    usePreviewBookingPrice(previewRequest);
+
+  // Extract server-side calculated total for final calculation
+  const serverTotalAmount = pricePreview?.total ?? 0;
 
   const getFinalTotal = () => {
     const override = form.watch("overridePrice");
     return override && !isNaN(Number(override)) && Number(override) > 0
       ? Number(override)
-      : totalAmount;
+      : serverTotalAmount;
   };
 
   const onSubmit = async (data: ReviewPaymentFormData) => {
@@ -103,15 +164,12 @@ export function ReviewPaymentForm({
         isBreakfastAll: storeData.isBreakfastAll ?? false,
       };
       mutateAsync(bookingData, {
-        onSuccess: (data) => {
+        onSuccess: () => {
           reset();
           onResetSteps && onResetSteps();
           navigate("/dashboard/reservation/bookings/list");
         },
       });
-      // reset();
-      // onResetSteps && onResetSteps();
-      // navigate("/dashboard/reservation/new-booking");
     } catch (error) {
       console.error("Booking creation failed:", error);
     } finally {
@@ -138,7 +196,8 @@ export function ReviewPaymentForm({
             <BookingSummaryCard
               form={form}
               roomsData={selectedRooms}
-              totalAmount={totalAmount}
+              pricePreview={pricePreview}
+              isLoadingPrice={isLoadingPrice}
             />
           </div>
 
@@ -149,6 +208,7 @@ export function ReviewPaymentForm({
                 form={form}
                 totalAmount={getFinalTotal()}
                 sourceType={storeData.source}
+                isLoadingPrice={isLoadingPrice}
               />
 
               <ServiceOrder

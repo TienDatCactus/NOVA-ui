@@ -96,14 +96,35 @@ const StaffBookingPricePreviewRequestSchema = z.object({
 });
 
 const StaffBookingPricePreviewResponseSchema = z.object({
-  bookingId: z.string(),
-  bookingCode: z.string(),
-  status: z.string(),
   checkinDate: z.string(),
   checkoutDate: z.string(),
-  totalAmount: z.number().min(0),
-  roomInvoice: InvoiceSchema.RoomInvoiceSchema,
-  serviceInvoice: InvoiceSchema.ServiceInvoiceSchema,
+  nights: z.number(),
+  adultsAmount: z.number(),
+  childrenAmount: z.number(),
+  rooms: z.array(
+    z.object({
+      roomTypeId: z.string(),
+      roomTypeCode: z.string(),
+      roomTypeName: z.string(),
+      quantity: z.number(),
+      ratePerNight: z.number(),
+      nights: z.number(),
+      subtotal: z.number(),
+    })
+  ),
+  breakfast: z
+    .object({
+      days: z.number(),
+      eligibleGuests: z.number(),
+      total: z.number(),
+    })
+    .nullable(),
+  services: z.any().nullable(),
+  roomsSubtotal: z.number(),
+  breakfastSubtotal: z.number(),
+  servicesSubtotal: z.number(),
+  total: z.number(),
+  availablePaymentMethods: z.array(z.any()),
 });
 
 const StaffUpdateBookingRequestSchema = z.object({

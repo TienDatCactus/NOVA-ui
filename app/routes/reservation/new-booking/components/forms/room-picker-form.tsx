@@ -54,6 +54,40 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
     CheckOutDate: format(storeData.checkoutDate!, "yyyy-MM-dd"),
     Guests: Number(storeData.adultsAmount!) + Number(storeData.childrenAmount!),
   });
+
+  useEffect(() => {
+    if (!availableRooms || isPending) return;
+
+    const currentRoomIds = form.getValues("roomIds") || [];
+    if (currentRoomIds.length === 0) return;
+
+    const availableRoomIds = new Set<string>();
+    availableRooms.forEach((roomType) => {
+      roomType.availableRooms.forEach((room) => {
+        availableRoomIds.add(room.roomId);
+      });
+    });
+
+    // Filter out room IDs that are no longer available
+    const validRoomIds = currentRoomIds.filter((id) =>
+      availableRoomIds.has(id)
+    );
+
+    // Update form if any rooms were removed
+    if (validRoomIds.length !== currentRoomIds.length) {
+      form.setValue("roomIds", validRoomIds, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+
+      // Show notification about removed rooms
+      const removedCount = currentRoomIds.length - validRoomIds.length;
+      toast.warning(
+        `${removedCount} phòng đã chọn không còn khả dụng cho thời gian mới và đã bị xóa`
+      );
+    }
+  }, [availableRooms, isPending, form]);
+
   const { data: selectedRoomDetails } = useRoomsDetailsByIds(selectedRoomIds);
   const selectedRooms = useMemo(() => {
     if (selectedRoomDetails && selectedRoomDetails.length > 0) {
@@ -111,8 +145,30 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
   };
 
   const onSubmit = (data: RoomSelectionFormData) => {
+    const validRoomIds = form.getValues("roomIds") || [];
+
+    // Double-check room IDs are still valid before saving
+    if (availableRooms) {
+      const availableRoomIds = new Set<string>();
+      availableRooms.forEach((roomType) => {
+        roomType.availableRooms.forEach((room) => {
+          availableRoomIds.add(room.roomId);
+        });
+      });
+
+      const finalValidRoomIds = validRoomIds.filter((id) =>
+        availableRoomIds.has(id)
+      );
+
+      if (finalValidRoomIds.length !== validRoomIds.length) {
+        toast.error("Một số phòng không còn khả dụng. Vui lòng chọn lại.");
+        form.setValue("roomIds", finalValidRoomIds);
+        return;
+      }
+    }
+
     setData({
-      roomIds: form.getValues("roomIds") || [],
+      roomIds: validRoomIds,
       isBreakfastAll: data.isBreakfastAll,
       breakfastDates: data.breakfastDates?.map((i) => new Date(i)) || [],
     });

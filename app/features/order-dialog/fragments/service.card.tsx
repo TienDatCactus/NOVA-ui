@@ -1,4 +1,119 @@
-function ServiceCard() {
-  return <div>Service Card Component</div>;
+import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import Image from "~/components/ui/image";
+import { Separator } from "~/components/ui/separator";
+import { cn, formatMoney } from "~/lib/utils";
+import type { ServiceItem } from "~/services/api/services/dto";
+
+interface ServiceCardProps {
+  service: ServiceItem;
+  isSelected: boolean;
+  quantity?: number;
+  onToggle: () => void;
+  onQuantityChange?: (quantity: number) => void;
 }
-export default ServiceCard;
+
+/**
+ * Service card component for order dialog
+ * Shows service image, name, description, price, and quantity controls
+ */
+export default function ServiceCard({
+  service,
+  isSelected,
+  quantity = 0,
+  onToggle,
+  onQuantityChange,
+}: ServiceCardProps) {
+  return (
+    <Card
+      className={cn(
+        "p-3 border h-fit cursor-pointer hover:shadow-md transition-all",
+        isSelected && "ring-2 ring-primary"
+      )}
+    >
+      <div className="space-y-2">
+        {/* Image */}
+        <div className="h-28 bg-muted rounded-md overflow-hidden flex items-center justify-center">
+          {service.imageUrls && service.imageUrls.length > 0 ? (
+            <Image
+              src={service.imageUrls[0]}
+              alt={service.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="text-xs text-muted-foreground">Không có ảnh</span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div>
+          <p className="font-medium line-clamp-1">{service.name}</p>
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {service.description}
+          </p>
+          <p className="text-sm font-semibold text-primary mt-1">
+            {service.basePrice
+              ? formatMoney(service.basePrice).vndFormatted
+              : "Liên hệ"}
+          </p>
+        </div>
+      </div>
+      <CardFooter className="flex justify-end p-0 pt-2 gap-2">
+        {isSelected && quantity > 0 ? (
+          <>
+            <div className="flex items-center gap-2 flex-1">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newQty = Math.max(1, quantity - 1);
+                  onQuantityChange?.(newQty);
+                }}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="min-w-8 text-center font-medium">
+                {quantity}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onQuantityChange?.(quantity + 1);
+                }}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button
+              onClick={onToggle}
+              variant="destructive"
+              size="sm"
+              className="flex-1"
+            >
+              Xóa
+            </Button>
+          </>
+        ) : (
+          <Button onClick={onToggle} variant="outline" className="w-full">
+            Thêm vào Order
+            <ShoppingCart />
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  );
+}

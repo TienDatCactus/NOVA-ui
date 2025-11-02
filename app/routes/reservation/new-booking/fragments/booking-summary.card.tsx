@@ -42,6 +42,12 @@ import {
   FormMessage,
   FormDescription,
 } from "~/components/ui/form";
+import { Skeleton } from "~/components/ui/skeleton";
+import type z from "zod";
+import { BookingSchema } from "~/services/schema/booking.schema";
+
+const { StaffBookingPricePreviewResponseSchema } = BookingSchema;
+type PricePreviewDto = z.infer<typeof StaffBookingPricePreviewResponseSchema>;
 
 interface BookingSummaryCardProps {
   form: UseFormReturn<ReviewPaymentFormData>;
@@ -51,34 +57,33 @@ interface BookingSummaryCardProps {
     roomTypeName: string;
     baseRatePerNight: number;
   }>;
-  totalAmount: number;
+  pricePreview?: PricePreviewDto;
+  isLoadingPrice?: boolean;
 }
 
 export function BookingSummaryCard({
   form,
   roomsData,
-  totalAmount,
+  pricePreview,
+  isLoadingPrice = false,
 }: BookingSummaryCardProps) {
   const { data } = useCreateBookingStore();
   const [noteOpen, setNoteOpen] = useState(true);
   const overridePrice = form.watch("overridePrice");
-  const nights =
-    data.checkinDate && data.checkoutDate
-      ? differenceInDays(data.checkoutDate, data.checkinDate)
-      : 0;
+
+  // Use server-calculated values directly
+  const nights = pricePreview?.nights ?? 0;
+  const serverTotalAmount = pricePreview?.total ?? 0;
+  const roomsSubtotal = pricePreview?.roomsSubtotal ?? 0;
+  const breakfastSubtotal = pricePreview?.breakfastSubtotal ?? 0;
+  const servicesSubtotal = pricePreview?.servicesSubtotal ?? 0;
+  const breakfastInfo = pricePreview?.breakfast;
 
   const finalTotal =
     overridePrice && !isNaN(Number(overridePrice)) && Number(overridePrice) > 0
       ? Number(overridePrice)
-      : totalAmount;
+      : serverTotalAmount;
 
-  const roomSubtotal = roomsData.reduce(
-    (sum, room) => sum + room.baseRatePerNight * nights,
-    0
-  );
-  const breakfastCount = data.isBreakfastAll
-    ? nights
-    : (data.breakfastDates?.length ?? 0);
   return (
     <div className="space-y-4">
       <Card className="border shadow-s px-4">
@@ -189,27 +194,44 @@ export function BookingSummaryCard({
               <ChevronDown className="ml-2 h-4 w-4" />
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 mt-2">
-              {roomsData.map((room) => (
-                <div
-                  key={room.roomId}
-                  className="flex justify-between items-start p-2 rounded-md bg-muted/50 text-sm border-2 hover:border-primary cursor-pointer border-dashed"
-                >
-                  <div>
-                    <p className="font-medium">{room.roomName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {room.roomTypeName}
-                    </p>
+              {roomsData.map((room) => {
+                // Try to find server-calculated rate for this room type
+                const serverRoomType = pricePreview?.rooms?.find(
+                  (r) => r.roomTypeName === room.roomTypeName
+                );
+                const displayRate =
+                  serverRoomType?.ratePerNight ?? room.baseRatePerNight;
+                const displayTotal =
+                  serverRoomType?.subtotal ?? displayRate * nights;
+
+                return (
+                  <div
+                    key={room.roomId}
+                    className="flex justify-between items-start p-2 rounded-md bg-muted/50 text-sm border-2 hover:border-primary cursor-pointer border-dashed"
+                  >
+                    <div>
+                      <p className="font-medium">{room.roomName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {room.roomTypeName}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      {isLoadingPrice ? (
+                        <Skeleton className="h-5 w-24" />
+                      ) : (
+                        <>
+                          <p className="font-semibold">
+                            {formatMoney(displayTotal).vndFormatted}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatMoney(displayRate).vndFormatted}/đêm
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">
-                      {formatMoney(room.baseRatePerNight * nights).vndFormatted}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatMoney(room.baseRatePerNight).vndFormatted}/đêm
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </CollapsibleContent>
           </Collapsible>
         </Card>
@@ -282,19 +304,41 @@ export function BookingSummaryCard({
         <CardContent className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tạm tính phòng</span>
-            <span className="font-medium">
-              {formatMoney(roomSubtotal).vndFormatted}
-            </span>
+            {isLoadingPrice ? (
+              <Skeleton className="h-5 w-24" />
+            ) : (
+              <span className="font-medium">
+                {formatMoney(roomsSubtotal).vndFormatted}
+              </span>
+            )}
           </div>
 
-          {breakfastCount > 0 && (
+          {breakfastInfo && breakfastSubtotal > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
-                Bữa sáng ({breakfastCount} ngày)
+                Bữa sáng ({breakfastInfo.days} ngày ×{" "}
+                {breakfastInfo.eligibleGuests} người)
               </span>
-              <span className="font-medium text-muted-foreground">
-                Tính vào hóa đơn
-              </span>
+              {isLoadingPrice ? (
+                <Skeleton className="h-5 w-24" />
+              ) : (
+                <span className="font-medium">
+                  {formatMoney(breakfastSubtotal).vndFormatted}
+                </span>
+              )}
+            </div>
+          )}
+
+          {servicesSubtotal > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Dịch vụ</span>
+              {isLoadingPrice ? (
+                <Skeleton className="h-5 w-24" />
+              ) : (
+                <span className="font-medium">
+                  {formatMoney(servicesSubtotal).vndFormatted}
+                </span>
+              )}
             </div>
           )}
 
@@ -326,14 +370,19 @@ export function BookingSummaryCard({
 
           <div className="flex justify-between font-bold text-lg">
             <span>Tổng cộng</span>
-            <span className="text-primary">
-              {formatMoney(finalTotal).vndFormatted}
-            </span>
+            {isLoadingPrice ? (
+              <Skeleton className="h-7 w-32" />
+            ) : (
+              <span className="text-primary">
+                {formatMoney(finalTotal).vndFormatted}
+              </span>
+            )}
           </div>
 
           {Number.isFinite(Number(overridePrice)) && (
             <p className="text-xs text-muted-foreground">
-              Giá gốc: {formatMoney(totalAmount).vndFormatted} (đã điều chỉnh)
+              Giá gốc: {formatMoney(serverTotalAmount).vndFormatted} (đã điều
+              chỉnh)
             </p>
           )}
         </CardContent>
