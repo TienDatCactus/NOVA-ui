@@ -73,7 +73,6 @@ export function BreakfastSelection({
             onCheckedChange={(checked) => {
               onToggleAll(checked);
               if (!checked) {
-                // Clear specific dates when turning off "all"
                 onSelectDates([]);
               }
             }}
@@ -114,7 +113,7 @@ export function BreakfastSelection({
                   selected={breakfastDates}
                   onSelect={(dates) => onSelectDates(dates || [])}
                   disabled={(date) =>
-                    date <= checkinDate || date >= checkoutDate
+                    date <= checkinDate || date > checkoutDate
                   }
                   locale={vi}
                 />

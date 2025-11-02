@@ -52,7 +52,11 @@ const StaffCreateBookingSchema = z.object({
     .or(z.literal("")),
 
   specialRequest: z.string().optional(),
-  overridePrice: z.number().optional().nullable(),
+  overridePrice: z
+    .number()
+    .max(9999999999, "Giá vượt quá giới hạn")
+    .optional()
+    .nullable(),
   internalNote: z.string().optional().nullable(),
 
   roomPayment: PaymentSchema.RoomPaymentSchema.optional().nullable(),

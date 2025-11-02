@@ -55,12 +55,12 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
-                Hình ảnh ({detailData.images.length})
+                Hình ảnh ({detailData.images?.length})
               </h4>
               <div className=" grid place-items-center ">
                 <Carousel className="w-50">
                   <CarouselContent>
-                    {detailData.images.map((img, index) => (
+                    {detailData.images?.map((img, index) => (
                       <CarouselItem key={index} className="w-fit">
                         <ImageZoom>
                           <Image
@@ -160,7 +160,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                 <h4 className="text-sm font-medium text-muted-foreground">
                   Mô tả
                 </h4>
-                <p className="text-sm leading-relaxed">
+                <p className="text-sm leading-relaxed text-wrap">
                   {detailData.description}
                 </p>
               </div>

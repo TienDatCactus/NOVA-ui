@@ -110,7 +110,7 @@ export const columns: ColumnDef<MenuCategoryItemDto>[] = [
 
       return (
         <span className="text-sm text-muted-foreground">
-          {format(parseISO(createdAt), "dd/MM/yyyy HH:mm")}
+          {format(createdAt, "dd/MM/yyyy")}
         </span>
       );
     },

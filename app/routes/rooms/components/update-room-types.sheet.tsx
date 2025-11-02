@@ -125,7 +125,6 @@ export function UpdateRoomTypeSheet({
                       </FormItem>
                     )}
                   />
-
                   {/* Name */}
                   <FormField
                     control={form.control}
@@ -323,9 +322,8 @@ export function UpdateRoomTypeSheet({
                       </div>
                       <FormControl>
                         <Switch
-                          checked={!!field.value}
-                          onCheckedChange={(checked) => field.onChange(checked)}
-                          disabled={field.disabled}
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
                     </FormItem>

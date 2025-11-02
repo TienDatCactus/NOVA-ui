@@ -1,19 +1,10 @@
-import { Calendar, Filter, RotateCcw, Search, User } from "lucide-react";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { Calendar as CalendarComponent } from "~/components/ui/calendar";
+import { Filter, RotateCcw, Search, User } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
-import { cn } from "~/lib/utils";
-import type { AvailableBookingFilters } from "../container/available-booking-filter.hooks";
-import { date } from "zod";
+import { Button } from "~/components/ui/button";
 import { DatePicker } from "~/components/ui/date-picker";
+import { Input } from "~/components/ui/input";
+import { cn, handleLimitInput } from "~/lib/utils";
+import type { AvailableBookingFilters } from "../container/available-booking-filter.hooks";
 
 interface BookingGridFiltersProps {
   filters: AvailableBookingFilters;
@@ -76,6 +67,7 @@ export default function BookingGridFilters({
           <div className="flex items-center gap-2">
             <Input
               type="number"
+              onInput={handleLimitInput}
               min={1}
               max={10}
               placeholder="Số khách"

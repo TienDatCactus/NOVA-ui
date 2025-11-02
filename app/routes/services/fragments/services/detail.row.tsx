@@ -86,7 +86,7 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
       {/* Right Column */}
       <div className="space-y-4">
         <DetailSection title="Mô tả">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-wrap">
             {service.description || "Không có mô tả"}
           </p>
         </DetailSection>

@@ -1,11 +1,10 @@
+import { Card } from "~/components/ui/card";
 import { useStep } from "~/hooks/use-step";
 import type { Route } from "./+types/new-booking";
 import { CustomerInfoForm } from "./components/forms/customer-info-form";
-import { RoomPickerForm } from "./components/forms/room-picker-form";
 import { ReviewPaymentForm } from "./components/forms/review-payment-form";
+import { RoomPickerForm } from "./components/forms/room-picker-form";
 import Steps from "./components/new-booking-stepper";
-import { Card } from "~/components/ui/card";
-import { useCreateBookingStore } from "~/store/create-booking.store";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};

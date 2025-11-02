@@ -31,15 +31,22 @@ export function daysBetweenFloor(a: Date, b: Date) {
   return Math.floor((b.getTime() - a.getTime()) / msPerDay);
 }
 
-export function formatMoney(amount: number) {
-  const usdFormatted = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-  const vndFormatted = new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(amount);
+export function formatMoney(amount: number | bigint | string) {
+  // Convert to string first to avoid precision loss
+  const amountStr = amount.toString();
+
+  // Use BigInt for safe handling of extremely large numbers
+  const bigAmount = BigInt(amountStr);
+
+  // Convert BigInt to plain string with thousands separators manually
+  const formattedBase = bigAmount
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  // Append currency symbols manually
+  const usdFormatted = `$${formattedBase}`;
+  const vndFormatted = `${formattedBase} ₫`;
+
   return { usdFormatted, vndFormatted };
 }
 
@@ -79,4 +86,13 @@ export const toYMD = (d: unknown) => {
     if (!isNaN(dt.getTime())) return format(dt, "yyyy-MM-dd");
   }
   return undefined;
+};
+
+export const handleLimitInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const max = 99999999;
+  const min = 0;
+  const value = e.target.valueAsNumber;
+
+  if (value > max) e.target.value = max.toString();
+  if (value < min) e.target.value = min.toString();
 };

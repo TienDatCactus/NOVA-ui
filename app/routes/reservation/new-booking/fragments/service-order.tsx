@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, UtensilsCrossed, Trash2 } from "lucide-react";
+import { Plus, UtensilsCrossed } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
@@ -10,6 +10,7 @@ import { useState } from "react";
 import type z from "zod";
 import AddServiceDialog from "~/features/order-dialog";
 import { OrderSchema } from "~/services/api/order/order.schema";
+import { ServiceOrderItem } from "./service-order-item";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
@@ -28,9 +29,9 @@ export function ServiceOrder({
   const [openServiceDialog, setOpenServiceDialog] = useState(false);
 
   const handleConfirmServices = (newServices: ServiceOrderItemDto[]) => {
-    onAddServices?.(newServices);
+    const mergedServices = [...services, ...newServices];
+    onAddServices?.(mergedServices);
   };
-
   return (
     <Card>
       <CardHeader>
@@ -69,38 +70,11 @@ export function ServiceOrder({
                 Dịch vụ đã chọn ({services.length})
               </h4>
               {services.map((service, index) => (
-                <div
+                <ServiceOrderItem
                   key={index}
-                  className="flex items-start justify-between p-3 rounded-md border bg-muted/30"
-                >
-                  <div className="flex-1 space-y-1">
-                    <p className="font-medium text-sm uppercase">
-                      {service.itemType}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Số lượng: {service.quantity}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Ngày thực hiện: {service.scheduledDate}
-                    </p>
-                    {service.note && (
-                      <p className="text-xs text-muted-foreground italic">
-                        Ghi chú: {service.note}
-                      </p>
-                    )}
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 shrink-0"
-                    onClick={() => onRemoveService?.(index)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                    <span className="sr-only">Xóa dịch vụ</span>
-                  </Button>
-                </div>
+                  service={service}
+                  onRemove={() => onRemoveService?.(index)}
+                />
               ))}
             </div>
 

@@ -29,6 +29,13 @@ export const useCreateBookingStore = create<CreateBookingState>()(
     }),
     {
       name: "nova-create-booking",
+      partialize: (state) => ({
+        data: {
+          ...state.data,
+          serviceOrder: undefined, // Exclude serviceOrder from persistence
+        },
+        currentStep: state.currentStep,
+      }),
     }
   )
 );

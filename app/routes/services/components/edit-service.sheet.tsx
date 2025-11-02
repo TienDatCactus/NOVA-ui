@@ -212,6 +212,8 @@ export default function EditServiceSheet({
                     <FormControl>
                       <Input
                         type="number"
+                        max={9999999999}
+                        onInput={handleLimitInput}
                         placeholder="0"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}

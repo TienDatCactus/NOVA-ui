@@ -10,9 +10,7 @@ import { vi } from "date-fns/locale";
 import ServiceTypeActionsCell from "../../fragments/service-types/actions.cell";
 import Image from "~/components/ui/image";
 
-type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
-
-export const columns: ColumnDef<EnrichedServiceTypeItem>[] = [
+export const columns: ColumnDef<ServiceTypeItem>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -108,7 +106,7 @@ export const columns: ColumnDef<EnrichedServiceTypeItem>[] = [
     accessorKey: "serviceCount",
     header: () => <p className="text-center">Số lượng dịch vụ</p>,
     cell: ({ row }) => {
-      const count = row.original.serviceCount || 0;
+      const count = row.original.serviceItemCount || 0;
       return (
         <div className="flex justify-center">
           <Badge variant={count > 0 ? "default" : "secondary"}>

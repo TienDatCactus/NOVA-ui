@@ -2,6 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link, useLocation } from "react-router";
+import { toast } from "sonner";
+import SectionLayout from "~/components/layouts/sections";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -12,14 +14,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "~/components/ui/input-otp";
-import useAuthSchema from "~/services/api/auth/auth.schema";
-import type { ResetPasswordDto } from "~/services/api/auth/dto";
-import { useAuth } from "./container/auth.hooks";
-import {
   Form,
   FormControl,
   FormDescription,
@@ -29,9 +23,15 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "~/components/ui/input-otp";
+import { AuthSchema } from "~/services/api/auth/auth.schema";
+import type { ResetPasswordDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/reset-password";
-import SectionLayout from "~/components/layouts/sections";
-import { toast } from "sonner";
+import { useAuth } from "./container/auth.hooks";
 
 export default function VerifyOTP({
   loaderData,
@@ -45,7 +45,7 @@ export default function VerifyOTP({
     );
     return null;
   }
-  const { ResetPasswordSchema } = useAuthSchema();
+  const { ResetPasswordSchema } = AuthSchema;
   const resetPasswordForm = useForm({
     resolver: zodResolver(ResetPasswordSchema),
   });

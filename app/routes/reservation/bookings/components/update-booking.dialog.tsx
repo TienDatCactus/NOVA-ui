@@ -39,7 +39,7 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import { cn, toYMD } from "~/lib/utils";
+import { cn, handleLimitInput, toYMD } from "~/lib/utils";
 import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
@@ -231,6 +231,8 @@ export default function UpdateBookingDialog({
                             </Button>
                             <Input
                               type="number"
+                              max={9999999999}
+                              onInput={handleLimitInput}
                               {...field}
                               className="text-center"
                               min={1}
@@ -273,6 +275,8 @@ export default function UpdateBookingDialog({
                             </Button>
                             <Input
                               type="number"
+                              max={9999999999}
+                              onInput={handleLimitInput}
                               {...field}
                               className="text-center"
                               min={0}
@@ -614,6 +618,8 @@ export default function UpdateBookingDialog({
                         <FormControl>
                           <Input
                             type="number"
+                            max={9999999999}
+                            onInput={handleLimitInput}
                             {...field}
                             onChange={(e) =>
                               field.onChange(parseFloat(e.target.value) || 0)
@@ -642,6 +648,8 @@ export default function UpdateBookingDialog({
                         <FormControl>
                           <Input
                             type="number"
+                            max={9999999999}
+                            onInput={handleLimitInput}
                             {...field}
                             onChange={(e) =>
                               field.onChange(parseFloat(e.target.value) || 0)

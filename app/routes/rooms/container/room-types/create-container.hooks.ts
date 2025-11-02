@@ -72,8 +72,8 @@ export function useCreateRoomTypeDialog({
       },
       {
         onSuccess: () => {
-          form.reset();
           onClose();
+          form.reset();
         },
       }
     );

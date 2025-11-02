@@ -205,6 +205,8 @@ export default function CreateServiceDialog({
                       <FormControl>
                         <Input
                           type="number"
+                          max={9999999999}
+                          onInput={handleLimitInput}
                           placeholder="0"
                           {...field}
                           onChange={(e) =>

@@ -26,7 +26,7 @@ import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { cn, formatMoney } from "~/lib/utils";
+import { cn, formatMoney, handleLimitInput } from "~/lib/utils";
 import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useAddItemToPOSOrder } from "../container/pos-orders-mutation.hooks";
@@ -319,6 +319,8 @@ export default function AddItemToPOSOrderDialog({
                           </Button>
                           <Input
                             type="number"
+                            max={9999999999}
+                            onInput={handleLimitInput}
                             {...field}
                             onChange={(e) =>
                               field.onChange(parseInt(e.target.value) || 1)
@@ -351,6 +353,8 @@ export default function AddItemToPOSOrderDialog({
                       <FormControl>
                         <Input
                           type="number"
+                          max={9999999999}
+                          onInput={handleLimitInput}
                           {...field}
                           onChange={(e) =>
                             field.onChange(parseFloat(e.target.value) || 0)

@@ -22,7 +22,7 @@ const PaymentStatusEnum = z.enum([
 ]);
 const RoomPaymentSchema = z.object({
   paymentMethod: PaymentMethodEnum.optional(),
-  paidAmount: z.number().optional(),
+  paidAmount: z.number().max(9999999999).optional(),
   paymentNote: z.string().optional(),
 });
 const ServicePaymentSchema = RoomPaymentSchema;

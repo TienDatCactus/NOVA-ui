@@ -36,6 +36,7 @@ import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { MenuSchema } from "~/services/api/menu/menu.schema";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useCreateMenuItem } from "../container/menu/mutation.hooks";
+import { handleLimitInput } from "~/lib/utils";
 
 const { CreateMenuItemRequestSchema } = MenuSchema;
 
@@ -133,9 +134,6 @@ export default function CreateMenuDialog({
             >
               {/* Basic Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">
-                  Thông tin cơ bản
-                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
@@ -150,7 +148,7 @@ export default function CreateMenuDialog({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Chọn danh mục" />
                             </SelectTrigger>
                           </FormControl>
@@ -202,27 +200,6 @@ export default function CreateMenuDialog({
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="Description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Mô tả <span className="text-destructive">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Mô tả chi tiết về món ăn..."
-                          rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
@@ -238,7 +215,7 @@ export default function CreateMenuDialog({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Chọn đơn vị" />
                             </SelectTrigger>
                           </FormControl>
@@ -266,6 +243,8 @@ export default function CreateMenuDialog({
                         <FormControl>
                           <Input
                             type="number"
+                            max={9999999999}
+                            onInput={handleLimitInput}
                             placeholder="0"
                             {...field}
                             onChange={(e) =>
@@ -300,6 +279,25 @@ export default function CreateMenuDialog({
                     )}
                   />
                 </div>
+                <FormField
+                  control={form.control}
+                  name="Description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Mô tả <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Mô tả chi tiết về món ăn..."
+                          rows={3}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {/* Images */}
@@ -438,6 +436,8 @@ export default function CreateMenuDialog({
                                   <FormControl>
                                     <Input
                                       type="number"
+                                      max={9999999999}
+                                      onInput={handleLimitInput}
                                       placeholder="0"
                                       {...field}
                                       onChange={(e) =>

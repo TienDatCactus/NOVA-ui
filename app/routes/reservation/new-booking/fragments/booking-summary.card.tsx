@@ -21,7 +21,7 @@ import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { formatMoney } from "~/lib/utils";
+import { formatMoney, handleLimitInput } from "~/lib/utils";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import type { UseFormReturn } from "react-hook-form";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
@@ -356,13 +356,20 @@ export function BookingSummaryCard({
               <Input
                 id="overridePrice"
                 type="number"
+                max={99999999}
                 placeholder="Nhập giá điều chỉnh"
                 defaultValue={0}
+                onInput={handleLimitInput}
                 min={0}
                 {...form.register("overridePrice", {
                   valueAsNumber: true,
                 })}
               />
+              {form.formState.errors.overridePrice && (
+                <p className="text-xs text-destructive mt-1">
+                  {form.formState.errors.overridePrice.message}
+                </p>
+              )}
             </div>
           </div>
 

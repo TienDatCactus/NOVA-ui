@@ -106,14 +106,9 @@ const DASHBOARD_ITEMS_RECEPTIONIST: Array<{
     icon: <HandPlatter />,
     href: "/dashboard/services",
   },
+
   {
     id: 5,
-    title: "Đơn hàng POS",
-    icon: <ShoppingCart />,
-    href: "/dashboard/pos-orders",
-  },
-  {
-    id: 6,
     title: "Hóa đơn",
     icon: <ReceiptText />,
     href: "/dashboard/invoices",

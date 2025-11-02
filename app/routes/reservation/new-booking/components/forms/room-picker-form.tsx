@@ -14,7 +14,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { AvailableRoomTypeCard } from "../../fragments/available-room.card";
 import { BreakfastSelection } from "../../fragments/breakfast-selection";
 import { SelectedRoomsSummary } from "../../fragments/selected-rooms";
-import { useCalculateNights } from "~/lib/utils";
+import { onError, useCalculateNights } from "~/lib/utils";
 import {
   useAvailableRoomsInternal,
   useRoomsDetailsByIds,
@@ -129,19 +129,23 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
     const set = new Set(current as string[]);
     if (set.has(roomId)) set.delete(roomId);
     else set.add(roomId);
-    form.setValue("roomIds", Array.from(set), {
+    const updatedRoomIds = Array.from(set);
+    form.setValue("roomIds", updatedRoomIds, {
       shouldValidate: true,
       shouldDirty: true,
     });
+    setData({ roomIds: updatedRoomIds });
   };
 
   const handleRemoveRoom = (roomId: string) => {
     const current = form.getValues("roomIds") || [];
-    form.setValue(
-      "roomIds",
-      (current as string[]).filter((id) => id !== roomId),
-      { shouldValidate: true, shouldDirty: true }
-    );
+    const updatedRoomIds = (current as string[]).filter((id) => id !== roomId);
+    form.setValue("roomIds", updatedRoomIds, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    // Update store immediately
+    setData({ roomIds: updatedRoomIds });
   };
 
   const onSubmit = (data: RoomSelectionFormData) => {
@@ -174,11 +178,6 @@ export function RoomPickerForm({ onNext, onCancel }: RoomPickerFormProps) {
     });
     setStep(3);
     onNext();
-  };
-
-  const onError = (errors: any) => {
-    toast.error("Vui lòng kiểm tra lại thông tin đã nhập", errors);
-    console.log("Validation errors:", errors);
   };
 
   return (

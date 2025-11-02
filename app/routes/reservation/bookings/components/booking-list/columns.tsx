@@ -33,7 +33,7 @@ export const columns: ColumnDef<BookingListItem>[] = [
   },
   {
     accessorKey: "checkinDate",
-    header: "Thời gian nhận phòng",
+    header: "Ngày nhận phòng",
     cell: ({ row }) => {
       return (
         <span>
@@ -46,7 +46,7 @@ export const columns: ColumnDef<BookingListItem>[] = [
   },
   {
     accessorKey: "checkoutDate",
-    header: "Thời gian trả phòng",
+    header: "Ngày trả phòng",
     cell: ({ row }) => {
       return (
         <span>

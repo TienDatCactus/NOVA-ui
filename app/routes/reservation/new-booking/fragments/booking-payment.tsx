@@ -24,7 +24,7 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import { Skeleton } from "~/components/ui/skeleton";
-import { formatMoney } from "~/lib/utils";
+import { formatMoney, handleLimitInput } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
@@ -47,10 +47,7 @@ export function BookingPayment({
 
   const remaining = totalAmount - paidAmount;
   const change = paidAmount > totalAmount ? paidAmount - totalAmount : 0;
-
-  const defaultPaymentMethod =
-    sourceType === "OTA" ? "4" : sourceType === "Agency" ? "6" : "1";
-
+  console.log(form.getValues("roomPayment"));
   return (
     <Card>
       <CardHeader>
@@ -67,12 +64,7 @@ export function BookingPayment({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Phương thức thanh toán</FormLabel>
-              <Select
-                value={field.value?.toString() ?? defaultPaymentMethod}
-                onValueChange={(value) => {
-                  field.onChange(Number(value) as 0 | 1 | 2 | 3 | 4 | 5 | 6);
-                }}
-              >
+              <Select value={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Chọn phương thức" />
@@ -120,6 +112,8 @@ export function BookingPayment({
               <FormControl>
                 <Input
                   type="number"
+                  max={9999999999}
+                  onInput={handleLimitInput}
                   placeholder="0"
                   min={0}
                   {...field}
@@ -169,7 +163,7 @@ export function BookingPayment({
               {isLoadingPrice ? (
                 <Skeleton className="h-5 w-24" />
               ) : (
-                <span className="font-bold">
+                <span className="font-bold truncate line-clamp-1 w-20">
                   {formatMoney(totalAmount).vndFormatted}
                 </span>
               )}
@@ -177,7 +171,7 @@ export function BookingPayment({
 
             <div className="flex justify-between">
               <span className="text-muted-foreground">Đã thanh toán</span>
-              <span className="font-semibold text-green-600">
+              <span className="font-semibold text-green-600 truncate">
                 {Number.isFinite(Number(paidAmount))
                   ? formatMoney(paidAmount).vndFormatted
                   : "0đ"}
@@ -194,7 +188,7 @@ export function BookingPayment({
                     <Skeleton className="h-5 w-24" />
                   ) : (
                     <>
-                      <p className="font-bold text-orange-600">
+                      <p className="font-bold text-orange-600 truncate line-clamp-1 w-20">
                         {formatMoney(remaining).vndFormatted}
                       </p>
                       <Badge variant="warning" className="text-xs mt-1">
@@ -210,7 +204,7 @@ export function BookingPayment({
               <div className="flex justify-between items-center">
                 <span className="font-medium">Trả lại khách</span>
                 <div className="text-right">
-                  <p className="font-bold text-blue-600">
+                  <p className="font-bold text-blue-600 truncate">
                     {formatMoney(change).vndFormatted}
                   </p>
                   <Badge variant="info" className="text-xs mt-1">

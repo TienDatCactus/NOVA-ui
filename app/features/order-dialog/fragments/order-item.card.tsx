@@ -1,6 +1,8 @@
 import { MessageSquare, Minus, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { format, parseISO } from "date-fns";
 import { Button } from "~/components/ui/button";
+import { DatePicker } from "~/components/ui/date-picker";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -84,7 +86,7 @@ export default function OrderItemCard({
             <PopoverContent className="w-72 p-4 space-y-3" align="start">
               <div className="space-y-2">
                 <Label className="text-xs font-medium">
-                  Ghi chú cho món này
+                  Ghi chú cho dịch vụ
                 </Label>
                 <Textarea
                   value={note || ""}
@@ -92,6 +94,18 @@ export default function OrderItemCard({
                   placeholder="Ví dụ: Không hành, ít cay..."
                   className="resize-none text-sm"
                   rows={3}
+                />{" "}
+                <Label className="text-xs font-medium">
+                  Thời gian phục vụ dịch vụ
+                </Label>
+                <DatePicker
+                  value={scheduledDate ? parseISO(scheduledDate) : undefined}
+                  onChange={(value) =>
+                    onScheduledDateChange(
+                      value ? format(value, "yyyy-MM-dd") : ""
+                    )
+                  }
+                  className="h-8 text-xs w-32"
                 />
               </div>
               <div className="flex justify-end">
@@ -103,14 +117,6 @@ export default function OrderItemCard({
           </Popover>
 
           {/* Scheduled Date */}
-          <div className="flex items-center gap-1">
-            <Input
-              type="date"
-              value={scheduledDate}
-              onChange={(e) => onScheduledDateChange(e.target.value)}
-              className="h-8 text-xs w-32"
-            />
-          </div>
         </div>
       </div>
     </div>

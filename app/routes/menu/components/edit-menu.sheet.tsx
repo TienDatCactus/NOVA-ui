@@ -41,7 +41,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { cn } from "~/lib/utils";
+import { cn, handleLimitInput } from "~/lib/utils";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
 import { useMenuItemDetail } from "../container/menu/query.hooks";
@@ -323,6 +323,8 @@ export default function EditMenuSheet({
                         <FormControl>
                           <Input
                             type="number"
+                            max={9999999999}
+                            onInput={handleLimitInput}
                             placeholder="0"
                             {...field}
                             onChange={(e) =>
@@ -569,6 +571,8 @@ export default function EditMenuSheet({
                                   <FormControl>
                                     <Input
                                       type="number"
+                                      max={9999999999}
+                                      onInput={handleLimitInput}
                                       placeholder="0"
                                       {...field}
                                       onChange={(e) =>

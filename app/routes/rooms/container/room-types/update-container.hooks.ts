@@ -42,7 +42,7 @@ export function useUpdateRoomTypeSheet({
     defaultValues: {
       code: roomType?.code,
       name: roomType?.name,
-      description: roomTypeDetail?.description,
+      description: roomTypeDetail?.description ?? "",
       baseRate: roomTypeDetail?.baseRate,
       maxOccupancy: roomTypeDetail?.maxOccupancy,
       active: roomTypeDetail?.active,
@@ -59,7 +59,7 @@ export function useUpdateRoomTypeSheet({
       description: roomTypeDetail.description ?? "",
       baseRate: roomTypeDetail.baseRate,
       maxOccupancy: roomTypeDetail.maxOccupancy,
-      active: roomType.active,
+      active: roomTypeDetail.active,
       images: [],
       removeMediaIds: [],
     });
@@ -136,7 +136,7 @@ export function useUpdateRoomTypeSheet({
       },
       {
         onSuccess: () => {
-          onClose(false);
+          onClose(true);
           form.reset();
         },
       }

@@ -46,9 +46,19 @@ export function ReviewPaymentForm({
       specialRequest: storeData.specialRequest ?? "",
       overridePrice: storeData.overridePrice,
       roomPayment: storeData.roomPayment ?? undefined,
-      serviceOrder: storeData.serviceOrder,
+      serviceOrder: storeData.serviceOrder ?? { services: [] },
     },
   });
+
+  // Sync form with store when store changes (e.g., when navigating back)
+  useEffect(() => {
+    form.reset({
+      specialRequest: storeData.specialRequest ?? "",
+      overridePrice: storeData.overridePrice,
+      roomPayment: storeData.roomPayment ?? undefined,
+      serviceOrder: storeData.serviceOrder ?? { services: [] },
+    });
+  }, [storeData, form]);
 
   const roomIds = storeData.roomIds ?? [];
   const { data: selectedRoomDetails, isError: isRoomDetailsError } =
@@ -218,14 +228,22 @@ export function ReviewPaymentForm({
                     shouldValidate: true,
                     shouldDirty: true,
                   });
+                  // Sync to store immediately
+                  setData({
+                    serviceOrder: { services: newServices },
+                  });
                 }}
                 onRemoveService={(index) => {
                   const currentServices =
                     form.watch("serviceOrder.services") ?? [];
-                  form.setValue(
-                    "serviceOrder.services",
-                    currentServices.filter((_, i) => i !== index)
+                  const updatedServices = currentServices.filter(
+                    (_, i) => i !== index
                   );
+                  form.setValue("serviceOrder.services", updatedServices);
+                  // Sync to store immediately
+                  setData({
+                    serviceOrder: { services: updatedServices },
+                  });
                 }}
               />
             </div>

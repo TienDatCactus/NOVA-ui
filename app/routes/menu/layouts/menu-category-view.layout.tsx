@@ -32,10 +32,10 @@ export default function MenuCategoryViewLayout({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
-                Quản lý thực đơn
+                Quản lý danh mục thực đơn
               </h1>
               <p className="text-muted-foreground mt-1">
-                Quản lý các món ăn và đồ uống của nhà hàng
+                Quản lý danh mục các món ăn và đồ uống của nhà hàng
               </p>
             </div>
             <div className="flex items-center gap-2">

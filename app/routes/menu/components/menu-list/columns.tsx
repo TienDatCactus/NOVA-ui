@@ -138,17 +138,14 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
   },
   {
     accessorKey: "components",
-    header: "Thành phần",
+    header: "Trạng thái",
     cell: ({ row }) => {
-      const components = row.original.components;
-      if (!components || components.length === 0) {
-        return <span className="text-muted-foreground">—</span>;
-      }
+      const active = row.original.active ? "Hoạt động" : "Ngưng hoạt động";
 
       return (
         <div className="flex items-center gap-1">
-          <Badge variant="secondary" className="text-xs">
-            {components.length} thành phần
+          <Badge variant={active ? "default" : "secondary"} className="text-xs">
+            {active}
           </Badge>
         </div>
       );

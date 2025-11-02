@@ -78,7 +78,7 @@ export default function ServiceTypeDetailRow({
 
         <div className="space-y-4">
           <DetailSection title="Mô tả">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground text-wrap">
               {type.description || "Không có mô tả"}
             </div>
           </DetailSection>
