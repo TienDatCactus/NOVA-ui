@@ -22,7 +22,6 @@ export default [
         ...prefix("bookings", [
           route("grid", "routes/reservation/bookings/grid.tsx"),
           route("list", "routes/reservation/bookings/list.tsx"),
-          route("timeline", "routes/reservation/bookings/timeline.tsx"),
         ]),
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
         route("new-booking", "routes/reservation/new-booking/new-booking.tsx"),
@@ -38,6 +37,7 @@ export default [
         route("menu", "routes/menu/menu.tsx"),
         route("menu-categories", "routes/menu/menu-categories.tsx"),
       ]),
+      ...prefix("pos-orders", [index("routes/pos-orders/pos-orders.tsx")]),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("customers", "routes/customers/customers.tsx"),
     ]),

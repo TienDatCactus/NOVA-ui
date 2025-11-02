@@ -98,6 +98,17 @@ const Orders = {
   listPOSbyInvoice: (invoiceId: string) => `PosOrders/invoice/${invoiceId}`,
   printPOSorder: (id: string) => `PosOrders/${id}/print-data`,
 };
+
+const Invoices = {
+  create: "Invoices", //? create invoice for a room booking
+  addItems: (id: string) => `Invoices/${id}/items`, //? add items to invoice
+  addCustomItems: (id: string) => `Invoices/${id}/custom-items`, //? add custom items to invoice
+  markPaid: (id: string) => `Invoices/${id}/mark-paid`, //? mark invoice as paid
+  void: (id: string) => `Invoices/${id}/void`, //? void invoice
+  detail: (id: string) => `Invoices/${id}`, //? get invoice details
+  listByBooking: (bookingRoomId: string) =>
+    `Invoices/booking-room/${bookingRoomId}`, //? list invoices by booking ID
+};
 export {
   Auth,
   Booking,

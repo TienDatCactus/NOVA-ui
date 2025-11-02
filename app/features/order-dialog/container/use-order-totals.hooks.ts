@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useServiceDetail } from "~/routes/services/container/services/query.hooks";
 import { useMenuItemDetail } from "~/routes/menu/container/menu/query.hooks";
 import type z from "zod";
-import { OrderSchema } from "~/services/schema/order.schema";
+import { OrderSchema } from "~/services/api/order/order.schema";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;

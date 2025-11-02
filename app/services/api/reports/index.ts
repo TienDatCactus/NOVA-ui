@@ -1,7 +1,7 @@
 import { Reports } from "~/services/url";
 import type { ReservationReportResponseDTO } from "./dto";
 import http from "~/lib/http";
-import { ReportsSchema } from "~/services/schema/reports.schema";
+import { ReportsSchema } from "~/services/api/reports/reports.schema";
 const { ReservationReportsSchema } = ReportsSchema;
 async function getReservationReports(
   fromDate: string,

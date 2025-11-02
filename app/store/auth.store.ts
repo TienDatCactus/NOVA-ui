@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { z } from "zod";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { AuthSchema } from "~/services/schema/auth.schema";
+import { AuthSchema } from "~/services/api/auth/auth.schema";
 const { UserSchema } = AuthSchema;
 export type User = z.infer<typeof UserSchema>;
 

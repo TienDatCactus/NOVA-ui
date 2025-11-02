@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { MenuCategorySchema } from "~/services/schema/menu-category.schema";
+import { MenuCategorySchema } from "~/services/api/menu-category/menu-category.schema";
 
 const {
   MenuCategoryItemSchema,

@@ -30,7 +30,7 @@ import {
 } from "~/components/ui/shadcn-io/dropzone";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { ServiceTypesSchema } from "~/services/schema/service-types.schema";
+import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
 import { useCreateServiceType } from "../container/service-types/mutation.hooks";
 
 const { CreateServiceTypeRequestSchema } = ServiceTypesSchema;

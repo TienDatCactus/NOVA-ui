@@ -1,6 +1,5 @@
 import http from "~/lib/http";
 import { Orders } from "~/services/url";
-import { OrderSchema } from "~/services/schema/order.schema";
 import type {
   CreatePOSOrderRequestDto,
   CreatePOSOrderResponseDto,
@@ -10,6 +9,7 @@ import type {
   POSOrderListResponseDto,
   POSOrderPrintDataDto,
 } from "./dto";
+import { OrderSchema } from "./order.schema";
 
 const {
   CreatePOSOrderResponseSchema,
@@ -29,6 +29,7 @@ async function createPOSOrder(
     const resp = await http.post(Orders.createPOS, data);
     return CreatePOSOrderResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -44,6 +45,7 @@ async function addItemsToPOSOrder(
     const resp = await http.post(Orders.addItemsToPOS(orderId), data);
     return AddItemsToPOSOrderResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -58,6 +60,7 @@ async function deleteItemFromPOSOrder(
   try {
     await http.delete(Orders.deleteItemFromPOS(orderId, itemId));
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -69,6 +72,7 @@ async function cancelPOSOrder(orderId: string): Promise<void> {
   try {
     await http.post(Orders.cancelPOSOrder(orderId));
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -80,6 +84,7 @@ async function completePOSOrder(orderId: string): Promise<void> {
   try {
     await http.post(Orders.completePOSOrder(orderId));
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -94,6 +99,7 @@ async function getPOSOrderDetail(
     const resp = await http.get(Orders.detailPOS(orderId));
     return POSOrderDetailResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -108,6 +114,7 @@ async function getPOSOrdersByInvoice(
     const resp = await http.get(Orders.listPOSbyInvoice(invoiceId));
     return POSOrderListResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -122,6 +129,7 @@ async function getPOSOrderPrintData(
     const resp = await http.get(Orders.printPOSorder(orderId));
     return POSOrderPrintDataSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }

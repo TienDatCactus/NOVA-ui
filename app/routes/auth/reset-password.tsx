@@ -16,7 +16,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "~/components/ui/input-otp";
-import useAuthSchema from "~/services/schema/auth.schema";
+import useAuthSchema from "~/services/api/auth/auth.schema";
 import type { ResetPasswordDto } from "~/services/api/auth/dto";
 import { useAuth } from "./container/auth.hooks";
 import {

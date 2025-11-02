@@ -22,7 +22,7 @@ import {
 import { Input } from "~/components/ui/input";
 import type { LoginDto } from "~/services/api/auth/dto";
 import { useAuth } from "./container/auth.hooks";
-import { AuthSchema } from "~/services/schema/auth.schema";
+import { AuthSchema } from "~/services/api/auth/auth.schema";
 
 export default function Login() {
   const { login, isLoading, error: apiError } = useAuth();

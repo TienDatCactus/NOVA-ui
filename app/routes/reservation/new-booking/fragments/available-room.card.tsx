@@ -11,7 +11,7 @@ import {
 } from "~/components/ui/collapsible";
 import { Label } from "~/components/ui/label";
 import { cn, formatMoney } from "~/lib/utils";
-import { RoomSchema } from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 const { AvailableRoomItemSchema } = RoomSchema;
 type AvailableRoomItem = z.infer<typeof AvailableRoomItemSchema>;
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentSchema } from "./payment.schema";
+import { PaymentSchema } from "~/services/schema/payment.schema";
 
 const ServiceOrderItemSchema = z.object({
   itemType: z.string().min(1),

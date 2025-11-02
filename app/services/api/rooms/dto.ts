@@ -1,5 +1,5 @@
 import type z from "zod";
-import { RoomSchema } from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 
 const {
   RoomBookingHistoryResponseSchema,

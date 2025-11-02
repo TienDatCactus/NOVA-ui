@@ -12,7 +12,7 @@ import {
 } from "./form.hooks";
 import { useRoomTypeDetail } from "./query.hooks";
 import { useUpdateRoomType, useDeleteRoomType } from "./mutation.hooks";
-import { RoomTypesSchema } from "~/services/schema/room-types.schema";
+import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
 
 const { UpdateRoomTypesDetailRequestSchema } = RoomTypesSchema;
 

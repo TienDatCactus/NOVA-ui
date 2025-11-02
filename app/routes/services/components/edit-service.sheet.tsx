@@ -33,7 +33,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import type { ServiceItem } from "~/services/api/services/dto";
-import { ServiceSchema } from "~/services/schema/service.schema";
+import { ServiceSchema } from "~/services/api/services/service.schema";
 import { useServiceTypes } from "../container/service-types/query.hooks";
 import { useUpdateService } from "../container/services/mutation.hooks";
 import { useServiceDetail } from "../container/services/query.hooks";

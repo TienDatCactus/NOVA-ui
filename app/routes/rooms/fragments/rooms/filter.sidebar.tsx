@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Switch } from "~/components/ui/switch";
-import { RoomTypesSchema } from "~/services/schema/room-types.schema";
+import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
 import { RoomStatusEnum } from "~/services/types/room.types";
 import type { RoomFilters } from "../../container/rooms/filter.hooks";
 const { RoomTypesListResponseSchema } = RoomTypesSchema;

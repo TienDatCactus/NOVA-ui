@@ -1,5 +1,5 @@
 import http from "~/lib/http";
-import useUnitSchema from "~/services/schema/unit.schema";
+import useUnitSchema from "~/services/api/units/unit.schema";
 import { Units } from "~/services/url";
 import type {
   CreateUnitRequestDto,

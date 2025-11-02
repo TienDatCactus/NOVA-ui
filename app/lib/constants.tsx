@@ -13,6 +13,7 @@ import {
   ReceiptText,
   Search,
   Settings,
+  ShoppingCart,
   Users,
   Warehouse,
 } from "lucide-react";
@@ -107,6 +108,12 @@ const DASHBOARD_ITEMS_RECEPTIONIST: Array<{
   },
   {
     id: 5,
+    title: "Đơn hàng POS",
+    icon: <ShoppingCart />,
+    href: "/dashboard/pos-orders",
+  },
+  {
+    id: 6,
     title: "Hóa đơn",
     icon: <ReceiptText />,
     href: "/dashboard/invoices",
@@ -218,6 +225,20 @@ const SERVICES_TOP_NAV_ITEMS: Array<{
     href: "/dashboard/services/menu-categories",
   },
 ];
+
+const POS_ORDERS_TOP_NAV_ITEMS: Array<{
+  icon?: JSX.Element;
+  title: string;
+  href?: string;
+  children?: Array<{ title: string; href: string }>;
+}> = [
+  {
+    icon: <ShoppingCart size={16} />,
+    title: "Danh sách đơn hàng",
+    href: "/dashboard/pos-orders/list",
+  },
+];
+
 const INVOICES_TOP_NAV_ITEMS: Array<{
   icon?: JSX.Element;
   title: string;
@@ -252,6 +273,7 @@ const TOP_NAV_CONFIG = {
   "/reservation": RESERVATION_TOP_NAV_ITEMS,
   "/rooms": ROOMS_TOP_NAV_ITEMS,
   "/services": SERVICES_TOP_NAV_ITEMS,
+  "/pos-orders": POS_ORDERS_TOP_NAV_ITEMS,
   "/invoices": INVOICES_TOP_NAV_ITEMS,
 } as const;
 

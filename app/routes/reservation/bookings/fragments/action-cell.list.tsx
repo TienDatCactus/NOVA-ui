@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { BookingSchema } from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 
 import { useBookingDetail } from "../container/booking-query.hooks";
 import UpdateBookingDialog from "../components/update-booking.dialog";

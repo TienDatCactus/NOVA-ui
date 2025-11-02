@@ -6,7 +6,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { useState } from "react";
 import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import { formatMoney } from "~/lib/utils";
-import { RoomSchema } from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 import RoomActionsCell from "../../fragments/rooms/actions.cell";
 import RoomStatusCell from "../../fragments/rooms/status.cell";
 import RoomDetailDialog from "../rooms-detail.dialog";

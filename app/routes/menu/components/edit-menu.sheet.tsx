@@ -47,7 +47,7 @@ import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
 import { useMenuItemDetail } from "../container/menu/query.hooks";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
-import { MenuSchema } from "~/services/schema/menu.schema";
+import { MenuSchema } from "~/services/api/menu/menu.schema";
 import Image from "~/components/ui/image";
 
 const { UpdateMenuItemRequestSchema } = MenuSchema;

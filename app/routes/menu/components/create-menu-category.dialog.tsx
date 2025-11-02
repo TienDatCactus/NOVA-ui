@@ -21,7 +21,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
-import { MenuCategorySchema } from "~/services/schema/menu-category.schema";
+import { MenuCategorySchema } from "~/services/api/menu-category/menu-category.schema";
 import { useCreateMenuCategory } from "../container/menu-categories/mutation.hooks";
 
 const { CreateMenuCategoryRequestSchema } = MenuCategorySchema;

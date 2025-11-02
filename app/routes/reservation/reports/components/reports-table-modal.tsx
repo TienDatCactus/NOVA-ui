@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import type z from "zod";
-import { ReportsSchema } from "~/services/schema/reports.schema";
+import { ReportsSchema } from "~/services/api/reports/reports.schema";
 
 const { ReservationReportsSchema } = ReportsSchema;
 type ReportsDataDto = z.infer<typeof ReservationReportsSchema>;

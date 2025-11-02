@@ -44,7 +44,7 @@ import {
 } from "~/components/ui/form";
 import { Skeleton } from "~/components/ui/skeleton";
 import type z from "zod";
-import { BookingSchema } from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 
 const { StaffBookingPricePreviewResponseSchema } = BookingSchema;
 type PricePreviewDto = z.infer<typeof StaffBookingPricePreviewResponseSchema>;

@@ -1,9 +1,7 @@
-import z, { number } from "zod";
-import { RoomSchema } from "./room.schema";
-import { ServiceSchema } from "./service.schema";
-import { InvoiceSchema } from "./invoice.schema";
-import { PaymentSchema } from "./payment.schema";
-import { OrderSchema } from "./order.schema";
+import z from "zod";
+import { PaymentSchema } from "../../schema/payment.schema";
+import { InvoiceSchema } from "../invoices/invoice.schema";
+import { OrderSchema } from "../order/order.schema";
 
 const BookingSourceEnum = z.enum(
   ["DirectStaff", "DirectCustomer", "OTA", "Agency"],

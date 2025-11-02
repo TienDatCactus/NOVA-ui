@@ -1,5 +1,5 @@
 import type z from "zod";
-import { ReportsSchema } from "~/services/schema/reports.schema";
+import { ReportsSchema } from "~/services/api/reports/reports.schema";
 
 const { ReservationReportsSchema } = ReportsSchema;
 

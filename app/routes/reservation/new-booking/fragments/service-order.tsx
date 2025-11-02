@@ -9,7 +9,7 @@ import { formatMoney } from "~/lib/utils";
 import { useState } from "react";
 import type z from "zod";
 import AddServiceDialog from "~/features/order-dialog";
-import { OrderSchema } from "~/services/schema/order.schema";
+import { OrderSchema } from "~/services/api/order/order.schema";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;

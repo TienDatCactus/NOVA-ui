@@ -25,7 +25,7 @@ import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
-import { BookingSchema } from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 const { BookingSourceEnum } = BookingSchema;

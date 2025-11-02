@@ -1,6 +1,4 @@
 import z from "zod";
-import { PaymentSchema } from "./payment.schema";
-import { RoomSchema } from "./room.schema";
 
 // general CRUD ops
 const ServiceListItemSchema = z.object({

@@ -1,5 +1,5 @@
 import type z from "zod";
-import { ServiceTypesSchema } from "~/services/schema/service-types.schema";
+import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
 
 const {
   CreateServiceTypeResponseSchema,

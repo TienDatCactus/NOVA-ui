@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import useAuthSchema from "~/services/schema/auth.schema";
+import useAuthSchema from "~/services/api/auth/auth.schema";
 import type { Route } from "./+types/forgot-password";
 import { useAuth } from "./container/auth.hooks";
 

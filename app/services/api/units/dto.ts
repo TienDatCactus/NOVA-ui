@@ -1,5 +1,5 @@
 import type z from "zod";
-import useUnitSchema from "~/services/schema/unit.schema";
+import useUnitSchema from "~/services/api/units/unit.schema";
 
 const {
   CreateUnitRequestSchema,

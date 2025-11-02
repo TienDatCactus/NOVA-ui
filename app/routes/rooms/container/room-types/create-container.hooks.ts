@@ -8,7 +8,7 @@ import {
   useRoomTypeCloseHandler,
 } from "./form.hooks";
 import { useCreateRoomType } from "./mutation.hooks";
-import { RoomTypesSchema } from "~/services/schema/room-types.schema";
+import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
 
 const { CreateRoomTypesRequestSchema } = RoomTypesSchema;
 

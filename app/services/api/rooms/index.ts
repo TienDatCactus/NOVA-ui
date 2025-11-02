@@ -17,7 +17,7 @@ import type {
 } from "./dto";
 import http from "~/lib/http";
 import { Rooms } from "~/services/url";
-import { RoomSchema } from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 
 const {
   RoomDetailSchema,

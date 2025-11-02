@@ -18,13 +18,13 @@ import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServiceTypes } from "~/routes/services/container/service-types/query.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
 import useServiceFilters from "~/routes/services/container/services/filter.hooks";
-import { OrderSchema } from "~/services/schema/order.schema";
 import MenuList from "./components/menu-list";
 import OrderDetail from "./components/order-detail";
 import ServiceList from "./components/service-list";
 import FilterMenuBar from "./fragments/filter-menu.bar";
 import FilterServiceBar from "./fragments/filter-service.bar";
 import useMenuFilters from "~/routes/menu/container/menu/filter.hooks";
+import { OrderSchema } from "~/services/api/order/order.schema";
 
 const { ServiceOrderItemSchema, ServiceOrderSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;

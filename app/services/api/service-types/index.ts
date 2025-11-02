@@ -9,7 +9,7 @@ import type {
   UpdateServiceTypeRequestDto,
   UpdateServiceTypeResponseDto,
 } from "./dto";
-import { ServiceTypesSchema } from "~/services/schema/service-types.schema";
+import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
 
 const {
   CreateServiceTypeResponseSchema,

@@ -7,8 +7,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { formatMoney } from "~/lib/utils";
-import { OrderSchema } from "~/services/schema/order.schema";
 import OrderItemWrapper from "../fragments/order-item-wrapper";
+import { OrderSchema } from "~/services/api/order/order.schema";
 
 const { ServiceOrderSchema } = OrderSchema;
 type ServiceOrderDto = z.infer<typeof ServiceOrderSchema>;

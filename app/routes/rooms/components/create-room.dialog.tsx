@@ -28,7 +28,7 @@ import {
 } from "~/components/ui/select";
 
 import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
-import { RoomSchema } from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 import { RoomStatusEnum } from "~/services/types/room.types";
 import { useCreateRoom } from "../container/rooms/mutation.hooks";
 

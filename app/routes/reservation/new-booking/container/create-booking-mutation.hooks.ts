@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type z from "zod";
 import { BookingService } from "~/services/api/booking";
-import { BookingSchema } from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 
 const { StaffCreateBookingSchema } = BookingSchema;
 function useCreateBookingMutation() {

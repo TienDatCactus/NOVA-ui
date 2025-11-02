@@ -1,7 +1,7 @@
 import http from "~/lib/http";
 
 import { toYMD } from "~/lib/utils";
-import { BookingSchema } from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { BookingListParams } from "~/services/types/booking.types";
 import { Booking, OTAInformation } from "../../url";
 import type {

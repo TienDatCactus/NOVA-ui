@@ -33,7 +33,7 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
-import { MenuSchema } from "~/services/schema/menu.schema";
+import { MenuSchema } from "~/services/api/menu/menu.schema";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useCreateMenuItem } from "../container/menu/mutation.hooks";
 

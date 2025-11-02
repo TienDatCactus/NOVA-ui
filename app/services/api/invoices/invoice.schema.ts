@@ -1,5 +1,5 @@
 import z from "zod";
-import { PaymentSchema } from "./payment.schema";
+import { PaymentSchema } from "../../schema/payment.schema";
 
 const InvoiceStatusEnum = z
   .enum(["Pending", "Paid", "Cancelled", "PartiallyPaid"])

@@ -1,7 +1,7 @@
 import z from "zod";
-import { BookingSchema } from "./booking.schema";
-import { OrderSchema } from "./order.schema";
+import { BookingSchema } from "../api/booking/booking.schema";
 import { PaymentSchema } from "./payment.schema";
+import { OrderSchema } from "../api/order/order.schema";
 
 const CustomerInfoFormSchema = z
   .object({

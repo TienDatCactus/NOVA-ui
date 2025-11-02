@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { OrderSchema } from "~/services/schema/order.schema";
+import { OrderSchema } from "./order.schema";
 
 const {
   ServiceOrderSchema,

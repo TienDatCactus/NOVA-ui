@@ -1,5 +1,5 @@
 import type z from "zod";
-import { BookingSchema } from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 
 const {
   BookingListResponseSchema,

@@ -9,7 +9,7 @@ import type {
 } from "./dto";
 import { RoomTypes } from "~/services/url";
 import http from "~/lib/http";
-import { RoomTypesSchema } from "~/services/schema/room-types.schema";
+import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
 
 const {
   RoomTypesListResponseSchema,

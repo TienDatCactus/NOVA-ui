@@ -1,6 +1,6 @@
 import http from "~/lib/http";
 import { Menu } from "~/services/url";
-import { MenuSchema } from "~/services/schema/menu.schema";
+import { MenuSchema } from "~/services/api/menu/menu.schema";
 import type {
   MenuListResponseDto,
   MenuListByCategoryResponseDto,

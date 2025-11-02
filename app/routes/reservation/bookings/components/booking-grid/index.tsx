@@ -10,7 +10,7 @@ import {
   EmptyTitle,
 } from "~/components/ui/empty";
 import { Skeleton } from "~/components/ui/skeleton";
-import { RoomSchema } from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
 import RoomTypeCard from "../../fragments/room.card";
 

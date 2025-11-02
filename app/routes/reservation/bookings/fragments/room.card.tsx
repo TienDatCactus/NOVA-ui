@@ -32,7 +32,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import Image from "~/components/ui/image";
 import { formatMoney } from "~/lib/utils";
-import { RoomSchema } from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 import { cn } from "~/lib/utils";
 import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
 

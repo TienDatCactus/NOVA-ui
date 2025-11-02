@@ -1,5 +1,5 @@
 import type z from "zod";
-import { RoomTypesSchema } from "~/services/schema/room-types.schema";
+import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
 
 const {
   RoomTypesListItem,

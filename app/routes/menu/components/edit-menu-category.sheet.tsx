@@ -23,7 +23,7 @@ import {
 } from "~/components/ui/sheet";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Switch } from "~/components/ui/switch";
-import { MenuCategorySchema } from "~/services/schema/menu-category.schema";
+import { MenuCategorySchema } from "~/services/api/menu-category/menu-category.schema";
 import { useUpdateMenuCategory } from "../container/menu-categories/mutation.hooks";
 import { useMenuCategoryDetail } from "../container/menu-categories/query.hooks";
 import { toYMD } from "~/lib/utils";

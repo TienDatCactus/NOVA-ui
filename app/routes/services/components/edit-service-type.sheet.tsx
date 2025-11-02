@@ -34,7 +34,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
-import { ServiceTypesSchema } from "~/services/schema/service-types.schema";
+import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
 import { useUpdateServiceType } from "../container/service-types/mutation.hooks";
 import { useServiceTypeDetails } from "../container/service-types/query.hooks";
 
