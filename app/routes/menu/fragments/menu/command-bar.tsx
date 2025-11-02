@@ -11,7 +11,7 @@ import {
 } from "~/components/ui/select";
 import type { MenuCategoryListResponseDto } from "~/services/api/menu-category/dto";
 import type { MenuFilters } from "~/services/types/menu.types";
-import CreateMenuDialog from "../components/create-menu.dialog";
+import CreateMenuDialog from "../../components/create-menu.dialog";
 
 interface MenuCommandBarProps {
   menuCategories?: MenuCategoryListResponseDto;

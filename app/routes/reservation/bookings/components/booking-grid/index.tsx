@@ -11,19 +11,23 @@ import {
 } from "~/components/ui/empty";
 import { Skeleton } from "~/components/ui/skeleton";
 import { RoomSchema } from "~/services/schema/room.schema";
-import RoomCard from "../fragments/room.card";
-const { RoomListResponseSchema } = RoomSchema;
-type RoomList = z.infer<typeof RoomListResponseSchema>;
+import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
+import RoomTypeCard from "../../fragments/room.card";
+
 interface BookingGridProps {
-  rooms?: RoomList;
+  rooms?: AvailableRoomsInternalResponseDto;
   isLoading?: boolean;
   refetch: () => void;
+  onBookNow?: (roomId: string) => void;
+  onViewDetails?: (roomId: string) => void;
 }
 
 function BookingGrid({
   rooms = [],
   isLoading = false,
   refetch,
+  onBookNow,
+  onViewDetails,
 }: BookingGridProps) {
   if (isLoading) {
     return (
@@ -31,8 +35,8 @@ function BookingGrid({
         {Array(8)
           .fill(0)
           .map((_, index) => (
-            <div key={index} className="h-32">
-              <Skeleton className="h-full w-full" />
+            <div key={index} className="h-96">
+              <Skeleton className="h-full w-full rounded-lg" />
             </div>
           ))}
       </div>
@@ -46,18 +50,15 @@ function BookingGrid({
           <EmptyMedia variant="icon">
             <FolderCode />
           </EmptyMedia>
-          <EmptyTitle>Chưa có đặt phòng</EmptyTitle>
+          <EmptyTitle>Không tìm thấy phòng</EmptyTitle>
           <EmptyDescription>
-            Bạn chưa có đặt phòng nào. Hãy bắt đầu bằng cách tạo đơn đặt phòng
-            đầu tiên.
+            Không có phòng nào phù hợp với bộ lọc của bạn. Hãy thử điều chỉnh bộ
+            lọc hoặc tải lại.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
-            <Button>Tạo đơn đặt phòng</Button>
-            <Button variant="outline" onClick={refetch}>
-              Tải lại
-            </Button>
+            <Button onClick={refetch}>Tải lại</Button>
           </div>
         </EmptyContent>
         <Button
@@ -67,7 +68,7 @@ function BookingGrid({
           size="sm"
         >
           <a href="#">
-            Learn More <ArrowUpRightIcon />
+            Tìm hiểu thêm <ArrowUpRightIcon />
           </a>
         </Button>
       </Empty>
@@ -75,9 +76,14 @@ function BookingGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {rooms.map((room) => (
-        <RoomCard key={room.roomId} room={room} />
+        <RoomTypeCard
+          key={room.roomTypeId}
+          roomType={room}
+          onBookNow={onBookNow}
+          onViewDetails={onViewDetails}
+        />
       ))}
     </div>
   );

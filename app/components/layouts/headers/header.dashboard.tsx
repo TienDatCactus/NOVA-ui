@@ -20,13 +20,10 @@ import {
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { useHeaderNav } from "../side-bar/dashboard/container/useHeader";
-import { QuickRoomAvailabilityDialog } from "~/features/check-available-rooms";
 
 interface DashboardHeaderProps extends React.HTMLAttributes<HTMLElement> {}
 export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
   const { navItems, currentPath } = useHeaderNav();
-  const [checkAvailableDialogOpen, setCheckAvailableDialogOpen] =
-    useState(false);
   const isMobile = useIsMobile();
   return (
     <header className="h-12 shadow-sm py-6 px-4 z-10 bg-white flex items-center w-full sticky top-0   justify-between border-b">
@@ -79,23 +76,12 @@ export default function DashboardHeader({ ...props }: DashboardHeaderProps) {
         </NavigationMenuList>
       </NavigationMenu>
       <div className="flex gap-2 items-center">
-        <Button
-          variant={"info-outline"}
-          onClick={() => setCheckAvailableDialogOpen(true)}
-        >
-          Kiểm tra phòng trống <CalendarPlus />
-        </Button>
-
         <Button asChild variant={"pink-outline"}>
           <Link to="/dashboard/reservation/new-booking">
             Đặt phòng <BookDown />
           </Link>
         </Button>
 
-        <QuickRoomAvailabilityDialog
-          onOpenChange={(open) => setCheckAvailableDialogOpen(open)}
-          open={checkAvailableDialogOpen}
-        />
         <Input
           placeholder="Tìm kiếm..."
           className="w-64 h-8 placeholder:text-sm"

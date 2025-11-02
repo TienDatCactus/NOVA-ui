@@ -14,7 +14,7 @@ import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
-import { useMenuItemDetail } from "../container/menu/query.hooks";
+import { useMenuItemDetail } from "../../container/menu/query.hooks";
 
 interface MenuDetailRowProps {
   menuItem: MenuListItemDto;

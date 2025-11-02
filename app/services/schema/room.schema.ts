@@ -109,7 +109,6 @@ export const RoomSchema = {
   RoomStatusEnum,
   RoomDetailSchema,
   UpdateRoomStatusResponseSchema,
-  RoomListResponseSchema,
   RoomListItemSchema,
   RoomBookingHistorySchema,
   RoomBookingHistoryResponseSchema,

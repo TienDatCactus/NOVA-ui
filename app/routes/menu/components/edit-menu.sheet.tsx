@@ -37,11 +37,11 @@ import { Textarea } from "~/components/ui/textarea";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { UnitsService } from "~/services/api/units";
 import { MenuSchema } from "~/services/schema/menu.schema";
-import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
 import { useMenuItemDetail } from "../container/menu/query.hooks";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { Label } from "~/components/ui/label";
+import { useMenuCategories } from "../container/menu-categories/query.hooks";
 
 const { UpdateMenuItemRequestSchema } = MenuSchema;
 

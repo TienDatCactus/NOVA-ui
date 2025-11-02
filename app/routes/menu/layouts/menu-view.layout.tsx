@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { useMenuCategories } from "../container/menu-categories/query.hooks";
-import MenuCommandBar from "../fragments/command-bar";
 import type { MenuFilters } from "~/services/types/menu.types";
+import { useMenuCategories } from "../container/menu-categories/query.hooks";
+import MenuCommandBar from "../fragments/menu/command-bar";
 
 interface MenuViewLayoutProps {
   children: ReactNode;

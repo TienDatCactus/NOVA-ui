@@ -2,9 +2,9 @@ import CreateMenuCategoryDialog from "./components/create-menu-category.dialog";
 import EditMenuCategorySheet from "./components/edit-menu-category.sheet";
 import MenuCategoryViewLayout from "./layouts/menu-category-view.layout";
 import { useMenuCategoryFilters } from "./container/menu-categories/filter.hooks";
-import { useMenuCategoryList } from "./container/menu-categories/query.hooks";
 import { useMemo } from "react";
 import MenuCategoryDataTable from "./components/menu-category-list";
+import { useMenuCategories } from "./container/menu-categories/query.hooks";
 
 /**
  * Main menu categories management page
@@ -14,11 +14,7 @@ export default function MenuCategoriesPage() {
   const { filters, updateFilter, resetFilters, filterCategories } =
     useMenuCategoryFilters();
 
-  const {
-    data: categories,
-    isPending,
-    refetch,
-  } = useMenuCategoryList({
+  const { data: categories, isPending } = useMenuCategories({
     includeInactive: filters.activeFilter !== "active",
   });
 

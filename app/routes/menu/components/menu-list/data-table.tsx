@@ -17,7 +17,7 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
-import MenuDetailRow from "../../fragments/detail.row";
+import MenuDetailRow from "../../fragments/menu/detail.row";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

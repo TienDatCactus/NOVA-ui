@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
-import { useDeleteMenuItem } from "../container/menu/mutation.hooks";
+import { useDeleteMenuItem } from "../../container/menu/mutation.hooks";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
