@@ -12,7 +12,7 @@ import Image from "~/components/ui/image";
 import { DetailItem, DetailSection } from "~/components/ui/section-detail";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
-import { useServiceTypeDetails } from "../../container/service-types-query.hooks";
+import { useServiceTypeDetails } from "../../container/service-types/query.hooks";
 
 interface ServiceTypeDetailRowProps {
   type: ServiceTypeItem;
@@ -21,7 +21,7 @@ interface ServiceTypeDetailRowProps {
 export default function ServiceTypeDetailRow({
   type,
 }: ServiceTypeDetailRowProps) {
-  const hasImages = Array.isArray(type.imageUrls) && type.imageUrls.length > 0;
+  const hasImages = Array.isArray(type.images) && type.images.length > 0;
   const { data: detailData, isPending } = useServiceTypeDetails(type.id);
 
   if (isPending) {
@@ -36,12 +36,12 @@ export default function ServiceTypeDetailRow({
             <div className="max-h-[400px] grid place-items-center overflow-y-auto">
               <Carousel className="w-fit">
                 <CarouselContent>
-                  {type.imageUrls.map((url, index) => (
+                  {type.images?.map((img, index) => (
                     <CarouselItem key={index}>
                       <div className="p-1">
                         <ImageZoom>
                           <Image
-                            src={url}
+                            src={img.url}
                             height={200}
                             width={200}
                             alt={`${type.name} - ${index + 1}`}
@@ -78,9 +78,9 @@ export default function ServiceTypeDetailRow({
 
         <div className="space-y-4">
           <DetailSection title="Mô tả">
-            <p className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               {type.description || "Không có mô tả"}
-            </p>
+            </div>
           </DetailSection>
 
           {type.createdAt && type.updatedAt && (

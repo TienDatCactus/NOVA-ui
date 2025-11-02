@@ -35,8 +35,8 @@ import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import { ServiceTypesSchema } from "~/services/schema/service-types.schema";
-import { useUpdateServiceType } from "../container/service-type-mutation.hooks";
-import { useServiceTypeDetails } from "../container/service-types-query.hooks";
+import { useUpdateServiceType } from "../container/service-types/mutation.hooks";
+import { useServiceTypeDetails } from "../container/service-types/query.hooks";
 
 const { UpdateServiceTypeRequestSchema } = ServiceTypesSchema;
 
@@ -214,18 +214,18 @@ export default function EditServiceTypeSheet({
 
               <div className="space-y-2">
                 <FormLabel>Hình ảnh hiện có</FormLabel>
-                {serviceTypeDetails?.imageUrls.length === 0 ? (
+                {serviceTypeDetails?.images?.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     Không có hình ảnh
                   </p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {!!serviceTypeDetails &&
-                      serviceTypeDetails.imageUrls.map((img) => {
-                        const marked = removeMediaIds.includes(img);
+                      serviceTypeDetails.images?.map((img) => {
+                        const marked = removeMediaIds.includes(img.mediaId);
                         return (
                           <Label
-                            key={img}
+                            key={img.mediaId}
                             className={cn(
                               "relative group rounded-md border cursor-pointer transition-all",
                               {
@@ -243,12 +243,12 @@ export default function EditServiceTypeSheet({
                               <Checkbox
                                 checked={marked}
                                 onCheckedChange={() =>
-                                  toggleRemoveExisting(img)
+                                  toggleRemoveExisting(img.mediaId)
                                 }
                               />
                             </div>
                             <Image
-                              src={img}
+                              src={img.url}
                               alt="existing"
                               width={100}
                               height={100}

@@ -12,7 +12,7 @@ export function useCreateService() {
     mutationFn: async (data: CreateServiceRequestDto) =>
       await ServicesService.createService(data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 }
@@ -29,18 +29,18 @@ export function useUpdateService() {
       data: UpdateServiceRequestDto;
     }) => await ServicesService.updateService(id, data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["service-detail"] });
     },
   });
 }
 
 export function useDeleteService() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => await ServicesService.deleteService(id),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 }

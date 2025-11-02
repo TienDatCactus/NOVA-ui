@@ -42,7 +42,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
     );
   }
 
-  const hasImages = detailData.imageUrls && detailData.imageUrls.length > 0;
+  const hasImages = detailData.images && detailData.images.length > 0;
   const hasComponents =
     detailData.components && detailData.components.length > 0;
 
@@ -55,16 +55,16 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
-                Hình ảnh ({detailData.imageUrls.length})
+                Hình ảnh ({detailData.images.length})
               </h4>
               <div className=" grid place-items-center ">
-                <Carousel className="w-60">
+                <Carousel className="w-50">
                   <CarouselContent>
-                    {detailData.imageUrls.map((url, index) => (
+                    {detailData.images.map((img, index) => (
                       <CarouselItem key={index} className="w-fit">
                         <ImageZoom>
                           <Image
-                            src={url}
+                            src={img.url}
                             height={200}
                             width={200}
                             alt={`${detailData.name} - ${index + 1}`}
@@ -123,7 +123,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
               </div>
               {/* Timestamps */}
               {(detailData.createdAt || detailData.updatedAt) && (
-                <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
+                <div className="flex flex-col gap-4 text-xs text-muted-foreground">
                   {detailData.createdAt && (
                     <div>
                       <span>Ngày tạo: </span>

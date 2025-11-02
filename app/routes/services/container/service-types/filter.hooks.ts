@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
-import type {
-  ServiceTypeItem,
-  ServiceTypeListResponseDto,
-} from "~/services/api/service-types/dto";
+import type { ServiceTypeListResponseDto } from "~/services/api/service-types/dto";
 
 export interface ServiceTypeFilters {
   activeFilter: "" | "all" | "active";

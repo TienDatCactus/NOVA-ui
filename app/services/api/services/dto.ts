@@ -1,5 +1,5 @@
 import type z from "zod";
-import useServiceSchema from "~/services/schema/service.schema";
+import { ServiceSchema } from "~/services/schema/service.schema";
 const {
   ServiceListResponseSchema,
   ServiceListByTypeResponseSchema,
@@ -9,7 +9,7 @@ const {
   UpdateServiceItemResponseSchema,
   ServiceItemDetailResponseSchema,
   ServiceListItemSchema,
-} = useServiceSchema();
+} = ServiceSchema;
 type ServiceListResponseDto = z.infer<typeof ServiceListResponseSchema>;
 type ServiceListByTypeResponseDto = z.infer<
   typeof ServiceListByTypeResponseSchema

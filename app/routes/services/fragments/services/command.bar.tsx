@@ -11,53 +11,46 @@ import {
 } from "~/components/ui/select";
 import type { ServiceTypeListResponseDto } from "~/services/api/service-types/dto";
 import type { ServiceFilters } from "~/services/types/service.types";
+import CreateServiceDialog from "../../components/create-service.dialog";
+import { useState } from "react";
 
 interface ServicesCommandBarProps {
   filters: ServiceFilters;
-  onFilterChange: <K extends keyof ServiceFilters>(
+  updateFilter: <K extends keyof ServiceFilters>(
     key: K,
     value: ServiceFilters[K]
   ) => void;
-  selectedCount: number;
-  onAddService: () => void;
-  onBulkEdit: () => void;
-  onExportExcel: () => void;
-  onClearSelection: () => void;
   serviceTypes: ServiceTypeListResponseDto;
-  onResetFilters: () => void;
+  resetFilters: () => void;
 }
 
 export default function ServicesCommandBar({
   serviceTypes,
   filters,
-  onFilterChange,
-  selectedCount,
-  onAddService,
-  onBulkEdit,
-  onExportExcel,
-  onClearSelection,
-  onResetFilters,
+  updateFilter,
+  resetFilters,
 }: ServicesCommandBarProps) {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const activeFiltersCount =
     (filters.searchText !== "" ? 1 : 0) +
     (filters.activeFilter !== "" ? 1 : 0) +
     (filters.typeCode !== "" ? 1 : 0);
   return (
-    <div className="flex flex-col gap-4 p-4 shadow-md bg-white/50 border rounded-md">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col gap-4 p-4 shadow-md h-fit border rounded-md">
+      <div className="flex flex-col items-center gap-4">
         <Input
           placeholder="Tìm kiếm dịch vụ theo tên, mã hoặc mô tả..."
           value={filters.searchText}
           className="bg-white"
-          onChange={(e) => onFilterChange("searchText", e.target.value)}
+          onChange={(e) => updateFilter("searchText", e.target.value)}
           startAddon={<Search className="text-muted-foreground" />}
         />
 
         <Select
           value={filters.typeCode || ""}
-          onValueChange={(value) => onFilterChange("typeCode", value)}
+          onValueChange={(value) => updateFilter("typeCode", value)}
         >
-          <SelectTrigger className="shadow-md bg-white">
+          <SelectTrigger className="shadow-md w-full bg-white">
             <SelectValue placeholder="Chọn loại dịch vụ" />
           </SelectTrigger>
           <SelectContent>
@@ -73,13 +66,13 @@ export default function ServicesCommandBar({
         <Select
           value={filters.activeFilter}
           onValueChange={(value) =>
-            onFilterChange(
+            updateFilter(
               "activeFilter",
               value as ServiceFilters["activeFilter"]
             )
           }
         >
-          <SelectTrigger className="shadow-md bg-white">
+          <SelectTrigger className="shadow-md w-full bg-white">
             <SelectValue placeholder="Chọn trạng thái" />
           </SelectTrigger>
           <SelectContent>
@@ -88,38 +81,22 @@ export default function ServicesCommandBar({
           </SelectContent>
         </Select>
 
-        <Button onClick={onAddService}>
+        <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Thêm dịch vụ
         </Button>
         {activeFiltersCount > 0 && (
-          <Button variant={"outline"} onClick={onResetFilters}>
+          <Button variant={"outline"} onClick={resetFilters}>
             <RotateCcw />
             Đặt lại bộ lọc
           </Button>
         )}
       </div>
 
-      {selectedCount > 0 && (
-        <div className="flex items-center justify-between p-3 bg-muted rounded-md animate-in slide-in-from-top-2">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{selectedCount} dịch vụ được chọn</Badge>
-            <Button variant="ghost" size="sm" onClick={onClearSelection}>
-              Bỏ chọn
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={onBulkEdit}>
-              <Edit className="h-4 w-4 mr-2" />
-              Chỉnh sửa hàng loạt
-            </Button>
-            <Button variant="outline" size="sm" onClick={onExportExcel}>
-              <Download className="h-4 w-4 mr-2" />
-              Xuất Excel
-            </Button>
-          </div>
-        </div>
-      )}
+      <CreateServiceDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+      />
     </div>
   );
 }

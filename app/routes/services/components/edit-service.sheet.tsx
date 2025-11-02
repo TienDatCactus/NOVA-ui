@@ -34,8 +34,9 @@ import { Textarea } from "~/components/ui/textarea";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import type { ServiceItem } from "~/services/api/services/dto";
 import { ServiceSchema } from "~/services/schema/service.schema";
-import { useUpdateService } from "../container/service-mutation.hooks";
-import { useServiceTypes } from "../container/service-types-query.hooks";
+import { useServiceTypes } from "../container/service-types/query.hooks";
+import { useUpdateService } from "../container/services/mutation.hooks";
+import { useServiceDetail } from "../container/services/query.hooks";
 
 const { UpdateServiceItemRequestSchema } = ServiceSchema;
 
@@ -54,31 +55,25 @@ export default function EditServiceSheet({
 }: EditServiceSheetProps) {
   const form = useForm({
     resolver: zodResolver(UpdateServiceItemRequestSchema),
-    defaultValues: {
-      code: "",
-      name: "",
-      description: "",
-      serviceTypeId: "",
-      unitId: "",
-      basePrice: 0,
-      active: true,
-    },
   });
-
+  const { data: serviceItemDetail } = useServiceDetail(service.serviceItemId);
   const { mutate: updateService, isPending } = useUpdateService();
   const { data: units } = useUnits();
   const { data: serviceTypesData } = useServiceTypes();
+
   useEffect(() => {
-    if (service) {
+    if (serviceItemDetail) {
       form.reset({
-        code: service.code,
-        name: service.name,
-        description: service.description,
-        basePrice: service.basePrice,
-        active: service.active,
+        serviceTypeId: serviceItemDetail.serviceTypeId,
+        unitId: serviceItemDetail.unitId,
+        code: serviceItemDetail.code,
+        name: serviceItemDetail.name,
+        description: serviceItemDetail.description,
+        basePrice: serviceItemDetail.basePrice,
+        active: serviceItemDetail.active,
       });
     }
-  }, [service, form]);
+  }, [serviceItemDetail, form]);
 
   const handleSubmit = (data: UpdateServiceFormData) => {
     if (!service) return;
@@ -117,6 +112,7 @@ export default function EditServiceSheet({
                         Loại dịch vụ <span className="text-destructive">*</span>
                       </FormLabel>
                       <Select
+                        {...field}
                         onValueChange={field.onChange}
                         value={field.value}
                       >
@@ -146,6 +142,7 @@ export default function EditServiceSheet({
                         Đơn vị tính <span className="text-destructive">*</span>
                       </FormLabel>
                       <Select
+                        {...field}
                         onValueChange={field.onChange}
                         value={field.value}
                       >

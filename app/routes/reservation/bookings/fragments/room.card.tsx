@@ -17,6 +17,7 @@ import {
   CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
@@ -69,57 +70,51 @@ function RoomTypeCard({
   };
 
   return (
-    <Card className="shadow-sm hover:shadow-md transition-all overflow-hidden group">
-      {/* Room Type Image */}
-      <div className="relative h-48 bg-muted overflow-hidden">
-        {isLoadingDetail ? (
-          <Skeleton className="w-full h-full" />
-        ) : roomDetail?.imageUrls &&
-          roomDetail.imageUrls.length > 0 &&
-          !imageError ? (
-          <>
-            <Image
-              src={roomDetail.imageUrls[0]}
-              alt={roomType.roomTypeName}
-              width={400}
-              height={300}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              onError={() => setImageError(true)}
-            />
-            {roomDetail.imageUrls.length > 1 && (
-              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
-                +{roomDetail.imageUrls.length - 1} ảnh
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted">
-            <ImageIcon className="w-12 h-12 text-muted-foreground" />
+    <Card className="max-w-md pt-0">
+      <CardContent className="px-0">
+        <div className="relative h-48 bg-muted overflow-hidden">
+          {isLoadingDetail ? (
+            <Skeleton className="w-full h-full" />
+          ) : roomDetail?.imageUrls &&
+            roomDetail.imageUrls.length > 0 &&
+            !imageError ? (
+            <>
+              <Image
+                src={roomDetail.imageUrls[0]}
+                alt={roomType.roomTypeName}
+                width={400}
+                height={300}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={() => setImageError(true)}
+              />
+              {roomDetail.imageUrls.length > 1 && (
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                  +{roomDetail.imageUrls.length - 1} ảnh
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-muted">
+              <ImageIcon className="w-12 h-12 text-muted-foreground" />
+            </div>
+          )}
+
+          {/* Availability Badge */}
+          <div className="absolute top-2 left-2">
+            <Badge variant={roomType.availableCount > 0 ? "success" : "info"}>
+              {roomType.availableCount} phòng trống
+            </Badge>
           </div>
-        )}
 
-        {/* Availability Badge */}
-        <div className="absolute top-2 left-2">
-          <Badge
-            variant={roomType.availableCount > 0 ? "default" : "secondary"}
-            className={cn(
-              "text-white",
-              roomType.availableCount > 0 ? "bg-green-500" : "bg-gray-500"
-            )}
-          >
-            {roomType.availableCount} phòng trống
-          </Badge>
+          {/* Room Type Code Badge */}
+          <div className="absolute top-2 right-2">
+            <Badge variant="outline" className="bg-white/90">
+              {roomType.roomTypeCode}
+            </Badge>
+          </div>
         </div>
-
-        {/* Room Type Code Badge */}
-        <div className="absolute top-2 right-2">
-          <Badge variant="outline" className="bg-white/90">
-            {roomType.roomTypeCode}
-          </Badge>
-        </div>
-      </div>
-
-      <CardHeader className="pb-3">
+      </CardContent>
+      <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg">{roomType.roomTypeName}</CardTitle>
@@ -159,9 +154,7 @@ function RoomTypeCard({
           </CardAction>
         </div>
       </CardHeader>
-
-      <CardContent className="space-y-3">
-        {/* Available Rooms List */}
+      <CardContent>
         {roomType.availableRooms.length > 0 && (
           <div className="rounded-md border p-3 bg-muted/30">
             <p className="text-xs font-medium text-muted-foreground mb-2">
@@ -169,11 +162,7 @@ function RoomTypeCard({
             </p>
             <div className="flex flex-wrap gap-1">
               {roomType.availableRooms.slice(0, 6).map((room) => (
-                <Badge
-                  key={room.roomId}
-                  variant="secondary"
-                  className="text-xs"
-                >
+                <Badge key={room.roomId} variant="warning" className="text-xs">
                   {room.roomName}
                 </Badge>
               ))}
@@ -193,24 +182,22 @@ function RoomTypeCard({
             {formatMoney(roomType.baseRatePerNight).vndFormatted}
           </span>
         </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={handleViewDetails}
-          >
-            Chi tiết
-          </Button>
-          {roomType.availableCount > 0 && (
-            <Button size="sm" className="flex-1" onClick={handleBookNow}>
-              Đặt ngay
-            </Button>
-          )}
-        </div>
       </CardContent>
+      <CardFooter className="gap-3 max-sm:flex-col max-sm:items-stretch">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={handleViewDetails}
+        >
+          Chi tiết
+        </Button>
+        {roomType.availableCount > 0 && (
+          <Button size="sm" className="flex-1" onClick={handleBookNow}>
+            Đặt ngay
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   );
 }

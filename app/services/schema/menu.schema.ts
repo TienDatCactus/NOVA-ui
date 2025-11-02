@@ -30,7 +30,17 @@ export const MenuItemDetailSchema = z.object({
   active: z.boolean(),
   createdAt: z.string().optional().nullable(),
   updatedAt: z.string().optional().nullable(),
-  imageUrls: z.array(z.string()),
+  images: z
+    .array(
+      z.object({
+        mediaId: z.string(),
+        url: z.url(),
+        caption: z.string().optional().nullable(),
+        contentType: z.string(),
+        displayOrder: z.number(),
+      })
+    )
+    .optional(),
   components: z.array(MenuItemComponentDetailSchema),
 });
 

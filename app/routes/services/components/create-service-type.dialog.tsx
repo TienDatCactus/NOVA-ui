@@ -31,7 +31,7 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { ServiceTypesSchema } from "~/services/schema/service-types.schema";
-import { useCreateServiceType } from "../container/service-type-mutation.hooks";
+import { useCreateServiceType } from "../container/service-types/mutation.hooks";
 
 const { CreateServiceTypeRequestSchema } = ServiceTypesSchema;
 

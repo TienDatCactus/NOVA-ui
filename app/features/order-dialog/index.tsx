@@ -21,10 +21,10 @@ import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn, formatMoney } from "~/lib/utils";
-import useServiceFilters from "~/routes/services/container/service-filter.hooks";
-import { useServices } from "~/routes/services/container/service-query.hooks";
-import { useServiceTypes } from "~/routes/services/container/service-types-query.hooks";
 import { OrderSchema } from "~/services/schema/order.schema";
+import useServiceFilters from "~/routes/services/container/services/filter.hooks";
+import { useServiceTypes } from "~/routes/services/container/service-types/query.hooks";
+import { useServices } from "~/routes/services/container/services/query.hooks";
 
 const { ServiceOrderItemSchema, ServiceOrderSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
@@ -267,47 +267,48 @@ export default function AddServiceDialog({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-0 h-[60vh] overflow-y-auto">
-                {activeTab === "service" &&
-                  (serviceItems.length === 0 ? (
-                    <div className="text-center text-muted-foreground col-span-2">
-                      Không có dịch vụ
-                    </div>
-                  ) : (
-                    filteredServiceItems.map((item: any) => (
-                      <Card
-                        key={item.serviceItemId}
-                        className={cn(
-                          "p-3 border cursor-pointer",
-                          isSelected(item.serviceItemId) &&
-                            "ring-2 ring-primary"
-                        )}
-                        onClick={() =>
-                          toggleSelectItem(item.serviceItemId, "service")
-                        }
-                      >
-                        <div className="space-y-2">
-                          <div className="h-28 bg-muted rounded-md flex items-center justify-center">
-                            <Image
-                              src={item.imageUrl || ""}
-                              alt={item.name}
-                              className="h-full w-full object-cover rounded-md"
-                            />
+                {
+                  activeTab === "service" &&
+                    (serviceItems.length === 0 ? (
+                      <div className="text-center text-muted-foreground col-span-2">
+                        Không có dịch vụ
+                      </div>
+                    ) : (
+                      filteredServiceItems.map((item: any) => (
+                        <Card
+                          key={item.serviceItemId}
+                          className={cn(
+                            "p-3 border cursor-pointer",
+                            isSelected(item.serviceItemId) &&
+                              "ring-2 ring-primary"
+                          )}
+                          onClick={() =>
+                            toggleSelectItem(item.serviceItemId, "service")
+                          }
+                        >
+                          <div className="space-y-2">
+                            <div className="h-28 bg-muted rounded-md flex items-center justify-center">
+                              <Image
+                                src={item.imageUrl || ""}
+                                alt={item.name}
+                                className="h-full w-full object-cover rounded-md"
+                              />
+                            </div>
+                            <div>
+                              <p className="font-medium">{item.name}</p>
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {item.description}
+                              </p>
+                              <p className="text-sm font-semibold text-primary mt-1">
+                                {item.basePrice
+                                  ? formatMoney(item.basePrice).vndFormatted
+                                  : ""}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">{item.name}</p>
-                            <p className="text-xs text-muted-foreground line-clamp-2">
-                              {item.description}
-                            </p>
-                            <p className="text-sm font-semibold text-primary mt-1">
-                              {item.basePrice
-                                ? formatMoney(item.basePrice).vndFormatted
-                                : ""}
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
+                        </Card>
+                      ))
                     ))
-                  ))
                   // ) : filteredMenuItems.length === 0 ? (
                   //   <div className="text-center text-muted-foreground col-span-2">
                   //     Không có món ăn

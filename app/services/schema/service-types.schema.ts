@@ -8,7 +8,17 @@ const ServiceTypeItemSchema = z.object({
   active: z.boolean(),
   createdAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional(),
-  imageUrls: z.array(z.url()),
+  images: z
+    .array(
+      z.object({
+        mediaId: z.string(),
+        url: z.url(),
+        caption: z.string().optional().nullable(),
+        contentType: z.string().optional().nullable(),
+        displayOrder: z.number().optional().nullable(),
+      })
+    )
+    .optional(),
 });
 
 const ServiceTypeListResponseSchema = z.array(ServiceTypeItemSchema);

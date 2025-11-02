@@ -7,6 +7,7 @@ import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -16,6 +17,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -23,6 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import {
+  Dropzone,
+  DropzoneContent,
+  DropzoneEmptyState,
+} from "~/components/ui/shadcn-io/dropzone";
 import {
   Sheet,
   SheetContent,
@@ -34,14 +41,14 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import type { MenuListItemDto } from "~/services/api/menu/dto";
-import { UnitsService } from "~/services/api/units";
-import { MenuSchema } from "~/services/schema/menu.schema";
+import { cn } from "~/lib/utils";
+import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
 import { useMenuItemDetail } from "../container/menu/query.hooks";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
-import { Label } from "~/components/ui/label";
-import { useMenuCategories } from "../container/menu-categories/query.hooks";
+import type { MenuListItemDto } from "~/services/api/menu/dto";
+import { MenuSchema } from "~/services/schema/menu.schema";
+import Image from "~/components/ui/image";
 
 const { UpdateMenuItemRequestSchema } = MenuSchema;
 
@@ -58,8 +65,9 @@ export default function EditMenuSheet({
   onClose,
   menuItem,
 }: EditMenuSheetProps) {
-  const [imagePreview, setImagePreview] = useState<string[]>([]);
-  const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [removeMediaIds, setRemoveMediaIds] = useState<string[]>([]);
 
   const form = useForm({
     resolver: zodResolver(UpdateMenuItemRequestSchema),
@@ -112,40 +120,19 @@ export default function EditMenuSheet({
         })),
       });
 
-      setRemovedImageIds([]);
+      setRemoveMediaIds([]);
+      setNewFiles([]);
+      setNewPreviews([]);
     }
-  }, [menuItem, form]);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    const currentImages = form.getValues("NewImages") || [];
-    form.setValue("NewImages", [...currentImages, ...files]);
-
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
-    setImagePreview((prev) => [...prev, ...newPreviews]);
-  };
-
-  const handleRemoveNewImage = (index: number) => {
-    const currentImages = form.getValues("NewImages") || [];
-    const newImages = currentImages.filter((_, i) => i !== index);
-    form.setValue("NewImages", newImages);
-
-    URL.revokeObjectURL(imagePreview[index]);
-    setImagePreview((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleRemoveExistingImage = (imageUrl: string, index: number) => {
-    // setExistingImages((prev) => prev.filter((_, i) => i !== index));
-    // You would need to get the actual media ID from the backend
-    // setRemovedImageIds((prev) => [...prev, mediaId]);
-    // form.setValue("RemoveMediaIds", [...removedImageIds, mediaId]);
-  };
+  }, [menuItem, form, menuItemDetail]);
 
   const handleSubmit = (data: UpdateMenuFormData) => {
     updateMenuItem(
-      { ...data, RemoveMediaIds: removedImageIds },
+      {
+        ...data,
+        RemoveMediaIds: removeMediaIds,
+        NewImages: newFiles,
+      },
       {
         onSuccess: () => {
           handleClose();
@@ -155,12 +142,41 @@ export default function EditMenuSheet({
   };
 
   const handleClose = () => {
-    imagePreview.forEach((url) => URL.revokeObjectURL(url));
-    setImagePreview([]);
-
-    setRemovedImageIds([]);
+    newPreviews.forEach((url) => URL.revokeObjectURL(url));
+    setNewPreviews([]);
+    setNewFiles([]);
+    setRemoveMediaIds([]);
     form.reset();
     onClose();
+  };
+
+  useEffect(() => {
+    form.setValue("NewImages", newFiles as any);
+    form.setValue("RemoveMediaIds", removeMediaIds);
+  }, [newFiles, removeMediaIds, form]);
+
+  useEffect(() => {
+    const urls = newFiles.map((f) => URL.createObjectURL(f));
+    setNewPreviews(urls);
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [newFiles]);
+
+  const onDropNewFiles = (accepted: File[]) => {
+    setNewFiles((prev) => [...prev, ...accepted]);
+  };
+
+  const removeNewFile = (index: number) => {
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const toggleRemoveExisting = (id: string) => {
+    setRemoveMediaIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((mediaId) => mediaId !== id)
+        : [...prev, id]
+    );
   };
 
   if (isLoadingDetail) {
@@ -384,91 +400,108 @@ export default function EditMenuSheet({
                 </h3>
 
                 {/* Existing Images */}
-                {!!menuItemDetail && menuItemDetail?.imageUrls.length > 0 && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Hình ảnh hiện tại:
+                <div className="space-y-2">
+                  <FormLabel>Hình ảnh hiện có</FormLabel>
+                  {!menuItemDetail || menuItemDetail?.images?.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      Không có hình ảnh
                     </p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {menuItemDetail.imageUrls.map((url, index) => (
-                        <div
-                          key={`existing-${index}`}
-                          className="relative group aspect-square rounded-lg overflow-hidden border"
-                        >
-                          <img
-                            src={url}
-                            alt={`Existing ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleRemoveExistingImage(url, index)
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {menuItemDetail.images?.map((img) => {
+                        const marked = removeMediaIds.includes(img.mediaId);
+                        return (
+                          <Label
+                            key={img.mediaId}
+                            className={cn(
+                              "relative group rounded-md border cursor-pointer transition-all",
+                              {
+                                "ring-2 ring-destructive/60 border-destructive/50":
+                                  marked,
+                                "border-border hover:border-primary/30":
+                                  !marked,
+                              }
+                            )}
+                            title={
+                              marked ? "Bỏ đánh dấu xóa" : "Đánh dấu để xóa"
                             }
-                            className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
+                            <div className="absolute top-2 left-2 z-10">
+                              <Checkbox
+                                checked={marked}
+                                onCheckedChange={() =>
+                                  toggleRemoveExisting(img.mediaId)
+                                }
+                              />
+                            </div>
+                            <Image
+                              src={img.url}
+                              alt="existing"
+                              width={100}
+                              height={100}
+                              className="object-cover rounded-md"
+                            />
+
+                            {marked && (
+                              <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold text-destructive-foreground">
+                                Sẽ xóa
+                              </span>
+                            )}
+                          </Label>
+                        );
+                      })}
                     </div>
-                  </div>
-                )}
+                  )}
+                  {removeMediaIds.length > 0 && (
+                    <p className="text-xs text-destructive">
+                      Đã đánh dấu xóa {removeMediaIds.length} ảnh
+                    </p>
+                  )}
+                </div>
 
                 {/* New Images Upload */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-4">
-                    <label
-                      htmlFor="new-image-upload"
-                      className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm"
-                    >
-                      <ImagePlus className="h-4 w-4" />
-                      <span>Thêm ảnh mới</span>
-                    </label>
-                    <input
-                      id="new-image-upload"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                    {imagePreview.length > 0 && (
-                      <p className="text-sm text-muted-foreground">
-                        {imagePreview.length} ảnh mới
-                      </p>
-                    )}
-                  </div>
+                <div className="space-y-2">
+                  <FormLabel>Thêm hình ảnh</FormLabel>
+                  <Dropzone
+                    accept={{ "image/*": [] }}
+                    maxFiles={8}
+                    onDrop={(accepted) => onDropNewFiles(accepted)}
+                    src={newFiles}
+                    className="border-2 border-dashed"
+                  >
+                    <DropzoneEmptyState />
+                    <DropzoneContent />
+                  </Dropzone>
 
-                  {imagePreview.length > 0 && (
-                    <div className="grid grid-cols-3 gap-3">
-                      {imagePreview.map((preview, index) => (
-                        <div
-                          key={`new-${index}`}
-                          className="relative group aspect-square rounded-lg overflow-hidden border border-primary"
-                        >
-                          <img
-                            src={preview}
-                            alt={`New ${index + 1}`}
-                            className="w-full h-full object-cover"
+                  {newPreviews.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {newPreviews.map((url, index) => (
+                        <div key={index} className="relative group">
+                          <Image
+                            src={url}
+                            alt={`new-${index}`}
+                            width={100}
+                            height={100}
+                            className="object-cover border"
                           />
-                          <button
+                          <Button
                             type="button"
-                            onClick={() => handleRemoveNewImage(index)}
-                            className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => removeNewFile(index)}
+                            aria-label="Xóa ảnh mới"
                           >
                             <X className="h-3 w-3" />
-                          </button>
-                          <Badge
-                            variant="default"
-                            className="absolute bottom-2 left-2 text-xs"
-                          >
-                            Mới
-                          </Badge>
+                          </Button>
                         </div>
                       ))}
                     </div>
                   )}
+                  <p className="text-xs text-muted-foreground">
+                    Có thể tải lên tối đa 8 ảnh. Ảnh sẽ được lưu khi bạn nhấn
+                    Lưu thay đổi.
+                  </p>
                 </div>
               </div>
 

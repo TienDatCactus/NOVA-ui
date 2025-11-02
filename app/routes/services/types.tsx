@@ -1,12 +1,8 @@
-import { useEffect } from "react";
-import ServiceTypesDataTable from "./components/service-types-list";
-import ServiceTypesViewLayout from "./layouts/service-types-view.layout";
-import useServiceTypesContainer from "./container/service-types-container.hooks";
-import CreateServiceTypeDialog from "./components/create-service-type.dialog";
-import EditServiceTypeSheet from "./components/edit-service-type.sheet";
 import type { Route } from "./+types/types";
-import useServiceTypeFilters from "./container/service-types-filter.hooks";
-import { useServiceTypes } from "./container/service-types-query.hooks";
+import ServiceTypesDataTable from "./components/service-types-list";
+import useServiceTypeFilters from "./container/service-types/filter.hooks";
+import { useServiceTypes } from "./container/service-types/query.hooks";
+import ServiceTypesViewLayout from "./layouts/service-types-view.layout";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -34,7 +30,12 @@ export default function Component({
   const filteredTypes = filterServiceTypes(serviceTypesData ?? []) ?? [];
 
   return (
-    <ServiceTypesViewLayout totalTypes={filteredTypes.length}>
+    <ServiceTypesViewLayout
+      totalTypes={filteredTypes.length}
+      filters={filters}
+      resetFilters={resetFilters}
+      updateFilter={updateFilter}
+    >
       <ServiceTypesDataTable types={filteredTypes} isLoading={isPending} />
     </ServiceTypesViewLayout>
   );

@@ -119,4 +119,5 @@ export const RoomSchema = {
   CreateRoomRequestSchema,
   AvailableRoomsInternalResponseSchema,
   AvailableRoomItemSchema,
+  RoomListResponseSchema,
 };

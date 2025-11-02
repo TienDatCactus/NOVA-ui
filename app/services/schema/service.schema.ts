@@ -11,6 +11,7 @@ const ServiceListItemSchema = z.object({
   unitName: z.string().max(100),
   basePrice: z.number().min(0),
   active: z.boolean().default(true),
+  imageUrls: z.array(z.url()).optional(),
 });
 
 const ServiceItemSchema = z.object({
@@ -26,6 +27,17 @@ const ServiceItemSchema = z.object({
   active: z.boolean().default(true),
   createdAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional(),
+  images: z
+    .array(
+      z.object({
+        mediaId: z.string(),
+        url: z.url(),
+        caption: z.string().optional().nullable(),
+        contentType: z.string().optional().nullable(),
+        displayOrder: z.number().optional().nullable(),
+      })
+    )
+    .optional(),
 });
 
 const ServiceListByTypeResponseSchema = z.array(ServiceItemSchema);

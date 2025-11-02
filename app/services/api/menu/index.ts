@@ -145,7 +145,7 @@ async function updateMenuItem(
         "Content-Type": "multipart/form-data",
       },
     });
-    return UpdateMenuItemResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }

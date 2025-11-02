@@ -1,15 +1,24 @@
 import type { ReactNode } from "react";
-import type { ServiceTypeFilters } from "../container/service-types-filter.hooks";
 import ServiceTypesCommandBar from "../fragments/service-types/command-bar";
+import type { ServiceTypeFilters } from "../container/service-types/filter.hooks";
 
 interface ServiceTypesViewLayoutProps {
   children: ReactNode;
   totalTypes: number;
+  filters: ServiceTypeFilters;
+  resetFilters: () => void;
+  updateFilter: <K extends keyof ServiceTypeFilters>(
+    key: K,
+    value: ServiceTypeFilters[K]
+  ) => void;
 }
 
 export default function ServiceTypesViewLayout({
   children,
   totalTypes,
+  filters,
+  resetFilters,
+  updateFilter,
 }: ServiceTypesViewLayoutProps) {
   return (
     <div className="flex flex-col space-y-2 h-full">
@@ -37,7 +46,11 @@ export default function ServiceTypesViewLayout({
         </div>
       </div>
       <div className="flex gap-2">
-        <ServiceTypesCommandBar />
+        <ServiceTypesCommandBar
+          filters={filters}
+          resetFilters={resetFilters}
+          updateFilter={updateFilter}
+        />
         <main className="flex-1 ">{children}</main>
       </div>
     </div>

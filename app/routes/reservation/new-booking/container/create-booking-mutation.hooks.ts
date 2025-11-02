@@ -18,7 +18,7 @@ function useCreateBookingMutation() {
       );
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
     },
   });
 }

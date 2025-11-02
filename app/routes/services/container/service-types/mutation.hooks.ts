@@ -13,8 +13,8 @@ export function useCreateServiceType() {
     mutationFn: async (data: CreateServiceTypeRequestDto) =>
       await ServiceTypesService.createServiceType(data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["service-types"] });
-      queryClient.refetchQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["service-types"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 }
@@ -31,8 +31,8 @@ export function useUpdateServiceType() {
       data: UpdateServiceTypeRequestDto;
     }) => await ServiceTypesService.updateServiceType(id, data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["service-types"] });
-      queryClient.refetchQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["service-types"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 }
@@ -44,8 +44,8 @@ export function useDeleteServiceType() {
     mutationFn: async (id: string) =>
       await ServiceTypesService.deleteServiceType(id),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["service-types"] });
-      queryClient.refetchQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["service-types"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 }

@@ -8,6 +8,7 @@ import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import ServiceTypeActionsCell from "../../fragments/service-types/actions.cell";
+import Image from "~/components/ui/image";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
@@ -50,13 +51,13 @@ export const columns: ColumnDef<EnrichedServiceTypeItem>[] = [
       const type = row.original;
       return (
         <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              "w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden bg-muted border shadow-s"
-            )}
-          >
-            <ImageIcon className="w-6 h-6 text-muted-foreground" />
-          </div>
+          <Image
+            src={type.images?.[0].url || ""}
+            className="w-6 h-6 object-contain"
+            width={48}
+            height={48}
+            alt={type.name}
+          />
 
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">

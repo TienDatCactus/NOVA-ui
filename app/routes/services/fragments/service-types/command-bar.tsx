@@ -9,14 +9,26 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Badge } from "~/components/ui/badge";
-import type { ServiceTypeFilters } from "~/routes/services/container/service-types-filter.hooks";
-import { useState, type use } from "react";
-import useServiceTypeFilters from "~/routes/services/container/service-types-filter.hooks";
+import { useState } from "react";
 import CreateServiceTypeDialog from "../../components/create-service-type.dialog";
+import useServiceTypeFilters, {
+  type ServiceTypeFilters,
+} from "../../container/service-types/filter.hooks";
+interface ServiceTypesCommandBarProps {
+  filters: ServiceTypeFilters;
+  resetFilters: () => void;
+  updateFilter: <K extends keyof ServiceTypeFilters>(
+    key: K,
+    value: ServiceTypeFilters[K]
+  ) => void;
+}
 
-export default function ServiceTypesCommandBar() {
+export default function ServiceTypesCommandBar({
+  filters,
+  resetFilters,
+  updateFilter,
+}: ServiceTypesCommandBarProps) {
   const [open, setOpen] = useState(false);
-  const { filters, resetFilters, updateFilter } = useServiceTypeFilters();
   const activeFiltersCount =
     (filters.searchText !== "" ? 1 : 0) + (filters.activeFilter !== "" ? 1 : 0);
   return (
