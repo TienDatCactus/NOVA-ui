@@ -36,6 +36,7 @@ import { cn } from "~/lib/utils";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import { ServiceTypesSchema } from "~/services/schema/service-types.schema";
 import { useUpdateServiceType } from "../container/service-type-mutation.hooks";
+import { useServiceTypeDetails } from "../container/service-types-query.hooks";
 
 const { UpdateServiceTypeRequestSchema } = ServiceTypesSchema;
 
@@ -52,11 +53,10 @@ export default function EditServiceTypeSheet({
   onClose,
   type,
 }: EditServiceTypeSheetProps) {
+  const { data: serviceTypeDetails } = useServiceTypeDetails(type!.id);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
-  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
   const [removeMediaIds, setRemoveMediaIds] = useState<string[]>([]);
-  console.log(type);
   const form = useForm<UpdateServiceTypeFormData>({
     resolver: zodResolver(UpdateServiceTypeRequestSchema),
     defaultValues: {
@@ -76,7 +76,6 @@ export default function EditServiceTypeSheet({
         description: type.description || "",
         active: type.active,
       });
-      setExistingImageUrls(type.imageUrls || []);
       setRemoveMediaIds([]);
       setNewFiles([]);
       setNewPreviews([]);
@@ -105,7 +104,6 @@ export default function EditServiceTypeSheet({
 
   const handleClose = () => {
     form.reset();
-    setExistingImageUrls([]);
     setRemoveMediaIds([]);
     setNewFiles([]);
     setNewPreviews([]);
@@ -216,49 +214,55 @@ export default function EditServiceTypeSheet({
 
               <div className="space-y-2">
                 <FormLabel>Hình ảnh hiện có</FormLabel>
-                {existingImageUrls.length === 0 ? (
+                {serviceTypeDetails?.imageUrls.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     Không có hình ảnh
                   </p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {existingImageUrls.map((url) => {
-                      const marked = removeMediaIds.includes(url);
-                      return (
-                        <Label
-                          key={url}
-                          className={cn(
-                            "relative group rounded-md border cursor-pointer transition-all",
-                            {
-                              "ring-2 ring-destructive/60 border-destructive/50":
-                                marked,
-                              "border-border hover:border-primary/30": !marked,
+                    {!!serviceTypeDetails &&
+                      serviceTypeDetails.imageUrls.map((img) => {
+                        const marked = removeMediaIds.includes(img);
+                        return (
+                          <Label
+                            key={img}
+                            className={cn(
+                              "relative group rounded-md border cursor-pointer transition-all",
+                              {
+                                "ring-2 ring-destructive/60 border-destructive/50":
+                                  marked,
+                                "border-border hover:border-primary/30":
+                                  !marked,
+                              }
+                            )}
+                            title={
+                              marked ? "Bỏ đánh dấu xóa" : "Đánh dấu để xóa"
                             }
-                          )}
-                          title={marked ? "Bỏ đánh dấu xóa" : "Đánh dấu để xóa"}
-                        >
-                          <div className="absolute top-2 left-2 z-10">
-                            <Checkbox
-                              checked={marked}
-                              onCheckedChange={() => toggleRemoveExisting(url)}
+                          >
+                            <div className="absolute top-2 left-2 z-10">
+                              <Checkbox
+                                checked={marked}
+                                onCheckedChange={() =>
+                                  toggleRemoveExisting(img)
+                                }
+                              />
+                            </div>
+                            <Image
+                              src={img}
+                              alt="existing"
+                              width={100}
+                              height={100}
+                              className="object-cover rounded-md"
                             />
-                          </div>
-                          <Image
-                            src={url}
-                            alt="existing"
-                            width={100}
-                            height={100}
-                            className="object-cover rounded-md"
-                          />
 
-                          {marked && (
-                            <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold text-destructive-foreground">
-                              Sẽ xóa
-                            </span>
-                          )}
-                        </Label>
-                      );
-                    })}
+                            {marked && (
+                              <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold text-destructive-foreground">
+                                Sẽ xóa
+                              </span>
+                            )}
+                          </Label>
+                        );
+                      })}
                   </div>
                 )}
                 {removeMediaIds.length > 0 && (

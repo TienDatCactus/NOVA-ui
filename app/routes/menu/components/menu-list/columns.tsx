@@ -8,9 +8,7 @@ import { ChevronDown, ImageIcon } from "lucide-react";
 import Image from "~/components/ui/image";
 import { Button } from "~/components/ui/button";
 
-export const createColumns = (
-  onEdit?: (item: MenuListItemDto) => void
-): ColumnDef<MenuListItemDto>[] => [
+export const columns: ColumnDef<MenuListItemDto>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -174,12 +172,9 @@ export const createColumns = (
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-          <MenuActionsCell menuItem={row.original} onEdit={onEdit} />
+          <MenuActionsCell menuItem={row.original} />
         </div>
       );
     },
   },
 ];
-
-// Default columns without onEdit callback
-export const columns = createColumns();

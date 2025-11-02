@@ -4,29 +4,12 @@ import ServiceTypesCommandBar from "../fragments/service-types/command-bar";
 
 interface ServiceTypesViewLayoutProps {
   children: ReactNode;
-  filters: ServiceTypeFilters;
-  onFilterChange: <K extends keyof ServiceTypeFilters>(
-    key: K,
-    value: ServiceTypeFilters[K]
-  ) => void;
   totalTypes: number;
-  selectedCount: number;
-  onAddType: () => void;
-  onExportExcel: () => void;
-  onClearSelection: () => void;
-  onResetFilters: () => void;
 }
 
 export default function ServiceTypesViewLayout({
   children,
-  filters,
-  onFilterChange,
   totalTypes,
-  selectedCount,
-  onAddType,
-  onExportExcel,
-  onClearSelection,
-  onResetFilters,
 }: ServiceTypesViewLayoutProps) {
   return (
     <div className="flex flex-col space-y-2 h-full">
@@ -52,19 +35,11 @@ export default function ServiceTypesViewLayout({
             </div>
           </div>
         </div>
-
-        <ServiceTypesCommandBar
-          filters={filters}
-          onFilterChange={onFilterChange}
-          selectedCount={selectedCount}
-          onAddType={onAddType}
-          onExportExcel={onExportExcel}
-          onClearSelection={onClearSelection}
-          onResetFilters={onResetFilters}
-        />
       </div>
-
-      <main className="flex-1 ">{children}</main>
+      <div className="flex gap-2">
+        <ServiceTypesCommandBar />
+        <main className="flex-1 ">{children}</main>
+      </div>
     </div>
   );
 }

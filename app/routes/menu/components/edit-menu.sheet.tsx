@@ -34,11 +34,14 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { MenuCategoryService } from "~/services/api/menu-category";
+import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { UnitsService } from "~/services/api/units";
 import { MenuSchema } from "~/services/schema/menu.schema";
-import { useUpdateMenuItem } from "../container/menu-mutation.hooks";
-import { useMenuItemDetail } from "../container/menu-query.hooks";
+import { useMenuCategories } from "../container/menu-categories/query.hooks";
+import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
+import { useMenuItemDetail } from "../container/menu/query.hooks";
+import { useUnits } from "~/routes/units/container/unit-query.hooks";
+import { Label } from "~/components/ui/label";
 
 const { UpdateMenuItemRequestSchema } = MenuSchema;
 
@@ -47,16 +50,15 @@ type UpdateMenuFormData = z.infer<typeof UpdateMenuItemRequestSchema>;
 interface EditMenuSheetProps {
   open: boolean;
   onClose: () => void;
-  itemId: string;
+  menuItem: MenuListItemDto;
 }
 
 export default function EditMenuSheet({
   open,
   onClose,
-  itemId,
+  menuItem,
 }: EditMenuSheetProps) {
   const [imagePreview, setImagePreview] = useState<string[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
 
   const form = useForm({
@@ -75,45 +77,41 @@ export default function EditMenuSheet({
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "Components",
   });
 
-  const { data: menuItem, isPending: isLoadingDetail } =
-    useMenuItemDetail(itemId);
-  const { mutate: updateMenuItem, isPending: isUpdating } =
-    useUpdateMenuItem(itemId);
-  const { data: categories } = useQuery({
-    queryKey: ["menu-categories"],
-    queryFn: async () => await MenuCategoryService.getMenuCategoryList(),
-  });
-  const { data: units } = useQuery({
-    queryKey: ["units"],
-    queryFn: async () => await UnitsService.getUnitList(),
-  });
+  const { data: menuItemDetail, isPending: isLoadingDetail } =
+    useMenuItemDetail(menuItem.itemId);
+
+  const { mutate: updateMenuItem, isPending: isUpdating } = useUpdateMenuItem(
+    menuItem.itemId
+  );
+  const { data: menuCategories } = useMenuCategories();
+  const { data: units } = useUnits();
 
   useEffect(() => {
     if (menuItem) {
       form.reset({
-        CategoryId: menuItem.categoryId,
-        Code: menuItem.code,
-        Name: menuItem.name,
-        Description: menuItem.description,
-        UnitId: menuItem.unitId,
-        Price: menuItem.price,
-        Active: menuItem.active,
+        CategoryId: menuItemDetail?.categoryId,
+        Code: menuItemDetail?.code,
+        Name: menuItemDetail?.name,
+        Description: menuItemDetail?.description,
+        UnitId: menuItemDetail?.unitId || "",
+        Price: menuItemDetail?.price,
+        Active: menuItemDetail?.active,
         RemoveMediaIds: [],
         NewImages: [],
-        Components: menuItem.components.map((comp) => ({
+        Components: menuItemDetail?.components.map((comp) => ({
           itemId: comp.itemId,
-          itemCode: comp.itemId, // Using itemId as code fallback
+          itemCode: menuItem.code,
           itemName: comp.itemName,
           quantity: comp.quantity,
           notes: comp.notes || "",
         })),
       });
-      setExistingImages(menuItem.imageUrls || []);
+
       setRemovedImageIds([]);
     }
   }, [menuItem, form]);
@@ -139,9 +137,7 @@ export default function EditMenuSheet({
   };
 
   const handleRemoveExistingImage = (imageUrl: string, index: number) => {
-    // For now, we'll just remove from display
-    // In a real implementation, you'd track the media ID to remove
-    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+    // setExistingImages((prev) => prev.filter((_, i) => i !== index));
     // You would need to get the actual media ID from the backend
     // setRemovedImageIds((prev) => [...prev, mediaId]);
     // form.setValue("RemoveMediaIds", [...removedImageIds, mediaId]);
@@ -161,7 +157,7 @@ export default function EditMenuSheet({
   const handleClose = () => {
     imagePreview.forEach((url) => URL.revokeObjectURL(url));
     setImagePreview([]);
-    setExistingImages([]);
+
     setRemovedImageIds([]);
     form.reset();
     onClose();
@@ -207,7 +203,7 @@ export default function EditMenuSheet({
                 <h3 className="text-lg font-semibold border-b pb-2">
                   Thông tin cơ bản
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="CategoryId"
@@ -221,12 +217,12 @@ export default function EditMenuSheet({
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Chọn danh mục" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {categories?.map((category) => (
+                            {menuCategories?.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name}
                               </SelectItem>
@@ -253,44 +249,22 @@ export default function EditMenuSheet({
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="Name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Tên món <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="VD: Phở bò" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="Name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Tên món <span className="text-destructive">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="VD: Phở bò" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="Description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Mô tả <span className="text-destructive">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Mô tả chi tiết..."
-                          rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
@@ -305,7 +279,7 @@ export default function EditMenuSheet({
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Chọn đơn vị" />
                             </SelectTrigger>
                           </FormControl>
@@ -350,22 +324,57 @@ export default function EditMenuSheet({
                     name="Active"
                     render={({ field }) => (
                       <FormItem className="flex flex-col justify-end">
-                        <FormLabel>Trạng thái</FormLabel>
-                        <div className="flex items-center gap-2">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
+                        <FormLabel>
                           <span className="text-sm text-muted-foreground">
                             {field.value ? "Hoạt động" : "Tạm ngưng"}
                           </span>
-                        </div>
+                        </FormLabel>
+                        <FormControl>
+                          <div className="flex items-center gap-2">
+                            <div className="border-input has-data-[state=checked]:border-primary/50 relative flex w-full items-start gap-2 rounded-md border p-4 shadow-xs outline-none">
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                              <div className="flex grow items-center gap-3">
+                                <div className="grid grow gap-2">
+                                  <FormLabel htmlFor={field.name}>
+                                    Kích hoạt món ăn
+                                  </FormLabel>
+                                  <p
+                                    id={field.name}
+                                    className="text-muted-foreground text-xs"
+                                  >
+                                    Cho phép món ăn hiển thị trong thực đơn
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </FormControl>
                       </FormItem>
                     )}
                   />
                 </div>
+                <FormField
+                  control={form.control}
+                  name="Description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Mô tả <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Mô tả chi tiết..."
+                          rows={3}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {/* Images */}
@@ -375,13 +384,13 @@ export default function EditMenuSheet({
                 </h3>
 
                 {/* Existing Images */}
-                {existingImages.length > 0 && (
+                {!!menuItemDetail && menuItemDetail?.imageUrls.length > 0 && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">
                       Hình ảnh hiện tại:
                     </p>
                     <div className="grid grid-cols-3 gap-3">
-                      {existingImages.map((url, index) => (
+                      {menuItemDetail.imageUrls.map((url, index) => (
                         <div
                           key={`existing-${index}`}
                           className="relative group aspect-square rounded-lg overflow-hidden border"

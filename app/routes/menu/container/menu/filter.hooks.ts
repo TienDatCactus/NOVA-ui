@@ -3,7 +3,7 @@ import type { MenuListResponseDto } from "~/services/api/menu/dto";
 import type { MenuFilters } from "~/services/types/menu.types";
 
 const defaultFilters: MenuFilters = {
-  categoryId: "",
+  categoryCode: "",
   activeFilter: "",
   searchText: "",
 };
@@ -25,7 +25,6 @@ export default function useMenuFilters() {
   const filterMenuItems = useMemo(
     () => (menuItems: MenuListResponseDto) => {
       return menuItems.filter((item) => {
-        // Filter by search text
         const matchesSearch =
           filters.searchText === "" ||
           item.name.toLowerCase().includes(filters.searchText.toLowerCase()) ||

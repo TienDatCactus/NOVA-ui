@@ -1,12 +1,11 @@
 import {
   flexRender,
   getCoreRowModel,
-  getExpandedRowModel,
   useReactTable,
   type ColumnDef,
   type RowSelectionState,
 } from "@tanstack/react-table";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -15,16 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { cn } from "~/lib/utils";
-import type { MenuListItemDto } from "~/services/api/menu/dto";
-import MenuDetailRow from "../../fragments/detail.row";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData extends MenuListItemDto, TValue>({
+export function DataTable<TData extends MenuCategoryItemDto, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -37,14 +35,12 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
       rowSelection,
     },
     onRowSelectionChange: setRowSelection,
-    getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getRowCanExpand: () => true,
-    getRowId: (row) => row.itemId,
+    getRowId: (row) => row.id,
   });
 
   return (
-    <div className="rounded-md border bg-white shadow-sm">
+    <div className="rounded-md border bg-card shadow-sm">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -65,33 +61,22 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <React.Fragment key={row.id}>
-                <TableRow
-                  data-state={row.getIsSelected() && "selected"}
-                  className={cn("h-16 transition-all")}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-                {row.getIsExpanded() && (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="p-0">
-                      <MenuDetailRow menuItem={row.original} />
-                    </TableCell>
-                  </TableRow>
-                )}
-              </React.Fragment>
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                className="h-14 transition-all"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
             ))
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                Không có dữ liệu.
+                <p className="text-muted-foreground">Không có dữ liệu.</p>
               </TableCell>
             </TableRow>
           )}

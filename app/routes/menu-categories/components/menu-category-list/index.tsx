@@ -1,6 +1,3 @@
-import type { MenuListResponseDto } from "~/services/api/menu/dto";
-import { columns } from "./columns";
-import { Skeleton } from "~/components/ui/skeleton";
 import { BedDouble } from "lucide-react";
 import {
   Empty,
@@ -8,14 +5,20 @@ import {
   EmptyMedia,
   EmptyTitle,
   EmptyDescription,
-  EmptyContent,
 } from "~/components/ui/empty";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { MenuCategoryListResponseDto } from "~/services/api/menu-category/dto";
 import { DataTable } from "./data-table";
+import { columns } from "./columns";
+
 interface MenuDataTableProps {
-  menu: MenuListResponseDto;
+  menuCategories: MenuCategoryListResponseDto;
   isLoading?: boolean;
 }
-function MenuDataTable({ menu, isLoading }: MenuDataTableProps) {
+function MenuCategoryDataTable({
+  menuCategories,
+  isLoading,
+}: MenuDataTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -28,23 +31,23 @@ function MenuDataTable({ menu, isLoading }: MenuDataTableProps) {
     );
   }
 
-  if (!menu || menu.length === 0) {
+  if (!menuCategories || menuCategories.length === 0) {
     return (
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <BedDouble />
           </EmptyMedia>
-          <EmptyTitle>Chưa có thực đơn nào</EmptyTitle>
+          <EmptyTitle>Chưa có danh mục thực đơn nào</EmptyTitle>
           <EmptyDescription>
-            Bạn chưa có thực đơn nào trong hệ thống. Hãy bắt đầu bằng cách thêm
-            thực đơn đầu tiên.
+            Bạn chưa có danh mục thực đơn nào trong hệ thống. Hãy bắt đầu bằng
+            cách thêm danh mục thực đơn đầu tiên.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
   }
 
-  return <DataTable columns={columns} data={menu} />;
+  return <DataTable columns={columns} data={menuCategories} />;
 }
-export default MenuDataTable;
+export default MenuCategoryDataTable;

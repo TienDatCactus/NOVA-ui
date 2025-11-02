@@ -1,5 +1,5 @@
 export interface MenuFilters {
-  categoryId: string;
+  categoryCode: string;
   activeFilter: "active" | "all" | "";
   searchText: string;
 }
@@ -7,5 +7,4 @@ export interface MenuFilters {
 export interface MenuListParams {
   includeInactive?: boolean;
   categoryCode?: string;
-  q?: string;
 }

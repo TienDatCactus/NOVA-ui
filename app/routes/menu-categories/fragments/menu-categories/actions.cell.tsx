@@ -1,4 +1,5 @@
 import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -8,18 +9,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import type { MenuListItemDto } from "~/services/api/menu/dto";
-import { useState } from "react";
+import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
-import EditMenuSheet from "../components/edit-menu.sheet";
+import EditMenuCategorySheet from "../../components/edit-menu-category.sheet";
 
-interface MenuActionsCellProps {
-  menuItem: MenuListItemDto;
+interface MenuCategoryActionsCellProps {
+  category: MenuCategoryItemDto;
 }
 
-export default function MenuActionsCell({ menuItem }: MenuActionsCellProps) {
+export default function MenuCategoryActionsCell({
+  category,
+}: MenuCategoryActionsCellProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editSheetOpen, setEditSheetOpen] = useState(false);
+  const [updateSheetOpen, setUpdateSheetOpen] = useState(false);
   return (
     <>
       <DropdownMenu>
@@ -32,7 +34,7 @@ export default function MenuActionsCell({ menuItem }: MenuActionsCellProps) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setEditSheetOpen(true)}>
+          <DropdownMenuItem onClick={() => setUpdateSheetOpen(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Chỉnh sửa
           </DropdownMenuItem>
@@ -49,12 +51,12 @@ export default function MenuActionsCell({ menuItem }: MenuActionsCellProps) {
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        menuItem={menuItem}
+        category={category}
       />
-      <EditMenuSheet
-        open={editSheetOpen}
-        onClose={() => setEditSheetOpen(false)}
-        menuItem={menuItem}
+      <EditMenuCategorySheet
+        open={updateSheetOpen}
+        onClose={() => setUpdateSheetOpen(false)}
+        categoryId={category.id}
       />
     </>
   );

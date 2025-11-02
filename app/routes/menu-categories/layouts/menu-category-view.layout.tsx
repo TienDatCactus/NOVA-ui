@@ -1,28 +1,30 @@
 import type { ReactNode } from "react";
-import { useMenuCategories } from "../container/menu-categories/query.hooks";
-import MenuCommandBar from "../fragments/command-bar";
-import type { MenuFilters } from "~/services/types/menu.types";
+import { Card, CardContent } from "~/components/ui/card";
+import MenuCategoryCommandBar from "../fragments/menu-categories/command-bar";
+import type { MenuCategoryFilters } from "../container/menu-categories/filter.hooks";
 
-interface MenuViewLayoutProps {
+interface MenuCategoryViewLayoutProps {
   children: ReactNode;
-  totalMenuItems: number;
-  updateFilter: <K extends keyof MenuFilters>(
+  totalMenuCategories: number;
+  updateFilter: <K extends keyof MenuCategoryFilters>(
     key: K,
-    value: MenuFilters[K]
+    value: MenuCategoryFilters[K]
   ) => void;
   resetFilters: () => void;
-  filters: MenuFilters;
+  filters: MenuCategoryFilters;
 }
 
-export default function MenuViewLayout({
+/**
+ * Layout cho menu category management page
+ * Bao gồm header, stats, command bar, và content area
+ */
+export default function MenuCategoryViewLayout({
   children,
-  totalMenuItems,
+  totalMenuCategories,
   updateFilter,
   resetFilters,
   filters,
-}: MenuViewLayoutProps) {
-  const { data: menuCategories } = useMenuCategories();
-
+}: MenuCategoryViewLayoutProps) {
   return (
     <div className="flex flex-col space-y-2 h-full">
       <div className="border-b">
@@ -40,7 +42,7 @@ export default function MenuViewLayout({
               <div className="text-sm text-muted-foreground">
                 Tổng số:{" "}
                 <span className="font-semibold text-foreground">
-                  {totalMenuItems}
+                  {totalMenuCategories}
                 </span>{" "}
                 món
               </div>
@@ -50,11 +52,10 @@ export default function MenuViewLayout({
       </div>
 
       <div className="flex gap-2">
-        <MenuCommandBar
-          menuCategories={menuCategories}
+        <MenuCategoryCommandBar
           filters={filters}
-          resetFilters={resetFilters}
           updateFilter={updateFilter}
+          resetFilters={resetFilters}
         />
         <main className="flex-1">{children}</main>
       </div>

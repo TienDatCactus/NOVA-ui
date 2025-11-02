@@ -14,5 +14,6 @@ export function useServiceTypeDetails(id: string) {
   return useQuery({
     queryKey: ["service-types-detail", id],
     queryFn: async () => await ServiceTypesService.getServiceTypeDetail(id),
+    enabled: !!id,
   });
 }

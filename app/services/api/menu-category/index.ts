@@ -1,26 +1,27 @@
 import http from "~/lib/http";
 import { MenuCategory } from "~/services/url";
-import useMenuCategorySchema from "~/services/schema/menu-category.schema";
-import type { MenuCategoryListParams } from "~/services/types/menu-category.types";
+import { MenuCategorySchema } from "~/services/schema/menu-category.schema";
 import type {
+  MenuCategoryListResponseDto,
+  MenuCategoryDetailDto,
   CreateMenuCategoryRequestDto,
   CreateMenuCategoryResponseDto,
-  MenuCategoryDetailDto,
-  MenuCategoryListResponseDto,
   UpdateMenuCategoryRequestDto,
   UpdateMenuCategoryResponseDto,
 } from "./dto";
-import { Menu } from "react-aria-components";
+import type { MenuCategoryListParams } from "~/services/types/menu-category.types";
 
 const {
   MenuCategoryListResponseSchema,
-  MenuCategoryDetailSchema,
+  MenuCategoryItemSchema,
   CreateMenuCategoryResponseSchema,
-  UpdateMenuCategoryResponseSchema,
-} = useMenuCategorySchema();
+} = MenuCategorySchema;
 
+/**
+ * Get list of all menu categories
+ */
 async function getMenuCategoryList(
-  params?: MenuCategoryListParams
+  params: MenuCategoryListParams
 ): Promise<MenuCategoryListResponseDto> {
   try {
     const resp = await http.get(MenuCategory.list, { params });
@@ -31,18 +32,24 @@ async function getMenuCategoryList(
   }
 }
 
+/**
+ * Get menu category details by ID
+ */
 async function getMenuCategoryDetail(
-  id: string
+  categoryId: string
 ): Promise<MenuCategoryDetailDto> {
   try {
-    const resp = await http.get(MenuCategory.detail(id));
-    return MenuCategoryDetailSchema.parse(resp.data);
+    const resp = await http.get(MenuCategory.detail(categoryId));
+    return MenuCategoryItemSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
+/**
+ * Create a new menu category
+ */
 async function createMenuCategory(
   data: CreateMenuCategoryRequestDto
 ): Promise<CreateMenuCategoryResponseDto> {
@@ -55,27 +62,28 @@ async function createMenuCategory(
   }
 }
 
+/**
+ * Update an existing menu category
+ */
 async function updateMenuCategory(
-  id: string,
+  categoryId: string,
   data: UpdateMenuCategoryRequestDto
 ): Promise<UpdateMenuCategoryResponseDto> {
   try {
-    const resp = await http.put(MenuCategory.update(id), data);
-    // Backend might return the updated item or just success message
-    // If no data returned, fetch the updated item
-    if (!resp.data || typeof resp.data !== "object") {
-      return getMenuCategoryDetail(id);
-    }
-    return UpdateMenuCategoryResponseSchema.parse(resp.data);
+    const resp = await http.put(MenuCategory.update(categoryId), data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function deleteMenuCategory(id: string): Promise<void> {
+/**
+ * Delete a menu category by ID
+ */
+async function deleteMenuCategory(categoryId: string): Promise<void> {
   try {
-    await http.delete(MenuCategory.delete(id));
+    await http.delete(MenuCategory.delete(categoryId));
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

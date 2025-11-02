@@ -10,6 +10,7 @@ import type {
   UpdateMenuItemRequestDto,
   UpdateMenuItemResponseDto,
 } from "./dto";
+import type { MenuListParams } from "~/services/types/menu.types";
 
 const {
   MenuListResponseSchema,
@@ -22,11 +23,14 @@ const {
 /**
  * Get list of all menu items
  */
-async function getMenuList(): Promise<MenuListResponseDto> {
+async function getMenuList(
+  params: MenuListParams
+): Promise<MenuListResponseDto> {
   try {
-    const resp = await http.get(Menu.list);
+    const resp = await http.get(Menu.list, { params });
     return MenuListResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -41,6 +45,7 @@ async function getMenuListByCategory(
     const resp = await http.get(Menu.listByCategory(categoryId));
     return MenuListByCategoryResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -53,6 +58,7 @@ async function getMenuItemDetail(itemId: string): Promise<MenuItemDetailDto> {
     const resp = await http.get(Menu.detail(itemId));
     return MenuItemDetailSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }

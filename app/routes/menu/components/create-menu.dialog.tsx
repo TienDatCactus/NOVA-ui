@@ -3,7 +3,9 @@ import { ImagePlus, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +17,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -31,13 +32,10 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { MenuSchema } from "~/services/schema/menu.schema";
-import { useCreateMenuItem } from "../container/menu-mutation.hooks";
-import { useQuery } from "@tanstack/react-query";
-import { MenuCategoryService } from "~/services/api/menu-category";
-import { UnitsService } from "~/services/api/units";
-import { Badge } from "~/components/ui/badge";
-import { Card } from "~/components/ui/card";
+import { useMenuCategories } from "../container/menu-categories/query.hooks";
+import { useCreateMenuItem } from "../container/menu/mutation.hooks";
 
 const { CreateMenuItemRequestSchema } = MenuSchema;
 
@@ -75,15 +73,8 @@ export default function CreateMenuDialog({
   });
 
   const { mutate: createMenuItem, isPending } = useCreateMenuItem();
-  const { data: categories } = useQuery({
-    queryKey: ["menu-categories"],
-    queryFn: async () => await MenuCategoryService.getMenuCategoryList(),
-  });
-  const { data: units } = useQuery({
-    queryKey: ["units"],
-    queryFn: async () => await UnitsService.getUnitList(),
-  });
-
+  const { data: categories } = useMenuCategories();
+  const { data: units } = useUnits();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;

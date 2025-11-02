@@ -9,7 +9,7 @@ function DetailSection({
   return (
     <div className="space-y-3">
       <h4 className="font-semibold text-sm">{title}</h4>
-      <div className="space-y-2">{children}</div>
+      <p className="space-y-2">{children}</p>
     </div>
   );
 }

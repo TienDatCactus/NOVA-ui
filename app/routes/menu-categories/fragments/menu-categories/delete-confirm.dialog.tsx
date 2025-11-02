@@ -9,24 +9,27 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import type { MenuListItemDto } from "~/services/api/menu/dto";
-import { useDeleteMenuItem } from "../container/menu/mutation.hooks";
+import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
+import { useDeleteMenuCategory } from "../../container/menu-categories/mutation.hooks";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  menuItem: MenuListItemDto;
+  category: MenuCategoryItemDto;
 }
 
+/**
+ * Dialog xác nhận xóa menu category
+ */
 export default function DeleteConfirmDialog({
   open,
   onOpenChange,
-  menuItem,
+  category,
 }: DeleteConfirmDialogProps) {
-  const { mutate: deleteMenuItem, isPending } = useDeleteMenuItem();
+  const { mutate: deleteCategory, isPending } = useDeleteMenuCategory();
 
   const handleConfirm = () => {
-    deleteMenuItem(menuItem.itemId, {
+    deleteCategory(category.id, {
       onSuccess: () => {
         onOpenChange(false);
       },
@@ -41,16 +44,21 @@ export default function DeleteConfirmDialog({
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
               <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
-            <AlertDialogTitle>Xác nhận xóa món ăn</AlertDialogTitle>
+            <AlertDialogTitle>Xác nhận xóa danh mục</AlertDialogTitle>
           </div>
           <AlertDialogDescription className="space-y-2">
             <p>
-              Bạn có chắc chắn muốn xóa món ăn{" "}
+              Bạn có chắc chắn muốn xóa danh mục{" "}
               <span className="font-semibold text-foreground">
-                {menuItem.name}
+                {category.name}
               </span>{" "}
-              không?
+              ({category.code}) không?
             </p>
+            {category.menuItemCount > 0 && (
+              <p className="text-amber-600 font-medium">
+                ⚠️ Danh mục này có {category.menuItemCount} món ăn!
+              </p>
+            )}
             <p className="text-destructive font-medium">
               Hành động này không thể hoàn tác!
             </p>

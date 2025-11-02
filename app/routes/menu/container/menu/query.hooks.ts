@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { MenuService } from "~/services/api/menu";
+import type { MenuListParams } from "~/services/types/menu.types";
 
-export function useMenuList() {
+export function useMenuList(params?: MenuListParams) {
   return useQuery({
-    queryKey: ["menu-list"],
-    queryFn: async () => await MenuService.getMenuList(),
+    queryKey: ["menu-list", params],
+    queryFn: async () => await MenuService.getMenuList(params ?? {}),
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
@@ -23,5 +24,6 @@ export function useMenuItemDetail(itemId: string) {
     queryKey: ["menu-item-detail", itemId],
     queryFn: async () => await MenuService.getMenuItemDetail(itemId),
     enabled: !!itemId,
+    staleTime: 2 * 60 * 1000,
   });
 }

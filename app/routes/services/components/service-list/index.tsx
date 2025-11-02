@@ -14,17 +14,9 @@ import { DataTable } from "./data-table";
 interface ServicesDataTableProps {
   services: ServiceItem[];
   isLoading?: boolean;
-
-  onSelectionChange?: (selectedRows: ServiceItem[]) => void;
-
-  onDelete: (service: ServiceItem) => void;
 }
 
-function ServicesDataTable({
-  services,
-  isLoading,
-  onSelectionChange,
-}: ServicesDataTableProps) {
+function ServicesDataTable({ services, isLoading }: ServicesDataTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -54,13 +46,7 @@ function ServicesDataTable({
     );
   }
 
-  return (
-    <DataTable
-      columns={columns}
-      data={services}
-      onSelectionChange={onSelectionChange}
-    />
-  );
+  return <DataTable columns={columns} data={services} />;
 }
 
 export default ServicesDataTable;

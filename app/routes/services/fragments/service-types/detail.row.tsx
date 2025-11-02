@@ -1,12 +1,18 @@
-import { Badge } from "~/components/ui/badge";
-import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import { format } from "date-fns";
-import { is, vi } from "date-fns/locale";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
+import { vi } from "date-fns/locale";
+import { Badge } from "~/components/ui/badge";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
 import Image from "~/components/ui/image";
-import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
-import { useServiceTypeDetails } from "../../container/service-types-query.hooks";
 import { DetailItem, DetailSection } from "~/components/ui/section-detail";
+import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
+import type { ServiceTypeItem } from "~/services/api/service-types/dto";
+import { useServiceTypeDetails } from "../../container/service-types-query.hooks";
 
 interface ServiceTypeDetailRowProps {
   type: ServiceTypeItem;
@@ -27,21 +33,29 @@ export default function ServiceTypeDetailRow({
         <div className="mb-6 col-span-1">
           <h4 className="font-semibold text-sm mb-3">Hình ảnh</h4>
           <div className="flex flex-col max-h-[300px] overflow-y-auto gap-4 ">
-            {type.imageUrls.map((url, index) => (
-              <div
-                key={index}
-                className="relative rounded-lg overflow-hidden border-2 border-border flex-shrink-0"
-              >
-                <ImageZoom>
-                  <Image
-                    src={url}
-                    height={200}
-                    alt={`${type.name} - ${index + 1}`}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                  />
-                </ImageZoom>
-              </div>
-            ))}
+            <div className="max-h-[400px] grid place-items-center overflow-y-auto">
+              <Carousel className="w-fit">
+                <CarouselContent>
+                  {type.imageUrls.map((url, index) => (
+                    <CarouselItem key={index}>
+                      <div className="p-1">
+                        <ImageZoom>
+                          <Image
+                            src={url}
+                            height={200}
+                            width={200}
+                            alt={`${type.name} - ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </ImageZoom>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </div>
           </div>
         </div>
       )}
