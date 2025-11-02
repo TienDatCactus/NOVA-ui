@@ -7,13 +7,16 @@ import { BookingLineChart } from "./components/line.chart";
 import { BookingPieChart } from "./components/pie.chart";
 import { BookingRadarChart } from "./components/radar.chart";
 import { BookingStackedBarChart } from "./components/stacked-bar.chart";
+import { ReportsTableModal } from "./components/reports-table-modal";
 import { Button } from "~/components/ui/button";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, TableIcon } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
 import { vi } from "react-day-picker/locale";
 import { useState } from "react";
-import { set } from "zod";
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
+import useReports from "./container/reservation-reports-query";
+import { Skeleton } from "~/components/ui/skeleton";
+
 export default function Component() {
   const [open, setOpen] = useState<{
     from: boolean;
@@ -22,6 +25,7 @@ export default function Component() {
     from: false,
     to: false,
   });
+
   const [date, setDate] = useState<{
     from: Date | undefined;
     to: Date | undefined;
@@ -29,102 +33,176 @@ export default function Component() {
     from: new Date(),
     to: new Date(),
   });
+
+  const [showTableModal, setShowTableModal] = useState(false);
+
+  // Format dates for API call
+  const fromDateStr = date.from ? format(date.from, "yyyy-MM-dd") : "";
+  const toDateStr = date.to ? format(date.to, "yyyy-MM-dd") : "";
+
+  // Fetch reports data
+  const {
+    data: reportsData,
+    isLoading,
+    refetch,
+  } = useReports(fromDateStr, toDateStr);
+
+  const handleApplyFilter = () => {
+    refetch();
+  };
+
+  const handleResetToToday = () => {
+    const today = new Date();
+    setDate({ from: today, to: today });
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-4 items-center">
-        <div className="flex gap-2 items-center">
-          <p>Từ ngày :</p>
-          <Popover
-            open={open.from}
-            onOpenChange={() => {
-              setOpen({ ...open, from: !open.from });
-            }}
-          >
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                id="date"
-                className="w-48 justify-between font-normal"
-              >
-                {date.from
-                  ? formatDate(date.from, "dd/MM/yyyy", { locale: vi })
-                  : "Select date"}
-                <ChevronDownIcon />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto overflow-hidden p-0"
-              align="start"
+      <div className="flex gap-4 items-center justify-between">
+        <div className="flex gap-4 items-center">
+          <div className="flex gap-2 items-center">
+            <p>Từ ngày:</p>
+            <Popover
+              open={open.from}
+              onOpenChange={() => {
+                setOpen({ ...open, from: !open.from });
+              }}
             >
-              <Calendar
-                locale={vi}
-                mode="single"
-                selected={date.from}
-                captionLayout="dropdown"
-                onSelect={(data) => {
-                  setDate({ ...date, from: data });
-                  setOpen({
-                    ...open,
-                    from: false,
-                    to: open.to,
-                  });
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div className="flex gap-2 items-center">
-          <p>Đến ngày :</p>
-          <Popover
-            open={open.to}
-            onOpenChange={() => {
-              setOpen({ ...open, to: !open.to });
-            }}
-          >
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                id="date"
-                className="w-48 justify-between font-normal"
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id="date"
+                  className="w-48 justify-between font-normal"
+                >
+                  {date.from ? format(date.from, "dd/MM/yyyy") : "Chọn ngày"}
+                  <ChevronDownIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0"
+                align="start"
               >
-                {date.to
-                  ? formatDate(date.to, "dd/MM/yyyy", { locale: vi })
-                  : "Select date"}
-                <ChevronDownIcon />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto overflow-hidden p-0"
-              align="start"
+                <Calendar
+                  locale={vi}
+                  mode="single"
+                  selected={date.from}
+                  captionLayout="dropdown"
+                  onSelect={(data) => {
+                    setDate({ ...date, from: data });
+                    setOpen({
+                      ...open,
+                      from: false,
+                      to: open.to,
+                    });
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex gap-2 items-center">
+            <p>Đến ngày:</p>
+            <Popover
+              open={open.to}
+              onOpenChange={() => {
+                setOpen({ ...open, to: !open.to });
+              }}
             >
-              <Calendar
-                locale={vi}
-                mode="single"
-                selected={date.to}
-                captionLayout="dropdown"
-                onSelect={(data) => {
-                  setDate({ ...date, to: data });
-                  setOpen({
-                    ...open,
-                    to: false,
-                    from: open.from,
-                  });
-                }}
-              />
-            </PopoverContent>
-          </Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id="date"
+                  className="w-48 justify-between font-normal"
+                >
+                  {date.to ? format(date.to, "dd/MM/yyyy") : "Chọn ngày"}
+                  <ChevronDownIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0"
+                align="start"
+              >
+                <Calendar
+                  locale={vi}
+                  mode="single"
+                  selected={date.to}
+                  captionLayout="dropdown"
+                  onSelect={(data) => {
+                    setDate({ ...date, to: data });
+                    setOpen({
+                      ...open,
+                      to: false,
+                      from: open.from,
+                    });
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <Button onClick={handleApplyFilter}>Áp dụng</Button>
+          <Button variant="outline" onClick={handleResetToToday}>
+            Hiện tại
+          </Button>
         </div>
-        <Button>Áp dụng</Button>
-        <Button variant={"outline"}>Hiện tại</Button>
+
+        <Button
+          variant="outline"
+          onClick={() => setShowTableModal(true)}
+          className="gap-2"
+        >
+          <TableIcon className="h-4 w-4" />
+          Xem dạng bảng
+        </Button>
       </div>
-      <div className="flex gap-4">
-        <BookingStackedBarChart className="flex-2 w-auto flex-col justify-between" />
-        <BookingLineChart className="flex-1 flex-col justify-between" />
-      </div>
-      <div className="flex gap-4">
-        <BookingPieChart className="flex-1 flex-col justify-between" />
-        <BookingRadarChart className="flex-2 flex-col justify-between" />
-      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <Skeleton className="flex-2 h-[450px]" />
+            <Skeleton className="flex-1 h-[450px]" />
+          </div>
+          <div className="flex gap-4">
+            <Skeleton className="flex-1 h-[450px]" />
+            <Skeleton className="flex-2 h-[450px]" />
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex gap-4">
+            <BookingStackedBarChart
+              className="flex-2 w-auto flex-col justify-between"
+              data={reportsData?.bookingData}
+            />
+            <BookingLineChart
+              className="flex-1 flex-col justify-between"
+              data={reportsData?.availableRoomsTrendData}
+            />
+          </div>
+          <div className="flex gap-4">
+            <BookingPieChart
+              className="flex-1 flex-col justify-between"
+              data={reportsData?.availableRoomsByType}
+              dateRange={
+                date.from && date.to
+                  ? { from: date.from, to: date.to }
+                  : undefined
+              }
+            />
+            <BookingRadarChart
+              className="flex-2 flex-col justify-between"
+              data={reportsData?.roomTypeComparisonData}
+            />
+          </div>
+        </>
+      )}
+
+      <ReportsTableModal
+        open={showTableModal}
+        onOpenChange={setShowTableModal}
+        data={reportsData}
+        dateRange={
+          date.from && date.to ? { from: date.from, to: date.to } : undefined
+        }
+      />
     </div>
   );
 }

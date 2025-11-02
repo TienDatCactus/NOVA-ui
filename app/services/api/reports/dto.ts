@@ -1,7 +1,7 @@
 import type z from "zod";
-import useReportsSchema from "~/services/schema/reports.schema";
+import { ReportsSchema } from "~/services/schema/reports.schema";
 
-const { ReservationReportsSchema } = useReportsSchema();
+const { ReservationReportsSchema } = ReportsSchema;
 
 type ReservationReportResponseDTO = z.infer<typeof ReservationReportsSchema>;
 

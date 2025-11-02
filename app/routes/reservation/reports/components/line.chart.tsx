@@ -24,17 +24,6 @@ import { cn } from "~/lib/utils";
 export const description =
   "A line chart showing available rooms trend by room type";
 
-// Xu hướng phòng trống theo hạng phòng
-const availableRoomsTrendData = [
-  { date: "01/12", Traditional: 8, Romantic: 5, Unique: 4, Chalet: 3 },
-  { date: "02/12", Traditional: 7, Romantic: 4, Unique: 5, Chalet: 4 },
-  { date: "03/12", Traditional: 6, Romantic: 6, Unique: 3, Chalet: 2 },
-  { date: "04/12", Traditional: 9, Romantic: 3, Unique: 4, Chalet: 4 },
-  { date: "05/12", Traditional: 7, Romantic: 5, Unique: 5, Chalet: 3 },
-  { date: "06/12", Traditional: 8, Romantic: 4, Unique: 4, Chalet: 5 },
-  { date: "07/12", Traditional: 6, Romantic: 6, Unique: 3, Chalet: 2 },
-];
-
 const chartConfig = {
   Traditional: {
     label: "Traditional",
@@ -54,7 +43,19 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function BookingLineChart({ className }: { className?: string }) {
+interface BookingLineChartProps {
+  className?: string;
+  data?: Array<Record<string, string | number>>;
+}
+
+export function BookingLineChart({ className, data }: BookingLineChartProps) {
+  const chartData = data || [];
+
+  const roomTypes =
+    chartData.length > 0
+      ? Object.keys(chartData[0]).filter((key) => key !== "date")
+      : [];
+
   return (
     <Card className={cn(className)}>
       <CardHeader>
@@ -64,67 +65,52 @@ export function BookingLineChart({ className }: { className?: string }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer className="h-[350px]" config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={availableRoomsTrendData}
-            margin={{
-              left: 12,
-              right: 12,
-              top: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => `${value}`}
-            />
-            <ChartTooltip
-              content={<ChartTooltipContent />}
-              cursor={{ strokeDasharray: "3 3" }}
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Line
-              dataKey="Traditional"
-              type="monotone"
-              stroke="var(--color-Traditional)"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-            <Line
-              dataKey="Romantic"
-              type="monotone"
-              stroke="var(--color-Romantic)"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-            <Line
-              dataKey="Unique"
-              type="monotone"
-              stroke="var(--color-Unique)"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-            <Line
-              dataKey="Chalet"
-              type="monotone"
-              stroke="var(--color-Chalet)"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ChartContainer>
+        {chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-[350px] text-muted-foreground">
+            Không có dữ liệu
+          </div>
+        ) : (
+          <ChartContainer className="h-[350px]" config={chartConfig}>
+            <LineChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                left: 12,
+                right: 12,
+                top: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => `${value}`}
+              />
+              <ChartTooltip
+                content={<ChartTooltipContent />}
+                cursor={{ strokeDasharray: "3 3" }}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              {roomTypes.map((roomType) => (
+                <Line
+                  key={roomType}
+                  dataKey={roomType}
+                  type="monotone"
+                  stroke={`var(--color-${roomType})`}
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              ))}
+            </LineChart>
+          </ChartContainer>
+        )}
       </CardContent>
       <CardFooter>
         <legend className="text-muted-foreground leading-none text-sm italic">

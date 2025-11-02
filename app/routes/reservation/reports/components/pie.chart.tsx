@@ -21,14 +21,6 @@ import { cn } from "~/lib/utils";
 export const description =
   "A pie chart showing room distribution by type for a specific date";
 
-// Snapshot phòng trống theo hạng phòng cho ngày 01/12/2024
-const availableRoomsByType = [
-  { type: "Traditional", value: 8, fill: "#3b82f6" }, // blue
-  { type: "Romantic", value: 5, fill: "#ec4899" }, // pink
-  { type: "Unique", value: 4, fill: "#8b5cf6" }, // purple
-  { type: "Chalet", value: 3, fill: "#f59e0b" }, // amber
-];
-
 const chartConfig = {
   value: {
     label: "Số phòng",
@@ -51,59 +43,97 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function BookingPieChart({ className }: { className?: string }) {
-  const totalRooms = availableRoomsByType.reduce(
-    (sum, item) => sum + item.value,
-    0
-  );
+// Color palette for dynamic room types
+const colorPalette = [
+  "#3b82f6", // blue
+  "#ec4899", // pink
+  "#8b5cf6", // purple
+  "#f59e0b", // amber
+  "#22c55e", // green
+  "#ef4444", // red
+  "#14b8a6", // teal
+  "#f97316", // orange
+];
+
+interface BookingPieChartProps {
+  className?: string;
+  data?: Array<{
+    type: string;
+    value: number;
+  }>;
+  dateRange?: { from: Date; to: Date };
+}
+
+export function BookingPieChart({
+  className,
+  data,
+  dateRange,
+}: BookingPieChartProps) {
+  // Use provided data or fallback to empty array
+  const chartData =
+    data?.map((item, index) => ({
+      ...item,
+      fill: colorPalette[index % colorPalette.length],
+    })) || [];
+
+  const totalRooms = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  const dateRangeText = dateRange
+    ? `${dateRange.from.toLocaleDateString("vi-VN")} - ${dateRange.to.toLocaleDateString("vi-VN")}`
+    : "Chưa chọn khoảng thời gian";
 
   return (
     <Card className={cn("flex flex-col", className)}>
       <CardHeader className="items-center pb-0">
         <CardTitle>Phân bổ phòng trống theo hạng phòng</CardTitle>
         <CardDescription>
-          Ngày 01/12/2024 - Tổng: {totalRooms} phòng
+          {dateRangeText} - Tổng: {totalRooms} phòng
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[300px]"
-        >
-          <PieChart>
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Pie
-              data={availableRoomsByType}
-              dataKey="value"
-              nameKey="type"
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              label={({ type, value, percent }) =>
-                `${type}: ${value} (${(percent * 100).toFixed(0)}%)`
-              }
-              labelLine={{ stroke: "#888", strokeWidth: 1 }}
-            >
-              {availableRoomsByType.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </Pie>
-            <Legend
-              verticalAlign="bottom"
-              height={36}
-              formatter={(value) => {
-                const item = availableRoomsByType.find((d) => d.type === value);
-                return `${value}: ${item?.value || 0} phòng`;
-              }}
-            />
-          </PieChart>
-        </ChartContainer>
+        {chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+            Không có dữ liệu
+          </div>
+        ) : (
+          <ChartContainer
+            config={chartConfig}
+            className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[300px]"
+          >
+            <PieChart>
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="type"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label={({ type, value, percent }) =>
+                  `${type}: ${value} (${(percent * 100).toFixed(0)}%)`
+                }
+                labelLine={{ stroke: "#888", strokeWidth: 1 }}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                formatter={(value) => {
+                  const item = chartData.find((d) => d.type === value);
+                  return `${value}: ${item?.value || 0} phòng`;
+                }}
+              />
+            </PieChart>
+          </ChartContainer>
+        )}
       </CardContent>
-      <CardFooter>
-        <legend className="text-muted-foreground leading-none text-sm italic">
-          *Biểu đồ hiển thị phân bổ phòng trống theo hạng phòng cho ngày
-          01/12/2024
-        </legend>
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="leading-none text-muted-foreground italic">
+          * Biểu đồ hiển thị phân bổ phòng trống theo từng loại phòng
+        </div>
       </CardFooter>
     </Card>
   );

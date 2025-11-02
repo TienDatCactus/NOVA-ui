@@ -83,8 +83,8 @@ const Units = {
 };
 
 const Reports = {
-  reservationReports: (date: string) =>
-    `Reports/daily-booking-dashboard?date=${date}`,
+  reservationReports: (fromDate: string, toDate: string) =>
+    `Reports/daily-booking-dashboard?fromDate=${fromDate}&toDate=${toDate}`,
 };
 
 const Orders = {

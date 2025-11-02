@@ -1,13 +1,14 @@
 import { Reports } from "~/services/url";
 import type { ReservationReportResponseDTO } from "./dto";
 import http from "~/lib/http";
-import useReportsSchema from "~/services/schema/reports.schema";
-const { ReservationReportsSchema } = useReportsSchema();
+import { ReportsSchema } from "~/services/schema/reports.schema";
+const { ReservationReportsSchema } = ReportsSchema;
 async function getReservationReports(
-  date: string
+  fromDate: string,
+  toDate: string
 ): Promise<ReservationReportResponseDTO> {
   try {
-    const resp = await http.get(Reports.reservationReports(date));
+    const resp = await http.get(Reports.reservationReports(fromDate, toDate));
     return ReservationReportsSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
