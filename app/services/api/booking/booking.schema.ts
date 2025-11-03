@@ -159,7 +159,6 @@ const StaffUpdateBookingRequestSchema = z.object({
   rooms: z
     .array(
       z.object({
-        bookingRoomId: z.string("Booking Room ID không hợp lệ").optional(),
         roomId: z.string("Room ID không hợp lệ").optional(),
         fromDate: z.string("Ngày bắt đầu không hợp lệ").optional(),
         toDate: z.string("Ngày kết thúc không hợp lệ").optional(),
