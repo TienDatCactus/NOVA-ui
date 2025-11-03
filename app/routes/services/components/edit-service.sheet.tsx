@@ -37,6 +37,7 @@ import { ServiceSchema } from "~/services/api/services/service.schema";
 import { useServiceTypes } from "../container/service-types/query.hooks";
 import { useUpdateService } from "../container/services/mutation.hooks";
 import { useServiceDetail } from "../container/services/query.hooks";
+import { handleLimitInput } from "~/lib/utils";
 
 const { UpdateServiceItemRequestSchema } = ServiceSchema;
 
