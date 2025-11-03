@@ -175,13 +175,10 @@ export function ReviewPaymentForm({
         guestFullName: storeData.guestFullName!,
         isBreakfastAll: storeData.isBreakfastAll ?? false,
       };
-      mutateAsync(bookingData, {
-        onSuccess: () => {
-          reset();
-          onResetSteps && onResetSteps();
-          navigate("/dashboard/reservation/bookings/list");
-        },
-      });
+      mutateAsync(bookingData);
+      reset();
+      onResetSteps && onResetSteps();
+      navigate("/dashboard/reservation/bookings/list");
     } catch (error) {
       console.error("Booking creation failed:", error);
     } finally {
