@@ -47,16 +47,49 @@ type ManageRolesForm = z.infer<typeof ManageRolesSchema>;
  * Helper function - Get role badge color
  */
 const getRoleBadgeVariant = (role: string) => {
-  const roleColors: Record<string, { bg: string; text: string; border: string }> = {
-    Receptionist: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
-    Staff: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
-    Customer: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-    HotelManager: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200" },
-    Accountant: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
+  const roleColors: Record<
+    string,
+    { bg: string; text: string; border: string }
+  > = {
+    Receptionist: {
+      bg: "bg-blue-50",
+      text: "text-blue-700",
+      border: "border-blue-200",
+    },
+    Staff: {
+      bg: "bg-purple-50",
+      text: "text-purple-700",
+      border: "border-purple-200",
+    },
+    Customer: {
+      bg: "bg-green-50",
+      text: "text-green-700",
+      border: "border-green-200",
+    },
+    HotelManager: {
+      bg: "bg-orange-50",
+      text: "text-orange-700",
+      border: "border-orange-200",
+    },
+    Accountant: {
+      bg: "bg-pink-50",
+      text: "text-pink-700",
+      border: "border-pink-200",
+    },
     Admin: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
-    ServiceStaff: { bg: "bg-indigo-50", text: "text-indigo-700", border: "border-indigo-200" },
+    ServiceStaff: {
+      bg: "bg-indigo-50",
+      text: "text-indigo-700",
+      border: "border-indigo-200",
+    },
   };
-  return roleColors[role] || { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200" };
+  return (
+    roleColors[role] || {
+      bg: "bg-gray-50",
+      text: "text-gray-700",
+      border: "border-gray-200",
+    }
+  );
 };
 
 export function ManageRolesDialog({
@@ -127,7 +160,7 @@ export function ManageRolesDialog({
       handleAssignRoles(data);
     } else {
       if (data.rolesToRemove.length === 0) {
-        return; 
+        return;
       }
       handleRemoveRoles(data);
     }
@@ -145,7 +178,9 @@ export function ManageRolesDialog({
           </DialogTitle>
           <DialogDescription>
             Thêm hoặc xóa vai trò cho{" "}
-            <span className="font-semibold text-foreground">{customer.fullName}</span>
+            <span className="font-semibold text-foreground">
+              {customer.fullName}
+            </span>
           </DialogDescription>
         </DialogHeader>
 
@@ -173,7 +208,9 @@ export function ManageRolesDialog({
                   );
                 })
               ) : (
-                <p className="text-sm text-muted-foreground">Chưa có vai trò nào</p>
+                <p className="text-sm text-muted-foreground">
+                  Chưa có vai trò nào
+                </p>
               )}
             </div>
           </div>
@@ -206,16 +243,17 @@ export function ManageRolesDialog({
 
           {/* Form Section */}
           <Form {...form}>
-            <form 
+            <form
               onSubmit={(e) => {
-                form.handleSubmit(handleSubmit, (errors) => {
-                })(e);
-              }} 
+                form.handleSubmit(handleSubmit, (errors) => {})(e);
+              }}
               className="space-y-4"
             >
               {mode === "add" ? (
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-base">Chọn vai trò để thêm</h3>
+                  <h3 className="font-semibold text-base">
+                    Chọn vai trò để thêm
+                  </h3>
                   {availableRoles.length === 0 ? (
                     <div className="p-8 text-center border-2 border-dashed rounded-lg">
                       <Shield className="h-12 w-12 mx-auto opacity-20 mb-2" />
@@ -251,16 +289,23 @@ export function ManageRolesDialog({
                                           checked={field.value?.includes(role)}
                                           onCheckedChange={(checked) => {
                                             return checked
-                                              ? field.onChange([...field.value, role])
+                                              ? field.onChange([
+                                                  ...field.value,
+                                                  role,
+                                                ])
                                               : field.onChange(
-                                                  field.value?.filter((value) => value !== role)
+                                                  field.value?.filter(
+                                                    (value) => value !== role
+                                                  )
                                                 );
                                           }}
                                         />
                                       </FormControl>
                                       <FormLabel
                                         className={`font-medium cursor-pointer flex-1 ${
-                                          field.value?.includes(role) ? colors.text : ""
+                                          field.value?.includes(role)
+                                            ? colors.text
+                                            : ""
                                         }`}
                                       >
                                         {role}
@@ -281,7 +326,9 @@ export function ManageRolesDialog({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-base">Chọn vai trò để xóa</h3>
+                  <h3 className="font-semibold text-base">
+                    Chọn vai trò để xóa
+                  </h3>
                   {customer.roles.length === 0 ? (
                     <div className="p-8 text-center border-2 border-dashed rounded-lg border-destructive/20">
                       <Shield className="h-12 w-12 mx-auto opacity-20 mb-2 text-destructive" />
@@ -316,18 +363,24 @@ export function ManageRolesDialog({
                                       >
                                         <FormControl>
                                           <Checkbox
-                                            checked={currentValue.includes(role)}
+                                            checked={currentValue.includes(
+                                              role
+                                            )}
                                             onCheckedChange={(checked) => {
                                               const newValue = checked
                                                 ? [...currentValue, role]
-                                                : currentValue.filter((value) => value !== role);
+                                                : currentValue.filter(
+                                                    (value) => value !== role
+                                                  );
                                               field.onChange(newValue);
                                             }}
                                           />
                                         </FormControl>
                                         <FormLabel
                                           className={`font-medium cursor-pointer flex-1 ${
-                                            currentValue.includes(role) ? "text-destructive" : ""
+                                            currentValue.includes(role)
+                                              ? "text-destructive"
+                                              : ""
                                           }`}
                                         >
                                           {role}
