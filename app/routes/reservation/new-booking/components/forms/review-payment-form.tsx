@@ -123,7 +123,7 @@ export function ReviewPaymentForm({
         storeData.breakfastDates?.map((date) => format(date, "yyyy-MM-dd")) ||
         [],
       services: selectedServices.map((s) => ({
-        itemType: s.itemType == "menu" ? "MenuItem" : "ServiceItem",
+        itemType: s.itemType,
         itemId: s.itemId,
         quantity: s.quantity,
         scheduledDate: s.scheduledDate,
@@ -174,6 +174,8 @@ export function ReviewPaymentForm({
         childrenAmount: storeData.childrenAmount ?? 0,
         guestFullName: storeData.guestFullName!,
         isBreakfastAll: storeData.isBreakfastAll ?? false,
+        overridePrice: data.overridePrice ?? null,
+        serviceOrder: {},
       };
       mutateAsync(bookingData);
       // reset();
