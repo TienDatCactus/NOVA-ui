@@ -27,12 +27,10 @@ function useCancelBooking(bookingId?: string) {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const idempotencyKey = crypto.randomUUID();
-      return await BookingService.staffCancelBooking(id, idempotencyKey);
+      return await BookingService.staffCancelBooking(id);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
-
       if (bookingId) {
         queryClient.invalidateQueries({
           queryKey: ["booking-detail", bookingId],
