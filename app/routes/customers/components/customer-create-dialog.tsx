@@ -20,15 +20,39 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Checkbox } from "~/components/ui/checkbox";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandItem } from "~/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "~/components/ui/command";
 import { Badge } from "~/components/ui/badge";
-import { UserPlus, Loader2, Pencil, Check, ChevronsUpDown, X } from "lucide-react";
+import {
+  UserPlus,
+  Loader2,
+  Pencil,
+  Check,
+  ChevronsUpDown,
+  X,
+} from "lucide-react";
 import { cn } from "~/lib/utils";
-import useCustomerSchema from "~/services/schema/customer.schema";
-import { useCreateCustomer, useUpdateCustomer, useRoles } from "../container/useCustomers.hooks";
-import type { CreateCustomerDto, CustomerItem, UpdateCustomerDto } from "~/services/api/customer/dto";
+import {
+  useCreateCustomer,
+  useUpdateCustomer,
+  useRoles,
+} from "../container/useCustomers.hooks";
+import type {
+  CreateCustomerDto,
+  CustomerItem,
+  UpdateCustomerDto,
+} from "~/services/api/customer/dto";
 import { useEffect, useMemo, useState } from "react";
+import { CustomerSchema } from "~/services/schema/customer.schema";
 
 interface CustomerFormDialogProps {
   open: boolean;
@@ -45,11 +69,15 @@ export function CustomerFormDialog({
   customer,
   mode = "create",
 }: CustomerFormDialogProps) {
-  const { CreateCustomerSchema, UpdateCustomerSchema } = useCustomerSchema();
+  const { CreateCustomerSchema, UpdateCustomerSchema } = CustomerSchema;
   const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
   const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
-  const { data: rolesData, isPending: isLoadingRoles, error: rolesError } = useRoles();
-  
+  const {
+    data: rolesData,
+    isPending: isLoadingRoles,
+    error: rolesError,
+  } = useRoles();
+
   const isEditMode = mode === "edit";
   const isPending = isCreating || isUpdating;
   const [openRoleSelect, setOpenRoleSelect] = useState(false);
@@ -65,19 +93,24 @@ export function CustomerFormDialog({
   }, [rolesData, isLoadingRoles, rolesError]);
 
   const form = useForm<CreateCustomerDto | UpdateCustomerDto>({
-    resolver: zodResolver(isEditMode ? UpdateCustomerSchema : CreateCustomerSchema),
-    defaultValues: isEditMode && customer ? {
-      fullName: customer.fullName,
-      email: customer.email,
-      phoneNumber: customer.phoneNumber,
-    } : {
-      userName: "",
-      email: "",
-      fullName: "",
-      password: "",
-      phoneNumber: "",
-      roles: [],
-    },
+    resolver: zodResolver(
+      isEditMode ? UpdateCustomerSchema : CreateCustomerSchema
+    ),
+    defaultValues:
+      isEditMode && customer
+        ? {
+            fullName: customer.fullName,
+            email: customer.email,
+            phoneNumber: customer.phoneNumber,
+          }
+        : {
+            userName: "",
+            email: "",
+            fullName: "",
+            password: "",
+            phoneNumber: "",
+            roles: [],
+          },
   });
 
   // Update form values when customer changes in edit mode
@@ -92,7 +125,6 @@ export function CustomerFormDialog({
   }, [customer, isEditMode, form]);
 
   const handleSubmit = (data: CreateCustomerDto | UpdateCustomerDto) => {
-    
     if (isEditMode && customer) {
       // Update mode - Extract only the fields we need
       const updatePayload: UpdateCustomerDto = {
@@ -100,7 +132,7 @@ export function CustomerFormDialog({
         email: (data as UpdateCustomerDto).email,
         phoneNumber: (data as UpdateCustomerDto).phoneNumber || "",
       };
-      
+
       updateCustomer(
         { id: customer.id, data: updatePayload },
         {
@@ -118,7 +150,7 @@ export function CustomerFormDialog({
       createCustomer(data as CreateCustomerDto, {
         onSuccess: (response) => {
           form.reset();
-          onSuccess(); 
+          onSuccess();
         },
         onError: (error) => {
           console.error("Create customer error callback!", error);
@@ -144,12 +176,17 @@ export function CustomerFormDialog({
                 <UserPlus className="h-5 w-5 text-primary" />
               )}
             </div>
-            {isEditMode ? "Cập nhật thông tin khách hàng" : "Thêm khách hàng mới"}
+            {isEditMode
+              ? "Cập nhật thông tin khách hàng"
+              : "Thêm khách hàng mới"}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Thông tin đăng nhập - Only show in create mode */}
             {!isEditMode && (
               <div className="space-y-4">
@@ -175,7 +212,11 @@ export function CustomerFormDialog({
                       <FormItem>
                         <FormLabel>Mật khẩu</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            {...field}
+                          />
                         </FormControl>
                         <FormDescription className="text-xs">
                           Tối thiểu 6 ký tự
@@ -243,11 +284,17 @@ export function CustomerFormDialog({
               <div className="space-y-4">
                 <h3 className="font-semibold text-base">Vai trò</h3>
                 {isLoadingRoles ? (
-                  <div className="text-sm text-muted-foreground">Đang tải vai trò...</div>
+                  <div className="text-sm text-muted-foreground">
+                    Đang tải vai trò...
+                  </div>
                 ) : rolesError ? (
-                  <div className="text-sm text-destructive">Lỗi tải vai trò: {rolesError.message}</div>
+                  <div className="text-sm text-destructive">
+                    Lỗi tải vai trò: {rolesError.message}
+                  </div>
                 ) : availableRoles.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">Không có vai trò nào</div>
+                  <div className="text-sm text-muted-foreground">
+                    Không có vai trò nào
+                  </div>
                 ) : (
                   <FormField
                     control={form.control}
@@ -255,7 +302,10 @@ export function CustomerFormDialog({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Chọn vai trò</FormLabel>
-                        <Popover open={openRoleSelect} onOpenChange={setOpenRoleSelect}>
+                        <Popover
+                          open={openRoleSelect}
+                          onOpenChange={setOpenRoleSelect}
+                        >
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
@@ -263,7 +313,8 @@ export function CustomerFormDialog({
                                 role="combobox"
                                 className={cn(
                                   "w-full justify-between",
-                                  !field.value?.length && "text-muted-foreground"
+                                  !field.value?.length &&
+                                    "text-muted-foreground"
                                 )}
                               >
                                 {field.value?.length
@@ -275,10 +326,14 @@ export function CustomerFormDialog({
                           </PopoverTrigger>
                           <PopoverContent className="w-full p-0" align="start">
                             <Command>
-                              <CommandEmpty>Không tìm thấy vai trò</CommandEmpty>
+                              <CommandEmpty>
+                                Không tìm thấy vai trò
+                              </CommandEmpty>
                               <CommandGroup className="max-h-64 overflow-auto">
                                 {availableRoles.map((role) => {
-                                  const isSelected = field.value?.includes(role.id);
+                                  const isSelected = field.value?.includes(
+                                    role.id
+                                  );
                                   return (
                                     <CommandItem
                                       key={role.id}
@@ -287,10 +342,15 @@ export function CustomerFormDialog({
                                         const currentValue = field.value || [];
                                         if (isSelected) {
                                           field.onChange(
-                                            currentValue.filter((val) => val !== role.id)
+                                            currentValue.filter(
+                                              (val) => val !== role.id
+                                            )
                                           );
                                         } else {
-                                          field.onChange([...currentValue, role.id]);
+                                          field.onChange([
+                                            ...currentValue,
+                                            role.id,
+                                          ]);
                                         }
                                       }}
                                       className="cursor-pointer"
@@ -303,9 +363,13 @@ export function CustomerFormDialog({
                                             : "border-gray-300 bg-white"
                                         )}
                                       >
-                                        {isSelected && <Check className="h-4 w-4 stroke-[3]" />}
+                                        {isSelected && (
+                                          <Check className="h-4 w-4 stroke-[3]" />
+                                        )}
                                       </div>
-                                      <span className="font-medium">{role.label}</span>
+                                      <span className="font-medium">
+                                        {role.label}
+                                      </span>
                                     </CommandItem>
                                   );
                                 })}
@@ -313,12 +377,14 @@ export function CustomerFormDialog({
                             </Command>
                           </PopoverContent>
                         </Popover>
-                        
+
                         {/* Selected Roles Display */}
                         {field.value && field.value.length > 0 && (
                           <div className="flex flex-wrap gap-2 mt-2">
                             {field.value.map((roleId) => {
-                              const role = availableRoles.find((r) => r.id === roleId);
+                              const role = availableRoles.find(
+                                (r) => r.id === roleId
+                              );
                               return (
                                 <Badge
                                   key={roleId}
@@ -331,7 +397,9 @@ export function CustomerFormDialog({
                                     className="ml-1 rounded-full hover:bg-muted"
                                     onClick={() => {
                                       field.onChange(
-                                        field.value?.filter((val) => val !== roleId)
+                                        field.value?.filter(
+                                          (val) => val !== roleId
+                                        )
                                       );
                                     }}
                                   >
@@ -342,7 +410,7 @@ export function CustomerFormDialog({
                             })}
                           </div>
                         )}
-                        
+
                         <FormDescription className="text-xs">
                           Chọn ít nhất một vai trò cho khách hàng
                         </FormDescription>
