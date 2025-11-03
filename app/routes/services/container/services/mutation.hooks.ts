@@ -30,7 +30,6 @@ export function useUpdateService() {
     }) => await ServicesService.updateService(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
-      queryClient.invalidateQueries({ queryKey: ["service-detail"] });
     },
   });
 }

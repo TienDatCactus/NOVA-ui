@@ -17,11 +17,6 @@ export function useCreateMenuItem() {
       queryClient.invalidateQueries({
         queryKey: ["menu-list-by-category"],
       });
-      toast.success("Thêm món ăn thành công");
-    },
-    onError: (error) => {
-      console.error("Create menu item error:", error);
-      toast.error("Có lỗi xảy ra khi thêm món ăn");
     },
   });
 }
@@ -37,14 +32,6 @@ export function useUpdateMenuItem(itemId: string) {
       queryClient.invalidateQueries({
         queryKey: ["menu-list-by-category"],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["menu-item-detail", itemId],
-      });
-      toast.success("Cập nhật món ăn thành công");
-    },
-    onError: (error) => {
-      console.error("Update menu item error:", error);
-      toast.error("Có lỗi xảy ra khi cập nhật món ăn");
     },
   });
 }
@@ -60,11 +47,6 @@ export function useDeleteMenuItem() {
       queryClient.invalidateQueries({
         queryKey: ["menu-list-by-category"],
       });
-      toast.success("Xóa món ăn thành công");
-    },
-    onError: (error) => {
-      console.error("Delete menu item error:", error);
-      toast.error("Có lỗi xảy ra khi xóa món ăn");
     },
   });
 }

@@ -59,9 +59,12 @@ function CreateRoomDialog({ open, onClose, roomTypes }: CreateRoomDialogProps) {
   const { mutate, isPending } = useCreateRoom();
 
   const handleSubmit: SubmitHandler<CreateRoomFormData> = (data) => {
-    mutate(data);
-    form.reset();
-    onClose();
+    mutate(data, {
+      onSuccess: () => {
+        form.reset();
+        onClose();
+      },
+    });
   };
 
   const handleClose = () => {
