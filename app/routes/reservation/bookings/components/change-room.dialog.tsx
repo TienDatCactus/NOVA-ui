@@ -107,15 +107,11 @@ export default function ChangeRoomDialog({
   const handleConfirm = () => {
     if (!bookingDetail) return;
 
-    // Build rooms array for update - only include changed rooms
     const updatedRooms = Array.from(roomChanges.values())
       .filter((change) => change.newRoomId !== null)
       .map((change) => ({
         bookingRoomId: change.bookingRoomId,
-        roomId: change.newRoomId!,
-        fromDate: bookingDetail.checkinDate,
-        toDate: bookingDetail.checkoutDate,
-        remove: false,
+        newRoomId: change.newRoomId!,
       }));
 
     // If no changes, just close
@@ -126,12 +122,6 @@ export default function ChangeRoomDialog({
 
     // Build partial update payload - only update rooms
     const payload = {
-      checkinDate: bookingDetail.checkinDate,
-      checkoutDate: bookingDetail.checkoutDate,
-      adultsAmount: bookingDetail.adults,
-      childrenAmount: bookingDetail.children || 0,
-      totalAmount: bookingDetail.totalAmount,
-      paidAmount: bookingDetail.paidAmount || 0,
       rooms: updatedRooms,
     };
 
