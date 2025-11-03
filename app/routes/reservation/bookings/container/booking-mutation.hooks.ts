@@ -22,6 +22,26 @@ function useUpdateBooking(bookingId: string) {
   });
 }
 
+function useChangeRoom(bookingId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      rooms: Array<{ bookingRoomId: string; newRoomId: string }>;
+    }) => await BookingService.staffUpdateBookingDetail(bookingId, data as any),
+    onSuccess: (response) => {
+      toast.success("Đổi phòng thành công");
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({
+        queryKey: ["booking-detail", bookingId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["booking-detail", response.bookingCode],
+      });
+    },
+  });
+}
+
 function useCancelBooking(bookingId?: string) {
   const queryClient = useQueryClient();
 
@@ -45,4 +65,4 @@ function useCancelBooking(bookingId?: string) {
   });
 }
 
-export { useCancelBooking, useUpdateBooking };
+export { useCancelBooking, useUpdateBooking, useChangeRoom };
