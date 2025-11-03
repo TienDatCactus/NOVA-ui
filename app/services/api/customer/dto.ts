@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import useCustomerSchema from "~/services/schema/customer.schema";
+import { CustomerSchema } from "~/services/schema/customer.schema";
 
 /**
  * Customer DTO Types - NOVA-UI
@@ -22,7 +22,7 @@ const {
   AssignRolesResponseSchema,
   RemoveRolesSchema,
   RemoveRolesResponseSchema,
-} = useCustomerSchema();
+} = CustomerSchema;
 
 // Customer Item
 export type CustomerItem = z.infer<typeof CustomerItemSchema>;

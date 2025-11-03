@@ -19,10 +19,13 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Pencil, Loader2 } from "lucide-react";
-import useCustomerSchema from "~/services/schema/customer.schema";
 import { useUpdateCustomer } from "../container/useCustomers.hooks";
-import type { CustomerItem, UpdateCustomerDto } from "~/services/api/customer/dto";
+import type {
+  CustomerItem,
+  UpdateCustomerDto,
+} from "~/services/api/customer/dto";
 import { useEffect } from "react";
+import { CustomerSchema } from "~/services/schema/customer.schema";
 
 interface CustomerEditDialogProps {
   customer: CustomerItem;
@@ -37,7 +40,7 @@ export function CustomerEditDialog({
   onClose,
   onSuccess,
 }: CustomerEditDialogProps) {
-  const { UpdateCustomerSchema } = useCustomerSchema();
+  const { UpdateCustomerSchema } = CustomerSchema;
   const { mutate: updateCustomer, isPending } = useUpdateCustomer();
 
   const form = useForm<UpdateCustomerDto>({
@@ -99,7 +102,10 @@ export function CustomerEditDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Thông tin cá nhân */}
             <div className="space-y-4">
               <h3 className="font-semibold text-base">Thông tin cá nhân</h3>

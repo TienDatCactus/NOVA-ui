@@ -1,21 +1,20 @@
 import http from "~/lib/http";
-import useCustomerSchema from "~/services/schema/customer.schema";
+import { CustomerSchema } from "~/services/schema/customer.schema";
 import { Customer } from "~/services/url";
 import type {
-  CustomerListResponseDto,
-  CustomerDetailResponseDto,
-  CreateCustomerDto,
-  CreateCustomerResponseDto,
-  UpdateCustomerDto,
-  UpdateCustomerResponseDto,
-  RoleListResponseDto,
-  LockUserDto,
-  LockUserResponseDto,
-  UnlockUserResponseDto,
   AssignRolesDto,
   AssignRolesResponseDto,
+  CreateCustomerDto,
+  CreateCustomerResponseDto,
+  CustomerDetailResponseDto,
+  CustomerListResponseDto,
+  LockUserDto,
+  LockUserResponseDto,
   RemoveRolesDto,
   RemoveRolesResponseDto,
+  UnlockUserResponseDto,
+  UpdateCustomerDto,
+  UpdateCustomerResponseDto,
 } from "./dto";
 
 const {
@@ -28,7 +27,7 @@ const {
   UnlockUserResponseSchema,
   AssignRolesResponseSchema,
   RemoveRolesResponseSchema,
-} = useCustomerSchema();
+} = CustomerSchema;
 
 async function getCustomerList(): Promise<CustomerListResponseDto> {
   try {

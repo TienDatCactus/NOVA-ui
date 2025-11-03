@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useUnitList } from "./container/use-unit-list.hooks";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
 import CreateUnitDialog from "./components/create-unit.dialog";
@@ -18,19 +17,23 @@ import {
 } from "~/components/ui/empty";
 import { Package } from "lucide-react";
 import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
+import { useUnits } from "./container/unit-query.hooks";
 
 export function clientLoader() {
   return { title: "Đơn vị tính - NOVA" };
 }
 
 export default function Units() {
-  const { data, isPending, refetch } = useUnitList();
+  const { data, isPending, refetch } = useUnits();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedUnit, setSelectedUnit] = useState<UnitItemDetailResponseDto | null>(null);
+  const [selectedUnit, setSelectedUnit] =
+    useState<UnitItemDetailResponseDto | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
 
   const handleEdit = (unit: UnitItemDetailResponseDto) => {
     setSelectedUnit(unit);
@@ -129,7 +132,9 @@ export default function Units() {
               <p className="text-sm font-medium text-muted-foreground">
                 Ngừng hoạt động
               </p>
-              <p className="text-2xl font-bold text-gray-600">{inactiveCount}</p>
+              <p className="text-2xl font-bold text-gray-600">
+                {inactiveCount}
+              </p>
             </div>
             <div className="rounded-full bg-gray-100 p-3 dark:bg-gray-800">
               <div className="h-5 w-5 rounded-full bg-gray-600" />
@@ -182,7 +187,12 @@ export default function Units() {
                 </EmptyHeader>
               </Empty>
             ) : (
-              <DataTable columns={columns} data={filteredData} onEdit={handleEdit} onDelete={handleDelete} />
+              <DataTable
+                columns={columns}
+                data={filteredData}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             )}
           </div>
         </div>

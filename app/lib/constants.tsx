@@ -108,15 +108,21 @@ const DASHBOARD_ITEMS_RECEPTIONIST: Array<{
   },
   {
     id: 5,
-    icon: <Warehouse size={16} />,
+    icon: <Warehouse />,
     title: "Đơn vị tính",
-    href: "/dashboard/services/units",
+    href: "/dashboard/units",
   },
   {
     id: 6,
     title: "Hóa đơn",
     icon: <ReceiptText />,
     href: "/dashboard/invoices",
+  },
+  {
+    id: 7,
+    title: "Khách hàng",
+    icon: <ReceiptText />,
+    href: "/dashboard/customers",
   },
 ];
 const SUB_DASHBOARD_ITEMS: Array<{
@@ -161,10 +167,7 @@ const RESERVATION_TOP_NAV_ITEMS: Array<{
     title: "Lịch đặt phòng",
     children: [
       { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
-      {
-        title: "Timeline",
-        href: "/dashboard/reservation/bookings/timeline",
-      },
+
       { title: "Danh sách", href: "/dashboard/reservation/bookings/list" },
     ],
   },
@@ -255,10 +258,7 @@ const INVOICES_TOP_NAV_ITEMS: Array<{
     title: "Lịch đặt phòng",
     children: [
       { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
-      {
-        title: "Timeline",
-        href: "/dashboard/reservation/bookings/timeline",
-      },
+
       { title: "Danh sách", href: "/dashboard/reservation/bookings/list" },
     ],
   },

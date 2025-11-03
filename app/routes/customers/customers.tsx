@@ -1,5 +1,14 @@
 import { useState, useMemo } from "react";
-import { UserPlus, Users, Pencil, Search, Lock, Unlock, Shield, MoreHorizontal } from "lucide-react";
+import {
+  UserPlus,
+  Users,
+  Pencil,
+  Search,
+  Lock,
+  Unlock,
+  Shield,
+  MoreHorizontal,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
@@ -36,40 +45,94 @@ import { CustomerStats } from "./components/customer-stats";
 import { LockUserDialog } from "./components/lock-user-dialog";
 import { ManageRolesDialog } from "./components/manage-roles-dialog";
 import type { CustomerItem } from "~/services/api/customer/dto";
+import type { Route } from "./+types/customers";
 
 /**
  * Helper function - Get role badge color
  */
 const getRoleBadgeVariant = (role: string) => {
-  const roleColors: Record<string, { bg: string; text: string; border: string }> = {
-    Receptionist: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
-    Staff: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
-    Customer: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-    HotelManager: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200" },
-    Accountant: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
+  const roleColors: Record<
+    string,
+    { bg: string; text: string; border: string }
+  > = {
+    Receptionist: {
+      bg: "bg-blue-50",
+      text: "text-blue-700",
+      border: "border-blue-200",
+    },
+    Staff: {
+      bg: "bg-purple-50",
+      text: "text-purple-700",
+      border: "border-purple-200",
+    },
+    Customer: {
+      bg: "bg-green-50",
+      text: "text-green-700",
+      border: "border-green-200",
+    },
+    HotelManager: {
+      bg: "bg-orange-50",
+      text: "text-orange-700",
+      border: "border-orange-200",
+    },
+    Accountant: {
+      bg: "bg-pink-50",
+      text: "text-pink-700",
+      border: "border-pink-200",
+    },
     Admin: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
-    ServiceStaff: { bg: "bg-indigo-50", text: "text-indigo-700", border: "border-indigo-200" },
+    ServiceStaff: {
+      bg: "bg-indigo-50",
+      text: "text-indigo-700",
+      border: "border-indigo-200",
+    },
   };
-  return roleColors[role] || { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200" };
+  return (
+    roleColors[role] || {
+      bg: "bg-gray-50",
+      text: "text-gray-700",
+      border: "border-gray-200",
+    }
+  );
 };
 
-export default function CustomersPage() {
+export const action = async ({ request, params }: Route.ActionArgs) => {
+  return {};
+};
+
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  return {};
+};
+
+export default function Component({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const { data, isPending } = useCustomers();
   const { data: rolesData } = useRoles();
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerItem | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerItem | null>(
+    null
+  );
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [customerToEdit, setCustomerToEdit] = useState<CustomerItem | null>(null);
-  
+  const [customerToEdit, setCustomerToEdit] = useState<CustomerItem | null>(
+    null
+  );
+
   // Lock/Unlock dialog states
   const [isLockDialogOpen, setIsLockDialogOpen] = useState(false);
-  const [lockDialogMode, setLockDialogMode] = useState<"lock" | "unlock">("lock");
-  const [customerToLock, setCustomerToLock] = useState<CustomerItem | null>(null);
-  
+  const [lockDialogMode, setLockDialogMode] = useState<"lock" | "unlock">(
+    "lock"
+  );
+  const [customerToLock, setCustomerToLock] = useState<CustomerItem | null>(
+    null
+  );
+
   // Manage roles dialog states
   const [isManageRolesOpen, setIsManageRolesOpen] = useState(false);
-  const [customerToManageRoles, setCustomerToManageRoles] = useState<CustomerItem | null>(null);
+  const [customerToManageRoles, setCustomerToManageRoles] =
+    useState<CustomerItem | null>(null);
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,7 +215,9 @@ export default function CustomersPage() {
           <div className="p-2 rounded-lg bg-primary/10">
             <Users className="h-6 w-6 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Quản lý Khách hàng</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Quản lý Khách hàng
+          </h1>
         </div>
         <p className="text-muted-foreground ml-12">
           Quản lý thông tin và tài khoản khách hàng
@@ -160,9 +225,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Statistics Cards */}
-      {data && data.length > 0 && (
-        <CustomerStats customers={data} />
-      )}
+      {data && data.length > 0 && <CustomerStats customers={data} />}
 
       {/* Search & Filter Bar */}
       <Card className="mb-6 p-4 shadow-md">
@@ -227,7 +290,9 @@ export default function CustomersPage() {
                 <TableHead className="font-semibold">Số điện thoại</TableHead>
                 <TableHead className="font-semibold">Vai trò</TableHead>
                 <TableHead className="font-semibold">Trạng thái</TableHead>
-                <TableHead className="font-semibold text-center">Thao tác</TableHead>
+                <TableHead className="font-semibold text-center">
+                  Thao tác
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -262,11 +327,13 @@ export default function CustomersPage() {
                     className="hover:bg-muted/30 transition-colors cursor-pointer"
                     onClick={() => handleViewDetail(customer)}
                   >
-                    <TableCell className="font-medium">{customer.fullName}</TableCell>
+                    <TableCell className="font-medium">
+                      {customer.fullName}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className="text-sm">{customer.email}</span>
-                        {customer.emailConfirmed }
+                        {customer.emailConfirmed}
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -290,10 +357,7 @@ export default function CustomersPage() {
                     </TableCell>
                     <TableCell>
                       {customer.lockoutEnabled && customer.lockoutEnd ? (
-                        <Badge
-                          variant="destructive"
-                          className="shadow-sm"
-                        >
+                        <Badge variant="destructive" className="shadow-sm">
                           Bị khóa
                         </Badge>
                       ) : (
@@ -308,8 +372,8 @@ export default function CustomersPage() {
                     <TableCell className="text-center">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0"
                             onClick={(e) => e.stopPropagation()}
@@ -320,8 +384,8 @@ export default function CustomersPage() {
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuLabel>Hành động</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          
-                          <DropdownMenuItem 
+
+                          <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEdit(customer);
@@ -330,8 +394,8 @@ export default function CustomersPage() {
                             <Pencil className="h-4 w-4 mr-2" />
                             Chỉnh sửa thông tin
                           </DropdownMenuItem>
-                          
-                          <DropdownMenuItem 
+
+                          <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
                               handleManageRoles(customer);
@@ -340,11 +404,11 @@ export default function CustomersPage() {
                             <Shield className="h-4 w-4 mr-2" />
                             Quản lý vai trò
                           </DropdownMenuItem>
-                          
+
                           <DropdownMenuSeparator />
-                          
+
                           {customer.lockoutEnabled && customer.lockoutEnd ? (
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleUnlockUser(customer);
@@ -355,7 +419,7 @@ export default function CustomersPage() {
                               Mở khóa tài khoản
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleLockUser(customer);
