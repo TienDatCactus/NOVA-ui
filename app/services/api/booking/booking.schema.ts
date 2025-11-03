@@ -130,36 +130,39 @@ const StaffBookingPricePreviewResponseSchema = z.object({
 });
 
 const StaffUpdateBookingRequestSchema = z.object({
-  checkinDate: z.union([
-    z.date("Ngày trả phòng không hợp lệ"),
-    z.string().refine((val) => !isNaN(Date.parse(val)), {
-      message: "Ngày không hợp lệ",
-    }),
-  ]),
-  checkoutDate: z.union([
-    z.date("Ngày trả phòng không hợp lệ"),
-    z.string().refine((val) => !isNaN(Date.parse(val)), {
-      message: "Ngày không hợp lệ",
-    }),
-  ]),
-  adultsAmount: z.number().min(1, "Phải có ít nhất 1 người lớn"),
-  childrenAmount: z.number().min(0).default(0).optional(),
+  checkinDate: z
+    .union([
+      z.date("Ngày trả phòng không hợp lệ"),
+      z.string().refine((val) => !isNaN(Date.parse(val)), {
+        message: "Ngày không hợp lệ",
+      }),
+    ])
+    .optional(),
+  checkoutDate: z
+    .union([
+      z.date("Ngày trả phòng không hợp lệ"),
+      z.string().refine((val) => !isNaN(Date.parse(val)), {
+        message: "Ngày không hợp lệ",
+      }),
+    ])
+    .optional(),
+  adultsAmount: z.number().min(1, "Phải có ít nhất 1 người lớn").optional(),
+  childrenAmount: z.number().min(0).optional(),
   note: z.string().optional(),
   otaBookingCode: z.string().optional(),
   otaInformationId: z.string().optional(),
   customerId: z.string("Customer ID không hợp lệ").optional(),
   paymentMethod: PaymentSchema.PaymentMethodEnum.optional(),
   paymentStatus: PaymentSchema.PaymentStatusEnum.optional(),
-  totalAmount: z.number().min(0, "Tổng tiền không hợp lệ"),
-  paidAmount: z.number().min(0, "Số tiền thanh toán không hợp lệ"),
+  totalAmount: z.number().min(0, "Tổng tiền không hợp lệ").optional(),
+  paidAmount: z.number().min(0, "Số tiền thanh toán không hợp lệ").optional(),
   rooms: z
     .array(
       z.object({
-        bookingRoomId: z.string("Booking Room ID không hợp lệ").optional(),
         roomId: z.string("Room ID không hợp lệ").optional(),
-        fromDate: z.string("Ngày bắt đầu không hợp lệ"),
-        toDate: z.string("Ngày kết thúc không hợp lệ"),
-        remove: z.boolean().default(false),
+        fromDate: z.string("Ngày bắt đầu không hợp lệ").optional(),
+        toDate: z.string("Ngày kết thúc không hợp lệ").optional(),
+        remove: z.boolean().default(false).optional(),
       })
     )
     .optional(),
