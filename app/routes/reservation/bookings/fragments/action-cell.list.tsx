@@ -44,7 +44,10 @@ export const ActionCell: React.FC<{ row: Row<BookingListItem> }> = ({
           <DropdownMenuItem onClick={() => setChangeRoomDialogOpen(true)}>
             Đổi phòng
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setUpdateDialogOpen(true)}>
+          <DropdownMenuItem
+            onClick={() => setUpdateDialogOpen(true)}
+            disabled={new Date(bookingDetail?.checkoutDate!) < new Date()}
+          >
             Sửa đặt phòng
           </DropdownMenuItem>
           <DropdownMenuSeparator />

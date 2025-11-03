@@ -1,30 +1,23 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
+import useMenuFilters from "~/routes/menu/container/menu/filter.hooks";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServiceTypes } from "~/routes/services/container/service-types/query.hooks";
-import { useServices } from "~/routes/services/container/services/query.hooks";
 import useServiceFilters from "~/routes/services/container/services/filter.hooks";
+import { useServices } from "~/routes/services/container/services/query.hooks";
+import { OrderSchema } from "~/services/api/order/order.schema";
 import MenuList from "./components/menu-list";
 import OrderDetail from "./components/order-detail";
 import ServiceList from "./components/service-list";
 import FilterMenuBar from "./fragments/filter-menu.bar";
 import FilterServiceBar from "./fragments/filter-service.bar";
-import useMenuFilters from "~/routes/menu/container/menu/filter.hooks";
-import { OrderSchema } from "~/services/api/order/order.schema";
 
 const { ServiceOrderItemSchema, ServiceOrderSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
@@ -111,7 +104,10 @@ export default function AddServiceDialog({
     }
   };
 
-  const toggleSelectItem = (itemId: string, itemType: string) => {
+  const toggleSelectItem = (
+    itemId: string,
+    itemType: "MenuItem" | "ServiceItem"
+  ) => {
     const servicesArr = form.getValues("services") || [];
     const idx = servicesArr.findIndex((s) => s.itemId === itemId);
     if (idx >= 0) {
@@ -215,7 +211,7 @@ export default function AddServiceDialog({
                   }
                   isSelected={isSelected}
                   getQuantity={getQuantity}
-                  onToggleSelect={(id) => toggleSelectItem(id, "service")}
+                  onToggleSelect={(id) => toggleSelectItem(id, "ServiceItem")}
                   onQuantityChange={handleQuantityChange}
                 />
               ) : (
@@ -227,7 +223,7 @@ export default function AddServiceDialog({
                   }
                   isSelected={isSelected}
                   getQuantity={getQuantity}
-                  onToggleSelect={(id) => toggleSelectItem(id, "menu")}
+                  onToggleSelect={(id) => toggleSelectItem(id, "MenuItem")}
                   onQuantityChange={handleQuantityChange}
                 />
               )}

@@ -243,7 +243,6 @@ export default function CreateMenuDialog({
                         <FormControl>
                           <Input
                             type="number"
-                            max={9999999999}
                             onInput={handleLimitInput}
                             placeholder="0"
                             {...field}
@@ -436,7 +435,6 @@ export default function CreateMenuDialog({
                                   <FormControl>
                                     <Input
                                       type="number"
-                                      max={9999999999}
                                       onInput={handleLimitInput}
                                       placeholder="0"
                                       {...field}
