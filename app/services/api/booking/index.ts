@@ -125,11 +125,16 @@ async function staffCancelBooking(
 ): Promise<StaffCancelBookingResponseDto> {
   const idempotencyKey = crypto.randomUUID();
   try {
-    const resp = await http.post(Booking.cancel(id), {
-      headers: {
-        "Idempotency-Key": idempotencyKey,
-      },
-    });
+    const resp = await http.post(
+      Booking.cancel(id),
+      {},
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+
     return StaffCancelBookingResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
