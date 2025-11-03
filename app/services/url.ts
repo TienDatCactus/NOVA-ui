@@ -1,3 +1,5 @@
+import { de } from "date-fns/locale";
+
 const Auth = {
   login: "Auth/login",
   logout: "Auth/logout",
@@ -41,6 +43,7 @@ const Rooms = {
   create: "Rooms",
   update: (id: string) => `Rooms/${id}`,
   getAvailableRoomsInternal: "Rooms/available-with-details",
+  delete: (id: string) => `Rooms/${id}`,
 };
 
 const RoomTypes = {

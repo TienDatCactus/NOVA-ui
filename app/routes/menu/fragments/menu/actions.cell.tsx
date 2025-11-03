@@ -13,6 +13,7 @@ import { useState } from "react";
 
 import EditMenuSheet from "../../components/edit-menu.sheet";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
+import { toast } from "sonner";
 
 interface MenuActionsCellProps {
   menuItem: MenuListItemDto;
@@ -21,6 +22,17 @@ interface MenuActionsCellProps {
 export default function MenuActionsCell({ menuItem }: MenuActionsCellProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
+  const canDelete = menuItem.active === false;
+
+  const handleDeleteClick = () => {
+    if (!canDelete) {
+      toast.error(
+        "Chỉ được xóa phòng khi trạng thái là OutOfService. Hãy chuyển trạng thái rồi thử lại."
+      );
+      return;
+    }
+    setDeleteDialogOpen(true);
+  };
   return (
     <>
       <DropdownMenu>
@@ -39,7 +51,8 @@ export default function MenuActionsCell({ menuItem }: MenuActionsCellProps) {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
-            onClick={() => setDeleteDialogOpen(true)}
+            onClick={handleDeleteClick}
+            disabled={!canDelete}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Xóa
