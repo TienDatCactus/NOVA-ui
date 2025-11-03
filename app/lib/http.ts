@@ -7,17 +7,12 @@ import { AuthService } from "~/services/api/auth";
 import STORAGE, { clearStorage, getStorage, setStorage } from "./storage";
 
 const parseBody = (response: AxiosResponse) => {
-  const { message, success } = response.data;
-  // Only show success/error toasts for non-GET requests to avoid noisy
-  // notifications when queries refetch automatically (GET responses).
-  const method = response.config?.method?.toLowerCase();
+ const { message, success } = response.data;
   if (message) {
-    if (method && method !== "get") {
-      if (success) {
-        toast.success(message);
-      } else {
-        toast.error(message);
-      }
+    if (success) {
+      toast.success(message);
+    } else {
+      toast.error(message);
     }
   }
   return response.data;
