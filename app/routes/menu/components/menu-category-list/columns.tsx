@@ -61,11 +61,6 @@ export const columns: ColumnDef<MenuCategoryItemDto>[] = [
       return (
         <div className="flex items-center gap-2">
           <span className="font-semibold">{category.name}</span>
-          {!category.active && (
-            <Badge variant="secondary" className="text-xs">
-              Ngưng hoạt động
-            </Badge>
-          )}
         </div>
       );
     },
