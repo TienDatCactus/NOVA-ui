@@ -144,7 +144,7 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
 
       return (
         <div className="flex items-center gap-1">
-          <Badge variant={active ? "default" : "secondary"} className="text-xs">
+          <Badge variant={active ? "success" : "warning"} className="text-xs">
             {active}
           </Badge>
         </div>

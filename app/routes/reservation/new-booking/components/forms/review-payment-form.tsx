@@ -176,10 +176,16 @@ export function ReviewPaymentForm({
         childrenAmount: storeData.childrenAmount ?? 0,
         guestFullName: storeData.guestFullName!,
         isBreakfastAll: storeData.isBreakfastAll ?? false,
-        overridePrice: data.overridePrice ?? null,
+        overridePrice: data.overridePrice == 0 ? null : data.overridePrice,
         serviceOrder: {},
       };
-      mutateAsync(bookingData);
+      mutateAsync(bookingData, {
+        onSuccess: () => {
+          reset();
+          onResetSteps && onResetSteps();
+          navigate("/dashboard/reservation/bookings/list");
+        },
+      });
       // reset();
       // onResetSteps && onResetSteps();
       // navigate("/dashboard/reservation/bookings/list");

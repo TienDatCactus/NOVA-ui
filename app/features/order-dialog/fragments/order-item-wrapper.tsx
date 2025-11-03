@@ -37,47 +37,42 @@ export default function OrderItemWrapper({
   onRemove,
   onPriceCalculated,
 }: OrderItemWrapperProps) {
-  // Fetch service detail if itemType is "service"
   const {
     data: serviceDetail,
     isLoading: isLoadingService,
     isError: isServiceError,
   } = useServiceDetail(itemId, {
-    enabled: itemType === "service",
+    enabled: itemType === "ServiceItem",
   });
 
-  // Fetch menu detail if itemType is "menu"
   const {
     data: menuDetail,
     isLoading: isLoadingMenu,
     isError: isMenuError,
   } = useMenuItemDetail(itemId, {
-    enabled: itemType === "menu",
+    enabled: itemType === "MenuItem",
   });
 
   const isLoading = isLoadingService || isLoadingMenu;
   const isError = isServiceError || isMenuError;
 
-  // Extract name and price based on item type
   let itemName = "";
   let unitPrice = 0;
 
-  if (itemType === "service" && serviceDetail) {
+  if (itemType === "ServiceItem" && serviceDetail) {
     itemName = serviceDetail.name;
     unitPrice = serviceDetail.basePrice;
-  } else if (itemType === "menu" && menuDetail) {
+  } else if (itemType === "MenuItem" && menuDetail) {
     itemName = menuDetail.name;
     unitPrice = menuDetail.price;
   }
 
-  // Report price to parent for total calculation
   useEffect(() => {
     if (!isLoading && !isError && unitPrice > 0) {
       onPriceCalculated?.(itemId, unitPrice, quantity);
     }
   }, [itemId, unitPrice, quantity, isLoading, isError, onPriceCalculated]);
 
-  // Show skeleton while loading
   if (isLoading) {
     return (
       <div className="py-4 border-b last:border-0 space-y-2">

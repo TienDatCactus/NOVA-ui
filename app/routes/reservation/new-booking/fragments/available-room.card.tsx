@@ -91,8 +91,8 @@ export function AvailableRoomTypeCard({
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <CollapsibleTrigger>
             <span className="text-muted-foreground text-sm font-medium">
-              {isExpanded ? "Ẩn" : "Xem"} danh sách phòng ({roomType.totalRooms}{" "}
-              phòng)
+              {isExpanded ? "Ẩn" : "Xem"} danh sách phòng (
+              {roomType.availableRooms.length} phòng)
             </span>
             <ChevronDown className="h-4 w-4" />
           </CollapsibleTrigger>

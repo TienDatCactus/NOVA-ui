@@ -192,12 +192,13 @@ const StaffCreateBookingResponseSchema = z.object({
   serviceInvoice: InvoiceSchema.ServiceInvoiceSchema.optional().nullable(),
 });
 const BookingListItemSchema = z.object({
-  bookingCode: z.string().min(1, "bookingCode không được để trống"),
-  customerName: z.string().min(1, "customerName không được để trống"),
-  checkinDate: z.string().min(1, "checkinDate không được để trống"),
-  checkoutDate: z.string().min(1, "checkoutDate không được để trống"),
-  source: z.string().min(1, "source không được để trống"),
-  status: z.string(),
+  bookingCode: z.string().optional(),
+  customerName: z.string().optional(),
+  checkinDate: z.string().optional(),
+  checkoutDate: z.string().optional(),
+  source: z.string().optional(),
+  otaName: z.string().optional().nullable(),
+  status: z.string().optional(),
 });
 const BookingListResponseSchema = z.array(BookingListItemSchema).optional();
 

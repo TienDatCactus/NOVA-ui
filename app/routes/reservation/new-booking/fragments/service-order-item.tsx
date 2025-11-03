@@ -24,7 +24,7 @@ export function ServiceOrderItem({ service, onRemove }: ServiceOrderItemProps) {
     isLoading: isLoadingService,
     isError: isServiceError,
   } = useServiceDetail(service.itemId, {
-    enabled: service.itemType === "service",
+    enabled: service.itemType === "ServiceItem",
   });
 
   const {
@@ -32,17 +32,17 @@ export function ServiceOrderItem({ service, onRemove }: ServiceOrderItemProps) {
     isLoading: isLoadingMenu,
     isError: isMenuError,
   } = useMenuItemDetail(service.itemId, {
-    enabled: service.itemType === "menu",
+    enabled: service.itemType === "MenuItem",
   });
 
   const isLoading = isLoadingService || isLoadingMenu;
   const isError = isServiceError || isMenuError;
 
-  let itemName = service.itemType;
-  if (service.itemType === "service" && serviceDetail) {
-    itemName = serviceDetail.name;
-  } else if (service.itemType === "menu" && menuDetail) {
-    itemName = menuDetail.name;
+  let itemName: "MenuItem" | "ServiceItem" = service.itemType;
+  if (service.itemType === "ServiceItem" && serviceDetail) {
+    itemName = serviceDetail.name as "MenuItem" | "ServiceItem";
+  } else if (service.itemType === "MenuItem" && menuDetail) {
+    itemName = menuDetail.name as "MenuItem" | "ServiceItem";
   }
 
   if (isLoading) {

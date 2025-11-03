@@ -44,7 +44,6 @@ export default function Component({
 
   return (
     <div className="flex flex-col space-y-4 h-full">
-      {/* Filters */}
       <BookingGridFilters
         filters={filters}
         updateFilters={updateFilter}

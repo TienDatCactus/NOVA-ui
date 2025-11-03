@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Package } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,31 +11,86 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
+import { Checkbox } from "~/components/ui/checkbox";
 
 export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <div className="flex items-center">
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Chọn tất cả"
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Chọn dòng"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "index",
+    header: "STT",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium text-muted-foreground">
+          {row.index + 1}
+        </span>
+      );
+    },
+  },
   {
     accessorKey: "code",
     header: "Mã đơn vị",
     cell: ({ row }) => (
-      <div className="font-mono font-medium">{row.getValue("code")}</div>
+      <div className="flex items-center gap-2">
+        <div className="rounded-md bg-primary/10 p-1.5">
+          <Package className="h-3.5 w-3.5 text-primary" />
+        </div>
+        <span className="font-mono text-sm font-semibold">
+          {row.getValue("code")}
+        </span>
+      </div>
     ),
   },
   {
     accessorKey: "name",
     header: "Tên đơn vị",
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
+      <div className="flex flex-col">
+        <span className="font-medium">{row.getValue("name")}</span>
+        <span className="text-xs text-muted-foreground">Đơn vị đo lường</span>
+      </div>
     ),
   },
   {
     accessorKey: "active",
-    header: "Trạng thái",
+    header: () => <div className="text-center">Trạng thái</div>,
     cell: ({ row }) => {
       const active = row.getValue("active") as boolean;
       return (
-        <Badge variant={active ? "default" : "secondary"}>
-          {active ? "Hoạt động" : "Ngừng hoạt động"}
-        </Badge>
+        <div className="flex justify-center">
+          <Badge
+            variant={active ? "default" : "secondary"}
+            className={
+              active
+                ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
+            }
+          >
+            {active ? "Hoạt động" : "Ngừng hoạt động"}
+          </Badge>
+        </div>
       );
     },
   },
@@ -52,12 +107,14 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">Mở menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-[160px]">
+              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+                Thao tác
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onEdit?.(unit)}>
                 <Pencil className="mr-2 h-4 w-4" />
@@ -65,7 +122,7 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => onDelete?.(unit)}
-                className="text-destructive focus:text-destructive"
+                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Xóa

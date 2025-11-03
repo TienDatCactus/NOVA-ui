@@ -31,7 +31,7 @@ export const BOOKING_STATUSES = [
   { value: "CheckedOut", label: "Đã trả phòng" },
   { value: "Pending", label: "Chờ xử lý" },
   { value: "Cancelled", label: "Đã hủy" },
-];
+] as const;
 export const BOOKING_SOURCES = [
   { value: 0, label: "Trực tiếp (Nhân viên)", key: "DirectStaff" },
   { value: 2, label: "OTA", key: "OTA" },

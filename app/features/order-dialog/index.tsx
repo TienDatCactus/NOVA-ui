@@ -75,7 +75,7 @@ export default function AddServiceDialog({
     defaultValues: { services: [], payment: null },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { append, remove } = useFieldArray({
     control: form.control,
     name: "services",
   });
