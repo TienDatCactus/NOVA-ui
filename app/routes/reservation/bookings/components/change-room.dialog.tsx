@@ -73,7 +73,6 @@ export default function ChangeRoomDialog({
     enabled: open && !!bookingDetail,
   });
 
-  // Initialize room changes when dialog opens
   useEffect(() => {
     if (bookingDetail && open) {
       const changes = new Map<string, RoomChange>();
@@ -117,7 +116,6 @@ export default function ChangeRoomDialog({
       return;
     }
 
-    // Build request payload matching the required structure
     const payload = {
       rooms: roomsToChange,
     };

@@ -147,7 +147,7 @@ const StaffUpdateBookingRequestSchema = z.object({
     ])
     .optional(),
   adultsAmount: z.number().min(1, "Phải có ít nhất 1 người lớn").optional(),
-  childrenAmount: z.number().min(0).default(0).optional(),
+  childrenAmount: z.number().min(0).optional(),
   note: z.string().optional(),
   otaBookingCode: z.string().optional(),
   otaInformationId: z.string().optional(),
