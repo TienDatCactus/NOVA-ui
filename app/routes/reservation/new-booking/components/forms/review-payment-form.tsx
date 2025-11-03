@@ -119,7 +119,9 @@ export function ReviewPaymentForm({
       childrenAmount: storeData.childrenAmount || 0,
       roomTypes,
       isBreakfastAll: storeData.isBreakfastAll || false,
-      breakfastDates: storeData.breakfastDates,
+      breakfastDates:
+        storeData.breakfastDates?.map((date) => format(date, "yyyy-MM-dd")) ||
+        [],
       services: selectedServices.map((s) => ({
         itemType: s.itemType == "menu" ? "MenuItem" : "ServiceItem",
         itemId: s.itemId,
