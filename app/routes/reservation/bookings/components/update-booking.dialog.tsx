@@ -1,12 +1,13 @@
 import { format, parseISO } from "date-fns";
-import { CalendarIcon, Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
-import { vi } from "date-fns/locale";
+import { SelectGroup } from "@radix-ui/react-select";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
 import { Card } from "~/components/ui/card";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -25,11 +26,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -37,9 +34,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import { cn, handleLimitInput, toYMD } from "~/lib/utils";
+import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
@@ -48,14 +47,8 @@ import {
   PAYMENT_METHODS,
   PAYMENT_STATUSES,
 } from "~/services/types/payment.types";
-import { DatePicker } from "~/components/ui/date-picker";
-import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
-import { SelectGroup } from "@radix-ui/react-select";
-import { toast } from "sonner";
-import { Label } from "~/components/ui/label";
-import { Separator } from "~/components/ui/separator";
-import { useUpdateBooking } from "../container/booking-mutation.hooks";
 import { useOTAInfo } from "../../new-booking/container/create-booking-query.hooks";
+import { useUpdateBooking } from "../container/booking-mutation.hooks";
 
 interface UpdateBookingDialogProps {
   open: boolean;
@@ -90,12 +83,7 @@ export default function UpdateBookingDialog({
     },
   });
 
-  const {
-    fields,
-    append,
-    remove,
-    update: updateRoom,
-  } = useFieldArray({
+  const { fields, append } = useFieldArray({
     control: form.control,
     name: "rooms",
   });
@@ -234,7 +222,6 @@ export default function UpdateBookingDialog({
                             </Button>
                             <Input
                               type="number"
-                              max={9999999999}
                               onInput={handleLimitInput}
                               {...field}
                               className="text-center"
@@ -278,7 +265,6 @@ export default function UpdateBookingDialog({
                             </Button>
                             <Input
                               type="number"
-                              max={9999999999}
                               onInput={handleLimitInput}
                               {...field}
                               className="text-center"
@@ -624,7 +610,6 @@ export default function UpdateBookingDialog({
                         <FormControl>
                           <Input
                             type="number"
-                            max={9999999999}
                             onInput={handleLimitInput}
                             {...field}
                             onChange={(e) =>
@@ -654,7 +639,6 @@ export default function UpdateBookingDialog({
                         <FormControl>
                           <Input
                             type="number"
-                            max={9999999999}
                             onInput={handleLimitInput}
                             {...field}
                             onChange={(e) =>

@@ -323,7 +323,6 @@ export default function EditMenuSheet({
                         <FormControl>
                           <Input
                             type="number"
-                            max={9999999999}
                             onInput={handleLimitInput}
                             placeholder="0"
                             {...field}
@@ -571,7 +570,6 @@ export default function EditMenuSheet({
                                   <FormControl>
                                     <Input
                                       type="number"
-                                      max={9999999999}
                                       onInput={handleLimitInput}
                                       placeholder="0"
                                       {...field}
