@@ -38,6 +38,7 @@ export default [
         route("menu-categories", "routes/menu/menu-categories.tsx"),
       ]),
       ...prefix("pos-orders", [index("routes/pos-orders/pos-orders.tsx")]),
+      route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("customers", "routes/customers/customers.tsx"),
     ]),

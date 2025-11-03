@@ -120,10 +120,15 @@ async function staffUpdateBookingDetail(
 }
 
 async function staffCancelBooking(
-  id: string
+  id: string,
+  idempotencyKey: string
 ): Promise<StaffCancelBookingResponseDto> {
   try {
-    const resp = await http.post(Booking.cancel(id));
+    const resp = await http.post(Booking.cancel(id), {
+      headers: {
+        "Idempotency-Key": idempotencyKey,
+      },
+    });
     return StaffCancelBookingResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);

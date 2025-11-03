@@ -21,16 +21,12 @@ const UpdateUnitResponseSchema = UnitItemSchema;
 const UnitItemDetailResponseSchema = UnitItemSchema;
 const UnitListResponseSchema = z.array(UnitItemSchema);
 
-const useUnitSchema = () => {
-  return {
-    UnitItemSchema,
-    UnitListResponseSchema,
-    UnitItemDetailResponseSchema,
-    CreateUnitRequestSchema,
-    CreateUnitResponseSchema,
-    UpdateUnitRequestSchema,
-    UpdateUnitResponseSchema,
-  };
+export const UnitSchema = {
+  UnitItemSchema,
+  UnitListResponseSchema,
+  UnitItemDetailResponseSchema,
+  CreateUnitRequestSchema,
+  CreateUnitResponseSchema,
+  UpdateUnitRequestSchema,
+  UpdateUnitResponseSchema,
 };
-
-export default useUnitSchema;
