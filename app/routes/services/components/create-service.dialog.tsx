@@ -34,6 +34,7 @@ import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { ServiceSchema } from "~/services/api/services/service.schema";
 import { useServiceTypes } from "../container/service-types/query.hooks";
 import { useCreateService } from "../container/services/mutation.hooks";
+import { handleLimitInput } from "~/lib/utils";
 
 const { CreateServiceItemRequestSchema } = ServiceSchema;
 

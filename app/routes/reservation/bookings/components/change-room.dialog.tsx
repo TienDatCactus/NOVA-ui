@@ -110,7 +110,6 @@ export default function ChangeRoomDialog({
         newRoomId: change.newRoomId!,
       }));
 
-    // If no changes, just close
     if (roomsToChange.length === 0) {
       onOpenChange(false);
       return;

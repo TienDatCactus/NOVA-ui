@@ -271,6 +271,20 @@ const BookingOTAItem = z.object({
 });
 const BookingOTAResponseSchema = z.array(BookingOTAItem);
 
+const StaffChangeRoomRequestSchema = z.object({
+  rooms: z.array(
+    z.object({
+      bookingRoomId: z.string("Booking Room ID không hợp lệ"),
+      newRoomId: z.string("New Room ID không hợp lệ"),
+    })
+  ),
+});
+
+const StaffChangeRoomResponseSchema = z.object({
+  bookingId: z.string("Booking ID không hợp lệ"),
+  bookingCode: z.string("Booking Code không hợp lệ"),
+});
+
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -287,4 +301,6 @@ export const BookingSchema = {
   StaffUpdateBookingRequestSchema,
   StaffUpdateBookingResponseSchema,
   StaffCancelBookingResponseSchema,
+  StaffChangeRoomRequestSchema,
+  StaffChangeRoomResponseSchema,
 };

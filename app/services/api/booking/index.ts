@@ -16,6 +16,8 @@ import type {
   StaffCreateBookingResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
+  StaffChangeRoomRequestDto,
+  StaffChangeRoomResponseDto,
 } from "./dto";
 
 const {
@@ -30,6 +32,8 @@ const {
   StaffUpdateBookingRequestSchema,
   StaffUpdateBookingResponseSchema,
   StaffCancelBookingResponseSchema,
+  StaffChangeRoomRequestSchema,
+  StaffChangeRoomResponseSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -120,6 +124,22 @@ async function staffUpdateBookingDetail(
   }
 }
 
+async function staffChangeRoom(
+  id: string,
+  data: StaffChangeRoomRequestDto
+): Promise<StaffChangeRoomResponseDto> {
+  try {
+    const resp = await http.put(
+      Booking.update(id),
+      StaffChangeRoomRequestSchema.parse(data)
+    );
+    return StaffChangeRoomResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 async function staffCancelBooking(
   id: string
 ): Promise<StaffCancelBookingResponseDto> {
@@ -181,5 +201,6 @@ export const BookingService = {
   getBookingOTA,
   staffBookingPricePreview,
   staffUpdateBookingDetail,
+  staffChangeRoom,
   staffCancelBooking,
 };

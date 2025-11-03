@@ -1,7 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { BookingService } from "~/services/api/booking";
-import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
+import type {
+  StaffUpdateBookingRequestDto,
+  StaffChangeRoomRequestDto,
+} from "~/services/api/booking/dto";
 
 function useUpdateBooking(bookingId: string) {
   const queryClient = useQueryClient();
@@ -12,12 +15,6 @@ function useUpdateBooking(bookingId: string) {
     onSuccess: (response) => {
       toast.success("Cập nhật đặt phòng thành công");
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-detail", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-detail", response.bookingCode],
-      });
     },
   });
 }
@@ -26,18 +23,10 @@ function useChangeRoom(bookingId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: {
-      rooms: Array<{ bookingRoomId: string; newRoomId: string }>;
-    }) => await BookingService.staffUpdateBookingDetail(bookingId, data as any),
-    onSuccess: (response) => {
-      toast.success("Đổi phòng thành công");
+    mutationFn: async (data: StaffChangeRoomRequestDto) =>
+      await BookingService.staffChangeRoom(bookingId, data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-detail", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-detail", response.bookingCode],
-      });
     },
   });
 }
@@ -51,16 +40,6 @@ function useCancelBooking(bookingId?: string) {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
-      if (bookingId) {
-        queryClient.invalidateQueries({
-          queryKey: ["booking-detail", bookingId],
-        });
-      }
-      if (data.bookingCode) {
-        queryClient.invalidateQueries({
-          queryKey: ["booking-detail", data.bookingCode],
-        });
-      }
     },
   });
 }

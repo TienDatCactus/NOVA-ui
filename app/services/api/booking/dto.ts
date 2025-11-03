@@ -13,6 +13,8 @@ const {
   StaffUpdateBookingRequestSchema,
   StaffUpdateBookingResponseSchema,
   StaffCancelBookingResponseSchema,
+  StaffChangeRoomRequestSchema,
+  StaffChangeRoomResponseSchema,
 } = BookingSchema;
 
 type StaffBookingPricePreviewRequestDto = z.infer<
@@ -30,6 +32,8 @@ type StaffUpdateBookingResponseDto = z.infer<
 type StaffCancelBookingResponseDto = z.infer<
   typeof StaffCancelBookingResponseSchema
 >;
+type StaffChangeRoomRequestDto = z.infer<typeof StaffChangeRoomRequestSchema>;
+type StaffChangeRoomResponseDto = z.infer<typeof StaffChangeRoomResponseSchema>;
 
 type BookingListResponseDto = z.infer<typeof BookingListResponseSchema>;
 type BookingListByWeekResponseDto = z.infer<
@@ -53,4 +57,6 @@ export type {
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
   StaffCancelBookingResponseDto,
+  StaffChangeRoomRequestDto,
+  StaffChangeRoomResponseDto,
 };
