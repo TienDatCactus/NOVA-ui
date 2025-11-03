@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { useRooms } from "./query.hooks";
 import useRoomFilters from "./filter.hooks";
+import { useDeleteRoom } from "./mutation.hooks";
 
 function useRoomsContainer() {
   const { filters, updateFilter, resetFilters, filterRooms } = useRoomFilters();
@@ -17,15 +18,24 @@ function useRoomsContainer() {
   });
   const [selectedRooms, setSelectedRooms] = useState<RoomListItemDto[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const { mutate: deleteRoom, isPending: isDeleting } = useDeleteRoom();
 
   const filteredRooms = rooms ? filterRooms(rooms) : [];
 
   const handleBulkDelete = async (roomIds: string[]) => {
     try {
-      console.log("Deleting rooms:", roomIds);
+      const deletePromises = roomIds.map((roomId) => {
+        return new Promise((resolve, reject) => {
+          deleteRoom(roomId, {
+            onSuccess: () => resolve(roomId),
+            onError: (error) => reject(error),
+          });
+        });
+      });
+
+      await Promise.all(deletePromises);
       toast.success(`Đã xóa ${roomIds.length} phòng`);
       setSelectedRooms([]);
-      refetch();
     } catch (error) {
       toast.error("Có lỗi xảy ra khi xóa phòng");
       console.error(error);
@@ -53,7 +63,7 @@ function useRoomsContainer() {
 
   return {
     filteredRooms,
-    isPending,
+    isPending: isPending || isDeleting,
     filters,
     updateFilter,
     resetFilters,
@@ -64,6 +74,7 @@ function useRoomsContainer() {
     handleClearSelection,
     setSelectedRooms,
     createDialogOpen,
+    isDeleting,
   };
 }
 export default useRoomsContainer;

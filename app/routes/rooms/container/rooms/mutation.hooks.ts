@@ -51,4 +51,15 @@ function useUpdateRoomStatus() {
   });
 }
 
-export { useCreateRoom, useUpdateRoom, useUpdateRoomStatus };
+function useDeleteRoom() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["delete-room"],
+    mutationFn: async (id: string) => await RoomsService.deleteRoom(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+    },
+  });
+}
+
+export { useCreateRoom, useUpdateRoom, useUpdateRoomStatus, useDeleteRoom };
