@@ -2,10 +2,10 @@ import { z } from "zod";
 import { PaymentSchema } from "~/services/schema/payment.schema";
 
 const ServiceOrderItemSchema = z.object({
-  itemType: z.string().min(1),
+  itemType: z.enum(["ServiceItem", "MenuItem"]),
   itemId: z.string().min(1),
   quantity: z.number().int().min(0),
-  scheduledDate: z.string().length(10), // e.g. "YYYY-MM-DD"
+  scheduledDate: z.string().length(10),
   note: z.string().max(500).optional().nullable(),
 });
 

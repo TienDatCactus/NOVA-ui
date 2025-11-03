@@ -319,7 +319,6 @@ export default function AddItemToPOSOrderDialog({
                           </Button>
                           <Input
                             type="number"
-                            max={9999999999}
                             onInput={handleLimitInput}
                             {...field}
                             onChange={(e) =>
@@ -353,7 +352,6 @@ export default function AddItemToPOSOrderDialog({
                       <FormControl>
                         <Input
                           type="number"
-                          max={9999999999}
                           onInput={handleLimitInput}
                           {...field}
                           onChange={(e) =>
