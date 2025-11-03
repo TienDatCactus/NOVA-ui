@@ -77,8 +77,8 @@ export default function ChangeRoomDialog({
     if (bookingDetail && open) {
       const changes = new Map<string, RoomChange>();
       bookingDetail.rooms.forEach((room) => {
-        changes.set(room.bookingRoomId, {
-          bookingRoomId: room.bookingRoomId,
+        changes.set(room.roomId, {
+          bookingRoomId: room.roomId,
           oldRoomId: room.roomId,
           oldRoomName: room.roomName,
           newRoomId: null,

@@ -36,9 +36,12 @@ export function ReviewPaymentForm({
 }: ReviewPaymentFormProps) {
   const navigate = useNavigate();
   const { data: storeData, setData, reset } = useCreateBookingStore();
-  const { mutateAsync, data: bookingResponseData } = useCreateBookingMutation();
+  const {
+    mutateAsync,
+    data: bookingResponseData,
+    isPending: isSubmitting,
+  } = useCreateBookingMutation();
   const { ReviewPaymentFormSchema } = FormSchema;
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ReviewPaymentFormData>({
     resolver: zodResolver(ReviewPaymentFormSchema),
@@ -155,7 +158,6 @@ export function ReviewPaymentForm({
   };
 
   const onSubmit = async (data: ReviewPaymentFormData) => {
-    setIsSubmitting(true);
     setData({
       specialRequest: data.specialRequest,
       overridePrice: data.overridePrice,
@@ -183,8 +185,6 @@ export function ReviewPaymentForm({
       // navigate("/dashboard/reservation/bookings/list");
     } catch (error) {
       console.error("Booking creation failed:", error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
