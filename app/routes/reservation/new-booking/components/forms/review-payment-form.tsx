@@ -174,6 +174,7 @@ export function ReviewPaymentForm({
         childrenAmount: storeData.childrenAmount ?? 0,
         guestFullName: storeData.guestFullName!,
         isBreakfastAll: storeData.isBreakfastAll ?? false,
+        overridePrice: data.overridePrice ?? null,
       };
       mutateAsync(bookingData);
       // reset();
