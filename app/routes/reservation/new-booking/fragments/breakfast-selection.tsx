@@ -33,21 +33,6 @@ export function BreakfastSelection({
   checkoutDate,
   nights,
 }: BreakfastSelectionProps) {
-  const handleToggleDate = (date: Date) => {
-    const dateString = format(date, "yyyy-MM-dd");
-    const exists = breakfastDates.some(
-      (d) => format(d, "yyyy-MM-dd") === dateString
-    );
-
-    if (exists) {
-      onSelectDates(
-        breakfastDates.filter((d) => format(d, "yyyy-MM-dd") !== dateString)
-      );
-    } else {
-      onSelectDates([...breakfastDates, date]);
-    }
-  };
-
   return (
     <Card>
       <CardHeader>

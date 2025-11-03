@@ -76,7 +76,8 @@ async function staffCreateBooking(
         "Idempotency-Key": idempotencyKey,
       },
     });
-    return StaffCreateBookingResponseSchema.parse(resp.data);
+    console.log(resp);
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }

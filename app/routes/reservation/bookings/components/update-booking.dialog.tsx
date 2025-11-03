@@ -55,6 +55,7 @@ import { toast } from "sonner";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { useUpdateBooking } from "../container/booking-mutation.hooks";
+import { useOTAInfo } from "../../new-booking/container/create-booking-query.hooks";
 
 interface UpdateBookingDialogProps {
   open: boolean;
@@ -124,7 +125,9 @@ export default function UpdateBookingDialog({
       });
     }
   }, [bookingDetail, open, form]);
-
+  const { data: OTAList } = useOTAInfo({
+    selection: true,
+  });
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
     const payload = {
       ...data,
@@ -340,9 +343,22 @@ export default function UpdateBookingDialog({
                     name="otaInformationId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Mã đặt phòng OTA</FormLabel>
+                        <FormLabel>Kênh đặt phòng OTA</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="ID thông tin OTA..." />
+                          <Select {...field}>
+                            <SelectTrigger className="w-full " size="lg">
+                              <SelectValue placeholder="Chọn kênh OTA" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {!!OTAList &&
+                                OTAList.length > 0 &&
+                                OTAList.map((ota) => (
+                                  <SelectItem key={ota.id} value={ota.id}>
+                                    {ota.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -375,18 +391,17 @@ export default function UpdateBookingDialog({
                     Thêm phòng
                   </Button>
                 </div>
-                <Separator />
                 {fields.length === 0 ? (
                   <Card className="p-6 text-center text-muted-foreground">
                     Chưa có phòng nào. Nhấn "Thêm phòng" để bắt đầu.
                   </Card>
                 ) : (
                   <div className="space-y-3">
+                    <Label>Phòng hiện tại</Label>
                     {!!bookingDetail.rooms &&
                       bookingDetail.rooms.length > 0 &&
                       bookingDetail.rooms.map((room, index) => (
                         <>
-                          <Label>Phòng hiện tại</Label>
                           <Card key={index} className="p-2 shadow-s">
                             <div className="flex items-start gap-4">
                               <div
@@ -400,21 +415,12 @@ export default function UpdateBookingDialog({
 
                                 <div>
                                   <Label>Từ ngày</Label>
-                                  <DatePicker
-                                    disabled
-                                    value={bookingDetail.checkinDate}
-                                  />
+                                  <DatePicker disabled value={room.fromDate} />
                                 </div>
 
                                 <div>
                                   <Label>Đến ngày</Label>
-                                  <FormControl>
-                                    <DatePicker
-                                      disabled
-                                      value={bookingDetail.checkinDate}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
+                                  <DatePicker disabled value={room.toDate} />
                                 </div>
                               </div>
                             </div>
@@ -422,9 +428,9 @@ export default function UpdateBookingDialog({
                         </>
                       ))}
                     <Separator />
+                    <Label>Phòng mới</Label>
                     {fields.map((field, index) => (
                       <>
-                        <Label>Phòng mới</Label>
                         <Card key={field.id} className="p-2 shadow-s">
                           <div className="flex items-start gap-4">
                             <div

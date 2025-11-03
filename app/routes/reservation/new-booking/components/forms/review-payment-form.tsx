@@ -176,9 +176,9 @@ export function ReviewPaymentForm({
         isBreakfastAll: storeData.isBreakfastAll ?? false,
       };
       mutateAsync(bookingData);
-      reset();
-      onResetSteps && onResetSteps();
-      navigate("/dashboard/reservation/bookings/list");
+      // reset();
+      // onResetSteps && onResetSteps();
+      // navigate("/dashboard/reservation/bookings/list");
     } catch (error) {
       console.error("Booking creation failed:", error);
     } finally {

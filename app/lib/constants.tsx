@@ -167,10 +167,7 @@ const RESERVATION_TOP_NAV_ITEMS: Array<{
     title: "Lịch đặt phòng",
     children: [
       { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
-      {
-        title: "Timeline",
-        href: "/dashboard/reservation/bookings/timeline",
-      },
+
       { title: "Danh sách", href: "/dashboard/reservation/bookings/list" },
     ],
   },
@@ -261,10 +258,7 @@ const INVOICES_TOP_NAV_ITEMS: Array<{
     title: "Lịch đặt phòng",
     children: [
       { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
-      {
-        title: "Timeline",
-        href: "/dashboard/reservation/bookings/timeline",
-      },
+
       { title: "Danh sách", href: "/dashboard/reservation/bookings/list" },
     ],
   },
