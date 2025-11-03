@@ -24,7 +24,7 @@ async function getUnitList(
 ): Promise<UnitListResponseDto> {
   try {
     const resp = await http.get(Units.list, { params });
-    return resp.data;
+    return UnitListResponseSchema.parse(resp.data);
   } catch (error) {
     console.error("Get units error:", error);
     return Promise.reject(error);
