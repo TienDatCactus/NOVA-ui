@@ -1,5 +1,5 @@
 import { ArrowRight, Check } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -26,7 +26,8 @@ import { cn } from "~/lib/utils";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
 import { useAvailableRooms } from "../container/booking-query.hooks";
-import { useUpdateBooking } from "../container/booking-mutation.hooks";
+import { useChangeRoom } from "../container/booking-mutation.hooks";
+import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
 
 interface ChangeRoomDialogProps {
   open: boolean;
@@ -39,8 +40,19 @@ type RoomChange = {
   oldRoomId: string;
   oldRoomName: string;
   newRoomId: string | null;
-  newRoomName: string | null;
 };
+
+// Component to display new room name using useRoomDetail
+function NewRoomName({ roomId }: { roomId: string | null }) {
+  const { data: roomDetail } = useRoomDetail({
+    id: roomId || "",
+    params: {},
+  });
+
+  if (!roomId || !roomDetail) return null;
+
+  return <span>{roomDetail.roomName}</span>;
+}
 
 export default function ChangeRoomDialog({
   open,
@@ -52,7 +64,7 @@ export default function ChangeRoomDialog({
   );
 
   const bookingId = bookingDetail?.id || "";
-  const { mutate: updateBooking, isPending } = useUpdateBooking(bookingId);
+  const { mutate: changeRoom, isPending } = useChangeRoom(bookingId);
 
   const { data: availableRooms, isLoading: loadingRooms } = useAvailableRooms({
     checkinDate: bookingDetail?.checkinDate || "",
@@ -61,81 +73,54 @@ export default function ChangeRoomDialog({
     enabled: open && !!bookingDetail,
   });
 
-  useMemo(() => {
+  useEffect(() => {
     if (bookingDetail && open) {
       const changes = new Map<string, RoomChange>();
       bookingDetail.rooms.forEach((room) => {
-        changes.set(room.roomId, {
-          bookingRoomId: bookingDetail.id,
+        changes.set(room.bookingRoomId, {
+          bookingRoomId: room.bookingRoomId,
           oldRoomId: room.roomId,
           oldRoomName: room.roomName,
           newRoomId: null,
-          newRoomName: null,
         });
       });
       setRoomChanges(changes);
     }
   }, [bookingDetail, open]);
 
-  const handleRoomChange = (oldRoomId: string, newRoomId: string) => {
-    const currentChange = roomChanges.get(oldRoomId);
+  const handleRoomChange = (bookingRoomId: string, newRoomId: string) => {
+    const currentChange = roomChanges.get(bookingRoomId);
     if (!currentChange) return;
-
-    // Find the new room details from available rooms
-    let newRoomName = "";
-    availableRooms?.forEach(
-      (roomType: AvailableRoomsInternalResponseDto[number]) => {
-        const foundRoom = roomType.availableRooms.find(
-          (r: { roomId: string; roomName: string; status: string }) =>
-            r.roomId === newRoomId
-        );
-        if (foundRoom) {
-          newRoomName = foundRoom.roomName;
-        }
-      }
-    );
 
     const updatedChange: RoomChange = {
       ...currentChange,
       newRoomId: newRoomId === currentChange.oldRoomId ? null : newRoomId,
-      newRoomName: newRoomId === currentChange.oldRoomId ? null : newRoomName,
     };
 
-    setRoomChanges(new Map(roomChanges.set(oldRoomId, updatedChange)));
+    setRoomChanges(new Map(roomChanges.set(bookingRoomId, updatedChange)));
   };
 
   const handleConfirm = () => {
     if (!bookingDetail) return;
 
-    // Build rooms array for update - only include changed rooms
-    const updatedRooms = Array.from(roomChanges.values())
+    const roomsToChange = Array.from(roomChanges.values())
       .filter((change) => change.newRoomId !== null)
       .map((change) => ({
         bookingRoomId: change.bookingRoomId,
-        roomId: change.newRoomId!,
-        fromDate: bookingDetail.checkinDate,
-        toDate: bookingDetail.checkoutDate,
-        remove: false,
+        newRoomId: change.newRoomId!,
       }));
 
     // If no changes, just close
-    if (updatedRooms.length === 0) {
+    if (roomsToChange.length === 0) {
       onOpenChange(false);
       return;
     }
 
-    // Build partial update payload - only update rooms
     const payload = {
-      checkinDate: bookingDetail.checkinDate,
-      checkoutDate: bookingDetail.checkoutDate,
-      adultsAmount: bookingDetail.adults,
-      childrenAmount: bookingDetail.children || 0,
-      totalAmount: bookingDetail.totalAmount,
-      paidAmount: bookingDetail.paidAmount || 0,
-      rooms: updatedRooms,
+      rooms: roomsToChange,
     };
 
-    updateBooking(payload as any, {
+    changeRoom(payload, {
       onSuccess: () => {
         onOpenChange(false);
         setRoomChanges(new Map());
@@ -218,7 +203,7 @@ export default function ChangeRoomDialog({
                       <Select
                         value={change.newRoomId || change.oldRoomId}
                         onValueChange={(value) =>
-                          handleRoomChange(change.oldRoomId, value)
+                          handleRoomChange(change.bookingRoomId, value)
                         }
                       >
                         <SelectTrigger
@@ -296,7 +281,8 @@ export default function ChangeRoomDialog({
                     <div className="mt-3 rounded-md bg-primary/5 p-2 text-sm">
                       <span className="text-muted-foreground">Thay đổi: </span>
                       <span className="font-medium">
-                        {change.oldRoomName} → {change.newRoomName}
+                        {change.oldRoomName} →{" "}
+                        <NewRoomName roomId={change.newRoomId} />
                       </span>
                     </div>
                   )}
