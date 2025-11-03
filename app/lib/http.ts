@@ -8,7 +8,14 @@ import STORAGE, { clearStorage, getStorage, setStorage } from "./storage";
 
 const parseBody = (response: AxiosResponse) => {
   const { message, success } = response.data;
-  if (message) {
+  const method = response.config.method?.toUpperCase();
+
+  // Only show toast for mutating operations (POST, PUT, DELETE, PATCH)
+  // Don't show toast for GET requests to avoid spam
+  const shouldShowToast =
+    method && ["POST", "PUT", "DELETE", "PATCH"].includes(method);
+
+  if (message && shouldShowToast) {
     if (success) {
       toast.success(message);
     } else {

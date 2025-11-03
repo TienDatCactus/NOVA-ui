@@ -7,6 +7,18 @@ const Auth = {
   revoke: "Auth/revoke",
 };
 
+const Customer = {
+  list: "Users",
+  detail: (id: string) => `Users/${id}`,
+  create: "Users",
+  update: (id: string) => `Users/${id}`,
+  roles: "Users/roles",
+  lock: (id: string) => `Users/${id}/lock`,
+  unlock: (id: string) => `Users/${id}/unlock`,
+  assignRoles: (id: string) => `Users/${id}/roles`,
+  removeRoles: (id: string) => `Users/${id}/roles`,
+};
+
 const Booking = {
   staffCreateBooking: "StaffBookings",
   preview: "StaffBookings/preview", // this is for the money calculation preview
@@ -111,6 +123,7 @@ const Invoices = {
 };
 export {
   Auth,
+  Customer,
   Booking,
   MenuCategory,
   Menu,
