@@ -193,12 +193,6 @@ const ROOMS_TOP_NAV_ITEMS: Array<{
     title: "Hạng phòng",
     href: "/dashboard/rooms/types",
   },
-
-  {
-    icon: <ReceiptText size={16} />,
-    title: "Thiết lập giá phòng",
-    href: "/dashboard/rooms/prices",
-  },
 ];
 const SERVICES_TOP_NAV_ITEMS: Array<{
   icon?: JSX.Element;

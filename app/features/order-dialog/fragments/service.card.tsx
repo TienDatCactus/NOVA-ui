@@ -1,16 +1,7 @@
 import { Minus, Plus, ShoppingCart } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardFooter } from "~/components/ui/card";
 import Image from "~/components/ui/image";
-import { Separator } from "~/components/ui/separator";
 import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
 

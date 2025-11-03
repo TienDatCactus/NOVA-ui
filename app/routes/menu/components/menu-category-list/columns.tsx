@@ -86,10 +86,7 @@ export const columns: ColumnDef<MenuCategoryItemDto>[] = [
       const isActive = row.original.active;
       return (
         <div className="flex justify-center">
-          <Badge
-            variant={isActive ? "default" : "secondary"}
-            className="text-xs"
-          >
+          <Badge variant={isActive ? "success" : "warning"} className="text-xs">
             {isActive ? "Hoạt động" : "Ngưng"}
           </Badge>
         </div>

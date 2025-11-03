@@ -99,7 +99,7 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
       const active = row.original.active;
       return (
         <div className="flex items-center gap-2">
-          <Badge variant={active ? "default" : "secondary"}>
+          <Badge variant={active ? "success" : "warning"}>
             {active ? "Hoạt động" : "Không hoạt động"}
           </Badge>
         </div>

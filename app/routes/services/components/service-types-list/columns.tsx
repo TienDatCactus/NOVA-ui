@@ -60,11 +60,6 @@ export const columns: ColumnDef<ServiceTypeItem>[] = [
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold truncate">{type.name}</span>
-              {!type.active && (
-                <Badge variant="secondary" className="text-xs">
-                  Ngưng hoạt động
-                </Badge>
-              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {type.code}
@@ -99,6 +94,20 @@ export const columns: ColumnDef<ServiceTypeItem>[] = [
         <p className="text-sm text-muted-foreground truncate max-w-xs">
           {description || "—"}
         </p>
+      );
+    },
+  },
+  {
+    accessorKey: "active",
+    header: () => <p className="text-end">Trạng thái</p>,
+    cell: ({ row }) => {
+      const isActive = row.original.active;
+      return (
+        <div className="flex justify-end">
+          <Badge variant={isActive ? "success" : "warning"}>
+            {isActive ? "Hoạt động" : "Ngưng hoạt động"}
+          </Badge>
+        </div>
       );
     },
   },

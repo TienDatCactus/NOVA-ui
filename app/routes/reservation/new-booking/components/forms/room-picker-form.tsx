@@ -1,25 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, differenceInDays } from "date-fns";
-import { toast } from "sonner";
+import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-import { useCreateBookingStore } from "~/store/create-booking.store";
 import type { RoomSelectionFormData } from "~/services/types/forms.types";
+import { useCreateBookingStore } from "~/store/create-booking.store";
 
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { Skeleton } from "~/components/ui/skeleton";
-import { AvailableRoomTypeCard } from "../../fragments/available-room.card";
-import { BreakfastSelection } from "../../fragments/breakfast-selection";
-import { SelectedRoomsSummary } from "../../fragments/selected-rooms";
 import { onError, useCalculateNights } from "~/lib/utils";
 import {
   useAvailableRoomsInternal,
   useRoomsDetailsByIds,
 } from "~/routes/rooms/container/rooms/query.hooks";
 import { FormSchema } from "~/services/schema/forms.schema";
+import { AvailableRoomTypeCard } from "../../fragments/available-room.card";
+import { BreakfastSelection } from "../../fragments/breakfast-selection";
+import { SelectedRoomsSummary } from "../../fragments/selected-rooms";
 
 interface RoomPickerFormProps {
   onNext: () => void;

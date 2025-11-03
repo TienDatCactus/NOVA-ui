@@ -13,8 +13,8 @@ type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
  */
 export function useOrderTotals(items: ServiceOrderItemDto[]) {
   // Fetch all service details
-  const serviceItems = items.filter((item) => item.itemType === "service");
-  const menuItems = items.filter((item) => item.itemType === "menu");
+  const serviceItems = items.filter((item) => item.itemType === "ServiceItem");
+  const menuItems = items.filter((item) => item.itemType === "MenuItem");
 
   // Create queries for services
   const serviceQueries = serviceItems.map((item) =>

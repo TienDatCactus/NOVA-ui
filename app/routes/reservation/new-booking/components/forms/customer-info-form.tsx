@@ -317,7 +317,7 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
                   name="otaInformationId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Chọn OTA</FormLabel>
+                      <FormLabel>Chọn kênh OTA</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -351,7 +351,7 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
                   name="otaBookingCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Chọn OTA</FormLabel>
+                      <FormLabel>Mã đặt phòng OTA</FormLabel>
 
                       <Input
                         {...field}

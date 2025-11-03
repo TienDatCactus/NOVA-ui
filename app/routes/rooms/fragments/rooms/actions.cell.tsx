@@ -34,29 +34,14 @@ function RoomActionsCell({ room }: RoomActionsCellProps) {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Mở menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setUpdateSheetOpen(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Chỉnh sửa
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onClick={handleDeleteClick}
-            disabled={!canDelete}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Xóa
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
+      <Button
+        variant={"outline"}
+        className="w-fit"
+        onClick={() => setUpdateSheetOpen(true)}
+      >
+        <Pencil className="mr-2 h-4 w-4" />
+        Chỉnh sửa
+      </Button>
       <UpdateRoomSheet
         open={updateSheetOpen}
         onClose={() => setUpdateSheetOpen(false)}

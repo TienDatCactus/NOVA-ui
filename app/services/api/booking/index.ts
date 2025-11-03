@@ -12,12 +12,12 @@ import type {
   StaffBookingPricePreviewRequestDto,
   StaffBookingPricePreviewResponseDto,
   StaffCancelBookingResponseDto,
+  StaffChangeRoomRequestDto,
+  StaffChangeRoomResponseDto,
   StaffCreateBookingDto,
   StaffCreateBookingResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
-  StaffChangeRoomRequestDto,
-  StaffChangeRoomResponseDto,
 } from "./dto";
 
 const {
@@ -43,6 +43,7 @@ async function getBookingList(
     const resp = await http.get(Booking.list, { params });
     return BookingListResponseSchema.parseAsync(resp.data);
   } catch (err) {
+    console.error(err);
     return Promise.reject(err);
   }
 }
@@ -83,6 +84,7 @@ async function staffCreateBooking(
     console.log(resp);
     return resp.data;
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
