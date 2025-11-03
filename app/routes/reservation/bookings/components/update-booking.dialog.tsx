@@ -129,6 +129,8 @@ export default function UpdateBookingDialog({
           : data.checkoutDate,
       paymentMethod: data.paymentMethod,
       paymentStatus: data.paymentStatus,
+      adultsAmount: Number(data.adultsAmount),
+      childrenAmount: Number(data.childrenAmount),
     };
 
     updateBooking(payload as any, {
@@ -613,10 +615,9 @@ export default function UpdateBookingDialog({
                             onInput={handleLimitInput}
                             {...field}
                             onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
+                              field.onChange(e.target.value || 0)
                             }
                             min={0}
-                            step={1000}
                           />
                         </FormControl>
                         <FormDescription>
