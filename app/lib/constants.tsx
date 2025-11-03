@@ -108,15 +108,21 @@ const DASHBOARD_ITEMS_RECEPTIONIST: Array<{
   },
   {
     id: 5,
-    icon: <Warehouse size={16} />,
+    icon: <Warehouse />,
     title: "Đơn vị tính",
-    href: "/dashboard/services/units",
+    href: "/dashboard/units",
   },
   {
     id: 6,
     title: "Hóa đơn",
     icon: <ReceiptText />,
     href: "/dashboard/invoices",
+  },
+  {
+    id: 7,
+    title: "Khách hàng",
+    icon: <ReceiptText />,
+    href: "/dashboard/customers",
   },
 ];
 const SUB_DASHBOARD_ITEMS: Array<{

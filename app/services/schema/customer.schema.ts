@@ -156,22 +156,20 @@ const RemoveRolesResponseSchema = z.object({
   meta: z.string().nullable().optional(),
 });
 
-export default function useCustomerSchema() {
-  return {
-    CustomerItemSchema,
-    CustomerListResponseSchema,
-    CustomerDetailResponseSchema,
-    CreateCustomerSchema,
-    CreateCustomerResponseSchema,
-    UpdateCustomerSchema,
-    UpdateCustomerResponseSchema,
-    RoleListResponseSchema,
-    LockUserSchema,
-    LockUserResponseSchema,
-    UnlockUserResponseSchema,
-    AssignRolesSchema,
-    AssignRolesResponseSchema,
-    RemoveRolesSchema,
-    RemoveRolesResponseSchema,
-  };
-}
+export const CustomerSchema = {
+  CustomerItemSchema,
+  CustomerListResponseSchema,
+  CustomerDetailResponseSchema,
+  CreateCustomerSchema,
+  CreateCustomerResponseSchema,
+  UpdateCustomerSchema,
+  UpdateCustomerResponseSchema,
+  RoleListResponseSchema,
+  LockUserSchema,
+  LockUserResponseSchema,
+  UnlockUserResponseSchema,
+  AssignRolesSchema,
+  AssignRolesResponseSchema,
+  RemoveRolesSchema,
+  RemoveRolesResponseSchema,
+};

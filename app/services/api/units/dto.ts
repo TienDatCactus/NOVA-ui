@@ -1,5 +1,5 @@
 import type z from "zod";
-import useUnitSchema from "~/services/api/units/unit.schema";
+import { UnitSchema } from "./unit.schema";
 
 const {
   CreateUnitRequestSchema,
@@ -8,7 +8,7 @@ const {
   UnitListResponseSchema,
   UpdateUnitRequestSchema,
   UpdateUnitResponseSchema,
-} = useUnitSchema();
+} = UnitSchema;
 type UnitListResponseDto = z.infer<typeof UnitListResponseSchema>;
 type CreateUnitRequestDto = z.infer<typeof CreateUnitRequestSchema>;
 type CreateUnitResponseDto = z.infer<typeof CreateUnitResponseSchema>;

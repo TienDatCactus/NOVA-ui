@@ -119,7 +119,9 @@ export function ReviewPaymentForm({
       childrenAmount: storeData.childrenAmount || 0,
       roomTypes,
       isBreakfastAll: storeData.isBreakfastAll || false,
-      breakfastDates: storeData.breakfastDates,
+      breakfastDates:
+        storeData.breakfastDates?.map((date) => format(date, "yyyy-MM-dd")) ||
+        [],
       services: selectedServices.map((s) => ({
         itemType: s.itemType == "menu" ? "MenuItem" : "ServiceItem",
         itemId: s.itemId,
@@ -173,13 +175,10 @@ export function ReviewPaymentForm({
         guestFullName: storeData.guestFullName!,
         isBreakfastAll: storeData.isBreakfastAll ?? false,
       };
-      mutateAsync(bookingData, {
-        onSuccess: () => {
-          reset();
-          onResetSteps && onResetSteps();
-          navigate("/dashboard/reservation/bookings/list");
-        },
-      });
+      mutateAsync(bookingData);
+      reset();
+      onResetSteps && onResetSteps();
+      navigate("/dashboard/reservation/bookings/list");
     } catch (error) {
       console.error("Booking creation failed:", error);
     } finally {

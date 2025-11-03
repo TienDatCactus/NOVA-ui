@@ -85,7 +85,7 @@ const StaffBookingPricePreviewRequestSchema = z.object({
     })
   ),
   isBreakfastAll: z.boolean().default(false),
-  breakfastDates: z.array(z.date()).optional(),
+  breakfastDates: z.array(z.string()).optional(),
   services: z.array(
     z.object({
       itemType: z.string(),
