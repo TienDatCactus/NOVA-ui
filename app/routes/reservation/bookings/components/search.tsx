@@ -1,4 +1,5 @@
-import { Search, X } from "lucide-react";
+import { Calendar as CalendarIcon, Download, Search, X } from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -9,9 +10,22 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import { Calendar } from "~/components/ui/calendar";
+import {
   BOOKING_SOURCES,
   BOOKING_STATUSES,
 } from "~/services/types/booking.types";
+import { BookingService } from "~/services/api/booking";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 
 export interface BookingSearchFilters {
   searchText: string;
@@ -26,6 +40,10 @@ interface SearchRoomProps {
 }
 
 function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportDate, setExportDate] = useState<Date>(new Date()); // Mặc định ngày hiện tại
+  const [openExportDialog, setOpenExportDialog] = useState(false);
+
   const handleSearchTextChange = (value: string) => {
     onFiltersChange({ ...filters, searchText: value });
   };
@@ -36,6 +54,51 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
 
   const handleSourceChange = (value: string) => {
     onFiltersChange({ ...filters, source: value });
+  };
+
+  const handleOpenExportDialog = () => {
+    setExportDate(new Date()); // Reset về ngày hiện tại
+    setOpenExportDialog(true);
+  };
+
+  const handleConfirmExport = async () => {
+    if (isExporting) return;
+    
+    try {
+      setIsExporting(true);
+      setOpenExportDialog(false);
+      toast.loading("Đang xuất file...", { id: "export-bookings" });
+      
+      const dateParam = format(exportDate, "yyyy-MM-dd");
+      const blob = await BookingService.exportBookings(dateParam);
+      
+      // Ensure blob is valid
+      if (!blob || !(blob instanceof Blob)) {
+        throw new Error("Dữ liệu không hợp lệ");
+      }
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `danh-sach-booking-${format(exportDate, "yyyy-MM-dd")}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+      toast.success("Xuất file thành công", { id: "export-bookings" });
+    } catch (error: any) {
+      toast.error(error?.message || "Xuất file thất bại. Vui lòng thử lại", { 
+        id: "export-bookings" 
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const hasActiveFilters =
@@ -84,6 +147,17 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
         </Select>
       </div>
 
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleOpenExportDialog}
+        disabled={isExporting}
+        className="h-9 gap-1"
+      >
+        <Download className="h-4 w-4" />
+        Xuất File
+      </Button>
+
       {hasActiveFilters && (
         <Button
           variant="outline"
@@ -95,6 +169,42 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
           Xóa bộ lọc
         </Button>
       )}
+
+      {/* Export Dialog */}
+      <Dialog open={openExportDialog} onOpenChange={setOpenExportDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Xuất danh sách booking</DialogTitle>
+            <DialogDescription>
+              Chọn ngày để xuất danh sách booking. Mặc định là ngày hiện tại.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <Calendar
+              mode="single"
+              selected={exportDate}
+              onSelect={(date) => {
+                if (date) setExportDate(date);
+              }}
+              locale={vi}
+              className="rounded-md border"
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setOpenExportDialog(false)}
+              disabled={isExporting}
+            >
+              Hủy
+            </Button>
+            <Button onClick={handleConfirmExport} disabled={isExporting}>
+              <Download className="h-4 w-4 mr-2" />
+              Xuất file ({format(exportDate, "dd/MM/yyyy", { locale: vi })})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

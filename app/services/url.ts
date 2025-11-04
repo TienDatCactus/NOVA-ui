@@ -28,6 +28,7 @@ const Booking = {
   listByWeek: "Bookings/rooms-week",
   detailById: (id: string) => `Bookings/${id}/details`,
   detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
+  Export: `Bookings/export`,
 };
 
 const OTAInformation = {
@@ -135,4 +136,5 @@ export {
   Units,
   Reports,
   Orders,
+  Invoices,
 };

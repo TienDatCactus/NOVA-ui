@@ -198,10 +198,6 @@ export default function Component() {
       <ReportsTableModal
         open={showTableModal}
         onOpenChange={setShowTableModal}
-        data={reportsData}
-        dateRange={
-          date.from && date.to ? { from: date.from, to: date.to } : undefined
-        }
       />
     </div>
   );
