@@ -40,7 +40,7 @@ export default function FilterServiceBar({
         {serviceTypes.map((type) => (
           <div
             key={type.id}
-            className="border-input shadow-none has-data-[state=checked]:shadow-s has-data-[state=checked]:border-primary/50 relative flex w-full items-center gap-3 rounded-md border p-2 cursor-pointer outline-none"
+            className="border-input shadow-none has-data-[state=checked]:shadow-sm has-data-[state=checked]:border-primary/50 relative flex w-full items-center gap-3 rounded-md border p-2 cursor-pointer outline-none"
           >
             <RadioGroupItem
               value={type.code}

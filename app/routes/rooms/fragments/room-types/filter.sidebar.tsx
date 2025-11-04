@@ -36,7 +36,7 @@ export function RoomTypesFilterSidebar({
           </Button>
         )}
       </div>
-      <Card className="p-4 shadow-s">
+      <Card className="p-4 shadow-sm">
         <CardContent className="space-y-2 px-0">
           <Label htmlFor="room-types-search">Tìm kiếm</Label>
           <Input

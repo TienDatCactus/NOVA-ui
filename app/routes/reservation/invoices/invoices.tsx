@@ -1,4 +1,3 @@
-import OnboardingDialog from "~/features/onboard-dialog";
 import type { Route } from "./+types/invoices";
 import BookingFlow from "~/features/create-booking-dialog/components/booking-flow";
 

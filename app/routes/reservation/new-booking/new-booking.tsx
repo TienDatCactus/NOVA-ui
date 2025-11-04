@@ -40,7 +40,7 @@ export default function Component({
   ];
   return (
     <main className="mx-auto max-w-5xl space-y-10 py-4">
-      <Card className="p-6 shadow-s">
+      <Card className="p-6 shadow-sm">
         <Steps
           steps={steps}
           currentStep={currentStep}

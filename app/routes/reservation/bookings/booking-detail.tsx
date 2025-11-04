@@ -1,30 +1,25 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
 import {
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Clock,
+  Baby,
+  Ellipsis,
+  Globe,
   Mail,
-  MapPin,
-  Minus,
+  Pen,
   Phone,
   Plus,
   Receipt,
-  StickyNote,
   User,
-  Users,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { SelectGroup } from "@radix-ui/react-select";
 import { toast } from "sonner";
-import type { Route } from "./+types/booking-detail";
+import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +27,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { DatePicker } from "~/components/ui/date-picker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Form,
   FormControl,
@@ -52,242 +54,28 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import AddServiceDialog from "~/features/order-dialog";
-import { useServiceOrderStore } from "~/store/service-order.store";
-import { cn, handleLimitInput, toYMD } from "~/lib/utils";
-import {
-  useAvailableRoomsInternal,
-  useRoomDetail,
-} from "~/routes/rooms/container/rooms/query.hooks";
+import { toYMD } from "~/lib/utils";
+import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import type {
-  BookingDetailResponseDto,
-  StaffUpdateBookingRequestDto,
-} from "~/services/api/booking/dto";
+import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { OrderSchema } from "~/services/api/order/order.schema";
-import { PAYMENT_STATUSES } from "~/services/types/payment.types";
-import {
-  BOOKING_SOURCES,
-  BOOKING_STATUSES,
-} from "~/services/types/booking.types";
-import { useBookingDetail } from "./container/booking-query.hooks";
-import { useUpdateBooking } from "./container/booking-mutation.hooks";
+import { BOOKING_STATUSES } from "~/services/types/booking.types";
+import { useServiceOrderStore } from "~/store/service-order.store";
 import { useOTAInfo } from "../new-booking/container/create-booking-query.hooks";
-import type z from "zod";
+import type { Route } from "./+types/booking-detail";
+import { AddRoomModal } from "./components/add-room-modal";
+import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
+import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
+import { useUpdateBooking } from "./container/booking-mutation.hooks";
+import { useBookingDetail } from "./container/booking-query.hooks";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
-
-function RoomItem({
-  room,
-  isSelected,
-  isExpanded,
-  onSelect,
-  onToggleExpand,
-}: {
-  room: {
-    roomId: string;
-    roomName: string;
-    roomTypeName: string;
-    fromDate: string;
-    toDate: string;
-  };
-  isSelected: boolean;
-  isExpanded: boolean;
-  onSelect: () => void;
-  onToggleExpand: () => void;
-}) {
-  const { data: roomDetail, isPending } = useRoomDetail({
-    id: room.roomId,
-    params: {},
-  });
-
-  return (
-    <Card
-      className={cn(
-        "transition-colors cursor-pointer",
-        isSelected && "border-primary bg-primary/5"
-      )}
-    >
-      <div onClick={onSelect} className="p-3 flex items-center justify-between">
-        <div className="flex-1">
-          <div className="font-medium text-sm">{room.roomName}</div>
-          <div className="text-xs text-muted-foreground mt-1">
-            {room.roomTypeName}
-          </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-            <Clock className="h-3 w-3" />
-            {format(parseISO(room.fromDate), "dd/MM")} →{" "}
-            {format(parseISO(room.toDate), "dd/MM")}
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleExpand();
-          }}
-        >
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
-      {isExpanded && (
-        <CardContent className="pt-0 pb-3">
-          {isPending ? (
-            <Skeleton className="h-20 w-full" />
-          ) : roomDetail ? (
-            <div className="space-y-2 text-xs">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-muted-foreground">Trạng thái:</span>
-                  <div className="font-medium">
-                    {roomDetail.status || "N/A"}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Hạng phòng:</span>
-                  <div className="font-medium">
-                    {roomDetail.roomTypeName || "N/A"}
-                  </div>
-                </div>
-              </div>
-              {/* {roomDetail.description && (
-                <div>
-                  <span className="text-muted-foreground">Mô tả:</span>
-                  <div className="font-medium">{roomDetail.description}</div>
-                </div>
-              )} */}
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              Không thể tải thông tin phòng
-            </p>
-          )}
-        </CardContent>
-      )}
-    </Card>
-  );
-}
-
-// NewRoomItem Component for new room modifications
-function NewRoomItem({
-  form,
-  index,
-  availableRoomTypes,
-  onRemove,
-}: {
-  form: any;
-  index: number;
-  availableRoomTypes: any;
-  onRemove: () => void;
-}) {
-  return (
-    <Card className="p-3 border-dashed">
-      <div className="space-y-3">
-        <FormField
-          control={form.control}
-          name={`rooms.${index}.roomId`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs">Phòng</FormLabel>
-              <FormControl>
-                <Select {...field} onValueChange={field.onChange}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Chọn phòng" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {!!availableRoomTypes &&
-                      availableRoomTypes.length > 0 &&
-                      availableRoomTypes?.map((r: any) => (
-                        <SelectGroup key={r.roomTypeId}>
-                          {r.availableRooms.map((room: any) => (
-                            <SelectItem key={room.roomId} value={room.roomId}>
-                              {room.roomName}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-2">
-          <FormField
-            control={form.control}
-            name={`rooms.${index}.fromDate`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Từ ngày</FormLabel>
-                <FormControl>
-                  <DatePicker {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name={`rooms.${index}.toDate`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Đến ngày</FormLabel>
-                <FormControl>
-                  <DatePicker {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <FormField
-            control={form.control}
-            name={`rooms.${index}.remove`}
-            render={({ field }) => (
-              <FormItem className="flex items-center gap-2">
-                <FormControl>
-                  <input
-                    type="checkbox"
-                    checked={field.value || false}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                    className="h-4 w-4"
-                  />
-                </FormControl>
-                <FormLabel className="text-xs cursor-pointer">
-                  Đánh dấu xóa
-                </FormLabel>
-              </FormItem>
-            )}
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={onRemove}
-          >
-            <X className="h-3 w-3" />
-          </Button>
-        </div>
-      </div>
-    </Card>
-  );
-}
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const bookingCode = params.bookingCode;
@@ -312,25 +100,26 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
   const serviceOrderItems = useServiceOrderStore((s) => s.services);
   const setOrderCtx = useServiceOrderStore((s) => s.setContext);
-  const addManyToOrder = useServiceOrderStore((s) => s.addMany);
   const removeOrderItem = useServiceOrderStore((s) => s.removeById);
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
     bookingDetail?.id || ""
   );
 
-  const { data: availableRoomTypes } = useAvailableRoomsInternal({
-    CheckInDate: bookingDetail?.checkinDate
-      ? format(parseISO(bookingDetail.checkinDate), "yyyy-MM-dd")
-      : "",
-    CheckOutDate: bookingDetail?.checkoutDate
-      ? format(parseISO(bookingDetail.checkoutDate), "yyyy-MM-dd")
-      : "",
-    Guests: (bookingDetail?.adults || 1) + (bookingDetail?.children || 0),
-  });
+  const { data: availableRoomTypes, isPending: isLoadingAvailableRooms } =
+    useAvailableRoomsInternal({
+      CheckInDate: bookingDetail?.checkinDate
+        ? format(parseISO(bookingDetail.checkinDate), "yyyy-MM-dd")
+        : "",
+      CheckOutDate: bookingDetail?.checkoutDate
+        ? format(parseISO(bookingDetail.checkoutDate), "yyyy-MM-dd")
+        : "",
+      Guests: (bookingDetail?.adults || 1) + (bookingDetail?.children || 0),
+    });
 
   const form = useForm<StaffUpdateBookingRequestDto>({
     resolver: zodResolver(StaffUpdateBookingRequestSchema),
@@ -375,16 +164,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         })),
       });
 
-      // Set first room as selected by default
-      if (bookingDetail.rooms.length > 0) {
-        setSelectedRoomId(bookingDetail.rooms[0].roomId);
-      }
       setOrderCtx({
         bookingId: bookingDetail.id,
         roomId: bookingDetail.rooms[0]?.roomId,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingDetail, setOrderCtx]);
 
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
@@ -420,14 +204,33 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     // TODO: When API is ready, call the submit order API here
   };
 
+  const handleAddRoom = (roomId: string, roomTypeId: string) => {
+    const checkinDate = form.watch("checkinDate");
+    const checkoutDate = form.watch("checkoutDate");
+
+    append({
+      roomId,
+      fromDate:
+        checkinDate instanceof Date
+          ? format(checkinDate, "yyyy-MM-dd")
+          : checkinDate?.toString() || format(new Date(), "yyyy-MM-dd"),
+      toDate:
+        checkoutDate instanceof Date
+          ? format(checkoutDate, "yyyy-MM-dd")
+          : checkoutDate?.toString() || format(new Date(), "yyyy-MM-dd"),
+      remove: false,
+    });
+
+    toast.success("Đã thêm phòng mới");
+  };
+
   const nights = useMemo(() => {
     const checkin = form.watch("checkinDate");
     const checkout = form.watch("checkoutDate");
-    if (!checkin || !checkout) return 0;
     const checkinDate =
-      checkin instanceof Date ? checkin : parseISO(checkin.toString());
+      checkin instanceof Date ? checkin : parseISO(checkin!.toString());
     const checkoutDate =
-      checkout instanceof Date ? checkout : parseISO(checkout.toString());
+      checkout instanceof Date ? checkout : parseISO(checkout!.toString());
     return differenceInDays(checkoutDate, checkinDate);
   }, [form.watch("checkinDate"), form.watch("checkoutDate")]);
 
@@ -443,19 +246,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     });
   };
 
-  // Get OTA info if source is OTA
-  const otaInfo = useMemo(() => {
-    if (bookingDetail?.source === "OTA" && OTAList && OTAList.length > 0) {
-      const otaInformationId = form.watch("otaInformationId");
-      if (otaInformationId) {
-        return OTAList.find((ota) => ota.id === otaInformationId) || OTAList[0];
-      }
-      return OTAList[0];
-    }
-    return null;
-  }, [bookingDetail?.source, OTAList, form.watch("otaInformationId")]);
-
-  // Separate services and menu items
   const services = useMemo(
     () => serviceOrderItems.filter((item) => item.itemType === "ServiceItem"),
     [serviceOrderItems]
@@ -500,109 +290,152 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Top Command Bar - Customer Info & Basic Info */}
-      <div className="border-b bg-card px-6 py-4">
-        <div className="flex items-center justify-between gap-6 flex-wrap">
-          {/* Customer Info */}
-          <div className="flex items-center gap-4">
-            <User className="h-5 w-5 text-primary" />
-            <div>
-              <div className="font-semibold">
-                {bookingDetail.customer.fullName}
-              </div>
-              <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                {bookingDetail.customer.email && (
-                  <a
-                    href={`mailto:${bookingDetail.customer.email}`}
-                    className="hover:underline flex items-center gap-1"
-                  >
-                    <Mail className="h-3 w-3" />
-                    {bookingDetail.customer.email}
-                  </a>
-                )}
-                {bookingDetail.customer.phoneNumber && (
-                  <a
-                    href={`tel:${bookingDetail.customer.phoneNumber}`}
-                    className="hover:underline flex items-center gap-1"
-                  >
-                    <Phone className="h-3 w-3" />
-                    {bookingDetail.customer.phoneNumber}
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <Separator orientation="vertical" className="h-8" />
-
-          {/* Amounts with Icons */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">
-                {form.watch("adultsAmount") || bookingDetail.adults} người lớn
-              </span>
-            </div>
-            {(form.watch("childrenAmount")! > 0 ||
-              (bookingDetail.children && bookingDetail.children > 0)) && (
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">
-                  {form.watch("childrenAmount") || bookingDetail.children || 0}{" "}
-                  trẻ em
-                </span>
-              </div>
-            )}
-          </div>
-
-          <Separator orientation="vertical" className="h-8" />
-
-          {/* Source */}
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">
-              {
-                BOOKING_SOURCES.find((s) => s.key === bookingDetail.source)
-                  ?.label
-              }
-            </span>
-            {otaInfo && (
-              <>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-sm">{otaInfo.name}</span>
-                {form.watch("otaBookingCode") && (
-                  <>
-                    <span className="text-muted-foreground">•</span>
-                    <span className="text-sm font-mono">
-                      {form.watch("otaBookingCode")}
-                    </span>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-
-          <Separator orientation="vertical" className="h-8" />
-
-          {/* Note Modal Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setNoteModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <StickyNote className="h-4 w-4" />
-            Ghi chú
-            {bookingDetail.note && (
-              <Badge variant="secondary" className="ml-1">
-                Có
-              </Badge>
-            )}
-          </Button>
-        </div>
-      </div>
-
       <Form {...form}>
+        <div className="px-6">
+          <Card className="border-b  w-full h-fit shadow-sm">
+            <CardContent className="flex items-center gap-6 flex-wrap">
+              <div>
+                <h1 className="uppercase text-muted-foreground text-sm">
+                  Khách hàng
+                </h1>
+                <p> {bookingDetail.customer.fullName}</p>
+              </div>
+              <Separator orientation="vertical" className="h-8" />
+              {bookingDetail.customer.email ||
+                (bookingDetail.customer.phoneNumber && (
+                  <div className="flex flex-col ">
+                    <h1 className="uppercase text-muted-foreground text-sm">
+                      Phương thức liên lạc
+                    </h1>
+                    <div className="flex flex-col gap-1 text-sm">
+                      {bookingDetail.customer.email && (
+                        <a
+                          href={`mailto:${bookingDetail.customer.email}`}
+                          className="hover:underline flex items-center gap-2 "
+                        >
+                          <Mail className="h-3 w-3" />
+                          {bookingDetail.customer.email}
+                        </a>
+                      )}
+                      {bookingDetail.customer.phoneNumber && (
+                        <a
+                          href={`tel:${bookingDetail.customer.phoneNumber}`}
+                          className="hover:underline flex items-center gap-1"
+                        >
+                          <Phone className="h-3 w-3" />
+                          {bookingDetail.customer.phoneNumber}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+              <Separator orientation="vertical" />
+
+              <FormField
+                control={form.control}
+                name="adultsAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm uppercase text-muted-foreground">
+                      Số lượng người lớn
+                    </FormLabel>
+                    <FormControl className="text-sm">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <Counter className="w-30 " {...field} />
+                      </div>
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("childrenAmount")! > 0 && (
+                <FormField
+                  control={form.control}
+                  name="childrenAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm uppercase text-muted-foreground">
+                        Số lượng trẻ em
+                      </FormLabel>
+                      <FormControl>
+                        <div className="flex items-center gap-2">
+                          <Baby className="h-4 w-4" />
+                          <Counter className="w-30" {...field} />
+                        </div>
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Source */}
+              {!form.watch("otaInformationId") && (
+                <div className="flex items-center gap-6">
+                  <FormField
+                    control={form.control}
+                    name="otaInformationId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm text-muted-foreground uppercase">
+                          Nền tảng OTA
+                        </FormLabel>
+                        <FormControl>
+                          <div className="flex items-center gap-2">
+                            <Globe />
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="w-full bg-secondary">
+                                  <SelectValue placeholder="Chọn nền tảng OTA" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {OTAList?.map((ota) => (
+                                  <SelectItem key={ota.id} value={ota.id}>
+                                    {ota.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="otaBookingCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm text-muted-foreground uppercase">
+                          Mã đặt phòng OTA
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} className="w-full bg-secondary" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              <Separator orientation="vertical" className="h-8" />
+
+              {/* Note Modal Button */}
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="flex gap-4 flex-1 overflow-hidden p-6">
           {/* Left Sidebar - Rooms List with Expandable Details */}
           <aside className="w-80 flex-shrink-0 flex flex-col">
@@ -614,16 +447,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      availableRoomTypes && availableRoomTypes.length > 0
-                        ? append({
-                            roomId: "",
-                            fromDate: format(new Date(), "yyyy-MM-dd"),
-                            toDate: format(new Date(), "yyyy-MM-dd"),
-                            remove: false,
-                          })
-                        : toast.error("Không có phòng trống để thêm")
-                    }
+                    onClick={() => setAddRoomModalOpen(true)}
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Thêm
@@ -633,9 +457,13 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               <CardContent className="flex-1 overflow-y-auto space-y-2">
                 {/* Existing Rooms */}
                 {bookingDetail.rooms.map((room) => (
-                  <RoomItem
+                  <ExistingRoomItemWrapper
                     key={room.roomId}
-                    room={room}
+                    roomId={room.roomId}
+                    roomName={room.roomName}
+                    roomTypeName={room.roomTypeName}
+                    fromDate={room.fromDate}
+                    toDate={room.toDate}
                     isSelected={selectedRoomId === room.roomId}
                     isExpanded={expandedRooms.has(room.roomId)}
                     onSelect={() => setSelectedRoomId(room.roomId)}
@@ -643,22 +471,32 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                   />
                 ))}
 
-                {/* New Room Modifications */}
+                {/* New Rooms Being Added */}
                 {fields.length > 0 && (
                   <>
                     <Separator className="my-3" />
                     <div className="text-xs font-semibold text-muted-foreground mb-2">
-                      Phòng mới
+                      Phòng đang được thêm ({fields.length})
                     </div>
-                    {fields.map((field, index) => (
-                      <NewRoomItem
-                        key={field.id}
-                        form={form}
-                        index={index}
-                        availableRoomTypes={availableRoomTypes}
-                        onRemove={() => remove(index)}
-                      />
-                    ))}
+                    <div className="space-y-2">
+                      {fields.map((field, index) => {
+                        const roomId = form.watch(`rooms.${index}.roomId`);
+                        const fromDate = form.watch(`rooms.${index}.fromDate`);
+                        const toDate = form.watch(`rooms.${index}.toDate`);
+
+                        if (!roomId || !fromDate || !toDate) return null;
+
+                        return (
+                          <NewRoomItemWrapper
+                            key={field.id}
+                            roomId={roomId}
+                            fromDate={fromDate}
+                            toDate={toDate}
+                            onRemove={() => remove(index)}
+                          />
+                        );
+                      })}
+                    </div>
                   </>
                 )}
               </CardContent>
@@ -672,52 +510,82 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               onSubmit={form.handleSubmit(handleSubmit)}
               className="space-y-6"
             >
-              <Card>
+              <Card className="shadow-sm">
                 <CardHeader>
-                  <CardTitle>Thông tin đặt phòng</CardTitle>
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="flex gap-1">
+                      <h1>
+                        {selectedRoomId
+                          ? `Phòng: ${
+                              bookingDetail.rooms.find(
+                                (room) => room.roomId == selectedRoomId
+                              )?.roomName
+                            }`
+                          : `Thông tin đặt phòng : ${bookingCode}`}
+                      </h1>
+                      <sup>
+                        <Badge
+                          variant={
+                            BOOKING_STATUSES.find(
+                              (status) => status.value == bookingDetail.status
+                            )?.variant
+                          }
+                        >
+                          {
+                            BOOKING_STATUSES.find(
+                              (status) => status.value == bookingDetail.status
+                            )?.label
+                          }
+                        </Badge>
+                      </sup>
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => setNoteModalOpen(true)}
+                        variant="outline"
+                      >
+                        <Pen />
+                      </Button>
+                      <Button variant={"success"}>Nhận phòng</Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size={"icon"}>
+                            <Ellipsis />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>Profile</DropdownMenuItem>
+                          <DropdownMenuItem>Billing</DropdownMenuItem>
+                          <DropdownMenuItem>Team</DropdownMenuItem>
+                          <DropdownMenuItem>Subscription</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Room Dropdown */}
-                  {bookingDetail.rooms.length > 1 && (
-                    <FormField
-                      control={form.control}
-                      name="customerId"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel>Phòng</FormLabel>
-                          <Select
-                            value={
-                              selectedRoomId ||
-                              bookingDetail.rooms[0]?.roomId ||
-                              ""
-                            }
-                            onValueChange={(value) => setSelectedRoomId(value)}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Chọn phòng để xem đơn hàng" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {bookingDetail.rooms.map((room) => (
-                                <SelectItem
-                                  key={room.roomId}
-                                  value={room.roomId}
-                                >
-                                  {room.roomName} - {room.roomTypeName}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            Chọn phòng để xem các đơn hàng dịch vụ/thực đơn
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  <div className="flex items-center gap-6">
+                    <div className="grid gap-2">
+                      <Label>Phòng</Label>
+                      <Select
+                        value={selectedRoomId ?? ""}
+                        onValueChange={setSelectedRoomId}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Chọn phòng" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {bookingDetail.rooms.map((room) => (
+                            <SelectItem key={room.roomId} value={room.roomId}>
+                              {room.roomName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="checkinDate"
@@ -745,17 +613,13 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                         </FormItem>
                       )}
                     />
-                  </div>
-
-                  {/* Days Calculation */}
-                  <Card className="p-4 bg-muted/30">
-                    <div className="flex items-center justify-between">
+                    <div className="grid gap-2">
                       <span className="text-sm font-medium">Số đêm:</span>
                       <span className="text-lg font-bold text-primary">
                         {nights} đêm
                       </span>
                     </div>
-                  </Card>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -864,18 +728,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                       </div>
                     )}
                   </div>
-
-                  {/* TODO: Future implementation
-                   * Currently services/menu items are added at booking level.
-                   * In the future, we may need to support:
-                   * 1. Booking-level items: Apply to entire booking
-                   * 2. Room-level items: Apply to specific room (selectedRoomId)
-                   *
-                   * Consider:
-                   * - Separate API endpoints: addItemsToBooking vs addItemsToRoom
-                   * - UI toggle: "Add to booking" vs "Add to room"
-                   * - Display separation: Show items grouped by booking vs room
-                   */}
                 </CardContent>
               </Card>
 
@@ -896,13 +748,20 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             </form>
           </main>
 
-          {/* Order Dialog */}
           <AddServiceDialog
             open={orderDialogOpen}
             onOpenChange={setOrderDialogOpen}
             onConfirm={handleConfirmServiceOrder}
             bookingId={bookingDetail.id}
             customerName={bookingDetail.customer.fullName}
+          />
+
+          <AddRoomModal
+            open={addRoomModalOpen}
+            onOpenChange={setAddRoomModalOpen}
+            availableRooms={availableRoomTypes || []}
+            isLoading={isLoadingAvailableRooms}
+            onAddRoom={handleAddRoom}
           />
 
           {/* Note Modal */}

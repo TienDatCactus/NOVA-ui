@@ -23,7 +23,7 @@ import "./index.css";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/sonner";
-import GlobalLoader from "./features/loading";
+import GlobalLoader, { SpinnerLoader } from "./features/loading";
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -64,9 +64,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       {isNavigating && (
-        <div className="absolute inset-0 flex items-center justify-center z-50 bg-white">
-          <GlobalLoader />
-        </div>
+        <SpinnerLoader fullScreen size="lg" text="Đang tải..." />
       )}
       <Outlet />
     </QueryClientProvider>

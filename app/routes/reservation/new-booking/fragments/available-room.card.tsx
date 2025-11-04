@@ -36,7 +36,7 @@ export function AvailableRoomTypeCard({
   ).length;
 
   return (
-    <Card className="overflow-hidden shadow-s">
+    <Card className="overflow-hidden shadow-sm">
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">

@@ -86,7 +86,7 @@ export function BookingSummaryCard({
 
   return (
     <div className="space-y-4">
-      <Card className="border shadow-s px-4">
+      <Card className="border shadow-sm px-4">
         <CardHeader className="px-0">
           <div className="space-y-4">
             <div className="space-y-2">

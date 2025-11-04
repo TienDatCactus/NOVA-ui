@@ -49,7 +49,7 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10" />
           <Input
-            className="h-9 pl-9 bg-white shadow-s"
+            className="h-9 pl-9 bg-white shadow-sm"
             placeholder="Tìm mã booking, tên khách, SĐT..."
             value={filters.searchText}
             onChange={(e) => handleSearchTextChange(e.target.value)}
@@ -57,7 +57,7 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
         </div>
 
         <Select value={filters.status} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-[180px] h-9 bg-white shadow-s">
+          <SelectTrigger className="w-[180px] h-9 bg-white shadow-sm">
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
@@ -70,7 +70,7 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
         </Select>
 
         <Select value={filters.source} onValueChange={handleSourceChange}>
-          <SelectTrigger className="w-[180px] h-9  bg-white shadow-s">
+          <SelectTrigger className="w-[180px] h-9  bg-white shadow-sm">
             <SelectValue placeholder="Kênh đặt" />
           </SelectTrigger>
           <SelectContent>

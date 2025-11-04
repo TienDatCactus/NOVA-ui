@@ -53,7 +53,7 @@ export default function ServicesCommandBar({
         )}
       </div>
 
-      <Card className="p-4 h-fit shadow-s">
+      <Card className="p-4 h-fit shadow-sm">
         <div className="flex flex-col  gap-4">
           <Label htmlFor="search" className="text-sm font-medium">
             Bộ lọc dịch vụ

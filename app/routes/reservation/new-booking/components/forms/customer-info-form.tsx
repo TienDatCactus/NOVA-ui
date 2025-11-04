@@ -101,7 +101,7 @@ export function CustomerInfoForm({ onNext }: CustomerInfoFormProps) {
   };
 
   return (
-    <Card className="space-y-6 p-6 shadow-s">
+    <Card className="space-y-6 p-6 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Thông tin khách hàng & Lưu trú</h2>

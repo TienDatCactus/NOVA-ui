@@ -58,7 +58,9 @@ function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
             </div>
             {data && (
               <div className="flex gap-2">
-                <Badge variant="warning">
+                <Badge variant={BOOKING_STATUSES.find(
+                      (status) => status.value === data.status
+                    )?.variant}>
                   {
                     BOOKING_STATUSES.find(
                       (status) => status.value === data.status

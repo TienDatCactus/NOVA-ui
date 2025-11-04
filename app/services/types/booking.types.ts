@@ -1,3 +1,5 @@
+import { badgeVariants } from "~/components/ui/badge";
+
 export type Room = {
   roomId: string;
   roomName: string;
@@ -25,12 +27,12 @@ export const BOOKING_STEPS = [
 ] as const;
 
 export const BOOKING_STATUSES = [
-  { value: "all", label: "Tất cả trạng thái" },
-  { value: "Confirmed", label: "Đã xác nhận" },
-  { value: "CheckedIn", label: "Đã nhận phòng" },
-  { value: "CheckedOut", label: "Đã trả phòng" },
-  { value: "Pending", label: "Chờ xử lý" },
-  { value: "Cancelled", label: "Đã hủy" },
+  { value: "all", label: "Tất cả trạng thái", variant: "secondary" },
+  { value: "Confirmed", label: "Đã xác nhận", variant: "default" },
+  { value: "CheckedIn", label: "Đã nhận phòng", variant: "success" },
+  { value: "CheckedOut", label: "Đã trả phòng", variant: "outline" },
+  { value: "Pending", label: "Chờ xử lý", variant: "warning" },
+  { value: "Cancelled", label: "Đã hủy", variant: "destructive" },
 ] as const;
 export const BOOKING_SOURCES = [
   { value: 0, label: "Trực tiếp (Nhân viên)", key: "DirectStaff" },

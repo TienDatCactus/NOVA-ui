@@ -36,7 +36,7 @@ function ExpandedSidebar({
   toggle: () => void;
 }) {
   return (
-    <Sidebar className="h-screen bg-white shadow-s">
+    <Sidebar className="h-screen bg-white shadow-sm">
       <SidebarHeader>
         <SidebarMenu>
           <div className="flex justify-between">
@@ -62,7 +62,7 @@ function ExpandedSidebar({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     className={cn({
-                      "shadow-s": curPath.includes(item.href),
+                      "shadow-sm": curPath.includes(item.href),
                     })}
                     asChild
                     isActive={curPath.includes(item.href)}

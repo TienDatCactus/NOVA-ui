@@ -197,7 +197,7 @@ export function CreateRoomTypeDialog({
                 </h3>
 
                 <div className="space-y-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="p-4 shadow-s h-18 rounded-lg border ">
+                  <Card className="p-4 shadow-sm h-18 rounded-lg border ">
                     <CardContent className="p-0 flex items-center justify-between ">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -222,7 +222,7 @@ export function CreateRoomTypeDialog({
                     </CardContent>
                   </Card>
 
-                  <Card className="p-4 shadow-s h-18 rounded-lg border">
+                  <Card className="p-4 shadow-sm h-18 rounded-lg border">
                     <CardContent className="p-0 flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-1">
                         <ImageIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />

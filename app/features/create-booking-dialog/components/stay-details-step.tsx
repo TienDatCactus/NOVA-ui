@@ -17,7 +17,6 @@ import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter
 import { onError, useCalculateNights } from "~/lib/utils";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
-// Step 3 Schema: Stay Details
 const StayDetailsSchema = z
   .object({
     checkinDate: z.date({ message: "Vui lòng chọn ngày nhận phòng" }),

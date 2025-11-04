@@ -185,7 +185,7 @@ export function UpdateRoomTypeSheet({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Card className="shadow-s border  p-4">
+                  <Card className="shadow-sm border  p-4">
                     <CardContent className="p-0 flex flex-col justify-between h-full">
                       <div>
                         <div className="flex items-center justify-between mb-3">
@@ -227,7 +227,7 @@ export function UpdateRoomTypeSheet({
                     </CardContent>
                   </Card>
 
-                  <Card className="shadow-s border p-4">
+                  <Card className="shadow-sm border p-4">
                     <CardContent className="p-0 flex flex-col justify-between h-full">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">

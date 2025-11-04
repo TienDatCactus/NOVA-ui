@@ -11,15 +11,14 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { Skeleton } from "~/components/ui/skeleton";
 import { onError, useCalculateNights } from "~/lib/utils";
-import {
-  useAvailableRoomsInternal,
-  useRoomsDetailsByIds,
-} from "~/routes/rooms/container/rooms/query.hooks";
+import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { FormSchema } from "~/services/schema/forms.schema";
 import { AvailableRoomTypeCard } from "~/routes/reservation/new-booking/fragments/available-room.card";
 import { BreakfastSelection } from "~/routes/reservation/new-booking/fragments/breakfast-selection";
-import { SelectedRoomsSummary } from "~/routes/reservation/new-booking/fragments/selected-rooms";
 import AddServiceDialog from "~/features/order-dialog";
+import RoomItemWrapper from "../fragments/room-item-wrapper";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Badge } from "~/components/ui/badge";
 
 interface RoomSelectionStepProps {
   onNext: () => void;
@@ -101,59 +100,12 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
     }
   }, [availableRooms, isPending, form]);
 
-  const { data: selectedRoomDetails } = useRoomsDetailsByIds(selectedRoomIds);
-
-  const selectedRooms = useMemo(() => {
-    if (selectedRoomDetails && selectedRoomDetails.length > 0) {
-      return selectedRoomDetails.map((d) => ({
-        roomId: d.roomId,
-        roomName: d.roomName,
-        roomTypeName: d.roomTypeName,
-        baseRatePerNight: d.dailyPrice,
-      }));
-    }
-    if (!availableRooms) return [];
-    return selectedRoomIds
-      .map((roomId) => {
-        for (const roomType of availableRooms) {
-          const matchingRoom = roomType.availableRooms.find(
-            (r) => r.roomId === roomId
-          );
-          if (matchingRoom) {
-            return {
-              roomId: matchingRoom.roomId,
-              roomName: matchingRoom.roomName,
-              roomTypeName: roomType.roomTypeName,
-              baseRatePerNight: roomType.baseRatePerNight,
-            };
-          }
-        }
-        return null;
-      })
-      .filter(Boolean) as Array<{
-      roomId: string;
-      roomName: string;
-      roomTypeName: string;
-      baseRatePerNight: number;
-    }>;
-  }, [selectedRoomIds, selectedRoomDetails, availableRooms]);
-
   const handleToggleRoom = (roomId: string) => {
     const current = form.getValues("roomIds") || [];
     const set = new Set(current as string[]);
     if (set.has(roomId)) set.delete(roomId);
     else set.add(roomId);
     const updatedRoomIds = Array.from(set);
-    form.setValue("roomIds", updatedRoomIds, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-    setData({ roomIds: updatedRoomIds });
-  };
-
-  const handleRemoveRoom = (roomId: string) => {
-    const current = form.getValues("roomIds") || [];
-    const updatedRoomIds = (current as string[]).filter((id) => id !== roomId);
     form.setValue("roomIds", updatedRoomIds, {
       shouldValidate: true,
       shouldDirty: true,
@@ -269,11 +221,28 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
           {/* Selected Rooms Summary & Breakfast */}
           <div className="lg:col-span-1 space-y-4">
             <div className="lg:sticky lg:top-6 space-y-4">
-              <SelectedRoomsSummary
-                selectedRooms={selectedRooms}
-                nights={nights}
-                onRemoveRoom={handleRemoveRoom}
-              />
+              {/* Selected Rooms */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">Phòng đã chọn</CardTitle>
+                    <Badge variant="secondary">
+                      {selectedRoomIds.length} phòng
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {selectedRoomIds.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Chưa chọn phòng nào
+                    </p>
+                  ) : (
+                    selectedRoomIds.map((roomId) => (
+                      <RoomItemWrapper key={roomId} roomId={roomId} />
+                    ))
+                  )}
+                </CardContent>
+              </Card>
 
               {selectedRoomIds.length > 0 &&
                 storeData.checkinDate &&

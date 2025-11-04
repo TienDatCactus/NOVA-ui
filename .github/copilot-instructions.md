@@ -40,7 +40,7 @@ Triết lý này dựa trên 4 trụ cột:
   - **Quy tắc chuẩn:** Nền trang (page) chính sử dụng `bg-background` (hoặc `bg-muted`).
   - Các khối nội dung (content) được đặt trên các component có nền `bg-card` (thường là màu trắng) như `Card`, `Popover`, `Dialog`.
 - **Đổ bóng (Shadows):**
-  - Sử dụng `box-shadow` (ví dụ `shadow-s`, `shadow-m`, `shadow-l`) để "nâng" (elevate) các yếu tố quan trọng (Card, Button, Dropdown) lên khỏi nền.
+  - Sử dụng `box-shadow` (ví dụ `shadow-sm`, `shadow-m`, `shadow-l`) để "nâng" (elevate) các yếu tố quan trọng (Card, Button, Dropdown) lên khỏi nền.
   - Điều này tạo ra độ sâu và tập trung sự chú ý của người dùng vào các yếu tố tương tác.
 
 ### 4\. Phân cấp: Dẫn dắt Người dùng (Hierarchy)
@@ -115,6 +115,280 @@ Triết lý này dựa trên 4 trụ cột:
   - **Đây là quy tắc quan trọng nhất:** **Hãy làm cho thông tin phụ trở nên "phụ"**.
   - Sử dụng `text-muted-foreground` (màu xám nhạt) cho các nhãn (label), mô tả (description), và các dữ liệu không quan trọng.
   - Việc này làm cho thông tin chính _tự động_ nổi bật mà không cần phải làm cho nó "to" hoặc "ồn ào" hơn.
+
+---
+
+## Design System & Styling
+
+### Color System
+
+NOVA-UI sử dụng hệ thống màu dựa trên HSL với hỗ trợ dark mode. Tất cả màu sắc được định nghĩa trong `app/index.css` và ánh xạ qua CSS variables.
+
+#### Light Mode Colors
+
+```css
+--hu-background: 0, 0%, 100%; /* White background */
+--hu-foreground: 0, 0%, 14%; /* Almost black text */
+--hu-card: 0, 0%, 99%; /* Off-white card */
+--hu-primary: 235, 100%, 60%; /* Blue primary */
+--hu-secondary: 0, 0%, 97%; /* Light gray */
+--hu-muted: 0, 0%, 97%; /* Muted background */
+--hu-muted-foreground: 0, 0%, 56%; /* Muted text */
+--hu-accent: 0, 0%, 96%; /* Accent background */
+--hu-destructive: 9, 96%, 47%; /* Red for errors */
+--hu-border: 0, 0%, 92%; /* Border color */
+```
+
+#### Dark Mode Colors
+
+```css
+--hu-background: 0, 0%, 7%; /* Near black */
+--hu-foreground: 0, 0%, 100%; /* White text */
+--hu-card: 0, 0%, 9%; /* Dark card */
+--hu-primary: 235, 100%, 60%; /* Same blue */
+--hu-secondary: 0, 0%, 15%; /* Dark gray */
+--hu-muted: 0, 0%, 15%; /* Dark muted */
+--hu-muted-foreground: 0, 0%, 71%; /* Light muted text */
+```
+
+#### Usage in Components
+
+```tsx
+// ✅ CORRECT: Use semantic color tokens
+<div className="bg-background text-foreground">
+<Card className="bg-card border-border">
+<Button className="bg-primary text-primary-foreground">
+<p className="text-muted-foreground">
+
+// ❌ WRONG: Don't use arbitrary colors
+<div className="bg-white text-black">
+<div style={{ backgroundColor: '#f5f5f5' }}>
+```
+
+### Typography System
+
+#### Font Families
+
+```css
+--font-sans: Inter, system-ui, sans-serif;
+--font-serif: "Source Serif 4", Georgia, serif;
+--font-mono: "IBM Plex Mono", monospace;
+```
+
+#### Font Usage
+
+- **Sans (Inter)**: Giao diện chính, UI components, body text
+- **Serif**: Tiêu đề trang quan trọng, landing pages
+- **Mono**: Code snippets, booking codes, IDs
+
+#### Text Sizes (Tailwind classes)
+
+```tsx
+text-xs    // 12px - Labels, metadata
+text-sm    // 14px - Body text, form fields
+text-base  // 16px - Default paragraph
+text-lg    // 18px - Section headings
+text-xl    // 20px - Page titles
+text-2xl   // 24px - Major headings
+```
+
+### Shadow System
+
+NOVA-UI có 3 cấp độ shadow tùy chỉnh cho độ sâu UI:
+
+#### Small Shadow (`shadow-sm`)
+
+**Usage**: Cards nhỏ, list items, buttons
+
+```css
+box-shadow:
+  inset 0 1px 2px #ffffff30,
+  /* top highlight */ 0 1px 2px #00000030,
+  /* dark edge */ 0 2px 4px #00000015; /* soft shadow */
+```
+
+```tsx
+<Card className="shadow-sm">...</Card>
+```
+
+#### Medium Shadow (`shadow-m`)
+
+**Usage**: Dialogs, popovers, dropdown menus
+
+```css
+box-shadow:
+  inset 0 1px 2px #ffffff50,
+  /* brighter highlight */ 0 2px 4px #00000030,
+  /* darker edge */ 0 4px 8px #00000015; /* deeper shadow */
+```
+
+```tsx
+<Dialog className="shadow-m">...</Dialog>
+```
+
+#### Large Shadow (`shadow-l`)
+
+**Usage**: Modals quan trọng, floating panels
+
+```css
+box-shadow:
+  inset 0 1px 2px #ffffff70,
+  /* strongest highlight */ 0 4px 6px #00000030,
+  /* strong edge */ 0 6px 10px #00000015; /* deepest shadow */
+```
+
+```tsx
+<div className="shadow-l">...</div>
+```
+
+### Border Radius
+
+```css
+--radius: 0.375rem; /* 6px - Default */
+--card-radius: 1rem; /* 16px - Card radius */
+```
+
+#### Tailwind Classes
+
+```tsx
+rounded-none  // 0px
+rounded-sm    // 2px
+rounded-md    // 6px (default)
+rounded-lg    // 8px
+rounded-xl    // 12px
+rounded-2xl   // 16px (cards)
+rounded-full  // 9999px (avatars, badges)
+```
+
+### Spacing System
+
+Dựa trên 8pt grid system (0.25rem = 4px).
+
+```tsx
+gap - 1; // 4px
+gap - 2; // 8px
+gap - 3; // 12px
+gap - 4; // 16px - Most common
+gap - 6; // 24px - Section spacing
+gap - 8; // 32px - Page spacing
+gap - 12; // 48px - Major sections
+```
+
+### Sidebar Theme
+
+```css
+/* Light Mode */
+--sidebar: oklch(0.985 0 0); /* Almost white */
+--sidebar-foreground: oklch(0.145 0 0); /* Dark text */
+--sidebar-primary: oklch(0.205 0 0); /* Dark primary */
+--sidebar-accent: oklch(0.97 0 0); /* Light accent */
+--sidebar-border: oklch(0.922 0 0); /* Light border */
+
+/* Dark Mode */
+--sidebar: oklch(0.205 0 0); /* Dark bg */
+--sidebar-foreground: oklch(0.985 0 0); /* Light text */
+--sidebar-primary: oklch(0.488 0.243 264.376); /* Blue primary */
+--sidebar-accent: oklch(0.269 0 0); /* Darker accent */
+```
+
+### Chart Colors
+
+Dùng cho biểu đồ và data visualization:
+
+```css
+--chart-1: hsl(235, 100%, 60%); /* Primary blue */
+--chart-2: hsl(230, 85%, 63%); /* Light blue */
+--chart-3: hsl(225, 60%, 55%); /* Medium blue */
+--chart-4: hsl(240, 50%, 58%); /* Purple-blue */
+--chart-5: hsl(250, 45%, 52%); /* Purple */
+```
+
+### Scrollbar Styling
+
+Custom scrollbar cho consistent UX:
+
+```css
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+```
+
+### Animation Utilities
+
+#### Shimmer Effect (for buttons)
+
+```css
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+```
+
+**Usage**: Loading states, skeleton screens
+
+```tsx
+<div className="relative overflow-hidden">
+  <div className="animate-shimmer">...</div>
+</div>
+```
+
+### Best Practices
+
+1. **Always use design tokens** - Never hardcode colors/spacing
+
+   ```tsx
+   // ✅ CORRECT
+   <div className="p-4 gap-6 bg-card text-foreground shadow-sm">
+
+   // ❌ WRONG
+   <div style={{ padding: '16px', gap: '24px', background: '#fff' }}>
+   ```
+
+2. **Layering with shadows**
+
+   ```tsx
+   // Page background
+   <div className="bg-muted">
+     // Content cards (elevated)
+     <Card className="bg-card shadow-sm">
+       // Interactive elements (more elevated)
+       <Popover className="shadow-m">
+   ```
+
+3. **Consistent spacing**
+
+   ```tsx
+   // Form spacing pattern
+   <form className="space-y-6">        // Form sections
+     <div className="space-y-4">       // Field groups
+       <div className="space-y-2">     // Label + Input
+   ```
+
+4. **Typography hierarchy**
+   ```tsx
+   <h1 className="text-2xl font-bold text-foreground">Main Title</h1>
+   <h2 className="text-lg font-semibold text-foreground">Section</h2>
+   <p className="text-sm text-muted-foreground">Description</p>
+   ```
 
 ---
 
