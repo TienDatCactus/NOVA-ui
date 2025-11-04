@@ -86,8 +86,29 @@ function useAvailableRooms({
   });
 }
 
+interface UseAvailableRoomsForChangeParams {
+  bookingId: string;
+  bookingRoomId: string;
+  enabled?: boolean;
+}
+
+function useAvailableRoomsForChange({
+  bookingId,
+  bookingRoomId,
+  enabled = false,
+}: UseAvailableRoomsForChangeParams) {
+  return useQuery({
+    queryKey: ["available-rooms-for-change", bookingId, bookingRoomId],
+    queryFn: async () =>
+      await BookingService.getAvailableRoomsForChange(bookingId, bookingRoomId),
+    staleTime: 2 * 60 * 1000,
+    enabled: enabled && !!bookingId && !!bookingRoomId,
+  });
+}
+
 export {
   useAvailableRooms,
+  useAvailableRoomsForChange,
   useBookingDetail,
   useBookingRoomsWeek,
   useBookings,

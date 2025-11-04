@@ -1,6 +1,5 @@
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
@@ -12,22 +11,12 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Separator } from "~/components/ui/separator";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
-import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
-import { useAvailableRooms } from "../container/booking-query.hooks";
+import { useAvailableRoomsForChange } from "../container/booking-query.hooks";
 import { useChangeRoom } from "../container/booking-mutation.hooks";
-import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
 
 interface ChangeRoomDialogProps {
   open: boolean;
@@ -38,40 +27,41 @@ interface ChangeRoomDialogProps {
 type RoomChange = {
   bookingRoomId: string;
   oldRoomId: string;
-  oldRoomName: string;
   newRoomId: string | null;
+  newRoomPrice: number | null;
 };
-
-// Component to display new room name using useRoomDetail
-function NewRoomName({ roomId }: { roomId: string | null }) {
-  const { data: roomDetail } = useRoomDetail({
-    id: roomId || "",
-    params: {},
-  });
-
-  if (!roomId || !roomDetail) return null;
-
-  return <span>{roomDetail.roomName}</span>;
-}
 
 export default function ChangeRoomDialog({
   open,
   onOpenChange,
   bookingDetail,
 }: ChangeRoomDialogProps) {
+  const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
   const [roomChanges, setRoomChanges] = useState<Map<string, RoomChange>>(
     new Map()
   );
+  const [useOriginalPrice, setUseOriginalPrice] = useState(true);
 
   const bookingId = bookingDetail?.id || "";
+  const currentRoom = bookingDetail?.rooms[currentRoomIndex];
   const { mutate: changeRoom, isPending } = useChangeRoom(bookingId);
 
-  const { data: availableRooms, isLoading: loadingRooms } = useAvailableRooms({
-    checkinDate: bookingDetail?.checkinDate || "",
-    checkoutDate: bookingDetail?.checkoutDate || "",
-    guests: (bookingDetail?.adults || 1) + (bookingDetail?.children || 0),
-    enabled: open && !!bookingDetail,
-  });
+   // Debug: Check what fields are available
+  useEffect(() => {
+    if (currentRoom) {
+      console.log("🔍 Current Room Data:", currentRoom);
+      console.log("📋 Available fields:", Object.keys(currentRoom));
+    }
+  }, [currentRoom]);
+
+  const { data: availableRoomsData, isLoading: loadingRooms } =
+    useAvailableRoomsForChange({
+      bookingId,
+      bookingRoomId: currentRoom?.roomId || "",
+      enabled: open && !!currentRoom,
+    });
+
+  const availableRooms = availableRoomsData?.data || [];
 
   useEffect(() => {
     if (bookingDetail && open) {
@@ -80,21 +70,27 @@ export default function ChangeRoomDialog({
         changes.set(room.roomId, {
           bookingRoomId: room.roomId,
           oldRoomId: room.roomId,
-          oldRoomName: room.roomName,
           newRoomId: null,
+          newRoomPrice: null,
         });
       });
       setRoomChanges(changes);
+      setCurrentRoomIndex(0);
     }
   }, [bookingDetail, open]);
 
-  const handleRoomChange = (bookingRoomId: string, newRoomId: string) => {
+  const handleRoomChange = (
+    bookingRoomId: string,
+    newRoomId: string,
+    newRoomPrice: number
+  ) => {
     const currentChange = roomChanges.get(bookingRoomId);
     if (!currentChange) return;
 
     const updatedChange: RoomChange = {
       ...currentChange,
-      newRoomId: newRoomId === currentChange.oldRoomId ? null : newRoomId,
+      newRoomId,
+      newRoomPrice,
     };
 
     setRoomChanges(new Map(roomChanges.set(bookingRoomId, updatedChange)));
@@ -104,7 +100,7 @@ export default function ChangeRoomDialog({
     if (!bookingDetail) return;
 
     const roomsToChange = Array.from(roomChanges.values())
-      .filter((change) => change.newRoomId !== null)
+      .filter((change) => change.newRoomId && change.newRoomId !== change.oldRoomId)
       .map((change) => ({
         bookingRoomId: change.bookingRoomId,
         newRoomId: change.newRoomId!,
@@ -127,201 +123,237 @@ export default function ChangeRoomDialog({
     });
   };
 
+  const currentChange = currentRoom
+    ? roomChanges.get(currentRoom.roomId)
+    : null;
   const hasChanges = Array.from(roomChanges.values()).some(
-    (change) => change.newRoomId !== null
+    (change) => change.newRoomId && change.newRoomId !== change.oldRoomId
   );
 
-  if (!bookingDetail) return null;
+  if (!bookingDetail || !currentRoom) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Đổi phòng</DialogTitle>
+          <DialogTitle className="text-2xl">
+            Đổi phòng {currentRoom.roomName}
+          </DialogTitle>
           <DialogDescription>
-            Chọn phòng mới cho đặt phòng {bookingDetail.bookingCode}
+            Chọn phòng mới cho {bookingDetail.customer.fullName}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Booking Info */}
-          <Card className="p-4 bg-muted/30">
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Khách hàng:</span>
-                <p className="font-medium">{bookingDetail.customer.fullName}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Nhận phòng:</span>
-                <p className="font-medium">{bookingDetail.checkinDate}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Trả phòng:</span>
-                <p className="font-medium">{bookingDetail.checkoutDate}</p>
-              </div>
+        <div className="flex-1 overflow-y-auto space-y-6 py-4">
+          {/* Timeline - Date Range */}
+          <div className="flex items-center justify-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">
+                {new Date(bookingDetail.checkinDate).toLocaleDateString("vi-VN")}
+              </span>
+              <span className="text-muted-foreground">14:00</span>
             </div>
-          </Card>
-
-          <Separator />
-
-          {/* Room Changes */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Danh sách phòng</h3>
-
-            {loadingRooms ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Đang tải danh sách phòng trống...
-              </div>
-            ) : !availableRooms || availableRooms.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Không có phòng trống trong khoảng thời gian này
-              </div>
-            ) : (
-              Array.from(roomChanges.values()).map((change, index) => (
-                <Card key={change.oldRoomId} className="p-4">
-                  <div className="flex items-center gap-4">
-                    {/* Current Room */}
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">
-                        Phòng hiện tại #{index + 1}
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Badge variant="outline" className="font-mono">
-                          {change.oldRoomName}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-
-                    {/* New Room Selector */}
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">
-                        Phòng mới
-                      </Label>
-                      <Select
-                        value={change.newRoomId || change.oldRoomId}
-                        onValueChange={(value) =>
-                          handleRoomChange(change.bookingRoomId, value)
-                        }
-                      >
-                        <SelectTrigger
-                          className={cn(change.newRoomId && "border-primary")}
-                        >
-                          <SelectValue placeholder="Chọn phòng mới" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {/* Current room option */}
-                          <SelectItem value={change.oldRoomId}>
-                            <div className="flex items-center gap-2">
-                              <span>{change.oldRoomName}</span>
-                              <span className="text-xs text-muted-foreground">
-                                (Giữ nguyên)
-                              </span>
-                            </div>
-                          </SelectItem>
-
-                          {/* Available rooms grouped by room type */}
-                          {availableRooms.map(
-                            (
-                              roomType: AvailableRoomsInternalResponseDto[number]
-                            ) => (
-                              <SelectGroup key={roomType.roomTypeId}>
-                                <SelectLabel>
-                                  {roomType.roomTypeName} (
-                                  {roomType.availableCount} trống)
-                                </SelectLabel>
-                                {roomType.availableRooms
-                                  .filter(
-                                    (r: { roomId: string }) =>
-                                      r.roomId !== change.oldRoomId
-                                  ) // Exclude current room
-                                  .map(
-                                    (room: {
-                                      roomId: string;
-                                      roomName: string;
-                                      status: string;
-                                    }) => (
-                                      <SelectItem
-                                        key={room.roomId}
-                                        value={room.roomId}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <span>{room.roomName}</span>
-                                          <Badge
-                                            variant="secondary"
-                                            className="text-xs"
-                                          >
-                                            {room.status}
-                                          </Badge>
-                                        </div>
-                                      </SelectItem>
-                                    )
-                                  )}
-                              </SelectGroup>
-                            )
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Change Indicator */}
-                    <div className="w-8 flex-shrink-0">
-                      {change.newRoomId && (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                          <Check className="h-4 w-4 text-primary" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Show change summary */}
-                  {change.newRoomId && (
-                    <div className="mt-3 rounded-md bg-primary/5 p-2 text-sm">
-                      <span className="text-muted-foreground">Thay đổi: </span>
-                      <span className="font-medium">
-                        {change.oldRoomName} →{" "}
-                        <NewRoomName roomId={change.newRoomId} />
-                      </span>
-                    </div>
-                  )}
-                </Card>
-              ))
-            )}
+            <span className="text-muted-foreground">đến</span>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">
+                {new Date(bookingDetail.checkoutDate).toLocaleDateString("vi-VN")}
+              </span>
+              <span className="text-muted-foreground">12:00</span>
+            </div>
           </div>
 
-          {/* Summary */}
-          {hasChanges && (
-            <Card className="p-4 bg-primary/5 border-primary/20">
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">
-                  {
-                    Array.from(roomChanges.values()).filter(
-                      (c) => c.newRoomId !== null
-                    ).length
-                  }{" "}
-                  phòng sẽ được thay đổi
-                </span>
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Left: Room Types */}
+            <div>
+              <h3 className="font-semibold mb-3">HẠNG PHÒNG</h3>
+              {loadingRooms ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  Đang tải...
+                </div>
+              ) : availableRooms.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  Không có phòng trống
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {availableRooms.map((roomType) => (
+                    <Card
+                      key={roomType.roomTypeId}
+                      className={cn(
+                        "p-4 cursor-pointer hover:border-primary transition-colors",
+                        roomType.rooms.some(
+                          (r) => r.roomId === currentChange?.newRoomId
+                        ) && "border-primary bg-primary/5"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold">{roomType.roomTypeName}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Sạch
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-lg">
+                            {formatMoney(roomType.rooms[0]?.currentPrice || 0).vndFormatted}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Available Rooms & Area */}
+            <div className="space-y-6">
+              {/* Rooms List */}
+              <div>
+                <h3 className="font-semibold mb-3">PHÒNG</h3>
+                {loadingRooms ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    Đang tải...
+                  </div>
+                ) : availableRooms.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    Không có phòng
+                  </div>
+                ) : (
+                  <RadioGroup
+                    value={currentChange?.newRoomId || ""}
+                    onValueChange={(value) => {
+                      const selectedRoom = availableRooms
+                        .flatMap((rt) => rt.rooms)
+                        .find((r) => r.roomId === value);
+                      if (selectedRoom) {
+                        handleRoomChange(
+                          currentRoom.roomId,
+                          value,
+                          selectedRoom.currentPrice
+                        );
+                      }
+                    }}
+                    className="space-y-2"
+                  >
+                    {availableRooms.map((roomType) =>
+                      roomType.rooms.map((room) => (
+                        <Card
+                          key={room.roomId}
+                          className={cn(
+                            "p-4 cursor-pointer hover:border-primary transition-colors",
+                            room.roomId === currentChange?.newRoomId &&
+                              "border-primary bg-primary/5"
+                          )}
+                          onClick={() => {
+                            handleRoomChange(
+                              currentRoom.roomId,
+                              room.roomId,
+                              room.currentPrice
+                            );
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <RadioGroupItem value={room.roomId} />
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium">{room.roomName}</span>
+                                <span className="text-sm px-2 py-0.5 rounded-full bg-muted">
+                                  {room.status}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      ))
+                    )}
+                  </RadioGroup>
+                )}
               </div>
-            </Card>
-          )}
+
+              {/* Area/Zone */}
+              <div>
+                <h3 className="font-semibold mb-3">KHU VỰC</h3>
+                <div className="space-y-2">
+                  {availableRooms.map((roomType) =>
+                    roomType.rooms
+                      .reduce((acc: string[], room) => {
+                        // Extract area from room type or status
+                        const area = roomType.roomTypeName.includes("Premium")
+                          ? "Premium"
+                          : "Standard";
+                        if (!acc.includes(area)) acc.push(area);
+                        return acc;
+                      }, [])
+                      .map((area) => (
+                        <Card key={area} className="p-3">
+                          <span className="font-medium">{area}</span>
+                        </Card>
+                      ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Price Section */}
+          <Separator />
+          <div className="space-y-3">
+            <h3 className="font-semibold">Giá mới</h3>
+            <RadioGroup
+              value={useOriginalPrice ? "original" : "custom"}
+              onValueChange={(value) => setUseOriginalPrice(value === "original")}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="original" id="original" />
+                <Label htmlFor="original" className="flex-1 cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <span>Áp dụng giá phòng mới:</span>
+                    <span className="font-semibold text-lg">
+                      {currentChange?.newRoomPrice
+                        ? formatMoney(currentChange.newRoomPrice).vndFormatted
+                        : "0 ₫"}{" "}
+                      {currentChange?.newRoomPrice &&
+                        currentChange.newRoomPrice > 0 && (
+                          <span className="text-sm text-green-600">
+                            ▲{" "}
+                            {formatMoney(
+                              Math.abs(currentChange.newRoomPrice - 0)
+                            ).vndFormatted}
+                          </span>
+                        )}
+                    </span>
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="custom" id="custom" />
+                <Label htmlFor="custom" className="cursor-pointer">
+                  Giữ nguyên giá hiện tại:{" "}
+                  <span className="font-semibold">
+                    {formatMoney(0).vndFormatted}
+                  </span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0">
           <Button
             type="button"
             variant="outline"
-            onClick={() => {
-              onOpenChange(false);
-              setRoomChanges(new Map());
-            }}
+            onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            Hủy
+            Bỏ qua
           </Button>
-          <Button onClick={handleConfirm} disabled={isPending || !hasChanges}>
-            {isPending ? "Đang lưu..." : "Xác nhận đổi phòng"}
+          <Button
+            onClick={handleConfirm}
+            disabled={isPending || !hasChanges}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            {isPending ? "Đang lưu..." : "Lưu"}
           </Button>
         </DialogFooter>
       </DialogContent>
