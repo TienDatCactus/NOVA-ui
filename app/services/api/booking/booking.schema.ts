@@ -251,7 +251,7 @@ const BookingDetailItemSchema = z.object({
   }),
   rooms: z.array(
     z.object({
-      bookingRoomId: z.string().optional(),
+      bookingRoomId: z.string(),
       roomId: z.string(),
       roomName: z.string(),
       roomTypeId: z.string(),

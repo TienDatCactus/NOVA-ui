@@ -1,18 +1,15 @@
-import { Check } from "lucide-react";
+import { format } from "date-fns";
+import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Label } from "~/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { Separator } from "~/components/ui/separator";
 import { cn, formatMoney } from "~/lib/utils";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import { useAvailableRoomsForChange } from "../container/booking-query.hooks";
@@ -24,322 +21,217 @@ interface ChangeRoomDialogProps {
   bookingDetail?: BookingDetailResponseDto;
 }
 
-type RoomChange = {
-  bookingRoomId: string;
-  oldRoomId: string;
-  newRoomId: string | null;
-  newRoomPrice: number | null;
-};
-
 export default function ChangeRoomDialog({
   open,
   onOpenChange,
   bookingDetail,
 }: ChangeRoomDialogProps) {
-  const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
-  const [roomChanges, setRoomChanges] = useState<Map<string, RoomChange>>(
-    new Map()
+  const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string | null>(
+    null
   );
-  const [useOriginalPrice, setUseOriginalPrice] = useState(true);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
 
   const bookingId = bookingDetail?.id || "";
-  const currentRoom = bookingDetail?.rooms[currentRoomIndex];
+  const currentRoom = bookingDetail?.rooms[0]; // First room for simplicity
   const { mutate: changeRoom, isPending } = useChangeRoom(bookingId);
-
-   // Debug: Check what fields are available
-  useEffect(() => {
-    if (currentRoom) {
-      console.log("🔍 Current Room Data:", currentRoom);
-      console.log("📋 Available fields:", Object.keys(currentRoom));
-    }
-  }, [currentRoom]);
 
   const { data: availableRoomsData, isLoading: loadingRooms } =
     useAvailableRoomsForChange({
       bookingId,
-      bookingRoomId: currentRoom?.roomId || "",
-      enabled: open && !!currentRoom,
+      bookingRoomId: currentRoom?.bookingRoomId || "",
+      enabled: open && !!currentRoom && !!currentRoom.bookingRoomId,
     });
 
   const availableRooms = availableRoomsData?.data || [];
 
+  // Reset selection when dialog opens
   useEffect(() => {
-    if (bookingDetail && open) {
-      const changes = new Map<string, RoomChange>();
-      bookingDetail.rooms.forEach((room) => {
-        changes.set(room.roomId, {
-          bookingRoomId: room.roomId,
-          oldRoomId: room.roomId,
-          newRoomId: null,
-          newRoomPrice: null,
-        });
-      });
-      setRoomChanges(changes);
-      setCurrentRoomIndex(0);
+    if (open) {
+      setSelectedRoomTypeId(null);
+      setSelectedRoomId(null);
     }
-  }, [bookingDetail, open]);
+  }, [open]);
 
-  const handleRoomChange = (
-    bookingRoomId: string,
-    newRoomId: string,
-    newRoomPrice: number
-  ) => {
-    const currentChange = roomChanges.get(bookingRoomId);
-    if (!currentChange) return;
-
-    const updatedChange: RoomChange = {
-      ...currentChange,
-      newRoomId,
-      newRoomPrice,
-    };
-
-    setRoomChanges(new Map(roomChanges.set(bookingRoomId, updatedChange)));
-  };
+  // Auto-select first room type when data loads
+  useEffect(() => {
+    if (availableRooms.length > 0 && !selectedRoomTypeId) {
+      setSelectedRoomTypeId(availableRooms[0].roomTypeId);
+    }
+  }, [availableRooms, selectedRoomTypeId]);
 
   const handleConfirm = () => {
-    if (!bookingDetail) return;
-
-    const roomsToChange = Array.from(roomChanges.values())
-      .filter((change) => change.newRoomId && change.newRoomId !== change.oldRoomId)
-      .map((change) => ({
-        bookingRoomId: change.bookingRoomId,
-        newRoomId: change.newRoomId!,
-      }));
-
-    if (roomsToChange.length === 0) {
-      onOpenChange(false);
-      return;
-    }
+    if (!currentRoom || !selectedRoomId) return;
 
     const payload = {
-      rooms: roomsToChange,
+      rooms: [
+        {
+          bookingRoomId: currentRoom.bookingRoomId,
+          newRoomId: selectedRoomId,
+        },
+      ],
     };
 
     changeRoom(payload, {
       onSuccess: () => {
         onOpenChange(false);
-        setRoomChanges(new Map());
       },
     });
   };
 
-  const currentChange = currentRoom
-    ? roomChanges.get(currentRoom.roomId)
-    : null;
-  const hasChanges = Array.from(roomChanges.values()).some(
-    (change) => change.newRoomId && change.newRoomId !== change.oldRoomId
+  if (!bookingDetail || !currentRoom) return null;
+
+  // Get selected room type details
+  const selectedRoomType = availableRooms.find(
+    (rt) => rt.roomTypeId === selectedRoomTypeId
   );
 
-  if (!bookingDetail || !currentRoom) return null;
+  // Get rooms for selected room type
+  const roomsForSelectedType = selectedRoomType?.rooms || [];
+
+  // Get selected room details
+  const selectedRoom = availableRooms
+    .flatMap((rt) => rt.rooms)
+    .find((r) => r.roomId === selectedRoomId);
+
+  const hasChanges = selectedRoomId && selectedRoomId !== currentRoom.roomId;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
+          <DialogTitle className="text-xl font-semibold">
             Đổi phòng {currentRoom.roomName}
           </DialogTitle>
-          <DialogDescription>
-            Chọn phòng mới cho {bookingDetail.customer.fullName}
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6 py-4">
-          {/* Timeline - Date Range */}
-          <div className="flex items-center justify-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">
-                {new Date(bookingDetail.checkinDate).toLocaleDateString("vi-VN")}
+        <div className="flex-1 overflow-y-auto space-y-4 py-2">
+          {/* Date Range Section */}
+          <div>
+            <h3 className="text-sm font-medium mb-2">Chọn phòng mới</h3>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>
+                {format(new Date(bookingDetail.checkinDate), "dd 'Thg' MM, HH:mm")}
               </span>
-              <span className="text-muted-foreground">14:00</span>
-            </div>
-            <span className="text-muted-foreground">đến</span>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">
-                {new Date(bookingDetail.checkoutDate).toLocaleDateString("vi-VN")}
+              <span>đến</span>
+              <span>
+                {format(new Date(bookingDetail.checkoutDate), "dd 'Thg' MM, HH:mm")}
               </span>
-              <span className="text-muted-foreground">12:00</span>
             </div>
           </div>
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-2 gap-6">
-            {/* Left: Room Types */}
-            <div>
-              <h3 className="font-semibold mb-3">HẠNG PHÒNG</h3>
-              {loadingRooms ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  Đang tải...
-                </div>
-              ) : availableRooms.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  Không có phòng trống
-                </div>
-              ) : (
+          {loadingRooms ? (
+            <div className="text-center py-12 text-muted-foreground">
+              Đang tải...
+            </div>
+          ) : availableRooms.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              Không có phòng trống
+            </div>
+          ) : (
+            <div className="grid grid-cols-[1fr_auto_1fr_1fr] gap-4">
+              {/* Column 1: HẠNG PHÒNG */}
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground mb-3">
+                  HẠNG PHÒNG
+                </h3>
                 <div className="space-y-2">
                   {availableRooms.map((roomType) => (
                     <Card
                       key={roomType.roomTypeId}
                       className={cn(
-                        "p-4 cursor-pointer hover:border-primary transition-colors",
-                        roomType.rooms.some(
-                          (r) => r.roomId === currentChange?.newRoomId
-                        ) && "border-primary bg-primary/5"
+                        "p-3 cursor-pointer transition-all hover:border-primary",
+                        selectedRoomTypeId === roomType.roomTypeId &&
+                          "border-primary bg-primary/5"
                       )}
+                      onClick={() => {
+                        setSelectedRoomTypeId(roomType.roomTypeId);
+                        setSelectedRoomId(null); // Reset room selection
+                      }}
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold">{roomType.roomTypeName}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Sạch
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-lg">
-                            {formatMoney(roomType.rooms[0]?.currentPrice || 0).vndFormatted}
-                          </p>
-                        </div>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-medium text-sm">
+                          {roomType.roomTypeName}
+                        </span>
+                        <span className="font-semibold text-sm whitespace-nowrap">
+                          {formatMoney(roomType.rooms[0]?.currentPrice || 0)
+                            .vndFormatted.replace(" ₫", "")}
+                        </span>
                       </div>
                     </Card>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Right: Available Rooms & Area */}
-            <div className="space-y-6">
-              {/* Rooms List */}
+              {/* Separator Icon */}
+              <div className="flex items-center justify-center pt-8">
+                <ChevronRight className="w-6 h-6 text-primary" strokeWidth={3} />
+              </div>
+
+              {/* Column 2: PHÒNG */}
               <div>
-                <h3 className="font-semibold mb-3">PHÒNG</h3>
-                {loadingRooms ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    Đang tải...
+                <h3 className="text-xs font-semibold text-muted-foreground mb-3">
+                  PHÒNG
+                </h3>
+                {!selectedRoomTypeId ? (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    Chọn hạng phòng
                   </div>
-                ) : availableRooms.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    Không có phòng
+                ) : roomsForSelectedType.length === 0 ? (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    Không có phòng trống
                   </div>
                 ) : (
-                  <RadioGroup
-                    value={currentChange?.newRoomId || ""}
-                    onValueChange={(value) => {
-                      const selectedRoom = availableRooms
-                        .flatMap((rt) => rt.rooms)
-                        .find((r) => r.roomId === value);
-                      if (selectedRoom) {
-                        handleRoomChange(
-                          currentRoom.roomId,
-                          value,
-                          selectedRoom.currentPrice
-                        );
-                      }
-                    }}
-                    className="space-y-2"
-                  >
-                    {availableRooms.map((roomType) =>
-                      roomType.rooms.map((room) => (
-                        <Card
-                          key={room.roomId}
-                          className={cn(
-                            "p-4 cursor-pointer hover:border-primary transition-colors",
-                            room.roomId === currentChange?.newRoomId &&
-                              "border-primary bg-primary/5"
-                          )}
-                          onClick={() => {
-                            handleRoomChange(
-                              currentRoom.roomId,
-                              room.roomId,
-                              room.currentPrice
-                            );
-                          }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <RadioGroupItem value={room.roomId} />
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium">{room.roomName}</span>
-                                <span className="text-sm px-2 py-0.5 rounded-full bg-muted">
-                                  {room.status}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      ))
-                    )}
-                  </RadioGroup>
+                  <div className="space-y-2">
+                    {roomsForSelectedType.map((room) => (
+                      <Card
+                        key={room.roomId}
+                        className={cn(
+                          "p-3 cursor-pointer transition-all hover:border-primary",
+                          selectedRoomId === room.roomId &&
+                            "border-primary bg-primary/5"
+                        )}
+                        onClick={() => setSelectedRoomId(room.roomId)}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-sm">
+                            {room.roomName}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                            {room.status}
+                          </span>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
                 )}
               </div>
 
-              {/* Area/Zone */}
+              {/* Column 3: KHU VỰC */}
               <div>
-                <h3 className="font-semibold mb-3">KHU VỰC</h3>
-                <div className="space-y-2">
-                  {availableRooms.map((roomType) =>
-                    roomType.rooms
-                      .reduce((acc: string[], room) => {
-                        // Extract area from room type or status
-                        const area = roomType.roomTypeName.includes("Premium")
-                          ? "Premium"
-                          : "Standard";
-                        if (!acc.includes(area)) acc.push(area);
-                        return acc;
-                      }, [])
-                      .map((area) => (
-                        <Card key={area} className="p-3">
-                          <span className="font-medium">{area}</span>
-                        </Card>
-                      ))
-                  )}
-                </div>
+                <h3 className="text-xs font-semibold text-muted-foreground mb-3">
+                  KHU VỰC
+                </h3>
+                {!selectedRoom ? (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    Chọn phòng
+                  </div>
+                ) : (
+                  <Card className="p-3">
+                    <span className="text-sm font-medium">
+                      {selectedRoom.roomName.includes("View") 
+                        ? "View hồ"
+                        : selectedRoomType?.roomTypeName.includes("VIP")
+                        ? "View hồ"
+                        : "View hồ"}
+                    </span>
+                  </Card>
+                )}
               </div>
             </div>
-          </div>
-
-          {/* Price Section */}
-          <Separator />
-          <div className="space-y-3">
-            <h3 className="font-semibold">Giá mới</h3>
-            <RadioGroup
-              value={useOriginalPrice ? "original" : "custom"}
-              onValueChange={(value) => setUseOriginalPrice(value === "original")}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="original" id="original" />
-                <Label htmlFor="original" className="flex-1 cursor-pointer">
-                  <div className="flex items-center justify-between">
-                    <span>Áp dụng giá phòng mới:</span>
-                    <span className="font-semibold text-lg">
-                      {currentChange?.newRoomPrice
-                        ? formatMoney(currentChange.newRoomPrice).vndFormatted
-                        : "0 ₫"}{" "}
-                      {currentChange?.newRoomPrice &&
-                        currentChange.newRoomPrice > 0 && (
-                          <span className="text-sm text-green-600">
-                            ▲{" "}
-                            {formatMoney(
-                              Math.abs(currentChange.newRoomPrice - 0)
-                            ).vndFormatted}
-                          </span>
-                        )}
-                    </span>
-                  </div>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="custom" id="custom" />
-                <Label htmlFor="custom" className="cursor-pointer">
-                  Giữ nguyên giá hiện tại:{" "}
-                  <span className="font-semibold">
-                    {formatMoney(0).vndFormatted}
-                  </span>
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
+          )}
         </div>
 
-        <DialogFooter className="flex-shrink-0">
+        <DialogFooter className="flex-shrink-0 gap-2">
           <Button
             type="button"
             variant="outline"
@@ -351,7 +243,7 @@ export default function ChangeRoomDialog({
           <Button
             onClick={handleConfirm}
             disabled={isPending || !hasChanges}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 text-white"
           >
             {isPending ? "Đang lưu..." : "Lưu"}
           </Button>
