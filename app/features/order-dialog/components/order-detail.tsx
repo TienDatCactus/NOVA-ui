@@ -1,70 +1,36 @@
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useState, useCallback, useMemo } from "react";
-import type { UseFormReturn } from "react-hook-form";
-import type z from "zod";
+import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { Separator } from "~/components/ui/separator";
 import { formatMoney } from "~/lib/utils";
 import OrderItemWrapper from "../fragments/order-item-wrapper";
-import { OrderSchema } from "~/services/api/order/order.schema";
-
-const { ServiceOrderSchema } = OrderSchema;
-type ServiceOrderDto = z.infer<typeof ServiceOrderSchema>;
+import { useServiceOrderStore } from "~/store/service-order.store";
 
 interface OrderDetailProps {
-  form: UseFormReturn<ServiceOrderDto>;
-  onRemoveItem: (index: number) => void;
   onClearAll: () => void;
   bookingId?: string;
   customerName?: string;
-  tableName?: string;
   checkinDate?: Date | string;
   checkoutDate?: Date | string;
 }
 
 /**
- * Restaurant-style order summary component
+ * Restaurant-style order summary component connected to global store
  * Displays customer details, order items, and price calculations
  * Each item fetches its own details using useServiceDetail/useMenuItemDetail
  */
 export default function OrderDetail({
-  form,
-  onRemoveItem,
   onClearAll,
   bookingId,
   customerName,
-  tableName,
-  checkinDate,
-  checkoutDate,
 }: OrderDetailProps) {
-  const selectedItems = form.watch("services") || [];
+  // Get items from global store
+  const selectedItems = useServiceOrderStore((s) => s.services);
 
-  const [itemPrices, setItemPrices] = useState<
-    Record<string, { unitPrice: number; quantity: number }>
-  >({});
-
-  const handlePriceCalculated = useCallback(
-    (itemId: string, unitPrice: number, quantity: number) => {
-      setItemPrices((prev) => ({
-        ...prev,
-        [itemId]: { unitPrice, quantity },
-      }));
-    },
-    []
-  );
-
-  // Calculate totals from tracked prices
-  const { subtotal, tax, total } = useMemo(() => {
-    const subtotal = Object.values(itemPrices).reduce(
-      (sum, { unitPrice, quantity }) => sum + unitPrice * quantity,
-      0
-    );
-    const tax = 0; // Can add: subtotal * 0.1 if needed
-    const total = subtotal + tax;
-    return { subtotal, tax, total };
-  }, [itemPrices]);
+  // Note: Price calculation will need to be done by fetching service/menu details
+  // For now, showing item count only. Real prices come from API in OrderItemWrapper
+  const itemCount = selectedItems.length;
 
   return (
     <div className="h-full flex flex-col gap-3 p-0">
@@ -92,12 +58,7 @@ export default function OrderDetail({
                   #{bookingId || "---"}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span>Bàn/Phòng</span>
-                <span className="text-right font-medium text-foreground">
-                  {tableName || "---"}
-                </span>
-              </div>
+
               <div className="flex items-center justify-between">
                 <span>Ngày</span>
                 <span className="text-right text-foreground tabular-nums">
@@ -118,26 +79,8 @@ export default function OrderDetail({
             </div>
           ) : (
             <div className="space-y-0">
-              {selectedItems.map((item, idx) => (
-                <OrderItemWrapper
-                  key={item.itemId}
-                  itemType={item.itemType}
-                  itemId={item.itemId}
-                  quantity={item.quantity}
-                  note={item.note || ""}
-                  scheduledDate={item.scheduledDate}
-                  onQuantityChange={(qty) =>
-                    form.setValue(`services.${idx}.quantity`, qty)
-                  }
-                  onNoteChange={(note) =>
-                    form.setValue(`services.${idx}.note`, note)
-                  }
-                  onScheduledDateChange={(date) =>
-                    form.setValue(`services.${idx}.scheduledDate`, date)
-                  }
-                  onRemove={() => onRemoveItem(idx)}
-                  onPriceCalculated={handlePriceCalculated}
-                />
+              {selectedItems.map((item) => (
+                <OrderItemWrapper key={item.itemId} itemId={item.itemId} />
               ))}
             </div>
           )}
@@ -150,28 +93,14 @@ export default function OrderDetail({
           <CardContent className="p-4 space-y-3">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Tạm tính:</span>
-                <span className="tabular-nums">
-                  {formatMoney(subtotal).vndFormatted}
-                </span>
+                <span className="text-muted-foreground">Số lượng món:</span>
+                <span className="tabular-nums font-medium">{itemCount}</span>
               </div>
-
-              {tax > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Thuế VAT:</span>
-                  <span className="tabular-nums">
-                    {formatMoney(tax).vndFormatted}
-                  </span>
-                </div>
-              )}
             </div>
 
-            <Separator />
-
-            <div className="flex justify-between items-center">
-              <span className="font-semibold">Tổng cộng:</span>
-              <span className="text-xl font-bold text-primary tabular-nums">
-                {formatMoney(total).vndFormatted}
+            <div className="flex justify-between items-center pt-2 border-t">
+              <span className="font-medium text-muted-foreground text-sm">
+                Tổng cộng sẽ được tính khi xác nhận
               </span>
             </div>
           </CardContent>

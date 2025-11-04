@@ -1,9 +1,7 @@
-import { CalendarIcon, MessageSquare, Minus, Plus, X } from "lucide-react";
+import { CalendarIcon, MessageSquare, X } from "lucide-react";
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Button } from "~/components/ui/button";
-import { DatePicker } from "~/components/ui/date-picker";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   Popover,
@@ -12,37 +10,52 @@ import {
 } from "~/components/ui/popover";
 import { Textarea } from "~/components/ui/textarea";
 import { cn, formatMoney } from "~/lib/utils";
-import { useCreateBookingStore } from "~/store/create-booking.store";
+import { useServiceOrderStore } from "~/store/service-order.store";
 import { Calendar } from "~/components/ui/calendar";
 
 interface OrderItemCardProps {
+  itemId: string;
   itemName: string;
   unitPrice: number;
-  quantity: number;
-  note: string | null;
-  scheduledDate: string;
-  onQuantityChange: (newQuantity: number) => void;
-  onNoteChange: (note: string) => void;
-  onScheduledDateChange: (date: string) => void;
-  onRemove: () => void;
 }
 
 /**
- * Minimal order item card for restaurant-style order summary
+ * Minimal order item card connected to global service-order store
+ * Reads item state from store and updates via store methods
  */
 export default function OrderItemCard({
+  itemId,
   itemName,
   unitPrice,
-  quantity,
-  note,
-  scheduledDate,
-  onNoteChange,
-  onScheduledDateChange,
-  onRemove,
 }: OrderItemCardProps) {
+  // Subscribe only to this specific item's data to prevent unnecessary re-renders
+  const item = useServiceOrderStore((s) =>
+    s.services.find((service) => service.itemId === itemId)
+  );
+
+  const { setNote, setScheduledDate, removeById } =
+    useServiceOrderStore.getState();
+
+  if (!item) return null;
+
+  const { quantity, note, scheduledDate } = item;
+
   const [noteOpen, setNoteOpen] = useState(false);
   const subtotal = unitPrice * quantity;
-  const { data } = useCreateBookingStore();
+
+  // Handler functions using store methods
+  const handleNoteChange = (newNote: string) => {
+    setNote(itemId, newNote);
+  };
+
+  const handleScheduledDateChange = (date: string) => {
+    setScheduledDate(itemId, date);
+  };
+
+  const handleRemove = () => {
+    removeById(itemId);
+  };
+
   return (
     <div className="flex items-start justify-between py-4 border-b last:border-0">
       <div className="flex-1 space-y-3">
@@ -57,7 +70,7 @@ export default function OrderItemCard({
             variant="ghost"
             size="icon"
             className="h-7 w-7 text-muted-foreground hover:text-foreground"
-            onClick={onRemove}
+            onClick={handleRemove}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -91,11 +104,11 @@ export default function OrderItemCard({
                 </Label>
                 <Textarea
                   value={note || ""}
-                  onChange={(e) => onNoteChange(e.target.value)}
+                  onChange={(e) => handleNoteChange(e.target.value)}
                   placeholder="Ví dụ: Không hành, ít cay..."
                   className="resize-none text-sm"
                   rows={3}
-                />{" "}
+                />
                 <Label className="text-xs font-medium">
                   Thời gian phục vụ dịch vụ
                 </Label>
@@ -105,11 +118,11 @@ export default function OrderItemCard({
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        scheduledDate.length === 0 && "text-muted-foreground"
+                        !scheduledDate && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {scheduledDate.length > 0
+                      {scheduledDate
                         ? `Đã chọn ${scheduledDate}`
                         : "Chọn ngày phục vụ"}
                     </Button>
@@ -117,14 +130,13 @@ export default function OrderItemCard({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={new Date(scheduledDate)}
+                      selected={
+                        scheduledDate ? new Date(scheduledDate) : undefined
+                      }
                       onSelect={(value) =>
-                        onScheduledDateChange(
+                        handleScheduledDateChange(
                           value ? format(value, "yyyy-MM-dd") : ""
                         )
-                      }
-                      disabled={(date) =>
-                        date <= data.checkinDate! || date > data.checkoutDate!
                       }
                     />
                   </PopoverContent>
@@ -137,8 +149,6 @@ export default function OrderItemCard({
               </div>
             </PopoverContent>
           </Popover>
-
-          {/* Scheduled Date */}
         </div>
       </div>
     </div>

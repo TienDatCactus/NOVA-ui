@@ -1,6 +1,4 @@
-import OnboardingDialog from "~/features/onboard-dialog";
-import type { Route } from "./+types/invoices";
-import BookingFlow from "~/features/create-booking-dialog/components/booking-flow";
+import type { Route } from "./+types/map";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -14,5 +12,10 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return <BookingFlow onComplete={() => {}} />;
+  return (
+    <div>
+      {/* Frontend Code here. */}
+      <h1>New Route</h1>
+    </div>
+  );
 }

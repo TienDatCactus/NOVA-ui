@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { useNavigate } from "react-router";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -22,6 +23,8 @@ function POSOrderViewLayout({
   selectedInvoiceId,
   onInvoiceSelect,
 }: POSOrderViewLayoutProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -32,7 +35,7 @@ function POSOrderViewLayout({
             Quản lý đơn hàng thực phẩm và dịch vụ
           </p>
         </div>
-        <Button>
+        <Button onClick={() => navigate("/dashboard/pos-orders/new")}>
           <Plus className="mr-2 h-4 w-4" />
           Tạo đơn hàng mới
         </Button>

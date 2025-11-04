@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
+import { useServiceOrderStore } from "~/store/service-order.store";
 
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
@@ -36,6 +37,8 @@ export function ReviewPaymentForm({
 }: ReviewPaymentFormProps) {
   const navigate = useNavigate();
   const { data: storeData, setData, reset } = useCreateBookingStore();
+  const serviceOrderServices = useServiceOrderStore((s) => s.services);
+  const replaceAllServices = useServiceOrderStore((s) => s.replaceAll);
   const {
     mutateAsync,
     data: bookingResponseData,
@@ -49,19 +52,34 @@ export function ReviewPaymentForm({
       specialRequest: storeData.specialRequest ?? "",
       overridePrice: storeData.overridePrice,
       roomPayment: storeData.roomPayment ?? undefined,
-      serviceOrder: storeData.serviceOrder ?? { services: [] },
+      serviceOrder: { services: [] }, // Empty - managed by global store
     },
+    mode: "onChange",
   });
 
-  // Sync form with store when store changes (e.g., when navigating back)
+  // Initialize service order store ONLY on mount from storeData
   useEffect(() => {
-    form.reset({
-      specialRequest: storeData.specialRequest ?? "",
-      overridePrice: storeData.overridePrice,
-      roomPayment: storeData.roomPayment ?? undefined,
-      serviceOrder: storeData.serviceOrder ?? { services: [] },
-    });
-  }, [storeData, form]);
+    if (
+      storeData.serviceOrder?.services &&
+      storeData.serviceOrder.services.length > 0
+    ) {
+      replaceAllServices(storeData.serviceOrder.services);
+    }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync form fields (NOT service order) when storeData changes
+  useEffect(() => {
+    form.setValue("specialRequest", storeData.specialRequest ?? "");
+    form.setValue("overridePrice", storeData.overridePrice);
+    form.setValue("roomPayment", storeData.roomPayment ?? undefined);
+  }, [
+    storeData.specialRequest,
+    storeData.overridePrice,
+    storeData.roomPayment,
+    form,
+  ]);
 
   const roomIds = storeData.roomIds ?? [];
   const { data: selectedRoomDetails, isError: isRoomDetailsError } =
@@ -99,8 +117,7 @@ export function ReviewPaymentForm({
     }));
   }, [selectedRoomDetails]);
 
-  const selectedServices = form.watch("serviceOrder.services") || [];
-
+  // Use services directly from store instead of form
   const previewRequest = useMemo<StaffBookingPricePreviewRequestDto>(() => {
     const roomTypeMap = new Map<string, number>();
     selectedRooms.forEach((room) => {
@@ -125,7 +142,7 @@ export function ReviewPaymentForm({
       breakfastDates:
         storeData.breakfastDates?.map((date) => format(date, "yyyy-MM-dd")) ||
         [],
-      services: selectedServices.map((s) => ({
+      services: serviceOrderServices.map((s) => ({
         itemType: s.itemType,
         itemId: s.itemId,
         quantity: s.quantity,
@@ -141,7 +158,7 @@ export function ReviewPaymentForm({
     storeData.isBreakfastAll,
     storeData.breakfastDates,
     selectedRooms,
-    selectedServices,
+    serviceOrderServices,
   ]);
 
   const { data: pricePreview, isLoading: isLoadingPrice } =
@@ -158,11 +175,16 @@ export function ReviewPaymentForm({
   };
 
   const onSubmit = async (data: ReviewPaymentFormData) => {
+    // Use services from global store instead of form
+    const finalServiceOrder = {
+      services: serviceOrderServices,
+    };
+
     setData({
       specialRequest: data.specialRequest,
       overridePrice: data.overridePrice,
       roomPayment: data.roomPayment,
-      serviceOrder: data.serviceOrder,
+      serviceOrder: finalServiceOrder,
     });
     try {
       const bookingData = {
@@ -228,31 +250,7 @@ export function ReviewPaymentForm({
                 isLoadingPrice={isLoadingPrice}
               />
 
-              <ServiceOrder
-                services={form.watch("serviceOrder.services") ?? []}
-                onAddServices={(newServices) => {
-                  form.setValue("serviceOrder.services", newServices, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
-                  // Sync to store immediately
-                  setData({
-                    serviceOrder: { services: newServices },
-                  });
-                }}
-                onRemoveService={(index) => {
-                  const currentServices =
-                    form.watch("serviceOrder.services") ?? [];
-                  const updatedServices = currentServices.filter(
-                    (_, i) => i !== index
-                  );
-                  form.setValue("serviceOrder.services", updatedServices);
-                  // Sync to store immediately
-                  setData({
-                    serviceOrder: { services: updatedServices },
-                  });
-                }}
-              />
+              <ServiceOrder />
             </div>
           </div>
         </div>

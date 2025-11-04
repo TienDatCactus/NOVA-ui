@@ -15,6 +15,11 @@ export default [
     ]),
   ]),
   route("buttons", "components/ui/button-showcase.tsx"),
+  ...prefix("customer", [
+    route("chat", "routes/customer/chat.tsx"),
+    route("map", "routes/customer/map.tsx"),
+    route("guides", "routes/customer/guides.tsx"),
+  ]),
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
       ...prefix("reservation", [
@@ -22,6 +27,10 @@ export default [
         ...prefix("bookings", [
           route("grid", "routes/reservation/bookings/grid.tsx"),
           route("list", "routes/reservation/bookings/list.tsx"),
+          route(
+            "detail/:bookingCode",
+            "routes/reservation/bookings/booking-detail.tsx"
+          ),
         ]),
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
         route("new-booking", "routes/reservation/new-booking/new-booking.tsx"),
@@ -37,7 +46,12 @@ export default [
         route("menu", "routes/menu/menu.tsx"),
         route("menu-categories", "routes/menu/menu-categories.tsx"),
       ]),
-      ...prefix("pos-orders", [index("routes/pos-orders/pos-orders.tsx")]),
+      ...prefix("pos-orders", [
+        index("routes/pos-orders/pos-orders.tsx"),
+        route("new", "routes/pos-orders/new.tsx"),
+        route(":posId", "routes/pos-orders/detail.tsx"),
+        route(":posId/print", "routes/pos-orders/print.tsx"),
+      ]),
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("customers", "routes/customers/customers.tsx"),

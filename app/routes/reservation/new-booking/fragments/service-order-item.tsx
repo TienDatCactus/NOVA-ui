@@ -38,11 +38,11 @@ export function ServiceOrderItem({ service, onRemove }: ServiceOrderItemProps) {
   const isLoading = isLoadingService || isLoadingMenu;
   const isError = isServiceError || isMenuError;
 
-  let itemName: "MenuItem" | "ServiceItem" = service.itemType;
+  let itemName = service.itemId; // fallback to itemId
   if (service.itemType === "ServiceItem" && serviceDetail) {
-    itemName = serviceDetail.name as "MenuItem" | "ServiceItem";
+    itemName = serviceDetail.name;
   } else if (service.itemType === "MenuItem" && menuDetail) {
-    itemName = menuDetail.name as "MenuItem" | "ServiceItem";
+    itemName = menuDetail.name;
   }
 
   if (isLoading) {

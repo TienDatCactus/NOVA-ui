@@ -1,6 +1,6 @@
-import OnboardingDialog from "~/features/onboard-dialog";
-import type { Route } from "./+types/invoices";
-import BookingFlow from "~/features/create-booking-dialog/components/booking-flow";
+import type { Route } from "./+types/chat";
+import { ChatMain } from "./components/chat/main";
+import { ChatSidebar } from "./components/chat/sidebar";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -14,5 +14,10 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return <BookingFlow onComplete={() => {}} />;
+  return (
+    <div className="flex h-screen">
+      <ChatSidebar />
+      <ChatMain />
+    </div>
+  );
 }

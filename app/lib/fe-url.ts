@@ -7,6 +7,9 @@ const AUTH = {
 const DASHBOARD = {
   reservation: {
     index: "/dashboard/reservation",
+    bookings: "/dashboard/reservation/bookings",
+    bookingDetail: (bookingCode: string) =>
+      `/dashboard/reservation/bookings/detail/${bookingCode}`,
   },
 };
 export { AUTH, DASHBOARD };

@@ -25,14 +25,17 @@ import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
-import { useAvailableRooms } from "../container/booking-query.hooks";
+import {
+  useAvailableRooms,
+  useBookingDetail,
+} from "../container/booking-query.hooks";
 import { useChangeRoom } from "../container/booking-mutation.hooks";
 import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
 
 interface ChangeRoomDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  bookingDetail?: BookingDetailResponseDto;
+  bookingCode?: string;
 }
 
 type RoomChange = {
@@ -42,7 +45,6 @@ type RoomChange = {
   newRoomId: string | null;
 };
 
-// Component to display new room name using useRoomDetail
 function NewRoomName({ roomId }: { roomId: string | null }) {
   const { data: roomDetail } = useRoomDetail({
     id: roomId || "",
@@ -57,12 +59,15 @@ function NewRoomName({ roomId }: { roomId: string | null }) {
 export default function ChangeRoomDialog({
   open,
   onOpenChange,
-  bookingDetail,
+  bookingCode,
 }: ChangeRoomDialogProps) {
   const [roomChanges, setRoomChanges] = useState<Map<string, RoomChange>>(
     new Map()
   );
-
+  const { data: bookingDetail } = useBookingDetail({
+    bookingCode,
+    enabled: open,
+  });
   const bookingId = bookingDetail?.id || "";
   const { mutate: changeRoom, isPending } = useChangeRoom(bookingId);
 

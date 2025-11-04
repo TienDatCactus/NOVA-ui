@@ -23,10 +23,13 @@ const {
  * Create a new POS order
  */
 async function createPOSOrder(
-  data: CreatePOSOrderRequestDto
+  data: CreatePOSOrderRequestDto,
+  idempotencyKey?: string
 ): Promise<CreatePOSOrderResponseDto> {
   try {
-    const resp = await http.post(Orders.createPOS, data);
+    const resp = await http.post(Orders.createPOS, data, {
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
+    });
     return CreatePOSOrderResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -39,10 +42,13 @@ async function createPOSOrder(
  */
 async function addItemsToPOSOrder(
   orderId: string,
-  data: AddItemsToPOSOrderRequestDto
+  data: AddItemsToPOSOrderRequestDto,
+  idempotencyKey?: string
 ): Promise<AddItemsToPOSOrderResponseDto> {
   try {
-    const resp = await http.post(Orders.addItemsToPOS(orderId), data);
+    const resp = await http.post(Orders.addItemsToPOS(orderId), data, {
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
+    });
     return AddItemsToPOSOrderResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -55,10 +61,13 @@ async function addItemsToPOSOrder(
  */
 async function deleteItemFromPOSOrder(
   orderId: string,
-  itemId: string
+  itemId: string,
+  idempotencyKey?: string
 ): Promise<void> {
   try {
-    await http.delete(Orders.deleteItemFromPOS(orderId, itemId));
+    await http.delete(Orders.deleteItemFromPOS(orderId, itemId), {
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
+    });
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -68,9 +77,14 @@ async function deleteItemFromPOSOrder(
 /**
  * Cancel a POS order
  */
-async function cancelPOSOrder(orderId: string): Promise<void> {
+async function cancelPOSOrder(
+  orderId: string,
+  idempotencyKey?: string
+): Promise<void> {
   try {
-    await http.post(Orders.cancelPOSOrder(orderId));
+    await http.post(Orders.cancelPOSOrder(orderId), null, {
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
+    });
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -80,9 +94,14 @@ async function cancelPOSOrder(orderId: string): Promise<void> {
 /**
  * Complete a POS order
  */
-async function completePOSOrder(orderId: string): Promise<void> {
+async function completePOSOrder(
+  orderId: string,
+  idempotencyKey?: string
+): Promise<void> {
   try {
-    await http.post(Orders.completePOSOrder(orderId));
+    await http.post(Orders.completePOSOrder(orderId), null, {
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
+    });
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

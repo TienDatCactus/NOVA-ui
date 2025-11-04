@@ -5,33 +5,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import { formatMoney } from "~/lib/utils";
 import { useState } from "react";
-import type z from "zod";
 import AddServiceDialog from "~/features/order-dialog";
-import { OrderSchema } from "~/services/api/order/order.schema";
 import { ServiceOrderItem } from "./service-order-item";
+import { useServiceOrderStore } from "~/store/service-order.store";
 
-const { ServiceOrderItemSchema } = OrderSchema;
-type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
-
-interface ServiceOrderProps {
-  services?: ServiceOrderItemDto[];
-  onAddServices?: (services: ServiceOrderItemDto[]) => void;
-  onRemoveService?: (index: number) => void;
-}
-
-export function ServiceOrder({
-  services = [],
-  onAddServices,
-  onRemoveService,
-}: ServiceOrderProps) {
+export function ServiceOrder() {
   const [openServiceDialog, setOpenServiceDialog] = useState(false);
 
-  const handleConfirmServices = (newServices: ServiceOrderItemDto[]) => {
-    const mergedServices = [...services, ...newServices];
-    onAddServices?.(mergedServices);
+  // Get services and actions from global store
+  const services = useServiceOrderStore((s) => s.services);
+  const removeById = useServiceOrderStore((s) => s.removeById);
+
+  const handleConfirmServices = () => {
+    // Services are already in the global store when dialog confirms
+    // Just close the dialog
+    setOpenServiceDialog(false);
   };
+
   return (
     <Card>
       <CardHeader>
@@ -69,11 +60,11 @@ export function ServiceOrder({
               <h4 className="font-semibold text-sm">
                 Dịch vụ đã chọn ({services.length})
               </h4>
-              {services.map((service, index) => (
+              {services.map((service) => (
                 <ServiceOrderItem
-                  key={index}
+                  key={service.itemId}
                   service={service}
-                  onRemove={() => onRemoveService?.(index)}
+                  onRemove={() => removeById(service.itemId)}
                 />
               ))}
             </div>

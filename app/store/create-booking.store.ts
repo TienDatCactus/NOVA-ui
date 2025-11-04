@@ -6,11 +6,16 @@ import { BookingSchema } from "~/services/api/booking/booking.schema";
 const { StaffCreateBookingSchema } = BookingSchema;
 type CreateBookingInput = z.infer<typeof StaffCreateBookingSchema>;
 
+// Extended type to include bookingType for UI flow
+type CreateBookingData = Partial<CreateBookingInput> & {
+  bookingType?: "Direct" | "OTA";
+};
+
 // -------------
 interface CreateBookingState {
-  data: Partial<CreateBookingInput>;
+  data: CreateBookingData;
   currentStep: number;
-  setData: (data: Partial<CreateBookingInput>) => void;
+  setData: (data: Partial<CreateBookingData>) => void;
   setStep: (step: number) => void;
   reset: () => void;
 }
