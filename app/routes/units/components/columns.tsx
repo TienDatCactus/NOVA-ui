@@ -42,11 +42,7 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     accessorKey: "index",
     header: "STT",
     cell: ({ row }) => {
-      return (
-        <span className="font-medium text-muted-foreground">
-          {row.index + 1}
-        </span>
-      );
+      return <span className="font-medium">{row.index + 1}</span>;
     },
   },
   {
@@ -54,9 +50,6 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     header: "Mã đơn vị",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <div className="rounded-md bg-primary/10 p-1.5">
-          <Package className="h-3.5 w-3.5 text-primary" />
-        </div>
         <span className="font-mono text-sm font-semibold">
           {row.getValue("code")}
         </span>
@@ -77,18 +70,11 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     accessorKey: "active",
     header: () => <div className="text-center">Trạng thái</div>,
     cell: ({ row }) => {
-      const active = row.getValue("active") as boolean;
+      const isActive = row.getValue("active") as boolean;
       return (
         <div className="flex justify-center">
-          <Badge
-            variant={active ? "default" : "secondary"}
-            className={
-              active
-                ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
-            }
-          >
-            {active ? "Hoạt động" : "Ngừng hoạt động"}
+          <Badge variant={isActive ? "success" : "warning"} className="text-xs">
+            {isActive ? "Hoạt động" : "Ngừng hoạt động"}
           </Badge>
         </div>
       );
@@ -96,7 +82,7 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
   },
   {
     id: "actions",
-    header: () => <div className="text-center">Thao tác</div>,
+    header: () => <div className="text-center"></div>,
     cell: ({ row, table }) => {
       const unit = row.original;
       const onEdit = (table.options.meta as any)?.onEdit;
@@ -112,9 +98,6 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[160px]">
-              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                Thao tác
-              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onEdit?.(unit)}>
                 <Pencil className="mr-2 h-4 w-4" />

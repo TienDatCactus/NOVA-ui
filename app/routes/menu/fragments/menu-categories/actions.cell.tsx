@@ -32,7 +32,6 @@ export default function MenuCategoryActionsCell({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setUpdateSheetOpen(true)}>
             <Edit className="mr-2 h-4 w-4" />

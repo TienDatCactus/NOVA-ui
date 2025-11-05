@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
-import { Card, CardContent } from "~/components/ui/card";
 import MenuCategoryCommandBar from "../fragments/menu-categories/command-bar";
 import type { MenuCategoryFilters } from "../container/menu-categories/filter.hooks";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface MenuCategoryViewLayoutProps {
   children: ReactNode;
@@ -12,6 +14,7 @@ interface MenuCategoryViewLayoutProps {
   ) => void;
   resetFilters: () => void;
   filters: MenuCategoryFilters;
+  onAddCategory: () => void;
 }
 
 /**
@@ -24,37 +27,38 @@ export default function MenuCategoryViewLayout({
   updateFilter,
   resetFilters,
   filters,
+  onAddCategory,
 }: MenuCategoryViewLayoutProps) {
   return (
-    <div className="flex gap-6 h-full">
+    <div className="flex gap-6">
       <MenuCategoryCommandBar
         filters={filters}
         updateFilter={updateFilter}
         resetFilters={resetFilters}
       />
 
-      <div className="flex-1  space-y-4">
-        <div className="flex items-center justify-between">
+      <main className="flex-1 space-y-4">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Quản lý danh mục thực đơn
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Quản lý danh mục các món ăn và đồ uống của nhà hàng
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">Quản lý danh mục thực đơn</h1>
+              <Badge variant="secondary" className="text-sm">
+                {totalMenuCategories} danh mục
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Quản lý danh mục các món ăn và đồ uống của NOVA
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="text-sm text-muted-foreground">
-              Tổng số:{" "}
-              <span className="font-semibold text-foreground">
-                {totalMenuCategories}
-              </span>{" "}
-              món
-            </div>
+            <Button onClick={onAddCategory} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Thêm danh mục
+            </Button>
           </div>
         </div>
-        <main className="flex-1">{children}</main>
-      </div>
+        {children}
+      </main>
     </div>
   );
 }

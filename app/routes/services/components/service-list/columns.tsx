@@ -50,11 +50,6 @@ export const columns: ColumnDef<ServiceItem>[] = [
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold truncate">{service.name}</span>
-              {!service.active && (
-                <Badge variant="secondary" className="text-xs">
-                  Ngưng hoạt động
-                </Badge>
-              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {service.code}

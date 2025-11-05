@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useState } from "react";
 import type { Route } from "./+types/menu";
 import MenuDataTable from "./components/menu-list";
-
+import CreateMenuDialog from "./components/create-menu.dialog";
 import useMenuFilters from "./container/menu/filter.hooks";
 import { useMenuList } from "./container/menu/query.hooks";
 import MenuViewLayout from "./layouts/menu-view.layout";
@@ -18,12 +18,13 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { filters, filterMenuItems, updateFilter, resetFilters } =
+  const { filters, filterMenuItems, updateFilter, resetFilters, includeInactive } =
     useMenuFilters();
   const { data: menuData, isPending } = useMenuList({
     categoryCode: filters.categoryCode,
-    includeInactive: filters.activeFilter !== "active",
+    includeInactive,
   });
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const filteredMenuItems = filterMenuItems(menuData || []);
 
   return (
@@ -32,8 +33,14 @@ export default function Component({
       updateFilter={updateFilter}
       resetFilters={resetFilters}
       filters={filters}
+      onAddMenuItem={() => setCreateDialogOpen(true)}
     >
       <MenuDataTable menu={filteredMenuItems} isLoading={isPending} />
+
+      <CreateMenuDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+      />
     </MenuViewLayout>
   );
 }

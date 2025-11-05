@@ -1,6 +1,8 @@
-import { Plus, RotateCcw, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -8,32 +10,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type { MenuCategoryListResponseDto } from "~/services/api/menu-category/dto";
-import type { MenuFilters } from "~/services/types/menu.types";
-import { Card } from "~/components/ui/card";
-import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
+import type { RoomFilters } from "../../container/rooms/filter.hooks";
+import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
+import { RoomStatusEnum } from "~/services/types/room.types";
 
-interface MenuCommandBarProps {
-  menuCategories?: MenuCategoryListResponseDto;
-  updateFilter: <K extends keyof MenuFilters>(
+interface RoomsCommandBarProps {
+  filters: RoomFilters;
+  updateFilter: <K extends keyof RoomFilters>(
     key: K,
-    value: MenuFilters[K]
+    value: RoomFilters[K]
   ) => void;
   resetFilters: () => void;
-  filters: MenuFilters;
+  roomTypes: RoomTypesListItemDto[];
 }
 
-export default function MenuCommandBar({
-  menuCategories = [],
+export default function RoomsCommandBar({
   filters,
   updateFilter,
   resetFilters,
-}: MenuCommandBarProps) {
+  roomTypes = [],
+}: RoomsCommandBarProps) {
   const activeFiltersCount =
     (filters.searchText !== "" ? 1 : 0) +
-    (filters.activeFilter !== "all" ? 1 : 0) +
-    (filters.categoryCode !== "" ? 1 : 0);
+    (filters.status ? 1 : 0) +
+    (filters.typeId ? 1 : 0);
 
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -51,49 +52,56 @@ export default function MenuCommandBar({
         )}
       </div>
       <Card className="p-4 h-fit shadow-sm">
-        <div className="flex flex-col  gap-4">
+        <div className="flex flex-col gap-4">
           <Label htmlFor="search" className="text-sm font-medium">
-            Bộ lọc thực đơn
+            Bộ lọc phòng
           </Label>
           <Input
-            placeholder="Tìm kiếm món ăn theo tên, mã hoặc mô tả..."
+            placeholder="Tìm kiếm theo tên, mã phòng..."
             value={filters.searchText}
             className="bg-white"
             onChange={(e) => updateFilter("searchText", e.target.value)}
             startAddon={<Search className="text-muted-foreground" />}
           />
           <Separator />
+          
+          {/* Room Type Filter */}
           <Select
-            value={filters.categoryCode || "all"}
-            onValueChange={(value) => updateFilter("categoryCode", value === "all" ? "" : value)}
+            value={filters.typeId || "all"}
+            onValueChange={(value) =>
+              updateFilter("typeId", value === "all" ? undefined : value)
+            }
           >
             <SelectTrigger className="shadow-md bg-white w-full">
-              <SelectValue placeholder="Chọn danh mục" />
+              <SelectValue placeholder="Chọn hạng phòng" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Danh mục</SelectItem>
-              {menuCategories.length > 0 &&
-                menuCategories.map((category) => (
-                  <SelectItem key={category.id} value={category.code}>
-                    {category.name}
-                  </SelectItem>
-                ))}
+              <SelectItem value="all">Hạng phòng</SelectItem>
+              {roomTypes.map((type) => (
+                <SelectItem key={type.id} value={type.id}>
+                  {type.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
+          {/* Status Filter */}
           <Select
-            value={filters.activeFilter}
+            value={filters.status || "all"}
             onValueChange={(value) =>
-              updateFilter("activeFilter", value as MenuFilters["activeFilter"])
+              updateFilter("status", value === "all" ? undefined : (value as RoomFilters["status"]))
             }
           >
             <SelectTrigger className="shadow-md bg-white w-full">
               <SelectValue placeholder="Chọn trạng thái" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="true">Đang hoạt động</SelectItem>
-              <SelectItem value="false">Ngừng hoạt động</SelectItem>
+              <SelectItem value="all">Trạng thái</SelectItem>
+              {Object.entries(RoomStatusEnum).map(([key, value]) => (
+                <SelectItem key={key} value={key}>
+                  {value}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

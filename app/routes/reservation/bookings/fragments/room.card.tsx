@@ -114,7 +114,6 @@ function RoomTypeCard({ roomType }: RoomTypeCardProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <DoorOpen className="h-4 w-4 mr-2" />

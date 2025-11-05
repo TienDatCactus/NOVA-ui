@@ -1,6 +1,8 @@
-import { Plus, RotateCcw, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -8,32 +10,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type { MenuCategoryListResponseDto } from "~/services/api/menu-category/dto";
-import type { MenuFilters } from "~/services/types/menu.types";
-import { Card } from "~/components/ui/card";
-import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
+import type { RoomTypeFilters } from "../../container/room-types/filter.hooks";
 
-interface MenuCommandBarProps {
-  menuCategories?: MenuCategoryListResponseDto;
-  updateFilter: <K extends keyof MenuFilters>(
+interface RoomTypesCommandBarProps {
+  filters: RoomTypeFilters;
+  updateFilter: <K extends keyof RoomTypeFilters>(
     key: K,
-    value: MenuFilters[K]
+    value: RoomTypeFilters[K]
   ) => void;
   resetFilters: () => void;
-  filters: MenuFilters;
 }
 
-export default function MenuCommandBar({
-  menuCategories = [],
+export default function RoomTypesCommandBar({
   filters,
   updateFilter,
   resetFilters,
-}: MenuCommandBarProps) {
+}: RoomTypesCommandBarProps) {
   const activeFiltersCount =
-    (filters.searchText !== "" ? 1 : 0) +
-    (filters.activeFilter !== "all" ? 1 : 0) +
-    (filters.categoryCode !== "" ? 1 : 0);
+    (filters.searchText ? 1 : 0) + (filters.activeFilter !== "all" ? 1 : 0);
 
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -51,12 +46,12 @@ export default function MenuCommandBar({
         )}
       </div>
       <Card className="p-4 h-fit shadow-sm">
-        <div className="flex flex-col  gap-4">
+        <div className="flex flex-col gap-4">
           <Label htmlFor="search" className="text-sm font-medium">
-            Bộ lọc thực đơn
+            Bộ lọc hạng phòng
           </Label>
           <Input
-            placeholder="Tìm kiếm món ăn theo tên, mã hoặc mô tả..."
+            placeholder="Tìm kiếm theo mã, tên hạng phòng..."
             value={filters.searchText}
             className="bg-white"
             onChange={(e) => updateFilter("searchText", e.target.value)}
@@ -64,27 +59,12 @@ export default function MenuCommandBar({
           />
           <Separator />
           <Select
-            value={filters.categoryCode || "all"}
-            onValueChange={(value) => updateFilter("categoryCode", value === "all" ? "" : value)}
-          >
-            <SelectTrigger className="shadow-md bg-white w-full">
-              <SelectValue placeholder="Chọn danh mục" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Danh mục</SelectItem>
-              {menuCategories.length > 0 &&
-                menuCategories.map((category) => (
-                  <SelectItem key={category.id} value={category.code}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-
-          <Select
             value={filters.activeFilter}
             onValueChange={(value) =>
-              updateFilter("activeFilter", value as MenuFilters["activeFilter"])
+              updateFilter(
+                "activeFilter",
+                value as RoomTypeFilters["activeFilter"]
+              )
             }
           >
             <SelectTrigger className="shadow-md bg-white w-full">

@@ -1,4 +1,4 @@
-import { Plus, RotateCcw, Search, Trash2, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -8,29 +8,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Badge } from "~/components/ui/badge";
-import type { MenuCategoryFilters } from "../../container/menu-categories/filter.hooks";
 import { Card } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 
-interface MenuCategoryCommandBarProps {
-  filters: MenuCategoryFilters;
-  updateFilter: <K extends keyof MenuCategoryFilters>(
+interface UnitsFilters {
+  searchQuery: string;
+  isActive: string;
+}
+
+interface UnitsCommandBarProps {
+  filters: UnitsFilters;
+  updateFilter: <K extends keyof UnitsFilters>(
     key: K,
-    value: MenuCategoryFilters[K]
+    value: UnitsFilters[K]
   ) => void;
   resetFilters: () => void;
 }
 
-export default function MenuCategoryCommandBar({
+export default function UnitsCommandBar({
   filters,
   updateFilter,
   resetFilters,
-}: MenuCategoryCommandBarProps) {
+}: UnitsCommandBarProps) {
   const activeFiltersCount =
-    (filters.searchText !== "" ? 1 : 0) +
-    (filters.activeFilter !== "all" ? 1 : 0);
+    (filters.searchQuery !== "" ? 1 : 0) +
+    (filters.isActive !== "all" ? 1 : 0);
 
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -48,25 +51,21 @@ export default function MenuCategoryCommandBar({
         )}
       </div>
       <Card className="p-4 h-fit shadow-sm">
-        <div className="flex flex-col  gap-4">
+        <div className="flex flex-col gap-4">
           <Label htmlFor="search" className="text-sm font-medium">
-            Bộ lọc danh mục thực đơn
+            Bộ lọc đơn vị
           </Label>
           <Input
-            placeholder="Tìm kiếm danh mục theo tên hoặc mã..."
-            value={filters.searchText}
-            onChange={(e) => updateFilter("searchText", e.target.value)}
+            placeholder="Tìm kiếm theo mã, tên đơn vị..."
+            value={filters.searchQuery}
+            className="bg-white"
+            onChange={(e) => updateFilter("searchQuery", e.target.value)}
             startAddon={<Search className="text-muted-foreground" />}
           />
           <Separator />
           <Select
-            value={filters.activeFilter}
-            onValueChange={(value) =>
-              updateFilter(
-                "activeFilter",
-                value as MenuCategoryFilters["activeFilter"]
-              )
-            }
+            value={filters.isActive}
+            onValueChange={(value) => updateFilter("isActive", value)}
           >
             <SelectTrigger className="shadow-md bg-white w-full">
               <SelectValue placeholder="Chọn trạng thái" />

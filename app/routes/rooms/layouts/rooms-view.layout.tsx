@@ -1,19 +1,19 @@
 import type { ReactNode } from "react";
-
-import RoomsFilterSidebar from "../fragments/rooms/filter.sidebar";
+import RoomsCommandBar from "../fragments/rooms/command-bar";
 import type { RoomFilters } from "../container/rooms/filter.hooks";
 import { useRoomTypes } from "../container/room-types/query.hooks";
 import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
 import { Plus } from "lucide-react";
 
 interface RoomsViewLayoutProps {
   children: ReactNode;
   filters: RoomFilters;
-  onFilterChange: <K extends keyof RoomFilters>(
+  updateFilter: <K extends keyof RoomFilters>(
     key: K,
     value: RoomFilters[K]
   ) => void;
-  onResetFilters: () => void;
+  resetFilters: () => void;
   totalRooms: number;
   onAddRoom: () => void;
 }
@@ -21,30 +21,32 @@ interface RoomsViewLayoutProps {
 function RoomsViewLayout({
   children,
   filters,
-  onFilterChange,
-  onResetFilters,
+  updateFilter,
+  resetFilters,
   totalRooms,
   onAddRoom,
 }: RoomsViewLayoutProps) {
-  const { data: roomTypes } = useRoomTypes();
+  const { data: roomTypes } = useRoomTypes({ includeInactive: true });
+  
   return (
     <div className="flex gap-6">
-      <RoomsFilterSidebar
+      <RoomsCommandBar
         filters={filters}
-        onFilterChange={onFilterChange}
-        onResetFilters={onResetFilters}
+        updateFilter={updateFilter}
+        resetFilters={resetFilters}
         roomTypes={roomTypes || []}
       />
       <main className="flex-1 space-y-4">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Quản lý phòng</h1>
-            <p className="text-muted-foreground mt-1">
-              Tổng{" "}
-              <span className="font-semibold text-foreground">
-                {totalRooms}
-              </span>{" "}
-              phòng
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">Quản lý phòng</h1>
+              <Badge variant="secondary" className="text-sm">
+                {totalRooms} phòng
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Quản lý thông tin và trạng thái các phòng trong NOVA
             </p>
           </div>
           <div className="flex items-center gap-2">

@@ -84,11 +84,6 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold truncate">{item.name}</span>
-              {!item.active && (
-                <Badge variant="secondary" className="text-xs">
-                  Ngưng hoạt động
-                </Badge>
-              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {item.code}
@@ -140,12 +135,12 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
     accessorKey: "components",
     header: "Trạng thái",
     cell: ({ row }) => {
-      const active = row.original.active ? "Hoạt động" : "Ngưng hoạt động";
+      const isActive = row.original.active;
 
       return (
         <div className="flex items-center gap-1">
-          <Badge variant={active ? "success" : "warning"} className="text-xs">
-            {active}
+          <Badge variant={isActive ? "success" : "warning"} className="text-xs">
+            {isActive ? "Hoạt động" : "Ngưng hoạt động"}
           </Badge>
         </div>
       );
@@ -165,7 +160,7 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
   },
   {
     id: "actions",
-    header: () => <p className="text-center">Thao tác</p>,
+    header: () => <p className="text-center"></p>,
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">

@@ -68,7 +68,7 @@ export default function ServiceTypeDetailRow({
             <DetailItem
               label="Trạng thái"
               value={
-                <Badge variant={type.active ? "success" : "secondary"}>
+                <Badge variant={type.active ? "success" : "warning"}>
                   {type.active ? "Đang hoạt động" : "Ngưng hoạt động"}
                 </Badge>
               }

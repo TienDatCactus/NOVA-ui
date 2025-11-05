@@ -115,7 +115,7 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   },
   {
     id: "actions",
-    header: "Thao tác",
+    header: "",
     cell: ({ row }) => <RoomTypeActionsCell roomType={row.original} />,
   },
 ];

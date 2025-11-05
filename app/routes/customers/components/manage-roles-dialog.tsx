@@ -29,6 +29,10 @@ import {
 } from "../container/useCustomers.hooks";
 import type { CustomerItem } from "~/services/api/customer/dto";
 import { Separator } from "~/components/ui/separator";
+import {
+  getRoleBadgeColors,
+  getRoleDisplayName,
+} from "~/services/types/customers.types";
 
 interface ManageRolesDialogProps {
   customer: CustomerItem;
@@ -42,55 +46,6 @@ const ManageRolesSchema = z.object({
 });
 
 type ManageRolesForm = z.infer<typeof ManageRolesSchema>;
-
-/**
- * Helper function - Get role badge color
- */
-const getRoleBadgeVariant = (role: string) => {
-  const roleColors: Record<
-    string,
-    { bg: string; text: string; border: string }
-  > = {
-    Receptionist: {
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-      border: "border-blue-200",
-    },
-    Staff: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-      border: "border-purple-200",
-    },
-    Customer: {
-      bg: "bg-green-50",
-      text: "text-green-700",
-      border: "border-green-200",
-    },
-    HotelManager: {
-      bg: "bg-orange-50",
-      text: "text-orange-700",
-      border: "border-orange-200",
-    },
-    Accountant: {
-      bg: "bg-pink-50",
-      text: "text-pink-700",
-      border: "border-pink-200",
-    },
-    Admin: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
-    ServiceStaff: {
-      bg: "bg-indigo-50",
-      text: "text-indigo-700",
-      border: "border-indigo-200",
-    },
-  };
-  return (
-    roleColors[role] || {
-      bg: "bg-gray-50",
-      text: "text-gray-700",
-      border: "border-gray-200",
-    }
-  );
-};
 
 export function ManageRolesDialog({
   customer,
@@ -196,14 +151,14 @@ export function ManageRolesDialog({
             <div className="flex gap-2 flex-wrap p-4 bg-muted/30 rounded-lg min-h-[60px]">
               {customer.roles.length > 0 ? (
                 customer.roles.map((role) => {
-                  const colors = getRoleBadgeVariant(role);
+                  const colors = getRoleBadgeColors(role);
                   return (
                     <Badge
                       key={role}
                       variant="outline"
                       className={`text-sm py-1.5 px-3 ${colors.bg} ${colors.text} ${colors.border} shadow-sm`}
                     >
-                      {role}
+                      {getRoleDisplayName(role)}
                     </Badge>
                   );
                 })
@@ -269,7 +224,7 @@ export function ManageRolesDialog({
                         <FormItem>
                           <div className="grid grid-cols-2 gap-3">
                             {availableRoles.map((role) => {
-                              const colors = getRoleBadgeVariant(role);
+                              const colors = getRoleBadgeColors(role);
                               return (
                                 <FormField
                                   key={role}
@@ -308,7 +263,7 @@ export function ManageRolesDialog({
                                             : ""
                                         }`}
                                       >
-                                        {role}
+                                        {getRoleDisplayName(role)}
                                       </FormLabel>
                                     </FormItem>
                                   )}
@@ -344,7 +299,7 @@ export function ManageRolesDialog({
                         <FormItem>
                           <div className="grid grid-cols-2 gap-3">
                             {customer.roles.map((role) => {
-                              const colors = getRoleBadgeVariant(role);
+                              const colors = getRoleBadgeColors(role);
                               return (
                                 <FormField
                                   key={role}
@@ -383,7 +338,7 @@ export function ManageRolesDialog({
                                               : ""
                                           }`}
                                         >
-                                          {role}
+                                          {getRoleDisplayName(role)}
                                         </FormLabel>
                                       </FormItem>
                                     );

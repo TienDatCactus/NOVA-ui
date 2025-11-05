@@ -1,8 +1,10 @@
+import { useState } from "react";
 import type { Route } from "./+types/services";
 import ServicesDataTable from "./components/service-list";
 import useServiceFilters from "./container/services/filter.hooks";
 import { useServices } from "./container/services/query.hooks";
 import ServicesViewLayout from "./layouts/service-view.layout";
+import CreateServiceDialog from "./components/create-service.dialog";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -29,14 +31,24 @@ export default function Component({
   });
 
   const filteredServices = servicesData ? filterServices(servicesData) : [];
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
   return (
-    <ServicesViewLayout
-      filters={filters}
-      totalServices={filteredServices.length}
-      resetFilters={resetFilters}
-      updateFilter={updateFilter}
-    >
-      <ServicesDataTable services={filteredServices} isLoading={isPending} />
-    </ServicesViewLayout>
+    <>
+      <ServicesViewLayout
+        filters={filters}
+        totalServices={filteredServices.length}
+        resetFilters={resetFilters}
+        updateFilter={updateFilter}
+        onAddService={() => setCreateDialogOpen(true)}
+      >
+        <ServicesDataTable services={filteredServices} isLoading={isPending} />
+      </ServicesViewLayout>
+
+      <CreateServiceDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+      />
+    </>
   );
 }

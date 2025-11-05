@@ -87,7 +87,7 @@ export const columns: ColumnDef<MenuCategoryItemDto>[] = [
       return (
         <div className="flex justify-center">
           <Badge variant={isActive ? "success" : "warning"} className="text-xs">
-            {isActive ? "Hoạt động" : "Ngưng"}
+            {isActive ? "Hoạt động" : "Ngưng hoạt động"}
           </Badge>
         </div>
       );
@@ -109,7 +109,7 @@ export const columns: ColumnDef<MenuCategoryItemDto>[] = [
   },
   {
     id: "actions",
-    header: () => <p className="text-center">Thao tác</p>,
+    header: () => <p className="text-center"></p>,
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">

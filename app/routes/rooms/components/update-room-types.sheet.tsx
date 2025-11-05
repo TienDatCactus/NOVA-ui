@@ -332,26 +332,18 @@ export function UpdateRoomTypeSheet({
 
                 <Separator className="my-4" />
 
-                <div className="flex justify-between items-center">
+                <div className="flex justify-end gap-2">
                   <Button
-                    variant={"destructive"}
-                    onClick={() => handleDeleteRoomType(roomType.id)}
+                    type="button"
+                    variant="outline"
+                    onClick={handleClose}
+                    disabled={isPending}
                   >
-                    Xóa hạng phòng
+                    Hủy
                   </Button>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleClose}
-                      disabled={isPending}
-                    >
-                      Hủy
-                    </Button>
-                    <Button type="submit" disabled={isPending}>
-                      {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-                    </Button>
-                  </div>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                  </Button>
                 </div>
               </form>
             </Form>

@@ -50,7 +50,7 @@ export const columns: ColumnDef<ServiceTypeItem>[] = [
       return (
         <div className="flex items-center gap-3">
           <Image
-            src={type.images?.[0].url || ""}
+            src={type.images?.[0]?.url || ""}
             className="w-6 h-6 object-contain"
             width={48}
             height={48}

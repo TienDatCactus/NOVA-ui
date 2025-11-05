@@ -6,7 +6,7 @@ import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
  */
 export interface MenuCategoryFilters {
   searchText: string;
-  activeFilter: "all" | "active";
+  activeFilter: "all" | "true" | "false";
 }
 
 /**
@@ -22,6 +22,7 @@ const DEFAULT_FILTERS: MenuCategoryFilters = {
  */
 export function useMenuCategoryFilters() {
   const [filters, setFilters] = useState<MenuCategoryFilters>(DEFAULT_FILTERS);
+  const includeInactive = filters.activeFilter !== "true";
 
   const updateFilter = <K extends keyof MenuCategoryFilters>(
     key: K,
@@ -50,7 +51,16 @@ export function useMenuCategoryFilters() {
             .toLowerCase()
             .includes(filters.searchText.toLowerCase());
 
-        return matchesSearch;
+        // Status filter
+        let matchesStatus = true;
+        if (filters.activeFilter === "true") {
+          matchesStatus = category.active === true;
+        } else if (filters.activeFilter === "false") {
+          matchesStatus = category.active === false;
+        }
+        // "all" means no filter
+
+        return matchesSearch && matchesStatus;
       });
     };
   }, [filters.searchText, filters.activeFilter]);
@@ -60,5 +70,6 @@ export function useMenuCategoryFilters() {
     updateFilter,
     resetFilters,
     filterCategories,
+    includeInactive,
   };
 }

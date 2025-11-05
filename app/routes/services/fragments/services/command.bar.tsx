@@ -1,5 +1,4 @@
-import { Plus, RotateCcw, Search, X } from "lucide-react";
-import { useState } from "react";
+import { RotateCcw, Search, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -14,7 +13,6 @@ import {
 import { Separator } from "~/components/ui/separator";
 import type { ServiceTypeListResponseDto } from "~/services/api/service-types/dto";
 import type { ServiceFilters } from "~/services/types/service.types";
-import CreateServiceDialog from "../../components/create-service.dialog";
 
 interface ServicesCommandBarProps {
   filters: ServiceFilters;
@@ -32,10 +30,9 @@ export default function ServicesCommandBar({
   updateFilter,
   resetFilters,
 }: ServicesCommandBarProps) {
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const activeFiltersCount =
     (filters.searchText !== "" ? 1 : 0) +
-    (filters.activeFilter !== "" ? 1 : 0) +
+    (filters.activeFilter !== "all" ? 1 : 0) +
     (filters.typeCode !== "" ? 1 : 0);
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -68,13 +65,16 @@ export default function ServicesCommandBar({
           />
           <Separator />
           <Select
-            value={filters.typeCode || ""}
-            onValueChange={(value) => updateFilter("typeCode", value)}
+            value={filters.typeCode || "all"}
+            onValueChange={(value) =>
+              updateFilter("typeCode", value === "all" ? "" : value)
+            }
           >
             <SelectTrigger className="shadow-md w-full bg-white">
               <SelectValue placeholder="Chọn loại dịch vụ" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">Loại dịch vụ</SelectItem>
               {!!serviceTypes &&
                 serviceTypes.length > 0 &&
                 serviceTypes.map((type) => (
@@ -97,21 +97,12 @@ export default function ServicesCommandBar({
               <SelectValue placeholder="Chọn trạng thái" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Đang hoạt động</SelectItem>
               <SelectItem value="all">Tất cả</SelectItem>
+              <SelectItem value="true">Đang hoạt động</SelectItem>
+              <SelectItem value="false">Ngừng hoạt động</SelectItem>
             </SelectContent>
           </Select>
-
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Thêm dịch vụ
-          </Button>
         </div>
-
-        <CreateServiceDialog
-          open={createDialogOpen}
-          onClose={() => setCreateDialogOpen(false)}
-        />
       </Card>
     </aside>
   );

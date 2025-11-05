@@ -36,8 +36,8 @@ export default function Component({
   return (
     <RoomsViewLayout
       filters={filters}
-      onFilterChange={updateFilter}
-      onResetFilters={resetFilters}
+      updateFilter={updateFilter}
+      resetFilters={resetFilters}
       totalRooms={filteredRooms.length}
       onAddRoom={() => setCreateDialogOpen(true)}
     >

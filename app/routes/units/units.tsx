@@ -64,11 +64,9 @@ export default function Units() {
   return (
     <UnitsViewLayout
       filters={filters}
-      onFilterChange={updateFilter}
-      onResetFilters={resetFilters}
+      updateFilter={updateFilter}
+      resetFilters={resetFilters}
       totalUnits={stats.total}
-      activeUnits={stats.active}
-      inactiveUnits={stats.inactive}
       onAddUnit={() => setCreateDialogOpen(true)}
     >
       <Card className="flex-1 overflow-hidden shadow-sm">

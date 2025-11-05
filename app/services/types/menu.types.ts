@@ -1,6 +1,6 @@
 export interface MenuFilters {
   categoryCode: string;
-  activeFilter: "active" | "all" | "";
+  activeFilter: "all" | "true" | "false";
   searchText: string;
 }
 

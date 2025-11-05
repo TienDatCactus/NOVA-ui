@@ -28,8 +28,8 @@ export default function RoomTypesPage() {
   return (
     <RoomTypesViewLayout
       filters={filters}
-      onFilterChange={updateFilter}
-      onResetFilters={resetFilters}
+      updateFilter={updateFilter}
+      resetFilters={resetFilters}
       totalRoomTypes={filteredRoomTypes?.length || 0}
       onAddRoomType={() => setCreateDialogOpen(true)}
     >

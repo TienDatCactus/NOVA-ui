@@ -1,52 +1,63 @@
 import type { ReactNode } from "react";
-import UnitsFilterSidebar from "../components/units-filter-sidebar";
-import UnitsHeader from "../fragments/header.layout";
+import UnitsCommandBar from "../fragments/command-bar";
+import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
+import { Plus } from "lucide-react";
+
+interface UnitsFilters {
+  searchQuery: string;
+  isActive: string;
+}
 
 interface UnitsViewLayoutProps {
-  filters: {
-    searchQuery: string;
-    isActive: string;
-  };
-  onFilterChange: (key: string, value: string) => void;
-  onResetFilters: () => void;
+  filters: UnitsFilters;
+  updateFilter: <K extends keyof UnitsFilters>(
+    key: K,
+    value: UnitsFilters[K]
+  ) => void;
+  resetFilters: () => void;
   totalUnits: number;
-  activeUnits: number;
-  inactiveUnits: number;
   onAddUnit: () => void;
   children: ReactNode;
 }
 
-function UnitsViewLayout({
+export default function UnitsViewLayout({
   filters,
-  onFilterChange,
-  onResetFilters,
+  updateFilter,
+  resetFilters,
   totalUnits,
-  activeUnits,
-  inactiveUnits,
   onAddUnit,
   children,
 }: UnitsViewLayoutProps) {
   return (
-    <div className="flex h-full w-full">
-      <UnitsFilterSidebar
+    <div className="flex gap-6">
+      <UnitsCommandBar
         filters={filters}
-        onFilterChange={onFilterChange}
-        onResetFilters={onResetFilters}
+        updateFilter={updateFilter}
+        resetFilters={resetFilters}
       />
-
-      <div className="flex-1 overflow-auto">
-        <div className="px-6 py-6">
-          <UnitsHeader
-            totalUnits={totalUnits}
-            activeUnits={activeUnits}
-            inactiveUnits={inactiveUnits}
-            onAddUnit={onAddUnit}
-          />
-          {children}
+      <main className="flex-1 space-y-4">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">Quản lý đơn vị</h1>
+              <Badge variant="secondary" className="text-sm">
+                {totalUnits} đơn vị
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Quản lý các đơn vị tính trong hệ thống
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button onClick={onAddUnit} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Thêm đơn vị
+            </Button>
+          </div>
         </div>
-      </div>
+        {children}
+      </main>
     </div>
   );
 }
-
-export default UnitsViewLayout;

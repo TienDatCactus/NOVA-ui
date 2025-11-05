@@ -4,12 +4,13 @@ import type { MenuFilters } from "~/services/types/menu.types";
 
 const defaultFilters: MenuFilters = {
   categoryCode: "",
-  activeFilter: "",
+  activeFilter: "all",
   searchText: "",
 };
 
 export default function useMenuFilters() {
   const [filters, setFilters] = useState<MenuFilters>(defaultFilters);
+  const includeInactive = filters.activeFilter !== "true";
 
   const updateFilter = <K extends keyof MenuFilters>(
     key: K,
@@ -34,13 +35,16 @@ export default function useMenuFilters() {
               .toLowerCase()
               .includes(filters.searchText.toLowerCase()));
 
-        // Filter by active status
-        const matchesActive =
-          filters.activeFilter === "" ||
-          filters.activeFilter === "all" ||
-          (filters.activeFilter === "active" && item.active);
+        // Status filter
+        let matchesStatus = true;
+        if (filters.activeFilter === "true") {
+          matchesStatus = item.active === true;
+        } else if (filters.activeFilter === "false") {
+          matchesStatus = item.active === false;
+        }
+        // "all" means no filter
 
-        return matchesSearch && matchesActive;
+        return matchesSearch && matchesStatus;
       });
     },
     [filters]
@@ -51,5 +55,6 @@ export default function useMenuFilters() {
     updateFilter,
     resetFilters,
     filterMenuItems,
+    includeInactive,
   };
 }

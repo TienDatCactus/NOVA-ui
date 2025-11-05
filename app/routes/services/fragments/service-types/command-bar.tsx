@@ -1,4 +1,4 @@
-import { Search, Plus, Download, RotateCcw, X } from "lucide-react";
+import { Search, Download, RotateCcw, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -9,14 +9,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Badge } from "~/components/ui/badge";
-import { useState } from "react";
-import CreateServiceTypeDialog from "../../components/create-service-type.dialog";
-import useServiceTypeFilters, {
-  type ServiceTypeFilters,
-} from "../../container/service-types/filter.hooks";
+import type { ServiceTypeFilters } from "../../container/service-types/filter.hooks";
 import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
+
 interface ServiceTypesCommandBarProps {
   filters: ServiceTypeFilters;
   resetFilters: () => void;
@@ -31,9 +28,9 @@ export default function ServiceTypesCommandBar({
   resetFilters,
   updateFilter,
 }: ServiceTypesCommandBarProps) {
-  const [open, setOpen] = useState(false);
   const activeFiltersCount =
-    (filters.searchText !== "" ? 1 : 0) + (filters.activeFilter !== "" ? 1 : 0);
+    (filters.searchText !== "" ? 1 : 0) +
+    (filters.activeFilter !== "all" ? 1 : 0);
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
       <div className="flex items-center justify-between">
@@ -75,18 +72,12 @@ export default function ServiceTypesCommandBar({
               <SelectValue placeholder="Chọn trạng thái" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Đang hoạt động</SelectItem>
               <SelectItem value="all">Tất cả</SelectItem>
+              <SelectItem value="true">Đang hoạt động</SelectItem>
+              <SelectItem value="false">Ngừng hoạt động</SelectItem>
             </SelectContent>
           </Select>
-
-          <Button onClick={() => setOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Thêm loại dịch vụ
-          </Button>
         </div>
-
-        <CreateServiceTypeDialog onClose={() => setOpen(false)} open={open} />
       </Card>
     </aside>
   );

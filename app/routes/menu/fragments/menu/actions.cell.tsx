@@ -43,7 +43,6 @@ export default function MenuActionsCell({ menuItem }: MenuActionsCellProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setEditSheetOpen(true)}>
             <Edit className="mr-2 h-4 w-4" />

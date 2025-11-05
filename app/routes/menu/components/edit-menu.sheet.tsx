@@ -386,6 +386,7 @@ export default function EditMenuSheet({
                           placeholder="Mô tả chi tiết..."
                           rows={3}
                           {...field}
+                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
