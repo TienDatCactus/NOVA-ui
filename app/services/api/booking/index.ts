@@ -82,7 +82,6 @@ async function staffCreateBooking(
         "Idempotency-Key": idempotencyKey,
       },
     });
-    console.log(resp);
     return resp.data;
   } catch (error) {
     return Promise.reject(error);
@@ -132,12 +131,9 @@ async function getAvailableRoomsForChange(
 ): Promise<AvailableRoomsForChangeResponseDto> {
   try {
     const resp = await http.get(Booking.changeRoom(bookingId, bookingRoomId));
-    console.log(resp);
-    const data = AvailableRoomsForChangeResponseSchema.parse(resp.data);
-    console.log(data);
-    return data;
+    const parsed = AvailableRoomsForChangeResponseSchema.parse(resp);
+    return parsed;
   } catch (error) {
-    console.error(error);
     return Promise.reject(error);
   }
 }

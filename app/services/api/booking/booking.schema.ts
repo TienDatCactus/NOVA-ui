@@ -286,22 +286,28 @@ const StaffChangeRoomResponseSchema = z.object({
 });
 
 const AvailableRoomForChangeSchema = z.object({
+  roomId: z.string(),
+  roomName: z.string(),
   roomTypeId: z.string(),
-  roomTypeCode: z.string(),
   roomTypeName: z.string(),
-  availableCount: z.number(),
-  rooms: z.array(
-    z.object({
-      roomId: z.string(),
-      roomName: z.string(),
-      currentPrice: z.number(),
+  baseRate: z.number(),
+  availabilityStatus: z.string(),
+  isSameRoomType: z.boolean(),
+  conflictInfo: z
+    .object({
+      bookingCode: z.string(),
       status: z.string(),
+      customerName: z.string().nullable(),
+      checkinDate: z.string(),
+      checkoutDate: z.string(),
+      message: z.string(),
     })
-  ),
+    .nullable(),
 });
 
 const AvailableRoomsForChangeResponseSchema = z.object({
   success: z.boolean(),
+  statusCode: z.number().optional(),
   message: z.string(),
   data: z.array(AvailableRoomForChangeSchema),
 });

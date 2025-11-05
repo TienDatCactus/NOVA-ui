@@ -27,6 +27,10 @@ function useChangeRoom(bookingId: string) {
       await BookingService.staffChangeRoom(bookingId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["bookings-detail"] });
+      queryClient.invalidateQueries({
+        queryKey: ["available-rooms-for-change"],
+      });
     },
   });
 }
