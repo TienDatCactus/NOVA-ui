@@ -15,6 +15,8 @@ import type {
   UnlockUserResponseDto,
   UpdateCustomerDto,
   UpdateCustomerResponseDto,
+  ChangePasswordDto,
+  ChangePasswordResponseDto,
 } from "./dto";
 
 const {
@@ -27,6 +29,8 @@ const {
   UnlockUserResponseSchema,
   AssignRolesResponseSchema,
   RemoveRolesResponseSchema,
+  ChangePasswordSchema,
+  ChangePasswordResponseSchema,
 } = CustomerSchema;
 
 async function getCustomerList(): Promise<CustomerListResponseDto> {
@@ -129,6 +133,19 @@ async function removeRoles(
   }
 }
 
+async function changePassword(
+  id: string,
+  data: ChangePasswordDto
+): Promise<ChangePasswordResponseDto> {
+  try {
+    const validatedData = ChangePasswordSchema.parse(data);
+    const resp = await http.post(Customer.changePassword(id), validatedData);
+    return ChangePasswordResponseSchema.parse(resp);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 export const CustomerService = {
   getCustomerList,
   getCustomerDetail,
@@ -139,4 +156,5 @@ export const CustomerService = {
   unlockUser,
   assignRoles,
   removeRoles,
+  changePassword,
 };

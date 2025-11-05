@@ -19,6 +19,7 @@ const Customer = {
   unlock: (id: string) => `Users/${id}/unlock`,
   assignRoles: (id: string) => `Users/${id}/roles`,
   removeRoles: (id: string) => `Users/${id}/roles`,
+  changePassword: (id: string) => `Users/${id}/change-password`,
 };
 
 const Booking = {
@@ -139,4 +140,5 @@ export {
   Units,
   Reports,
   Orders,
+  Invoices,
 };

@@ -156,6 +156,25 @@ const RemoveRolesResponseSchema = z.object({
   meta: z.string().nullable().optional(),
 });
 
+// POST /api/Users/{id}/change-password - Change password request
+const ChangePasswordSchema = z.object({
+  newPassword: z
+    .string()
+    .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
+    .max(100, "Mật khẩu không được quá 100 ký tự"),
+});
+
+// POST /api/Users/{id}/change-password - Change password response
+const ChangePasswordResponseSchema = z.object({
+  success: z.boolean(),
+  statusCode: z.number(),
+  message: z.string(),
+  data: z.object({
+    userId: z.string(),
+  }),
+  meta: z.string().nullable().optional(),
+});
+
 export const CustomerSchema = {
   CustomerItemSchema,
   CustomerListResponseSchema,
@@ -172,4 +191,6 @@ export const CustomerSchema = {
   AssignRolesResponseSchema,
   RemoveRolesSchema,
   RemoveRolesResponseSchema,
+  ChangePasswordSchema,
+  ChangePasswordResponseSchema,
 };

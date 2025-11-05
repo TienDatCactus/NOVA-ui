@@ -8,6 +8,7 @@ import {
   Unlock,
   Shield,
   MoreHorizontal,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -44,6 +45,7 @@ import { CustomerEditDialog } from "./components/customer-edit-dialog";
 import { CustomerStats } from "./components/customer-stats";
 import { LockUserDialog } from "./components/lock-user-dialog";
 import { ManageRolesDialog } from "./components/manage-roles-dialog";
+import ChangePasswordDialog from "./components/change-password-dialog";
 import type { CustomerItem } from "~/services/api/customer/dto";
 import type { Route } from "./+types/customers";
 
@@ -134,6 +136,11 @@ export default function Component({
   const [customerToManageRoles, setCustomerToManageRoles] =
     useState<CustomerItem | null>(null);
 
+  // Change password dialog states
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [customerToChangePassword, setCustomerToChangePassword] =
+    useState<CustomerItem | null>(null);
+
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -178,6 +185,11 @@ export default function Component({
   const handleManageRoles = (customer: CustomerItem) => {
     setCustomerToManageRoles(customer);
     setIsManageRolesOpen(true);
+  };
+
+  const handleChangePassword = (customer: CustomerItem) => {
+    setCustomerToChangePassword(customer);
+    setIsChangePasswordOpen(true);
   };
 
   // Filtered and searched data
@@ -405,6 +417,16 @@ export default function Component({
                             Quản lý vai trò
                           </DropdownMenuItem>
 
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleChangePassword(customer);
+                            }}
+                          >
+                            <KeyRound className="h-4 w-4 mr-2" />
+                            Đổi mật khẩu
+                          </DropdownMenuItem>
+
                           <DropdownMenuSeparator />
 
                           {customer.lockoutEnabled && customer.lockoutEnd ? (
@@ -503,6 +525,18 @@ export default function Component({
           onClose={() => {
             setIsManageRolesOpen(false);
             setCustomerToManageRoles(null);
+          }}
+        />
+      )}
+      {customerToChangePassword && (
+        <ChangePasswordDialog
+          open={isChangePasswordOpen}
+          onOpenChange={setIsChangePasswordOpen}
+          customerId={customerToChangePassword.id}
+          customerName={customerToChangePassword.fullName}
+          onSuccess={() => {
+            setIsChangePasswordOpen(false);
+            setCustomerToChangePassword(null);
           }}
         />
       )}

@@ -1,11 +1,6 @@
 import type { z } from "zod";
 import { CustomerSchema } from "~/services/schema/customer.schema";
 
-/**
- * Customer DTO Types - NOVA-UI
- * All types inferred from Zod schemas
- */
-
 const {
   CustomerItemSchema,
   CustomerListResponseSchema,
@@ -22,6 +17,8 @@ const {
   AssignRolesResponseSchema,
   RemoveRolesSchema,
   RemoveRolesResponseSchema,
+  ChangePasswordSchema,
+  ChangePasswordResponseSchema,
 } = CustomerSchema;
 
 // Customer Item
@@ -52,3 +49,7 @@ export type UpdateCustomerDto = z.infer<typeof UpdateCustomerSchema>;
 export type LockUserDto = z.infer<typeof LockUserSchema>;
 export type AssignRolesDto = z.infer<typeof AssignRolesSchema>;
 export type RemoveRolesDto = z.infer<typeof RemoveRolesSchema>;
+export type ChangePasswordDto = z.infer<typeof ChangePasswordSchema>;
+export type ChangePasswordResponseDto = z.infer<
+  typeof ChangePasswordResponseSchema
+>;
