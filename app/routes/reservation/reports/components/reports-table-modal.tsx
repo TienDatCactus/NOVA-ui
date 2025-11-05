@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, startOfWeek, endOfWeek, addDays } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   Dialog,
@@ -10,6 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { Calendar } from "~/components/ui/calendar";
 import {
   Table,
   TableBody,
@@ -23,29 +29,66 @@ import {
   ChevronDown,
   ChevronRight,
   Download,
-  FileSpreadsheet,
+  Calendar as CalendarIcon,
+  ChevronDownIcon,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import type z from "zod";
 import { ReportsSchema } from "~/services/api/reports/reports.schema";
+import { ReportsService } from "~/services/api/reports";
+import { useQuery } from "@tanstack/react-query";
 
 const { ReservationReportsSchema } = ReportsSchema;
-type ReportsDataDto = z.infer<typeof ReservationReportsSchema>;
+type ReservationReportsData = z.infer<typeof ReservationReportsSchema>;
 
 interface ReportsTableModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  data?: ReportsDataDto;
-  dateRange?: { from: Date; to: Date };
 }
 
 export function ReportsTableModal({
   open,
   onOpenChange,
-  data,
-  dateRange,
 }: ReportsTableModalProps) {
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(
+    new Set([]) // Start with all sections collapsed to show totals
+  );
+
+  const [openCalendar, setOpenCalendar] = useState<{
+    from: boolean;
+    to: boolean;
+  }>({
+    from: false,
+    to: false,
+  });
+
+  // Initialize with current week (max 7 days)
+  const today = new Date();
+  const [dateRange, setDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
+    from: today,
+    to: addDays(today, 6), // 7 days total (today + 6)
+  });
+
+  // Format dates for API call
+  const fromDateStr = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
+  const toDateStr = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
+
+  // Fetch dashboard data
+  const {
+    data: dashboardData,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["daily-booking-dashboard-modal", fromDateStr, toDateStr],
+    queryFn: async () => await ReportsService.getReservationReports(fromDateStr, toDateStr),
+    enabled: Boolean(open && fromDateStr && toDateStr),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const data = dashboardData;
 
   const toggleRow = (rowKey: string) => {
     const newExpanded = new Set(expandedRows);
@@ -57,57 +100,67 @@ export function ReportsTableModal({
     setExpandedRows(newExpanded);
   };
 
-  // Extract unique dates from bookingData
-  const dates = data?.bookingData?.map((item) => item.date) || [];
-  const today = format(new Date(), "yyyy-MM-dd");
+  const handleNextWeek = () => {
+    if (dateRange.from && dateRange.to) {
+      const nextWeekStart = addDays(dateRange.from, 7);
+      const nextWeekEnd = addDays(dateRange.to, 7);
+      setDateRange({ from: nextWeekStart, to: nextWeekEnd });
+    }
+  };
+
+  const handlePrevWeek = () => {
+    if (dateRange.from && dateRange.to) {
+      const prevWeekStart = addDays(dateRange.from, -7);
+      const prevWeekEnd = addDays(dateRange.to, -7);
+      setDateRange({ from: prevWeekStart, to: prevWeekEnd });
+    }
+  };
+
+  const handleResetToToday = () => {
+    const today = new Date();
+    setDateRange({
+      from: today,
+      to: addDays(today, 6), // 7 days max
+    });
+  };
+
+  // Extract unique dates from dailyAvailability
+  const dates = data?.dailyAvailability?.map((item: { date: string }) => {
+    const [year, month, day] = item.date.split("-");
+    return `${day}/${month}`;
+  }) || [];
+  const todayStr = format(new Date(), "dd/MM");
 
   // Export to CSV
   const handleExport = () => {
-    if (!data || !data.bookingData) return;
+    if (!data || !data.dailyAvailability) return;
 
     const csvRows = [];
-
-    // Header row
     csvRows.push(["Danh mục", ...dates].join(","));
-
-    // Booking status rows
-    csvRows.push(
-      ["Đã đặt", ...data.bookingData.map((d) => d.booked)].join(",")
-    );
-
-    csvRows.push(
-      ["Check-in", ...data.bookingData.map((d) => d.checkin)].join(",")
-    );
-
-    csvRows.push(
-      ["Check-out", ...data.bookingData.map((d) => d.checkout)].join(",")
-    );
-
-    csvRows.push(
-      ["Phòng trống", ...data.bookingData.map((d) => d.available)].join(",")
-    );
-
-    // Room type trend rows (if available)
-    if (
-      data.availableRoomsTrendData &&
-      data.availableRoomsTrendData.length > 0
-    ) {
-      csvRows.push([""]); // Empty row
-      csvRows.push(["Xu hướng theo loại phòng"]);
-
-      const roomTypes = Object.keys(data.availableRoomsTrendData[0]).filter(
-        (key) => key !== "date"
-      );
-
-      roomTypes.forEach((roomType) => {
-        csvRows.push(
-          [
-            roomType,
-            ...data.availableRoomsTrendData.map((d) => d[roomType] || 0),
-          ].join(",")
-        );
-      });
-    }
+    
+    // Phòng trống - Calculate totals from dailyAvailability
+    const availableTotals = data.dailyAvailability.map((dayData: any) => {
+      return Object.values(dayData.available).reduce((sum: number, value: any) => sum + value, 0);
+    });
+    csvRows.push(["Phòng trống", ...availableTotals].join(","));
+    
+    // Đã đặt
+    const bookedTotals = data.dailyAvailability.map((dayData: any) => {
+      return Object.values(dayData.booked).reduce((sum: number, value: any) => sum + value, 0);
+    });
+    csvRows.push(["Đã đặt", ...bookedTotals].join(","));
+    
+    // Check-in
+    const checkinTotals = data.dailyAvailability.map((dayData: any) => {
+      return Object.values(dayData.checkin).reduce((sum: number, value: any) => sum + value, 0);
+    });
+    csvRows.push(["Check-in", ...checkinTotals].join(","));
+    
+    // Check-out
+    const checkoutTotals = data.dailyAvailability.map((dayData: any) => {
+      return Object.values(dayData.checkout).reduce((sum: number, value: any) => sum + value, 0);
+    });
+    csvRows.push(["Check-out", ...checkoutTotals].join(","));
 
     const csvContent = csvRows.join("\n");
     const blob = new Blob(["\ufeff" + csvContent], {
@@ -119,7 +172,7 @@ export function ReportsTableModal({
     link.setAttribute("href", url);
     link.setAttribute(
       "download",
-      `bao-cao-phong-${format(new Date(), "yyyy-MM-dd")}.csv`
+      `bao-cao-le-tan-${format(new Date(), "yyyy-MM-dd")}.csv`
     );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
@@ -127,9 +180,10 @@ export function ReportsTableModal({
     document.body.removeChild(link);
   };
 
-  const dateRangeText = dateRange
-    ? `${format(dateRange.from, "dd/MM/yyyy")} - ${format(dateRange.to, "dd/MM/yyyy")}`
-    : "Chưa chọn khoảng thời gian";
+  const dateRangeText =
+    dateRange.from && dateRange.to
+      ? `Từ ${format(dateRange.from, "dd/MM/yyyy", { locale: vi })} đến ${format(dateRange.to, "dd/MM/yyyy", { locale: vi })}`
+      : "Chưa chọn khoảng thời gian";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -137,265 +191,410 @@ export function ReportsTableModal({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileSpreadsheet className="h-5 w-5" />
-              Báo cáo chi tiết - Dạng bảng
+              <CalendarIcon className="h-5 w-5" />
+              Báo cáo lễ tân
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={handleExport}
               className="gap-2"
+              disabled={!data || !data.dailyAvailability}
             >
               <Download className="h-4 w-4" />
-              Xuất CSV
+              Xuất file
             </Button>
           </DialogTitle>
           <DialogDescription>{dateRangeText}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto">
-          {!data || !data.bookingData || data.bookingData.length === 0 ? (
+        {/* Date Range Picker */}
+        <div className="flex gap-4 items-center flex-wrap border-b pb-4">
+          <Button variant="outline" size="icon" onClick={handlePrevWeek}>
+            ‹
+          </Button>
+          <div className="flex gap-2 items-center">
+            <p className="text-sm text-muted-foreground">Từ</p>
+            <Popover
+              open={openCalendar.from}
+              onOpenChange={() => {
+                setOpenCalendar({ ...openCalendar, from: !openCalendar.from });
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-56 justify-between font-normal"
+                >
+                  <span className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4" />
+                    {dateRange.from
+                      ? format(dateRange.from, "EEEE, dd 'Thg' MM, yyyy", {
+                          locale: vi,
+                        })
+                      : "Chọn ngày"}
+                  </span>
+                  <ChevronDownIcon className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                <Calendar
+                  locale={vi}
+                  mode="single"
+                  selected={dateRange.from}
+                  captionLayout="dropdown"
+                  onSelect={(data) => {
+                    setDateRange({ ...dateRange, from: data });
+                    setOpenCalendar({
+                      ...openCalendar,
+                      from: false,
+                    });
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="flex gap-2 items-center">
+            <p className="text-sm text-muted-foreground">đến</p>
+            <Popover
+              open={openCalendar.to}
+              onOpenChange={() => {
+                setOpenCalendar({ ...openCalendar, to: !openCalendar.to });
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-56 justify-between font-normal"
+                >
+                  <span className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4" />
+                    {dateRange.to
+                      ? format(dateRange.to, "EEEE, dd 'Thg' MM, yyyy", {
+                          locale: vi,
+                        })
+                      : "Chọn ngày"}
+                  </span>
+                  <ChevronDownIcon className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                <Calendar
+                  locale={vi}
+                  mode="single"
+                  selected={dateRange.to}
+                  captionLayout="dropdown"
+                  onSelect={(data) => {
+                    setDateRange({ ...dateRange, to: data });
+                    setOpenCalendar({
+                      ...openCalendar,
+                      to: false,
+                    });
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <Button variant="outline" size="icon" onClick={handleNextWeek}>
+            ›
+          </Button>
+
+          <Button variant="outline" onClick={handleResetToToday}>
+            Hiện tại
+          </Button>
+        </div>
+
+        <div className="flex-1 overflow-x-auto overflow-y-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
+              Đang tải dữ liệu...
+            </div>
+          ) : !data || !data.dailyAvailability || data.dailyAvailability.length === 0 ? (
             <div className="flex items-center justify-center h-64 text-muted-foreground">
               Không có dữ liệu để hiển thị
             </div>
           ) : (
-            <Table>
-              <TableHeader className="sticky top-0 bg-background z-10">
-                <TableRow>
-                  <TableHead className="w-[200px] font-semibold">
-                    Danh mục
-                  </TableHead>
-                  {dates.map((date) => {
-                    const isToday = date === today;
-                    return (
-                      <TableHead
-                        key={date}
-                        className={cn(
-                          "text-center font-semibold",
-                          isToday && "bg-primary/10 text-primary"
-                        )}
-                      >
-                        <div className="flex flex-col gap-0.5">
-                          <span>{format(new Date(date), "dd/MM")}</span>
-                          <span className="text-xs font-normal text-muted-foreground">
-                            {format(new Date(date), "EEE", { locale: vi })}
-                          </span>
-                        </div>
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              </TableHeader>
+            <div className="relative">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background z-10">
+                  <TableRow>
+                    <TableHead className="sticky left-0 bg-background z-20 w-[200px] font-semibold border-r">
+                      Phòng
+                    </TableHead>
+                    {dates.map((date: string) => {
+                      const isToday = date === todayStr;
+                      // Parse date from dd/MM format to get day of week
+                      const [day, month] = date.split("/");
+                      const year = new Date().getFullYear();
+                      const dateObj = new Date(year, parseInt(month) - 1, parseInt(day));
+                      const dayOfWeek = dateObj.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+                      
+                      // Map to Vietnamese day labels
+                      const dayLabels = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+                      const dayLabel = dayLabels[dayOfWeek];
+                      
+                      return (
+                        <TableHead
+                          key={date}
+                          className={cn(
+                            "text-center font-semibold min-w-[100px]",
+                            isToday && "bg-primary text-primary-foreground"
+                          )}
+                        >
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-base">{dayLabel}</span>
+                            <span className="text-xs font-normal opacity-90">
+                              {date}
+                            </span>
+                          </div>
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                </TableHeader>
               <TableBody>
-                {/* Booking Status Section */}
-                <TableRow className="bg-muted/50">
-                  <TableCell
-                    colSpan={dates.length + 1}
-                    className="font-semibold"
-                  >
-                    TRẠNG THÁI ĐẶT PHÒNG
-                  </TableCell>
-                </TableRow>
-
-                <TableRow className="hover:bg-muted/50">
-                  <TableCell className="font-medium">Đã đặt</TableCell>
-                  {data.bookingData.map((dayData) => {
-                    const isToday = dayData.date === today;
-                    return (
-                      <TableCell
-                        key={dayData.date}
-                        className={cn(
-                          "text-center tabular-nums",
-                          isToday && "bg-primary/5"
-                        )}
-                      >
-                        <span className="text-blue-600 font-semibold">
-                          {dayData.booked}
-                        </span>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-
-                <TableRow className="hover:bg-muted/50">
-                  <TableCell className="font-medium">Check-in</TableCell>
-                  {data.bookingData.map((dayData) => {
-                    const isToday = dayData.date === today;
-                    return (
-                      <TableCell
-                        key={dayData.date}
-                        className={cn(
-                          "text-center tabular-nums",
-                          isToday && "bg-primary/5"
-                        )}
-                      >
-                        <span className="text-green-600 font-semibold">
-                          {dayData.checkin}
-                        </span>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-
-                <TableRow className="hover:bg-muted/50">
-                  <TableCell className="font-medium">Check-out</TableCell>
-                  {data.bookingData.map((dayData) => {
-                    const isToday = dayData.date === today;
-                    return (
-                      <TableCell
-                        key={dayData.date}
-                        className={cn(
-                          "text-center tabular-nums",
-                          isToday && "bg-primary/5"
-                        )}
-                      >
-                        <span className="text-yellow-600 font-semibold">
-                          {dayData.checkout}
-                        </span>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-
-                <TableRow className="hover:bg-muted/50">
-                  <TableCell className="font-medium">Phòng trống</TableCell>
-                  {data.bookingData.map((dayData) => {
-                    const isToday = dayData.date === today;
-                    return (
-                      <TableCell
-                        key={dayData.date}
-                        className={cn(
-                          "text-center tabular-nums",
-                          isToday && "bg-primary/5"
-                        )}
-                      >
-                        <span className="text-gray-600 font-semibold">
-                          {dayData.available}
-                        </span>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-
-                {/* Room Type Trend Section - Expandable */}
-                {data.availableRoomsTrendData &&
-                  data.availableRoomsTrendData.length > 0 && (
-                    <>
-                      <TableRow className="bg-muted/50">
-                        <TableCell
-                          colSpan={dates.length + 1}
-                          className="font-semibold cursor-pointer"
-                          onClick={() => toggleRow("room-types")}
-                        >
-                          <div className="flex items-center gap-2">
-                            {expandedRows.has("room-types") ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                            XU HƯỚNG THEO LOẠI PHÒNG
-                          </div>
-                        </TableCell>
-                      </TableRow>
-
-                      {expandedRows.has("room-types") &&
-                        (() => {
-                          const roomTypes = Object.keys(
-                            data.availableRoomsTrendData[0]
-                          ).filter((key) => key !== "date");
-
-                          return roomTypes.map((roomType) => (
-                            <TableRow
-                              key={roomType}
-                              className="hover:bg-muted/50"
-                            >
-                              <TableCell className="font-medium pl-8">
-                                {roomType}
-                              </TableCell>
-                              {data.availableRoomsTrendData.map((dayData) => {
-                                const isToday = dayData.date === today;
-                                return (
-                                  <TableCell
-                                    key={dayData.date}
-                                    className={cn(
-                                      "text-center tabular-nums",
-                                      isToday && "bg-primary/5"
-                                    )}
-                                  >
-                                    {dayData[roomType] || 0}
-                                  </TableCell>
-                                );
-                              })}
-                            </TableRow>
-                          ));
-                        })()}
-                    </>
-                  )}
-
-                {/* Room Type Comparison Section - Expandable */}
-                {data.roomTypeComparisonData &&
-                  data.roomTypeComparisonData.length > 0 && (
-                    <>
-                      <TableRow className="bg-muted/50">
-                        <TableCell
-                          colSpan={dates.length + 1}
-                          className="font-semibold cursor-pointer"
-                          onClick={() => toggleRow("room-comparison")}
-                        >
-                          <div className="flex items-center gap-2">
-                            {expandedRows.has("room-comparison") ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                            SO SÁNH LOẠI PHÒNG
-                          </div>
-                        </TableCell>
-                      </TableRow>
-
-                      {expandedRows.has("room-comparison") && (
-                        <>
-                          {data.roomTypeComparisonData.map((roomData) => (
-                            <TableRow
-                              key={roomData.type}
-                              className="hover:bg-muted/50"
-                            >
-                              <TableCell className="font-medium pl-8">
-                                {roomData.type}
-                              </TableCell>
-                              <TableCell
-                                colSpan={dates.length}
-                                className="text-sm"
-                              >
-                                <div className="flex gap-6">
-                                  <span>
-                                    Trống:{" "}
-                                    <span className="font-semibold text-green-600">
-                                      {roomData.available}%
-                                    </span>
-                                  </span>
-                                  <span>
-                                    Đã đặt:{" "}
-                                    <span className="font-semibold text-blue-600">
-                                      {roomData.booked}%
-                                    </span>
-                                  </span>
-                                  <span>
-                                    Check-in:{" "}
-                                    <span className="font-semibold text-orange-600">
-                                      {roomData.checkin}%
-                                    </span>
-                                  </span>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </>
+                {/* Phòng trống Section */}
+                <TableRow className="bg-muted/30 hover:bg-muted/50 cursor-pointer" onClick={() => toggleRow("available-rooms")}>
+                  <TableCell className="font-semibold sticky left-0 bg-muted/30 z-10 border-r">
+                    <div className="flex items-center gap-2">
+                      {expandedRows.has("available-rooms") ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
                       )}
-                    </>
-                  )}
+                      Phòng trống
+                    </div>
+                  </TableCell>
+                  {data.dailyAvailability?.map((dayData: any) => {
+                    const [year, month, day] = dayData.date.split("-");
+                    const dateStr = `${day}/${month}`;
+                    const isToday = dateStr === todayStr;
+                    // Calculate total available rooms for this day (sum all room types)
+                    const total = Object.values(dayData.available).reduce((sum: number, value: any) => sum + value, 0);
+                    
+                    return (
+                      <TableCell
+                        key={dayData.date}
+                        className={cn(
+                          "text-center tabular-nums text-foreground font-semibold",
+                          isToday && "bg-primary/10"
+                        )}
+                      >
+                        {total}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+
+                {/* Room Type Breakdown for Available - Show when expanded */}
+                {expandedRows.has("available-rooms") && data.dailyAvailability && (() => {
+                  // Extract unique room types from first day's available data
+                  const firstDay = data.dailyAvailability[0];
+                  const roomTypes = Object.keys(firstDay.available);
+                  
+                  return roomTypes.map((roomType: string) => (
+                    <TableRow key={roomType} className="hover:bg-muted/20">
+                      <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType}</TableCell>
+                      {data.dailyAvailability.map((dayData: any) => {
+                        const [year, month, day] = dayData.date.split("-");
+                        const dateStr = `${day}/${month}`;
+                        const isToday = dateStr === todayStr;
+                        return (
+                          <TableCell
+                            key={dayData.date}
+                            className={cn(
+                              "text-center tabular-nums text-foreground",
+                              isToday && "bg-primary/5"
+                            )}
+                          >
+                            {dayData.available[roomType] || 0}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ));
+                })()}
+
+                {/* Đã đặt Section */}
+                <TableRow className="bg-muted/30 hover:bg-muted/50 cursor-pointer" onClick={() => toggleRow("booked-rooms")}>
+                  <TableCell className="font-semibold sticky left-0 bg-muted/30 z-10 border-r">
+                    <div className="flex items-center gap-2">
+                      {expandedRows.has("booked-rooms") ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                      Đã đặt
+                    </div>
+                  </TableCell>
+                  {data.dailyAvailability.map((dayData: any) => {
+                    const [year, month, day] = dayData.date.split("-");
+                    const dateStr = `${day}/${month}`;
+                    const isToday = dateStr === todayStr;
+                    const total = Object.values(dayData.booked).reduce((sum: number, value: any) => sum + value, 0);
+                    return (
+                      <TableCell
+                        key={dayData.date}
+                        className={cn(
+                          "text-center tabular-nums text-foreground font-semibold",
+                          isToday && "bg-primary/10"
+                        )}
+                      >
+                        {total}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+
+                {/* Room Type Breakdown for Booked - Show when expanded */}
+                {expandedRows.has("booked-rooms") && data.dailyAvailability && (() => {
+                  const firstDay = data.dailyAvailability[0];
+                  const roomTypes = Object.keys(firstDay.booked);
+                  
+                  return roomTypes.map((roomType: string) => (
+                    <TableRow key={roomType} className="hover:bg-muted/20">
+                      <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType}</TableCell>
+                      {data.dailyAvailability.map((dayData: any) => {
+                        const [year, month, day] = dayData.date.split("-");
+                        const dateStr = `${day}/${month}`;
+                        const isToday = dateStr === todayStr;
+                        return (
+                          <TableCell
+                            key={dayData.date}
+                            className={cn(
+                              "text-center tabular-nums text-foreground",
+                              isToday && "bg-primary/5"
+                            )}
+                          >
+                            {dayData.booked[roomType] || 0}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ));
+                })()}
+
+                {/* Check-in Section */}
+                <TableRow className="bg-muted/30 hover:bg-muted/50 cursor-pointer" onClick={() => toggleRow("checkin-rooms")}>
+                  <TableCell className="font-semibold sticky left-0 bg-muted/30 z-10 border-r">
+                    <div className="flex items-center gap-2">
+                      {expandedRows.has("checkin-rooms") ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                      Check-in
+                    </div>
+                  </TableCell>
+                  {data.dailyAvailability.map((dayData: any) => {
+                    const [year, month, day] = dayData.date.split("-");
+                    const dateStr = `${day}/${month}`;
+                    const isToday = dateStr === todayStr;
+                    const total = Object.values(dayData.checkin).reduce((sum: number, value: any) => sum + value, 0);
+                    return (
+                      <TableCell
+                        key={dayData.date}
+                        className={cn(
+                          "text-center tabular-nums text-foreground font-semibold",
+                          isToday && "bg-primary/10"
+                        )}
+                      >
+                        {total}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+
+                {/* Room Type Breakdown for Check-in - Show when expanded */}
+                {expandedRows.has("checkin-rooms") && data.dailyAvailability && (() => {
+                  const firstDay = data.dailyAvailability[0];
+                  const roomTypes = Object.keys(firstDay.checkin);
+                  
+                  return roomTypes.map((roomType: string) => (
+                    <TableRow key={roomType} className="hover:bg-muted/20">
+                      <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType}</TableCell>
+                      {data.dailyAvailability.map((dayData: any) => {
+                        const [year, month, day] = dayData.date.split("-");
+                        const dateStr = `${day}/${month}`;
+                        const isToday = dateStr === todayStr;
+                        return (
+                          <TableCell
+                            key={dayData.date}
+                            className={cn(
+                              "text-center tabular-nums text-foreground",
+                              isToday && "bg-primary/5"
+                            )}
+                          >
+                            {dayData.checkin[roomType] || 0}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ));
+                })()}
+
+                {/* Check-out Section */}
+                <TableRow className="bg-muted/30 hover:bg-muted/50 cursor-pointer" onClick={() => toggleRow("checkout-rooms")}>
+                  <TableCell className="font-semibold sticky left-0 bg-muted/30 z-10 border-r">
+                    <div className="flex items-center gap-2">
+                      {expandedRows.has("checkout-rooms") ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                      Check-out
+                    </div>
+                  </TableCell>
+                  {data.dailyAvailability.map((dayData: any) => {
+                    const [year, month, day] = dayData.date.split("-");
+                    const dateStr = `${day}/${month}`;
+                    const isToday = dateStr === todayStr;
+                    const total = Object.values(dayData.checkout).reduce((sum: number, value: any) => sum + value, 0);
+                    return (
+                      <TableCell
+                        key={dayData.date}
+                        className={cn(
+                          "text-center tabular-nums text-foreground font-semibold",
+                          isToday && "bg-primary/10"
+                        )}
+                      >
+                        {total}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+
+                {/* Room Type Breakdown for Check-out - Show when expanded */}
+                {expandedRows.has("checkout-rooms") && data.dailyAvailability && (() => {
+                  const firstDay = data.dailyAvailability[0];
+                  const roomTypes = Object.keys(firstDay.checkout);
+                  
+                  return roomTypes.map((roomType: string) => (
+                    <TableRow key={roomType} className="hover:bg-muted/20">
+                      <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType}</TableCell>
+                      {data.dailyAvailability.map((dayData: any) => {
+                        const [year, month, day] = dayData.date.split("-");
+                        const dateStr = `${day}/${month}`;
+                        const isToday = dateStr === todayStr;
+                        return (
+                          <TableCell
+                            key={dayData.date}
+                            className={cn(
+                              "text-center tabular-nums text-foreground",
+                              isToday && "bg-primary/5"
+                            )}
+                          >
+                            {dayData.checkout[roomType] || 0}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ));
+                })()}
               </TableBody>
             </Table>
+            </div>
           )}
         </div>
       </DialogContent>

@@ -195,6 +195,23 @@ async function getBookingOTA(): Promise<BookingOTAResponseDto> {
     return Promise.reject(error);
   }
 }
+
+async function exportBookings(date?: string): Promise<Blob> {
+  try {
+    const params = date ? { date } : {};
+    const resp = await http.get(Booking.Export, {
+      params,
+      responseType: "blob",
+    });
+    if (resp && typeof resp === "object" && "data" in resp) {
+      return (resp as any).data;
+    }
+    return resp as Blob;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
@@ -205,4 +222,5 @@ export const BookingService = {
   staffUpdateBookingDetail,
   staffChangeRoom,
   staffCancelBooking,
+  exportBookings,
 };
