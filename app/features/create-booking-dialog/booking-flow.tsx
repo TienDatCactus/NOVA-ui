@@ -13,14 +13,16 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import { useStep } from "~/hooks/use-step";
 import { useCreateBookingStore } from "~/store/create-booking.store";
-import { CustomerInfoStep } from "./customer-info-step";
-import { StayDetailsStep } from "./stay-details-step";
-import { RoomSelectionStep } from "./room-selection-step";
-import ReviewPaymentStep from "./review-payment-step";
+import { CustomerInfoStep } from "./components/customer-info-step";
+import { StayDetailsStep } from "./components/stay-details-step";
+import { RoomSelectionStep } from "./components/room-selection-step";
+import { ServicesBreakfastStep } from "./components/services-breakfast-step";
+import ReviewPaymentStep from "./components/review-payment-step";
 import { useRef } from "react";
 
 const steps = [
@@ -42,34 +44,35 @@ const steps = [
   {
     id: 4,
     title: "Chọn phòng",
-    description: "Phòng và dịch vụ",
+    description: "Lựa chọn phòng",
   },
   {
     id: 5,
+    title: "Bữa sáng & Dịch vụ",
+    description: "Dịch vụ bổ sung",
+  },
+  {
+    id: 6,
     title: "Thanh toán",
     description: "Xác nhận và thanh toán",
   },
   {
-    id: 6,
+    id: 7,
     title: "Hoàn tất",
     description: "Đặt phòng thành công",
   },
 ];
 
-interface BookingFlowProps {
-  onComplete?: () => void;
-}
-
-export default function BookingFlow({ onComplete }: BookingFlowProps) {
-  const [currentStep, { goToNextStep, goToPrevStep }] = useStep(6);
+export default function BookingFlow() {
+  const [currentStep, { goToNextStep, goToPrevStep }] = useStep(7);
   const { data: bookingData, setData } = useCreateBookingStore();
   const customerInfoFormRef = useRef<HTMLFormElement>(null);
   const stayDetailsFormRef = useRef<HTMLFormElement>(null);
   const roomSelectionFormRef = useRef<HTMLFormElement>(null);
+  const servicesBreakfastFormRef = useRef<HTMLFormElement>(null);
   const reviewPaymentFormRef = useRef<HTMLFormElement>(null);
 
   const handleNext = () => {
-    // For step 2, trigger form submission instead of direct navigation
     if (currentStep === 2 && customerInfoFormRef.current) {
       customerInfoFormRef.current.requestSubmit();
       return;
@@ -84,8 +87,13 @@ export default function BookingFlow({ onComplete }: BookingFlowProps) {
       roomSelectionFormRef.current.requestSubmit();
       return;
     }
-    // For step 5, trigger form submission to create booking
-    if (currentStep === 5 && reviewPaymentFormRef.current) {
+    // For step 5, trigger form submission
+    if (currentStep === 5 && servicesBreakfastFormRef.current) {
+      servicesBreakfastFormRef.current.requestSubmit();
+      return;
+    }
+    // For step 6, trigger form submission to create booking
+    if (currentStep === 6 && reviewPaymentFormRef.current) {
       reviewPaymentFormRef.current.requestSubmit();
       return;
     }
@@ -115,7 +123,7 @@ export default function BookingFlow({ onComplete }: BookingFlowProps) {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Card
                 className={cn(
-                  "cursor-pointer transition-all",
+                  "cursor-pointer transition-all ",
                   bookingData.bookingType === "Direct"
                     ? "bg-muted border-primary ring-2 ring-primary"
                     : "border-gray-200 hover:shadow-md"
@@ -144,14 +152,14 @@ export default function BookingFlow({ onComplete }: BookingFlowProps) {
                   "cursor-pointer transition-all",
                   bookingData.bookingType === "OTA"
                     ? "bg-muted border-primary ring-2 ring-primary"
-                    : "border-gray-200 hover:shadow-md"
+                    : "border-card hover:shadow-md"
                 )}
                 onClick={() => updateBookingData("bookingType", "OTA")}
               >
                 <CardContent className="flex items-start space-x-4 p-6">
                   <div className="flex-shrink-0">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
-                      <Globe className="h-6 w-6 text-purple-600" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                      <Globe className="h-6 w-6 text-primary" />
                     </div>
                   </div>
                   <div>
@@ -204,9 +212,9 @@ export default function BookingFlow({ onComplete }: BookingFlowProps) {
         return (
           <div className="space-y-6">
             <CardHeader className="px-0 pt-0">
-              <CardTitle>Chọn phòng và dịch vụ</CardTitle>
+              <CardTitle>Chọn phòng</CardTitle>
               <CardDescription>
-                Chọn phòng phù hợp và các dịch vụ kèm theo
+                Lựa chọn phòng phù hợp cho kỳ nghỉ
               </CardDescription>
             </CardHeader>
             <RoomSelectionStep
@@ -218,10 +226,26 @@ export default function BookingFlow({ onComplete }: BookingFlowProps) {
 
       case 5:
         return (
-          <ReviewPaymentStep onNext={goToNextStep} ref={reviewPaymentFormRef} />
+          <div className="space-y-6">
+            <CardHeader className="px-0 pt-0">
+              <CardTitle>Bữa sáng & Dịch vụ</CardTitle>
+              <CardDescription>
+                Thêm bữa sáng và các dịch vụ bổ sung
+              </CardDescription>
+            </CardHeader>
+            <ServicesBreakfastStep
+              onNext={goToNextStep}
+              formRef={servicesBreakfastFormRef}
+            />
+          </div>
         );
 
       case 6:
+        return (
+          <ReviewPaymentStep onNext={goToNextStep} ref={reviewPaymentFormRef} />
+        );
+
+      case 7:
         return (
           <div className="space-y-6">
             <CardHeader className="px-0 pt-0">
@@ -251,11 +275,10 @@ export default function BookingFlow({ onComplete }: BookingFlowProps) {
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl shadow-lg">
-        <CardHeader className="pb-0">
-          {/* Step Indicator */}
-          <div className="mb-6 flex items-center justify-between">
+    <div className="flex h-full items-center justify-center p-4">
+      <Card className="w-full max-w-4xl bg-white shadow-lg ">
+        <CardHeader className="p-6">
+          <div className="flex items-center justify-between">
             {steps.map((step) => (
               <div
                 key={step.id}
@@ -298,44 +321,38 @@ export default function BookingFlow({ onComplete }: BookingFlowProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="p-6 md:p-8">
-          {renderStepContent()}
+        <CardContent className="p-6 md:px-8">{renderStepContent()}</CardContent>
+        <CardFooter className="mt-8 flex items-center justify-between border-t">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Quay lại</span>
+          </Button>
 
-          {/* Navigation */}
-          <div className="mt-8 flex items-center justify-between border-t pt-6">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>Quay lại</span>
+          {currentStep < 7 ? (
+            <Button onClick={handleNext}>
+              <span>
+                {currentStep === 6 ? "Xác nhận đặt phòng" : "Tiếp theo"}
+              </span>
+              <ChevronRight className="h-4 w-4" />
             </Button>
-
-            {currentStep < 6 ? (
-              <Button onClick={handleNext}>
-                <span>
-                  {currentStep === 5 ? "Xác nhận đặt phòng" : "Tiếp theo"}
-                </span>
-                <ChevronRight className="h-4 w-4" />
+          ) : (
+            <div className="flex gap-2">
+              <Button variant="outline">Hủy</Button>
+              <Button
+                onClick={() => {
+                  useCreateBookingStore.getState().reset();
+                  window.location.reload();
+                }}
+              >
+                Tạo đặt phòng mới
               </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={onComplete}>
-                  Đóng
-                </Button>
-                <Button
-                  onClick={() => {
-                    useCreateBookingStore.getState().reset();
-                    window.location.reload();
-                  }}
-                >
-                  Tạo đặt phòng mới
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
+            </div>
+          )}
+        </CardFooter>
       </Card>
     </div>
   );

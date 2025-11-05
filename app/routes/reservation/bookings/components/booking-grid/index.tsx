@@ -18,16 +18,12 @@ interface BookingGridProps {
   rooms?: AvailableRoomsInternalResponseDto;
   isLoading?: boolean;
   refetch: () => void;
-  onBookNow?: (roomId: string) => void;
-  onViewDetails?: (roomId: string) => void;
 }
 
 function BookingGrid({
   rooms = [],
   isLoading = false,
   refetch,
-  onBookNow,
-  onViewDetails,
 }: BookingGridProps) {
   if (isLoading) {
     return (
@@ -76,14 +72,9 @@ function BookingGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid auto-rows-fr gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {rooms.map((room) => (
-        <RoomTypeCard
-          key={room.roomTypeId}
-          roomType={room}
-          onBookNow={onBookNow}
-          onViewDetails={onViewDetails}
-        />
+        <RoomTypeCard key={room.roomTypeId} roomType={room} />
       ))}
     </div>
   );

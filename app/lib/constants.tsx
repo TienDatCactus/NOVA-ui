@@ -1,20 +1,13 @@
 import {
   type LucideIcon,
-  HousePlus,
-  ReceiptText,
-  ClipboardMinus,
   Bath,
-  Utensils,
-  Users,
-  Settings,
   HelpCircle,
-  DollarSign,
-  LayoutGrid,
-  List,
-  CalendarDays,
+  HousePlus,
   PackageSearch,
-  ChefHat,
-  Boxes,
+  ReceiptText,
+  Settings,
+  Users,
+  Utensils,
 } from "lucide-react";
 
 const SERVICE_CATEGORIES = ["Dịch vụ", "Thức ăn", "Đồ uống"];
@@ -162,9 +155,9 @@ export {
   ROOM_COUNT,
   rowHeight,
   SERVICE_CATEGORIES,
-  SUBS_PER_DAY,
-  totalSubCols,
   SIDEBAR_NAV_MAIN,
   SIDEBAR_PROJECTS,
   SIDEBAR_TEAMS,
+  SUBS_PER_DAY,
+  totalSubCols,
 };

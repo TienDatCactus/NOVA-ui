@@ -62,7 +62,6 @@ import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { BOOKING_STATUSES } from "~/services/types/booking.types";
-import { useOTAInfo } from "../new-booking/container/create-booking-query.hooks";
 import type { Route } from "./+types/booking-detail";
 import { AddRoomModal } from "./components/add-room-modal";
 import AddMenuItemDialog from "./components/add-menu-item.dialog";
@@ -72,6 +71,7 @@ import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import { useUpdateBooking } from "./container/booking-mutation.hooks";
 import { useBookingDetail } from "./container/booking-query.hooks";
 import { useBookingOrders } from "./container/use-booking-orders.hooks";
+import { useOTAInfo } from "~/features/create-booking-dialog/container/create-booking-query.hooks";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -275,7 +275,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     <div className="flex flex-col h-full">
       <Form {...form}>
         <div className="flex-1 flex overflow-hidden">
-          <aside className="w-80 flex-shrink-0 flex flex-col">
+          <aside className="w-80 flex-shrink-0 h-fit flex flex-col">
             <Card className="flex-1 flex flex-col  border-accent-foreground">
               <CardHeader className="text-card-foreground">
                 <div className="flex items-center justify-between">

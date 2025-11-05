@@ -1,10 +1,13 @@
-import { type FormEvent, forwardRef, useMemo } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Calendar, Users, BedDouble, Utensils } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { BedDouble, Calendar, Loader2, Users, Utensils } from "lucide-react";
+import { type FormEvent, forwardRef, useMemo, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
+import { Badge } from "~/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Form,
   FormControl,
@@ -12,27 +15,66 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
+import { Textarea } from "~/components/ui/textarea";
 
-import { useCreateBookingStore } from "~/store/create-booking.store";
-import { useServiceOrderStore } from "~/store/service-order.store";
-import useCreateBookingMutation from "~/routes/reservation/new-booking/container/create-booking-mutation.hooks";
-import { FormSchema } from "~/services/schema/forms.schema";
-import type { ReviewPaymentFormData } from "~/services/types/forms.types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { formatMoney, useCalculateNights } from "~/lib/utils";
 import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
+import { FormSchema } from "~/services/schema/forms.schema";
+import type { ReviewPaymentFormData } from "~/services/types/forms.types";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { useCreateBookingStore } from "~/store/create-booking.store";
+import { useServiceOrderStore } from "~/store/service-order.store";
+import { useServiceDetail } from "~/routes/services/container/services/query.hooks";
+import Image from "~/components/ui/image";
+import type { StaffBookingPricePreviewRequestDto } from "~/services/api/booking/dto";
+import useCreateBookingMutation from "../container/create-booking-mutation.hooks";
+import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
 
 const { ReviewPaymentFormSchema } = FormSchema;
 
 interface ReviewPaymentStepProps {
   onNext: (goToNextStep: () => void) => void;
+}
+function ServicePopulateItem({
+  id,
+  quantity,
+  note,
+}: {
+  id: string;
+  quantity: number;
+  note?: string;
+}) {
+  const { data } = useServiceDetail(id);
+  return (
+    <div key={id} className="grid gap-2 text-sm">
+      <span className="flex gap-2 items-center">
+        <Image
+          src={data?.images?.[0].url || ""}
+          alt={data?.name}
+          className="h-10 w-10"
+        />
+        <p className="uppercase text-muted-foreground">{data?.name}</p>
+        <sup>x {quantity}</sup>
+      </span>
+      <p className="text-muted-foreground hover:line-clamp-none line-clamp-2">
+        {note} Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+        Architecto cumque ut harum at soluta sequi dicta dolore, fuga, vitae
+        culpa aliquam nemo itaque ex ipsa illo voluptatum aspernatur distinctio
+        repellat!
+      </p>
+    </div>
+  );
 }
 
 export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
@@ -51,56 +93,147 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
         roomPayment: storeData.roomPayment || undefined,
         serviceOrder: undefined, // Services come from global store
       },
+      mode: "onChange",
     });
 
     // Fetch full room details for selected room IDs
-    const { data: roomsDetails, isLoading: isLoadingRooms } =
-      useRoomsDetailsByIds(storeData.roomIds ?? []);
+    const roomIds = storeData.roomIds ?? [];
+    const {
+      data: roomsDetails,
+      isLoading: isLoadingRooms,
+      isError: isRoomDetailsError,
+    } = useRoomsDetailsByIds(roomIds);
 
     const nights = useCalculateNights({
       checkinDate: storeData.checkinDate,
       checkoutDate: storeData.checkoutDate,
     });
 
-    // Calculate totals
-    const roomTotal = useMemo(() => {
-      if (!roomsDetails) return 0;
-      return roomsDetails.reduce((sum, room) => {
-        return sum + room.dailyPrice * nights;
-      }, 0);
-    }, [roomsDetails, nights]);
-
-    const serviceTotal = useMemo(() => {
-      return serviceOrderServices.reduce((sum, service) => {
-        return sum + service.quantity * 0; // TODO: Get service price
-      }, 0);
-    }, [serviceOrderServices]);
-
-    const breakfastTotal = useMemo(() => {
-      const roomCount = roomsDetails?.length ?? 0;
-      if (storeData.isBreakfastAll && roomCount > 0) {
-        return roomCount * nights * 50000; // 50k per person per day
-      }
-      if (storeData.breakfastDates && roomCount > 0) {
-        return storeData.breakfastDates.length * roomCount * 50000;
-      }
-      return 0;
+    // Sync form fields when storeData changes (handle back navigation)
+    useEffect(() => {
+      form.setValue("specialRequest", storeData.specialRequest ?? "");
+      form.setValue("overridePrice", storeData.overridePrice);
+      form.setValue("roomPayment", storeData.roomPayment ?? undefined);
     }, [
-      storeData.isBreakfastAll,
-      storeData.breakfastDates,
-      roomsDetails,
-      nights,
+      storeData.specialRequest,
+      storeData.overridePrice,
+      storeData.roomPayment,
+      form,
     ]);
 
+    // Validate room IDs - alert if any rooms failed to load
+    useEffect(() => {
+      if (
+        isRoomDetailsError ||
+        (roomIds.length > 0 &&
+          roomsDetails &&
+          roomsDetails.length < roomIds.length)
+      ) {
+        toast.error(
+          "Một số phòng đã chọn không hợp lệ. Vui lòng quay lại để chọn lại phòng."
+        );
+      }
+    }, [roomIds, roomsDetails, isRoomDetailsError]);
+
+    // Map room details for preview request
+    const selectedRooms = useMemo(() => {
+      if (!roomsDetails || roomsDetails.length === 0)
+        return [] as {
+          roomId: string;
+          roomName: string;
+          roomTypeName: string;
+          baseRatePerNight: number;
+          roomTypeId: string;
+        }[];
+      return roomsDetails.map((d) => ({
+        roomId: d.roomId,
+        roomName: d.roomName,
+        roomTypeName: d.roomTypeName,
+        baseRatePerNight: d.dailyPrice,
+        roomTypeId: d.roomTypeId,
+      }));
+    }, [roomsDetails]);
+
+    // Build price preview request
+    const previewRequest = useMemo<StaffBookingPricePreviewRequestDto>(() => {
+      const roomTypeMap = new Map<string, number>();
+      selectedRooms.forEach((room) => {
+        const count = roomTypeMap.get(room.roomTypeId) || 0;
+        roomTypeMap.set(room.roomTypeId, count + 1);
+      });
+
+      const roomTypes = Array.from(roomTypeMap.entries()).map(
+        ([roomTypeId, quantity]) => ({
+          roomTypeId,
+          quantity,
+        })
+      );
+
+      return {
+        checkinDate: format(storeData.checkinDate || new Date(), "yyyy-MM-dd"),
+        checkoutDate: format(
+          storeData.checkoutDate || new Date(),
+          "yyyy-MM-dd"
+        ),
+        adultsAmount: storeData.adultsAmount || 1,
+        childrenAmount: storeData.childrenAmount || 0,
+        roomTypes,
+        isBreakfastAll: storeData.isBreakfastAll || false,
+        breakfastDates:
+          storeData.breakfastDates?.map((date) => format(date, "yyyy-MM-dd")) ||
+          [],
+        services: serviceOrderServices.map((s) => ({
+          itemType: s.itemType,
+          itemId: s.itemId,
+          quantity: s.quantity,
+          scheduledDate: s.scheduledDate,
+          note: s.note || "",
+        })),
+      };
+    }, [
+      storeData.checkinDate,
+      storeData.checkoutDate,
+      storeData.adultsAmount,
+      storeData.childrenAmount,
+      storeData.isBreakfastAll,
+      storeData.breakfastDates,
+      selectedRooms,
+      serviceOrderServices,
+    ]);
+
+    // Get server-calculated price preview
+    const { data: pricePreview, isLoading: isLoadingPrice } =
+      usePreviewBookingPrice(previewRequest);
+
+    // Extract server-side calculated totals
+    const serverTotalAmount = pricePreview?.total ?? 0;
+    const roomTotal = pricePreview?.roomsSubtotal ?? 0;
+    const breakfastTotal = pricePreview?.breakfastSubtotal ?? 0;
+    const serviceTotal = pricePreview?.servicesSubtotal ?? 0;
     const calculatedTotal = roomTotal + serviceTotal + breakfastTotal;
-    const finalTotal = form.watch("overridePrice") || calculatedTotal;
+
+    // Calculate final total (use override if set, otherwise server total)
+    const getFinalTotal = () => {
+      const override = form.watch("overridePrice");
+      return override && !isNaN(Number(override)) && Number(override) > 0
+        ? Number(override)
+        : serverTotalAmount;
+    };
+
+    const finalTotal = getFinalTotal();
 
     const onSubmit = async (data: ReviewPaymentFormData) => {
+      // Build service order from global store
+      const finalServiceOrder = {
+        services: serviceOrderServices,
+      };
+
       // Save form data to store
       setData({
         specialRequest: data.specialRequest,
         overridePrice: data.overridePrice,
         roomPayment: data.roomPayment,
+        serviceOrder: finalServiceOrder,
       });
 
       try {
@@ -116,34 +249,30 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
           guestFullName: storeData.guestFullName!,
           isBreakfastAll: storeData.isBreakfastAll ?? false,
           overridePrice: data.overridePrice == 0 ? null : data.overridePrice,
-          serviceOrder: {},
+          serviceOrder: finalServiceOrder,
         };
 
         const response = await mutateAsync(bookingData);
 
-        // Store booking result for Step 6 display
         setData({
           createdBookingId: response?.bookingId,
           createdBookingCode: response?.bookingCode,
         } as any);
 
-        // Navigate to completion step after success
         onNext(() => {});
       } catch (error) {
         console.error("Booking creation failed:", error);
       }
     };
 
-    const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      void form.handleSubmit(onSubmit)();
-    };
-
     return (
       <Form {...form}>
-        <form ref={ref} onSubmit={handleFormSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Booking Summary */}
+        <form
+          ref={ref}
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
+          <div className="space-y-6">
             <div className="lg:col-span-2 space-y-4">
               <Card>
                 <CardHeader>
@@ -261,7 +390,13 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                           <span>
                             {storeData.isBreakfastAll
                               ? `Tất cả (${nights} ngày)`
-                              : `${storeData.breakfastDates?.length} ngày`}
+                              : `${storeData.breakfastDates?.length} ngày`}{" "}
+                            :{" "}
+                            <span className="font-medium">
+                              {storeData.breakfastDates
+                                ?.map((date) => format(new Date(date), "dd/MM"))
+                                .join(", ")}
+                            </span>
                           </span>
                           <span className="font-medium">
                             {formatMoney(breakfastTotal).vndFormatted}
@@ -280,17 +415,11 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                           Dịch vụ ({serviceOrderServices.length})
                         </p>
                         {serviceOrderServices.map((service, idx) => (
-                          <div
-                            key={idx}
-                            className="flex justify-between text-sm"
-                          >
-                            <span>
-                              {service.itemType === "ServiceItem"
-                                ? "Dịch vụ"
-                                : "Món ăn"}{" "}
-                              x{service.quantity}
-                            </span>
-                          </div>
+                          <ServicePopulateItem
+                            id={service.itemId}
+                            quantity={service.quantity}
+                            note={service.note || ""}
+                          />
                         ))}
                       </div>
                     </>
@@ -331,8 +460,8 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
             </div>
 
             {/* Right Column - Payment */}
-            <div className="lg:col-span-1 space-y-4">
-              <Card>
+            <div className="grid grid-cols-2 space-y-4">
+              <Card className="col-start-2">
                 <CardHeader>
                   <CardTitle>Thanh toán</CardTitle>
                 </CardHeader>
@@ -342,28 +471,36 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                     control={form.control}
                     name="roomPayment.paymentMethod"
                     render={({ field }) => (
-                      <FormItem className="space-y-3">
+                      <FormItem>
                         <FormLabel>Phương thức thanh toán</FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            className="flex flex-col space-y-1"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="Cash" id="cash" />
-                              <Label htmlFor="cash">Tiền mặt</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="Card" id="card" />
-                              <Label htmlFor="card">Thẻ</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="BankTransfer" id="bank" />
-                              <Label htmlFor="bank">Chuyển khoản</Label>
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Chọn phương thức" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PAYMENT_METHODS.map((method) => {
+                              const Icon = method.icon;
+                              return (
+                                <SelectItem
+                                  key={method.value}
+                                  value={method.value}
+                                  disabled={method.disabled}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Icon className="h-4 w-4" />
+                                    {method.label}
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />

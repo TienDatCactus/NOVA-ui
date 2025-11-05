@@ -10,6 +10,7 @@ const DASHBOARD = {
     bookings: "/dashboard/reservation/bookings",
     bookingDetail: (bookingCode: string) =>
       `/dashboard/reservation/bookings/detail/${bookingCode}`,
+    newBooking: "/dashboard/reservation/new-booking",
   },
 };
 const CUSTOMER = {

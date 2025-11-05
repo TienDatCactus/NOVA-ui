@@ -13,12 +13,10 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { onError, useCalculateNights } from "~/lib/utils";
 import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { FormSchema } from "~/services/schema/forms.schema";
-import { AvailableRoomTypeCard } from "~/routes/reservation/new-booking/fragments/available-room.card";
-import { BreakfastSelection } from "~/routes/reservation/new-booking/fragments/breakfast-selection";
-import AddServiceDialog from "~/features/order-dialog";
 import RoomItemWrapper from "../fragments/room-item-wrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
+import { AvailableRoomTypeCard } from "../fragments/available-room.card";
 
 interface RoomSelectionStepProps {
   onNext: () => void;
@@ -28,18 +26,11 @@ interface RoomSelectionStepProps {
 export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
   const { data: storeData, setData } = useCreateBookingStore();
   const { RoomSelectionFormSchema } = FormSchema;
-  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
 
   const form = useForm<RoomSelectionFormData>({
     resolver: zodResolver(RoomSelectionFormSchema),
     defaultValues: {
       roomIds: storeData.roomIds ?? [],
-      isBreakfastAll: storeData.isBreakfastAll ?? false,
-      breakfastDates: storeData.breakfastDates
-        ? storeData.breakfastDates.map((d) =>
-            d instanceof Date ? d : new Date(d)
-          )
-        : [],
     },
   });
 
@@ -60,12 +51,6 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
   useEffect(() => {
     form.reset({
       roomIds: storeData.roomIds ?? [],
-      isBreakfastAll: storeData.isBreakfastAll ?? false,
-      breakfastDates: storeData.breakfastDates
-        ? storeData.breakfastDates.map((d) =>
-            d instanceof Date ? d : new Date(d)
-          )
-        : [],
     });
   }, [storeData, form]);
 
@@ -137,8 +122,6 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
 
     setData({
       roomIds: validRoomIds,
-      isBreakfastAll: data.isBreakfastAll,
-      breakfastDates: data.breakfastDates?.map((i) => new Date(i)) || [],
     });
 
     toast.success("Đã lưu thông tin phòng");
@@ -162,107 +145,66 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
             ) || 0}{" "}
             phòng trống
           </p>
-          {selectedRoomIds.length > 0 && (
+        </div>
+
+        <div className=" space-y-2">
+          {isPending ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-[200px] w-full" />
+              ))}
+            </div>
+          ) : !availableRooms || availableRooms.length === 0 ? (
+            <div className="text-center py-12 border-2 border-dashed rounded-lg">
+              <p className="text-muted-foreground">
+                Không có phòng trống cho thời gian này
+              </p>
+            </div>
+          ) : (
             <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setServiceDialogOpen(true)}
-              >
-                Thêm dịch vụ
-              </Button>
-              <AddServiceDialog
-                open={serviceDialogOpen}
-                onOpenChange={setServiceDialogOpen}
-                customerName={storeData.guestFullName}
-              />
+              <div className="space-y-4">
+                {availableRooms.map((roomType) => (
+                  <AvailableRoomTypeCard
+                    key={roomType.roomTypeId}
+                    roomType={roomType}
+                    selectedRoomIds={selectedRoomIds}
+                    onToggleRoom={handleToggleRoom}
+                    nights={nights}
+                  />
+                ))}
+              </div>
+              {form.formState.errors.roomIds && (
+                <p className="text-sm text-destructive mt-2">
+                  {form.formState.errors.roomIds.message as string}
+                </p>
+              )}
             </>
           )}
         </div>
 
-        {/* Room Selection Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Available Rooms List */}
-          <div className="lg:col-span-2 space-y-2">
-            {isPending ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-[200px] w-full" />
-                ))}
+        <div className="grid grid-cols-2">
+          {/* Selected Rooms */}
+          <Card className="col-start-2  border shadow-sm ">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Phòng đã chọn</CardTitle>
+                <Badge variant="secondary">
+                  {selectedRoomIds.length} phòng
+                </Badge>
               </div>
-            ) : !availableRooms || availableRooms.length === 0 ? (
-              <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                <p className="text-muted-foreground">
-                  Không có phòng trống cho thời gian này
+            </CardHeader>
+            <CardContent className="space-y-2 snap-y max-h-64  overflow-y-scroll ">
+              {selectedRoomIds.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Chưa chọn phòng nào
                 </p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4">
-                  {availableRooms.map((roomType) => (
-                    <AvailableRoomTypeCard
-                      key={roomType.roomTypeId}
-                      roomType={roomType}
-                      selectedRoomIds={selectedRoomIds}
-                      onToggleRoom={handleToggleRoom}
-                      nights={nights}
-                    />
-                  ))}
-                </div>
-                {form.formState.errors.roomIds && (
-                  <p className="text-sm text-destructive mt-2">
-                    {form.formState.errors.roomIds.message as string}
-                  </p>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Selected Rooms Summary & Breakfast */}
-          <div className="lg:col-span-1 space-y-4">
-            <div className="lg:sticky lg:top-6 space-y-4">
-              {/* Selected Rooms */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">Phòng đã chọn</CardTitle>
-                    <Badge variant="secondary">
-                      {selectedRoomIds.length} phòng
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {selectedRoomIds.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      Chưa chọn phòng nào
-                    </p>
-                  ) : (
-                    selectedRoomIds.map((roomId) => (
-                      <RoomItemWrapper key={roomId} roomId={roomId} />
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-
-              {selectedRoomIds.length > 0 &&
-                storeData.checkinDate &&
-                storeData.checkoutDate && (
-                  <BreakfastSelection
-                    isBreakfastAll={form.watch("isBreakfastAll") || false}
-                    breakfastDates={form.watch("breakfastDates") || []}
-                    onToggleAll={(value) =>
-                      form.setValue("isBreakfastAll", value)
-                    }
-                    onSelectDates={(dates) =>
-                      form.setValue("breakfastDates", dates)
-                    }
-                    checkinDate={storeData.checkinDate}
-                    checkoutDate={storeData.checkoutDate}
-                    nights={nights}
-                  />
-                )}
-            </div>
-          </div>
+              ) : (
+                selectedRoomIds.map((roomId) => (
+                  <RoomItemWrapper key={roomId} roomId={roomId} />
+                ))
+              )}
+            </CardContent>
+          </Card>
         </div>
       </form>
     </Form>

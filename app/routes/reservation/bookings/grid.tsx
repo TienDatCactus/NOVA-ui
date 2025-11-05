@@ -35,12 +35,6 @@ export default function Component({
   });
 
   const filteredRooms = filterAvailableRooms(rooms ?? []);
-  const handleBookNow = (roomId: string) => {
-    navigate(`/dashboard/reservation/new-booking?roomId=${roomId}`);
-  };
-  const handleViewDetails = (roomId: string) => {
-    navigate(`/dashboard/rooms/${roomId}`);
-  };
 
   return (
     <div className="flex flex-col space-y-4 h-full">
@@ -55,8 +49,6 @@ export default function Component({
           rooms={filteredRooms}
           isLoading={isLoading}
           refetch={refetch}
-          onBookNow={handleBookNow}
-          onViewDetails={handleViewDetails}
         />
       </div>
     </div>

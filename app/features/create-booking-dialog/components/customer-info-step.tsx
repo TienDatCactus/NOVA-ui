@@ -21,10 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { onError } from "~/lib/utils";
+import { cn, onError } from "~/lib/utils";
 import { useCreateBookingStore } from "~/store/create-booking.store";
-import { useOTAInfo } from "~/routes/reservation/new-booking/container/create-booking-query.hooks";
 import { BOOKING_SOURCES } from "~/services/types/booking.types";
+import type { BookingOTAResponseDto } from "~/services/api/booking/dto";
+import { Button } from "~/components/ui/button";
+import { useOTAInfo } from "../container/create-booking-query.hooks";
 
 // Step 2 Schema: Customer Info + Detailed Booking Type
 const CustomerInfoSchema = z.object({
@@ -51,7 +53,6 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
   const { data: bookingData, setData } = useCreateBookingStore();
   const bookingType = bookingData.bookingType;
 
-  // Fetch OTA list only if OTA is selected
   const { data: otaList } = useOTAInfo({
     selection: bookingType === "OTA",
   });
@@ -68,7 +69,6 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
     },
   });
 
-  // Sync form with store data
   useEffect(() => {
     form.reset({
       guestFullName: bookingData.guestFullName ?? "",
@@ -82,7 +82,6 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
 
   const onSubmit = async (values: CustomerInfoFormData) => {
     try {
-      // Map bookingType to source field for API
       let sourceValue = values.source;
       if (bookingType === "OTA") {
         sourceValue = "OTA";
@@ -114,7 +113,107 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
         onSubmit={form.handleSubmit(onSubmit, onError)}
         className="space-y-6"
       >
-        {/* Customer Contact Fields - Always shown */}
+        {bookingType === "Direct" && (
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="source"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Nguồn đặt phòng</FormLabel>
+                  <FormControl>
+                    <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
+                      {BOOKING_SOURCES.filter((s) => s.key !== "OTA").map(
+                        (source) => (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            key={source.key}
+                            onClick={() => form.setValue("source", source.key)}
+                            className={cn(
+                              "rounded-lg border-2 h-12 p-4 text-center transition-all",
+                              form.getValues("source") === source.key
+                                ? "border-primary bg-primary/10"
+                                : ""
+                            )}
+                          >
+                            {source.label}
+                          </Button>
+                        )
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Chọn nguồn đặt phòng trực tiếp (Nhân viên, Đại lý, v.v.)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
+        {bookingType === "OTA" && (
+          <div className="grid grid-cols-1  gap-4">
+            <FormField
+              control={form.control}
+              name="otaInformationId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Nền tảng OTA <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <div className="flex flex-wrap gap-2">
+                      {otaList?.map((ota) => (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          key={ota.id}
+                          onClick={() =>
+                            form.setValue("otaInformationId", ota.id)
+                          }
+                          className={cn(
+                            "rounded-lg border-2 h-12 p-4 text-center transition-all",
+                            form.getValues("otaInformationId") === ota.id
+                              ? "border-primary bg-primary/10"
+                              : ""
+                          )}
+                        >
+                          {ota.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </FormControl>
+
+                  <FormDescription>
+                    Booking.com, Agoda, Expedia, v.v.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="otaBookingCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mã đặt phòng OTA</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Nhập mã đặt phòng từ OTA"
+                      className="bg-secondary"
+                    />
+                  </FormControl>
+                  <FormDescription>Mã booking từ nền tảng OTA</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
@@ -186,92 +285,6 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
         </div>
 
         {/* Conditional Fields based on Booking Type */}
-        {bookingType === "Direct" && (
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="source"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nguồn đặt phòng</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger className="bg-secondary">
-                        <SelectValue placeholder="Chọn nguồn đặt phòng" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {BOOKING_SOURCES.filter((s) => s.key !== "OTA").map(
-                        (source) => (
-                          <SelectItem key={source.key} value={source.key}>
-                            {source.label}
-                          </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Chọn nguồn đặt phòng trực tiếp (Nhân viên, Đại lý, v.v.)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
-
-        {bookingType === "OTA" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="otaInformationId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Nền tảng OTA <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger className="bg-secondary">
-                        <SelectValue placeholder="Chọn nền tảng OTA" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {otaList?.map((ota) => (
-                        <SelectItem key={ota.id} value={ota.id}>
-                          {ota.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Booking.com, Agoda, Expedia, v.v.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="otaBookingCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mã đặt phòng OTA</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Nhập mã đặt phòng từ OTA"
-                      className="bg-secondary"
-                    />
-                  </FormControl>
-                  <FormDescription>Mã booking từ nền tảng OTA</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
       </form>
     </Form>
   );
