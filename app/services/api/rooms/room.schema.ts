@@ -104,6 +104,14 @@ const AvailableRoomItemSchema = z.object({
 });
 const AvailableRoomsInternalResponseSchema = z.array(AvailableRoomItemSchema);
 
+const BookingDetailRoomItemSchema = z.object({
+  roomId: z.string(),
+  roomName: z.string(),
+  roomTypeId: z.string(),
+  roomTypeName: z.string(),
+  fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+});
 export const RoomSchema = {
   RoomTypeEnum,
   RoomStatusEnum,
@@ -120,4 +128,5 @@ export const RoomSchema = {
   AvailableRoomsInternalResponseSchema,
   AvailableRoomItemSchema,
   RoomListResponseSchema,
+  BookingDetailRoomItemSchema,
 };

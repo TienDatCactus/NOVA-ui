@@ -7,6 +7,13 @@ const AUTH = {
 const DASHBOARD = {
   reservation: {
     index: "/dashboard/reservation",
+    bookings: "/dashboard/reservation/bookings",
+    bookingDetail: (bookingCode: string) =>
+      `/dashboard/reservation/bookings/detail/${bookingCode}`,
+    newBooking: "/dashboard/reservation/new-booking",
   },
 };
-export { AUTH, DASHBOARD };
+const CUSTOMER = {
+  chat: "/customer/chat",
+};
+export { AUTH, DASHBOARD, CUSTOMER };

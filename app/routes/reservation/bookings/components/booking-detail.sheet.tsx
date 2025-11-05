@@ -1,22 +1,11 @@
 // booking-detail.dialog.tsx
 import { differenceInDays, format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  BedDouble,
-  Calendar,
-  Clock,
-  CreditCard,
-  FileText,
-  Mail,
-  MapPin,
-  Phone,
-  Receipt,
-  Users,
-} from "lucide-react";
+import { Clock, Mail, MapPin, Phone, Receipt } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
@@ -27,10 +16,14 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { Skeleton } from "~/components/ui/skeleton";
-import { cn, formatMoney } from "~/lib/utils";
 import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
+import { cn, formatMoney } from "~/lib/utils";
 import { PAYMENT_STATUSES } from "~/services/types/payment.types";
 import { useBookingDetail } from "../container/booking-query.hooks";
+import {
+  BOOKING_SOURCES,
+  BOOKING_STATUSES,
+} from "~/services/types/booking.types";
 
 function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
   const [open, setOpen] = useState(false);
@@ -65,14 +58,24 @@ function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
             </div>
             {data && (
               <div className="flex gap-2">
-                <Badge variant="warning">{data.status}</Badge>
-                <Badge variant="warning">
+                <Badge variant={BOOKING_STATUSES.find(
+                      (status) => status.value === data.status
+                    )?.variant}>
                   {
-                    PAYMENT_STATUSES.find(
-                      (status) => status.key === data.paymentStatus
+                    BOOKING_STATUSES.find(
+                      (status) => status.value === data.status
                     )?.label
                   }
                 </Badge>
+                {data.paymentStatus && (
+                  <Badge variant="warning">
+                    {
+                      PAYMENT_STATUSES.find(
+                        (status) => status.key === data.paymentStatus
+                      )?.label
+                    }
+                  </Badge>
+                )}
               </div>
             )}
           </div>
@@ -116,24 +119,28 @@ function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
                   <p className="text-base font-semibold">
                     {data.customer.fullName}
                   </p>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                    <a
-                      href={`tel:${data.customer.phoneNumber}`}
-                      className="hover:underline text-blue-600"
-                    >
-                      {data.customer.phoneNumber}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Mail className="h-4 w-4 text-gray-500" />
-                    <a
-                      href={`mailto:${data.customer.email}`}
-                      className="hover:underline text-blue-600"
-                    >
-                      {data.customer.email}
-                    </a>
-                  </div>
+                  {data.customer.phoneNumber && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      <a
+                        href={`tel:${data.customer.phoneNumber}`}
+                        className="hover:underline text-blue-600"
+                      >
+                        {data.customer.phoneNumber}
+                      </a>
+                    </div>
+                  )}
+                  {data.customer.email && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <Mail className="h-4 w-4 text-gray-500" />
+                      <a
+                        href={`mailto:${data.customer.email}`}
+                        className="hover:underline text-blue-600"
+                      >
+                        {data.customer.email}
+                      </a>
+                    </div>
+                  )}
                 </div>
                 {data.note && (
                   <section className="">
@@ -161,8 +168,13 @@ function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
                 </h3>
                 <Badge variant={"info"} className=" flex items-center  text-sm">
                   <MapPin />
-                  <span>Nguồn:</span>
-                  <span className="font-medium">{data.source}</span>
+                  <span className="font-medium">
+                    {
+                      BOOKING_SOURCES.find(
+                        (source) => source.key === data.source
+                      )?.label
+                    }
+                  </span>
                 </Badge>
               </div>
 

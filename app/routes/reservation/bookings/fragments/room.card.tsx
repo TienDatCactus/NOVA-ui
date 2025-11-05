@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Bed,
   DoorOpen,
@@ -8,7 +6,6 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { useState } from "react";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -29,55 +26,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Skeleton } from "~/components/ui/skeleton";
 import Image from "~/components/ui/image";
+import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
-import { RoomSchema } from "~/services/api/rooms/room.schema";
-import { cn } from "~/lib/utils";
 import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 
 const { AvailableRoomItemSchema } = RoomSchema;
 
 type RoomTypeCardProps = {
   roomType: z.infer<typeof AvailableRoomItemSchema>;
-  onBookNow?: (roomTypeId: string, roomId?: string) => void;
-  onViewDetails?: (roomTypeId: string) => void;
 };
 
 /**
  * Card hiển thị room type với thông tin chi tiết
  * Fetch room details để hiển thị hình ảnh và thông tin đầy đủ
  */
-function RoomTypeCard({
-  roomType,
-  onBookNow,
-  onViewDetails,
-}: RoomTypeCardProps) {
-  const [imageError, setImageError] = useState(false);
-
+function RoomTypeCard({ roomType }: RoomTypeCardProps) {
   // Fetch details of the first available room to get images
   const firstAvailableRoom = roomType.availableRooms[0];
   const { data: roomDetail, isPending: isLoadingDetail } = useRoomDetail({
     id: firstAvailableRoom?.roomId,
   });
 
-  const handleBookNow = () => {
-    onBookNow?.(roomType.roomTypeId, firstAvailableRoom?.roomId);
-  };
-
-  const handleViewDetails = () => {
-    onViewDetails?.(roomType.roomTypeId);
-  };
-
   return (
-    <Card className="max-w-md pt-0">
+    <Card className="pt-0 h-full">
       <CardContent className="px-0">
         <div className="relative h-48 bg-muted overflow-hidden">
           {isLoadingDetail ? (
             <Skeleton className="w-full h-full" />
-          ) : roomDetail?.imageUrls &&
-            roomDetail.imageUrls.length > 0 &&
-            !imageError ? (
+          ) : roomDetail?.imageUrls ? (
             <>
               <Image
                 src={roomDetail.imageUrls[0]}
@@ -85,7 +63,6 @@ function RoomTypeCard({
                 width={400}
                 height={300}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                onError={() => setImageError(true)}
               />
               {roomDetail.imageUrls.length > 1 && (
                 <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
@@ -118,13 +95,13 @@ function RoomTypeCard({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg">{roomType.roomTypeName}</CardTitle>
-            <CardDescription className="flex items-center gap-3 mt-2">
-              <span className="flex items-center gap-1">
-                <Bed className="h-3 w-3" />
+            <CardDescription className="flex items-center text-sm gap-3 mt-2">
+              <span className="grid gap-1">
+                <Bed className="h-4 w-4" />
                 {roomType.totalRooms} phòng
               </span>
-              <span className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
+              <span className="grid gap-1">
+                <Users className="h-4 w-4" />
                 Tối đa {roomType.maxOccupancy} khách
               </span>
             </CardDescription>
@@ -139,12 +116,12 @@ function RoomTypeCard({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleViewDetails}>
+                <DropdownMenuItem>
                   <DoorOpen className="h-4 w-4 mr-2" />
                   Xem chi tiết loại phòng
                 </DropdownMenuItem>
                 {roomType.availableCount > 0 && (
-                  <DropdownMenuItem onClick={handleBookNow}>
+                  <DropdownMenuItem>
                     <User className="h-4 w-4 mr-2" />
                     Đặt phòng
                   </DropdownMenuItem>
@@ -184,16 +161,11 @@ function RoomTypeCard({
         </div>
       </CardContent>
       <CardFooter className="gap-3 max-sm:flex-col max-sm:items-stretch">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={handleViewDetails}
-        >
+        <Button variant="outline" size="sm" className="flex-1">
           Chi tiết
         </Button>
         {roomType.availableCount > 0 && (
-          <Button size="sm" className="flex-1" onClick={handleBookNow}>
+          <Button size="sm" className="flex-1">
             Đặt ngay
           </Button>
         )}

@@ -60,7 +60,7 @@ function RoomsFilterSidebar({
         )}
       </div>
 
-      <Card className="p-4 shadow-s">
+      <Card className="p-4 shadow-sm">
         <CardContent className="px-0">
           <div className="space-y-2">
             <Label htmlFor="search" className="text-sm font-medium">

@@ -1,7 +1,7 @@
 import z from "zod";
 import { BookingSchema } from "../api/booking/booking.schema";
 import { PaymentSchema } from "./payment.schema";
-import { OrderSchema } from "../api/order/order.schema";
+import { OrderSchema } from "../api/orders/order.schema";
 
 const CustomerInfoFormSchema = z
   .object({
@@ -32,6 +32,9 @@ const CustomerInfoFormSchema = z
 
 const RoomSelectionFormSchema = z.object({
   roomIds: z.array(z.string()).min(1, "Phải chọn ít nhất 1 phòng"),
+});
+
+const ServicesBreakfastFormSchema = z.object({
   isBreakfastAll:
     BookingSchema.StaffCreateBookingSchema.shape.isBreakfastAll.optional(),
   breakfastDates:
@@ -50,5 +53,6 @@ const ReviewPaymentFormSchema = z.object({
 export const FormSchema = {
   CustomerInfoFormSchema,
   RoomSelectionFormSchema,
+  ServicesBreakfastFormSchema,
   ReviewPaymentFormSchema,
 };

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useServiceDetail } from "~/routes/services/container/services/query.hooks";
 import { useMenuItemDetail } from "~/routes/menu/container/menu/query.hooks";
 import type z from "zod";
-import { OrderSchema } from "~/services/api/order/order.schema";
+import { OrderSchema } from "~/services/api/orders/order.schema";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
@@ -13,8 +13,8 @@ type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
  */
 export function useOrderTotals(items: ServiceOrderItemDto[]) {
   // Fetch all service details
-  const serviceItems = items.filter((item) => item.itemType === "service");
-  const menuItems = items.filter((item) => item.itemType === "menu");
+  const serviceItems = items.filter((item) => item.itemType === "ServiceItem");
+  const menuItems = items.filter((item) => item.itemType === "MenuItem");
 
   // Create queries for services
   const serviceQueries = serviceItems.map((item) =>

@@ -1,7 +1,8 @@
 import z from "zod";
 import { PaymentSchema } from "../../schema/payment.schema";
 import { InvoiceSchema } from "../invoices/invoice.schema";
-import { OrderSchema } from "../order/order.schema";
+import { OrderSchema } from "../orders/order.schema";
+import { RoomSchema } from "../rooms/room.schema";
 
 const BookingSourceEnum = z.enum(
   ["DirectStaff", "DirectCustomer", "OTA", "Agency"],
@@ -192,12 +193,13 @@ const StaffCreateBookingResponseSchema = z.object({
   serviceInvoice: InvoiceSchema.ServiceInvoiceSchema.optional().nullable(),
 });
 const BookingListItemSchema = z.object({
-  bookingCode: z.string().min(1, "bookingCode không được để trống"),
-  customerName: z.string().min(1, "customerName không được để trống"),
-  checkinDate: z.string().min(1, "checkinDate không được để trống"),
-  checkoutDate: z.string().min(1, "checkoutDate không được để trống"),
-  source: z.string().min(1, "source không được để trống"),
-  status: z.string(),
+  bookingCode: z.string().optional(),
+  customerName: z.string().optional(),
+  checkinDate: z.string().optional(),
+  checkoutDate: z.string().optional(),
+  source: z.string().optional(),
+  otaName: z.string().optional().nullable(),
+  status: z.string().optional(),
 });
 const BookingListResponseSchema = z.array(BookingListItemSchema).optional();
 
@@ -249,17 +251,7 @@ const BookingDetailItemSchema = z.object({
     phoneNumber: z.string().optional().nullable(),
     email: z.email().optional().nullable(),
   }),
-  rooms: z.array(
-    z.object({
-      bookingRoomId: z.string(),
-      roomId: z.string(),
-      roomName: z.string(),
-      roomTypeId: z.string(),
-      roomTypeName: z.string(),
-      fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
-      toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
-    })
-  ),
+  rooms: z.array(RoomSchema.BookingDetailRoomItemSchema),
   invoices: InvoiceSchema.InvoiceListResponseSchema.optional(),
 });
 

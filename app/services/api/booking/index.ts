@@ -12,6 +12,8 @@ import type {
   StaffBookingPricePreviewRequestDto,
   StaffBookingPricePreviewResponseDto,
   StaffCancelBookingResponseDto,
+  StaffChangeRoomRequestDto,
+  StaffChangeRoomResponseDto,
   StaffCreateBookingDto,
   StaffCreateBookingResponseDto,
   StaffUpdateBookingRequestDto,
@@ -45,6 +47,7 @@ async function getBookingList(
     const resp = await http.get(Booking.list, { params });
     return BookingListResponseSchema.parseAsync(resp.data);
   } catch (err) {
+    console.error(err);
     return Promise.reject(err);
   }
 }
@@ -84,6 +87,7 @@ async function staffCreateBooking(
     });
     return resp.data;
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -207,6 +211,23 @@ async function getBookingOTA(): Promise<BookingOTAResponseDto> {
     return Promise.reject(error);
   }
 }
+
+async function exportBookings(date?: string): Promise<Blob> {
+  try {
+    const params = date ? { date } : {};
+    const resp = await http.get(Booking.Export, {
+      params,
+      responseType: "blob",
+    });
+    if (resp && typeof resp === "object" && "data" in resp) {
+      return (resp as any).data;
+    }
+    return resp as Blob;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
@@ -218,4 +239,5 @@ export const BookingService = {
   getAvailableRoomsForChange,
   staffChangeRoom,
   staffCancelBooking,
+  exportBookings,
 };

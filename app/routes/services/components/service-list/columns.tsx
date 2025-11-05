@@ -118,7 +118,7 @@ export const columns: ColumnDef<ServiceItem>[] = [
       const isActive = row.original.active;
       return (
         <div className="flex justify-end">
-          <Badge variant={isActive ? "success" : "secondary"}>
+          <Badge variant={isActive ? "success" : "warning"}>
             {isActive ? "Hoạt động" : "Ngưng hoạt động"}
           </Badge>
         </div>

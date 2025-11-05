@@ -14,22 +14,24 @@ import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import { useCancelBooking } from "../container/booking-mutation.hooks";
 import { buttonVariants } from "~/components/ui/button";
 import { Alert, AlertTitle } from "~/components/ui/alert";
+import { useBookingDetail } from "../container/booking-query.hooks";
 
 interface CancelBookingAlertDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  bookingId?: string;
-  bookingDetail?: BookingDetailResponseDto | null;
-  onSuccess?: () => void;
+  bookingCode?: string;
 }
 
 export default function CancelBookingAlertDialog({
   open,
   onOpenChange,
-  bookingDetail,
+  bookingCode,
 }: CancelBookingAlertDialogProps) {
+  const { data: bookingDetail } = useBookingDetail({
+    bookingCode,
+    enabled: open,
+  });
   const id = bookingDetail?.id;
-  const bookingCode = bookingDetail?.bookingCode;
 
   const { mutate: cancelBooking, isPending } = useCancelBooking(id);
 

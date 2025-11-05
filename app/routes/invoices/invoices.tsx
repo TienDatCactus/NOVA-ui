@@ -12,10 +12,5 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  return (
-    <div>
-      {/* Frontend Code here. */}
-      <h1>New Route</h1>
-    </div>
-  );
+  return <div></div>;
 }

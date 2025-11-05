@@ -1,26 +1,29 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { OrderService } from "~/services/api/order";
+import { OrderService } from "~/services/api/orders";
 import type {
   CreatePOSOrderRequestDto,
   AddItemsToPOSOrderRequestDto,
-} from "~/services/api/order/dto";
+} from "~/services/api/orders/dto";
 
 /**
  * Create a new POS order
  * Invalidates: pos-orders list for the invoice
+ * Uses idempotency key to prevent duplicate orders
  */
 function useCreatePOSOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreatePOSOrderRequestDto) =>
-      await OrderService.createPOSOrder(data),
+    mutationFn: async (data: CreatePOSOrderRequestDto) => {
+      const idempotencyKey = crypto.randomUUID();
+      return await OrderService.createPOSOrder(data, idempotencyKey);
+    },
     onSuccess: (data, variables) => {
       toast.success("Đơn hàng đã được tạo thành công");
-      // Invalidate orders list for this invoice
+      // Invalidate orders list - response doesn't include invoiceId
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders", "by-invoice", variables.invoiceId],
+        queryKey: ["pos-orders", "by-invoice"],
       });
     },
     onError: (error) => {
@@ -33,6 +36,7 @@ function useCreatePOSOrder() {
 /**
  * Add an item to an existing POS order
  * Invalidates: specific order detail and invoice orders list
+ * Uses idempotency key to prevent duplicate item additions
  */
 function useAddItemToPOSOrder() {
   const queryClient = useQueryClient();
@@ -44,7 +48,14 @@ function useAddItemToPOSOrder() {
     }: {
       orderId: string;
       data: AddItemsToPOSOrderRequestDto;
-    }) => await OrderService.addItemsToPOSOrder(orderId, data),
+    }) => {
+      const idempotencyKey = crypto.randomUUID();
+      return await OrderService.addItemsToPOSOrder(
+        orderId,
+        data,
+        idempotencyKey
+      );
+    },
     onSuccess: (data, variables) => {
       toast.success("Đã thêm món vào đơn hàng");
       // Invalidate the order detail
@@ -66,6 +77,7 @@ function useAddItemToPOSOrder() {
 /**
  * Delete an item from a POS order
  * Invalidates: specific order detail and invoice orders list
+ * Uses idempotency key to prevent duplicate deletions
  */
 function useDeleteItemFromPOSOrder() {
   const queryClient = useQueryClient();
@@ -77,7 +89,14 @@ function useDeleteItemFromPOSOrder() {
     }: {
       orderId: string;
       itemId: string;
-    }) => await OrderService.deleteItemFromPOSOrder(orderId, itemId),
+    }) => {
+      const idempotencyKey = crypto.randomUUID();
+      return await OrderService.deleteItemFromPOSOrder(
+        orderId,
+        itemId,
+        idempotencyKey
+      );
+    },
     onSuccess: (data, variables) => {
       toast.success("Đã xóa món khỏi đơn hàng");
       // Invalidate the order detail
@@ -99,13 +118,16 @@ function useDeleteItemFromPOSOrder() {
 /**
  * Complete a POS order
  * Marks the order as completed and locks it from further edits
+ * Uses idempotency key to prevent duplicate completions
  */
 function useCompletePOSOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (orderId: string) =>
-      await OrderService.completePOSOrder(orderId),
+    mutationFn: async (orderId: string) => {
+      const idempotencyKey = crypto.randomUUID();
+      return await OrderService.completePOSOrder(orderId, idempotencyKey);
+    },
     onSuccess: (data, orderId) => {
       toast.success("Đơn hàng đã hoàn thành");
       // Invalidate the order detail
@@ -127,13 +149,16 @@ function useCompletePOSOrder() {
 /**
  * Cancel a POS order
  * Marks the order as cancelled and prevents further modifications
+ * Uses idempotency key to prevent duplicate cancellations
  */
 function useCancelPOSOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (orderId: string) =>
-      await OrderService.cancelPOSOrder(orderId),
+    mutationFn: async (orderId: string) => {
+      const idempotencyKey = crypto.randomUUID();
+      return await OrderService.cancelPOSOrder(orderId, idempotencyKey);
+    },
     onSuccess: (data, orderId) => {
       toast.success("Đơn hàng đã bị hủy");
       // Invalidate the order detail

@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   isRouteErrorResponse,
+  Link,
   Links,
   Meta,
   Outlet,
@@ -18,12 +19,21 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, DiamondPlus } from "lucide-react";
 import "./index.css";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/sonner";
-import GlobalLoader from "./features/loading";
+import GlobalLoader, { SpinnerLoader } from "./features/loading";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./components/ui/dropdown-menu";
+import { CUSTOMER } from "./lib/fe-url";
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -48,6 +58,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className="group fixed bottom-10 right-10 rounded-full size-10 z-20"
+              size="icon"
+            >
+              <DiamondPlus className="size-5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>CSKH</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Link to={CUSTOMER.chat}>Chat</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>Dịch vụ</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Toaster position="top-right" />
         <ScrollRestoration />
         <Scripts />
@@ -64,9 +92,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       {isNavigating && (
-        <div className="absolute inset-0 flex items-center justify-center z-50 bg-white">
-          <GlobalLoader />
-        </div>
+        <SpinnerLoader fullScreen size="lg" text="Đang tải..." />
       )}
       <Outlet />
     </QueryClientProvider>

@@ -6,12 +6,14 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,6 +22,8 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
+import { Card } from "~/components/ui/card";
+import { Loader2, Pencil } from "lucide-react";
 import { useUpdateUnit } from "../container/unit-mutation.hooks";
 import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
 
@@ -27,8 +31,12 @@ const EditUnitFormSchema = z.object({
   code: z
     .string()
     .min(1, "Mã đơn vị không được để trống")
-    .max(10, "Mã đơn vị không được quá 10 ký tự"),
-  name: z.string().min(1, "Tên đơn vị không được để trống"),
+    .max(10, "Mã đơn vị không được quá 10 ký tự")
+    .toUpperCase(),
+  name: z
+    .string()
+    .min(1, "Tên đơn vị không được để trống")
+    .max(100, "Tên đơn vị không được quá 100 ký tự"),
   active: z.boolean(),
 });
 
@@ -91,73 +99,108 @@ export default function EditUnitDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>Chỉnh sửa đơn vị tính</DialogTitle>
-          <DialogDescription>
-            Cập nhật thông tin đơn vị tính
-          </DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-blue-100 p-2.5 dark:bg-blue-900/20">
+              <Pencil className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl">
+                Chỉnh sửa đơn vị tính
+              </DialogTitle>
+              <DialogDescription className="mt-1">
+                Cập nhật thông tin đơn vị đo lường
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
+            className="space-y-6 mt-4"
           >
-            {/* Code */}
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mã đơn vị *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="VD: KG, L, CHAI..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-4">
+              {/* Code */}
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">
+                      Mã đơn vị <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="VD: KG, L, CHAI, HỘP..."
+                        className="font-mono uppercase"
+                        maxLength={10}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      Mã viết tắt của đơn vị (tối đa 10 ký tự)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tên đơn vị *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="VD: Kilogram, Lít, Chai..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              {/* Name */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">
+                      Tên đơn vị <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="VD: Kilogram, Lít, Chai, Hộp..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      Tên đầy đủ của đơn vị đo lường
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Active */}
-            <FormField
-              control={form.control}
-              name="active"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Trạng thái</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      Đơn vị đang hoạt động
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+              {/* Active */}
+              <FormField
+                control={form.control}
+                name="active"
+                render={({ field }) => (
+                  <FormItem>
+                    <Card className="p-4 border-muted bg-muted/30">
+                      <div className="flex items-center justify-between space-x-4">
+                        <div className="flex-1 space-y-1">
+                          <FormLabel className="text-sm font-semibold">
+                            Trạng thái hoạt động
+                          </FormLabel>
+                          <FormDescription className="text-xs">
+                            Cho phép sử dụng đơn vị này trong hệ thống
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </div>
+                    </Card>
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3">
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button
                 type="button"
                 variant="outline"
@@ -166,10 +209,11 @@ export default function EditUnitDialog({
               >
                 Hủy
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="gap-2">
+                {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isPending ? "Đang lưu..." : "Lưu thay đổi"}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

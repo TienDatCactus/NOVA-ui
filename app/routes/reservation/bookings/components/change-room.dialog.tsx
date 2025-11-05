@@ -30,13 +30,13 @@ import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
 interface ChangeRoomDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  bookingDetail?: BookingDetailResponseDto;
+  bookingCode?: string;
 }
 
 export default function ChangeRoomDialog({
   open,
   onOpenChange,
-  bookingDetail,
+  bookingCode,
 }: ChangeRoomDialogProps) {
   const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string | null>(

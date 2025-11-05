@@ -1,83 +1,58 @@
-import { useEffect } from "react";
 import { useServiceDetail } from "~/routes/services/container/services/query.hooks";
 import { useMenuItemDetail } from "~/routes/menu/container/menu/query.hooks";
 import { Skeleton } from "~/components/ui/skeleton";
+import { useServiceOrderStore } from "~/store/service-order.store";
 import OrderItemCard from "./order-item.card";
 
 interface OrderItemWrapperProps {
-  itemType: string;
   itemId: string;
-  quantity: number;
-  note: string;
-  scheduledDate: string;
-  onQuantityChange: (newQuantity: number) => void;
-  onNoteChange: (note: string) => void;
-  onScheduledDateChange: (date: string) => void;
-  onRemove: () => void;
-  onPriceCalculated?: (
-    itemId: string,
-    unitPrice: number,
-    quantity: number
-  ) => void;
 }
 
 /**
- * Wrapper component that fetches item details and renders OrderItemCard
- * Uses useServiceDetail or useMenuItemDetail based on itemType
+ * Wrapper component that fetches item details from global store and API
+ * Connects OrderItemCard to the global service-order store
  */
-export default function OrderItemWrapper({
-  itemType,
-  itemId,
-  quantity,
-  note,
-  scheduledDate,
-  onQuantityChange,
-  onNoteChange,
-  onScheduledDateChange,
-  onRemove,
-  onPriceCalculated,
-}: OrderItemWrapperProps) {
-  // Fetch service detail if itemType is "service"
+export default function OrderItemWrapper({ itemId }: OrderItemWrapperProps) {
+  // Get item from global store
+  const item = useServiceOrderStore((s) =>
+    s.services.find((service) => service.itemId === itemId)
+  );
+
+  // Fetch details based on item type
   const {
     data: serviceDetail,
     isLoading: isLoadingService,
     isError: isServiceError,
   } = useServiceDetail(itemId, {
-    enabled: itemType === "service",
+    enabled: item?.itemType === "ServiceItem",
   });
 
-  // Fetch menu detail if itemType is "menu"
   const {
     data: menuDetail,
     isLoading: isLoadingMenu,
     isError: isMenuError,
   } = useMenuItemDetail(itemId, {
-    enabled: itemType === "menu",
+    enabled: item?.itemType === "MenuItem",
   });
 
   const isLoading = isLoadingService || isLoadingMenu;
   const isError = isServiceError || isMenuError;
 
-  // Extract name and price based on item type
+  if (!item) {
+    return null;
+  }
+
   let itemName = "";
   let unitPrice = 0;
 
-  if (itemType === "service" && serviceDetail) {
+  if (item.itemType === "ServiceItem" && serviceDetail) {
     itemName = serviceDetail.name;
     unitPrice = serviceDetail.basePrice;
-  } else if (itemType === "menu" && menuDetail) {
+  } else if (item.itemType === "MenuItem" && menuDetail) {
     itemName = menuDetail.name;
     unitPrice = menuDetail.price;
   }
 
-  // Report price to parent for total calculation
-  useEffect(() => {
-    if (!isLoading && !isError && unitPrice > 0) {
-      onPriceCalculated?.(itemId, unitPrice, quantity);
-    }
-  }, [itemId, unitPrice, quantity, isLoading, isError, onPriceCalculated]);
-
-  // Show skeleton while loading
   if (isLoading) {
     return (
       <div className="py-4 border-b last:border-0 space-y-2">
@@ -100,16 +75,6 @@ export default function OrderItemWrapper({
   }
 
   return (
-    <OrderItemCard
-      itemName={itemName || itemId}
-      unitPrice={unitPrice}
-      quantity={quantity}
-      note={note || null}
-      scheduledDate={scheduledDate}
-      onQuantityChange={onQuantityChange}
-      onNoteChange={onNoteChange}
-      onScheduledDateChange={onScheduledDateChange}
-      onRemove={onRemove}
-    />
+    <OrderItemCard itemId={itemId} itemName={itemName} unitPrice={unitPrice} />
   );
 }

@@ -23,8 +23,15 @@ export default function ServicesViewLayout({
 }: ServicesViewLayoutProps) {
   const { data: serviceTypes } = useServiceTypes();
   return (
-    <div className="flex flex-col space-y-2 h-full">
-      <div className=" pb-4">
+    <div className="flex gap-6 h-full">
+      <ServicesCommandBar
+        serviceTypes={serviceTypes || []}
+        filters={filters}
+        resetFilters={resetFilters}
+        updateFilter={updateFilter}
+      />
+
+      <div className="flex-1  space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
@@ -44,14 +51,6 @@ export default function ServicesViewLayout({
             </div>
           </div>
         </div>
-      </div>
-      <div className="flex gap-2">
-        <ServicesCommandBar
-          serviceTypes={serviceTypes || []}
-          filters={filters}
-          resetFilters={resetFilters}
-          updateFilter={updateFilter}
-        />
         <main className="flex-1">{children}</main>
       </div>
     </div>

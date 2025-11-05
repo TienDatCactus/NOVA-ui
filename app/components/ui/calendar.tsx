@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {
   ChevronDownIcon,
@@ -75,7 +73,7 @@ function Calendar({
           defaultClassNames.dropdown_root
         ),
         dropdown: cn(
-          "absolute bg-popover inset-0 opacity-0",
+          "absolute bg-background inset-0 opacity-0",
           defaultClassNames.dropdown
         ),
         caption_label: cn(

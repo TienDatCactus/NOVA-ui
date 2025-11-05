@@ -36,7 +36,7 @@ export function RoomTypesFilterSidebar({
           </Button>
         )}
       </div>
-      <Card className="p-4 shadow-s">
+      <Card className="p-4 shadow-sm">
         <CardContent className="space-y-2 px-0">
           <Label htmlFor="room-types-search">Tìm kiếm</Label>
           <Input
@@ -44,11 +44,11 @@ export function RoomTypesFilterSidebar({
             placeholder="Tìm kiếm..."
             value={filters.searchText}
             onChange={(e) => onFilterChange("searchText", e.target.value)}
-            startAddon={<Search className=" h-4 w-4 text-muted-foreground" />}
+            startAddon={<Search className=" h-4 w-4 " />}
           />
         </CardContent>
 
-        <CardContent className="space-y-2 px-0">
+        <CardContent className="space-y-2 *:text-card-foreground px-0">
           <Label>Trạng thái</Label>
           <RadioGroup
             value={filters.activeFilter}
