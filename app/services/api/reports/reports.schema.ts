@@ -27,6 +27,15 @@ const ReservationReportsSchema = z.object({
       available: z.number(),
     })
   ),
+  dailyAvailability: z.array(
+    z.object({
+      date: z.string(),
+      available: z.record(z.string(), z.number()),
+      booked: z.record(z.string(), z.number()),
+      checkin: z.record(z.string(), z.number()),
+      checkout: z.record(z.string(), z.number()),
+    })
+  ),
 });
 
 // Schema cho Daily Booking Dashboard API mới

@@ -124,36 +124,43 @@ export function ReportsTableModal({
     });
   };
 
-  // Extract unique dates from bookingData
-  const dates = data?.bookingData?.map((item: { date: string }) => item.date) || [];
+  // Extract unique dates from dailyAvailability
+  const dates = data?.dailyAvailability?.map((item: { date: string }) => {
+    const [year, month, day] = item.date.split("-");
+    return `${day}/${month}`;
+  }) || [];
   const todayStr = format(new Date(), "dd/MM");
 
   // Export to CSV
   const handleExport = () => {
-    if (!data || !data.bookingData || !data.availableRoomsTrendData) return;
+    if (!data || !data.dailyAvailability) return;
 
     const csvRows = [];
     csvRows.push(["Danh mục", ...dates].join(","));
     
-    // Phòng trống - Calculate totals from availableRoomsTrendData
-    const availableTotals = data.availableRoomsTrendData.map((dayData: any) => {
-      return Object.entries(dayData).reduce((sum, [key, value]) => {
-        if (key !== "date" && typeof value === "number") {
-          return sum + value;
-        }
-        return sum;
-      }, 0);
+    // Phòng trống - Calculate totals from dailyAvailability
+    const availableTotals = data.dailyAvailability.map((dayData: any) => {
+      return Object.values(dayData.available).reduce((sum: number, value: any) => sum + value, 0);
     });
     csvRows.push(["Phòng trống", ...availableTotals].join(","));
     
     // Đã đặt
-    csvRows.push(["Đã đặt", ...data.bookingData.map((d: { booked: number }) => d.booked)].join(","));
+    const bookedTotals = data.dailyAvailability.map((dayData: any) => {
+      return Object.values(dayData.booked).reduce((sum: number, value: any) => sum + value, 0);
+    });
+    csvRows.push(["Đã đặt", ...bookedTotals].join(","));
     
     // Check-in
-    csvRows.push(["Check-in", ...data.bookingData.map((d: { checkin: number }) => d.checkin)].join(","));
+    const checkinTotals = data.dailyAvailability.map((dayData: any) => {
+      return Object.values(dayData.checkin).reduce((sum: number, value: any) => sum + value, 0);
+    });
+    csvRows.push(["Check-in", ...checkinTotals].join(","));
     
     // Check-out
-    csvRows.push(["Check-out", ...data.bookingData.map((d: { checkout: number }) => d.checkout)].join(","));
+    const checkoutTotals = data.dailyAvailability.map((dayData: any) => {
+      return Object.values(dayData.checkout).reduce((sum: number, value: any) => sum + value, 0);
+    });
+    csvRows.push(["Check-out", ...checkoutTotals].join(","));
 
     const csvContent = csvRows.join("\n");
     const blob = new Blob(["\ufeff" + csvContent], {
@@ -192,7 +199,7 @@ export function ReportsTableModal({
               size="sm"
               onClick={handleExport}
               className="gap-2"
-              disabled={!data || !data.bookingData}
+              disabled={!data || !data.dailyAvailability}
             >
               <Download className="h-4 w-4" />
               Xuất file
@@ -303,8 +310,7 @@ export function ReportsTableModal({
             <div className="flex items-center justify-center h-64 text-muted-foreground">
               Đang tải dữ liệu...
             </div>
-          ) : !data || !data.bookingData || !data.availableRoomsTrendData || !data.roomTypeComparisonData ||
-             data.bookingData.length === 0 || data.availableRoomsTrendData.length === 0 ? (
+          ) : !data || !data.dailyAvailability || data.dailyAvailability.length === 0 ? (
             <div className="flex items-center justify-center h-64 text-muted-foreground">
               Không có dữ liệu để hiển thị
             </div>
@@ -360,15 +366,12 @@ export function ReportsTableModal({
                       Phòng trống
                     </div>
                   </TableCell>
-                  {data.availableRoomsTrendData?.map((dayData: any) => {
-                    const isToday = dayData.date === todayStr;
+                  {data.dailyAvailability?.map((dayData: any) => {
+                    const [year, month, day] = dayData.date.split("-");
+                    const dateStr = `${day}/${month}`;
+                    const isToday = dateStr === todayStr;
                     // Calculate total available rooms for this day (sum all room types)
-                    const total = Object.entries(dayData).reduce((sum, [key, value]) => {
-                      if (key !== "date" && typeof value === "number") {
-                        return sum + value;
-                      }
-                      return sum;
-                    }, 0);
+                    const total = Object.values(dayData.available).reduce((sum: number, value: any) => sum + value, 0);
                     
                     return (
                       <TableCell
@@ -385,16 +388,18 @@ export function ReportsTableModal({
                 </TableRow>
 
                 {/* Room Type Breakdown for Available - Show when expanded */}
-                {expandedRows.has("available-rooms") && data.availableRoomsTrendData && (() => {
-                  // Extract unique room types from first day's data
-                  const firstDay = data.availableRoomsTrendData[0];
-                  const roomTypes = Object.keys(firstDay).filter(key => key !== "date");
+                {expandedRows.has("available-rooms") && data.dailyAvailability && (() => {
+                  // Extract unique room types from first day's available data
+                  const firstDay = data.dailyAvailability[0];
+                  const roomTypes = Object.keys(firstDay.available);
                   
                   return roomTypes.map((roomType: string) => (
                     <TableRow key={roomType} className="hover:bg-muted/20">
                       <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType}</TableCell>
-                      {data.availableRoomsTrendData.map((dayData: any) => {
-                        const isToday = dayData.date === todayStr;
+                      {data.dailyAvailability.map((dayData: any) => {
+                        const [year, month, day] = dayData.date.split("-");
+                        const dateStr = `${day}/${month}`;
+                        const isToday = dateStr === todayStr;
                         return (
                           <TableCell
                             key={dayData.date}
@@ -403,7 +408,7 @@ export function ReportsTableModal({
                               isToday && "bg-primary/5"
                             )}
                           >
-                            {dayData[roomType] || 0}
+                            {dayData.available[roomType] || 0}
                           </TableCell>
                         );
                       })}
@@ -423,8 +428,11 @@ export function ReportsTableModal({
                       Đã đặt
                     </div>
                   </TableCell>
-                  {data.bookingData.map((dayData: { date: string; booked: number }) => {
-                    const isToday = dayData.date === todayStr;
+                  {data.dailyAvailability.map((dayData: any) => {
+                    const [year, month, day] = dayData.date.split("-");
+                    const dateStr = `${day}/${month}`;
+                    const isToday = dateStr === todayStr;
+                    const total = Object.values(dayData.booked).reduce((sum: number, value: any) => sum + value, 0);
                     return (
                       <TableCell
                         key={dayData.date}
@@ -433,32 +441,39 @@ export function ReportsTableModal({
                           isToday && "bg-primary/10"
                         )}
                       >
-                        {dayData.booked}
+                        {total}
                       </TableCell>
                     );
                   })}
                 </TableRow>
 
                 {/* Room Type Breakdown for Booked - Show when expanded */}
-                {expandedRows.has("booked-rooms") && data.roomTypeComparisonData && data.roomTypeComparisonData.map((roomType: { type: string; booked: number }) => (
-                  <TableRow key={roomType.type} className="hover:bg-muted/20">
-                    <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType.type}</TableCell>
-                    {dates.map((date: string) => {
-                      const isToday = date === todayStr;
-                      return (
-                        <TableCell
-                          key={date}
-                          className={cn(
-                            "text-center tabular-nums text-foreground",
-                            isToday && "bg-primary/5"
-                          )}
-                        >
-                          {roomType.booked}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
+                {expandedRows.has("booked-rooms") && data.dailyAvailability && (() => {
+                  const firstDay = data.dailyAvailability[0];
+                  const roomTypes = Object.keys(firstDay.booked);
+                  
+                  return roomTypes.map((roomType: string) => (
+                    <TableRow key={roomType} className="hover:bg-muted/20">
+                      <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType}</TableCell>
+                      {data.dailyAvailability.map((dayData: any) => {
+                        const [year, month, day] = dayData.date.split("-");
+                        const dateStr = `${day}/${month}`;
+                        const isToday = dateStr === todayStr;
+                        return (
+                          <TableCell
+                            key={dayData.date}
+                            className={cn(
+                              "text-center tabular-nums text-foreground",
+                              isToday && "bg-primary/5"
+                            )}
+                          >
+                            {dayData.booked[roomType] || 0}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ));
+                })()}
 
                 {/* Check-in Section */}
                 <TableRow className="bg-muted/30 hover:bg-muted/50 cursor-pointer" onClick={() => toggleRow("checkin-rooms")}>
@@ -472,8 +487,11 @@ export function ReportsTableModal({
                       Check-in
                     </div>
                   </TableCell>
-                  {data.bookingData.map((dayData: { date: string; checkin: number }) => {
-                    const isToday = dayData.date === todayStr;
+                  {data.dailyAvailability.map((dayData: any) => {
+                    const [year, month, day] = dayData.date.split("-");
+                    const dateStr = `${day}/${month}`;
+                    const isToday = dateStr === todayStr;
+                    const total = Object.values(dayData.checkin).reduce((sum: number, value: any) => sum + value, 0);
                     return (
                       <TableCell
                         key={dayData.date}
@@ -482,32 +500,39 @@ export function ReportsTableModal({
                           isToday && "bg-primary/10"
                         )}
                       >
-                        {dayData.checkin}
+                        {total}
                       </TableCell>
                     );
                   })}
                 </TableRow>
 
                 {/* Room Type Breakdown for Check-in - Show when expanded */}
-                {expandedRows.has("checkin-rooms") && data.roomTypeComparisonData && data.roomTypeComparisonData.map((roomType: { type: string; checkin: number }) => (
-                  <TableRow key={roomType.type} className="hover:bg-muted/20">
-                    <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType.type}</TableCell>
-                    {dates.map((date: string) => {
-                      const isToday = date === todayStr;
-                      return (
-                        <TableCell
-                          key={date}
-                          className={cn(
-                            "text-center tabular-nums text-foreground",
-                            isToday && "bg-primary/5"
-                          )}
-                        >
-                          {roomType.checkin}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
+                {expandedRows.has("checkin-rooms") && data.dailyAvailability && (() => {
+                  const firstDay = data.dailyAvailability[0];
+                  const roomTypes = Object.keys(firstDay.checkin);
+                  
+                  return roomTypes.map((roomType: string) => (
+                    <TableRow key={roomType} className="hover:bg-muted/20">
+                      <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType}</TableCell>
+                      {data.dailyAvailability.map((dayData: any) => {
+                        const [year, month, day] = dayData.date.split("-");
+                        const dateStr = `${day}/${month}`;
+                        const isToday = dateStr === todayStr;
+                        return (
+                          <TableCell
+                            key={dayData.date}
+                            className={cn(
+                              "text-center tabular-nums text-foreground",
+                              isToday && "bg-primary/5"
+                            )}
+                          >
+                            {dayData.checkin[roomType] || 0}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ));
+                })()}
 
                 {/* Check-out Section */}
                 <TableRow className="bg-muted/30 hover:bg-muted/50 cursor-pointer" onClick={() => toggleRow("checkout-rooms")}>
@@ -521,8 +546,11 @@ export function ReportsTableModal({
                       Check-out
                     </div>
                   </TableCell>
-                  {data.bookingData.map((dayData: { date: string; checkout: number }) => {
-                    const isToday = dayData.date === todayStr;
+                  {data.dailyAvailability.map((dayData: any) => {
+                    const [year, month, day] = dayData.date.split("-");
+                    const dateStr = `${day}/${month}`;
+                    const isToday = dateStr === todayStr;
+                    const total = Object.values(dayData.checkout).reduce((sum: number, value: any) => sum + value, 0);
                     return (
                       <TableCell
                         key={dayData.date}
@@ -531,37 +559,39 @@ export function ReportsTableModal({
                           isToday && "bg-primary/10"
                         )}
                       >
-                        {dayData.checkout}
+                        {total}
                       </TableCell>
                     );
                   })}
                 </TableRow>
 
                 {/* Room Type Breakdown for Check-out - Show when expanded */}
-                {expandedRows.has("checkout-rooms") && data.roomTypeComparisonData && data.roomTypeComparisonData.map((roomType: { type: string; available: number }) => {
-                  // For checkout, we might want to show a different calculation
-                  // For now, showing available value (can be adjusted based on business logic)
-                  const checkoutValue = roomType.available < 0 ? Math.abs(roomType.available) : 0;
-                  return (
-                    <TableRow key={roomType.type} className="hover:bg-muted/20">
-                      <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType.type}</TableCell>
-                      {dates.map((date: string) => {
-                        const isToday = date === todayStr;
+                {expandedRows.has("checkout-rooms") && data.dailyAvailability && (() => {
+                  const firstDay = data.dailyAvailability[0];
+                  const roomTypes = Object.keys(firstDay.checkout);
+                  
+                  return roomTypes.map((roomType: string) => (
+                    <TableRow key={roomType} className="hover:bg-muted/20">
+                      <TableCell className="sticky left-0 bg-background pl-8 border-r">{roomType}</TableCell>
+                      {data.dailyAvailability.map((dayData: any) => {
+                        const [year, month, day] = dayData.date.split("-");
+                        const dateStr = `${day}/${month}`;
+                        const isToday = dateStr === todayStr;
                         return (
                           <TableCell
-                            key={date}
+                            key={dayData.date}
                             className={cn(
                               "text-center tabular-nums text-foreground",
                               isToday && "bg-primary/5"
                             )}
                           >
-                            {checkoutValue}
+                            {dayData.checkout[roomType] || 0}
                           </TableCell>
                         );
                       })}
                     </TableRow>
-                  );
-                })}
+                  ));
+                })()}
               </TableBody>
             </Table>
             </div>
