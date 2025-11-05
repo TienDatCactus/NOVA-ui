@@ -27,6 +27,8 @@ const Booking = {
   preview: "StaffBookings/preview", // this is for the money calculation preview
   update: (id: string) => `StaffBookings/${id}`,
   cancel: (id: string) => `StaffBookings/${id}/cancel`,
+  changeRoom: (bookingId: string, bookingRoomId: string) =>
+    `StaffBookings/${bookingId}/rooms/${bookingRoomId}/available-for-change`,
   list: "Bookings/list",
   listByWeek: "Bookings/rooms-week",
   detailById: (id: string) => `Bookings/${id}/details`,

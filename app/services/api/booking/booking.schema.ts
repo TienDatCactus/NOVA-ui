@@ -277,6 +277,33 @@ const StaffChangeRoomResponseSchema = z.object({
   bookingCode: z.string("Booking Code không hợp lệ"),
 });
 
+const AvailableRoomForChangeSchema = z.object({
+  roomId: z.string(),
+  roomName: z.string(),
+  roomTypeId: z.string(),
+  roomTypeName: z.string(),
+  baseRate: z.number(),
+  availabilityStatus: z.string(),
+  isSameRoomType: z.boolean(),
+  conflictInfo: z
+    .object({
+      bookingCode: z.string(),
+      status: z.string(),
+      customerName: z.string().nullable(),
+      checkinDate: z.string(),
+      checkoutDate: z.string(),
+      message: z.string(),
+    })
+    .nullable(),
+});
+
+const AvailableRoomsForChangeResponseSchema = z.object({
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  message: z.string(),
+  data: z.array(AvailableRoomForChangeSchema),
+});
+
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -295,4 +322,5 @@ export const BookingSchema = {
   StaffCancelBookingResponseSchema,
   StaffChangeRoomRequestSchema,
   StaffChangeRoomResponseSchema,
+  AvailableRoomsForChangeResponseSchema,
 };

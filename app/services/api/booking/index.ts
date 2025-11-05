@@ -18,6 +18,9 @@ import type {
   StaffCreateBookingResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
+  StaffChangeRoomRequestDto,
+  StaffChangeRoomResponseDto,
+  AvailableRoomsForChangeResponseDto,
 } from "./dto";
 
 const {
@@ -34,6 +37,7 @@ const {
   StaffCancelBookingResponseSchema,
   StaffChangeRoomRequestSchema,
   StaffChangeRoomResponseSchema,
+  AvailableRoomsForChangeResponseSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -81,7 +85,6 @@ async function staffCreateBooking(
         "Idempotency-Key": idempotencyKey,
       },
     });
-    console.log(resp);
     return resp.data;
   } catch (error) {
     console.error(error);
@@ -122,6 +125,19 @@ async function staffUpdateBookingDetail(
     return StaffUpdateBookingResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function getAvailableRoomsForChange(
+  bookingId: string,
+  bookingRoomId: string
+): Promise<AvailableRoomsForChangeResponseDto> {
+  try {
+    const resp = await http.get(Booking.changeRoom(bookingId, bookingRoomId));
+    const parsed = AvailableRoomsForChangeResponseSchema.parse(resp);
+    return parsed;
+  } catch (error) {
     return Promise.reject(error);
   }
 }
@@ -220,6 +236,7 @@ export const BookingService = {
   getBookingOTA,
   staffBookingPricePreview,
   staffUpdateBookingDetail,
+  getAvailableRoomsForChange,
   staffChangeRoom,
   staffCancelBooking,
   exportBookings,
