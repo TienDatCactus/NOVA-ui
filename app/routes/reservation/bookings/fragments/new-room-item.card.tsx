@@ -3,7 +3,7 @@ import { format, parseISO } from "date-fns";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import ImageWithFallback from "~/components/ui/image";
+import Image from "~/components/ui/image";
 
 interface NewRoomItemCardProps {
   roomId: string;
@@ -37,10 +37,10 @@ export default function NewRoomItemCard({
 
   return (
     <Card className="border-dashed border-primary/50 bg-primary/5 p-0 overflow-hidden">
-      <div className="flex gap-3 p-3">
+      <div className="flex gap-3 p-3 items-center">
         {/* Room Image */}
         <div className="flex-shrink-0">
-          <ImageWithFallback
+          <Image
             src={imageUrl || ""}
             alt={roomName}
             className="w-16 h-12 object-cover rounded-md"

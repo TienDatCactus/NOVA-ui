@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import z from "zod";
-import { OrderSchema } from "~/services/api/order/order.schema";
+import { OrderSchema } from "~/services/api/orders/order.schema";
 
 const { ServiceOrderSchema, ServiceOrderItemSchema } = OrderSchema;
 
@@ -12,7 +12,10 @@ type ServiceOrderState = {
   bookingId?: string | null;
   roomId?: string | null;
   services: ServiceOrderItemDto[];
-  setContext: (ctx: { bookingId?: string | null; roomId?: string | null }) => void;
+  setContext: (ctx: {
+    bookingId?: string | null;
+    roomId?: string | null;
+  }) => void;
   replaceAll: (items: ServiceOrderItemDto[]) => void;
   clear: () => void;
   addItem: (item: ServiceOrderItemDto) => void;
@@ -29,7 +32,8 @@ export const useServiceOrderStore = create<ServiceOrderState>()(
       bookingId: null,
       roomId: null,
       services: [],
-      setContext: ({ bookingId, roomId }) => set({ bookingId: bookingId ?? null, roomId: roomId ?? null }),
+      setContext: ({ bookingId, roomId }) =>
+        set({ bookingId: bookingId ?? null, roomId: roomId ?? null }),
       replaceAll: (items) => set({ services: items }),
       clear: () => set({ services: [] }),
       addItem: (item) => {
@@ -44,7 +48,8 @@ export const useServiceOrderStore = create<ServiceOrderState>()(
         }
         set({ services: Array.from(map.values()) });
       },
-      removeById: (itemId) => set({ services: get().services.filter((s) => s.itemId !== itemId) }),
+      removeById: (itemId) =>
+        set({ services: get().services.filter((s) => s.itemId !== itemId) }),
       setQuantity: (itemId, quantity) =>
         set({
           services: get().services.map((s) =>
@@ -52,15 +57,25 @@ export const useServiceOrderStore = create<ServiceOrderState>()(
           ),
         }),
       setNote: (itemId, note) =>
-        set({ services: get().services.map((s) => (s.itemId === itemId ? { ...s, note } : s)) }),
+        set({
+          services: get().services.map((s) =>
+            s.itemId === itemId ? { ...s, note } : s
+          ),
+        }),
       setScheduledDate: (itemId, date) =>
-        set({ services: get().services.map((s) => (s.itemId === itemId ? { ...s, scheduledDate: date } : s)) }),
+        set({
+          services: get().services.map((s) =>
+            s.itemId === itemId ? { ...s, scheduledDate: date } : s
+          ),
+        }),
     }),
     {
       name: "service-order-store",
-      partialize: (state) => ({ bookingId: state.bookingId, roomId: state.roomId, services: state.services }),
+      partialize: (state) => ({
+        bookingId: state.bookingId,
+        roomId: state.roomId,
+        services: state.services,
+      }),
     }
   )
 );
-
-

@@ -4,15 +4,13 @@ import { OrderSchema } from "./order.schema";
 const {
   ServiceOrderSchema,
   ServiceOrderItemSchema,
-  CreatePOSOrderRequestSchema,
   CreatePOSOrderResponseSchema,
   AddItemsToPOSOrderRequestSchema,
   AddItemsToPOSOrderResponseSchema,
   POSOrderItemSchema,
   POSOrderDetailSchema,
   POSOrderDetailResponseSchema,
-  POSOrderListItemSchema,
-  POSOrderListResponseSchema,
+  POSOrderListByInvoiceResponseSchema,
   POSOrderPrintItemSchema,
   POSOrderPrintDataSchema,
 } = OrderSchema;
@@ -22,9 +20,11 @@ export type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
 export type ServiceOrderDto = z.infer<typeof ServiceOrderSchema>;
 
 // POS Order Request/Response types
-export type CreatePOSOrderRequestDto = z.infer<
-  typeof CreatePOSOrderRequestSchema
->;
+export type CreatePOSOrderRequestDto = {
+  bookingId?: string | null;
+  bookingRoomId?: string | null;
+};
+
 export type CreatePOSOrderResponseDto = z.infer<
   typeof CreatePOSOrderResponseSchema
 >;
@@ -44,9 +44,8 @@ export type POSOrderDetailResponseDto = z.infer<
 >;
 
 // POS Order List types
-export type POSOrderListItemDto = z.infer<typeof POSOrderListItemSchema>;
 export type POSOrderListResponseDto = z.infer<
-  typeof POSOrderListResponseSchema
+  typeof POSOrderListByInvoiceResponseSchema
 >;
 
 // POS Order Print types

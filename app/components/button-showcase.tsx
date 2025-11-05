@@ -5,9 +5,9 @@
  */
 
 import type { Route } from "./+types/button-showcase";
-import { Button } from "./button";
-import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Heart, Star, Check, AlertCircle, Info, Zap } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import { Button } from "./ui/button";
 
 export function ButtonShowcase() {
   return (

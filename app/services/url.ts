@@ -103,14 +103,15 @@ const Reports = {
 };
 
 const Orders = {
-  createPOS: "PosOrders",
-  addItemsToPOS: (id: string) => `PosOrders/${id}/items`,
-  deleteItemFromPOS: (orderId: string, itemId: string) =>
+  createPosOrder: "PosOrders",
+  addItemsToPos: (id: string) => `PosOrders/${id}/items`,
+  deleteItemFromPos: (orderId: string, itemId: string) =>
     `PosOrders/${orderId}/items/${itemId}`,
-  cancelPOSOrder: (id: string) => `PosOrders/${id}/cancel`,
-  completePOSOrder: (id: string) => `PosOrders/${id}/complete`,
+  cancelPosOrder: (id: string) => `PosOrders/${id}/cancel`,
+  completePosOrder: (id: string) => `PosOrders/${id}/complete`,
   detailPOS: (id: string) => `PosOrders/${id}/details`,
-  listPOSbyInvoice: (invoiceId: string) => `PosOrders/invoice/${invoiceId}`,
+  listPosOrderbyInvoice: (invoiceId: string) =>
+    `PosOrders/invoice/${invoiceId}`,
   printPOSorder: (id: string) => `PosOrders/${id}/print-data`,
 };
 

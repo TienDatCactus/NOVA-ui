@@ -15,7 +15,7 @@ const {
   CreatePOSOrderResponseSchema,
   AddItemsToPOSOrderResponseSchema,
   POSOrderDetailResponseSchema,
-  POSOrderListResponseSchema,
+  POSOrderListByInvoiceResponseSchema,
   POSOrderPrintDataSchema,
 } = OrderSchema;
 
@@ -27,7 +27,7 @@ async function createPOSOrder(
   idempotencyKey?: string
 ): Promise<CreatePOSOrderResponseDto> {
   try {
-    const resp = await http.post(Orders.createPOS, data, {
+    const resp = await http.post(Orders.createPosOrder, data, {
       headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
     });
     return CreatePOSOrderResponseSchema.parse(resp.data);
@@ -46,7 +46,7 @@ async function addItemsToPOSOrder(
   idempotencyKey?: string
 ): Promise<AddItemsToPOSOrderResponseDto> {
   try {
-    const resp = await http.post(Orders.addItemsToPOS(orderId), data, {
+    const resp = await http.post(Orders.addItemsToPos(orderId), data, {
       headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
     });
     return AddItemsToPOSOrderResponseSchema.parse(resp.data);
@@ -65,7 +65,7 @@ async function deleteItemFromPOSOrder(
   idempotencyKey?: string
 ): Promise<void> {
   try {
-    await http.delete(Orders.deleteItemFromPOS(orderId, itemId), {
+    await http.delete(Orders.deleteItemFromPos(orderId, itemId), {
       headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
     });
   } catch (error) {
@@ -82,7 +82,7 @@ async function cancelPOSOrder(
   idempotencyKey?: string
 ): Promise<void> {
   try {
-    await http.post(Orders.cancelPOSOrder(orderId), null, {
+    await http.post(Orders.cancelPosOrder(orderId), null, {
       headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
     });
   } catch (error) {
@@ -99,7 +99,7 @@ async function completePOSOrder(
   idempotencyKey?: string
 ): Promise<void> {
   try {
-    await http.post(Orders.completePOSOrder(orderId), null, {
+    await http.post(Orders.completePosOrder(orderId), null, {
       headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
     });
   } catch (error) {
@@ -130,8 +130,8 @@ async function getPOSOrdersByInvoice(
   invoiceId: string
 ): Promise<POSOrderListResponseDto> {
   try {
-    const resp = await http.get(Orders.listPOSbyInvoice(invoiceId));
-    return POSOrderListResponseSchema.parse(resp.data);
+    const resp = await http.get(Orders.listPosOrderbyInvoice(invoiceId));
+    return POSOrderListByInvoiceResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

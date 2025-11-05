@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { OrderService } from "~/services/api/order";
+import { OrderService } from "~/services/api/orders";
 
 /**
  * Get list of POS orders by invoice ID

@@ -1,7 +1,8 @@
 import z from "zod";
 import { PaymentSchema } from "../../schema/payment.schema";
 import { InvoiceSchema } from "../invoices/invoice.schema";
-import { OrderSchema } from "../order/order.schema";
+import { OrderSchema } from "../orders/order.schema";
+import { RoomSchema } from "../rooms/room.schema";
 
 const BookingSourceEnum = z.enum(
   ["DirectStaff", "DirectCustomer", "OTA", "Agency"],
@@ -250,16 +251,7 @@ const BookingDetailItemSchema = z.object({
     phoneNumber: z.string().optional().nullable(),
     email: z.email().optional().nullable(),
   }),
-  rooms: z.array(
-    z.object({
-      roomId: z.string(),
-      roomName: z.string(),
-      roomTypeId: z.string(),
-      roomTypeName: z.string(),
-      fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
-      toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
-    })
-  ),
+  rooms: z.array(RoomSchema.BookingDetailRoomItemSchema),
   invoices: InvoiceSchema.InvoiceListResponseSchema.optional(),
 });
 

@@ -2,13 +2,12 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { Card, CardContent } from "~/components/ui/card";
 import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
 import ExistingRoomItemCard from "./existing-room-item.card";
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+import type z from "zod";
+import type { RoomSchema } from "~/services/api/rooms/room.schema";
 
 interface ExistingRoomItemWrapperProps {
-  roomId: string;
-  roomName: string;
-  roomTypeName: string;
-  fromDate: string | Date;
-  toDate: string | Date;
+  room: z.infer<typeof RoomSchema.BookingDetailRoomItemSchema>;
   isSelected: boolean;
   isExpanded: boolean;
   onSelect: () => void;
@@ -16,22 +15,17 @@ interface ExistingRoomItemWrapperProps {
 }
 
 export default function ExistingRoomItemWrapper({
-  roomId,
-  roomName,
-  roomTypeName,
-  fromDate,
-  toDate,
+  room,
   isSelected,
   isExpanded,
   onSelect,
   onToggleExpand,
 }: ExistingRoomItemWrapperProps) {
   const { data: roomDetail, isPending } = useRoomDetail({
-    id: roomId,
+    id: room.roomId,
     params: {},
   });
 
-  // Loading state (only show skeleton when expanded and loading)
   if (isExpanded && isPending) {
     return (
       <Card className="cursor-pointer">
@@ -47,12 +41,8 @@ export default function ExistingRoomItemWrapper({
 
   return (
     <ExistingRoomItemCard
-      roomId={roomId}
-      roomName={roomName}
-      roomTypeName={roomTypeName}
-      fromDate={fromDate}
-      toDate={toDate}
-      status={roomDetail?.status}
+      room={room}
+      roomDetail={roomDetail}
       isSelected={isSelected}
       isExpanded={isExpanded}
       onSelect={onSelect}

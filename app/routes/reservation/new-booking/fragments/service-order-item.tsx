@@ -4,7 +4,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { useServiceDetail } from "~/routes/services/container/services/query.hooks";
 import { useMenuItemDetail } from "~/routes/menu/container/menu/query.hooks";
 import type z from "zod";
-import { OrderSchema } from "~/services/api/order/order.schema";
+import { OrderSchema } from "~/services/api/orders/order.schema";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;

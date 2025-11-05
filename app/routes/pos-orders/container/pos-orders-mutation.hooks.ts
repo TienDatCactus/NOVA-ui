@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { OrderService } from "~/services/api/order";
+import { OrderService } from "~/services/api/orders";
 import type {
   CreatePOSOrderRequestDto,
   AddItemsToPOSOrderRequestDto,
-} from "~/services/api/order/dto";
+} from "~/services/api/orders/dto";
 
 /**
  * Create a new POS order
@@ -21,9 +21,9 @@ function useCreatePOSOrder() {
     },
     onSuccess: (data, variables) => {
       toast.success("Đơn hàng đã được tạo thành công");
-      // Invalidate orders list for this invoice
+      // Invalidate orders list - response doesn't include invoiceId
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders", "by-invoice", variables.invoiceId],
+        queryKey: ["pos-orders", "by-invoice"],
       });
     },
     onError: (error) => {

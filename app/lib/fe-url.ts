@@ -12,4 +12,7 @@ const DASHBOARD = {
       `/dashboard/reservation/bookings/detail/${bookingCode}`,
   },
 };
-export { AUTH, DASHBOARD };
+const CUSTOMER = {
+  chat: "/customer/chat",
+};
+export { AUTH, DASHBOARD, CUSTOMER };

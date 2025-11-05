@@ -18,8 +18,8 @@ const ServiceOrderSchema = z.object({
 // POS orders
 
 const CreatePOSOrderRequestSchema = z.object({
-  invoiceId: z.string(),
-  customerId: z.string(),
+  bookingId: z.string().optional().nullable(),
+  bookingRoomId: z.string().optional().nullable(),
 });
 
 const CreatePOSOrderResponseSchema = z.object({
@@ -28,6 +28,7 @@ const CreatePOSOrderResponseSchema = z.object({
 });
 
 const AddItemsToPOSOrderRequestSchema = z.object({
+  // only for menu
   menuItemId: z.string(),
   quantity: z.number().int().min(0),
   unitPrice: z.number().min(0),
@@ -40,10 +41,13 @@ const AddItemsToPOSOrderResponseSchema = z.object({
 
 const POSOrderItemSchema = z.object({
   id: z.string(),
-  menuItemId: z.string(),
-  menuItemName: z.string().min(1),
-  quantity: z.number().int().min(0),
+  itemType: z.string(),
+  menuItemId: z.string().optional().nullable(),
+  serviceItemId: z.string().optional().nullable(),
+  itemName: z.string().min(1),
+  quantity: z.number().min(0),
   unitPrice: z.number().min(0),
+  servedAt: z.string().optional().nullable(),
   subtotal: z.number().min(0),
 });
 
@@ -51,25 +55,14 @@ const POSOrderDetailSchema = z.object({
   id: z.string(),
   status: z.string().min(1),
   totalAmount: z.number().min(0),
-  customerId: z.string(),
-  invoiceId: z.string(),
-  createdAt: z.string(),
+  customerId: z.string().optional().nullable(),
+  invoiceId: z.string().optional().nullable(),
+  createdAt: z.string().optional().nullable(),
   items: z.array(POSOrderItemSchema),
 });
 
 const POSOrderDetailResponseSchema = POSOrderDetailSchema;
-
-const POSOrderListItemSchema = z.object({
-  id: z.string(),
-  status: z.string().min(1),
-  totalAmount: z.number().min(0),
-  customerId: z.string(),
-  invoiceId: z.string(),
-  createdAt: z.string(),
-  items: z.array(POSOrderItemSchema),
-});
-
-const POSOrderListResponseSchema = z.array(POSOrderListItemSchema);
+const POSOrderListByInvoiceResponseSchema = z.array(POSOrderDetailSchema);
 
 const POSOrderPrintItemSchema = z.object({
   itemName: z.string().min(1),
@@ -92,16 +85,13 @@ const POSOrderPrintDataSchema = z.object({
 export const OrderSchema = {
   ServiceOrderSchema,
   ServiceOrderItemSchema,
-
-  CreatePOSOrderRequestSchema,
+  POSOrderListByInvoiceResponseSchema,
   CreatePOSOrderResponseSchema,
   AddItemsToPOSOrderRequestSchema,
   AddItemsToPOSOrderResponseSchema,
   POSOrderItemSchema,
   POSOrderDetailSchema,
   POSOrderDetailResponseSchema,
-  POSOrderListItemSchema,
-  POSOrderListResponseSchema,
   POSOrderPrintItemSchema,
   POSOrderPrintDataSchema,
 };

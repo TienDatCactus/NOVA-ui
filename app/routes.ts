@@ -14,7 +14,8 @@ export default [
       route("reset-password", "routes/auth/reset-password.tsx"),
     ]),
   ]),
-  route("buttons", "components/ui/button-showcase.tsx"),
+  route("buttons", "components/button-showcase.tsx"),
+  route("colors", "components/color-showcase.tsx"),
   ...prefix("customer", [
     route("chat", "routes/customer/chat.tsx"),
     route("map", "routes/customer/map.tsx"),
@@ -46,12 +47,7 @@ export default [
         route("menu", "routes/menu/menu.tsx"),
         route("menu-categories", "routes/menu/menu-categories.tsx"),
       ]),
-      ...prefix("pos-orders", [
-        index("routes/pos-orders/pos-orders.tsx"),
-        route("new", "routes/pos-orders/new.tsx"),
-        route(":posId", "routes/pos-orders/detail.tsx"),
-        route(":posId/print", "routes/pos-orders/print.tsx"),
-      ]),
+
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("customers", "routes/customers/customers.tsx"),

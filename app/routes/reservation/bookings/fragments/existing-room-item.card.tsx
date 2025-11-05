@@ -1,17 +1,16 @@
 import { Clock, ChevronDown, ChevronUp } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, toDate } from "date-fns";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
+import type z from "zod";
+import type { RoomSchema } from "~/services/api/rooms/room.schema";
+import { RoomStatusEnum } from "~/services/types/room.types";
 
 interface ExistingRoomItemCardProps {
-  roomId: string;
-  roomName: string;
-  roomTypeName: string;
-  fromDate: string | Date;
-  toDate: string | Date;
-  status?: string;
+  room: z.infer<typeof RoomSchema.BookingDetailRoomItemSchema>;
+  roomDetail?: z.infer<typeof RoomSchema.RoomDetailSchema>;
   isSelected: boolean;
   isExpanded: boolean;
   onSelect: () => void;
@@ -19,12 +18,8 @@ interface ExistingRoomItemCardProps {
 }
 
 export default function ExistingRoomItemCard({
-  roomId,
-  roomName,
-  roomTypeName,
-  fromDate,
-  toDate,
-  status,
+  room,
+  roomDetail,
   isSelected,
   isExpanded,
   onSelect,
@@ -40,19 +35,20 @@ export default function ExistingRoomItemCard({
   return (
     <Card
       className={cn(
-        "transition-colors cursor-pointer",
+        "transition-colors cursor-pointer p-0 hover:border-primary",
         isSelected && "border-primary bg-primary/5"
       )}
     >
       <div onClick={onSelect} className="p-3 flex items-center justify-between">
         <div className="flex-1">
-          <div className="font-medium text-sm">{roomName}</div>
+          <div className="font-medium text-sm">{room.roomName}</div>
           <div className="text-xs text-muted-foreground mt-1">
-            {roomTypeName}
+            {room.roomTypeName} -{" "}
+            {formatMoney(roomDetail?.dailyPrice || 0).vndFormatted}
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
             <Clock className="h-3 w-3" />
-            {formatDate(fromDate)} → {formatDate(toDate)}
+            {formatDate(room.fromDate)} → {formatDate(room.toDate)}
           </div>
         </div>
         <Button
@@ -74,14 +70,19 @@ export default function ExistingRoomItemCard({
       {isExpanded && (
         <CardContent className="pt-0 pb-3">
           <div className="space-y-2 text-xs">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
               <div>
                 <span className="text-muted-foreground">Trạng thái:</span>
-                <div className="font-medium">{status || "N/A"}</div>
+                <div className="font-medium">
+                  {RoomStatusEnum[
+                    roomDetail?.status as keyof typeof RoomStatusEnum
+                  ] || "N/A"}
+                </div>
               </div>
+
               <div>
                 <span className="text-muted-foreground">Hạng phòng:</span>
-                <div className="font-medium">{roomTypeName || "N/A"}</div>
+                <div className="font-medium">{room.roomTypeName || "N/A"}</div>
               </div>
             </div>
           </div>
