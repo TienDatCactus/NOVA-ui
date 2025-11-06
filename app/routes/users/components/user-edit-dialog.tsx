@@ -19,57 +19,57 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Pencil, Loader2 } from "lucide-react";
-import { useUpdateCustomer } from "../container/useCustomers.hooks";
+import { useUpdateUser } from "../container/useUsers.hooks";
 import type {
-  CustomerItem,
-  UpdateCustomerDto,
-} from "~/services/api/customer/dto";
+  UserItem,
+  UpdateUserDto,
+} from "~/services/api/user/dto";
 import { useEffect } from "react";
-import { CustomerSchema } from "~/services/schema/customer.schema";
+import { UserSchema } from "~/services/schema/user.schema";
 
-interface CustomerEditDialogProps {
-  customer: CustomerItem;
+interface UserEditDialogProps {
+  user: UserItem;
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function CustomerEditDialog({
-  customer,
+export function UserEditDialog({
+  user,
   open,
   onClose,
   onSuccess,
-}: CustomerEditDialogProps) {
-  const { UpdateCustomerSchema } = CustomerSchema;
-  const { mutate: updateCustomer, isPending } = useUpdateCustomer();
+}: UserEditDialogProps) {
+  const { UpdateUserSchema } = UserSchema;
+  const { mutate: updateUser, isPending } = useUpdateUser();
 
-  const form = useForm<UpdateCustomerDto>({
-    resolver: zodResolver(UpdateCustomerSchema),
+  const form = useForm<UpdateUserDto>({
+    resolver: zodResolver(UpdateUserSchema),
     defaultValues: {
-      fullName: customer.fullName,
-      email: customer.email,
-      phoneNumber: customer.phoneNumber || "",
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber || "",
     },
   });
 
-  // Update form when customer changes
+  // Update form when user changes
   useEffect(() => {
     form.reset({
-      fullName: customer.fullName,
-      email: customer.email,
-      phoneNumber: customer.phoneNumber || "",
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber || "",
     });
-  }, [customer, form]);
+  }, [user, form]);
 
-  const handleSubmit = (data: UpdateCustomerDto) => {
+  const handleSubmit = (data: UpdateUserDto) => {
     // Only send the 3 fields that API allows to update
     const updatePayload = {
       fullName: data.fullName,
       email: data.email,
       phoneNumber: data.phoneNumber,
     };
-    updateCustomer(
-      { id: customer.id, data: updatePayload as any },
+    updateUser(
+      { id: user.id, data: updatePayload as any },
       {
         onSuccess: (response) => {
           // Toast already shown by http interceptor

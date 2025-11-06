@@ -42,36 +42,36 @@ import {
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
-  useCreateCustomer,
-  useUpdateCustomer,
+  useCreateUser,
+  useUpdateUser,
   useRoles,
-} from "../container/useCustomers.hooks";
+} from "../container/useUsers.hooks";
 import type {
-  CreateCustomerDto,
-  CustomerItem,
-  UpdateCustomerDto,
-} from "~/services/api/customer/dto";
+  CreateUserDto,
+  UserItem,
+  UpdateUserDto,
+} from "~/services/api/user/dto";
 import { useEffect, useMemo, useState } from "react";
-import { CustomerSchema } from "~/services/schema/customer.schema";
+import { UserSchema } from "~/services/schema/user.schema";
 
-interface CustomerFormDialogProps {
+interface UserFormDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  customer?: CustomerItem;
+  user?: UserItem;
   mode?: "create" | "edit";
 }
 
-export function CustomerFormDialog({
+export function UserFormDialog({
   open,
   onClose,
   onSuccess,
-  customer,
+  user,
   mode = "create",
-}: CustomerFormDialogProps) {
-  const { CreateCustomerSchema, UpdateCustomerSchema } = CustomerSchema;
-  const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
-  const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
+}: UserFormDialogProps) {
+  const { CreateUserSchema, UpdateUserSchema } = UserSchema;
+  const { mutate: createUser, isPending: isCreating } = useCreateUser();
+  const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
   const {
     data: rolesData,
     isPending: isLoadingRoles,
@@ -92,16 +92,16 @@ export function CustomerFormDialog({
     return transformed;
   }, [rolesData, isLoadingRoles, rolesError]);
 
-  const form = useForm<CreateCustomerDto | UpdateCustomerDto>({
+  const form = useForm<CreateUserDto | UpdateUserDto>({
     resolver: zodResolver(
-      isEditMode ? UpdateCustomerSchema : CreateCustomerSchema
+      isEditMode ? UpdateUserSchema : CreateUserSchema
     ),
     defaultValues:
-      isEditMode && customer
+      isEditMode && user
         ? {
-            fullName: customer.fullName,
-            email: customer.email,
-            phoneNumber: customer.phoneNumber,
+            fullName: user.fullName,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
           }
         : {
             userName: "",
@@ -113,47 +113,47 @@ export function CustomerFormDialog({
           },
   });
 
-  // Update form values when customer changes in edit mode
+  // Update form values when user changes in edit mode
   useEffect(() => {
-    if (isEditMode && customer) {
+    if (isEditMode && user) {
       form.reset({
-        fullName: customer.fullName,
-        email: customer.email,
-        phoneNumber: customer.phoneNumber,
+        fullName: user.fullName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
       });
     }
-  }, [customer, isEditMode, form]);
+  }, [user, isEditMode, form]);
 
-  const handleSubmit = (data: CreateCustomerDto | UpdateCustomerDto) => {
-    if (isEditMode && customer) {
+  const handleSubmit = (data: CreateUserDto | UpdateUserDto) => {
+    if (isEditMode && user) {
       // Update mode - Extract only the fields we need
-      const updatePayload: UpdateCustomerDto = {
-        fullName: (data as UpdateCustomerDto).fullName,
-        email: (data as UpdateCustomerDto).email,
-        phoneNumber: (data as UpdateCustomerDto).phoneNumber || "",
+      const updatePayload: UpdateUserDto = {
+        fullName: (data as UpdateUserDto).fullName,
+        email: (data as UpdateUserDto).email,
+        phoneNumber: (data as UpdateUserDto).phoneNumber || "",
       };
 
-      updateCustomer(
-        { id: customer.id, data: updatePayload },
+      updateUser(
+        { id: user.id, data: updatePayload },
         {
           onSuccess: (response) => {
             form.reset();
             onSuccess();
           },
           onError: (error) => {
-            console.error("Update customer error callback!", error);
+            console.error("Update user error callback!", error);
           },
         }
       );
     } else {
       // Create mode
-      createCustomer(data as CreateCustomerDto, {
+      createUser(data as CreateUserDto, {
         onSuccess: (response) => {
           form.reset();
           onSuccess();
         },
         onError: (error) => {
-          console.error("Create customer error callback!", error);
+          console.error("Create user error callback!", error);
         },
       });
     }

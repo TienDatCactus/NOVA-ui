@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CustomerService } from "~/services/api/customer";
+import { UserService } from "~/services/api/user";
 
-export function useCustomers() {
+export function useUsers() {
   return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => await CustomerService.getCustomerList(),
+    queryKey: ["users"],
+    queryFn: async () => await UserService.getUserList(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -12,10 +12,10 @@ export function useCustomers() {
   });
 }
 
-export function useCustomerDetail(id: string) {
+export function useUserDetail(id: string) {
   return useQuery({
-    queryKey: ["customers", id],
-    queryFn: async () => await CustomerService.getCustomerDetail(id),
+    queryKey: ["users", id],
+    queryFn: async () => await UserService.getUserDetail(id),
     enabled: !!id, // Only fetch if id exists
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -24,27 +24,27 @@ export function useCustomerDetail(id: string) {
   });
 }
 
-export function useCreateCustomer() {
+export function useCreateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: CustomerService.createCustomer,
+    mutationFn: UserService.createUser,
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 }
 
-export function useUpdateCustomer() {
+export function useUpdateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
-      CustomerService.updateCustomer(id, data),
+      UserService.updateUser(id, data),
     onSettled: (_, __, variables) => {
-      // Always invalidate both list and specific customer detail after mutation completes
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["customers", variables.id] });
+      // Always invalidate both list and specific user detail after mutation completes
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", variables.id] });
     },
   });
 }
@@ -52,7 +52,7 @@ export function useUpdateCustomer() {
 export function useRoles() {
   return useQuery({
     queryKey: ["roles"],
-    queryFn: async () => await CustomerService.getRoleList(),
+    queryFn: async () => await UserService.getRoleList(),
     staleTime: 60 * 60 * 1000, // 1 hour - roles don't change often
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -65,10 +65,10 @@ export function useLockUser() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
-      CustomerService.lockUser(id, data),
+      UserService.lockUser(id, data),
     onSettled: (_, __, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["customers", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", variables.id] });
     },
   });
 }
@@ -77,10 +77,10 @@ export function useUnlockUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => CustomerService.unlockUser(id),
+    mutationFn: (id: string) => UserService.unlockUser(id),
     onSettled: (_, __, id) => {
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["customers", id] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", id] });
     },
   });
 }
@@ -90,10 +90,10 @@ export function useAssignRoles() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
-      CustomerService.assignRoles(id, data),
+      UserService.assignRoles(id, data),
     onSettled: (_, __, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["customers", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", variables.id] });
     },
   });
 }
@@ -103,10 +103,10 @@ export function useRemoveRoles() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
-      CustomerService.removeRoles(id, data),
+      UserService.removeRoles(id, data),
     onSettled: (_, __, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["customers", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", variables.id] });
     },
   });
 }

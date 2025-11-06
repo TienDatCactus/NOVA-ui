@@ -42,11 +42,7 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     accessorKey: "index",
     header: "STT",
     cell: ({ row }) => {
-      return (
-        <span className="font-medium text-muted-foreground">
-          {row.index + 1}
-        </span>
-      );
+      return <span className="font-medium">{row.index + 1}</span>;
     },
   },
   {
@@ -54,10 +50,7 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     header: "Mã đơn vị",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <div className="rounded-md bg-primary/10 p-1.5">
-          <Package className="h-3.5 w-3.5 text-primary" />
-        </div>
-        <span className="font-mono text-sm font-semibold">
+        <span className="font-mono text-sm ">
           {row.getValue("code")}
         </span>
       </div>
@@ -68,8 +61,7 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     header: "Tên đơn vị",
     cell: ({ row }) => (
       <div className="flex flex-col">
-        <span className="font-medium">{row.getValue("name")}</span>
-        <span className="text-xs text-muted-foreground">Đơn vị đo lường</span>
+        <span>{row.getValue("name")}</span>
       </div>
     ),
   },
