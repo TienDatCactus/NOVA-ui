@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { DataTable } from "./components/data-table";
-import { columns } from "./components/columns";
 import CreateUnitDialog from "./components/create-unit.dialog";
 import EditUnitDialog from "./components/edit-unit.dialog";
 import DeleteUnitDialog from "./components/delete-unit.dialog";
@@ -18,6 +16,7 @@ import {
 } from "~/components/ui/empty";
 import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
 import { useUnits } from "./container/unit-query.hooks";
+import { DataTable, columns } from "./components";
 
 export function clientLoader() {
   return { title: "Đơn vị tính - NOVA" };

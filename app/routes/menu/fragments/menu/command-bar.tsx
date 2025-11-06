@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import type { MenuCategoryListResponseDto } from "~/services/api/menu-category/dto";
-import type { MenuFilters } from "~/services/types/menu.types";
+import type { MenuFilters } from "~/services/api/menu/menu.types";
 import CreateMenuDialog from "../../components/create-menu.dialog";
 import { Card } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";

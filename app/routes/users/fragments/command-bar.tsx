@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import type { UserFilters } from "../container/filter.hooks";
-import { getRoleDisplayName } from "~/services/types/users.types";
+import { getRoleDisplayName } from "~/services/api/user/users.types";
 
 interface UsersCommandBarProps {
   filters: UserFilters;
@@ -66,10 +66,7 @@ export default function UsersCommandBar({
           <Select
             value={filters.statusFilter}
             onValueChange={(value) =>
-              updateFilter(
-                "statusFilter",
-                value as UserFilters["statusFilter"]
-              )
+              updateFilter("statusFilter", value as UserFilters["statusFilter"])
             }
           >
             <SelectTrigger className="shadow-md bg-white w-full">

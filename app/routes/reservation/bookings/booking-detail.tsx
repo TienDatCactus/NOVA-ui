@@ -61,7 +61,7 @@ import { toYMD } from "~/lib/utils";
 import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
-import { BOOKING_STATUSES } from "~/services/types/booking.types";
+import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type { Route } from "./+types/booking-detail";
 import { AddRoomModal } from "./components/add-room-modal";
 import AddMenuItemDialog from "./components/add-menu-item.dialog";
@@ -71,7 +71,7 @@ import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import { useUpdateBooking } from "./container/booking-mutation.hooks";
 import { useBookingDetail } from "./container/booking-query.hooks";
 import { useBookingOrders } from "./container/use-booking-orders.hooks";
-import { useOTAInfo } from "~/features/create-booking-dialog/container/create-booking-query.hooks";
+import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 

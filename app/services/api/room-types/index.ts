@@ -1,4 +1,4 @@
-import type { RoomTypesListParams } from "~/services/types/room-types.types";
+import type { RoomTypesListParams } from "~/services/api/room-types/room-types.types";
 import type {
   CreateRoomTypesRequestDto,
   CreateRoomTypesResponseDto,

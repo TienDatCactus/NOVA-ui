@@ -10,7 +10,7 @@ import type {
   UpdateMenuItemRequestDto,
   UpdateMenuItemResponseDto,
 } from "./dto";
-import type { MenuListParams } from "~/services/types/menu.types";
+import type { MenuListParams } from "~/services/api/menu/menu.types";
 
 const {
   MenuListResponseSchema,

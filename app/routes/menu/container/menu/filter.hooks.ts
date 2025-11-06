@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { MenuListResponseDto } from "~/services/api/menu/dto";
-import type { MenuFilters } from "~/services/types/menu.types";
+import type { MenuFilters } from "~/services/api/menu/menu.types";
 
 const defaultFilters: MenuFilters = {
   categoryCode: "",

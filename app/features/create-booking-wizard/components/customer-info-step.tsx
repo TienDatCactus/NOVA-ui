@@ -23,7 +23,7 @@ import {
 } from "~/components/ui/select";
 import { cn, onError } from "~/lib/utils";
 import { useCreateBookingStore } from "~/store/create-booking.store";
-import { BOOKING_SOURCES } from "~/services/types/booking.types";
+import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
 import type { BookingOTAResponseDto } from "~/services/api/booking/dto";
 import { Button } from "~/components/ui/button";
 import { useOTAInfo } from "../container/create-booking-query.hooks";

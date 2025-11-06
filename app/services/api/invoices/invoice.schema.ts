@@ -2,7 +2,16 @@ import z from "zod";
 import { PaymentSchema } from "../../schema/payment.schema";
 
 const InvoiceStatusEnum = z
-  .enum(["Pending", "Paid", "Cancelled", "PartiallyPaid"])
+  .enum([
+    "Unpaid",
+    "DepositOnly",
+    "Paid",
+    "Overpaid",
+    "PartiallyPaid",
+    "Refunded",
+    "Chargeback",
+    "Voided",
+  ])
   .or(z.string());
 // ----------------
 const InvoiceItemSchema = z.object({

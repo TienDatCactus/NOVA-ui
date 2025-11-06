@@ -30,7 +30,7 @@ import {
 import {
   getRoleBadgeColors,
   getRoleDisplayName,
-} from "~/services/types/users.types";
+} from "~/services/api/user/users.types";
 import type { UserItem } from "~/services/api/user/dto";
 import { Separator } from "~/components/ui/separator";
 

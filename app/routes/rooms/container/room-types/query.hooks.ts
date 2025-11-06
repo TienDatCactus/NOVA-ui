@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { RoomTypesService } from "~/services/api/room-types";
-import type { RoomTypesListParams } from "~/services/types/room-types.types";
+import type { RoomTypesListParams } from "~/services/api/room-types/room-types.types";
 
 function useRoomTypes(params?: RoomTypesListParams) {
   return useQuery({

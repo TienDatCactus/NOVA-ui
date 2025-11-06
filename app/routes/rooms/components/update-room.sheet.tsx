@@ -32,7 +32,7 @@ import type {
   RoomListItemDto,
   UpdateRoomDetailRequestDto,
 } from "~/services/api/rooms/dto";
-import { RoomStatusEnum } from "~/services/types/room.types";
+import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useRoomTypes } from "../container/room-types/query.hooks";
 import { useUpdateRoom } from "../container/rooms/mutation.hooks";
 import { RoomSchema } from "~/services/api/rooms/room.schema";

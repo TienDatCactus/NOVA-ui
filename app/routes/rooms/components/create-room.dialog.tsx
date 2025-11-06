@@ -29,7 +29,7 @@ import {
 
 import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
-import { RoomStatusEnum } from "~/services/types/room.types";
+import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useCreateRoom } from "../container/rooms/mutation.hooks";
 
 const { CreateRoomResponseSchema } = RoomSchema;

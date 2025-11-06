@@ -1,5 +1,5 @@
 import http from "~/lib/http";
-import type { ServiceTypeListParams } from "~/services/types/service-types.types";
+import type { ServiceTypeListParams } from "~/services/api/service-types/service-types.types";
 import { ServiceTypes } from "~/services/url";
 import type {
   CreateServiceTypeRequestDto,

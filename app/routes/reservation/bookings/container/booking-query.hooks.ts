@@ -2,9 +2,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { BookingService } from "~/services/api/booking";
-import type { BookingListParams } from "~/services/types/booking.types";
+import type { BookingListParams } from "~/services/api/booking/booking.types";
 import { RoomsService } from "~/services/api/rooms";
-import type { GetAvailableRoomsInternalParams } from "~/services/types/room.types";
+import type { GetAvailableRoomsInternalParams } from "~/services/api/rooms/room.types";
 
 interface UseBookingDetailProps {
   bookingCode?: string;

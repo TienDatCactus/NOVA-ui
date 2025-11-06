@@ -47,38 +47,32 @@ import useUserFilters from "./container/filter.hooks";
 import {
   getRoleBadgeColors,
   getRoleDisplayName,
-} from "~/services/types/users.types";
+} from "~/services/api/user/users.types";
 import type { UserItem } from "~/services/api/user/dto";
 
 export default function Component() {
   const { data, isPending } = useUsers();
   const { data: rolesData } = useRoles();
-  const { filters, updateFilter, resetFilters, filterUsers } =
-    useUserFilters();
+  const { filters, updateFilter, resetFilters, filterUsers } = useUserFilters();
 
-  const [selectedUser, setSelectedUser] = useState<UserItem | null>(
-    null
-  );
+  const [selectedUser, setSelectedUser] = useState<UserItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [UserToEdit, setUserToEdit] = useState<UserItem | null>(
-    null
-  );
+  const [UserToEdit, setUserToEdit] = useState<UserItem | null>(null);
 
   // Lock/Unlock dialog states
   const [isLockDialogOpen, setIsLockDialogOpen] = useState(false);
   const [lockDialogMode, setLockDialogMode] = useState<"lock" | "unlock">(
     "lock"
   );
-  const [UserToLock, setUserToLock] = useState<UserItem | null>(
-    null
-  );
+  const [UserToLock, setUserToLock] = useState<UserItem | null>(null);
 
   // Manage roles dialog states
   const [isManageRolesOpen, setIsManageRolesOpen] = useState(false);
-  const [UserToManageRoles, setUserToManageRoles] =
-    useState<UserItem | null>(null);
+  const [UserToManageRoles, setUserToManageRoles] = useState<UserItem | null>(
+    null
+  );
 
   // Change password dialog states
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);

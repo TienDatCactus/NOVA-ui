@@ -9,7 +9,7 @@ import type {
   UpdateMenuCategoryRequestDto,
   UpdateMenuCategoryResponseDto,
 } from "./dto";
-import type { MenuCategoryListParams } from "~/services/types/menu-category.types";
+import type { MenuCategoryListParams } from "~/services/api/menu-category/menu-category.types";
 
 const {
   MenuCategoryListResponseSchema,

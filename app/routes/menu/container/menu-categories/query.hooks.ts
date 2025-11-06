@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MenuCategoryService } from "~/services/api/menu-category";
-import type { MenuCategoryListParams } from "~/services/types/menu-category.types";
+import type { MenuCategoryListParams } from "~/services/api/menu-category/menu-category.types";
 
 /**
  * Hook để lấy danh sách menu categories

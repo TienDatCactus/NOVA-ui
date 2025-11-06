@@ -1,5 +1,5 @@
 import z from "zod";
-import { ROOM_TYPE } from "../../types/room.types";
+import { ROOM_TYPE } from "./room.types";
 import { PaymentSchema } from "../../schema/payment.schema";
 
 const RoomTypeEnum = z.enum(ROOM_TYPE, {
@@ -105,6 +105,7 @@ const AvailableRoomItemSchema = z.object({
 const AvailableRoomsInternalResponseSchema = z.array(AvailableRoomItemSchema);
 
 const BookingDetailRoomItemSchema = z.object({
+  bookingRoomId: z.string(),
   roomId: z.string(),
   roomName: z.string(),
   roomTypeId: z.string(),

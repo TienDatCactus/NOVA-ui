@@ -6,7 +6,7 @@ import { Badge } from "~/components/ui/badge";
 import { ActionCell } from "../../fragments/action-cell.list";
 import BookingDetailDialog from "../booking-detail.sheet";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import { BOOKING_SOURCES } from "~/services/types/booking.types";
+import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [

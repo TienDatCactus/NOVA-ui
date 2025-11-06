@@ -19,13 +19,36 @@ import {
 } from "~/components/ui/select";
 import { cn, formatMoney } from "~/lib/utils";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+
 import {
-  getRoomAvailabilityColor,
-  getRoomAvailabilityLabel,
-} from "~/services/types/room-availability.types";
-import { useAvailableRoomsForChange } from "../container/booking-query.hooks";
+  useAvailableRoomsForChange,
+  useBookingDetail,
+} from "../container/booking-query.hooks";
 import { useChangeRoom } from "../container/booking-mutation.hooks";
 import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
+import {
+  RoomAvailabilityStatusLabel,
+  RoomAvailabilityStatus,
+  RoomAvailabilityStatusColor,
+} from "~/services/api/rooms/room.types";
+
+export function getRoomAvailabilityLabel(status: string): string {
+  return (
+    RoomAvailabilityStatusLabel[status as RoomAvailabilityStatus] || status
+  );
+}
+
+export function getRoomAvailabilityColor(status: string): {
+  bg: string;
+  text: string;
+} {
+  return (
+    RoomAvailabilityStatusColor[status as RoomAvailabilityStatus] || {
+      bg: "bg-gray-100",
+      text: "text-gray-600",
+    }
+  );
+}
 
 interface ChangeRoomDialogProps {
   open: boolean;
@@ -43,6 +66,10 @@ export default function ChangeRoomDialog({
     null
   );
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const { data: bookingDetail } = useBookingDetail({
+    bookingCode,
+    enabled: !!bookingCode,
+  });
 
   const bookingId = bookingDetail?.id || "";
   const hasMultipleRooms = (bookingDetail?.rooms.length || 0) > 1;
@@ -67,19 +94,26 @@ export default function ChangeRoomDialog({
   }, [open, currentRoomIndex]);
 
   // Group rooms by room type
-  const groupedRooms = availableRooms.reduce((acc, room) => {
-    const existing = acc.find((g) => g.roomTypeId === room.roomTypeId);
-    if (existing) {
-      existing.rooms.push(room);
-    } else {
-      acc.push({
-        roomTypeId: room.roomTypeId,
-        roomTypeName: room.roomTypeName,
-        rooms: [room],
-      });
-    }
-    return acc;
-  }, [] as Array<{ roomTypeId: string; roomTypeName: string; rooms: typeof availableRooms }>);
+  const groupedRooms = availableRooms.reduce(
+    (acc, room) => {
+      const existing = acc.find((g) => g.roomTypeId === room.roomTypeId);
+      if (existing) {
+        existing.rooms.push(room);
+      } else {
+        acc.push({
+          roomTypeId: room.roomTypeId,
+          roomTypeName: room.roomTypeName,
+          rooms: [room],
+        });
+      }
+      return acc;
+    },
+    [] as Array<{
+      roomTypeId: string;
+      roomTypeName: string;
+      rooms: typeof availableRooms;
+    }>
+  );
 
   // Auto-select first room type when data loads
   useEffect(() => {
@@ -115,9 +149,10 @@ export default function ChangeRoomDialog({
   );
 
   // Get rooms for selected room type (filter available only)
-  const roomsForSelectedType = selectedRoomType?.rooms.filter(
-    (r) => r.availabilityStatus === "Available"
-  ) || [];
+  const roomsForSelectedType =
+    selectedRoomType?.rooms.filter(
+      (r) => r.availabilityStatus === "Available"
+    ) || [];
 
   // Get selected room details
   const selectedRoom = availableRooms.find((r) => r.roomId === selectedRoomId);
@@ -149,7 +184,9 @@ export default function ChangeRoomDialog({
                 </SelectContent>
               </Select>
             ) : (
-              <span className="text-xl font-semibold">{currentRoom.roomName}</span>
+              <span className="text-xl font-semibold">
+                {currentRoom.roomName}
+              </span>
             )}
           </div>
         </DialogHeader>
@@ -160,11 +197,13 @@ export default function ChangeRoomDialog({
             <h3 className="text-sm font-medium mb-2">Chọn phòng mới</h3>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>
-                {format(new Date(bookingDetail.checkinDate), "dd 'Thg' MM")}, {CHECK_IN_TIME}
+                {format(new Date(bookingDetail.checkinDate), "dd 'Thg' MM")},{" "}
+                {CHECK_IN_TIME}
               </span>
               <span>đến</span>
               <span>
-                {format(new Date(bookingDetail.checkoutDate), "dd 'Thg' MM")}, {CHECK_OUT_TIME}
+                {format(new Date(bookingDetail.checkoutDate), "dd 'Thg' MM")},{" "}
+                {CHECK_OUT_TIME}
               </span>
             </div>
           </div>
@@ -208,8 +247,9 @@ export default function ChangeRoomDialog({
                           {roomType.roomTypeName}
                         </span>
                         <span className="font-semibold text-sm whitespace-nowrap">
-                          {formatMoney(roomType.rooms[0]?.baseRate || 0)
-                            .vndFormatted.replace(" ₫", "")}
+                          {formatMoney(
+                            roomType.rooms[0]?.baseRate || 0
+                          ).vndFormatted.replace(" ₫", "")}
                         </span>
                       </div>
                     </Card>
@@ -220,9 +260,18 @@ export default function ChangeRoomDialog({
               {/* Separator Icon */}
               <div className="flex items-center justify-center">
                 <div className="flex gap-0.5">
-                  <ChevronRight className="w-5 h-5 text-primary" strokeWidth={3} />
-                  <ChevronRight className="w-5 h-5 text-primary -ml-3" strokeWidth={3} />
-                  <ChevronRight className="w-5 h-5 text-primary -ml-3" strokeWidth={3} />
+                  <ChevronRight
+                    className="w-5 h-5 text-primary"
+                    strokeWidth={3}
+                  />
+                  <ChevronRight
+                    className="w-5 h-5 text-primary -ml-3"
+                    strokeWidth={3}
+                  />
+                  <ChevronRight
+                    className="w-5 h-5 text-primary -ml-3"
+                    strokeWidth={3}
+                  />
                 </div>
               </div>
 

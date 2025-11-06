@@ -3,7 +3,7 @@ import type {
   RoomBookingHistoryParams,
   RoomDetailParams,
   RoomListParams,
-} from "~/services/types/room.types";
+} from "~/services/api/rooms/room.types";
 import type {
   RoomDetailResponseDto,
   UpdateRoomStatusResponseDto,

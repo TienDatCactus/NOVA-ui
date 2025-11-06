@@ -23,7 +23,7 @@ import { useBookingDetail } from "../container/booking-query.hooks";
 import {
   BOOKING_SOURCES,
   BOOKING_STATUSES,
-} from "~/services/types/booking.types";
+} from "~/services/api/booking/booking.types";
 
 function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
   const [open, setOpen] = useState(false);
@@ -58,20 +58,24 @@ function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
             </div>
             {data && (
               <div className="flex gap-2">
-                <Badge variant={BOOKING_STATUSES.find(
+                <Badge
+                  variant={
+                    BOOKING_STATUSES.find(
                       (status) => status.value === data.status
-                    )?.variant}>
+                    )?.variant
+                  }
+                >
                   {
                     BOOKING_STATUSES.find(
                       (status) => status.value === data.status
                     )?.label
                   }
                 </Badge>
-                {data.paymentStatus && (
+                {data.invoiceStatus && (
                   <Badge variant="warning">
                     {
                       PAYMENT_STATUSES.find(
-                        (status) => status.key === data.paymentStatus
+                        (status) => status.key === data.invoiceStatus
                       )?.label
                     }
                   </Badge>

@@ -1,4 +1,4 @@
-import BookingFlow from "~/features/create-booking-dialog/booking-flow";
+import BookingFlow from "~/features/create-booking-wizard";
 import type { Route } from "./+types/new-booking";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {

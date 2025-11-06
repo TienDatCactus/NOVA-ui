@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ServiceTypesService } from "~/services/api/service-types";
-import type { ServiceTypeListParams } from "~/services/types/service-types.types";
+import type { ServiceTypeListParams } from "~/services/api/service-types/service-types.types";
 
 export function useServiceTypes(params?: ServiceTypeListParams) {
   return useQuery({

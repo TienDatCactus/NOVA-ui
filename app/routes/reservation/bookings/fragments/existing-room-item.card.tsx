@@ -6,7 +6,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { cn, formatMoney } from "~/lib/utils";
 import type z from "zod";
 import type { RoomSchema } from "~/services/api/rooms/room.schema";
-import { RoomStatusEnum } from "~/services/types/room.types";
+import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 
 interface ExistingRoomItemCardProps {
   room: z.infer<typeof RoomSchema.BookingDetailRoomItemSchema>;

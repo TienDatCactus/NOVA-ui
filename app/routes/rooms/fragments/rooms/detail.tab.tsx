@@ -22,7 +22,7 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { formatMoney } from "~/lib/utils";
-import { RoomStatusEnum } from "~/services/types/room.types";
+import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { useRoomDetail } from "../../container/rooms/query.hooks";
 interface RoomDetailTabProps {

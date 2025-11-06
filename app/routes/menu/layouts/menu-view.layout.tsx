@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { MenuFilters } from "~/services/types/menu.types";
+import type { MenuFilters } from "~/services/api/menu/menu.types";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import MenuCommandBar from "../fragments/menu/command-bar";
 

@@ -21,7 +21,7 @@ import { Calendar } from "~/components/ui/calendar";
 import {
   BOOKING_SOURCES,
   BOOKING_STATUSES,
-} from "~/services/types/booking.types";
+} from "~/services/api/booking/booking.types";
 import { BookingService } from "~/services/api/booking";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -63,20 +63,20 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
 
   const handleConfirmExport = async () => {
     if (isExporting) return;
-    
+
     try {
       setIsExporting(true);
       setOpenExportDialog(false);
       toast.loading("Đang xuất file...", { id: "export-bookings" });
-      
+
       const dateParam = format(exportDate, "yyyy-MM-dd");
       const blob = await BookingService.exportBookings(dateParam);
-      
+
       // Ensure blob is valid
       if (!blob || !(blob instanceof Blob)) {
         throw new Error("Dữ liệu không hợp lệ");
       }
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -84,17 +84,17 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
       link.download = `danh-sach-booking-${format(exportDate, "yyyy-MM-dd")}.xlsx`;
       document.body.appendChild(link);
       link.click();
-      
+
       // Cleanup
       setTimeout(() => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }, 100);
-      
+
       toast.success("Xuất file thành công", { id: "export-bookings" });
     } catch (error: any) {
-      toast.error(error?.message || "Xuất file thất bại. Vui lòng thử lại", { 
-        id: "export-bookings" 
+      toast.error(error?.message || "Xuất file thất bại. Vui lòng thử lại", {
+        id: "export-bookings",
       });
     } finally {
       setIsExporting(false);
