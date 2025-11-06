@@ -1,42 +1,42 @@
 import { Users, UserCheck, UserX, Shield } from "lucide-react";
 import { Card } from "~/components/ui/card";
-import type { CustomerItem } from "~/services/api/customer/dto";
+import type { UserItem } from "~/services/api/user/dto";
 
-interface CustomerStatsProps {
-  customers: CustomerItem[];
+interface UserStatsProps {
+  Users: UserItem[];
 }
 
 /**
- * Customer Statistics Component - NOVA-UI
+ * user Statistics Component - NOVA-UI
  * Hiển thị thống kê tổng quan về khách hàng
  */
-export function CustomerStats({ customers }: CustomerStatsProps) {
-  const totalCustomers = customers.length;
-  const activeCustomers = customers.filter(
+export function UserStats({ Users }: UserStatsProps) {
+  const totalUsers = Users.length;
+  const activeUsers = Users.filter(
     (c) => !c.lockoutEnabled || !c.lockoutEnd
   ).length;
-  const lockedCustomers = customers.filter(
+  const lockedUsers = Users.filter(
     (c) => c.lockoutEnabled && c.lockoutEnd
   ).length;
 
   const stats = [
     {
       title: "Tổng khách hàng",
-      value: totalCustomers,
+      value: totalUsers,
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
       title: "Đang hoạt động",
-      value: activeCustomers,
+      value: activeUsers,
       icon: UserCheck,
       color: "text-green-600",
       bgColor: "bg-green-50",
     },
     {
       title: "Bị khóa",
-      value: lockedCustomers,
+      value: lockedUsers,
       icon: UserX,
       color: "text-red-600",
       bgColor: "bg-red-50",

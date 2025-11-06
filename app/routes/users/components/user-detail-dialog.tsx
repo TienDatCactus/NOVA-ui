@@ -7,11 +7,11 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { Mail, Phone, User, Shield, Calendar, Lock } from "lucide-react";
-import type { CustomerItem } from "~/services/api/customer/dto";
+import type { UserItem } from "~/services/api/user/dto";
 import { format, parseISO } from "date-fns";
 
-interface CustomerDetailDialogProps {
-  customer: CustomerItem;
+interface UserDetailDialogProps {
+  user: UserItem;
   open: boolean;
   onClose: () => void;
 }
@@ -23,7 +23,7 @@ const getRoleBadgeVariant = (role: string) => {
   const roleColors: Record<string, { bg: string; text: string; border: string }> = {
     Receptionist: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
     Staff: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
-    Customer: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
+    user: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
     HotelManager: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200" },
     Accountant: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
   };
@@ -31,14 +31,14 @@ const getRoleBadgeVariant = (role: string) => {
 };
 
 /**
- * Customer Detail Dialog - NOVA-UI
+ * user Detail Dialog - NOVA-UI
  * Hiển thị chi tiết khách hàng với layout thoáng đãng
  */
-export function CustomerDetailDialog({
-  customer,
+export function UserDetailDialog({
+  user,
   open,
   onClose,
-}: CustomerDetailDialogProps) {
+}: UserDetailDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
@@ -58,11 +58,11 @@ export function CustomerDetailDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Tên đăng nhập</p>
-                <p className="font-medium">{customer.userName}</p>
+                <p className="font-medium">{user.userName}</p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Họ và tên</p>
-                <p className="font-medium">{customer.fullName}</p>
+                <p className="font-medium">{user.fullName}</p>
               </div>
             </div>
           </div>
@@ -79,8 +79,8 @@ export function CustomerDetailDialog({
               <div className="flex items-center gap-3">
                 <div className="w-32 text-sm text-muted-foreground">Email:</div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">{customer.email}</span>
-                  {customer.emailConfirmed }
+                  <span className="font-medium">{user.email}</span>
+                  {user.emailConfirmed }
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -88,7 +88,7 @@ export function CustomerDetailDialog({
                   <Phone className="h-4 w-4" />
                   Số điện thoại:
                 </div>
-                <span className="font-medium">{customer.phoneNumber}</span>
+                <span className="font-medium">{user.phoneNumber}</span>
               </div>
             </div>
           </div>
@@ -102,7 +102,7 @@ export function CustomerDetailDialog({
               Vai trò
             </h3>
             <div className="flex gap-2 flex-wrap">
-              {customer.roles.map((role) => {
+              {user.roles.map((role) => {
                 const colors = getRoleBadgeVariant(role);
                 return (
                   <Badge
@@ -128,7 +128,7 @@ export function CustomerDetailDialog({
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-32 text-sm text-muted-foreground">Trạng thái:</div>
-                {customer.lockoutEnabled && customer.lockoutEnd ? (
+                {user.lockoutEnabled && user.lockoutEnd ? (
                   <Badge variant="destructive">Bị khóa</Badge>
                 ) : (
                   <Badge
@@ -139,14 +139,14 @@ export function CustomerDetailDialog({
                   </Badge>
                 )}
               </div>
-              {customer.lockoutEnd && (
+              {user.lockoutEnd && (
                 <div className="flex items-center gap-3">
                   <div className="w-32 text-sm text-muted-foreground flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Khóa đến:
                   </div>
                   <span className="font-medium">
-                    {format(parseISO(customer.lockoutEnd), "dd/MM/yyyy HH:mm")}
+                    {format(parseISO(user.lockoutEnd), "dd/MM/yyyy HH:mm")}
                   </span>
                 </div>
               )}

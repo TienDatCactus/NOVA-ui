@@ -1,9 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import {
-  UserPlus,
   Users,
   Pencil,
-  Search,
   Lock,
   Unlock,
   Shield,
@@ -22,14 +20,6 @@ import {
 } from "~/components/ui/table";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,87 +28,41 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { useCustomers, useRoles } from "./container/useCustomers.hooks";
-import { CustomerDetailDialog } from "./components/customer-detail-dialog";
-import { CustomerFormDialog } from "./components/customer-create-dialog";
-import { CustomerEditDialog } from "./components/customer-edit-dialog";
-import { CustomerStats } from "./components/customer-stats";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
+import { useUsers, useRoles } from "./container/useUsers.hooks";
+import { UserDetailDialog } from "./components/user-detail-dialog";
+import { UserFormDialog } from "./components/user-create-dialog";
+import { UserEditDialog } from "./components/user-edit-dialog";
 import { LockUserDialog } from "./components/lock-user-dialog";
 import { ManageRolesDialog } from "./components/manage-roles-dialog";
 import ChangePasswordDialog from "./components/change-password-dialog";
-import type { CustomerItem } from "~/services/api/customer/dto";
-import type { Route } from "./+types/customers";
+import UsersViewLayout from "./layouts/users-view.layout";
+import useUserFilters from "./container/filter.hooks";
+import {
+  getRoleBadgeColors,
+  getRoleDisplayName,
+} from "~/services/types/users.types";
+import type { UserItem } from "~/services/api/user/dto";
 
-/**
- * Helper function - Get role badge color
- */
-const getRoleBadgeVariant = (role: string) => {
-  const roleColors: Record<
-    string,
-    { bg: string; text: string; border: string }
-  > = {
-    Receptionist: {
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-      border: "border-blue-200",
-    },
-    Staff: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-      border: "border-purple-200",
-    },
-    Customer: {
-      bg: "bg-green-50",
-      text: "text-green-700",
-      border: "border-green-200",
-    },
-    HotelManager: {
-      bg: "bg-orange-50",
-      text: "text-orange-700",
-      border: "border-orange-200",
-    },
-    Accountant: {
-      bg: "bg-pink-50",
-      text: "text-pink-700",
-      border: "border-pink-200",
-    },
-    Admin: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
-    ServiceStaff: {
-      bg: "bg-indigo-50",
-      text: "text-indigo-700",
-      border: "border-indigo-200",
-    },
-  };
-  return (
-    roleColors[role] || {
-      bg: "bg-gray-50",
-      text: "text-gray-700",
-      border: "border-gray-200",
-    }
-  );
-};
-
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
-  const { data, isPending } = useCustomers();
+export default function Component() {
+  const { data, isPending } = useUsers();
   const { data: rolesData } = useRoles();
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerItem | null>(
+  const { filters, updateFilter, resetFilters, filterUsers } =
+    useUserFilters();
+
+  const [selectedUser, setSelectedUser] = useState<UserItem | null>(
     null
   );
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [customerToEdit, setCustomerToEdit] = useState<CustomerItem | null>(
+  const [UserToEdit, setUserToEdit] = useState<UserItem | null>(
     null
   );
 
@@ -127,172 +71,78 @@ export default function Component({
   const [lockDialogMode, setLockDialogMode] = useState<"lock" | "unlock">(
     "lock"
   );
-  const [customerToLock, setCustomerToLock] = useState<CustomerItem | null>(
+  const [UserToLock, setUserToLock] = useState<UserItem | null>(
     null
   );
 
   // Manage roles dialog states
   const [isManageRolesOpen, setIsManageRolesOpen] = useState(false);
-  const [customerToManageRoles, setCustomerToManageRoles] =
-    useState<CustomerItem | null>(null);
+  const [UserToManageRoles, setUserToManageRoles] =
+    useState<UserItem | null>(null);
 
   // Change password dialog states
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [customerToChangePassword, setCustomerToChangePassword] =
-    useState<CustomerItem | null>(null);
+  const [UserToChangePassword, setUserToChangePassword] =
+    useState<UserItem | null>(null);
 
-  // Search and filter states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [roleFilter, setRoleFilter] = useState<string>("all");
-
-  const handleViewDetail = (customer: CustomerItem) => {
-    setSelectedCustomer(customer);
+  const handleViewDetail = (user: UserItem) => {
+    setSelectedUser(user);
     setIsDetailOpen(true);
   };
 
   const handleCloseDetail = () => {
     setIsDetailOpen(false);
-    setSelectedCustomer(null);
+    setSelectedUser(null);
   };
 
   const handleCreateSuccess = () => {
     setIsCreateOpen(false);
   };
 
-  const handleEdit = (customer: CustomerItem) => {
-    setCustomerToEdit(customer);
+  const handleEdit = (user: UserItem) => {
+    setUserToEdit(user);
     setIsEditOpen(true);
   };
 
   const handleEditSuccess = () => {
     setIsEditOpen(false);
-    setCustomerToEdit(null);
+    setUserToEdit(null);
   };
 
-  const handleLockUser = (customer: CustomerItem) => {
-    setCustomerToLock(customer);
+  const handleLockUser = (user: UserItem) => {
+    setUserToLock(user);
     setLockDialogMode("lock");
     setIsLockDialogOpen(true);
   };
 
-  const handleUnlockUser = (customer: CustomerItem) => {
-    setCustomerToLock(customer);
+  const handleUnlockUser = (user: UserItem) => {
+    setUserToLock(user);
     setLockDialogMode("unlock");
     setIsLockDialogOpen(true);
   };
 
-  const handleManageRoles = (customer: CustomerItem) => {
-    setCustomerToManageRoles(customer);
+  const handleManageRoles = (user: UserItem) => {
+    setUserToManageRoles(user);
     setIsManageRolesOpen(true);
   };
 
-  const handleChangePassword = (customer: CustomerItem) => {
-    setCustomerToChangePassword(customer);
+  const handleChangePassword = (user: UserItem) => {
+    setUserToChangePassword(user);
     setIsChangePasswordOpen(true);
   };
 
-  // Filtered and searched data
-  const filteredCustomers = useMemo(() => {
-    if (!data) return [];
-
-    return data.filter((customer) => {
-      // Search filter - search in name, email, username
-      const matchesSearch =
-        searchQuery === "" ||
-        customer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.userName.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Status filter
-      const isLocked = customer.lockoutEnabled && customer.lockoutEnd;
-      const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "active" && !isLocked) ||
-        (statusFilter === "locked" && isLocked);
-
-      // Role filter
-      const matchesRole =
-        roleFilter === "all" || customer.roles.includes(roleFilter);
-
-      return matchesSearch && matchesStatus && matchesRole;
-    });
-  }, [data, searchQuery, statusFilter, roleFilter]);
+  const filteredUsers = data ? filterUsers(data) : [];
 
   return (
-    <div className="min-h-screen bg-muted/30 p-8">
-      {/* Header Section - Thoáng đãng với spacing lớn */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Users className="h-6 w-6 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Quản lý Khách hàng
-          </h1>
-        </div>
-        <p className="text-muted-foreground ml-12">
-          Quản lý thông tin và tài khoản khách hàng
-        </p>
-      </div>
-
-      {/* Statistics Cards */}
-      {data && data.length > 0 && <CustomerStats customers={data} />}
-
-      {/* Search & Filter Bar */}
-      <Card className="mb-6 p-4 shadow-md">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Search Input */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm kiếm theo tên, email, tên đăng nhập..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          {/* Status Filter */}
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder="Lọc theo trạng thái" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả trạng thái</SelectItem>
-              <SelectItem value="active">Hoạt động</SelectItem>
-              <SelectItem value="locked">Bị khóa</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Role Filter */}
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder="Lọc theo vai trò" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả vai trò</SelectItem>
-              {rolesData?.map((role) => (
-                <SelectItem key={role} value={role}>
-                  {role}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Add Button */}
-          <Button
-            onClick={() => setIsCreateOpen(true)}
-            className="gap-2 shadow-md"
-          >
-            <UserPlus className="h-4 w-4" />
-            Thêm mới
-          </Button>
-        </div>
-      </Card>
-
-      {/* Main Content Card - Elevation với shadow */}
-      <Card className="shadow-lg border-0 overflow-hidden">
+    <UsersViewLayout
+      filters={filters}
+      updateFilter={updateFilter}
+      resetFilters={resetFilters}
+      totalUsers={data?.length || 0}
+      onAddUser={() => setIsCreateOpen(true)}
+      roles={rolesData || []}
+    >
+      <Card className="flex-1 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -332,43 +182,43 @@ export default function Component({
                     </TableCell>
                   </TableRow>
                 ))
-              ) : filteredCustomers && filteredCustomers.length > 0 ? (
-                filteredCustomers.map((customer) => (
+              ) : filteredUsers && filteredUsers.length > 0 ? (
+                filteredUsers.map((user) => (
                   <TableRow
-                    key={customer.id}
+                    key={user.id}
                     className="hover:bg-muted/30 transition-colors cursor-pointer"
-                    onClick={() => handleViewDetail(customer)}
+                    onClick={() => handleViewDetail(user)}
                   >
                     <TableCell className="font-medium">
-                      {customer.fullName}
+                      {user.fullName}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">{customer.email}</span>
-                        {customer.emailConfirmed}
+                        <span className="text-sm">{user.email}</span>
+                        {user.emailConfirmed}
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {customer.phoneNumber}
+                      {user.phoneNumber}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
-                        {customer.roles.map((role) => {
-                          const colors = getRoleBadgeVariant(role);
+                        {user.roles.map((role) => {
+                          const colors = getRoleBadgeColors(role);
                           return (
                             <Badge
                               key={role}
                               variant="outline"
                               className={`text-xs ${colors.bg} ${colors.text} ${colors.border} shadow-sm`}
                             >
-                              {role}
+                              {getRoleDisplayName(role)}
                             </Badge>
                           );
                         })}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {customer.lockoutEnabled && customer.lockoutEnd ? (
+                      {user.lockoutEnabled && user.lockoutEnd ? (
                         <Badge variant="destructive" className="shadow-sm">
                           Bị khóa
                         </Badge>
@@ -400,7 +250,7 @@ export default function Component({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleEdit(customer);
+                              handleEdit(user);
                             }}
                           >
                             <Pencil className="h-4 w-4 mr-2" />
@@ -410,7 +260,7 @@ export default function Component({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleManageRoles(customer);
+                              handleManageRoles(user);
                             }}
                           >
                             <Shield className="h-4 w-4 mr-2" />
@@ -420,7 +270,7 @@ export default function Component({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleChangePassword(customer);
+                              handleChangePassword(user);
                             }}
                           >
                             <KeyRound className="h-4 w-4 mr-2" />
@@ -429,11 +279,11 @@ export default function Component({
 
                           <DropdownMenuSeparator />
 
-                          {customer.lockoutEnabled && customer.lockoutEnd ? (
+                          {user.lockoutEnabled && user.lockoutEnd ? (
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleUnlockUser(customer);
+                                handleUnlockUser(user);
                               }}
                               className="text-green-600 focus:text-green-600"
                             >
@@ -444,7 +294,7 @@ export default function Component({
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleLockUser(customer);
+                                handleLockUser(user);
                               }}
                               className="text-destructive focus:text-destructive"
                             >
@@ -459,15 +309,35 @@ export default function Component({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <Users className="h-12 w-12 opacity-20" />
-                      <p>
-                        {data && data.length > 0
-                          ? "Không tìm thấy khách hàng phù hợp"
-                          : "Chưa có khách hàng nào"}
-                      </p>
-                    </div>
+                  <TableCell colSpan={6} className="h-64">
+                    {filters.searchText ||
+                    filters.statusFilter !== "all" ||
+                    filters.roleFilter !== "all" ? (
+                      <Empty>
+                        <EmptyHeader>
+                          <EmptyMedia variant="icon">
+                            <Users />
+                          </EmptyMedia>
+                          <EmptyTitle>Không tìm thấy kết quả</EmptyTitle>
+                          <EmptyDescription>
+                            Thử điều chỉnh bộ lọc hoặc thay đổi từ khóa tìm kiếm
+                          </EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
+                    ) : (
+                      <Empty>
+                        <EmptyHeader>
+                          <EmptyMedia variant="icon">
+                            <Users />
+                          </EmptyMedia>
+                          <EmptyTitle>Chưa có tài khoản nào</EmptyTitle>
+                          <EmptyDescription>
+                            Bắt đầu bằng cách thêm tài khoản đầu tiên cho hệ
+                            thống
+                          </EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
+                    )}
                   </TableCell>
                 </TableRow>
               )}
@@ -477,69 +347,69 @@ export default function Component({
       </Card>
 
       {/* Dialogs */}
-      {selectedCustomer && (
-        <CustomerDetailDialog
-          customer={selectedCustomer}
+      {selectedUser && (
+        <UserDetailDialog
+          user={selectedUser}
           open={isDetailOpen}
           onClose={handleCloseDetail}
         />
       )}
 
-      <CustomerFormDialog
+      <UserFormDialog
         open={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         onSuccess={handleCreateSuccess}
       />
 
-      {/* Edit Customer Dialog */}
-      {customerToEdit && (
-        <CustomerEditDialog
-          customer={customerToEdit}
+      {/* Edit user Dialog */}
+      {UserToEdit && (
+        <UserEditDialog
+          user={UserToEdit}
           open={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
-            setCustomerToEdit(null);
+            setUserToEdit(null);
           }}
           onSuccess={handleEditSuccess}
         />
       )}
 
       {/* Lock/Unlock User Dialog */}
-      {customerToLock && (
+      {UserToLock && (
         <LockUserDialog
-          customer={customerToLock}
+          user={UserToLock}
           open={isLockDialogOpen}
           onClose={() => {
             setIsLockDialogOpen(false);
-            setCustomerToLock(null);
+            setUserToLock(null);
           }}
           mode={lockDialogMode}
         />
       )}
 
       {/* Manage Roles Dialog */}
-      {customerToManageRoles && (
+      {UserToManageRoles && (
         <ManageRolesDialog
-          customer={customerToManageRoles}
+          user={UserToManageRoles}
           open={isManageRolesOpen}
           onClose={() => {
             setIsManageRolesOpen(false);
-            setCustomerToManageRoles(null);
+            setUserToManageRoles(null);
           }}
         />
       )}
-      {customerToChangePassword && (
+      {UserToChangePassword && (
         <ChangePasswordDialog
           open={isChangePasswordOpen}
           onOpenChange={setIsChangePasswordOpen}
-          customerId={customerToChangePassword.id}
-          customerName={customerToChangePassword.fullName}
+          UserId={UserToChangePassword.id}
+          UserName={UserToChangePassword.fullName}
           onSuccess={() => {
             setIsChangePasswordOpen(false);
-            setCustomerToChangePassword(null);
+            setUserToChangePassword(null);
           }}
         />
       )}
-    </div>
+    </UsersViewLayout>
   );
 }

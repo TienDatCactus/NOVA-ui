@@ -1,10 +1,16 @@
+import { Search, X } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { Search, Filter, CheckCircle2, XCircle, Circle } from "lucide-react";
 import { Separator } from "~/components/ui/separator";
-import { Card } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 interface UnitsFilterSidebarProps {
   filters: {
@@ -18,114 +24,55 @@ interface UnitsFilterSidebarProps {
 export default function UnitsFilterSidebar({
   filters,
   onFilterChange,
+  onResetFilters,
 }: UnitsFilterSidebarProps) {
+  const activeFiltersCount =
+    (filters.searchQuery !== "" ? 1 : 0) + (filters.isActive !== "all" ? 1 : 0);
+
   return (
-    <Card className="w-72 flex flex-col shadow-sm">
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-primary/10 p-2">
-            <Filter className="h-4 w-4 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm">Bộ lọc</h3>
-            <p className="text-xs text-muted-foreground">
-              Lọc danh sách đơn vị
-            </p>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Search */}
-        <div className="space-y-3">
-          <Label className="text-sm font-semibold flex items-center gap-2">
-            <Search className="h-3.5 w-3.5" />
-            Tìm kiếm
+    <aside className="w-72 flex-shrink-0 space-y-2">
+      <div className="flex items-center justify-between">
+        {activeFiltersCount > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onResetFilters}
+            className="h-8 text-xs gap-1"
+          >
+            <X className="h-3 w-3" />
+            Xóa ({activeFiltersCount})
+          </Button>
+        )}
+      </div>
+      <Card className="p-4 h-fit shadow-sm">
+        <div className="flex flex-col gap-4">
+          <Label htmlFor="search" className="text-sm font-medium">
+            Bộ lọc đơn vị tính
           </Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Mã, tên đơn vị..."
-              className="pl-9 h-9"
-              value={filters.searchQuery}
-              onChange={(e) => onFilterChange("searchQuery", e.target.value)}
-            />
-          </div>
-          {filters.searchQuery && (
-            <p className="text-xs text-muted-foreground">
-              Đang tìm:{" "}
-              <Badge variant="secondary" className="text-xs">
-                {filters.searchQuery}
-              </Badge>
-            </p>
-          )}
-        </div>
-
-        <Separator />
-
-        {/* Status Filter */}
-        <div className="space-y-3">
-          <Label className="text-sm font-semibold">Trạng thái</Label>
-          <RadioGroup
+          <Input
+            placeholder="Mã, tên đơn vị..."
+            value={filters.searchQuery}
+            className="bg-white"
+            onChange={(e) => onFilterChange("searchQuery", e.target.value)}
+            startAddon={<Search className="text-muted-foreground" />}
+          />
+          <Separator />
+          <Select
             value={filters.isActive}
             onValueChange={(value) => onFilterChange("isActive", value)}
           >
-            <div className="space-y-2">
-              <label
-                htmlFor="all"
-                className={`flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-colors hover:bg-muted/50 ${
-                  filters.isActive === "all"
-                    ? "border-primary bg-primary/5"
-                    : "border-border"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <RadioGroupItem value="all" id="all" />
-                  <div className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Tất cả</span>
-                  </div>
-                </div>
-              </label>
-
-              <label
-                htmlFor="active"
-                className={`flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-colors hover:bg-muted/50 ${
-                  filters.isActive === "true"
-                    ? "border-green-600 bg-green-50 dark:bg-green-900/10"
-                    : "border-border"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <RadioGroupItem value="true" id="active" />
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium">Đang hoạt động</span>
-                  </div>
-                </div>
-              </label>
-
-              <label
-                htmlFor="inactive"
-                className={`flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-colors hover:bg-muted/50 ${
-                  filters.isActive === "false"
-                    ? "border-gray-600 bg-gray-50 dark:bg-gray-900/10"
-                    : "border-border"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <RadioGroupItem value="false" id="inactive" />
-                  <div className="flex items-center gap-2">
-                    <XCircle className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-medium">Ngừng hoạt động</span>
-                  </div>
-                </div>
-              </label>
-            </div>
-          </RadioGroup>
+            <SelectTrigger className="shadow-md bg-white w-full">
+              <SelectValue placeholder="Chọn trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">Đang hoạt động</SelectItem>
+              <SelectItem value="false">Ngừng hoạt động</SelectItem>
+              <SelectItem value="all">Tất cả</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </aside>
   );
 }
+

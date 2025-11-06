@@ -6,28 +6,29 @@ interface UnitFilters {
   isActive: string; // "all" | "true" | "false"
 }
 
+const defaultFilters: UnitFilters = {
+  searchQuery: "",
+  isActive: "all",
+};
+
 function useUnitFilters() {
-  const [filters, setFilters] = useState<UnitFilters>({
-    searchQuery: "",
-    isActive: "all",
-  });
+  const [filters, setFilters] = useState<UnitFilters>(defaultFilters);
+
+  // Derived value for API params
+  const includeInactive = filters.isActive !== "true";
 
   const updateFilter = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const resetFilters = () => {
-    setFilters({
-      searchQuery: "",
-      isActive: "all",
-    });
+    setFilters(defaultFilters);
   };
 
   const filterUnits = useMemo(() => {
     return (units: UnitItemDetailResponseDto[]) => {
       let filtered = [...units];
 
-      // Search filter
       if (filters.searchQuery) {
         const query = filters.searchQuery.toLowerCase();
         filtered = filtered.filter(
@@ -37,10 +38,10 @@ function useUnitFilters() {
         );
       }
 
-      // Active status filter
-      if (filters.isActive !== "all") {
-        const isActive = filters.isActive === "true";
-        filtered = filtered.filter((unit) => unit.active === isActive);
+      if (filters.isActive === "true") {
+        filtered = filtered.filter((unit) => unit.active === true);
+      } else if (filters.isActive === "false") {
+        filtered = filtered.filter((unit) => unit.active === false);
       }
 
       return filtered;
@@ -52,6 +53,7 @@ function useUnitFilters() {
     updateFilter,
     resetFilters,
     filterUnits,
+    includeInactive,
   };
 }
 

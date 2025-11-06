@@ -9,7 +9,7 @@ const Auth = {
   revoke: "Auth/revoke",
 };
 
-const Customer = {
+const User = {
   list: "Users",
   detail: (id: string) => `Users/${id}`,
   create: "Users",
@@ -131,7 +131,7 @@ const Invoices = {
 };
 export {
   Auth,
-  Customer,
+  User,
   Booking,
   MenuCategory,
   Menu,

@@ -1,14 +1,14 @@
 import type { z } from "zod";
-import { CustomerSchema } from "~/services/schema/customer.schema";
+import { UserSchema } from "~/services/schema/user.schema";
 
 const {
-  CustomerItemSchema,
-  CustomerListResponseSchema,
-  CustomerDetailResponseSchema,
-  CreateCustomerSchema,
-  CreateCustomerResponseSchema,
-  UpdateCustomerSchema,
-  UpdateCustomerResponseSchema,
+  UserItemSchema,
+  UserListResponseSchema,
+  UserDetailResponseSchema,
+  CreateUserSchema,
+  CreateUserResponseSchema,
+  UpdateUserSchema,
+  UpdateUserResponseSchema,
   RoleListResponseSchema,
   LockUserSchema,
   LockUserResponseSchema,
@@ -19,24 +19,16 @@ const {
   RemoveRolesResponseSchema,
   ChangePasswordSchema,
   ChangePasswordResponseSchema,
-} = CustomerSchema;
+} = UserSchema;
 
-// Customer Item
-export type CustomerItem = z.infer<typeof CustomerItemSchema>;
+// User Item
+export type UserItem = z.infer<typeof UserItemSchema>;
 
 // API Response Types
-export type CustomerListResponseDto = z.infer<
-  typeof CustomerListResponseSchema
->;
-export type CustomerDetailResponseDto = z.infer<
-  typeof CustomerDetailResponseSchema
->;
-export type CreateCustomerResponseDto = z.infer<
-  typeof CreateCustomerResponseSchema
->;
-export type UpdateCustomerResponseDto = z.infer<
-  typeof UpdateCustomerResponseSchema
->;
+export type UserListResponseDto = z.infer<typeof UserListResponseSchema>;
+export type UserDetailResponseDto = z.infer<typeof UserDetailResponseSchema>;
+export type CreateUserResponseDto = z.infer<typeof CreateUserResponseSchema>;
+export type UpdateUserResponseDto = z.infer<typeof UpdateUserResponseSchema>;
 export type RoleListResponseDto = z.infer<typeof RoleListResponseSchema>;
 export type LockUserResponseDto = z.infer<typeof LockUserResponseSchema>;
 export type UnlockUserResponseDto = z.infer<typeof UnlockUserResponseSchema>;
@@ -44,8 +36,8 @@ export type AssignRolesResponseDto = z.infer<typeof AssignRolesResponseSchema>;
 export type RemoveRolesResponseDto = z.infer<typeof RemoveRolesResponseSchema>;
 
 // Request Body Types
-export type CreateCustomerDto = z.infer<typeof CreateCustomerSchema>;
-export type UpdateCustomerDto = z.infer<typeof UpdateCustomerSchema>;
+export type CreateUserDto = z.infer<typeof CreateUserSchema>;
+export type UpdateUserDto = z.infer<typeof UpdateUserSchema>;
 export type LockUserDto = z.infer<typeof LockUserSchema>;
 export type AssignRolesDto = z.infer<typeof AssignRolesSchema>;
 export type RemoveRolesDto = z.infer<typeof RemoveRolesSchema>;

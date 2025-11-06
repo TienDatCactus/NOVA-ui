@@ -1,29 +1,29 @@
 import http from "~/lib/http";
-import { CustomerSchema } from "~/services/schema/customer.schema";
-import { Customer } from "~/services/url";
+import { UserSchema } from "~/services/schema/user.schema";
+import { User } from "~/services/url";
 import type {
   AssignRolesDto,
   AssignRolesResponseDto,
-  CreateCustomerDto,
-  CreateCustomerResponseDto,
-  CustomerDetailResponseDto,
-  CustomerListResponseDto,
+  CreateUserDto,
+  CreateUserResponseDto,
+  UserDetailResponseDto,
+  UserListResponseDto,
   LockUserDto,
   LockUserResponseDto,
   RemoveRolesDto,
   RemoveRolesResponseDto,
   UnlockUserResponseDto,
-  UpdateCustomerDto,
-  UpdateCustomerResponseDto,
+  UpdateUserDto,
+  UpdateUserResponseDto,
   ChangePasswordDto,
   ChangePasswordResponseDto,
 } from "./dto";
 
 const {
-  CustomerListResponseSchema,
-  CustomerDetailResponseSchema,
-  CreateCustomerResponseSchema,
-  UpdateCustomerResponseSchema,
+  UserListResponseSchema,
+  UserDetailResponseSchema,
+  CreateUserResponseSchema,
+  UpdateUserResponseSchema,
   RoleListResponseSchema,
   LockUserResponseSchema,
   UnlockUserResponseSchema,
@@ -31,46 +31,42 @@ const {
   RemoveRolesResponseSchema,
   ChangePasswordSchema,
   ChangePasswordResponseSchema,
-} = CustomerSchema;
+} = UserSchema;
 
-async function getCustomerList(): Promise<CustomerListResponseDto> {
+async function getUserList(): Promise<UserListResponseDto> {
   try {
-    const resp = await http.get(Customer.list);
-    return CustomerListResponseSchema.parse(resp.data);
+    const resp = await http.get(User.list);
+    return UserListResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
   }
 }
 
-async function getCustomerDetail(
-  id: string
-): Promise<CustomerDetailResponseDto> {
+async function getUserDetail(id: string): Promise<UserDetailResponseDto> {
   try {
-    const resp = await http.get(Customer.detail(id));
-    return CustomerDetailResponseSchema.parse(resp.data);
+    const resp = await http.get(User.detail(id));
+    return UserDetailResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
   }
 }
 
-async function createCustomer(
-  data: CreateCustomerDto
-): Promise<CreateCustomerResponseDto> {
+async function createUser(data: CreateUserDto): Promise<CreateUserResponseDto> {
   try {
-    const resp = await http.post(Customer.create, data);
-    return CreateCustomerResponseSchema.parse(resp);
+    const resp = await http.post(User.create, data);
+    return CreateUserResponseSchema.parse(resp);
   } catch (error) {
     return Promise.reject(error);
   }
 }
 
-async function updateCustomer(
+async function updateUser(
   id: string,
-  data: UpdateCustomerDto
-): Promise<UpdateCustomerResponseDto> {
+  data: UpdateUserDto
+): Promise<UpdateUserResponseDto> {
   try {
-    const resp: any = await http.put(Customer.update(id), data);
-    return UpdateCustomerResponseSchema.parse(resp);
+    const resp: any = await http.put(User.update(id), data);
+    return UpdateUserResponseSchema.parse(resp);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -78,7 +74,7 @@ async function updateCustomer(
 
 async function getRoleList(): Promise<string[]> {
   try {
-    const resp = await http.get(Customer.roles);
+    const resp = await http.get(User.roles);
     if (resp && typeof resp === "object" && "data" in resp) {
       return resp.data;
     }
@@ -93,7 +89,7 @@ async function lockUser(
   data: LockUserDto
 ): Promise<LockUserResponseDto> {
   try {
-    const resp: any = await http.post(Customer.lock(id), data);
+    const resp: any = await http.post(User.lock(id), data);
     return LockUserResponseSchema.parse(resp);
   } catch (error) {
     return Promise.reject(error);
@@ -102,7 +98,7 @@ async function lockUser(
 
 async function unlockUser(id: string): Promise<UnlockUserResponseDto> {
   try {
-    const resp: any = await http.post(Customer.unlock(id));
+    const resp: any = await http.post(User.unlock(id));
     return UnlockUserResponseSchema.parse(resp);
   } catch (error) {
     return Promise.reject(error);
@@ -114,7 +110,7 @@ async function assignRoles(
   data: AssignRolesDto
 ): Promise<AssignRolesResponseDto> {
   try {
-    const resp: any = await http.post(Customer.assignRoles(id), data);
+    const resp: any = await http.post(User.assignRoles(id), data);
     return AssignRolesResponseSchema.parse(resp);
   } catch (error) {
     return Promise.reject(error);
@@ -126,7 +122,7 @@ async function removeRoles(
   data: RemoveRolesDto
 ): Promise<RemoveRolesResponseDto> {
   try {
-    const resp: any = await http.delete(Customer.removeRoles(id), { data });
+    const resp: any = await http.delete(User.removeRoles(id), { data });
     return RemoveRolesResponseSchema.parse(resp);
   } catch (error) {
     return Promise.reject(error);
@@ -139,18 +135,18 @@ async function changePassword(
 ): Promise<ChangePasswordResponseDto> {
   try {
     const validatedData = ChangePasswordSchema.parse(data);
-    const resp = await http.post(Customer.changePassword(id), validatedData);
+    const resp = await http.post(User.changePassword(id), validatedData);
     return ChangePasswordResponseSchema.parse(resp);
   } catch (error) {
     return Promise.reject(error);
   }
 }
 
-export const CustomerService = {
-  getCustomerList,
-  getCustomerDetail,
-  createCustomer,
-  updateCustomer,
+export const UserService = {
+  getUserList,
+  getUserDetail,
+  createUser,
+  updateUser,
   getRoleList,
   lockUser,
   unlockUser,

@@ -105,8 +105,8 @@ const SIDEBAR_NAV_MAIN: Array<{
     ],
   },
   {
-    title: "Khách hàng",
-    url: "/dashboard/customers",
+    title: "Tài khoản",
+    url: "/dashboard/users",
     icon: Users,
   },
   {

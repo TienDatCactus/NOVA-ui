@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-// Base Customer Item Schema (for list and detail responses)
-const CustomerItemSchema = z
+// Base User Item Schema (for list and detail responses)
+const UserItemSchema = z
   .object({
     id: z.string(),
     userName: z.string(),
@@ -20,13 +20,13 @@ const CustomerItemSchema = z
   .passthrough();
 
 // GET /api/Users - List response
-const CustomerListResponseSchema = z.array(CustomerItemSchema);
+const UserListResponseSchema = z.array(UserItemSchema);
 
 // GET /api/Users/{id} - Detail response
-const CustomerDetailResponseSchema = CustomerItemSchema;
+const UserDetailResponseSchema = UserItemSchema;
 
 // POST /api/Users - Create request body
-const CreateCustomerSchema = z.object({
+const CreateUserSchema = z.object({
   userName: z.string().min(1, "Tên đăng nhập không được để trống"),
   email: z
     .string()
@@ -46,7 +46,7 @@ const CreateCustomerSchema = z.object({
 });
 
 // POST /api/Users - Create response
-const CreateCustomerResponseSchema = z.object({
+const CreateUserResponseSchema = z.object({
   success: z.boolean(),
   statusCode: z.number(),
   message: z.string(),
@@ -59,7 +59,7 @@ const CreateCustomerResponseSchema = z.object({
 });
 
 // PUT /api/Users/{id} - Update request body
-const UpdateCustomerSchema = z.object({
+const UpdateUserSchema = z.object({
   fullName: z
     .string()
     .min(1, "Họ tên không được để trống")
@@ -73,7 +73,7 @@ const UpdateCustomerSchema = z.object({
 });
 
 // PUT /api/Users/{id} - Update response
-const UpdateCustomerResponseSchema = z.object({
+const UpdateUserResponseSchema = z.object({
   success: z.boolean(),
   statusCode: z.number(),
   message: z.string(),
@@ -175,14 +175,14 @@ const ChangePasswordResponseSchema = z.object({
   meta: z.string().nullable().optional(),
 });
 
-export const CustomerSchema = {
-  CustomerItemSchema,
-  CustomerListResponseSchema,
-  CustomerDetailResponseSchema,
-  CreateCustomerSchema,
-  CreateCustomerResponseSchema,
-  UpdateCustomerSchema,
-  UpdateCustomerResponseSchema,
+export const UserSchema = {
+  UserItemSchema,
+  UserListResponseSchema,
+  UserDetailResponseSchema,
+  CreateUserSchema,
+  CreateUserResponseSchema,
+  UpdateUserSchema,
+  UpdateUserResponseSchema,
   RoleListResponseSchema,
   LockUserSchema,
   LockUserResponseSchema,
