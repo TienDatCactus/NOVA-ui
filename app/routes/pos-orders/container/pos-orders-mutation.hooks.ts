@@ -4,6 +4,7 @@ import { OrderService } from "~/services/api/orders";
 import type {
   CreatePOSOrderRequestDto,
   AddItemsToPOSOrderRequestDto,
+  POSOrderPayNowRequestDto,
 } from "~/services/api/orders/dto";
 
 /**
@@ -16,19 +17,12 @@ function useCreatePOSOrder() {
 
   return useMutation({
     mutationFn: async (data: CreatePOSOrderRequestDto) => {
-      const idempotencyKey = crypto.randomUUID();
-      return await OrderService.createPOSOrder(data, idempotencyKey);
+      return await OrderService.createPOSOrder(data);
     },
-    onSuccess: (data, variables) => {
-      toast.success("Đơn hàng đã được tạo thành công");
-      // Invalidate orders list - response doesn't include invoiceId
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["pos-orders", "by-invoice"],
       });
-    },
-    onError: (error) => {
-      console.error("Create POS order error:", error);
-      toast.error("Không thể tạo đơn hàng. Vui lòng thử lại.");
     },
   });
 }
@@ -49,27 +43,15 @@ function useAddItemToPOSOrder() {
       orderId: string;
       data: AddItemsToPOSOrderRequestDto;
     }) => {
-      const idempotencyKey = crypto.randomUUID();
-      return await OrderService.addItemsToPOSOrder(
-        orderId,
-        data,
-        idempotencyKey
-      );
+      return await OrderService.addItemsToPOSOrder(orderId, data);
     },
     onSuccess: (data, variables) => {
-      toast.success("Đã thêm món vào đơn hàng");
-      // Invalidate the order detail
       queryClient.invalidateQueries({
         queryKey: ["pos-order-detail", variables.orderId],
       });
-      // Also invalidate orders list (total might change)
       queryClient.invalidateQueries({
         queryKey: ["pos-orders", "by-invoice"],
       });
-    },
-    onError: (error) => {
-      console.error("Add item error:", error);
-      toast.error("Không thể thêm món. Vui lòng thử lại.");
     },
   });
 }
@@ -90,27 +72,15 @@ function useDeleteItemFromPOSOrder() {
       orderId: string;
       itemId: string;
     }) => {
-      const idempotencyKey = crypto.randomUUID();
-      return await OrderService.deleteItemFromPOSOrder(
-        orderId,
-        itemId,
-        idempotencyKey
-      );
+      return await OrderService.deleteItemFromPOSOrder(orderId, itemId);
     },
     onSuccess: (data, variables) => {
-      toast.success("Đã xóa món khỏi đơn hàng");
-      // Invalidate the order detail
       queryClient.invalidateQueries({
         queryKey: ["pos-order-detail", variables.orderId],
       });
-      // Also invalidate orders list (total might change)
       queryClient.invalidateQueries({
         queryKey: ["pos-orders", "by-invoice"],
       });
-    },
-    onError: (error) => {
-      console.error("Delete item error:", error);
-      toast.error("Không thể xóa món. Vui lòng thử lại.");
     },
   });
 }
@@ -125,23 +95,15 @@ function useCompletePOSOrder() {
 
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const idempotencyKey = crypto.randomUUID();
-      return await OrderService.completePOSOrder(orderId, idempotencyKey);
+      return await OrderService.completePOSOrder(orderId);
     },
-    onSuccess: (data, orderId) => {
-      toast.success("Đơn hàng đã hoàn thành");
-      // Invalidate the order detail
+    onSuccess: (orderId) => {
       queryClient.invalidateQueries({
         queryKey: ["pos-order-detail", orderId],
       });
-      // Invalidate orders list
       queryClient.invalidateQueries({
         queryKey: ["pos-orders", "by-invoice"],
       });
-    },
-    onError: (error) => {
-      console.error("Complete order error:", error);
-      toast.error("Không thể hoàn thành đơn hàng. Vui lòng thử lại.");
     },
   });
 }
@@ -156,23 +118,38 @@ function useCancelPOSOrder() {
 
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const idempotencyKey = crypto.randomUUID();
-      return await OrderService.cancelPOSOrder(orderId, idempotencyKey);
+      return await OrderService.cancelPOSOrder(orderId);
     },
-    onSuccess: (data, orderId) => {
-      toast.success("Đơn hàng đã bị hủy");
-      // Invalidate the order detail
+    onSuccess: (orderId) => {
       queryClient.invalidateQueries({
         queryKey: ["pos-order-detail", orderId],
       });
-      // Invalidate orders list
       queryClient.invalidateQueries({
         queryKey: ["pos-orders", "by-invoice"],
       });
     },
-    onError: (error) => {
-      console.error("Cancel order error:", error);
-      toast.error("Không thể hủy đơn hàng. Vui lòng thử lại.");
+  });
+}
+
+function usePayPOSOrderNow() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      data,
+    }: {
+      orderId: string;
+      data: POSOrderPayNowRequestDto;
+    }) => {
+      return await OrderService.payPOSOrderNow(orderId, data);
+    },
+    onSuccess: (orderId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail", orderId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-orders", "by-invoice"],
+      });
     },
   });
 }
@@ -183,4 +160,5 @@ export {
   useDeleteItemFromPOSOrder,
   useCompletePOSOrder,
   useCancelPOSOrder,
+  usePayPOSOrderNow,
 };

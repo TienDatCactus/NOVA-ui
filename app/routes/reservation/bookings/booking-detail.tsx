@@ -66,6 +66,7 @@ import type { Route } from "./+types/booking-detail";
 import { AddRoomModal } from "./components/add-room-modal";
 import AddMenuItemDialog from "./components/add-menu-item.dialog";
 import BookingOrders from "./components/booking-orders";
+import CreateOrderDialog from "./components/create-order-dialog";
 import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
 import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import { useUpdateBooking } from "./container/booking-mutation.hooks";
@@ -97,6 +98,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
@@ -111,7 +113,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     isCreatingOrder,
     orderDetail,
     isLoadingOrder,
-    createOrder,
+    createBookingOrder,
+    createRoomOrder,
     addMenuItem,
     removeItem,
   } = useBookingOrders({
@@ -418,7 +421,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 )}
 
                 {/* Source */}
-                {!form.watch("otaInformationId") && (
+                {form.watch("otaInformationId") && (
                   <div className="flex items-center gap-6">
                     <FormField
                       control={form.control}
@@ -600,7 +603,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                   isCreatingOrder={isCreatingOrder}
                   orderDetail={orderDetail}
                   isLoadingOrder={isLoadingOrder}
-                  onCreateOrder={createOrder}
+                  onOpenCreateDialog={() => setCreateOrderDialogOpen(true)}
                   onAddMenuItem={() => setOrderDialogOpen(true)}
                   onRemoveItem={removeItem}
                 />
@@ -636,6 +639,16 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               onOpenChange={setOrderDialogOpen}
               onConfirm={addMenuItem}
               isAdding={false}
+            />
+
+            {/* Create Order Dialog */}
+            <CreateOrderDialog
+              open={createOrderDialogOpen}
+              onOpenChange={setCreateOrderDialogOpen}
+              onCreateBookingOrder={createBookingOrder}
+              onCreateRoomOrder={createRoomOrder}
+              isCreating={isCreatingOrder}
+              hasMultipleRooms={(bookingDetail?.rooms.length || 0) > 1}
             />
 
             {/* Note Modal */}

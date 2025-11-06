@@ -114,9 +114,10 @@ const Orders = {
   cancelPosOrder: (id: string) => `PosOrders/${id}/cancel`,
   completePosOrder: (id: string) => `PosOrders/${id}/complete`,
   detailPOS: (id: string) => `PosOrders/${id}/details`,
-  listPosOrderbyInvoice: (invoiceId: string) =>
-    `PosOrders/invoice/${invoiceId}`,
+  // listPosOrderbyInvoice: (invoiceId: string) =>
+  //   `PosOrders/invoice/${invoiceId}`,
   printPOSorder: (id: string) => `PosOrders/${id}/print-data`,
+  payNow: (id: string) => `PosOrders/${id}/pay-now`,
 };
 
 const Invoices = {

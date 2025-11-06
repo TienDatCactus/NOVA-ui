@@ -130,10 +130,59 @@ const StaffBookingPricePreviewResponseSchema = z.object({
   availablePaymentMethods: z.array(z.any()),
 });
 
+/**
+ * UpdateBookingRoomRequestDto - Room operations
+ *
+ * Three operation types:
+ * 1. ADD: bookingRoomId = null, requires roomId + fromDate + toDate
+ * 2. CHANGE: bookingRoomId + newRoomId (swap rooms)
+ * 3. REMOVE: bookingRoomId + remove = true
+ */
+const UpdateBookingRoomRequestSchema = z
+  .object({
+    // CHANGE or REMOVE: ID of existing BookingRoom
+    bookingRoomId: z.string().nullable().optional(),
+
+    // ADD: ID of room to add (when bookingRoomId is null)
+    roomId: z.string().optional(),
+
+    // CHANGE: ID of new room to swap to
+    newRoomId: z.string().optional(),
+
+    // ADD: Date range for new room
+    fromDate: z.string().optional(),
+    toDate: z.string().optional(),
+
+    // REMOVE: Set to true to remove this room
+    remove: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      // ADD operation validation
+      if (data.bookingRoomId === null) {
+        return !!(data.roomId && data.fromDate && data.toDate);
+      }
+      // CHANGE operation validation
+      if (data.newRoomId) {
+        return !!data.bookingRoomId;
+      }
+      // REMOVE operation validation
+      if (data.remove) {
+        return !!data.bookingRoomId;
+      }
+      return true;
+    },
+    {
+      message:
+        "Invalid room operation: ADD requires roomId+dates, CHANGE requires bookingRoomId+newRoomId, REMOVE requires bookingRoomId+remove",
+    }
+  );
+
 const StaffUpdateBookingRequestSchema = z.object({
+  // ========== THÔNG TIN NGÀY Ở ==========
   checkinDate: z
     .union([
-      z.date("Ngày trả phòng không hợp lệ"),
+      z.date("Ngày nhận phòng không hợp lệ"),
       z.string().refine((val) => !isNaN(Date.parse(val)), {
         message: "Ngày không hợp lệ",
       }),
@@ -147,26 +196,29 @@ const StaffUpdateBookingRequestSchema = z.object({
       }),
     ])
     .optional(),
+
+  // ========== THÔNG TIN KHÁCH ==========
   adultsAmount: z.number().min(1, "Phải có ít nhất 1 người lớn").optional(),
   childrenAmount: z.number().min(0).optional(),
+
+  // ========== GHI CHÚ ==========
   note: z.string().optional(),
+
+  // ========== OTA ==========
   otaBookingCode: z.string().optional(),
   otaInformationId: z.string().optional(),
+
+  // ========== KHÁCH HÀNG ==========
   customerId: z.string("Customer ID không hợp lệ").optional(),
+
+  // ========== THANH TOÁN ==========
   paymentMethod: PaymentSchema.PaymentMethodEnum.optional(),
   paymentStatus: PaymentSchema.PaymentStatusEnum.optional(),
   totalAmount: z.number().min(0, "Tổng tiền không hợp lệ").optional(),
   paidAmount: z.number().min(0, "Số tiền thanh toán không hợp lệ").optional(),
-  rooms: z
-    .array(
-      z.object({
-        roomId: z.string("Room ID không hợp lệ").optional(),
-        fromDate: z.string("Ngày bắt đầu không hợp lệ").optional(),
-        toDate: z.string("Ngày kết thúc không hợp lệ").optional(),
-        remove: z.boolean().default(false).optional(),
-      })
-    )
-    .optional(),
+
+  // ========== PHÒNG (Array operations: ADD, CHANGE, REMOVE) ==========
+  rooms: z.array(UpdateBookingRoomRequestSchema).optional(),
 });
 
 const StaffUpdateBookingResponseSchema = z.object({
@@ -319,6 +371,7 @@ export const BookingSchema = {
   StaffBookingPricePreviewRequestSchema,
   StaffBookingPricePreviewResponseSchema,
   StaffUpdateBookingRequestSchema,
+  UpdateBookingRoomRequestSchema,
   StaffUpdateBookingResponseSchema,
   StaffCancelBookingResponseSchema,
   StaffChangeRoomRequestSchema,

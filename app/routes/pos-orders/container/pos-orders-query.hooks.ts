@@ -5,17 +5,17 @@ import { OrderService } from "~/services/api/orders";
  * Get list of POS orders by invoice ID
  * @param invoiceId - Invoice ID to filter orders
  */
-function usePOSOrdersByInvoice(invoiceId: string) {
-  return useQuery({
-    queryKey: ["pos-orders", "by-invoice", invoiceId],
-    queryFn: async () => await OrderService.getPOSOrdersByInvoice(invoiceId),
-    staleTime: 30 * 1000,
-    enabled: !!invoiceId,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-    refetchOnMount: false,
-  });
-}
+// function usePOSOrdersByInvoice(invoiceId: string) {
+//   return useQuery({
+//     queryKey: ["pos-orders", "by-invoice", invoiceId],
+//     queryFn: async () => await OrderService.getPOSOrdersByInvoice(invoiceId),
+//     staleTime: 30 * 1000,
+//     enabled: !!invoiceId,
+//     refetchOnWindowFocus: true,
+//     refetchOnReconnect: true,
+//     refetchOnMount: false,
+//   });
+// }
 
 /**
  * Get detailed information for a single POS order
@@ -52,4 +52,4 @@ function usePOSOrderPrintData(orderId: string, enabled: boolean = true) {
   });
 }
 
-export { usePOSOrdersByInvoice, usePOSOrderDetail, usePOSOrderPrintData };
+export { usePOSOrderDetail, usePOSOrderPrintData };

@@ -18,8 +18,6 @@ import type {
   StaffCreateBookingResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
-  StaffChangeRoomRequestDto,
-  StaffChangeRoomResponseDto,
   AvailableRoomsForChangeResponseDto,
 } from "./dto";
 

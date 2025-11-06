@@ -12,7 +12,7 @@ interface BookingOrdersProps {
   isCreatingOrder: boolean;
   orderDetail?: POSOrderDetailDto;
   isLoadingOrder: boolean;
-  onCreateOrder: () => void;
+  onOpenCreateDialog: () => void;
   onAddMenuItem: () => void;
   onRemoveItem: (itemId: string) => void;
 }
@@ -41,7 +41,7 @@ export default function BookingOrders({
   isCreatingOrder,
   orderDetail,
   isLoadingOrder,
-  onCreateOrder,
+  onOpenCreateDialog,
   onAddMenuItem,
   onRemoveItem,
 }: BookingOrdersProps) {
@@ -52,7 +52,7 @@ export default function BookingOrders({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Đơn hàng POS
+            Đơn POS
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -63,7 +63,7 @@ export default function BookingOrders({
             </p>
             <Button
               type="button"
-              onClick={onCreateOrder}
+              onClick={onOpenCreateDialog}
               disabled={isCreatingOrder}
             >
               {isCreatingOrder ? "Đang tạo..." : "Tạo đơn hàng"}

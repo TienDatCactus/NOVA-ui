@@ -17,7 +17,7 @@ const DashboardLayout: React.FC = () => {
           <header className="h-12 shadow-sm py-6 px-4 z-10 bg-white flex items-center w-full sticky top-0 justify-between border-b">
             <SidebarTrigger />
             <div className="flex gap-2 items-center">
-              <Button asChild variant={"pink-outline"}>
+              <Button asChild variant={"info-outline"}>
                 <Link to={DASHBOARD.reservation.newBooking}>
                   Đặt phòng <BookDown />
                 </Link>

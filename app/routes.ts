@@ -52,6 +52,7 @@ export default [
       route("invoices", "routes/invoices/invoices.tsx"),
       route("users", "routes/users/users.tsx"),
     ]),
+    route("point-of-sale", "routes/pos/pos.tsx"),
   ]),
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

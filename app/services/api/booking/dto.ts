@@ -11,6 +11,7 @@ const {
   StaffBookingPricePreviewRequestSchema,
   StaffBookingPricePreviewResponseSchema,
   StaffUpdateBookingRequestSchema,
+  UpdateBookingRoomRequestSchema,
   StaffUpdateBookingResponseSchema,
   StaffCancelBookingResponseSchema,
   StaffChangeRoomRequestSchema,
@@ -26,6 +27,9 @@ type StaffBookingPricePreviewResponseDto = z.infer<
 >;
 type StaffUpdateBookingRequestDto = z.infer<
   typeof StaffUpdateBookingRequestSchema
+>;
+type UpdateBookingRoomRequestDto = z.infer<
+  typeof UpdateBookingRoomRequestSchema
 >;
 type StaffUpdateBookingResponseDto = z.infer<
   typeof StaffUpdateBookingResponseSchema
@@ -59,6 +63,7 @@ export type {
   StaffBookingPricePreviewRequestDto,
   StaffBookingPricePreviewResponseDto,
   StaffUpdateBookingRequestDto,
+  UpdateBookingRoomRequestDto,
   StaffUpdateBookingResponseDto,
   StaffCancelBookingResponseDto,
   StaffChangeRoomRequestDto,

@@ -1,12 +1,12 @@
 import http from "~/lib/http";
 import { Orders } from "~/services/url";
 import type {
-  CreatePOSOrderRequestDto,
-  CreatePOSOrderResponseDto,
   AddItemsToPOSOrderRequestDto,
   AddItemsToPOSOrderResponseDto,
+  CreatePOSOrderRequestDto,
+  CreatePOSOrderResponseDto,
   POSOrderDetailResponseDto,
-  POSOrderListResponseDto,
+  POSOrderPayNowRequestDto,
   POSOrderPrintDataDto,
 } from "./dto";
 import { OrderSchema } from "./order.schema";
@@ -15,21 +15,18 @@ const {
   CreatePOSOrderResponseSchema,
   AddItemsToPOSOrderResponseSchema,
   POSOrderDetailResponseSchema,
-  POSOrderListByInvoiceResponseSchema,
+  // POSOrderListByInvoiceResponseSchema,
   POSOrderPrintDataSchema,
 } = OrderSchema;
 
 /**
- * Create a new POS order
+ *? Create a new POS order
  */
 async function createPOSOrder(
-  data: CreatePOSOrderRequestDto,
-  idempotencyKey?: string
+  data: CreatePOSOrderRequestDto
 ): Promise<CreatePOSOrderResponseDto> {
   try {
-    const resp = await http.post(Orders.createPosOrder, data, {
-      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
-    });
+    const resp = await http.post(Orders.createPosOrder, data);
     return CreatePOSOrderResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -38,17 +35,14 @@ async function createPOSOrder(
 }
 
 /**
- * Add items to an existing POS order
+ *? Add items to an existing POS order
  */
 async function addItemsToPOSOrder(
   orderId: string,
-  data: AddItemsToPOSOrderRequestDto,
-  idempotencyKey?: string
+  data: AddItemsToPOSOrderRequestDto
 ): Promise<AddItemsToPOSOrderResponseDto> {
   try {
-    const resp = await http.post(Orders.addItemsToPos(orderId), data, {
-      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
-    });
+    const resp = await http.post(Orders.addItemsToPos(orderId), data);
     return AddItemsToPOSOrderResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -57,17 +51,14 @@ async function addItemsToPOSOrder(
 }
 
 /**
- * Delete an item from a POS order
+ *? Delete an item from a POS order
  */
 async function deleteItemFromPOSOrder(
   orderId: string,
-  itemId: string,
-  idempotencyKey?: string
+  itemId: string
 ): Promise<void> {
   try {
-    await http.delete(Orders.deleteItemFromPos(orderId, itemId), {
-      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
-    });
+    await http.delete(Orders.deleteItemFromPos(orderId, itemId));
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -75,16 +66,11 @@ async function deleteItemFromPOSOrder(
 }
 
 /**
- * Cancel a POS order
+ *? Cancel a POS order
  */
-async function cancelPOSOrder(
-  orderId: string,
-  idempotencyKey?: string
-): Promise<void> {
+async function cancelPOSOrder(orderId: string): Promise<void> {
   try {
-    await http.post(Orders.cancelPosOrder(orderId), null, {
-      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
-    });
+    await http.post(Orders.cancelPosOrder(orderId), null);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -92,16 +78,11 @@ async function cancelPOSOrder(
 }
 
 /**
- * Complete a POS order
+ *? Complete a POS order
  */
-async function completePOSOrder(
-  orderId: string,
-  idempotencyKey?: string
-): Promise<void> {
+async function completePOSOrder(orderId: string): Promise<void> {
   try {
-    await http.post(Orders.completePosOrder(orderId), null, {
-      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
-    });
+    await http.post(Orders.completePosOrder(orderId), null);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -109,7 +90,7 @@ async function completePOSOrder(
 }
 
 /**
- * Get POS order details by ID
+ * ?Get POS order details by ID
  */
 async function getPOSOrderDetail(
   orderId: string
@@ -124,19 +105,19 @@ async function getPOSOrderDetail(
 }
 
 /**
- * Get list of POS orders by invoice ID
+ *? Get list of POS orders by invoice ID
  */
-async function getPOSOrdersByInvoice(
-  invoiceId: string
-): Promise<POSOrderListResponseDto> {
-  try {
-    const resp = await http.get(Orders.listPosOrderbyInvoice(invoiceId));
-    return POSOrderListByInvoiceResponseSchema.parse(resp.data);
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
-}
+// async function getPOSOrdersByInvoice(
+//   invoiceId: string
+// ): Promise<POSOrderListResponseDto> {
+//   try {
+//     const resp = await http.get(Orders.listPosOrderbyInvoice(invoiceId));
+//     return POSOrderListByInvoiceResponseSchema.parse(resp.data);
+//   } catch (error) {
+//     console.error(error);
+//     return Promise.reject(error);
+//   }
+// }
 
 /**
  * Get print data for a POS order
@@ -152,7 +133,15 @@ async function getPOSOrderPrintData(
     return Promise.reject(error);
   }
 }
-
+async function payPOSOrderNow(orderId: string, data: POSOrderPayNowRequestDto) {
+  try {
+    const resp = await http.post(Orders.payNow(orderId), data);
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const OrderService = {
   createPOSOrder,
   addItemsToPOSOrder,
@@ -160,6 +149,7 @@ export const OrderService = {
   cancelPOSOrder,
   completePOSOrder,
   getPOSOrderDetail,
-  getPOSOrdersByInvoice,
+  // getPOSOrdersByInvoice,
   getPOSOrderPrintData,
+  payPOSOrderNow,
 };

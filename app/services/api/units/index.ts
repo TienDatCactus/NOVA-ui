@@ -7,7 +7,7 @@ import type {
   UpdateUnitRequestDto,
   UpdateUnitResponseDto,
 } from "./dto";
-import type { UnitListParams } from "~/services/api/units/unit.types";
+import type { UnitListParams } from "~/services/types/unit.types";
 import { UnitSchema } from "./unit.schema";
 
 const {

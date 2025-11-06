@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import type { UserFilters } from "../container/filter.hooks";
-import { getRoleDisplayName } from "~/services/api/user/users.types";
+import { getRoleDisplayName } from "~/services/types/users.types";
 
 interface UsersCommandBarProps {
   filters: UserFilters;

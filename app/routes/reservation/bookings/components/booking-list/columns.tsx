@@ -6,7 +6,10 @@ import { Badge } from "~/components/ui/badge";
 import { ActionCell } from "../../fragments/action-cell.list";
 import BookingDetailDialog from "../booking-detail.sheet";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
+import {
+  BOOKING_SOURCES,
+  BOOKING_STATUSES,
+} from "~/services/api/booking/booking.types";
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [
@@ -72,7 +75,19 @@ export const columns: ColumnDef<BookingListItem>[] = [
     accessorKey: "status",
     header: "Trạng thái",
     cell: ({ row }) => {
-      return <Badge variant="default">{row.original.status}</Badge>;
+      return (
+        <Badge
+          variant={
+            BOOKING_STATUSES.find((item) => item.value === row.original.status)
+              ?.variant
+          }
+        >
+          {
+            BOOKING_STATUSES.find((item) => item.value === row.original.status)
+              ?.label
+          }
+        </Badge>
+      );
     },
   },
   {

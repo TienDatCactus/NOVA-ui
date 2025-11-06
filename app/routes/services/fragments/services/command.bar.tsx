@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import type { ServiceTypeListResponseDto } from "~/services/api/service-types/dto";
-import type { ServiceFilters } from "~/services/api/services/service.types";
+import type { ServiceFilters } from "~/services/types/service.types";
 import CreateServiceDialog from "../../components/create-service.dialog";
 
 interface ServicesCommandBarProps {

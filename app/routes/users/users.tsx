@@ -47,7 +47,7 @@ import useUserFilters from "./container/filter.hooks";
 import {
   getRoleBadgeColors,
   getRoleDisplayName,
-} from "~/services/api/user/users.types";
+} from "~/services/types/users.types";
 import type { UserItem } from "~/services/api/user/dto";
 
 export default function Component() {

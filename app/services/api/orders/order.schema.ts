@@ -82,6 +82,12 @@ const POSOrderPrintDataSchema = z.object({
   bookingCode: z.string().min(1).optional().nullable(),
 });
 
+const POSOrderPayNowRequestSchema = z.object({
+  paymentMethod: z.string(),
+  paidAmount: z.number().min(0),
+  transactionReference: z.string(),
+});
+
 export const OrderSchema = {
   ServiceOrderSchema,
   ServiceOrderItemSchema,
@@ -94,4 +100,6 @@ export const OrderSchema = {
   POSOrderDetailResponseSchema,
   POSOrderPrintItemSchema,
   POSOrderPrintDataSchema,
+  CreatePOSOrderRequestSchema,
+  POSOrderPayNowRequestSchema,
 };

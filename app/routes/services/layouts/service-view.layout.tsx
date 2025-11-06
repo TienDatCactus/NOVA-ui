@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ServiceFilters } from "~/services/api/services/service.types";
+import type { ServiceFilters } from "~/services/types/service.types";
 import { useServiceTypes } from "../container/service-types/query.hooks";
 import ServicesCommandBar from "../fragments/services/command.bar";
 

@@ -26,20 +26,31 @@ import { BookingService } from "~/services/api/booking";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { DatePicker } from "~/components/ui/date-picker";
 
 export interface BookingSearchFilters {
   searchText: string;
   status: string;
   source: string;
+  date?: string;
+  onDateChange?: (date: Date | undefined) => void;
 }
 
 interface SearchRoomProps {
   filters: BookingSearchFilters;
   onFiltersChange: (filters: BookingSearchFilters) => void;
   onReset: () => void;
+  date?: Date | string;
+  onDateChange?: (date: Date | undefined) => void;
 }
 
-function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
+function SearchRoom({
+  filters,
+  onFiltersChange,
+  onReset,
+  date,
+  onDateChange,
+}: SearchRoomProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportDate, setExportDate] = useState<Date>(new Date()); // Mặc định ngày hiện tại
   const [openExportDialog, setOpenExportDialog] = useState(false);
@@ -145,6 +156,12 @@ function SearchRoom({ filters, onFiltersChange, onReset }: SearchRoomProps) {
             ))}
           </SelectContent>
         </Select>
+        <DatePicker
+          value={date}
+          onChange={onDateChange}
+          placeholder="Chọn ngày"
+          className="w-[180px] h-9 bg-white shadow-sm"
+        />
       </div>
 
       <Button
