@@ -22,10 +22,10 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { CustomerService } from "~/services/api/customer";
-import { CustomerSchema } from "~/services/schema/customer.schema";
+import { UserService } from "~/services/api/user";
+import { UserSchema } from "~/services/schema/user.schema";
 
-const { ChangePasswordSchema } = CustomerSchema;
+const { ChangePasswordSchema } = UserSchema;
 
 // Extend schema for UI with confirm password field
 const ChangePasswordFormSchema = ChangePasswordSchema.extend({
@@ -40,16 +40,16 @@ type ChangePasswordFormData = z.infer<typeof ChangePasswordFormSchema>;
 interface ChangePasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  customerId: string;
-  customerName: string;
+  UserId: string;
+  UserName: string;
   onSuccess?: () => void;
 }
 
 export default function ChangePasswordDialog({
   open,
   onOpenChange,
-  customerId,
-  customerName,
+  UserId,
+  UserName,
   onSuccess,
 }: ChangePasswordDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,7 +69,7 @@ export default function ChangePasswordDialog({
       setIsSubmitting(true);
       toast.loading("Đang đổi mật khẩu...", { id: "change-password" });
 
-      await CustomerService.changePassword(customerId, {
+      await UserService.changePassword(UserId, {
         newPassword: data.newPassword,
       });
 
@@ -102,7 +102,7 @@ export default function ChangePasswordDialog({
             Đổi mật khẩu
           </DialogTitle>
           <DialogDescription>
-            Đổi mật khẩu cho tài khoản: <span className="font-semibold">{customerName}</span>
+            Đổi mật khẩu cho tài khoản: <span className="font-semibold">{UserName}</span>
           </DialogDescription>
         </DialogHeader>
 

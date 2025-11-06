@@ -50,7 +50,7 @@ export default [
 
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
-      route("customers", "routes/customers/customers.tsx"),
+      route("users", "routes/users/users.tsx"),
     ]),
   ]),
   route("*", "routes/not-found.tsx"),

@@ -26,12 +26,16 @@ import {
   useAssignRoles,
   useRemoveRoles,
   useRoles,
-} from "../container/useCustomers.hooks";
-import type { CustomerItem } from "~/services/api/customer/dto";
+} from "../container/useUsers.hooks";
+import {
+  getRoleBadgeColors,
+  getRoleDisplayName,
+} from "~/services/types/users.types";
+import type { UserItem } from "~/services/api/user/dto";
 import { Separator } from "~/components/ui/separator";
 
 interface ManageRolesDialogProps {
-  customer: CustomerItem;
+  user: UserItem;
   open: boolean;
   onClose: () => void;
 }
@@ -43,57 +47,8 @@ const ManageRolesSchema = z.object({
 
 type ManageRolesForm = z.infer<typeof ManageRolesSchema>;
 
-/**
- * Helper function - Get role badge color
- */
-const getRoleBadgeVariant = (role: string) => {
-  const roleColors: Record<
-    string,
-    { bg: string; text: string; border: string }
-  > = {
-    Receptionist: {
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-      border: "border-blue-200",
-    },
-    Staff: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-      border: "border-purple-200",
-    },
-    Customer: {
-      bg: "bg-green-50",
-      text: "text-green-700",
-      border: "border-green-200",
-    },
-    HotelManager: {
-      bg: "bg-orange-50",
-      text: "text-orange-700",
-      border: "border-orange-200",
-    },
-    Accountant: {
-      bg: "bg-pink-50",
-      text: "text-pink-700",
-      border: "border-pink-200",
-    },
-    Admin: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
-    ServiceStaff: {
-      bg: "bg-indigo-50",
-      text: "text-indigo-700",
-      border: "border-indigo-200",
-    },
-  };
-  return (
-    roleColors[role] || {
-      bg: "bg-gray-50",
-      text: "text-gray-700",
-      border: "border-gray-200",
-    }
-  );
-};
-
 export function ManageRolesDialog({
-  customer,
+  user,
   open,
   onClose,
 }: ManageRolesDialogProps) {
@@ -112,18 +67,17 @@ export function ManageRolesDialog({
 
   const isPending = isAssigning || isRemoving;
 
-  // Available roles to add (not currently assigned)
   const availableRoles = useMemo(() => {
     if (!allRoles) return [];
-    return allRoles.filter((role) => !customer.roles.includes(role));
-  }, [allRoles, customer.roles]);
+    return allRoles.filter((role) => !user.roles.includes(role));
+  }, [allRoles, user.roles]);
 
   const handleAssignRoles = (data: ManageRolesForm) => {
     if (data.rolesToAdd.length === 0) return;
 
     assignRoles(
       {
-        id: customer.id,
+        id: user.id,
         data: { roles: data.rolesToAdd },
       },
       {
@@ -140,7 +94,7 @@ export function ManageRolesDialog({
 
     removeRoles(
       {
-        id: customer.id,
+        id: user.id,
         data: { roles: data.rolesToRemove },
       },
       {
@@ -179,7 +133,7 @@ export function ManageRolesDialog({
           <DialogDescription>
             Thêm hoặc xóa vai trò cho{" "}
             <span className="font-semibold text-foreground">
-              {customer.fullName}
+              {user.fullName}
             </span>
           </DialogDescription>
         </DialogHeader>
@@ -190,20 +144,20 @@ export function ManageRolesDialog({
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-base">Vai trò hiện tại</h3>
               <Badge variant="outline" className="text-xs">
-                {customer.roles.length} vai trò
+                {user.roles.length} vai trò
               </Badge>
             </div>
             <div className="flex gap-2 flex-wrap p-4 bg-muted/30 rounded-lg min-h-[60px]">
-              {customer.roles.length > 0 ? (
-                customer.roles.map((role) => {
-                  const colors = getRoleBadgeVariant(role);
+              {user.roles.length > 0 ? (
+                user.roles.map((role) => {
+                  const colors = getRoleBadgeColors(role);
                   return (
                     <Badge
                       key={role}
                       variant="outline"
                       className={`text-sm py-1.5 px-3 ${colors.bg} ${colors.text} ${colors.border} shadow-sm`}
                     >
-                      {role}
+                      {getRoleDisplayName(role)}
                     </Badge>
                   );
                 })
@@ -234,7 +188,7 @@ export function ManageRolesDialog({
               variant={mode === "remove" ? "destructive" : "outline"}
               onClick={() => setMode("remove")}
               className="flex-1 gap-2"
-              disabled={customer.roles.length === 0}
+              disabled={user.roles.length === 0}
             >
               <Trash2 className="h-4 w-4" />
               Xóa vai trò
@@ -269,7 +223,7 @@ export function ManageRolesDialog({
                         <FormItem>
                           <div className="grid grid-cols-2 gap-3">
                             {availableRoles.map((role) => {
-                              const colors = getRoleBadgeVariant(role);
+                              const colors = getRoleBadgeColors(role);
                               return (
                                 <FormField
                                   key={role}
@@ -308,7 +262,7 @@ export function ManageRolesDialog({
                                             : ""
                                         }`}
                                       >
-                                        {role}
+                                        {getRoleDisplayName(role)}
                                       </FormLabel>
                                     </FormItem>
                                   )}
@@ -329,7 +283,7 @@ export function ManageRolesDialog({
                   <h3 className="font-semibold text-base">
                     Chọn vai trò để xóa
                   </h3>
-                  {customer.roles.length === 0 ? (
+                  {user.roles.length === 0 ? (
                     <div className="p-8 text-center border-2 border-dashed rounded-lg border-destructive/20">
                       <Shield className="h-12 w-12 mx-auto opacity-20 mb-2 text-destructive" />
                       <p className="text-sm text-muted-foreground">
@@ -343,8 +297,8 @@ export function ManageRolesDialog({
                       render={() => (
                         <FormItem>
                           <div className="grid grid-cols-2 gap-3">
-                            {customer.roles.map((role) => {
-                              const colors = getRoleBadgeVariant(role);
+                            {user.roles.map((role) => {
+                              const colors = getRoleBadgeColors(role);
                               return (
                                 <FormField
                                   key={role}
@@ -383,7 +337,7 @@ export function ManageRolesDialog({
                                               : ""
                                           }`}
                                         >
-                                          {role}
+                                          {getRoleDisplayName(role)}
                                         </FormLabel>
                                       </FormItem>
                                     );

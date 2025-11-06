@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import UnitsFilterSidebar from "../components/units-filter-sidebar";
-import UnitsHeader from "../fragments/header.layout";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface UnitsViewLayoutProps {
   filters: {
@@ -27,24 +29,34 @@ function UnitsViewLayout({
   children,
 }: UnitsViewLayoutProps) {
   return (
-    <div className="flex h-full w-full">
+    <div className="flex gap-6">
       <UnitsFilterSidebar
         filters={filters}
         onFilterChange={onFilterChange}
         onResetFilters={onResetFilters}
       />
-
-      <div className="flex-1 overflow-auto">
-        <div className="px-6 py-6">
-          <UnitsHeader
-            totalUnits={totalUnits}
-            activeUnits={activeUnits}
-            inactiveUnits={inactiveUnits}
-            onAddUnit={onAddUnit}
-          />
-          {children}
+      <main className="flex-1 space-y-4">
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">Quản lý đơn vị tính</h1>
+              <Badge variant="secondary" className="text-sm">
+                {totalUnits} đơn vị
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button onClick={onAddUnit}>
+                <Plus className="mr-2 h-4 w-4" />
+                Thêm đơn vị tính
+              </Button>
+            </div>
+          </div>
+          <p className="text-muted-foreground mt-2">
+            Quản lý các đơn vị tính được sử dụng trong hệ thống
+          </p>
         </div>
-      </div>
+        {children}
+      </main>
     </div>
   );
 }

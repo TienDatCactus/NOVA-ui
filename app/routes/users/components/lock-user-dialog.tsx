@@ -24,13 +24,13 @@ import {
 import { Calendar } from "~/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Lock, Unlock, Loader2, Calendar as CalendarIcon, AlertTriangle } from "lucide-react";
-import { useLockUser, useUnlockUser } from "../container/useCustomers.hooks";
-import type { CustomerItem } from "~/services/api/customer/dto";
+import { useLockUser, useUnlockUser } from "../container/useUsers.hooks";
+import type { UserItem } from "~/services/api/user/dto";
 import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
 
 interface LockUserDialogProps {
-  customer: CustomerItem;
+  user: UserItem;
   open: boolean;
   onClose: () => void;
   mode: "lock" | "unlock";
@@ -54,7 +54,7 @@ const QUICK_LOCK_OPTIONS = [
 ];
 
 export function LockUserDialog({
-  customer,
+  user,
   open,
   onClose,
   mode,
@@ -77,7 +77,7 @@ export function LockUserDialog({
 
     lockUser(
       {
-        id: customer.id,
+        id: user.id,
         data: { lockUntil: lockUntilISO },
       },
       {
@@ -90,7 +90,7 @@ export function LockUserDialog({
   };
 
   const handleUnlock = () => {
-    unlockUser(customer.id, {
+    unlockUser(user.id, {
       onSuccess: () => {
         onClose();
       },
@@ -122,8 +122,8 @@ export function LockUserDialog({
           </DialogTitle>
           <DialogDescription>
             {mode === "lock"
-              ? `Tài khoản của ${customer.fullName} sẽ bị khóa cho đến thời gian bạn chọn`
-              : `Bạn có chắc muốn mở khóa tài khoản của ${customer.fullName}?`}
+              ? `Tài khoản của ${user.fullName} sẽ bị khóa cho đến thời gian bạn chọn`
+              : `Bạn có chắc muốn mở khóa tài khoản của ${user.fullName}?`}
           </DialogDescription>
         </DialogHeader>
 
@@ -134,11 +134,11 @@ export function LockUserDialog({
               <div className="p-4 bg-muted/30 rounded-lg space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Người dùng:</span>
-                  <span className="font-semibold">{customer.fullName}</span>
+                  <span className="font-semibold">{user.fullName}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Email:</span>
-                  <span className="text-sm">{customer.email}</span>
+                  <span className="text-sm">{user.email}</span>
                 </div>
               </div>
 
@@ -258,17 +258,17 @@ export function LockUserDialog({
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Người dùng:</span>
-                <span className="font-semibold">{customer.fullName}</span>
+                <span className="font-semibold">{user.fullName}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Email:</span>
-                <span className="text-sm">{customer.email}</span>
+                <span className="text-sm">{user.email}</span>
               </div>
-              {customer.lockoutEnd && (
+              {user.lockoutEnd && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Khóa đến:</span>
                   <span className="text-sm font-semibold text-destructive">
-                    {format(new Date(customer.lockoutEnd), "dd/MM/yyyy HH:mm")}
+                    {format(new Date(user.lockoutEnd), "dd/MM/yyyy HH:mm")}
                   </span>
                 </div>
               )}
