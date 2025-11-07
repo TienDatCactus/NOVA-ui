@@ -1,8 +1,14 @@
-import { Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, ChevronDown, ChevronUp, Ellipsis, Trash2 } from "lucide-react";
 import { format, parseISO, toDate } from "date-fns";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { cn, formatMoney } from "~/lib/utils";
 import type z from "zod";
 import type { RoomSchema } from "~/services/api/rooms/room.schema";
@@ -15,6 +21,7 @@ interface ExistingRoomItemCardProps {
   isExpanded: boolean;
   onSelect: () => void;
   onToggleExpand: () => void;
+  onRemove?: () => void;
 }
 
 export default function ExistingRoomItemCard({
@@ -24,6 +31,7 @@ export default function ExistingRoomItemCard({
   isExpanded,
   onSelect,
   onToggleExpand,
+  onRemove,
 }: ExistingRoomItemCardProps) {
   const formatDate = (date: string | Date) => {
     if (typeof date === "string") {
@@ -51,21 +59,51 @@ export default function ExistingRoomItemCard({
             {formatDate(room.fromDate)} → {formatDate(room.toDate)}
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleExpand();
-          }}
-        >
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleExpand();
+            }}
+          >
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+
+          {/* Dropdown Menu for Delete */}
+          {onRemove && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Ellipsis className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove();
+                  }}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Xóa phòng
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
-        </Button>
+        </div>
       </div>
       {isExpanded && (
         <CardContent className="pt-0 pb-3">

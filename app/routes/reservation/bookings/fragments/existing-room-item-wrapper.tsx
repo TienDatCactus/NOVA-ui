@@ -2,7 +2,6 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { Card, CardContent } from "~/components/ui/card";
 import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
 import ExistingRoomItemCard from "./existing-room-item.card";
-import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import type z from "zod";
 import type { RoomSchema } from "~/services/api/rooms/room.schema";
 
@@ -12,6 +11,7 @@ interface ExistingRoomItemWrapperProps {
   isExpanded: boolean;
   onSelect: () => void;
   onToggleExpand: () => void;
+  onRemove?: () => void;
 }
 
 export default function ExistingRoomItemWrapper({
@@ -20,6 +20,7 @@ export default function ExistingRoomItemWrapper({
   isExpanded,
   onSelect,
   onToggleExpand,
+  onRemove,
 }: ExistingRoomItemWrapperProps) {
   const { data: roomDetail, isPending } = useRoomDetail({
     id: room.roomId,
@@ -47,6 +48,7 @@ export default function ExistingRoomItemWrapper({
       isExpanded={isExpanded}
       onSelect={onSelect}
       onToggleExpand={onToggleExpand}
+      onRemove={onRemove}
     />
   );
 }

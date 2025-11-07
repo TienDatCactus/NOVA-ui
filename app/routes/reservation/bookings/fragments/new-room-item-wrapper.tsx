@@ -6,9 +6,12 @@ import NewRoomItemCard from "./new-room-item.card";
 
 interface NewRoomItemWrapperProps {
   roomId: string;
+  roomName?: string;
+  roomTypeName?: string;
   fromDate: string | Date;
   toDate: string | Date;
   onRemove: () => void;
+  isRemoveMode?: boolean;
 }
 
 /**
@@ -17,9 +20,12 @@ interface NewRoomItemWrapperProps {
  */
 export default function NewRoomItemWrapper({
   roomId,
+  roomName,
+  roomTypeName,
   fromDate,
   toDate,
   onRemove,
+  isRemoveMode = false,
 }: NewRoomItemWrapperProps) {
   const {
     data: roomDetail,
@@ -29,6 +35,22 @@ export default function NewRoomItemWrapper({
     id: roomId,
     params: {},
   });
+
+  // If roomName is provided (remove mode), skip loading and use provided data
+  if (roomName && isRemoveMode) {
+    return (
+      <NewRoomItemCard
+        roomId={roomId}
+        roomName={roomName}
+        roomTypeName={roomTypeName || ""}
+        imageUrl={roomDetail?.imageUrls?.[0]}
+        fromDate={fromDate}
+        toDate={toDate}
+        onRemove={onRemove}
+        isRemoveMode={isRemoveMode}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -77,6 +99,7 @@ export default function NewRoomItemWrapper({
       fromDate={fromDate}
       toDate={toDate}
       onRemove={onRemove}
+      isRemoveMode={isRemoveMode}
     />
   );
 }

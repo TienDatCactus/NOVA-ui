@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import Image from "~/components/ui/image";
+import { cn } from "~/lib/utils";
 
 interface NewRoomItemCardProps {
   roomId: string;
@@ -13,6 +14,7 @@ interface NewRoomItemCardProps {
   fromDate: string | Date;
   toDate: string | Date;
   onRemove: () => void;
+  isRemoveMode?: boolean;
 }
 
 /**
@@ -27,6 +29,7 @@ export default function NewRoomItemCard({
   fromDate,
   toDate,
   onRemove,
+  isRemoveMode = false,
 }: NewRoomItemCardProps) {
   const formatDate = (date: string | Date) => {
     if (typeof date === "string") {
@@ -36,7 +39,14 @@ export default function NewRoomItemCard({
   };
 
   return (
-    <Card className="border-dashed border-primary/50 bg-primary/5 p-0 overflow-hidden">
+    <Card
+      className={cn(
+        "border-dashed p-0 overflow-hidden",
+        isRemoveMode
+          ? "border-destructive/50 bg-destructive/5"
+          : "border-primary/50 bg-primary/5"
+      )}
+    >
       <div className="flex gap-3 p-3 items-center">
         {/* Room Image */}
         <div className="flex-shrink-0">
@@ -52,9 +62,19 @@ export default function NewRoomItemCard({
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-medium truncate">{roomName}</p>
-                <Badge variant="success" className="text-xs flex-shrink-0">
-                  Mới
+                <p
+                  className={cn(
+                    "text-sm font-medium truncate",
+                    isRemoveMode && "text-destructive"
+                  )}
+                >
+                  {roomName}
+                </p>
+                <Badge
+                  variant={isRemoveMode ? "destructive" : "success"}
+                  className="text-xs flex-shrink-0"
+                >
+                  {isRemoveMode ? "Xóa" : "Mới"}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">

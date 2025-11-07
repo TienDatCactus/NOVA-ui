@@ -4,6 +4,7 @@ import { vi } from "date-fns/locale";
 import {
   Baby,
   CalendarIcon,
+  Clock,
   Ellipsis,
   Mail,
   Pen,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -93,6 +95,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 
 export default function Component({ loaderData }: Route.ComponentProps) {
   const { bookingCode } = loaderData;
+  const navigate = useNavigate();
   const {
     data: bookingDetail,
     isPending,
@@ -187,13 +190,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         paidAmount: bookingDetail.paidAmount || 0,
         paymentMethod: bookingDetail.paymentMethod || undefined,
         invoiceStatus: bookingDetail.invoiceStatus || undefined,
-        rooms: bookingDetail.rooms.map((r) => ({
-          bookingRoomId: bookingDetail.id,
-          roomId: r.roomId,
-          fromDate: r.fromDate,
-          toDate: r.toDate,
-          remove: false,
-        })),
+        rooms: [],
       });
     }
   }, [bookingDetail, form]);
@@ -216,6 +213,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     updateBooking(payload as any, {
       onSuccess: () => {
         toast.success("Cập nhật đặt phòng thành công");
+        navigate("/dashboard/reservation/bookings/list");
       },
     });
   };
@@ -225,6 +223,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     const checkoutDate = form.watch("checkoutDate");
 
     append({
+      bookingRoomId: null,
       roomId,
       fromDate:
         checkinDate instanceof Date
@@ -234,10 +233,18 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         checkoutDate instanceof Date
           ? format(checkoutDate, "yyyy-MM-dd")
           : checkoutDate?.toString() || format(new Date(), "yyyy-MM-dd"),
-      remove: false,
     });
 
-    toast.success("Đã thêm phòng mới");
+    toast.success("Đã thêm phòng vào danh sách");
+  };
+
+  const handleRemoveRoom = (bookingRoomId: string) => {
+    append({
+      bookingRoomId,
+      remove: true,
+    });
+
+    toast.success("Đã đánh dấu xóa phòng");
   };
 
   const nights = useMemo(() => {
@@ -319,26 +326,39 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 </CardHeader>
                 <CardContent className="flex-1 overflow-y-auto space-y-2">
                   {/* Existing Rooms */}
-                  {bookingDetail.rooms.map((room) => (
-                    <ExistingRoomItemWrapper
-                      key={room.roomId}
-                      room={room}
-                      isSelected={selectedRoomId === room.roomId}
-                      isExpanded={expandedRooms.has(room.roomId)}
-                      onSelect={() => setSelectedRoomId(room.roomId)}
-                      onToggleExpand={() => toggleRoomExpand(room.roomId)}
-                    />
-                  ))}
+                  {bookingDetail.rooms.map((room) => {
+                    // Check if this room is pending removal
+                    const isPendingRemoval = fields.some((field, index) => {
+                      const isRemove = form.watch(`rooms.${index}.remove`);
+                      const bookingRoomId = form.watch(`rooms.${index}.bookingRoomId`);
+                      return isRemove && bookingRoomId === room.bookingRoomId;
+                    });
+
+                    return (
+                      <ExistingRoomItemWrapper
+                        key={room.roomId}
+                        room={room}
+                        isSelected={selectedRoomId === room.roomId}
+                        isExpanded={expandedRooms.has(room.roomId)}
+                        onSelect={() => setSelectedRoomId(room.roomId)}
+                        onToggleExpand={() => toggleRoomExpand(room.roomId)}
+                        onRemove={!isPendingRemoval ? () => handleRemoveRoom(room.bookingRoomId) : undefined}
+                      />
+                    );
+                  })}
 
                   {/* New Rooms Being Added */}
-                  {fields.length > 0 && (
+                  {fields.filter((f) => !form.watch(`rooms.${fields.indexOf(f)}.remove`)).length > 0 && (
                     <>
                       <Separator className="my-3" />
                       <div className="text-xs font-semibold text-card-foreground mb-2">
-                        Phòng đang được thêm ({fields.length})
+                        Phòng đang được thêm ({fields.filter((f) => !form.watch(`rooms.${fields.indexOf(f)}.remove`)).length})
                       </div>
                       <div className="space-y-2">
                         {fields.map((field, index) => {
+                          const isRemove = form.watch(`rooms.${index}.remove`);
+                          if (isRemove) return null;
+
                           const roomId = form.watch(`rooms.${index}.roomId`);
                           const fromDate = form.watch(
                             `rooms.${index}.fromDate`
@@ -354,6 +374,45 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                               fromDate={fromDate}
                               toDate={toDate}
                               onRemove={() => remove(index)}
+                            />
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Rooms Being Removed */}
+                  {fields.filter((f) => form.watch(`rooms.${fields.indexOf(f)}.remove`)).length > 0 && (
+                    <>
+                      <Separator className="my-3" />
+                      <div className="text-xs font-semibold text-destructive mb-2">
+                        Phòng sẽ được xóa ({fields.filter((f) => form.watch(`rooms.${fields.indexOf(f)}.remove`)).length})
+                      </div>
+                      <div className="space-y-2">
+                        {fields.map((field, index) => {
+                          const isRemove = form.watch(`rooms.${index}.remove`);
+                          if (!isRemove) return null;
+
+                          const bookingRoomId = form.watch(`rooms.${index}.bookingRoomId`);
+                          if (!bookingRoomId) return null;
+
+                          // Find the room in bookingDetail.rooms
+                          const roomToRemove = bookingDetail.rooms.find(
+                            (r) => r.bookingRoomId === bookingRoomId
+                          );
+
+                          if (!roomToRemove) return null;
+
+                          return (
+                            <NewRoomItemWrapper
+                              key={field.id}
+                              roomId={roomToRemove.roomId}
+                              roomName={roomToRemove.roomName}
+                              roomTypeName={roomToRemove.roomTypeName}
+                              fromDate={roomToRemove.fromDate}
+                              toDate={roomToRemove.toDate}
+                              onRemove={() => remove(index)}
+                              isRemoveMode={true}
                             />
                           );
                         })}
