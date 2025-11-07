@@ -129,6 +129,7 @@ const Orders = {
 };
 
 const Invoices = {
+  list: "Invoices", //? get list of invoices with pagination and filters
   create: "Invoices", //? create invoice for a room booking
   addItems: (id: string) => `Invoices/${id}/items`, //? add items to invoice
   addCustomItems: (id: string) => `Invoices/${id}/custom-items`, //? add custom items to invoice

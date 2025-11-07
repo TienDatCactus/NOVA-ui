@@ -20,3 +20,19 @@ export const INVOICE_STATUSES = [
   },
   { code: 7, value: "Voided", label: "Đã vô hiệu hóa", variant: "destructive" },
 ] as const;
+
+// Request params types
+export interface InvoiceListParams {
+  Page?: number;
+  PageSize?: number;
+  SortBy?: string;
+  SortDirection?: string;
+  Status?: string; // Unpaid, DepositOnly, PartiallyPaid, Paid, Overpaid, Refunded, Chargeback, Voided
+  PaymentMethod?: string; // Unknown, Cash, Card, BankTransfer, OTACollect, OTAPrepaid, OnAccount
+  BookingId?: string;
+  BookingCode?: string;
+  Keyword?: string;
+  IssuedFrom?: string; // date-time string
+  IssuedTo?: string; // date-time string
+  InvoiceType?: string;
+}

@@ -309,7 +309,7 @@ function BookingDetailDialog({ bookingCode }: { bookingCode: string }) {
                   </span>
                 </div>
 
-                {!!data.invoices && data.invoices?.length > 0 && (
+                {!!data.invoices && Array.isArray(data.invoices) && data.invoices.length > 0 && (
                   <div className="flex items-center gap-2 text-xs text-gray-600 mt-2">
                     <Receipt className="h-4 w-4" />
                     <span>{data.invoices.length} hóa đơn đã tạo</span>
