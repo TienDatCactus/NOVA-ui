@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AlertTriangle } from "lucide-react";
 import {
   isRouteErrorResponse,
-  Link,
   Links,
   Meta,
   Outlet,
@@ -9,7 +9,7 @@ import {
   ScrollRestoration,
   useNavigation,
 } from "react-router";
-import type { Route } from "./+types/root";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,22 +18,12 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { AlertTriangle, DiamondPlus } from "lucide-react";
+import type { Route } from "./+types/root";
 import "./index.css";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/sonner";
-import GlobalLoader, { SpinnerLoader } from "./features/loading";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./components/ui/dropdown-menu";
-import { CUSTOMER } from "./lib/fe-url";
+import { SpinnerLoader } from "./features/loading";
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -58,24 +48,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              className="group fixed bottom-10 right-10 rounded-full size-10 z-20"
-              size="icon"
-            >
-              <DiamondPlus className="size-5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>CSKH</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link to={CUSTOMER.chat}>Chat</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>Dịch vụ</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
         <Toaster position="top-right" />
         <ScrollRestoration />
         <Scripts />

@@ -18,6 +18,7 @@ import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 interface AddMenuItemDialogProps {
   open: boolean;
@@ -42,7 +43,7 @@ export default function AddMenuItemDialog({
   const [quantity, setQuantity] = useState(1);
 
   const { data: menuCategories = [], isPending: isLoadingCategories } =
-    useMenuCategories({});
+    useMenuCategories({}, true);
 
   const { data: menuItems = [], isPending: isLoadingMenu } = useMenuList({
     categoryCode: selectedCategoryCode || undefined,
@@ -63,7 +64,6 @@ export default function AddMenuItemDialog({
 
     onConfirm(selectedItem.itemId, quantity, selectedItem.price);
 
-    // Reset state
     setSelectedItem(null);
     setQuantity(1);
     setSearchText("");
@@ -81,7 +81,7 @@ export default function AddMenuItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] ">
+      <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Utensils className="h-5 w-5" />
@@ -92,8 +92,7 @@ export default function AddMenuItemDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-12 gap-4 py-4">
-          {/* Left: Categories */}
+        <div className="grid grid-cols-12 gap-2 py-4">
           <div className="col-span-3 space-y-2">
             <Label className="text-sm font-semibold">Danh mục</Label>
             <div>
@@ -135,8 +134,7 @@ export default function AddMenuItemDialog({
             </div>
           </div>
 
-          {/* Middle: Menu Items */}
-          <div className="col-span-6 space-y-2  max-h-[50vh] overflow-y-auto">
+          <div className="col-span-6 space-y-2 max-h-[50vh] flex flex-col">
             <div className="space-y-2">
               <Label className="text-sm font-semibold">Tìm kiếm món ăn</Label>
               <div className="relative">
@@ -149,8 +147,7 @@ export default function AddMenuItemDialog({
                 />
               </div>
             </div>
-
-            <div>
+            <div className="flex-1  p-2  overflow-y-auto">
               {isLoadingMenu ? (
                 <div className="space-y-2">
                   {[...Array(6)].map((_, i) => (
@@ -227,32 +224,10 @@ export default function AddMenuItemDialog({
                 <div className="space-y-2">
                   <Label className="text-xs">Số lượng</Label>
                   <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      disabled={quantity <= 1}
-                    >
-                      -
-                    </Button>
-                    <Input
-                      type="number"
+                    <Counter
                       value={quantity}
-                      onChange={(e) =>
-                        setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                      }
-                      className="text-center"
-                      min={1}
+                      onChange={(value) => setQuantity(Math.max(1, value || 1))}
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setQuantity(quantity + 1)}
-                    >
-                      +
-                    </Button>
                   </div>
                 </div>
 

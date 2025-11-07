@@ -1,7 +1,10 @@
-import { useState } from "react";
 import { format } from "date-fns";
-import { Plus, BedDouble } from "lucide-react";
+import { BedDouble, Plus } from "lucide-react";
+import { useState } from "react";
 
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -9,41 +12,43 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { Skeleton } from "~/components/ui/skeleton";
+import ImageWithFallback from "~/components/ui/image";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
+import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
-import ImageWithFallback from "~/components/ui/image";
+import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
 interface AddRoomModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  availableRooms: any[];
-  isLoading: boolean;
   onAddRoom: (roomId: string, roomTypeId: string) => void;
+  bookingDetail: BookingDetailResponseDto;
 }
 
 export function AddRoomModal({
   open,
   onOpenChange,
-  availableRooms,
-  isLoading,
   onAddRoom,
+  bookingDetail,
 }: AddRoomModalProps) {
   const [addingRoomId, setAddingRoomId] = useState<string | null>(null);
-
+  const { data: availableRooms, isPending: isLoading } =
+    useAvailableRoomsInternal({
+      CheckInDate: bookingDetail?.checkinDate
+        ? format(bookingDetail.checkinDate, "yyyy-MM-dd")
+        : "",
+      CheckOutDate: bookingDetail?.checkoutDate
+        ? format(bookingDetail.checkoutDate, "yyyy-MM-dd")
+        : "",
+      Guests: (bookingDetail?.adults || 1) + (bookingDetail?.children || 0),
+    });
   const handleAddRoom = (roomId: string, roomTypeId: string) => {
     setAddingRoomId(roomId);
     onAddRoom(roomId, roomTypeId);
-
-    // Reset after a short delay to show feedback
-    setTimeout(() => {
-      setAddingRoomId(null);
-      onOpenChange(false);
-    }, 300);
+    setAddingRoomId(null);
+    onOpenChange(false);
   };
 
   return (

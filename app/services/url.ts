@@ -27,6 +27,12 @@ const Booking = {
   preview: "StaffBookings/preview", // this is for the money calculation preview
   update: (id: string) => `StaffBookings/${id}`,
   cancel: (id: string) => `StaffBookings/${id}/cancel`,
+  pendingCharges: (bookingId: string) =>
+    `StaffBookings/${bookingId}/pending-charges`,
+  createInvoice: (id: string) => `StaffBookings/${id}/checkout/create-invoice`,
+  payment: (id: string) => `StaffBookings/${id}/checkout/payment`,
+  checkout: (id: string) => `StaffBookings/${id}/checkout`,
+  checkoutMultiple: "StaffBookings/checkout",
   changeRoom: (bookingId: string, bookingRoomId: string) =>
     `StaffBookings/${bookingId}/rooms/${bookingRoomId}/available-for-change`,
   list: "Bookings/list",

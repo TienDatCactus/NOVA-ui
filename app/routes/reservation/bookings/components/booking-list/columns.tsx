@@ -4,12 +4,12 @@ import { vi } from "date-fns/locale";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { ActionCell } from "../../fragments/action-cell.list";
-import BookingDetailDialog from "../booking-detail.sheet";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import {
   BOOKING_SOURCES,
   BOOKING_STATUSES,
 } from "~/services/api/booking/booking.types";
+import BookingDetailDialog from "../booking-detail.sheet";
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [

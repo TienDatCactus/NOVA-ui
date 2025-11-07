@@ -38,12 +38,7 @@ type RoomTypeCardProps = {
   roomType: z.infer<typeof AvailableRoomItemSchema>;
 };
 
-/**
- * Card hiển thị room type với thông tin chi tiết
- * Fetch room details để hiển thị hình ảnh và thông tin đầy đủ
- */
 function RoomTypeCard({ roomType }: RoomTypeCardProps) {
-  // Fetch details of the first available room to get images
   const firstAvailableRoom = roomType.availableRooms[0];
   const { data: roomDetail, isPending: isLoadingDetail } = useRoomDetail({
     id: firstAvailableRoom?.roomId,
@@ -152,7 +147,6 @@ function RoomTypeCard({ roomType }: RoomTypeCardProps) {
           </div>
         )}
 
-        {/* Price */}
         <div className="flex items-center justify-between pt-2 border-t">
           <span className="text-sm text-muted-foreground">Giá/đêm</span>
           <span className="text-lg font-bold text-primary">

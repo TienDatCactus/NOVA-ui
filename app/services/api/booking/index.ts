@@ -19,7 +19,9 @@ import type {
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
   AvailableRoomsForChangeResponseDto,
+  BookingPendingChargesResponseDto,
 } from "./dto";
+import { data } from "react-router";
 
 const {
   BookingListResponseSchema,
@@ -35,6 +37,7 @@ const {
   StaffCancelBookingResponseSchema,
   StaffChangeRoomRequestSchema,
   StaffChangeRoomResponseSchema,
+  BookingPendingChargesResponseSchema,
   AvailableRoomsForChangeResponseSchema,
 } = BookingSchema;
 
@@ -61,6 +64,59 @@ async function getBookingListByWeek(
     return Promise.reject(error);
   }
 }
+
+async function getBookingDetail(
+  params: BookingListParams
+): Promise<BookingDetailResponseDto> {
+  try {
+    const code = params.code?.trim();
+    const id = params.id?.trim();
+    const url = code
+      ? Booking.detailByCode(code)
+      : id
+        ? Booking.detailById(id)
+        : null;
+
+    if (!url) {
+      return Promise.reject(new Error("ID/Code is required"));
+    }
+    const resp = await http.get(url);
+    return await BookingDetailItemSchema.parseAsync(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function getBookingOTA(): Promise<BookingOTAResponseDto> {
+  try {
+    const resp = await http.get(OTAInformation.list);
+    return BookingOTAResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function exportBookings(date?: string): Promise<Blob> {
+  try {
+    const params = date ? { date } : {};
+    const resp = await http.get(Booking.Export, {
+      params,
+      responseType: "blob",
+    });
+    if (resp && typeof resp === "object" && "data" in resp) {
+      return (resp as any).data;
+    }
+    return resp as Blob;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+//?-----------------------------------------
+
+// * flow staff
 
 async function staffCreateBooking(
   idempotencyKey: string,
@@ -177,55 +233,28 @@ async function staffCancelBooking(
     return Promise.reject(error);
   }
 }
-async function getBookingDetail(
-  params: BookingListParams
-): Promise<BookingDetailResponseDto> {
-  try {
-    const code = params.code?.trim();
-    const id = params.id?.trim();
-    const url = code
-      ? Booking.detailByCode(code)
-      : id
-        ? Booking.detailById(id)
-        : null;
 
-    if (!url) {
-      return Promise.reject(new Error("ID/Code is required"));
-    }
-    const resp = await http.get(url);
-    return await BookingDetailItemSchema.parseAsync(resp.data);
+async function getBookingPendingCharges(
+  bookingId: string
+): Promise<BookingPendingChargesResponseDto> {
+  try {
+    const resp = await http.get(Booking.pendingCharges(bookingId));
+    return BookingPendingChargesResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function getBookingOTA(): Promise<BookingOTAResponseDto> {
+async function staffCreateInvoice(bookingId: string) {
   try {
-    const resp = await http.get(OTAInformation.list);
-    return BookingOTAResponseSchema.parse(resp.data);
+    const resp = await http.get(Booking.pendingCharges(bookingId));
+    return BookingPendingChargesResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
-
-async function exportBookings(date?: string): Promise<Blob> {
-  try {
-    const params = date ? { date } : {};
-    const resp = await http.get(Booking.Export, {
-      params,
-      responseType: "blob",
-    });
-    if (resp && typeof resp === "object" && "data" in resp) {
-      return (resp as any).data;
-    }
-    return resp as Blob;
-  } catch (error) {
-    return Promise.reject(error);
-  }
-}
-
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
@@ -238,4 +267,5 @@ export const BookingService = {
   staffChangeRoom,
   staffCancelBooking,
   exportBookings,
+  getBookingPendingCharges,
 };

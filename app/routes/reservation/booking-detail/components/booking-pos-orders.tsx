@@ -1,18 +1,26 @@
 import {
+  Beef,
+  Building2,
   ChevronDown,
   ChevronRight,
-  Building2,
   Plus,
   ShoppingCart,
   Trash2,
   Utensils,
 } from "lucide-react";
 import { useState } from "react";
+import type z from "zod";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { formatMoney } from "~/lib/utils";
-import type { POSOrderDetailDto } from "~/services/api/orders/dto";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -21,15 +29,8 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Skeleton } from "~/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import type z from "zod";
+import { formatMoney } from "~/lib/utils";
+import type { POSOrderDetailDto } from "~/services/api/orders/dto";
 import type { RoomSchema } from "~/services/api/rooms/room.schema";
 
 interface BookingOrdersProps {
@@ -45,7 +46,7 @@ interface BookingOrdersProps {
   rooms?: z.infer<typeof RoomSchema.BookingDetailRoomItemSchema>[];
 }
 
-export default function BookingOrders({
+export default function BookingPosOrders({
   hasOrder,
   isCreatingOrder,
   ordersList = [],
@@ -79,7 +80,7 @@ export default function BookingOrders({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Đơn hàng POS
+            Đơn bán hàng tại quầy (POS)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -99,7 +100,7 @@ export default function BookingOrders({
                   <SelectItem value="all">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
-                      <span>Tất cả đơn booking</span>
+                      <span>Theo đơn đặt phòng</span>
                     </div>
                   </SelectItem>
                   {rooms.map((room) => (
@@ -151,8 +152,8 @@ export default function BookingOrders({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            Đơn hàng POS
+            <Beef className="h-5 w-5" />
+            Đơn bán hàng tại quầy (POS)
             <Badge variant="secondary" className="ml-2">
               {ordersList.length} đơn
             </Badge>
@@ -186,7 +187,7 @@ export default function BookingOrders({
                   <SelectItem value="all">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
-                      <span className="font-medium">Tất cả đơn booking</span>
+                      <span className="font-medium">Theo đơn đặt phòng</span>
                     </div>
                   </SelectItem>
                   {rooms.map((room) => (
@@ -226,7 +227,6 @@ export default function BookingOrders({
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Số món</TableHead>
                 <TableHead>Tổng tiền</TableHead>
-                <TableHead>Ngày tạo</TableHead>
                 <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
@@ -261,7 +261,7 @@ export default function BookingOrders({
                               ? "default"
                               : order.status === "Cancelled"
                                 ? "destructive"
-                                : "secondary"
+                                : "success"
                           }
                         >
                           {order.status}
@@ -276,13 +276,7 @@ export default function BookingOrders({
                       <TableCell className="font-semibold">
                         {formatMoney(order.totalAmount).vndFormatted}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {order.createdAt
-                          ? new Date(order.createdAt).toLocaleDateString(
-                              "vi-VN"
-                            )
-                          : "—"}
-                      </TableCell>
+
                       <TableCell className="text-right">
                         <Button
                           type="button"

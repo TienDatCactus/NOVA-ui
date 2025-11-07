@@ -30,7 +30,7 @@ export default [
           route("list", "routes/reservation/bookings/list.tsx"),
           route(
             "detail/:bookingCode",
-            "routes/reservation/bookings/booking-detail.tsx"
+            "routes/reservation/booking-detail/booking-detail.tsx"
           ),
         ]),
         route("invoices", "routes/reservation/invoices/invoices.tsx"),

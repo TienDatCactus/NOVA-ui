@@ -12,7 +12,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
 import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
-import RoomTypeCard from "../../fragments/room.card";
+import RoomTypeCard from "../../../booking-detail/fragments/room.card";
 
 interface BookingGridProps {
   rooms?: AvailableRoomsInternalResponseDto;

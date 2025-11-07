@@ -130,43 +130,23 @@ const StaffBookingPricePreviewResponseSchema = z.object({
   availablePaymentMethods: z.array(z.any()),
 });
 
-/**
- * UpdateBookingRoomRequestDto - Room operations
- *
- * Three operation types:
- * 1. ADD: bookingRoomId = null, requires roomId + fromDate + toDate
- * 2. CHANGE: bookingRoomId + newRoomId (swap rooms)
- * 3. REMOVE: bookingRoomId + remove = true
- */
 const UpdateBookingRoomRequestSchema = z
   .object({
-    // CHANGE or REMOVE: ID of existing BookingRoom
     bookingRoomId: z.string().nullable().optional(),
-
-    // ADD: ID of room to add (when bookingRoomId is null)
     roomId: z.string().optional(),
-
-    // CHANGE: ID of new room to swap to
     newRoomId: z.string().optional(),
-
-    // ADD: Date range for new room
     fromDate: z.string().optional(),
     toDate: z.string().optional(),
-
-    // REMOVE: Set to true to remove this room
     remove: z.boolean().optional(),
   })
   .refine(
     (data) => {
-      // ADD operation validation
       if (data.bookingRoomId === null) {
         return !!(data.roomId && data.fromDate && data.toDate);
       }
-      // CHANGE operation validation
       if (data.newRoomId) {
         return !!data.bookingRoomId;
       }
-      // REMOVE operation validation
       if (data.remove) {
         return !!data.bookingRoomId;
       }
@@ -179,7 +159,6 @@ const UpdateBookingRoomRequestSchema = z
   );
 
 const StaffUpdateBookingRequestSchema = z.object({
-  // ========== THÔNG TIN NGÀY Ở ==========
   checkinDate: z
     .union([
       z.date("Ngày nhận phòng không hợp lệ"),
@@ -232,6 +211,68 @@ const StaffUpdateBookingRequestSchema = z.object({
 const StaffUpdateBookingResponseSchema = z.object({
   bookingId: z.string("Booking ID không hợp lệ"),
   bookingCode: z.string("Booking Code không hợp lệ"),
+});
+
+const BookingPendingChargesResponseSchema = z.object({
+  bookingId: z.string("Booking ID không hợp lệ"),
+  roomInvoice: z.object({
+    invoiceId: z.string(),
+    invoiceNo: z.string(),
+    total: z.number(),
+    paid: z.number(),
+    balance: z.number(),
+  }),
+  pendingOrders: z.object({
+    posOrders: z.array(
+      z.object({
+        id: z.string(),
+        status: z.string(),
+        totalAmount: z.number(),
+        customerId: z.string(),
+        createdAt: z.string(),
+        items: z.array(
+          z.object({
+            id: z.string(),
+            menuItemId: z.string(),
+            itemName: z.string(),
+            quantity: z.number(),
+            unitPrice: z.number(),
+            servedAt: z.string().optional().nullable(),
+            subtotal: z.number(),
+          })
+        ),
+      })
+    ),
+    serviceOrders: z.array(
+      z.object({
+        id: z.string(),
+        bookingId: z.string(),
+        serviceItemId: z.string(),
+        serviceName: z.string(),
+        quantity: z.number(),
+        unitPrice: z.number(),
+        scheduledAt: z.string(),
+        performedAt: z.string().optional().nullable(),
+        status: z.string(),
+        subtotal: z.number(),
+      })
+    ),
+  }),
+  paidOrders: z.array(
+    z.object({
+      invoiceId: z.string(),
+      invoiceNo: z.string(),
+      orderType: z.string(),
+      orderId: z.string(),
+      total: z.number(),
+      paidAt: z.string(),
+    })
+  ),
+  summary: z.object({
+    roomBalance: z.number(),
+    pendingCharges: z.number(),
+    totalDue: z.number(),
+  }),
 });
 
 const StaffCancelBookingResponseSchema = StaffUpdateBookingResponseSchema;
@@ -338,6 +379,51 @@ const StaffChangeRoomResponseSchema = z.object({
   bookingCode: z.string("Booking Code không hợp lệ"),
 });
 
+// Common payment item schema
+const CheckoutPaymentItemSchema = z.object({
+  method: PaymentSchema.PaymentMethodEnum,
+  amount: z.number().min(0, "Số tiền không hợp lệ"),
+  transactionReference: z
+    .string()
+    .min(1, "Mã giao dịch không hợp lệ")
+    .optional()
+    .nullable(),
+});
+
+// Yêu cầu thanh toán khi checkout (phòng + tổng thể)
+const StaffCheckoutPaymentRequestSchema = z.object({
+  roomPayment: CheckoutPaymentItemSchema.optional().nullable(),
+  checkoutPayment: CheckoutPaymentItemSchema.optional().nullable(),
+});
+
+// Yêu cầu checkout 1 booking
+const StaffCheckoutRequestSchema = z.object({
+  actualCheckoutTime: z
+    .union([
+      z.date("Thời gian trả phòng thực tế không hợp lệ"),
+      z.string().refine((val) => !isNaN(Date.parse(val)), {
+        message: "Thời gian trả phòng thực tế không hợp lệ",
+      }),
+    ])
+    .optional(),
+  notes: z.string().optional().nullable(),
+  payments: StaffCheckoutPaymentRequestSchema.optional(),
+});
+
+// Yêu cầu checkout nhiều booking cùng lúc
+const StaffCheckoutMultipleRequestSchema = z.object({
+  bookingIds: z
+    .array(z.string().uuid("Booking ID không hợp lệ"))
+    .min(1, "Phải chọn ít nhất 1 booking"),
+  paymentMethod: PaymentSchema.PaymentMethodEnum.optional(),
+  paidAmount: z.number().min(0, "Số tiền thanh toán không hợp lệ").optional(),
+  transactionReference: z
+    .string()
+    .min(1, "Mã giao dịch không hợp lệ")
+    .optional()
+    .nullable(),
+});
+
 const AvailableRoomForChangeSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
@@ -385,4 +471,5 @@ export const BookingSchema = {
   StaffChangeRoomRequestSchema,
   StaffChangeRoomResponseSchema,
   AvailableRoomsForChangeResponseSchema,
+  BookingPendingChargesResponseSchema,
 };

@@ -10,28 +10,26 @@ const {
   ServiceItemDetailResponseSchema,
   ServiceListItemSchema,
 } = ServiceSchema;
-type ServiceListResponseDto = z.infer<typeof ServiceListResponseSchema>;
-type ServiceListByTypeResponseDto = z.infer<
+export type ServiceListResponseDto = z.infer<typeof ServiceListResponseSchema>;
+export type ServiceListByTypeResponseDto = z.infer<
   typeof ServiceListByTypeResponseSchema
 >;
-type CreateServiceRequestDto = z.infer<typeof CreateServiceItemRequestSchema>;
-type CreateServiceResponseDto = z.infer<typeof CreateServiceItemResponseSchema>;
-type UpdateServiceRequestDto = z.infer<typeof UpdateServiceItemRequestSchema>;
-type UpdateServiceResponseDto = z.infer<typeof UpdateServiceItemResponseSchema>;
-type ServiceItemDetailResponseDto = z.infer<
+export type CreateServiceRequestDto = z.infer<
+  typeof CreateServiceItemRequestSchema
+>;
+export type CreateServiceResponseDto = z.infer<
+  typeof CreateServiceItemResponseSchema
+>;
+export type UpdateServiceRequestDto = z.infer<
+  typeof UpdateServiceItemRequestSchema
+>;
+export type UpdateServiceResponseDto = z.infer<
+  typeof UpdateServiceItemResponseSchema
+>;
+export type ServiceItemDetailResponseDto = z.infer<
   typeof ServiceItemDetailResponseSchema
 >;
-type ServiceItem = z.infer<typeof ServiceListItemSchema>;
-type ServiceTypeGroup = z.infer<typeof ServiceListResponseSchema>[number];
-
-export type {
-  ServiceListResponseDto,
-  ServiceListByTypeResponseDto,
-  CreateServiceRequestDto,
-  CreateServiceResponseDto,
-  UpdateServiceRequestDto,
-  UpdateServiceResponseDto,
-  ServiceItemDetailResponseDto,
-  ServiceItem,
-  ServiceTypeGroup,
-};
+export type ServiceItem = z.infer<typeof ServiceListItemSchema>;
+export type ServiceTypeGroup = z.infer<
+  typeof ServiceListResponseSchema
+>[number];

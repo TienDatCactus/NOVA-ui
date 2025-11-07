@@ -13,8 +13,9 @@ function useUpdateBooking(bookingId: string) {
     mutationFn: async (data: StaffUpdateBookingRequestDto) =>
       await BookingService.staffUpdateBookingDetail(bookingId, data),
     onSuccess: (response) => {
-      toast.success("Cập nhật đặt phòng thành công");
+      // Don't toast here - let the component handle success message
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["bookings-detail"] });
     },
   });
 }

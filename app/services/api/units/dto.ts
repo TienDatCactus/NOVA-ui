@@ -9,18 +9,11 @@ const {
   UpdateUnitRequestSchema,
   UpdateUnitResponseSchema,
 } = UnitSchema;
-type UnitListResponseDto = z.infer<typeof UnitListResponseSchema>;
-type CreateUnitRequestDto = z.infer<typeof CreateUnitRequestSchema>;
-type CreateUnitResponseDto = z.infer<typeof CreateUnitResponseSchema>;
-type UnitItemDetailResponseDto = z.infer<typeof UnitItemDetailResponseSchema>;
-type UpdateUnitRequestDto = z.infer<typeof UpdateUnitRequestSchema>;
-type UpdateUnitResponseDto = z.infer<typeof UpdateUnitResponseSchema>;
-
-export type {
-  UnitListResponseDto,
-  CreateUnitRequestDto,
-  CreateUnitResponseDto,
-  UnitItemDetailResponseDto,
-  UpdateUnitRequestDto,
-  UpdateUnitResponseDto,
-};
+export type UnitListResponseDto = z.infer<typeof UnitListResponseSchema>;
+export type CreateUnitRequestDto = z.infer<typeof CreateUnitRequestSchema>;
+export type CreateUnitResponseDto = z.infer<typeof CreateUnitResponseSchema>;
+export type UnitItemDetailResponseDto = z.infer<
+  typeof UnitItemDetailResponseSchema
+>;
+export type UpdateUnitRequestDto = z.infer<typeof UpdateUnitRequestSchema>;
+export type UpdateUnitResponseDto = z.infer<typeof UpdateUnitResponseSchema>;

@@ -5,12 +5,16 @@ import type { MenuCategoryListParams } from "~/services/api/menu-category/menu-c
 /**
  * Hook để lấy danh sách menu categories
  */
-export function useMenuCategories(params?: MenuCategoryListParams) {
+export function useMenuCategories(
+  params?: MenuCategoryListParams,
+  enabled: boolean = false
+) {
   return useQuery({
     queryKey: ["menu-category-list", params],
     queryFn: async () =>
       await MenuCategoryService.getMenuCategoryList(params ?? {}),
     staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled,
   });
 }
 
