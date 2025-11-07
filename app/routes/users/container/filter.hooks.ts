@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { UserItem } from "~/services/api/user/dto";
+import type { GetUserListParams } from "~/services/api/user";
 
 export interface UserFilters {
   searchText: string;
@@ -16,8 +17,17 @@ const DEFAULT_FILTERS: UserFilters = {
 function useUserFilters() {
   const [filters, setFilters] = useState<UserFilters>(DEFAULT_FILTERS);
 
-  // Derived value for API params (if needed in future)
-  const includeInactive = filters.statusFilter !== "active";
+  // Convert filters to API params (server-side filtering)
+  const apiParams: GetUserListParams = useMemo(() => {
+    const params: GetUserListParams = {};
+
+    // Only add role param if not "all"
+    if (filters.roleFilter && filters.roleFilter !== "all") {
+      params.role = filters.roleFilter;
+    }
+
+    return params;
+  }, [filters.roleFilter]);
 
   const updateFilter = <K extends keyof UserFilters>(
     key: K,
@@ -30,6 +40,7 @@ function useUserFilters() {
     setFilters(DEFAULT_FILTERS);
   };
 
+  // Client-side filtering for search and status (since API doesn't support these yet)
   const filterUsers = (users: UserItem[]) => {
     if (!users) return [];
 
@@ -50,20 +61,16 @@ function useUserFilters() {
         (filters.statusFilter === "active" && !isLocked) ||
         (filters.statusFilter === "locked" && isLocked);
 
-      // Role filter (client-side)
-      const matchesRole =
-        filters.roleFilter === "all" || user.roles.includes(filters.roleFilter);
-
-      return matchesSearch && matchesStatus && matchesRole;
+      return matchesSearch && matchesStatus;
     });
   };
 
   return {
     filters,
+    apiParams,
     updateFilter,
     resetFilters,
     filterUsers,
-    includeInactive,
   };
 }
 

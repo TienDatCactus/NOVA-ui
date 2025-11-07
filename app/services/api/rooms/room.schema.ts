@@ -105,6 +105,7 @@ const AvailableRoomItemSchema = z.object({
 const AvailableRoomsInternalResponseSchema = z.array(AvailableRoomItemSchema);
 
 const BookingDetailRoomItemSchema = z.object({
+  bookingRoomId: z.string().optional(),
   roomId: z.string(),
   roomName: z.string(),
   roomTypeId: z.string(),

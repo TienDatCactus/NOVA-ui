@@ -33,9 +33,15 @@ const {
   ChangePasswordResponseSchema,
 } = UserSchema;
 
-async function getUserList(): Promise<UserListResponseDto> {
+export interface GetUserListParams {
+  role?: string;
+}
+
+async function getUserList(
+  params?: GetUserListParams
+): Promise<UserListResponseDto> {
   try {
-    const resp = await http.get(User.list);
+    const resp = await http.get(User.list, { params });
     return UserListResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);

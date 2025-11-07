@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserService } from "~/services/api/user";
+import { UserService, type GetUserListParams } from "~/services/api/user";
 
-export function useUsers() {
+export function useUsers(params?: GetUserListParams) {
   return useQuery({
-    queryKey: ["users"],
-    queryFn: async () => await UserService.getUserList(),
+    queryKey: ["users", params],
+    queryFn: async () => await UserService.getUserList(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

@@ -12,8 +12,8 @@ const UserItemSchema = z
       .nullable()
       .optional()
       .transform((val) => val || ""),
-    emailConfirmed: z.boolean(),
-    lockoutEnabled: z.boolean(),
+    emailConfirmed: z.boolean().optional().default(false),
+    lockoutEnabled: z.boolean().optional().default(false),
     lockoutEnd: z.union([z.string(), z.null()]).optional(),
     roles: z.array(z.string()),
   })

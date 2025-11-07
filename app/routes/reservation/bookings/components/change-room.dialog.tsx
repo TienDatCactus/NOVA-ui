@@ -23,7 +23,7 @@ import {
   getRoomAvailabilityColor,
   getRoomAvailabilityLabel,
 } from "~/services/types/room-availability.types";
-import { useAvailableRoomsForChange } from "../container/booking-query.hooks";
+import { useAvailableRoomsForChange, useBookingDetail } from "../container/booking-query.hooks";
 import { useChangeRoom } from "../container/booking-mutation.hooks";
 import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
 
@@ -43,6 +43,12 @@ export default function ChangeRoomDialog({
     null
   );
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+
+  // Fetch booking detail
+  const { data: bookingDetail, isLoading: loadingBooking } = useBookingDetail({
+    bookingCode,
+    enabled: open && !!bookingCode,
+  });
 
   const bookingId = bookingDetail?.id || "";
   const hasMultipleRooms = (bookingDetail?.rooms.length || 0) > 1;
@@ -89,7 +95,7 @@ export default function ChangeRoomDialog({
   }, [groupedRooms.length, selectedRoomTypeId]);
 
   const handleConfirm = () => {
-    if (!currentRoom || !selectedRoomId) return;
+    if (!currentRoom || !selectedRoomId || !currentRoom.bookingRoomId) return;
 
     const payload = {
       rooms: [
@@ -155,30 +161,41 @@ export default function ChangeRoomDialog({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4 py-2">
-          {/* Date Range Section */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">Chọn phòng mới</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>
-                {format(new Date(bookingDetail.checkinDate), "dd 'Thg' MM")}, {CHECK_IN_TIME}
-              </span>
-              <span>đến</span>
-              <span>
-                {format(new Date(bookingDetail.checkoutDate), "dd 'Thg' MM")}, {CHECK_OUT_TIME}
-              </span>
-            </div>
-          </div>
-
-          {loadingRooms ? (
+          {/* Loading state */}
+          {loadingBooking ? (
             <div className="text-center py-12 text-muted-foreground">
-              Đang tải...
+              Đang tải thông tin đặt phòng...
             </div>
-          ) : groupedRooms.length === 0 ? (
+          ) : !bookingDetail ? (
             <div className="text-center py-12 text-muted-foreground">
-              Không có phòng trống
+              Không tìm thấy thông tin đặt phòng
             </div>
           ) : (
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
+            <>
+              {/* Date Range Section */}
+              <div>
+                <h3 className="text-sm font-medium mb-2">Chọn phòng mới</h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>
+                    {format(new Date(bookingDetail.checkinDate), "dd 'Thg' MM")}, {CHECK_IN_TIME}
+                  </span>
+                  <span>đến</span>
+                  <span>
+                    {format(new Date(bookingDetail.checkoutDate), "dd 'Thg' MM")}, {CHECK_OUT_TIME}
+                  </span>
+                </div>
+              </div>
+
+              {loadingRooms ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  Đang tải danh sách phòng...
+                </div>
+              ) : groupedRooms.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  Không có phòng trống
+                </div>
+              ) : (
+                <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
               {/* Column 1: HẠNG PHÒNG & GIÁ PHÒNG - No scroll */}
               <div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
@@ -280,6 +297,8 @@ export default function ChangeRoomDialog({
                 )}
               </div>
             </div>
+              )}
+            </>
           )}
         </div>
 

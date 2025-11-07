@@ -48,4 +48,21 @@ function useCancelBooking(bookingId?: string) {
   });
 }
 
-export { useCancelBooking, useUpdateBooking, useChangeRoom };
+function useUpdateBookingStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { bookingId: string; newStatus: string }) =>
+      await BookingService.updateBookingStatus(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+    },
+  });
+}
+
+export {
+  useCancelBooking,
+  useUpdateBooking,
+  useChangeRoom,
+  useUpdateBookingStatus,
+};

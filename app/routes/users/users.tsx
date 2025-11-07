@@ -51,10 +51,10 @@ import {
 import type { UserItem } from "~/services/api/user/dto";
 
 export default function Component() {
-  const { data, isPending } = useUsers();
-  const { data: rolesData } = useRoles();
-  const { filters, updateFilter, resetFilters, filterUsers } =
+  const { filters, apiParams, updateFilter, resetFilters, filterUsers } =
     useUserFilters();
+  const { data, isPending } = useUsers(apiParams);
+  const { data: rolesData } = useRoles();
 
   const [selectedUser, setSelectedUser] = useState<UserItem | null>(
     null

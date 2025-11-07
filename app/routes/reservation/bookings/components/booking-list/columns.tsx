@@ -7,6 +7,8 @@ import { ActionCell } from "../../fragments/action-cell.list";
 import BookingDetailDialog from "../booking-detail.sheet";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_SOURCES } from "~/services/types/booking.types";
+import BookingStatusCell from "../../fragments/status.cell";
+
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [
@@ -72,7 +74,7 @@ export const columns: ColumnDef<BookingListItem>[] = [
     accessorKey: "status",
     header: "Trạng thái",
     cell: ({ row }) => {
-      return <Badge variant="default">{row.original.status}</Badge>;
+      return <BookingStatusCell booking={row.original} />;
     },
   },
   {

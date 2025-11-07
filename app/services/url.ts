@@ -34,6 +34,7 @@ const Booking = {
   detailById: (id: string) => `Bookings/${id}/details`,
   detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
   Export: `Bookings/export`,
+  updateStatus: "Bookings/update-status",
 };
 
 const OTAInformation = {

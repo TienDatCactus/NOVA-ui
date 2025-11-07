@@ -18,8 +18,6 @@ import type {
   StaffCreateBookingResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
-  StaffChangeRoomRequestDto,
-  StaffChangeRoomResponseDto,
   AvailableRoomsForChangeResponseDto,
 } from "./dto";
 
@@ -228,6 +226,18 @@ async function exportBookings(date?: string): Promise<Blob> {
   }
 }
 
+async function updateBookingStatus(data: {
+  bookingId: string;
+  newStatus: string;
+}): Promise<void> {
+  try {
+    const response = await http.post(Booking.updateStatus, data);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
@@ -240,4 +250,5 @@ export const BookingService = {
   staffChangeRoom,
   staffCancelBooking,
   exportBookings,
+  updateBookingStatus,
 };

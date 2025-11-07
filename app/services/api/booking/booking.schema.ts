@@ -193,6 +193,7 @@ const StaffCreateBookingResponseSchema = z.object({
   serviceInvoice: InvoiceSchema.ServiceInvoiceSchema.optional().nullable(),
 });
 const BookingListItemSchema = z.object({
+  bookingId: z.string().optional(),
   bookingCode: z.string().optional(),
   customerName: z.string().optional(),
   checkinDate: z.string().optional(),

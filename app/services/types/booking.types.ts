@@ -34,6 +34,20 @@ export const BOOKING_STATUSES = [
   { value: "Pending", label: "Chờ xử lý", variant: "warning" },
   { value: "Cancelled", label: "Đã hủy", variant: "destructive" },
 ] as const;
+
+// Mapping booking status từ tiếng Anh sang tiếng Việt
+export const BookingStatusEnum = {
+  Pending: "Chờ xử lý",
+  Confirmed: "Đã xác nhận",
+  CheckedIn: "Đã nhận phòng",
+  InHouse: "Đang ở",
+  CheckedOut: "Đã trả phòng",
+  Cancelled: "Đã hủy",
+} as const;
+
+// Type-safe keys
+export type BookingStatus = keyof typeof BookingStatusEnum;
+
 export const BOOKING_SOURCES = [
   { value: 0, label: "Trực tiếp (Nhân viên)", key: "DirectStaff" },
   { value: 2, label: "OTA", key: "OTA" },
