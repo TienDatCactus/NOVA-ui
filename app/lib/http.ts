@@ -90,6 +90,9 @@ http.interceptors.response.use(
         processQueue(err, null);
         clearStorage();
         toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        if (!window.location.pathname.includes("/auth/login")) {
+          window.location.href = "/auth/login";
+        }
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

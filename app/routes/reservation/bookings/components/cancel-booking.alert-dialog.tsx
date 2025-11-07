@@ -1,4 +1,5 @@
 import { AlertCircle, AlertTriangle } from "lucide-react";
+import { Alert, AlertTitle } from "~/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,10 +11,8 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
-import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
-import { useCancelBooking } from "../container/booking-mutation.hooks";
 import { buttonVariants } from "~/components/ui/button";
-import { Alert, AlertTitle } from "~/components/ui/alert";
+import { useCancelBooking } from "../container/booking-mutation.hooks";
 import { useBookingDetail } from "../container/booking-query.hooks";
 
 interface CancelBookingAlertDialogProps {

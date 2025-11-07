@@ -1,65 +1,131 @@
-import { Plus, Receipt, ShoppingCart, Utensils, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Building2,
+  Plus,
+  ShoppingCart,
+  Trash2,
+  Utensils,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Separator } from "~/components/ui/separator";
 import { Badge } from "~/components/ui/badge";
 import { formatMoney } from "~/lib/utils";
 import type { POSOrderDetailDto } from "~/services/api/orders/dto";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { Skeleton } from "~/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import type z from "zod";
+import type { RoomSchema } from "~/services/api/rooms/room.schema";
 
 interface BookingOrdersProps {
   hasOrder: boolean;
   isCreatingOrder: boolean;
-  orderDetail?: POSOrderDetailDto;
+  ordersList?: POSOrderDetailDto[];
   isLoadingOrder: boolean;
   onOpenCreateDialog: () => void;
-  onAddMenuItem: () => void;
-  onRemoveItem: (itemId: string) => void;
+  onAddMenuItem: (orderId: string) => void;
+  onRemoveItem: (orderId: string, itemId: string) => void;
+  selectedRoomId?: string | null;
+  onRoomChange?: (roomId: string | null) => void;
+  rooms?: z.infer<typeof RoomSchema.BookingDetailRoomItemSchema>[];
 }
-
-// Fake service data for now
-const FAKE_SERVICES = [
-  {
-    id: "svc-1",
-    name: "Massage trị liệu",
-    quantity: 1,
-    unitPrice: 500000,
-    scheduledDate: "2025-11-06",
-    note: "Yêu cầu kỹ thuật viên nữ",
-  },
-  {
-    id: "svc-2",
-    name: "Giặt ủi",
-    quantity: 3,
-    unitPrice: 50000,
-    scheduledDate: "2025-11-06",
-  },
-];
 
 export default function BookingOrders({
   hasOrder,
   isCreatingOrder,
-  orderDetail,
+  ordersList = [],
   isLoadingOrder,
   onOpenCreateDialog,
   onAddMenuItem,
   onRemoveItem,
+  selectedRoomId,
+  onRoomChange,
+  rooms = [],
 }: BookingOrdersProps) {
+  const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (orderId: string) => {
+    setExpandedOrders((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(orderId)) {
+        newSet.delete(orderId);
+      } else {
+        newSet.add(orderId);
+      }
+      return newSet;
+    });
+  };
+  const selectedRoom = rooms.find((r) => r.roomId === selectedRoomId);
+
   // If no order exists, show create button
-  if (!hasOrder) {
+  if (!hasOrder || ordersList.length === 0) {
     return (
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Đơn POS
+            Đơn hàng POS
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Room Filter */}
+          {rooms.length > 0 && onRoomChange && (
+            <div className="flex items-center gap-2 mb-4">
+              <Select
+                value={selectedRoomId || "all"}
+                onValueChange={(value) =>
+                  onRoomChange(value === "all" ? null : value)
+                }
+              >
+                <SelectTrigger className="w-[280px]">
+                  <SelectValue placeholder="Chọn phòng" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      <span>Tất cả đơn booking</span>
+                    </div>
+                  </SelectItem>
+                  {rooms.map((room) => (
+                    <SelectItem key={room.roomId} value={room.roomId}>
+                      <div className="flex items-center gap-2">
+                        <Utensils className="h-4 w-4" />
+                        <span>{room.roomName}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedRoomId && (
+                <Badge variant="secondary" className="gap-1">
+                  Đơn của phòng: {selectedRoom?.roomName}
+                </Badge>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-sm text-muted-foreground mb-4">
-              Chưa có đơn hàng POS nào cho booking này
+              {selectedRoomId
+                ? `Chưa có đơn hàng POS nào cho phòng ${selectedRoom?.roomName}`
+                : "Chưa có đơn hàng POS nào cho booking này"}
             </p>
             <Button
               type="button"
@@ -74,183 +140,239 @@ export default function BookingOrders({
     );
   }
 
-  // Calculate totals
-  const menuItemsTotal =
-    orderDetail?.items.reduce((sum, item) => sum + item.subtotal, 0) || 0;
-  const servicesTotal = FAKE_SERVICES.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice,
+  // Calculate grand total from all orders
+  const grandTotal = ordersList.reduce(
+    (sum, order) => sum + order.totalAmount,
     0
   );
-  const grandTotal = menuItemsTotal + servicesTotal;
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-md">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
             Đơn hàng POS
-            {orderDetail && (
-              <Badge variant="secondary" className="ml-2">
-                {orderDetail.status}
-              </Badge>
-            )}
+            <Badge variant="secondary" className="ml-2">
+              {ordersList.length} đơn
+            </Badge>
           </CardTitle>
           <div className="text-sm">
-            <span className="text-muted-foreground">Tổng: </span>
-            <span className="font-semibold">
+            <span className="text-muted-foreground">Tổng cộng: </span>
+            <span className="font-semibold text-lg text-primary">
               {formatMoney(grandTotal).vndFormatted}
             </span>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-6">
-          {/* Left Column: Menu Items (POS Order) */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <Utensils className="h-4 w-4" />
-                Thực đơn ({orderDetail?.items.length || 0})
-              </h3>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={onAddMenuItem}
+        {/* Room Filter Select */}
+        {rooms.length > 0 && onRoomChange && (
+          <div className="flex items-center gap-3 mb-4 p-3 bg-muted/30 rounded-lg border">
+            <div className="flex items-center gap-2 flex-1">
+              <label className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                Lọc đơn hàng:
+              </label>
+              <Select
+                value={selectedRoomId || "all"}
+                onValueChange={(value) =>
+                  onRoomChange(value === "all" ? null : value)
+                }
               >
-                <Plus className="h-3 w-3 mr-1" />
-                Thêm món
-              </Button>
-            </div>
-
-            {isLoadingOrder ? (
-              <div className="text-sm text-muted-foreground">Đang tải...</div>
-            ) : orderDetail && orderDetail.items.length > 0 ? (
-              <div className="space-y-2">
-                {orderDetail.items.map((item) => (
-                  <Card key={item.id} className="p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">
-                          {item.itemName}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-muted-foreground">
-                            SL: {item.quantity}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            •
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {formatMoney(item.unitPrice).vndFormatted}
-                          </span>
-                        </div>
-                        <p className="text-sm font-semibold mt-1">
-                          {formatMoney(item.subtotal).vndFormatted}
-                        </p>
-                        {item.servedAt && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Phục vụ: {item.servedAt}
-                          </p>
-                        )}
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 flex-shrink-0"
-                        onClick={() => onRemoveItem(item.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                <SelectTrigger className="w-[280px] bg-background">
+                  <SelectValue placeholder="Chọn phòng hoặc xem tất cả" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      <span className="font-medium">Tất cả đơn booking</span>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-sm text-muted-foreground py-4 text-center border-2 border-dashed rounded-md">
-                Chưa có món nào
-              </div>
-            )}
-
-            {orderDetail && orderDetail.items.length > 0 && (
-              <div className="pt-2 border-t">
-                <div className="flex justify-between text-sm font-semibold">
-                  <span>Tổng thực đơn:</span>
-                  <span>{formatMoney(menuItemsTotal).vndFormatted}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column: Service Items (Fake Data) */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <Receipt className="h-4 w-4" />
-                Dịch vụ ({FAKE_SERVICES.length})
-              </h3>
-              <Badge variant="outline" className="text-xs">
-                Dữ liệu mẫu
+                  </SelectItem>
+                  {rooms.map((room) => (
+                    <SelectItem key={room.roomId} value={room.roomId}>
+                      <div className="flex items-center gap-2">
+                        <Utensils className="h-4 w-4" />
+                        <span>{room.roomName}</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({room.roomTypeName})
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedRoomId && (
+              <Badge variant="default" className="gap-1 px-3 py-1">
+                <Utensils className="h-3 w-3" />
+                Phòng: {selectedRoom?.roomName}
               </Badge>
-            </div>
-
-            <div className="space-y-2">
-              {FAKE_SERVICES.map((service) => (
-                <Card key={service.id} className="p-3 bg-muted/30">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {service.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-muted-foreground">
-                          SL: {service.quantity}
-                        </span>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatMoney(service.unitPrice).vndFormatted}
-                        </span>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-muted-foreground">
-                          {service.scheduledDate}
-                        </span>
-                      </div>
-                      <p className="text-sm font-semibold mt-1">
-                        {
-                          formatMoney(service.quantity * service.unitPrice)
-                            .vndFormatted
-                        }
-                      </p>
-                      {service.note && (
-                        <p className="text-xs text-muted-foreground mt-1 italic">
-                          {service.note}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-
-            <div className="pt-2 border-t">
-              <div className="flex justify-between text-sm font-semibold">
-                <span>Tổng dịch vụ:</span>
-                <span>{formatMoney(servicesTotal).vndFormatted}</span>
-              </div>
-            </div>
+            )}
           </div>
-        </div>
+        )}
+        {isLoadingOrder ? (
+          <div className="space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12"></TableHead>
+                <TableHead>Mã đơn</TableHead>
+                <TableHead>Trạng thái</TableHead>
+                <TableHead>Số món</TableHead>
+                <TableHead>Tổng tiền</TableHead>
+                <TableHead>Ngày tạo</TableHead>
+                <TableHead className="text-right">Thao tác</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ordersList.map((order) => {
+                const isExpanded = expandedOrders.has(order.id);
+                return (
+                  <>
+                    <TableRow key={order.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleExpand(order.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">
+                        #{order.id.slice(0, 8)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            order.status === "Completed"
+                              ? "default"
+                              : order.status === "Cancelled"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                        >
+                          {order.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Utensils className="h-3 w-3 text-muted-foreground" />
+                          <span>{order.items.length}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        {formatMoney(order.totalAmount).vndFormatted}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {order.createdAt
+                          ? new Date(order.createdAt).toLocaleDateString(
+                              "vi-VN"
+                            )
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onAddMenuItem(order.id)}
+                          disabled={order.status !== "Open"}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Thêm món
+                        </Button>
+                      </TableCell>
+                    </TableRow>
 
-        {/* Grand Total */}
-        <Separator className="my-4" />
-        <div className="flex justify-between items-center">
-          <span className="font-semibold">Tổng cộng:</span>
-          <span className="text-lg font-bold text-primary">
-            {formatMoney(grandTotal).vndFormatted}
-          </span>
-        </div>
+                    {isExpanded && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="bg-muted/20 p-0">
+                          <div className="p-4">
+                            <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                              <Utensils className="h-4 w-4" />
+                              Chi tiết món ăn
+                            </h4>
+                            {order.items.length === 0 ? (
+                              <div className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-md">
+                                Chưa có món nào
+                              </div>
+                            ) : (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Tên món</TableHead>
+                                    <TableHead>Số lượng</TableHead>
+                                    <TableHead>Đơn giá</TableHead>
+                                    <TableHead>Thành tiền</TableHead>
+                                    <TableHead>Phục vụ lúc</TableHead>
+                                    <TableHead className="text-right">
+                                      Xóa
+                                    </TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {order.items.map((item) => (
+                                    <TableRow key={item.id}>
+                                      <TableCell className="font-medium">
+                                        {item.itemName}
+                                      </TableCell>
+                                      <TableCell>{item.quantity}</TableCell>
+                                      <TableCell>
+                                        {
+                                          formatMoney(item.unitPrice)
+                                            .vndFormatted
+                                        }
+                                      </TableCell>
+                                      <TableCell className="font-semibold">
+                                        {
+                                          formatMoney(item.subtotal)
+                                            .vndFormatted
+                                        }
+                                      </TableCell>
+                                      <TableCell className="text-sm text-muted-foreground">
+                                        {item.servedAt || "—"}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() =>
+                                            onRemoveItem(order.id, item.id)
+                                          }
+                                          disabled={order.status !== "Open"}
+                                        >
+                                          <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );

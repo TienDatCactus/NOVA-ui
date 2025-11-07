@@ -213,10 +213,18 @@ const StaffUpdateBookingRequestSchema = z.object({
 
   // ========== THANH TOÁN ==========
   paymentMethod: PaymentSchema.PaymentMethodEnum.optional(),
-  paymentStatus: PaymentSchema.PaymentStatusEnum.optional(),
+  invoiceStatus: InvoiceSchema.InvoiceStatusEnum.optional(),
   totalAmount: z.number().min(0, "Tổng tiền không hợp lệ").optional(),
   paidAmount: z.number().min(0, "Số tiền thanh toán không hợp lệ").optional(),
-
+  breakfastDates: z
+    .array(
+      z.object({
+        bookingRoomId: z.string(),
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+        hasBreakfast: z.boolean(),
+      })
+    )
+    .optional(),
   // ========== PHÒNG (Array operations: ADD, CHANGE, REMOVE) ==========
   rooms: z.array(UpdateBookingRoomRequestSchema).optional(),
 });

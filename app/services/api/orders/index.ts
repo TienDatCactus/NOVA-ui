@@ -6,6 +6,7 @@ import type {
   CreatePOSOrderRequestDto,
   CreatePOSOrderResponseDto,
   POSOrderDetailResponseDto,
+  POSOrderListByBookingResponseDto,
   POSOrderPayNowRequestDto,
   POSOrderPrintDataDto,
 } from "./dto";
@@ -17,6 +18,7 @@ const {
   POSOrderDetailResponseSchema,
   // POSOrderListByInvoiceResponseSchema,
   POSOrderPrintDataSchema,
+  POSOrderListByBookingResponseSchema,
 } = OrderSchema;
 
 /**
@@ -104,6 +106,21 @@ async function getPOSOrderDetail(
   }
 }
 
+async function getPosOrderListByBooking(
+  bookingId: string,
+  bookingRoomId?: string
+): Promise<POSOrderListByBookingResponseDto> {
+  try {
+    const resp = await http.get(Orders.listPosOrderbyBooking(bookingId), {
+      params: bookingRoomId ? { bookingRoomId } : {},
+    });
+    return POSOrderListByBookingResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 /**
  *? Get list of POS orders by invoice ID
  */
@@ -119,9 +136,6 @@ async function getPOSOrderDetail(
 //   }
 // }
 
-/**
- * Get print data for a POS order
- */
 async function getPOSOrderPrintData(
   orderId: string
 ): Promise<POSOrderPrintDataDto> {
@@ -152,4 +166,5 @@ export const OrderService = {
   // getPOSOrdersByInvoice,
   getPOSOrderPrintData,
   payPOSOrderNow,
+  getPosOrderListByBooking,
 };

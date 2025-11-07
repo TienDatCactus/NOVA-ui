@@ -15,6 +15,7 @@ const {
   POSOrderPrintDataSchema,
   CreatePOSOrderRequestSchema,
   POSOrderPayNowRequestSchema,
+  POSOrderListByBookingResponseSchema,
 } = OrderSchema;
 
 // Service Order types
@@ -55,4 +56,8 @@ export type POSOrderPrintDataDto = z.infer<typeof POSOrderPrintDataSchema>;
 
 export type POSOrderPayNowRequestDto = z.infer<
   typeof POSOrderPayNowRequestSchema
+>;
+
+export type POSOrderListByBookingResponseDto = z.infer<
+  typeof POSOrderListByBookingResponseSchema
 >;

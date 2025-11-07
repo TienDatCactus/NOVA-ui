@@ -15,21 +15,12 @@ interface OrderDetailProps {
   checkoutDate?: Date | string;
 }
 
-/**
- * Restaurant-style order summary component connected to global store
- * Displays customer details, order items, and price calculations
- * Each item fetches its own details using useServiceDetail/useMenuItemDetail
- */
 export default function OrderDetail({
   onClearAll,
   bookingId,
   customerName,
 }: OrderDetailProps) {
-  // Get items from global store
   const selectedItems = useServiceOrderStore((s) => s.services);
-
-  // Note: Price calculation will need to be done by fetching service/menu details
-  // For now, showing item count only. Real prices come from API in OrderItemWrapper
   const itemCount = selectedItems.length;
 
   return (

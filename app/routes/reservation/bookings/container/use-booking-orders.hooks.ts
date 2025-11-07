@@ -1,14 +1,14 @@
-import { useState } from "react";
 import {
   useCreatePOSOrder,
   useAddItemToPOSOrder,
   useDeleteItemFromPOSOrder,
-} from "~/routes/pos-orders/container/pos-orders-mutation.hooks";
-import { usePOSOrderDetail } from "~/routes/pos-orders/container/pos-orders-query.hooks";
+} from "~/routes/pos-orders/container/mutation.hooks";
+
+import { usePOSOrderDetailByBooking } from "~/routes/pos-orders/container/query.hooks";
 import type { AddItemsToPOSOrderRequestDto } from "~/services/api/orders/dto";
 
 interface UseBookingOrdersProps {
-  bookingId?: string;
+  bookingId: string;
   bookingRoomId?: string;
 }
 
@@ -16,8 +16,6 @@ export function useBookingOrders({
   bookingId,
   bookingRoomId,
 }: UseBookingOrdersProps) {
-  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
-
   const { mutate: createOrder, isPending: isCreatingOrder } =
     useCreatePOSOrder();
   const { mutate: addItem, isPending: isAddingItem } = useAddItemToPOSOrder();
@@ -25,10 +23,10 @@ export function useBookingOrders({
     useDeleteItemFromPOSOrder();
 
   const {
-    data: orderDetail,
+    data: ordersList,
     isPending: isLoadingOrder,
     refetch: refetchOrder,
-  } = usePOSOrderDetail(currentOrderId || "", !!currentOrderId);
+  } = usePOSOrderDetailByBooking(bookingId, bookingRoomId, !!bookingId);
 
   const handleCreateBookingOrder = () => {
     createOrder(
@@ -37,33 +35,43 @@ export function useBookingOrders({
         bookingRoomId: null, // No specific room - order belongs to booking
       },
       {
-        onSuccess: (data) => {
-          setCurrentOrderId(data.posOrderId);
+        onSuccess: () => {
+          refetchOrder();
         },
       }
     );
   };
 
   const handleCreateRoomOrder = () => {
+    console.log(bookingId, bookingRoomId);
     createOrder(
       {
         bookingId: bookingId || null,
         bookingRoomId: bookingRoomId || null, // Specific room
       },
       {
-        onSuccess: (data) => {
-          setCurrentOrderId(data.posOrderId);
+        onSuccess: () => {
+          refetchOrder();
         },
       }
     );
   };
 
-  const handleAddMenuItem = (item: AddItemsToPOSOrderRequestDto) => {
-    if (!currentOrderId) return;
+  const handleAddMenuItem = (
+    orderId: string,
+    menuItemId: string,
+    quantity: number,
+    unitPrice: number
+  ) => {
+    const item: AddItemsToPOSOrderRequestDto = {
+      menuItemId,
+      quantity,
+      unitPrice,
+    };
 
     addItem(
       {
-        orderId: currentOrderId,
+        orderId,
         data: item,
       },
       {
@@ -77,12 +85,10 @@ export function useBookingOrders({
   /**
    * Remove an item from the order
    */
-  const handleRemoveItem = (itemId: string) => {
-    if (!currentOrderId) return;
-
+  const handleRemoveItem = (orderId: string, itemId: string) => {
     deleteItem(
       {
-        orderId: currentOrderId,
+        orderId,
         itemId,
       },
       {
@@ -95,11 +101,9 @@ export function useBookingOrders({
 
   return {
     // State
-    currentOrderId,
-    orderDetail,
-    hasOrder: !!currentOrderId,
+    ordersList,
+    hasOrder: !!ordersList,
 
-    // Loading states
     isCreatingOrder,
     isAddingItem,
     isDeletingItem,

@@ -114,6 +114,8 @@ const Orders = {
   cancelPosOrder: (id: string) => `PosOrders/${id}/cancel`,
   completePosOrder: (id: string) => `PosOrders/${id}/complete`,
   detailPOS: (id: string) => `PosOrders/${id}/details`,
+  listPosOrderbyBooking: (bookingId: string) =>
+    `PosOrders/by-booking/${bookingId}`,
   // listPosOrderbyInvoice: (invoiceId: string) =>
   //   `PosOrders/invoice/${invoiceId}`,
   printPOSorder: (id: string) => `PosOrders/${id}/print-data`,

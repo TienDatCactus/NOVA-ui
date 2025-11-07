@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { PaymentSchema } from "~/services/schema/payment.schema";
 
+const PosOrderStatusEnum = z.enum(["Open", "Completed", "Cancelled"]);
+
 const ServiceOrderItemSchema = z.object({
   itemType: z.enum(["ServiceItem", "MenuItem"]),
   itemId: z.string().min(1),
@@ -53,7 +55,7 @@ const POSOrderItemSchema = z.object({
 
 const POSOrderDetailSchema = z.object({
   id: z.string(),
-  status: z.string().min(1),
+  status: PosOrderStatusEnum,
   totalAmount: z.number().min(0),
   customerId: z.string().optional().nullable(),
   invoiceId: z.string().optional().nullable(),
@@ -63,6 +65,7 @@ const POSOrderDetailSchema = z.object({
 
 const POSOrderDetailResponseSchema = POSOrderDetailSchema;
 const POSOrderListByInvoiceResponseSchema = z.array(POSOrderDetailSchema);
+const POSOrderListByBookingResponseSchema = z.array(POSOrderDetailSchema);
 
 const POSOrderPrintItemSchema = z.object({
   itemName: z.string().min(1),
@@ -102,4 +105,5 @@ export const OrderSchema = {
   POSOrderPrintDataSchema,
   CreatePOSOrderRequestSchema,
   POSOrderPayNowRequestSchema,
+  POSOrderListByBookingResponseSchema,
 };

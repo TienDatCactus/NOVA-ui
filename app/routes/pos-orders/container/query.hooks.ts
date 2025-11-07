@@ -22,7 +22,7 @@ import { OrderService } from "~/services/api/orders";
  * @param orderId - POS Order ID
  * @param enabled - Whether to enable the query (default: true)
  */
-function usePOSOrderDetail(orderId: string, enabled: boolean = true) {
+function usePOSOrderDetailByOrder(orderId: string, enabled: boolean = true) {
   return useQuery({
     queryKey: ["pos-order-detail", orderId],
     queryFn: async () => await OrderService.getPOSOrderDetail(orderId),
@@ -31,6 +31,20 @@ function usePOSOrderDetail(orderId: string, enabled: boolean = true) {
     refetchOnWindowFocus: true,
     refetchOnReconnect: false,
     refetchOnMount: false,
+  });
+}
+function usePOSOrderDetailByBooking(
+  bookingId: string,
+  bookingRoomId?: string,
+  enabled: boolean = true
+) {
+  return useQuery({
+    queryKey: ["pos-order-detail", bookingId, bookingRoomId ?? bookingRoomId],
+    queryFn: async () =>
+      await OrderService.getPosOrderListByBooking(bookingId, bookingRoomId),
+    staleTime: 30 * 1000, // 30 seconds
+    enabled: !!bookingId && enabled,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -52,4 +66,8 @@ function usePOSOrderPrintData(orderId: string, enabled: boolean = true) {
   });
 }
 
-export { usePOSOrderDetail, usePOSOrderPrintData };
+export {
+  usePOSOrderDetailByBooking,
+  usePOSOrderDetailByOrder,
+  usePOSOrderPrintData,
+};
