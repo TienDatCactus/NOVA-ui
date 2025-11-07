@@ -43,11 +43,6 @@ function InvoicesViewLayout({
                 {totalInvoices}
               </span>{" "}
               hóa đơn
-              {totalPages && currentPage && (
-                <span className="ml-2">
-                  • Trang {currentPage}/{totalPages}
-                </span>
-              )}
             </p>
           </div>
           <div className="flex items-center gap-2">

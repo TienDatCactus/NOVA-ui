@@ -11,7 +11,8 @@ import {
 } from "~/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import type { InvoiceFilters } from "../../container/invoices/filter.hooks";
-import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import { INVOICE_STATUSES, PAYMENT_METHODS } from "~/services/api/invoices/invoice.types";
+import { DateRangePicker } from "~/components/ui/date-range-picker";
 
 interface InvoicesFilterSidebarProps {
   filters: InvoiceFilters;
@@ -22,16 +23,6 @@ interface InvoicesFilterSidebarProps {
   onResetFilters: () => void;
 }
 
-const PAYMENT_METHODS = [
-  { value: "Cash", label: "Tiền mặt" },
-  { value: "Card", label: "Thẻ" },
-  { value: "BankTransfer", label: "Chuyển khoản" },
-  { value: "OTACollect", label: "OTA thu hộ" },
-  { value: "OTAPrepaid", label: "OTA trả trước" },
-  { value: "OnAccount", label: "Ghi nợ" },
-  { value: "Unknown", label: "Chưa xác định" },
-];
-
 function InvoicesFilterSidebar({
   filters,
   onFilterChange,
@@ -41,8 +32,7 @@ function InvoicesFilterSidebar({
     (filters.searchText ? 1 : 0) +
     (filters.status ? 1 : 0) +
     (filters.paymentMethod ? 1 : 0) +
-    (filters.issuedFrom ? 1 : 0) +
-    (filters.issuedTo ? 1 : 0);
+    (filters.dateRange?.from || filters.dateRange?.to ? 1 : 0);
 
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -167,30 +157,11 @@ function InvoicesFilterSidebar({
         <CardContent className="px-0 rounded-md">
           <div className="space-y-3">
             <Label className="text-sm font-medium">Khoảng thời gian</Label>
-            <div className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="issued-from" className="text-xs text-muted-foreground">
-                  Từ ngày
-                </Label>
-                <Input
-                  id="issued-from"
-                  type="date"
-                  value={filters.issuedFrom || ""}
-                  onChange={(e) => onFilterChange("issuedFrom", e.target.value || undefined)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="issued-to" className="text-xs text-muted-foreground">
-                  Đến ngày
-                </Label>
-                <Input
-                  id="issued-to"
-                  type="date"
-                  value={filters.issuedTo || ""}
-                  onChange={(e) => onFilterChange("issuedTo", e.target.value || undefined)}
-                />
-              </div>
-            </div>
+            <DateRangePicker
+              value={filters.dateRange}
+              onChange={(range) => onFilterChange("dateRange", range)}
+              placeholder="Chọn khoảng ngày"
+            />
           </div>
         </CardContent>
       </Card>

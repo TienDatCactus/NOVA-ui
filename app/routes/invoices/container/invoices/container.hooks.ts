@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { format } from "date-fns";
 import { useInvoices } from "./query.hooks";
 import useInvoiceFilters from "./filter.hooks";
 
@@ -13,8 +14,12 @@ function useInvoicesContainer() {
       PageSize: filters.pageSize,
       Status: filters.status,
       PaymentMethod: filters.paymentMethod,
-      IssuedFrom: filters.issuedFrom,
-      IssuedTo: filters.issuedTo,
+      IssuedFrom: filters.dateRange?.from
+        ? format(filters.dateRange.from, "yyyy-MM-dd")
+        : undefined,
+      IssuedTo: filters.dateRange?.to
+        ? format(filters.dateRange.to, "yyyy-MM-dd")
+        : undefined,
       Keyword: filters.searchText || undefined,
     }),
     [filters]
@@ -27,19 +32,11 @@ function useInvoicesContainer() {
   const meta = response?.meta || {
     page: 1,
     pageSize: 10,
-    total: 0,
+    total: invoices.length,
     hasNext: false,
   };
-
-  console.log("📦 Container Hook:", {
-    response,
-    invoices,
-    invoicesLength: invoices.length,
-    meta,
-  });
-
   return {
-    invoices: invoices, // Dùng trực tiếp data từ API, không filter thêm
+    invoices: invoices,
     meta: {
       page: meta.page,
       pageSize: meta.pageSize,

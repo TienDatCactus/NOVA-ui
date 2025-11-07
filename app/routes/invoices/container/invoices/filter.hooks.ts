@@ -1,12 +1,12 @@
 import { useState } from "react";
 import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
+import type { DateRange } from "~/components/ui/date-range-picker";
 
 export interface InvoiceFilters {
   searchText: string; // Search by invoice number, booking code, customer name
   status?: string; // Unpaid, DepositOnly, PartiallyPaid, Paid, Overpaid, Refunded, Chargeback, Voided
   paymentMethod?: string; // Unknown, Cash, Card, BankTransfer, OTACollect, OTAPrepaid, OnAccount
-  issuedFrom?: string; // Date from
-  issuedTo?: string; // Date to
+  dateRange?: DateRange; // Date range filter
   page: number;
   pageSize: number;
 }
@@ -15,10 +15,9 @@ const DEFAULT_FILTERS: InvoiceFilters = {
   searchText: "",
   status: undefined,
   paymentMethod: undefined,
-  issuedFrom: undefined,
-  issuedTo: undefined,
+  dateRange: undefined,
   page: 1,
-  pageSize: 1,
+  pageSize: 5,
 };
 
 function useInvoiceFilters() {
