@@ -369,7 +369,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             </aside>
             <div className="grid flex-1 gap-4 px-6">
               <Card className="border-b w-full h-fit shadow-sm">
-                <CardContent className="flex justify-around items-center gap-6 flex-wrap">
+                <CardContent className="flex justify-around items-start gap-6 flex-wrap">
                   <div className="grid gap-2">
                     <h1 className="uppercase font-medium text-card-foreground text-sm">
                       Khách hàng
@@ -621,6 +621,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                           </Badge>
                         </sup>
                       </CardTitle>
+
                       <div className="flex items-center gap-2">
                         <Button
                           onClick={() => setNoteModalOpen(true)}
@@ -646,7 +647,19 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                         </DropdownMenu>
                       </div>
                     </div>
+                    {selectedRoomId && (
+                      <div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setSelectedRoomId("")}
+                        >
+                          Xem đơn đặt phòng
+                        </Button>
+                      </div>
+                    )}
                   </CardHeader>
+
                   <CardContent className="space-y-4">
                     <div className="flex items-center gap-6">
                       <div className="grid gap-2">

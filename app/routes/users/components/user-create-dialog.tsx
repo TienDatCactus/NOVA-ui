@@ -52,7 +52,7 @@ import type {
   UpdateUserDto,
 } from "~/services/api/user/dto";
 import { useEffect, useMemo, useState } from "react";
-import { UserSchema } from "~/services/schema/user.schema";
+import { UserSchema } from "~/services/api/user/user.schema";
 
 interface UserFormDialogProps {
   open: boolean;
@@ -93,9 +93,7 @@ export function UserFormDialog({
   }, [rolesData, isLoadingRoles, rolesError]);
 
   const form = useForm<CreateUserDto | UpdateUserDto>({
-    resolver: zodResolver(
-      isEditMode ? UpdateUserSchema : CreateUserSchema
-    ),
+    resolver: zodResolver(isEditMode ? UpdateUserSchema : CreateUserSchema),
     defaultValues:
       isEditMode && user
         ? {

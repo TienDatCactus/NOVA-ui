@@ -1,5 +1,5 @@
 import http from "~/lib/http";
-import { UserSchema } from "~/services/schema/user.schema";
+import { UserSchema } from "~/services/api/user/user.schema";
 import { User } from "~/services/url";
 import type {
   AssignRolesDto,
@@ -38,6 +38,7 @@ async function getUserList(): Promise<UserListResponseDto> {
     const resp = await http.get(User.list);
     return UserListResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -47,6 +48,7 @@ async function getUserDetail(id: string): Promise<UserDetailResponseDto> {
     const resp = await http.get(User.detail(id));
     return UserDetailResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -56,6 +58,7 @@ async function createUser(data: CreateUserDto): Promise<CreateUserResponseDto> {
     const resp = await http.post(User.create, data);
     return CreateUserResponseSchema.parse(resp);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -68,6 +71,7 @@ async function updateUser(
     const resp: any = await http.put(User.update(id), data);
     return UpdateUserResponseSchema.parse(resp);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -80,6 +84,7 @@ async function getRoleList(): Promise<string[]> {
     }
     return [];
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -92,6 +97,7 @@ async function lockUser(
     const resp: any = await http.post(User.lock(id), data);
     return LockUserResponseSchema.parse(resp);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -101,6 +107,7 @@ async function unlockUser(id: string): Promise<UnlockUserResponseDto> {
     const resp: any = await http.post(User.unlock(id));
     return UnlockUserResponseSchema.parse(resp);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -113,6 +120,7 @@ async function assignRoles(
     const resp: any = await http.post(User.assignRoles(id), data);
     return AssignRolesResponseSchema.parse(resp);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }

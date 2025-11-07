@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { UserSchema } from "~/services/schema/user.schema";
+import { UserSchema } from "~/services/api/user/user.schema";
 
 const {
   UserItemSchema,

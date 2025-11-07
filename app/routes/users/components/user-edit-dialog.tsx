@@ -20,12 +20,9 @@ import {
 import { Input } from "~/components/ui/input";
 import { Pencil, Loader2 } from "lucide-react";
 import { useUpdateUser } from "../container/useUsers.hooks";
-import type {
-  UserItem,
-  UpdateUserDto,
-} from "~/services/api/user/dto";
+import type { UserItem, UpdateUserDto } from "~/services/api/user/dto";
 import { useEffect } from "react";
-import { UserSchema } from "~/services/schema/user.schema";
+import { UserSchema } from "~/services/api/user/user.schema";
 
 interface UserEditDialogProps {
   user: UserItem;

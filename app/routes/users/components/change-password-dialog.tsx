@@ -23,7 +23,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { UserService } from "~/services/api/user";
-import { UserSchema } from "~/services/schema/user.schema";
+import { UserSchema } from "~/services/api/user/user.schema";
 
 const { ChangePasswordSchema } = UserSchema;
 
@@ -79,7 +79,8 @@ export default function ChangePasswordDialog({
       onSuccess?.();
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.message || "Đổi mật khẩu thất bại. Vui lòng thử lại",
+        error?.response?.data?.message ||
+          "Đổi mật khẩu thất bại. Vui lòng thử lại",
         { id: "change-password" }
       );
     } finally {
@@ -102,12 +103,16 @@ export default function ChangePasswordDialog({
             Đổi mật khẩu
           </DialogTitle>
           <DialogDescription>
-            Đổi mật khẩu cho tài khoản: <span className="font-semibold">{UserName}</span>
+            Đổi mật khẩu cho tài khoản:{" "}
+            <span className="font-semibold">{UserName}</span>
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="newPassword"
@@ -135,7 +140,8 @@ export default function ChangePasswordDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Xác nhận mật khẩu <span className="text-destructive">*</span>
+                    Xác nhận mật khẩu{" "}
+                    <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input

@@ -1,23 +1,21 @@
 import { z } from "zod";
 
 // Base User Item Schema (for list and detail responses)
-const UserItemSchema = z
-  .object({
-    id: z.string(),
-    userName: z.string(),
-    email: z.string(),
-    fullName: z.string(),
-    phoneNumber: z
-      .string()
-      .nullable()
-      .optional()
-      .transform((val) => val || ""),
-    emailConfirmed: z.boolean(),
-    lockoutEnabled: z.boolean(),
-    lockoutEnd: z.union([z.string(), z.null()]).optional(),
-    roles: z.array(z.string()),
-  })
-  .passthrough();
+const UserItemSchema = z.object({
+  id: z.string(),
+  userName: z.string(),
+  email: z.string(),
+  fullName: z.string(),
+  phoneNumber: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => val || ""),
+  emailConfirmed: z.boolean().optional(),
+  lockoutEnabled: z.boolean().optional(),
+  lockoutEnd: z.union([z.string(), z.null()]).optional(),
+  roles: z.array(z.string()),
+});
 
 // GET /api/Users - List response
 const UserListResponseSchema = z.array(UserItemSchema);
