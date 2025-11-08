@@ -23,7 +23,7 @@ export default function CartItem({
   const subtotal = unitPrice * quantity;
 
   return (
-    <Card className="shadow-sm p-0">
+    <Card className="shadow-sm p-0 snap-center">
       <CardContent className="p-3">
         <div className="flex gap-3">
           {/* Image */}

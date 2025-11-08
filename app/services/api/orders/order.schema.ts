@@ -23,6 +23,7 @@ const CreatePOSOrderRequestSchema = z.object({
   bookingId: z.string().optional().nullable(),
   bookingRoomId: z.string().optional().nullable(),
   servedAt: z.string().optional().nullable(),
+  notes: z.string().max(500).optional().nullable(),
 });
 
 const CreatePOSOrderResponseSchema = z.object({
@@ -32,8 +33,10 @@ const CreatePOSOrderResponseSchema = z.object({
 
 const AddItemsToPOSOrderRequestSchema = z.object({
   // only for menu
-  menuItemId: z.string(),
-  quantity: z.number().int().min(0),
+  menuItemId: z.string().optional(),
+  customItemName: z.string().min(2).max(100).optional(),
+  customItemDescription: z.string().min(2).max(500).optional(),
+  quantity: z.number().min(1),
   unitPrice: z.number().min(0),
 });
 
@@ -92,6 +95,55 @@ const POSOrderPayNowRequestSchema = z.object({
   transactionReference: z.string(),
 });
 
+const POSOrdersListItemByBookingDetailSchema = z.object({
+  id: z.string().optional(),
+  bookingRoomId: z.string().optional().nullable(),
+  status: z.string().optional(),
+  source: z.string().optional(),
+  scheduledAt: z.string().optional().nullable(),
+  note: z.string().optional().nullable(),
+  totalAmount: z.number().min(0).optional(),
+  createdAt: z.string().optional(),
+  completedAt: z.string().optional().nullable(),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      menuItemId: z.string(),
+      menuItemName: z.string(),
+      quantity: z.number().min(0),
+      unitPrice: z.number().min(0),
+      subtotal: z.number().min(0),
+      servedAt: z.string().optional().nullable(),
+    })
+  ),
+});
+const ServiceOrdersListItemByBookingDetailSchema = z.object({
+  id: z.string().optional(),
+  bookingRoomId: z.string().optional(),
+  serviceItemId: z.string().optional(),
+  serviceItemName: z.string().optional(),
+  serviceItemCode: z.string().optional(),
+  scheduledAt: z.string().optional(),
+  performedAt: z.string().optional(),
+  completedAt: z.string().optional(),
+  quantity: z.number().min(0).optional(),
+  unitPrice: z.number().min(0).optional(),
+  discountAmount: z.number().min(0).optional(),
+  total: z.number().min(0).optional(),
+  note: z.string().optional(),
+  assignedToStaffId: z.string().optional(),
+  assignedToStaffName: z.string().optional(),
+  status: z.string().optional(),
+  source: z.string().optional(),
+  createdAt: z.string().optional(),
+});
+
+const ServiceOrderListByBookingDetailSchema = z.array(
+  ServiceOrdersListItemByBookingDetailSchema
+);
+const POSOrderListByBookingDetailSchema = z.array(
+  POSOrdersListItemByBookingDetailSchema
+);
 export const OrderSchema = {
   ServiceOrderSchema,
   ServiceOrderItemSchema,
@@ -107,4 +159,8 @@ export const OrderSchema = {
   CreatePOSOrderRequestSchema,
   POSOrderPayNowRequestSchema,
   POSOrderListByBookingResponseSchema,
+  POSOrderListByBookingDetailSchema,
+  POSOrdersListItemByBookingDetailSchema,
+  ServiceOrderListByBookingDetailSchema,
+  ServiceOrdersListItemByBookingDetailSchema,
 };

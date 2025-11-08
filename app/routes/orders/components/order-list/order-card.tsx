@@ -1,5 +1,5 @@
 import { Badge } from "~/components/ui/badge";
-import { Card, CardHeader } from "~/components/ui/card";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
@@ -7,13 +7,14 @@ import {
 } from "~/components/ui/collapsible";
 import { formatMoney } from "~/lib/utils";
 import type { POSOrderDetailDto } from "~/services/api/orders/dto";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useState } from "react";
-import OrderItemsList from "./order-items-list";
 import OrderActions from "./order-actions";
+import OrderDetails from "./order-details";
 import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
 
 interface OrderCardProps {
   order: POSOrderDetailDto;
@@ -21,7 +22,7 @@ interface OrderCardProps {
 
 const statusConfig = {
   Open: {
-    label: "Mở",
+    label: "Đang mở",
     className: "bg-primary text-primary-foreground",
   },
   Completed: {
@@ -37,61 +38,88 @@ const statusConfig = {
 export default function OrderCard({ order }: OrderCardProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const itemCount = order?.items?.length;
+  const itemCount = order?.items?.length || 0;
   const statusInfo = statusConfig[order.status];
-  console.log(order);
+
   return (
-    <Card>
-      <CardHeader>
-        <div>
-          <div>
-            <h3>Ngày tạo</h3>
-            <p>
-              {format(parseISO(order?.createdAt ?? ""), "dd/MMM/yyyy", {
-                locale: vi,
-              })}
-            </p>
+    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-4">
+            {/* Left: Order Info */}
+            <div className="flex-1 min-w-0 space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <Badge variant="outline" className="font-mono text-xs">
+                  #{order.id.slice(0, 8)}
+                </Badge>
+                <Badge className={cn("text-xs", statusInfo.className)}>
+                  {statusInfo.label}
+                </Badge>
+                {itemCount > 0 && (
+                  <span className="text-xs text-muted-foreground">
+                    {itemCount} món
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-6 text-sm">
+                <div>
+                  <p className="text-muted-foreground text-xs">Ngày tạo</p>
+                  <p className="font-medium">
+                    {format(
+                      parseISO(order.createdAt || new Date().toISOString()),
+                      "HH:mm - dd/MM/yyyy",
+                      {
+                        locale: vi,
+                      }
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Tổng tiền</p>
+                  <p className="font-semibold text-primary">
+                    {formatMoney(order.totalAmount).vndFormatted}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex-shrink-0">
+              <OrderActions
+                orderId={order.id}
+                status={order.status}
+                totalAmount={order.totalAmount}
+              />
+            </div>
           </div>
-          <div>
-            <h3>Tổng tiền</h3>
-            <p>{formatMoney(order.totalAmount ?? 0).vndFormatted}</p>
-          </div>
-          <div>
-            <h3>Trạng thái</h3>
-            <p>
-              <Badge>{statusInfo.label}</Badge>
-            </p>
-          </div>
-        </div>
-      </CardHeader>
+
+          {/* Expand/Collapse Trigger */}
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-2 hover:bg-muted"
+            >
+              <span className="text-xs text-muted-foreground">
+                {isOpen ? "Ẩn chi tiết" : "Xem chi tiết"}
+              </span>
+              {isOpen ? (
+                <ChevronUp className="h-4 w-4 ml-2" />
+              ) : (
+                <ChevronDown className="h-4 w-4 ml-2" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+        </CardHeader>
+
+        {/* Expandable Details */}
+        <CollapsibleContent>
+          <CardContent className="pt-0">
+            <OrderDetails order={order} />
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
-const dat = {
-  id: "f19c0964-ef5b-423b-bdef-62b9c5063338",
-  status: "Open",
-  totalAmount: 450000,
-  customerId: null,
-  invoiceId: null,
-  createdAt: "2025-11-08T09:33:04.1794839",
-  items: [
-    {
-      id: "ea677405-03f5-4559-a5af-9c1425c76084",
-      menuItemId: "b81df381-fc0c-42ca-99f8-4612616f935d",
-      itemName: "Cơm chiên hải sản",
-      quantity: 1,
-      unitPrice: 120000,
-      servedAt: null,
-      subtotal: 120000,
-    },
-    {
-      id: "d90ffdf5-cc80-4dff-8907-fa1250b946cb",
-      menuItemId: "0048c648-2462-4bd6-a8b6-1aecaa11d143",
-      itemName: "Mì xào bò",
-      quantity: 3,
-      unitPrice: 110000,
-      servedAt: null,
-      subtotal: 330000,
-    },
-  ],
-};

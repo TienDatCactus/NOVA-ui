@@ -9,7 +9,7 @@ const DASHBOARD = {
     index: "/dashboard/bookings",
     bookings: "/dashboard/bookings/bookings",
     bookingDetail: (bookingCode: string) =>
-      `/dashboard/bookings/bookings/detail/${bookingCode}`,
+      `/dashboard/bookings/detail/${bookingCode}`,
     newBooking: "/dashboard/bookings/new-booking",
   },
   orders: {

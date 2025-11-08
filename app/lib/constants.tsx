@@ -48,11 +48,11 @@ const SIDEBAR_NAV_MAIN: Array<{
       },
       {
         title: "Sơ đồ phòng",
-        url: "/dashboard/bookings/bookings/grid",
+        url: "/dashboard/bookings/grid",
       },
       {
         title: "Danh sách đặt phòng",
-        url: "/dashboard/bookings/bookings/list",
+        url: "/dashboard/bookings/list",
       },
       {
         title: "Hóa đơn đặt phòng",

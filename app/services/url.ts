@@ -127,6 +127,9 @@ const Orders = {
   //   `PosOrders/invoice/${invoiceId}`,
   printPOSorder: (id: string) => `PosOrders/${id}/print-data`,
   payNow: (id: string) => `PosOrders/${id}/pay-now`,
+  setServed: (id: string, itemId: string) =>
+    `PosOrders/${id}/items/${itemId}/set-served`,
+  setScheduled: (id: string) => `PosOrders/${id}/set-scheduled`,
 };
 
 const Invoices = {

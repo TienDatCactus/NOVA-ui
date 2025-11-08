@@ -3,53 +3,52 @@ import {
   useAddItemToPOSOrder,
   useDeleteItemFromPOSOrder,
 } from "~/routes/orders/container/order-pos/mutation.hooks";
-import {
-  usePOSOrderDetailByBooking,
-  usePOSOrderList,
-} from "~/routes/orders/container/order-pos/query.hooks";
 import type { AddItemsToPOSOrderRequestDto } from "~/services/api/orders/dto";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BookingService } from "~/services/api/booking";
 import type { StaffAddCompletedChargesRequestDto } from "~/services/api/booking/dto";
 import { toast } from "sonner";
+import type z from "zod";
+import { OrderSchema } from "~/services/api/orders/order.schema";
+
+type POSOrderFromBookingDetail = z.infer<
+  typeof OrderSchema.POSOrdersListItemByBookingDetailSchema
+>;
 
 interface UseBookingOrdersProps {
   bookingId: string;
   bookingRoomId?: string;
+  ordersData?: POSOrderFromBookingDetail[]; // Data from booking detail
 }
 
 export function useBookingOrders({
   bookingId,
   bookingRoomId,
 }: UseBookingOrdersProps) {
+  const queryClient = useQueryClient();
   const { mutate: createOrder, isPending: isCreatingOrder } =
     useCreatePOSOrder();
   const { mutate: addItem, isPending: isAddingItem } = useAddItemToPOSOrder();
   const { mutate: deleteItem, isPending: isDeletingItem } =
     useDeleteItemFromPOSOrder();
 
-  const {
-    data: ordersList,
-    isPending: isLoadingOrder,
-    refetch: refetchOrder,
-  } = usePOSOrderDetailByBooking(bookingId, bookingRoomId, !!bookingId);
-
   const handleCreateBookingOrder = () => {
     createOrder(
       {
         bookingId: bookingId || null,
-        bookingRoomId: null, // No specific room - order belongs to booking
+        bookingRoomId: bookingRoomId || null,
       },
       {
         onSuccess: () => {
-          refetchOrder();
+          queryClient.invalidateQueries({
+            queryKey: ["bookings-detail"],
+          });
         },
       }
     );
   };
 
   const handleCreateRoomOrder = () => {
-    console.log(bookingId, bookingRoomId);
     createOrder(
       {
         bookingId: bookingId || null,
@@ -57,7 +56,9 @@ export function useBookingOrders({
       },
       {
         onSuccess: () => {
-          refetchOrder();
+          queryClient.invalidateQueries({
+            queryKey: ["bookings-detail"],
+          });
         },
       }
     );
@@ -82,7 +83,9 @@ export function useBookingOrders({
       },
       {
         onSuccess: () => {
-          refetchOrder();
+          queryClient.invalidateQueries({
+            queryKey: ["bookings-detail"],
+          });
         },
       }
     );
@@ -99,7 +102,9 @@ export function useBookingOrders({
       },
       {
         onSuccess: () => {
-          refetchOrder();
+          queryClient.invalidateQueries({
+            queryKey: ["bookings-detail"],
+          });
         },
       }
     );
@@ -109,7 +114,6 @@ export function useBookingOrders({
    * Add completed charges (POS items) to booking
    * Creates a new POS order with status = Completed
    */
-  const queryClient = useQueryClient();
   const { mutate: addCompletedCharges, isPending: isAddingCompletedCharges } =
     useMutation({
       mutationFn: async ({
@@ -123,7 +127,9 @@ export function useBookingOrders({
       },
       onSuccess: () => {
         toast.success("Đã thêm món hoàn thành thành công");
-        refetchOrder();
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+        });
         queryClient.invalidateQueries({
           queryKey: ["booking-pending-charges", bookingId],
         });
@@ -151,13 +157,11 @@ export function useBookingOrders({
 
   return {
     // State
-    ordersList,
-    hasOrder: !!ordersList,
 
     isCreatingOrder,
     isAddingItem,
     isDeletingItem,
-    isLoadingOrder,
+    isLoadingOrder: false, // No longer loading from separate API call
     isAddingCompletedCharges,
 
     createBookingOrder: handleCreateBookingOrder,

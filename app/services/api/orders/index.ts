@@ -161,6 +161,34 @@ async function payPOSOrderNow(orderId: string, data: POSOrderPayNowRequestDto) {
     return Promise.reject(error);
   }
 }
+
+async function setServedOrderItem(
+  orderId: string,
+  itemId: string,
+  data: { servedAt: Date }
+) {
+  try {
+    const resp = await http.post(Orders.setServed(orderId, itemId), {
+      servedAt: data.servedAt.toISOString(),
+    });
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function setScheduledOrder(orderId: string, data: { scheduledAt: Date }) {
+  try {
+    const resp = await http.post(Orders.setScheduled(orderId), {
+      scheduledAt: data.scheduledAt.toISOString(),
+    });
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const OrderService = {
   createPOSOrder,
   addItemsToPOSOrder,
@@ -172,4 +200,6 @@ export const OrderService = {
   getPOSOrderPrintData,
   payPOSOrderNow,
   getPosOrderList,
+  setScheduledOrder,
+  setServedOrderItem,
 };

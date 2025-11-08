@@ -198,9 +198,8 @@ const StaffUpdateBookingRequestSchema = z.object({
   breakfastDates: z
     .array(
       z.object({
-        bookingRoomId: z.string(),
-        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
-        hasBreakfast: z.boolean(),
+        date: z.string().optional(),
+        hasBreakfast: z.boolean().optional(),
       })
     )
     .optional(),
@@ -355,6 +354,9 @@ const BookingDetailItemSchema = z.object({
   }),
   rooms: z.array(RoomSchema.BookingDetailRoomItemSchema),
   invoices: InvoiceSchema.InvoiceListResponseSchema.optional(),
+  serviceOrder:
+    OrderSchema.ServiceOrderListByBookingDetailSchema.optional().nullable(),
+  posOrders: OrderSchema.POSOrderListByBookingDetailSchema.optional(),
 });
 
 const BookingOTAItem = z.object({

@@ -30,25 +30,24 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { formatMoney } from "~/lib/utils";
-import type { POSOrderDetailDto } from "~/services/api/orders/dto";
+import { OrderSchema } from "~/services/api/orders/order.schema";
 import type { RoomSchema } from "~/services/api/rooms/room.schema";
 
+type POSOrderFromBookingDetail = z.infer<
+  typeof OrderSchema.POSOrdersListItemByBookingDetailSchema
+>;
+
 interface BookingOrdersProps {
-  hasOrder: boolean;
   isCreatingOrder: boolean;
-  ordersList?: POSOrderDetailDto[];
+  ordersList?: POSOrderFromBookingDetail[];
   isLoadingOrder: boolean;
   onOpenCreateDialog: () => void;
   onAddMenuItem: (orderId: string) => void;
   onRemoveItem: (orderId: string, itemId: string) => void;
   onAddCompletedCharges?: () => void;
-  selectedRoomId?: string | null;
-  onRoomChange?: (roomId: string | null) => void;
-  rooms?: z.infer<typeof RoomSchema.BookingDetailRoomItemSchema>[];
 }
 
 export default function BookingPosOrders({
-  hasOrder,
   isCreatingOrder,
   ordersList = [],
   isLoadingOrder,
@@ -56,9 +55,6 @@ export default function BookingPosOrders({
   onAddMenuItem,
   onRemoveItem,
   onAddCompletedCharges,
-  selectedRoomId,
-  onRoomChange,
-  rooms = [],
 }: BookingOrdersProps) {
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
 
@@ -73,10 +69,9 @@ export default function BookingPosOrders({
       return newSet;
     });
   };
-  const selectedRoom = rooms.find((r) => r.roomId === selectedRoomId);
 
   // If no order exists, show create button
-  if (!hasOrder || ordersList.length === 0) {
+  if (ordersList.length === 0) {
     return (
       <Card className="shadow-sm">
         <CardHeader>
@@ -86,49 +81,10 @@ export default function BookingPosOrders({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Room Filter */}
-          {rooms.length > 0 && onRoomChange && (
-            <div className="flex items-center gap-2 mb-4">
-              <Select
-                value={selectedRoomId || "all"}
-                onValueChange={(value) =>
-                  onRoomChange(value === "all" ? null : value)
-                }
-              >
-                <SelectTrigger className="w-[280px]">
-                  <SelectValue placeholder="Chọn phòng" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4" />
-                      <span>Theo đơn đặt phòng</span>
-                    </div>
-                  </SelectItem>
-                  {rooms.map((room) => (
-                    <SelectItem key={room.roomId} value={room.roomId}>
-                      <div className="flex items-center gap-2">
-                        <Utensils className="h-4 w-4" />
-                        <span>{room.roomName}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedRoomId && (
-                <Badge variant="secondary" className="gap-1">
-                  Đơn của phòng: {selectedRoom?.roomName}
-                </Badge>
-              )}
-            </div>
-          )}
-
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-sm text-muted-foreground mb-4">
-              {selectedRoomId
-                ? `Chưa có đơn hàng POS nào cho phòng ${selectedRoom?.roomName}`
-                : "Chưa có đơn hàng POS nào cho booking này"}
+              Chưa có đơn hàng POS nào cho booking này
             </p>
             <Button
               type="button"
@@ -145,7 +101,7 @@ export default function BookingPosOrders({
 
   // Calculate grand total from all orders
   const grandTotal = ordersList.reduce(
-    (sum, order) => sum + order.totalAmount,
+    (sum, order) => sum + (order.totalAmount || 0),
     0
   );
 
@@ -170,64 +126,20 @@ export default function BookingPosOrders({
           </div>
         </div>{" "}
         {onAddCompletedCharges && (
-          <Button
-            type="button"
-            size="sm"
-            variant="warning"
-            onClick={onAddCompletedCharges}
-            className="gap-2 w-fit"
-          >
-            <Plus className="h-4 w-4" />
-            Thêm món đã hoàn thành
-          </Button>
+          <div className="flex justify-end w-full">
+            <Button
+              type="button"
+              size="sm"
+              variant="link"
+              onClick={onAddCompletedCharges}
+            >
+              <Plus className="h-4 w-4" />
+              Thêm món đã hoàn thành
+            </Button>
+          </div>
         )}
       </CardHeader>
       <CardContent>
-        {/* Room Filter Select */}
-        {rooms.length > 0 && onRoomChange && (
-          <div className="flex items-center gap-3 mb-4 p-3 bg-muted/30 rounded-lg border">
-            <div className="flex items-center gap-2 flex-1">
-              <label className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-                Lọc đơn hàng:
-              </label>
-              <Select
-                value={selectedRoomId || "all"}
-                onValueChange={(value) =>
-                  onRoomChange(value === "all" ? null : value)
-                }
-              >
-                <SelectTrigger className="w-[280px] bg-background">
-                  <SelectValue placeholder="Chọn phòng hoặc xem tất cả" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4" />
-                      <span className="font-medium">Theo đơn đặt phòng</span>
-                    </div>
-                  </SelectItem>
-                  {rooms.map((room) => (
-                    <SelectItem key={room.roomId} value={room.roomId}>
-                      <div className="flex items-center gap-2">
-                        <Utensils className="h-4 w-4" />
-                        <span>{room.roomName}</span>
-                        <span className="text-xs text-muted-foreground">
-                          ({room.roomTypeName})
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {selectedRoomId && (
-              <Badge variant="default" className="gap-1 px-3 py-1">
-                <Utensils className="h-3 w-3" />
-                Phòng: {selectedRoom?.roomName}
-              </Badge>
-            )}
-          </div>
-        )}
         {isLoadingOrder ? (
           <div className="space-y-2">
             {[...Array(3)].map((_, i) => (
@@ -248,7 +160,7 @@ export default function BookingPosOrders({
             </TableHeader>
             <TableBody>
               {ordersList.map((order) => {
-                const isExpanded = expandedOrders.has(order.id);
+                const isExpanded = expandedOrders.has(order.id || "");
                 return (
                   <>
                     <TableRow key={order.id} className="hover:bg-muted/50">
@@ -257,7 +169,7 @@ export default function BookingPosOrders({
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => toggleExpand(order.id)}
+                          onClick={() => toggleExpand(order.id || "")}
                           className="h-8 w-8 p-0"
                         >
                           {isExpanded ? (
@@ -268,7 +180,7 @@ export default function BookingPosOrders({
                         </Button>
                       </TableCell>
                       <TableCell className="font-mono text-sm">
-                        #{order.id.slice(0, 8)}
+                        #{order.id?.slice(0, 8)}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -286,11 +198,11 @@ export default function BookingPosOrders({
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Utensils className="h-3 w-3 text-muted-foreground" />
-                          <span>{order.items?.length}</span>
+                          <span>{order.items?.length || 0}</span>
                         </div>
                       </TableCell>
                       <TableCell className="font-semibold">
-                        {formatMoney(order.totalAmount).vndFormatted}
+                        {formatMoney(order.totalAmount || 0).vndFormatted}
                       </TableCell>
 
                       <TableCell className="text-right">
@@ -298,7 +210,7 @@ export default function BookingPosOrders({
                           type="button"
                           size="sm"
                           variant="outline"
-                          onClick={() => onAddMenuItem(order.id)}
+                          onClick={() => onAddMenuItem(order.id || "")}
                           disabled={order.status !== "Open"}
                         >
                           <Plus className="h-3 w-3 mr-1" />
@@ -337,7 +249,7 @@ export default function BookingPosOrders({
                                   {order.items?.map((item) => (
                                     <TableRow key={item.id}>
                                       <TableCell className="font-medium">
-                                        {item.itemName}
+                                        {item.menuItemName}
                                       </TableCell>
                                       <TableCell>{item.quantity}</TableCell>
                                       <TableCell>
@@ -361,7 +273,10 @@ export default function BookingPosOrders({
                                           variant="ghost"
                                           size="sm"
                                           onClick={() =>
-                                            onRemoveItem(order.id, item.id)
+                                            onRemoveItem(
+                                              order.id || "",
+                                              item.id
+                                            )
                                           }
                                           disabled={order.status !== "Open"}
                                         >

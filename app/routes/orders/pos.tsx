@@ -97,11 +97,13 @@ export default function Component({
     bookingId,
     bookingRoomId,
     servedAt,
+    notes,
     addItem,
     removeItem,
     updateQuantity,
     setBookingInfo,
     setServedAt,
+    setNotes,
     clearOrder,
   } = usePosOrderStore();
 
@@ -127,6 +129,7 @@ export default function Component({
   // Handlers
   const handleAddToCart = (item: MenuItem) => {
     addItem({
+      id: item.itemId,
       menuItemId: item.itemId,
       code: item.code,
       name: item.name,
@@ -138,15 +141,20 @@ export default function Component({
 
   const handleAddCustomItem = (item: {
     name: string;
+    description?: string;
     unitPrice: number;
     quantity: number;
   }) => {
+    const customId = `CUSTOM-${Date.now()}`;
     addItem({
-      menuItemId: `CUSTOM-${Date.now()}`, // Generate unique ID for custom items
+      id: customId,
+      menuItemId: undefined,
       code: "CUSTOM",
       name: item.name,
       unitPrice: item.unitPrice,
       quantity: item.quantity,
+      customItemName: item.name,
+      customItemDescription: item.description,
     });
     toast.success(`Đã thêm "${item.name}" vào giỏ`);
   };
@@ -191,6 +199,7 @@ export default function Component({
         bookingId,
         bookingRoomId,
         servedAt,
+        notes,
         items: items,
       });
       setConfirmationDialog({
@@ -322,15 +331,13 @@ export default function Component({
             <Separator className="my-2" />
             <div className="flex-1 flex flex-col justify-between space-y-2">
               {items.length > 0 && (
-                <div className="space-y-4 p-2 overflow-y-auto  h-100">
+                <div className="space-y-4 p-2 overflow-y-auto h-72 snap-y">
                   {items.map((item) => (
                     <CartItem
-                      key={item.menuItemId}
+                      key={item.id}
                       cartItem={item}
-                      onQuantityChange={(qty) =>
-                        updateQuantity(item.menuItemId, qty)
-                      }
-                      onRemove={() => removeItem(item.menuItemId)}
+                      onQuantityChange={(qty) => updateQuantity(item.id, qty)}
+                      onRemove={() => removeItem(item.id)}
                     />
                   ))}
                 </div>
@@ -338,10 +345,11 @@ export default function Component({
 
               {/* Cart Summary */}
               <CartSummary
-                orderId={orderId}
                 itemCount={itemCount}
                 subtotal={subtotal}
                 isEmpty={isEmpty}
+                notes={notes}
+                onNotesChange={setNotes}
                 onConfirm={handleConfirm}
                 onClearCart={clearOrder}
               />

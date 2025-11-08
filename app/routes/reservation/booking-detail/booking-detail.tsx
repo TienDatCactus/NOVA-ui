@@ -119,9 +119,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   );
 
   const {
-    hasOrder,
     isCreatingOrder,
-    ordersList,
     isLoadingOrder,
     createBookingOrder,
     createRoomOrder,
@@ -132,12 +130,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     isAddingCompletedCharges,
   } = useBookingOrders({
     bookingId: bookingDetail?.id || "",
-    bookingRoomId: selectedRoomId
-      ? bookingDetail?.rooms.find((r) => r.roomId === selectedRoomId)
-          ?.bookingRoomId
-      : undefined,
+    ordersData: bookingDetail ? bookingDetail.posOrders : [],
   });
-
   const form = useForm<StaffUpdateBookingRequestDto>({
     resolver: zodResolver(StaffUpdateBookingRequestSchema),
     defaultValues: {
@@ -187,10 +181,9 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       });
     }
   }, [bookingDetail, form]);
-
+  const checkinDate = form.watch("checkinDate");
+  const checkoutDate = form.watch("checkoutDate");
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
-    // Only send booking information fields (exclude rooms, breakfastDates)
-    // Rooms are handled separately via ADD/CHANGE/REMOVE operations
     const payload: Partial<StaffUpdateBookingRequestDto> = {
       checkinDate:
         data.checkinDate instanceof Date
@@ -220,9 +213,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   };
 
   const handleAddRoom = (roomId: string, roomTypeId: string) => {
-    const checkinDate = form.watch("checkinDate");
-    const checkoutDate = form.watch("checkoutDate");
-
     append({
       roomId,
       fromDate:
@@ -249,11 +239,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     }
   };
 
-  const handleAddCompletedCharges = (
-    menuItemId: string,
-    quantity: number,
-    unitPrice: number
-  ) => {
+  const handleAddCompletedCharges = (menuItemId: string, quantity: number) => {
     const posItems = [{ menuItemId, quantity }];
     addCompletedCharges(posItems, selectedRoomId);
   };
@@ -811,7 +797,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                       </Button>
                       <Button
                         onClick={() => {
-                          // Note is already saved in form state, just close modal
                           setNoteModalOpen(false);
                         }}
                       >
@@ -825,9 +810,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           </div>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pb-4">
             <BookingPosOrders
-              hasOrder={hasOrder}
               isCreatingOrder={isCreatingOrder}
-              ordersList={ordersList}
+              ordersList={bookingDetail.posOrders}
               isLoadingOrder={isLoadingOrder}
               onOpenCreateDialog={() => setCreateOrderDialogOpen(true)}
               onAddMenuItem={(orderId) => {
@@ -836,9 +820,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               }}
               onRemoveItem={removeItem}
               onAddCompletedCharges={() => setCompletedChargesDialogOpen(true)}
-              selectedRoomId={selectedRoomId}
-              onRoomChange={(roomId) => setSelectedRoomId(roomId)}
-              rooms={bookingDetail?.rooms || []}
             />
             <BookingServiceOrders />
           </div>

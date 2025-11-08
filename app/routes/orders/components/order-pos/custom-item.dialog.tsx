@@ -10,6 +10,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 import { Plus } from "lucide-react";
 
 type CustomItemDialogProps = {
@@ -17,6 +18,7 @@ type CustomItemDialogProps = {
   onOpenChange: (open: boolean) => void;
   onConfirm: (item: {
     name: string;
+    description?: string;
     unitPrice: number;
     quantity: number;
   }) => void;
@@ -28,16 +30,19 @@ export default function CustomItemDialog({
   onConfirm,
 }: CustomItemDialogProps) {
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [errors, setErrors] = useState<{
     name?: string;
+    description?: string;
     price?: string;
     quantity?: string;
   }>({});
 
   const resetForm = () => {
     setName("");
+    setDescription("");
     setPrice("");
     setQuantity("1");
     setErrors({});
@@ -48,6 +53,15 @@ export default function CustomItemDialog({
 
     if (!name.trim()) {
       newErrors.name = "Vui lòng nhập tên món";
+    } else if (name.trim().length < 2 || name.trim().length > 100) {
+      newErrors.name = "Tên món phải từ 2-100 ký tự";
+    }
+
+    if (
+      description.trim() &&
+      (description.trim().length < 2 || description.trim().length > 500)
+    ) {
+      newErrors.description = "Mô tả phải từ 2-500 ký tự";
     }
 
     const priceNum = parseFloat(price);
@@ -71,6 +85,7 @@ export default function CustomItemDialog({
 
     onConfirm({
       name: name.trim(),
+      description: description.trim() || undefined,
       unitPrice: parseFloat(price),
       quantity: parseInt(quantity),
     });
@@ -126,6 +141,31 @@ export default function CustomItemDialog({
             />
             {errors.name && (
               <p className="text-sm text-destructive">{errors.name}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="item-description" className="text-sm font-medium">
+              Mô tả (tùy chọn)
+            </Label>
+            <Textarea
+              id="item-description"
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                setErrors((prev) => ({ ...prev, description: undefined }));
+              }}
+              placeholder="Thêm mô tả cho món..."
+              className="resize-none min-h-20"
+              maxLength={500}
+            />
+            {errors.description && (
+              <p className="text-sm text-destructive">{errors.description}</p>
+            )}
+            {description && (
+              <p className="text-xs text-muted-foreground text-right">
+                {description.length}/500
+              </p>
             )}
           </div>
 

@@ -33,28 +33,45 @@ function useCreatePosOrderAndItems() {
       bookingId,
       bookingRoomId,
       servedAt,
+      notes,
       items,
     }: {
       bookingId?: string | null;
       bookingRoomId?: string | null;
       servedAt?: string | null;
+      notes?: string | null;
       items: PosCartItem[];
     }) => {
+      // Step 1: Create the POS order
       const order = await OrderService.createPOSOrder({
         bookingId: bookingId || undefined,
         bookingRoomId: bookingRoomId || undefined,
         servedAt: servedAt || undefined,
+        notes: notes || undefined,
       });
 
+      // Step 2: Add items to the order
       for (const item of items) {
         await OrderService.addItemsToPOSOrder(order.posOrderId, {
-          menuItemId: item.menuItemId,
+          menuItemId: item.customItemName ? undefined : item.menuItemId,
+          customItemName: item.customItemName,
+          customItemDescription: item.customItemDescription,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
         });
       }
 
+      // Step 3: Set scheduled time if provided
+      if (servedAt) {
+        await OrderService.setScheduledOrder(order.posOrderId, {
+          scheduledAt: new Date(servedAt),
+        });
+      }
+
       return order;
+    },
+    onSuccess: () => {
+      toast.success("Đã tạo đơn hàng thành công!");
     },
     onError: (error: any) => {
       console.error("Error creating POS order:", error);
@@ -190,6 +207,79 @@ function usePayPOSOrderNow() {
   });
 }
 
+/**
+ * Set scheduled time for a POS order
+ * Updates when the order should be prepared/served
+ * Invalidates: specific order detail and orders list
+ */
+function useSetScheduledOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      scheduledAt,
+    }: {
+      orderId: string;
+      scheduledAt: Date;
+    }) => {
+      return await OrderService.setScheduledOrder(orderId, { scheduledAt });
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-orders"],
+      });
+      toast.success("Đã đặt thời gian phục vụ");
+    },
+    onError: (error: any) => {
+      console.error("Error setting scheduled time:", error);
+      toast.error(
+        error.message || "Không thể đặt thời gian phục vụ. Vui lòng thử lại."
+      );
+    },
+  });
+}
+
+/**
+ * Set served time for a specific item in a POS order
+ * Marks when an item was actually served to customer
+ * Invalidates: specific order detail
+ */
+function useSetServedOrderItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      itemId,
+      servedAt,
+    }: {
+      orderId: string;
+      itemId: string;
+      servedAt: Date;
+    }) => {
+      return await OrderService.setServedOrderItem(orderId, itemId, {
+        servedAt,
+      });
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      toast.success("Đã đánh dấu món đã phục vụ");
+    },
+    onError: (error: any) => {
+      console.error("Error setting served time:", error);
+      toast.error(
+        error.message || "Không thể đánh dấu món đã phục vụ. Vui lòng thử lại."
+      );
+    },
+  });
+}
+
 export {
   useCreatePOSOrder,
   useAddItemToPOSOrder,
@@ -198,4 +288,6 @@ export {
   useCancelPOSOrder,
   usePayPOSOrderNow,
   useCreatePosOrderAndItems,
+  useSetScheduledOrder,
+  useSetServedOrderItem,
 };
