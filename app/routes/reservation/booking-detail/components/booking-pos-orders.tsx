@@ -41,6 +41,7 @@ interface BookingOrdersProps {
   onOpenCreateDialog: () => void;
   onAddMenuItem: (orderId: string) => void;
   onRemoveItem: (orderId: string, itemId: string) => void;
+  onAddCompletedCharges?: () => void;
   selectedRoomId?: string | null;
   onRoomChange?: (roomId: string | null) => void;
   rooms?: z.infer<typeof RoomSchema.BookingDetailRoomItemSchema>[];
@@ -54,6 +55,7 @@ export default function BookingPosOrders({
   onOpenCreateDialog,
   onAddMenuItem,
   onRemoveItem,
+  onAddCompletedCharges,
   selectedRoomId,
   onRoomChange,
   rooms = [],
@@ -158,13 +160,27 @@ export default function BookingPosOrders({
               {ordersList.length} đơn
             </Badge>
           </CardTitle>
-          <div className="text-sm">
-            <span className="text-muted-foreground">Tổng cộng: </span>
-            <span className="font-semibold text-lg text-primary">
-              {formatMoney(grandTotal).vndFormatted}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="text-sm">
+              <span className="text-muted-foreground">Tổng cộng: </span>
+              <span className="font-semibold text-lg text-primary">
+                {formatMoney(grandTotal).vndFormatted}
+              </span>
+            </div>
           </div>
-        </div>
+        </div>{" "}
+        {onAddCompletedCharges && (
+          <Button
+            type="button"
+            size="sm"
+            variant="warning"
+            onClick={onAddCompletedCharges}
+            className="gap-2 w-fit"
+          >
+            <Plus className="h-4 w-4" />
+            Thêm món đã hoàn thành
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {/* Room Filter Select */}
@@ -270,7 +286,7 @@ export default function BookingPosOrders({
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Utensils className="h-3 w-3 text-muted-foreground" />
-                          <span>{order.items.length}</span>
+                          <span>{order.items?.length}</span>
                         </div>
                       </TableCell>
                       <TableCell className="font-semibold">
@@ -299,7 +315,7 @@ export default function BookingPosOrders({
                               <Utensils className="h-4 w-4" />
                               Chi tiết món ăn
                             </h4>
-                            {order.items.length === 0 ? (
+                            {order.items?.length === 0 ? (
                               <div className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-md">
                                 Chưa có món nào
                               </div>
@@ -318,7 +334,7 @@ export default function BookingPosOrders({
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {order.items.map((item) => (
+                                  {order.items?.map((item) => (
                                     <TableRow key={item.id}>
                                       <TableCell className="font-medium">
                                         {item.itemName}

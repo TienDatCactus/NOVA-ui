@@ -413,7 +413,7 @@ const StaffCheckoutRequestSchema = z.object({
 // Yêu cầu checkout nhiều booking cùng lúc
 const StaffCheckoutMultipleRequestSchema = z.object({
   bookingIds: z
-    .array(z.string().uuid("Booking ID không hợp lệ"))
+    .array(z.string("Booking ID không hợp lệ"))
     .min(1, "Phải chọn ít nhất 1 booking"),
   paymentMethod: PaymentSchema.PaymentMethodEnum.optional(),
   paidAmount: z.number().min(0, "Số tiền thanh toán không hợp lệ").optional(),
@@ -423,6 +423,42 @@ const StaffCheckoutMultipleRequestSchema = z.object({
     .optional()
     .nullable(),
 });
+
+// Response cho add-completed-charges
+const StaffAddCompletedChargesRequestSchema = z.object({
+  posItems: z
+    .array(
+      z.object({
+        menuItemId: z.string(),
+        quantity: z.number().min(0),
+      })
+    )
+    .optional(),
+  serviceItems: z
+    .array(
+      z.object({
+        serviceItemId: z.string(),
+        quantity: z.number().min(0),
+      })
+    )
+    .optional(),
+  bookingRoomId: z.string().optional(),
+  source: z.string().optional(),
+});
+
+const StaffAddCompletedChargesResponseSchema = z.object({}).optional();
+
+// Response cho create-invoice
+const StaffCreateCheckoutInvoiceResponseSchema = z.object({}).optional();
+
+// Response cho checkout payment
+const StaffCheckoutPaymentResponseSchema = z.object({}).optional();
+
+// Response cho checkout
+const StaffCheckoutResponseSchema = z.object({}).optional();
+
+// Response cho checkout multiple
+const StaffCheckoutMultipleResponseSchema = z.object({}).optional();
 
 const AvailableRoomForChangeSchema = z.object({
   roomId: z.string(),
@@ -472,4 +508,12 @@ export const BookingSchema = {
   StaffChangeRoomResponseSchema,
   AvailableRoomsForChangeResponseSchema,
   BookingPendingChargesResponseSchema,
+  StaffCheckoutRequestSchema,
+  StaffCheckoutMultipleRequestSchema,
+  StaffAddCompletedChargesRequestSchema,
+  StaffAddCompletedChargesResponseSchema,
+  StaffCreateCheckoutInvoiceResponseSchema,
+  StaffCheckoutPaymentResponseSchema,
+  StaffCheckoutResponseSchema,
+  StaffCheckoutMultipleResponseSchema,
 };

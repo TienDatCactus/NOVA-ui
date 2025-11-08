@@ -5,10 +5,12 @@ import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { BookingListParams } from "~/services/api/booking/booking.types";
 import { Booking, OTAInformation } from "../../url";
 import type {
+  AvailableRoomsForChangeResponseDto,
   BookingDetailResponseDto,
   BookingListByWeekResponseDto,
   BookingListResponseDto,
   BookingOTAResponseDto,
+  BookingPendingChargesResponseDto,
   StaffBookingPricePreviewRequestDto,
   StaffBookingPricePreviewResponseDto,
   StaffCancelBookingResponseDto,
@@ -18,10 +20,15 @@ import type {
   StaffCreateBookingResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
-  AvailableRoomsForChangeResponseDto,
-  BookingPendingChargesResponseDto,
+  StaffCheckoutRequestDto,
+  StaffCheckoutResponseDto,
+  StaffCheckoutMultipleRequestDto,
+  StaffCheckoutMultipleResponseDto,
+  StaffAddCompletedChargesRequestDto,
+  StaffAddCompletedChargesResponseDto,
+  StaffCreateCheckoutInvoiceResponseDto,
+  StaffCheckoutPaymentResponseDto,
 } from "./dto";
-import { data } from "react-router";
 
 const {
   BookingListResponseSchema,
@@ -39,6 +46,14 @@ const {
   StaffChangeRoomResponseSchema,
   BookingPendingChargesResponseSchema,
   AvailableRoomsForChangeResponseSchema,
+  StaffCheckoutRequestSchema,
+  StaffCheckoutResponseSchema,
+  StaffAddCompletedChargesRequestSchema,
+  StaffAddCompletedChargesResponseSchema,
+  StaffCreateCheckoutInvoiceResponseSchema,
+  StaffCheckoutPaymentResponseSchema,
+  StaffCheckoutMultipleRequestSchema,
+  StaffCheckoutMultipleResponseSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -246,6 +261,81 @@ async function getBookingPendingCharges(
   }
 }
 
+async function staffAddCompletedCharges(
+  bookingId: string,
+  data: StaffAddCompletedChargesRequestDto
+): Promise<StaffAddCompletedChargesResponseDto> {
+  try {
+    const resp = await http.post(
+      Booking.addToCompletedRoomOrder(bookingId),
+      StaffAddCompletedChargesRequestSchema.parse(data)
+    );
+    return StaffAddCompletedChargesResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCreateCheckoutInvoice(
+  bookingId: string
+): Promise<StaffCreateCheckoutInvoiceResponseDto> {
+  try {
+    const resp = await http.post(Booking.createInvoice(bookingId));
+    return StaffCreateCheckoutInvoiceResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCheckoutPayment(
+  bookingId: string,
+  data: StaffCheckoutRequestDto
+): Promise<StaffCheckoutPaymentResponseDto> {
+  try {
+    const resp = await http.post(
+      Booking.payment(bookingId),
+      StaffCheckoutRequestSchema.parse(data)
+    );
+    return StaffCheckoutPaymentResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCheckout(
+  bookingId: string,
+  data: StaffCheckoutRequestDto
+): Promise<StaffCheckoutResponseDto> {
+  try {
+    const resp = await http.post(
+      Booking.checkout(bookingId),
+      StaffCheckoutRequestSchema.parse(data)
+    );
+    return StaffCheckoutResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCheckoutMultiple(
+  data: StaffCheckoutMultipleRequestDto
+): Promise<StaffCheckoutMultipleResponseDto> {
+  try {
+    const resp = await http.post(
+      Booking.checkoutMultiple,
+      StaffCheckoutMultipleRequestSchema.parse(data)
+    );
+    return StaffCheckoutMultipleResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 async function staffCreateInvoice(bookingId: string) {
   try {
     const resp = await http.get(Booking.pendingCharges(bookingId));
@@ -268,4 +358,9 @@ export const BookingService = {
   staffCancelBooking,
   exportBookings,
   getBookingPendingCharges,
+  staffAddCompletedCharges,
+  staffCreateCheckoutInvoice,
+  staffCheckoutPayment,
+  staffCheckout,
+  staffCheckoutMultiple,
 };

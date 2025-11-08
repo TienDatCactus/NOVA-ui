@@ -22,6 +22,7 @@ const ServiceOrderSchema = z.object({
 const CreatePOSOrderRequestSchema = z.object({
   bookingId: z.string().optional().nullable(),
   bookingRoomId: z.string().optional().nullable(),
+  servedAt: z.string().optional().nullable(),
 });
 
 const CreatePOSOrderResponseSchema = z.object({
@@ -43,7 +44,7 @@ const AddItemsToPOSOrderResponseSchema = z.object({
 
 const POSOrderItemSchema = z.object({
   id: z.string(),
-  itemType: z.string(),
+  itemType: z.string().optional(),
   menuItemId: z.string().optional().nullable(),
   serviceItemId: z.string().optional().nullable(),
   itemName: z.string().min(1),
@@ -60,7 +61,7 @@ const POSOrderDetailSchema = z.object({
   customerId: z.string().optional().nullable(),
   invoiceId: z.string().optional().nullable(),
   createdAt: z.string().optional().nullable(),
-  items: z.array(POSOrderItemSchema),
+  items: z.array(POSOrderItemSchema).optional(),
 });
 
 const POSOrderDetailResponseSchema = POSOrderDetailSchema;

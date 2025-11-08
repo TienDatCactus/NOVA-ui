@@ -10,36 +10,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import type {
+  MenuItemDetailDto,
+  MenuListItemDto,
+} from "~/services/api/menu/dto";
 
 type MenuItemCardProps = {
-  itemId: string;
-  code: string;
-  name: string;
-  description: string;
-  imageUrl?: string;
-  unitName?: string;
-  price: number;
-  active: boolean;
-
-  onAdd: () => void;
+  menuItem: MenuListItemDto;
+  addToOrder: () => void;
 };
 
 export default function MenuItemCard({
-  itemId,
-  code,
-  name,
-  description,
-  imageUrl,
-  unitName,
-  price,
-  active,
-  onAdd,
+  addToOrder,
+  menuItem,
 }: MenuItemCardProps) {
+  const { active, code, name, description, imageUrls, unitName, price } =
+    menuItem;
   return (
     <Card className="overflow-hidden shadow-sm p-0 hover:shadow-m transition-shadow">
       <div className="relative ">
         <Image
-          src={imageUrl || "/placeholder-menu.png"}
+          src={imageUrls[0] || "/placeholder-menu.png"}
           alt={name}
           height={200}
           className="w-full h-full object-cover"
@@ -80,7 +71,12 @@ export default function MenuItemCard({
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button className="w-full" onClick={onAdd} disabled={!active} size="sm">
+        <Button
+          className="w-full"
+          onClick={addToOrder}
+          disabled={!active}
+          size="sm"
+        >
           <Plus className="h-4 w-4 mr-1" />
           Thêm vào giỏ
         </Button>

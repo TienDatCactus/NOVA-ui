@@ -9,7 +9,6 @@ axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 async function login(data: LoginDto): Promise<LoginResponseDto> {
   try {
     const resp = await axios.post(Auth.login, LoginSchema.parse(data));
-    console.log(resp.data);
     const parsedData = LoginResponseSchema.parse(resp.data.data);
     parsedData.accessToken && setStorage(STORAGE.TOKEN, parsedData.accessToken);
     parsedData.refreshToken &&

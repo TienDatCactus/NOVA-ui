@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import ChatMessage from "./chat-message";
 import { format, parseISO, isSameDay } from "date-fns";
 import { vi } from "date-fns/locale";
+import { MessageSquare } from "lucide-react";
 
 type Message = {
   id: string;
@@ -47,7 +48,9 @@ export default function ChatMessagesArea({
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="text-6xl mb-4">💬</div>
+              <div className="text-6xl mb-4">
+                <MessageSquare />
+              </div>
               <h3 className="font-semibold text-lg mb-2">
                 Chưa có tin nhắn nào
               </h3>
@@ -112,7 +115,7 @@ function groupMessagesByDate(messages: Message[]): Record<string, Message[]> {
 }
 
 function formatDateDivider(dateString: string): string {
-  const date = parseISO(dateString);
+  const date = dateString;
   const today = new Date();
 
   if (isSameDay(date, today)) {

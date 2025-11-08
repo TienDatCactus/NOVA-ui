@@ -107,6 +107,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
+  const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
+    useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
@@ -126,6 +128,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     addMenuItem,
     removeItem,
     isAddingItem,
+    addCompletedCharges,
+    isAddingCompletedCharges,
   } = useBookingOrders({
     bookingId: bookingDetail?.id || "",
     bookingRoomId: selectedRoomId
@@ -244,6 +248,16 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       addMenuItem(selectedOrderId, menuItemId, quantity, unitPrice);
     }
   };
+
+  const handleAddCompletedCharges = (
+    menuItemId: string,
+    quantity: number,
+    unitPrice: number
+  ) => {
+    const posItems = [{ menuItemId, quantity }];
+    addCompletedCharges(posItems, selectedRoomId);
+  };
+
   const nights = useMemo(() => {
     const checkin = form.watch("checkinDate");
     const checkout = form.watch("checkoutDate");
@@ -735,6 +749,13 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 isAdding={isAddingItem}
               />
 
+              <AddMenuItemDialog
+                open={completedChargesDialogOpen}
+                onOpenChange={setCompletedChargesDialogOpen}
+                onConfirm={handleAddCompletedCharges}
+                isAdding={isAddingCompletedCharges}
+              />
+
               <CreateOrderDialog
                 open={createOrderDialogOpen}
                 onOpenChange={setCreateOrderDialogOpen}
@@ -814,6 +835,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 setOrderDialogOpen(true);
               }}
               onRemoveItem={removeItem}
+              onAddCompletedCharges={() => setCompletedChargesDialogOpen(true)}
               selectedRoomId={selectedRoomId}
               onRoomChange={(roomId) => setSelectedRoomId(roomId)}
               rooms={bookingDetail?.rooms || []}

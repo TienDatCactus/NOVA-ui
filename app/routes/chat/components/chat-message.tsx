@@ -2,6 +2,7 @@ import { cn } from "~/lib/utils";
 import { Avatar } from "~/components/ui/avatar";
 import { format, parseISO } from "date-fns";
 import { Check, CheckCheck } from "lucide-react";
+import Image from "~/components/ui/image";
 
 type Message = {
   id: string;
@@ -38,7 +39,7 @@ export default function ChatMessage({
       {showAvatar && !isOwn && (
         <Avatar className="h-8 w-8 flex-shrink-0">
           {senderAvatar ? (
-            <img
+            <Image
               src={senderAvatar}
               alt={senderName || "User"}
               className="object-cover"

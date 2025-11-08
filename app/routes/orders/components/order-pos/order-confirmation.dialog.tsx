@@ -11,6 +11,8 @@ import { CheckCircle2, Printer, Receipt } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { formatMoney } from "~/lib/utils";
+import { DASHBOARD } from "~/lib/fe-url";
+import { Link } from "react-router";
 
 type OrderConfirmationDialogProps = {
   open: boolean;
@@ -26,7 +28,6 @@ type OrderConfirmationDialogProps = {
 export default function OrderConfirmationDialog({
   open,
   onOpenChange,
-  orderId,
   orderTotal,
   itemCount,
   customerInfo,
@@ -61,15 +62,6 @@ export default function OrderConfirmationDialog({
           {/* Order Info */}
           <div className="rounded-lg border bg-muted/50 p-4 space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Mã đơn hàng</span>
-              <Badge variant="outline" className="font-mono text-base">
-                {orderId}
-              </Badge>
-            </div>
-
-            <Separator />
-
-            <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Khách hàng</span>
               <span className="text-sm font-medium">{customerInfo}</span>
             </div>
@@ -101,21 +93,23 @@ export default function OrderConfirmationDialog({
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-col gap-2">
+        <DialogFooter className="flex  gap-2">
           {onPrintReceipt && (
-            <Button
-              variant="outline"
-              onClick={onPrintReceipt}
-              className="w-full"
-            >
+            <Button variant="success" onClick={onPrintReceipt}>
               <Printer className="h-4 w-4 mr-2" />
               In hóa đơn
             </Button>
           )}
-          <Button onClick={handleNewOrder} className="w-full">
+          <Button onClick={handleNewOrder}>
             <Receipt className="h-4 w-4 mr-2" />
             Đơn hàng mới
           </Button>
+          <Link to={DASHBOARD.orders.index}>
+            <Button variant={"outline"}>
+              <Receipt className="h-4 w-4 mr-2" />
+              Xem đơn hàng
+            </Button>
+          </Link>
         </DialogFooter>
       </DialogContent>
     </Dialog>

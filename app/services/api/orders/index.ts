@@ -106,13 +106,18 @@ async function getPOSOrderDetail(
   }
 }
 
-async function getPosOrderListByBooking(
-  bookingId: string,
+async function getPosOrderList(
+  bookingId?: string,
   bookingRoomId?: string
 ): Promise<POSOrderListByBookingResponseDto> {
   try {
-    const resp = await http.get(Orders.listPosOrderbyBooking(bookingId), {
-      params: bookingRoomId ? { bookingRoomId } : {},
+    // Filter out undefined params to avoid sending them to backend
+    const params: Record<string, string> = {};
+    if (bookingId) params.bookingId = bookingId;
+    if (bookingRoomId) params.bookingRoomId = bookingRoomId;
+
+    const resp = await http.get(Orders.list, {
+      params: Object.keys(params).length > 0 ? params : undefined,
     });
     return POSOrderListByBookingResponseSchema.parse(resp.data);
   } catch (error) {
@@ -166,5 +171,5 @@ export const OrderService = {
   // getPOSOrdersByInvoice,
   getPOSOrderPrintData,
   payPOSOrderNow,
-  getPosOrderListByBooking,
+  getPosOrderList,
 };

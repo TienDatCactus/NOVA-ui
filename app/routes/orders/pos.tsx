@@ -2,7 +2,13 @@ import { useState, useMemo } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Badge } from "~/components/ui/badge";
-import { ArrowLeft, RotateCcw, SearchIcon, SquareMenu } from "lucide-react";
+import {
+  ArrowLeft,
+  RotateCcw,
+  SearchIcon,
+  SquareMenu,
+  Plus,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type { MenuListItemSchema } from "~/services/api/menu/menu.schema";
@@ -11,20 +17,22 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useMenuCategories } from "../menu/container/menu-categories/query.hooks";
 import { useMenuList } from "../menu/container/menu/query.hooks";
-import BookingSelectionDialog from "./components/booking-selection.dialog";
-import CartItem from "./components/cart-item";
-import CartSummary from "./components/cart-summary";
-import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
-import CustomerInfoDialog from "./components/customer-info.dialog";
-import ItemCustomizationDialog from "./components/item-customization.dialog";
-import MenuItemCard from "./components/menu-item-card";
-import OrderConfirmationDialog from "./components/order-confirmation.dialog";
-import { useCreatePosOrder } from "./container/use-create-order.hooks";
-import { usePosCart } from "./container/use-pos-cart.hooks";
+import BookingSelectionDialog from "./components/order-pos/booking-selection.dialog";
+import CartItem from "./components/order-pos/cart-item";
+import CartSummary from "./components/order-pos/cart-summary";
+import CheckoutConfirmDialog from "./components/order-pos/checkout-confirm.dialog";
+import ItemCustomizationDialog from "./components/order-pos/item-customization.dialog";
+import MenuItemCard from "./components/order-pos/menu-item-card";
+import OrderConfirmationDialog from "./components/order-pos/order-confirmation.dialog";
+import ServedTimeDialog from "./components/order-pos/served-time.dialog";
+import CustomItemDialog from "./components/order-pos/custom-item.dialog";
+
 import useMenuFilters from "../menu/container/menu/filter.hooks";
 import { Link } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
 import type { Route } from "./+types/pos";
+import { usePosOrderStore } from "~/store/pos-order.store";
+import { useCreatePosOrderAndItems } from "./container/order-pos/mutation.hooks";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -82,32 +90,35 @@ export default function Component({
 
   // Cart logic
   const {
-    items: cartItems,
+    items,
     subtotal,
     itemCount,
-    isEmpty,
     orderId,
-    customerDisplay,
     bookingId,
     bookingRoomId,
+    servedAt,
     addItem,
     removeItem,
     updateQuantity,
-    updateNotes,
-    setWalkInCustomer,
     setBookingInfo,
+    setServedAt,
     clearOrder,
-  } = usePosCart();
+  } = usePosOrderStore();
 
-  const { mutate } = useCreatePosOrder();
-  const [customizationDialog, setCustomizationDialog] = useState<{
-    open: boolean;
-    itemId?: string;
-  }>({ open: false });
+  const isEmpty = items.length === 0;
 
-  const [customerInfoDialog, setCustomerInfoDialog] = useState(false);
+  const customerDisplay = bookingId ? "Khách lẻ" : null;
+  const { mutate } = useCreatePosOrderAndItems();
+
   const [checkoutDialog, setCheckoutDialog] = useState(false);
   const [bookingDialog, setBookingDialog] = useState(false);
+  const [servedTimeDialog, setServedTimeDialog] = useState(false);
+  const [customItemDialog, setCustomItemDialog] = useState(false);
+  const [selectedBookingInfo, setSelectedBookingInfo] = useState<{
+    bookingId: string;
+    bookingRoomId: string;
+    bookingCode?: string;
+  } | null>(null);
   const [confirmationDialog, setConfirmationDialog] = useState<{
     open: boolean;
     orderId?: string;
@@ -125,15 +136,19 @@ export default function Component({
     toast.success(`Đã thêm ${item.name} vào giỏ`);
   };
 
-  const handleEditCartItem = (menuItemId: string) => {
-    setCustomizationDialog({ open: true, itemId: menuItemId });
-  };
-
-  const handleSaveCustomization = (notes: string) => {
-    const itemId = customizationDialog.itemId;
-    if (!itemId) return;
-    updateNotes(itemId, notes);
-    toast.success("Đã cập nhật món");
+  const handleAddCustomItem = (item: {
+    name: string;
+    unitPrice: number;
+    quantity: number;
+  }) => {
+    addItem({
+      menuItemId: `CUSTOM-${Date.now()}`, // Generate unique ID for custom items
+      code: "CUSTOM",
+      name: item.name,
+      unitPrice: item.unitPrice,
+      quantity: item.quantity,
+    });
+    toast.success(`Đã thêm "${item.name}" vào giỏ`);
   };
 
   const handleConfirm = () => {
@@ -144,45 +159,44 @@ export default function Component({
   const handleCheckoutConfirm = (mode: "walk-in" | "booking") => {
     if (mode === "walk-in") {
       setCheckoutDialog(false);
-      setCustomerInfoDialog(true);
+      handleCreateOrder();
     } else {
-      // Open booking selection dialog
       setCheckoutDialog(false);
       setBookingDialog(true);
     }
   };
 
-  const handleSelectBooking = (bookingId: string, bookingRoomId: string) => {
-    setBookingInfo(bookingId, bookingRoomId);
-    toast.success("Đã chọn booking và phòng");
-    handleCreateOrder();
+  const handleSelectBooking = (
+    bookingId: string,
+    bookingRoomId: string,
+    bookingCode?: string
+  ) => {
+    setBookingInfo(bookingId, bookingRoomId || null);
+    setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
+
+    // Show served time dialog for booking orders
+    setBookingDialog(false);
+    setServedTimeDialog(true);
   };
 
-  const handleSaveCustomerInfo = (customer: {
-    name: string;
-    phone?: string;
-  }) => {
-    setWalkInCustomer(customer);
-    toast.success(`Đã lưu thông tin khách: ${customer.name}`);
+  const handleServedTimeConfirm = (servedAt: string) => {
+    setServedAt(servedAt);
+    setServedTimeDialog(false);
     handleCreateOrder();
   };
 
   const handleCreateOrder = () => {
-    console.log(bookingId, bookingRoomId);
     try {
-      const result = mutate({
+      mutate({
         bookingId,
         bookingRoomId,
-        items: cartItems,
+        servedAt,
+        items: items,
       });
-
-      toast.success("Đơn hàng đã được tạo thành công!");
-
       setConfirmationDialog({
         open: true,
       });
     } catch (error) {
-      // Error already handled in mutation
       console.error("Create order failed:", error);
     }
   };
@@ -192,13 +206,8 @@ export default function Component({
     toast.info("Bắt đầu đơn hàng mới");
   };
 
-  const currentCustomizationItem = cartItems.find(
-    (item) => item.menuItemId === customizationDialog.itemId
-  );
-
   return (
     <div className="flex flex-col h-screen">
-      {/* Header */}
       <header className="flex items-center justify-between p-4 border-b  border-accent-foreground/20">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
@@ -251,6 +260,16 @@ export default function Component({
             Đặt lại
           </Button>
           <Separator orientation="vertical" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCustomItemDialog(true)}
+            className="text-primary border-primary/50 hover:bg-primary/10"
+          >
+            <Plus className="h-4 w-4" />
+            Món tùy chỉnh
+          </Button>
+          <Separator orientation="vertical" />
           <Input
             startAddon={<SearchIcon />}
             placeholder="Tìm kiếm món..."
@@ -274,15 +293,8 @@ export default function Component({
               {filteredItems.map((item) => (
                 <MenuItemCard
                   key={item.itemId}
-                  itemId={item.itemId}
-                  code={item.code}
-                  name={item.name}
-                  description={item.description}
-                  imageUrl={item.imageUrls?.[0]}
-                  unitName={item.unitName || undefined}
-                  price={item.price}
-                  active={item.active}
-                  onAdd={() => handleAddToCart(item)}
+                  menuItem={item}
+                  addToOrder={() => handleAddToCart(item)}
                 />
               ))}
             </div>
@@ -309,22 +321,15 @@ export default function Component({
             </div>
             <Separator className="my-2" />
             <div className="flex-1 flex flex-col justify-between space-y-2">
-              {cartItems.length > 0 && (
+              {items.length > 0 && (
                 <div className="space-y-4 p-2 overflow-y-auto  h-100">
-                  {cartItems.map((item) => (
+                  {items.map((item) => (
                     <CartItem
                       key={item.menuItemId}
-                      menuItemId={item.menuItemId}
-                      code={item.code}
-                      name={item.name}
-                      unitPrice={item.unitPrice}
-                      quantity={item.quantity}
-                      imageUrl={item.imageUrl}
-                      notes={item.notes}
+                      cartItem={item}
                       onQuantityChange={(qty) =>
                         updateQuantity(item.menuItemId, qty)
                       }
-                      onEdit={() => handleEditCartItem(item.menuItemId)}
                       onRemove={() => removeItem(item.menuItemId)}
                     />
                   ))}
@@ -345,35 +350,11 @@ export default function Component({
         </aside>
       </div>
 
-      {/* Dialogs */}
-      {currentCustomizationItem && (
-        <ItemCustomizationDialog
-          open={customizationDialog.open}
-          onOpenChange={(open) =>
-            setCustomizationDialog({
-              open,
-              itemId: open ? customizationDialog.itemId : undefined,
-            })
-          }
-          itemName={currentCustomizationItem.name}
-          currentNotes={currentCustomizationItem.notes}
-          onSave={handleSaveCustomization}
-        />
-      )}
-
-      <CustomerInfoDialog
-        open={customerInfoDialog}
-        onOpenChange={setCustomerInfoDialog}
-        onSave={handleSaveCustomerInfo}
-      />
-
       <CheckoutConfirmDialog
         open={checkoutDialog}
         onOpenChange={setCheckoutDialog}
         subtotal={subtotal}
         itemCount={itemCount}
-        hasCustomerInfo={!!customerDisplay}
-        customerDisplay={customerDisplay}
         onConfirm={handleCheckoutConfirm}
       />
 
@@ -383,7 +364,21 @@ export default function Component({
         onSelect={handleSelectBooking}
       />
 
+      <ServedTimeDialog
+        open={servedTimeDialog}
+        onOpenChange={setServedTimeDialog}
+        onConfirm={handleServedTimeConfirm}
+        bookingInfo={selectedBookingInfo?.bookingCode}
+      />
+
+      <CustomItemDialog
+        open={customItemDialog}
+        onOpenChange={setCustomItemDialog}
+        onConfirm={handleAddCustomItem}
+      />
+
       <OrderConfirmationDialog
+        onPrintReceipt={() => {}}
         open={confirmationDialog.open}
         onOpenChange={(open) =>
           setConfirmationDialog({ open, orderId: undefined })

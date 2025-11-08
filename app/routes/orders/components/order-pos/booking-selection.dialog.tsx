@@ -36,7 +36,11 @@ import { useBookings } from "~/routes/reservation/bookings/container/booking-que
 type BookingSelectionDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (bookingId: string, bookingRoomId: string) => void;
+  onSelect: (
+    bookingId: string,
+    bookingRoomId: string,
+    bookingCode?: string
+  ) => void;
 };
 
 export default function BookingSelectionDialog({
@@ -66,7 +70,6 @@ export default function BookingSelectionDialog({
   });
 
   const handleToggleBooking = async (bookingCode: string) => {
-    // If already expanded, collapse it
     if (expandedBooking === bookingCode) {
       setExpandedBooking(null);
       return;
@@ -117,7 +120,22 @@ export default function BookingSelectionDialog({
       return;
     }
 
-    onSelect(bookingDetail.id, selectedRoomId);
+    onSelect(bookingDetail.id, selectedRoomId, bookingCode);
+    onOpenChange(false);
+
+    setExpandedBooking(null);
+    setSearchQuery("");
+  };
+
+  const handleConfirmBookingOnly = (bookingCode: string) => {
+    const bookingDetail = bookingDetails.get(bookingCode);
+
+    if (!bookingDetail) {
+      toast.error("Không tìm thấy thông tin booking");
+      return;
+    }
+
+    onSelect(bookingDetail.id, "", bookingCode);
     onOpenChange(false);
 
     setExpandedBooking(null);
@@ -126,7 +144,7 @@ export default function BookingSelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl h-fit">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -158,7 +176,6 @@ export default function BookingSelectionDialog({
             <ScrollArea className="h-96 rounded-md border">
               <div className="p-4 space-y-2">
                 {isLoading ? (
-                  // Loading state
                   Array.from({ length: 5 }).map((_, i) => (
                     <div
                       key={i}
@@ -172,7 +189,6 @@ export default function BookingSelectionDialog({
                     </div>
                   ))
                 ) : filteredBookings && filteredBookings.length > 0 ? (
-                  // Booking cards with collapsible rooms
                   filteredBookings.map((booking: any) => {
                     const bookingDetail = bookingDetails.get(
                       booking.bookingCode
@@ -193,10 +209,7 @@ export default function BookingSelectionDialog({
                         <div className="rounded-lg border">
                           {/* Booking Header */}
                           <CollapsibleTrigger asChild>
-                            <button
-                              disabled={isLoadingDetail}
-                              className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
+                            <div className="w-full flex items-center gap-3 ">
                               <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 flex-shrink-0">
                                 <Hotel className="h-6 w-6 text-primary" />
                               </div>
@@ -239,7 +252,7 @@ export default function BookingSelectionDialog({
                               ) : (
                                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
                               )}
-                            </button>
+                            </div>
                           </CollapsibleTrigger>
 
                           {/* Room Selection */}
@@ -253,6 +266,37 @@ export default function BookingSelectionDialog({
                               ) : bookingDetail &&
                                 bookingDetail.rooms.length > 0 ? (
                                 <div className="space-y-3">
+                                  {/* Create order for entire booking */}
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">
+                                      Tạo đơn hàng cho toàn bộ booking
+                                    </Label>
+                                    <Button
+                                      onClick={() =>
+                                        handleConfirmBookingOnly(
+                                          booking.bookingCode
+                                        )
+                                      }
+                                      className="w-full"
+                                      variant="secondary"
+                                    >
+                                      Tạo đơn cho booking (tất cả{" "}
+                                      {bookingDetail.rooms.length} phòng)
+                                    </Button>
+                                  </div>
+
+                                  <div className="relative">
+                                    <div className="absolute inset-0 flex items-center">
+                                      <span className="w-full border-t" />
+                                    </div>
+                                    <div className="relative flex justify-center text-xs uppercase">
+                                      <span className="bg-muted/20 px-2 text-muted-foreground">
+                                        Hoặc chọn phòng cụ thể
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Select specific room */}
                                   <Label className="text-sm font-medium">
                                     Chọn phòng ({bookingDetail.rooms.length}{" "}
                                     phòng)
@@ -319,7 +363,7 @@ export default function BookingSelectionDialog({
                                     className="w-full mt-2"
                                     disabled={!selectedRoomId}
                                   >
-                                    Tạo đơn hàng cho booking này
+                                    Tạo đơn hàng cho phòng đã chọn
                                   </Button>
                                 </div>
                               ) : (

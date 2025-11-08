@@ -37,6 +37,7 @@ import { MenuSchema } from "~/services/api/menu/menu.schema";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useCreateMenuItem } from "../container/menu/mutation.hooks";
 import { handleLimitInput } from "~/lib/utils";
+import Image from "~/components/ui/image";
 
 const { CreateMenuItemRequestSchema } = MenuSchema;
 
@@ -333,7 +334,7 @@ export default function CreateMenuDialog({
                           key={index}
                           className="relative group aspect-square rounded-lg overflow-hidden border bg-muted"
                         >
-                          <img
+                          <Image
                             src={preview}
                             alt={`Preview ${index + 1}`}
                             className="w-full h-full object-cover"

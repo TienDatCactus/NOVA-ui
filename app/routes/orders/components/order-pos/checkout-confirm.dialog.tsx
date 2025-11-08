@@ -22,8 +22,6 @@ type CheckoutConfirmDialogProps = {
   onOpenChange: (open: boolean) => void;
   subtotal: number;
   itemCount: number;
-  hasCustomerInfo: boolean;
-  customerDisplay: string | null;
   onConfirm: (mode: CheckoutMode) => void;
   isSubmitting?: boolean;
 };
@@ -33,8 +31,6 @@ export default function CheckoutConfirmDialog({
   onOpenChange,
   subtotal,
   itemCount,
-  hasCustomerInfo,
-  customerDisplay,
   onConfirm,
   isSubmitting = false,
 }: CheckoutConfirmDialogProps) {

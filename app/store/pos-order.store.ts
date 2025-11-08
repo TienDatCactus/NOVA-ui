@@ -11,17 +11,12 @@ export type PosCartItem = {
   notes?: string;
 };
 
-export type WalkInCustomer = {
-  name: string;
-  phone?: string;
-};
-
 type PosOrderState = {
   // Order metadata
   orderId: string | null;
   bookingId: string | null;
   bookingRoomId: string | null;
-  walkInCustomer: WalkInCustomer | null;
+  servedAt: string | null; // Time when customer wants order served
 
   // Cart items
   items: PosCartItem[];
@@ -36,7 +31,7 @@ type PosOrderState = {
     bookingId: string | null,
     bookingRoomId: string | null
   ) => void;
-  setWalkInCustomer: (customer: WalkInCustomer | null) => void;
+  setServedAt: (servedAt: string) => void;
   clearOrder: () => void;
 
   // Actions - Cart management
@@ -45,7 +40,6 @@ type PosOrderState = {
   ) => void;
   removeItem: (menuItemId: string) => void;
   updateQuantity: (menuItemId: string, quantity: number) => void;
-  updateNotes: (menuItemId: string, notes: string) => void;
   recalculateSubtotal: () => void;
 };
 
@@ -56,7 +50,7 @@ export const usePosOrderStore = create<PosOrderState>()(
       orderId: null,
       bookingId: null,
       bookingRoomId: null,
-      walkInCustomer: null,
+      servedAt: null,
       items: [],
       subtotal: 0,
       itemCount: 0,
@@ -68,15 +62,11 @@ export const usePosOrderStore = create<PosOrderState>()(
       },
 
       setBookingInfo: (bookingId, bookingRoomId) => {
-        set({ bookingId, bookingRoomId, walkInCustomer: null }); // Clear walk-in if booking selected
+        set({ bookingId, bookingRoomId }); // Clear walk-in if booking selected
       },
 
-      setWalkInCustomer: (customer) => {
-        set({
-          walkInCustomer: customer,
-          bookingId: null,
-          bookingRoomId: null,
-        }); // Clear booking if walk-in
+      setServedAt: (servedAt) => {
+        set({ servedAt });
       },
 
       clearOrder: () => {
@@ -84,7 +74,7 @@ export const usePosOrderStore = create<PosOrderState>()(
           orderId: null,
           bookingId: null,
           bookingRoomId: null,
-          walkInCustomer: null,
+          servedAt: null,
           items: [],
           subtotal: 0,
           itemCount: 0,
@@ -140,14 +130,6 @@ export const usePosOrderStore = create<PosOrderState>()(
           ),
         });
         get().recalculateSubtotal();
-      },
-
-      updateNotes: (menuItemId, notes) => {
-        set({
-          items: get().items.map((i) =>
-            i.menuItemId === menuItemId ? { ...i, notes } : i
-          ),
-        });
       },
 
       recalculateSubtotal: () => {

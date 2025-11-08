@@ -6,6 +6,7 @@ import type {
   AddItemsToPOSOrderRequestDto,
   POSOrderPayNowRequestDto,
 } from "~/services/api/orders/dto";
+import type { PosCartItem } from "~/store/pos-order.store";
 
 /**
  * Create a new POS order
@@ -23,6 +24,41 @@ function useCreatePOSOrder() {
       queryClient.invalidateQueries({
         queryKey: ["pos-orders", "by-invoice"],
       });
+    },
+  });
+}
+function useCreatePosOrderAndItems() {
+  return useMutation({
+    mutationFn: async ({
+      bookingId,
+      bookingRoomId,
+      servedAt,
+      items,
+    }: {
+      bookingId?: string | null;
+      bookingRoomId?: string | null;
+      servedAt?: string | null;
+      items: PosCartItem[];
+    }) => {
+      const order = await OrderService.createPOSOrder({
+        bookingId: bookingId || undefined,
+        bookingRoomId: bookingRoomId || undefined,
+        servedAt: servedAt || undefined,
+      });
+
+      for (const item of items) {
+        await OrderService.addItemsToPOSOrder(order.posOrderId, {
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        });
+      }
+
+      return order;
+    },
+    onError: (error: any) => {
+      console.error("Error creating POS order:", error);
+      toast.error(error.message || "Không thể tạo đơn hàng. Vui lòng thử lại.");
     },
   });
 }
@@ -161,4 +197,5 @@ export {
   useCompletePOSOrder,
   useCancelPOSOrder,
   usePayPOSOrderNow,
+  useCreatePosOrderAndItems,
 };

@@ -19,6 +19,7 @@ import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import Image from "~/components/ui/image";
 
 interface AddMenuItemDialogProps {
   open: boolean;
@@ -195,7 +196,7 @@ export default function AddMenuItemDialog({
                           </p>
                         </div>
                         {item.imageUrls && item.imageUrls.length > 0 && (
-                          <img
+                          <Image
                             src={item.imageUrls[0]}
                             alt={item.name}
                             className="w-16 h-16 object-cover rounded"

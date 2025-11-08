@@ -6,6 +6,7 @@ import { Search, MoreVertical } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
+import Image from "~/components/ui/image";
 
 type Conversation = {
   id: string;
@@ -70,7 +71,7 @@ export default function ChatSidebar({
               <div className="relative flex-shrink-0">
                 <Avatar className="h-12 w-12">
                   {conversation.avatar ? (
-                    <img
+                    <Image
                       src={conversation.avatar}
                       alt={conversation.name}
                       className="object-cover"

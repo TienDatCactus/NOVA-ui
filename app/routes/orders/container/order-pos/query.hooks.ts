@@ -41,7 +41,7 @@ function usePOSOrderDetailByBooking(
   return useQuery({
     queryKey: ["pos-order-detail", bookingId, bookingRoomId ?? bookingRoomId],
     queryFn: async () =>
-      await OrderService.getPosOrderListByBooking(bookingId, bookingRoomId),
+      await OrderService.getPosOrderList(bookingId, bookingRoomId),
     staleTime: 30 * 1000, // 30 seconds
     enabled: !!bookingId && enabled,
     refetchOnWindowFocus: true,
@@ -65,8 +65,23 @@ function usePOSOrderPrintData(orderId: string, enabled: boolean = true) {
     refetchOnMount: false,
   });
 }
+/**
+ * Get list of POS orders by booking ID and/or room ID
+ * @param bookingId - Booking ID to filter orders (optional)
+ * @param bookingRoomId - Booking Room ID to filter orders (optional)
+ * @param enabled - Whether to enable the query (default: true)
+ */
+function usePOSOrderList() {
+  return useQuery({
+    queryKey: ["pos-order-list"],
+    queryFn: async () => await OrderService.getPosOrderList(),
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
+  });
+}
 
 export {
+  usePOSOrderList,
   usePOSOrderDetailByBooking,
   usePOSOrderDetailByOrder,
   usePOSOrderPrintData,

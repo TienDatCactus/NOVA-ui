@@ -5,33 +5,21 @@ import { formatMoney } from "~/lib/utils";
 import { PenLine, Trash2 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import type { PosCartItem } from "~/store/pos-order.store";
 
 type CartItemProps = {
-  menuItemId: string;
-  code: string;
-  name: string;
-  unitPrice: number;
-  quantity: number;
-  imageUrl?: string;
-  notes?: string;
+  cartItem: PosCartItem;
 
   onQuantityChange: (quantity: number) => void;
-  onEdit: () => void;
   onRemove: () => void;
 };
 
 export default function CartItem({
-  menuItemId,
-  code,
-  name,
-  unitPrice,
-  quantity,
-  imageUrl,
-  notes,
+  cartItem,
   onQuantityChange,
-  onEdit,
   onRemove,
 }: CartItemProps) {
+  const { code, name, imageUrl, unitPrice, quantity } = cartItem;
   const subtotal = unitPrice * quantity;
 
   return (
@@ -79,14 +67,6 @@ export default function CartItem({
                   onChange={(value) => onQuantityChange(value)}
                 />
                 <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={onEdit}
-                  >
-                    <PenLine className="h-3.5 w-3.5" />
-                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

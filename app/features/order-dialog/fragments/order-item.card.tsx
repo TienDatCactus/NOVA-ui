@@ -12,6 +12,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { cn, formatMoney } from "~/lib/utils";
 import { useServiceOrderStore } from "~/store/service-order.store";
 import { Calendar } from "~/components/ui/calendar";
+import { useCreateBookingStore } from "~/store/create-booking.store";
 
 interface OrderItemCardProps {
   itemId: string;
@@ -28,11 +29,10 @@ export default function OrderItemCard({
   itemName,
   unitPrice,
 }: OrderItemCardProps) {
-  // Subscribe only to this specific item's data to prevent unnecessary re-renders
   const item = useServiceOrderStore((s) =>
     s.services.find((service) => service.itemId === itemId)
   );
-
+  const { data } = useCreateBookingStore();
   const { setNote, setScheduledDate, removeById } =
     useServiceOrderStore.getState();
 
@@ -133,6 +133,27 @@ export default function OrderItemCard({
                       selected={
                         scheduledDate ? new Date(scheduledDate) : undefined
                       }
+                      disabled={(date: Date) => {
+                        if (data.checkinDate) {
+                          const checkinDate = parseISO(
+                            data.checkinDate as string
+                          );
+                          if (date < checkinDate) {
+                            return true;
+                          }
+                        }
+
+                        if (data.checkoutDate) {
+                          const checkoutDate = parseISO(
+                            data.checkoutDate as string
+                          );
+                          if (date > checkoutDate) {
+                            return true;
+                          }
+                        }
+
+                        return false;
+                      }}
                       onSelect={(value) =>
                         handleScheduledDateChange(
                           value ? format(value, "yyyy-MM-dd") : ""

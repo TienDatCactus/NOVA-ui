@@ -32,7 +32,7 @@ const Booking = {
   createInvoice: (id: string) => `StaffBookings/${id}/checkout/create-invoice`,
   payment: (id: string) => `StaffBookings/${id}/checkout/payment`,
   checkout: (id: string) => `StaffBookings/${id}/checkout`,
-  checkoutMultiple: "StaffBookings/checkout",
+  checkoutMultiple: "StaffBookings/checkout-multiple",
   changeRoom: (bookingId: string, bookingRoomId: string) =>
     `StaffBookings/${bookingId}/rooms/${bookingRoomId}/available-for-change`,
   list: "Bookings/list",
@@ -40,6 +40,8 @@ const Booking = {
   detailById: (id: string) => `Bookings/${id}/details`,
   detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
   Export: `Bookings/export`,
+  addToCompletedRoomOrder: (bookingId: string) =>
+    `/StaffBookings/${bookingId}/add-completed-charges`,
 };
 
 const OTAInformation = {
@@ -120,8 +122,7 @@ const Orders = {
   cancelPosOrder: (id: string) => `PosOrders/${id}/cancel`,
   completePosOrder: (id: string) => `PosOrders/${id}/complete`,
   detailPOS: (id: string) => `PosOrders/${id}/details`,
-  listPosOrderbyBooking: (bookingId: string) =>
-    `PosOrders/by-booking/${bookingId}`,
+  list: `PosOrders/list`,
   // listPosOrderbyInvoice: (invoiceId: string) =>
   //   `PosOrders/invoice/${invoiceId}`,
   printPOSorder: (id: string) => `PosOrders/${id}/print-data`,

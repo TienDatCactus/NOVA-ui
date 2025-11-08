@@ -1,6 +1,7 @@
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Phone, Video, MoreVertical, X } from "lucide-react";
+import Image from "~/components/ui/image";
 
 type ChatHeaderProps = {
   name: string;
@@ -28,7 +29,7 @@ export default function ChatHeader({
         <div className="relative">
           <Avatar className="h-10 w-10">
             {avatar ? (
-              <img src={avatar} alt={name} className="object-cover" />
+              <Image src={avatar} alt={name} className="object-cover" />
             ) : (
               <div className="flex items-center justify-center h-full w-full bg-primary/10 text-primary font-semibold">
                 {name.charAt(0).toUpperCase()}
