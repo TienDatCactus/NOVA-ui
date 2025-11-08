@@ -1,18 +1,54 @@
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
+import { Button } from "~/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { formatMoney } from "~/lib/utils";
 import type { POSOrderDetailDto } from "~/services/api/orders/dto";
-import { Clock, StickyNote, Utensils } from "lucide-react";
+import { Clock, StickyNote, Utensils, Trash2, Check } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
+import {
+  useDeleteItemFromOrder,
+  useMarkItemServed,
+} from "../../container/order-list/mutation.hooks";
 
 interface OrderDetailsProps {
   order: POSOrderDetailDto;
 }
 
 export default function OrderDetails({ order }: OrderDetailsProps) {
-  const hasScheduledTime = order.createdAt; // You'll need to add scheduledAt to schema
-  const hasNotes = false; // You'll need to add notes to schema
+  const hasScheduledTime = order.createdAt;
+  const hasNotes = false;
+  const isOpen = order.status === "Open";
+
+  const { mutate: deleteItem } = useDeleteItemFromOrder();
+  const { mutate: markServed, isPending: isMarkingServed } =
+    useMarkItemServed();
+
+  const handleDeleteItem = (itemId: string) => {
+    deleteItem({
+      orderId: order.id,
+      itemId,
+    });
+  };
+
+  const handleMarkServed = (itemId: string) => {
+    markServed({
+      orderId: order.id,
+      itemId,
+      servedAt: new Date(),
+    });
+  };
 
   return (
     <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
@@ -41,10 +77,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium">Ghi chú</p>
-            <p className="text-sm text-muted-foreground">
-              {/* Add notes field here */}
-              Ghi chú đơn hàng...
-            </p>
+            <p className="text-sm text-muted-foreground">Ghi chú đơn hàng...</p>
           </div>
         </div>
       )}
@@ -87,10 +120,57 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                     </Badge>
                   )}
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-semibold">
-                    {formatMoney(item.subtotal).vndFormatted}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-semibold">
+                      {formatMoney(item.subtotal).vndFormatted}
+                    </p>
+                  </div>
+                  {/* Mark as Served button for Open orders only (if not already served) */}
+                  {isOpen && !item.servedAt && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleMarkServed(item.id)}
+                      disabled={isMarkingServed}
+                      className="h-8 text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700"
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      Đã phục vụ
+                    </Button>
+                  )}
+                  {/* Delete button for Open orders only */}
+                  {isOpen && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Xóa món ăn?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Bạn có chắc muốn xóa "{item.itemName}" khỏi đơn
+                            hàng? Hành động này không thể hoàn tác.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Hủy</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Xóa món
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
               </div>
             ))

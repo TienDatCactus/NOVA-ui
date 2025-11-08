@@ -1,9 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { OrderService } from "~/services/api/orders";
 import type {
-  CreatePOSOrderRequestDto,
   AddItemsToPOSOrderRequestDto,
+  CreatePOSOrderRequestDto,
   POSOrderPayNowRequestDto,
 } from "~/services/api/orders/dto";
 import type { PosCartItem } from "~/store/pos-order.store";
@@ -69,13 +68,6 @@ function useCreatePosOrderAndItems() {
       }
 
       return order;
-    },
-    onSuccess: () => {
-      toast.success("Đã tạo đơn hàng thành công!");
-    },
-    onError: (error: any) => {
-      console.error("Error creating POS order:", error);
-      toast.error(error.message || "Không thể tạo đơn hàng. Vui lòng thử lại.");
     },
   });
 }
@@ -232,13 +224,6 @@ function useSetScheduledOrder() {
       queryClient.invalidateQueries({
         queryKey: ["pos-orders"],
       });
-      toast.success("Đã đặt thời gian phục vụ");
-    },
-    onError: (error: any) => {
-      console.error("Error setting scheduled time:", error);
-      toast.error(
-        error.message || "Không thể đặt thời gian phục vụ. Vui lòng thử lại."
-      );
     },
   });
 }
@@ -269,25 +254,18 @@ function useSetServedOrderItem() {
       queryClient.invalidateQueries({
         queryKey: ["pos-order-detail", variables.orderId],
       });
-      toast.success("Đã đánh dấu món đã phục vụ");
-    },
-    onError: (error: any) => {
-      console.error("Error setting served time:", error);
-      toast.error(
-        error.message || "Không thể đánh dấu món đã phục vụ. Vui lòng thử lại."
-      );
     },
   });
 }
 
 export {
-  useCreatePOSOrder,
   useAddItemToPOSOrder,
-  useDeleteItemFromPOSOrder,
-  useCompletePOSOrder,
   useCancelPOSOrder,
-  usePayPOSOrderNow,
+  useCompletePOSOrder,
+  useCreatePOSOrder,
   useCreatePosOrderAndItems,
+  useDeleteItemFromPOSOrder,
+  usePayPOSOrderNow,
   useSetScheduledOrder,
   useSetServedOrderItem,
 };

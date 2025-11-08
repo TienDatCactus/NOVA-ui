@@ -90,6 +90,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                 orderId={order.id}
                 status={order.status}
                 totalAmount={order.totalAmount}
+                currentScheduledTime={order.scheduledAt}
               />
             </div>
           </div>

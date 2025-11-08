@@ -8,16 +8,10 @@ import { OrderService } from "~/services/api/orders";
  */
 function useCancelOrder() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (orderId: string) => OrderService.cancelPOSOrder(orderId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pos-orders"] });
-      toast.success("Đơn hàng đã hủy thành công");
-    },
-    onError: (error: any) => {
-      console.error("Error cancelling order:", error);
-      toast.error(error.message || "Không thể hủy đơn hàng. Vui lòng thử lại.");
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }
@@ -32,14 +26,7 @@ function useCompleteOrder() {
   return useMutation({
     mutationFn: (orderId: string) => OrderService.completePOSOrder(orderId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pos-orders"] });
-      toast.success("Đơn hàng đã hoàn thành");
-    },
-    onError: (error: any) => {
-      console.error("Error completing order:", error);
-      toast.error(
-        error.message || "Không thể hoàn thành đơn hàng. Vui lòng thử lại."
-      );
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }
@@ -64,12 +51,7 @@ function usePayNow() {
       };
     }) => OrderService.payPOSOrderNow(orderId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pos-orders"] });
-      toast.success("Thanh toán thành công");
-    },
-    onError: (error: any) => {
-      console.error("Error processing payment:", error);
-      toast.error(error.message || "Không thể thanh toán. Vui lòng thử lại.");
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }
@@ -82,12 +64,6 @@ function usePrintOrder() {
   return useMutation({
     mutationFn: async (orderId: string) => {
       return await OrderService.getPOSOrderPrintData(orderId);
-    },
-    onError: (error: any) => {
-      console.error("Error fetching print data:", error);
-      toast.error(
-        error.message || "Không thể lấy dữ liệu in. Vui lòng thử lại."
-      );
     },
   });
 }
@@ -123,12 +99,7 @@ function useAddItemToOrder() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pos-orders"] });
-      toast.success("Đã thêm món vào đơn hàng");
-    },
-    onError: (error: any) => {
-      console.error("Error adding item:", error);
-      toast.error(error.message || "Không thể thêm món. Vui lòng thử lại.");
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }
@@ -150,12 +121,7 @@ function useDeleteItemFromOrder() {
       return await OrderService.deleteItemFromPOSOrder(orderId, itemId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pos-orders"] });
-      toast.success("Đã xóa món khỏi đơn hàng");
-    },
-    onError: (error: any) => {
-      console.error("Error deleting item:", error);
-      toast.error(error.message || "Không thể xóa món. Vui lòng thử lại.");
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }
@@ -177,14 +143,7 @@ function useUpdateScheduledTime() {
       return await OrderService.setScheduledOrder(orderId, { scheduledAt });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pos-orders"] });
-      toast.success("Đã cập nhật thời gian phục vụ");
-    },
-    onError: (error: any) => {
-      console.error("Error updating schedule:", error);
-      toast.error(
-        error.message || "Không thể cập nhật thời gian. Vui lòng thử lại."
-      );
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }
@@ -210,12 +169,7 @@ function useMarkItemServed() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pos-orders"] });
-      toast.success("Đã đánh dấu món đã phục vụ");
-    },
-    onError: (error: any) => {
-      console.error("Error marking item served:", error);
-      toast.error(error.message || "Không thể đánh dấu món. Vui lòng thử lại.");
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }

@@ -64,6 +64,8 @@ const POSOrderDetailSchema = z.object({
   customerId: z.string().optional().nullable(),
   invoiceId: z.string().optional().nullable(),
   createdAt: z.string().optional().nullable(),
+  note: z.string().max(500).optional().nullable(),
+  scheduledAt: z.string().optional().nullable(),
   items: z.array(POSOrderItemSchema).optional(),
 });
 

@@ -10,7 +10,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { Ban, CheckCircle, Printer, CreditCard } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import {
+  Ban,
+  CheckCircle,
+  Printer,
+  CreditCard,
+  Plus,
+  MoreVertical,
+  Clock,
+} from "lucide-react";
 import { useState } from "react";
 import {
   Dialog,
@@ -33,32 +48,43 @@ import {
   useCompleteOrder,
   usePayNow,
   usePrintOrder,
+  useAddItemToOrder,
+  useUpdateScheduledTime,
 } from "../../container/order-list/mutation.hooks";
 import PrintPreviewDialog from "./print-preview.dialog";
+import AddMenuItemDialog from "./add-menu-item.dialog";
+import UpdateScheduleDialog from "./update-schedule.dialog";
 import type { POSOrderPrintDataDto } from "~/services/api/orders/dto";
 
 interface OrderActionsProps {
   orderId: string;
   status: "Open" | "Completed" | "Cancelled";
   totalAmount: number;
+  currentScheduledTime?: string | null;
 }
 
 export default function OrderActions({
   orderId,
   status,
   totalAmount,
+  currentScheduledTime,
 }: OrderActionsProps) {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [paidAmount, setPaidAmount] = useState(totalAmount);
   const [transactionRef, setTransactionRef] = useState("");
   const [isPayDialogOpen, setIsPayDialogOpen] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
+  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [printData, setPrintData] = useState<POSOrderPrintDataDto | null>(null);
 
   const { mutate: onPayNow } = usePayNow();
   const { mutate: onPrint, isPending: isPrintLoading } = usePrintOrder();
   const { mutate: onCancel } = useCancelOrder();
   const { mutate: onComplete } = useCompleteOrder();
+  const { mutate: onAddItem, isPending: isAddingItem } = useAddItemToOrder();
+  const { mutate: onUpdateSchedule, isPending: isUpdatingSchedule } =
+    useUpdateScheduledTime();
 
   const handlePayNow = () => {
     onPayNow({
@@ -81,6 +107,40 @@ export default function OrderActions({
     });
   };
 
+  const handleAddItem = (
+    menuItemId: string,
+    quantity: number,
+    unitPrice: number
+  ) => {
+    onAddItem(
+      {
+        orderId,
+        menuItemId,
+        quantity,
+        unitPrice,
+      },
+      {
+        onSuccess: () => {
+          setIsAddItemDialogOpen(false);
+        },
+      }
+    );
+  };
+
+  const handleUpdateSchedule = (scheduledAt: Date) => {
+    onUpdateSchedule(
+      {
+        orderId,
+        scheduledAt,
+      },
+      {
+        onSuccess: () => {
+          setIsScheduleDialogOpen(false);
+        },
+      }
+    );
+  };
+
   return (
     <>
       <div className="flex items-center gap-2 flex-wrap">
@@ -98,6 +158,17 @@ export default function OrderActions({
         {/* Actions for Open orders only */}
         {status === "Open" && (
           <>
+            {/* Add Items Button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsAddItemDialogOpen(true)}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm món
+            </Button>
+
             {/* Pay Now Dialog */}
             <Dialog open={isPayDialogOpen} onOpenChange={setIsPayDialogOpen}>
               <DialogTrigger asChild>
@@ -106,7 +177,7 @@ export default function OrderActions({
                   Thanh toán
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>Thanh toán đơn hàng</DialogTitle>
                 </DialogHeader>
@@ -228,6 +299,22 @@ export default function OrderActions({
         onOpenChange={setIsPrintDialogOpen}
         printData={printData}
         onPrint={() => setIsPrintDialogOpen(false)}
+      />
+
+      {/* Add Menu Item Dialog */}
+      <AddMenuItemDialog
+        open={isAddItemDialogOpen}
+        onOpenChange={setIsAddItemDialogOpen}
+        onConfirm={handleAddItem}
+        isAdding={isAddingItem}
+      />
+
+      {/* Update Schedule Dialog */}
+      <UpdateScheduleDialog
+        open={isScheduleDialogOpen}
+        onOpenChange={setIsScheduleDialogOpen}
+        onConfirm={handleUpdateSchedule}
+        currentScheduledTime={currentScheduledTime}
       />
     </>
   );
