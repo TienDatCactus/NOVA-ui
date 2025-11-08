@@ -27,14 +27,16 @@ function InvoicesViewLayout({
   currentPage,
 }: InvoicesViewLayoutProps) {
   return (
-    <div className="flex gap-6">
-      <InvoicesFilterSidebar
-        filters={filters}
-        onFilterChange={onFilterChange}
-        onResetFilters={onResetFilters}
-      />
-      <main className="flex-1 space-y-4">
-        <div className="flex items-center justify-between mb-6">
+    <div className="flex gap-6 h-[calc(100vh-4rem)]">
+      <div className="w-72 flex-shrink-0">
+        <InvoicesFilterSidebar
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onResetFilters={onResetFilters}
+        />
+      </div>
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <div>
             <h1 className="text-3xl font-bold">Quản lý hóa đơn</h1>
             <p className="text-muted-foreground mt-1">
@@ -52,7 +54,9 @@ function InvoicesViewLayout({
             </Button>
           </div>
         </div>
-        {children}
+        <div className="flex-1 overflow-auto">
+          {children}
+        </div>
       </main>
     </div>
   );

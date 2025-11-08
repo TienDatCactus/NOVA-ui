@@ -1,4 +1,4 @@
-import { ChevronDown, Search, X } from "lucide-react";
+import { ChevronDown, Search, X, ArrowUpDown } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -10,6 +10,13 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import type { InvoiceFilters } from "../../container/invoices/filter.hooks";
 import { INVOICE_STATUSES, PAYMENT_METHODS } from "~/services/api/invoices/invoice.types";
 import { DateRangePicker } from "~/components/ui/date-range-picker";
@@ -32,7 +39,10 @@ function InvoicesFilterSidebar({
     (filters.searchText ? 1 : 0) +
     (filters.status ? 1 : 0) +
     (filters.paymentMethod ? 1 : 0) +
-    (filters.dateRange?.from || filters.dateRange?.to ? 1 : 0);
+    (filters.dateRange?.from || filters.dateRange?.to ? 1 : 0) +
+    (filters.bookingCode ? 1 : 0) +
+    (filters.bookingId ? 1 : 0) +
+    (filters.invoiceType ? 1 : 0);
 
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -50,12 +60,30 @@ function InvoicesFilterSidebar({
         )}
       </div>
 
-      <Card className="p-4 shadow-sm">
+      <Card className="p-3 shadow-sm">
         <CardContent className="px-0">
           <div className="space-y-2">
-            <Label htmlFor="search" className="text-sm font-medium">
-              Tìm kiếm
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="search" className="text-sm font-medium">
+                Tìm kiếm
+              </Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  onFilterChange(
+                    "sortDirection",
+                    filters.sortDirection === "asc" ? "desc" : "asc"
+                  )
+                }
+                className="h-7 gap-1.5 px-2"
+              >
+                <ArrowUpDown className="h-3.5 w-3.5" />
+                <span className="text-xs">
+                  {filters.sortDirection === "asc" ? "Tăng dần" : "Giảm dần"}
+                </span>
+              </Button>
+            </div>
             <Input
               id="search"
               placeholder="Mã hóa đơn, mã booking, tên khách..."
@@ -162,6 +190,114 @@ function InvoicesFilterSidebar({
               onChange={(range) => onFilterChange("dateRange", range)}
               placeholder="Chọn khoảng ngày"
             />
+          </div>
+        </CardContent>
+
+        <Separator />
+
+        <CardContent className="px-0 rounded-md">
+          <div className="space-y-3">
+            <Label htmlFor="booking-code" className="text-sm font-medium">
+              Mã booking
+            </Label>
+            <Input
+              id="booking-code"
+              placeholder="BK2025..."
+              value={filters.bookingCode || ""}
+              onChange={(e) =>
+                onFilterChange("bookingCode", e.target.value || undefined)
+              }
+            />
+          </div>
+        </CardContent>
+
+        <Separator />
+
+        <CardContent className="px-0 rounded-md">
+          <div className="space-y-3">
+            <Label htmlFor="booking-id" className="text-sm font-medium">
+              Booking ID (UUID)
+            </Label>
+            <Input
+              id="booking-id"
+              placeholder="uuid..."
+              value={filters.bookingId || ""}
+              onChange={(e) =>
+                onFilterChange("bookingId", e.target.value || undefined)
+              }
+            />
+          </div>
+        </CardContent>
+
+        <Separator />
+
+        <CardContent className="px-0 rounded-md">
+          <div className="space-y-3">
+            <Label htmlFor="invoice-type" className="text-sm font-medium">
+              Loại hóa đơn
+            </Label>
+            <Select
+              value={filters.invoiceType || "all"}
+              onValueChange={(value) =>
+                onFilterChange("invoiceType", value === "all" ? undefined : value)
+              }
+            >
+              <SelectTrigger id="invoice-type" className="w-full">
+                <SelectValue placeholder="Chọn loại hóa đơn" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="Room">Phòng</SelectItem>
+                <SelectItem value="Service">Dịch vụ</SelectItem>
+                <SelectItem value="Total">Tổng hợp</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+
+        <Separator />
+
+        <CardContent className="px-0 rounded-md">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Sắp xếp theo</Label>
+            <Select
+              value={filters.sortBy || "IssuedDate"}
+              onValueChange={(value) => onFilterChange("sortBy", value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="IssuedDate">Ngày xuất</SelectItem>
+                <SelectItem value="TotalAmount">Tổng tiền</SelectItem>
+                <SelectItem value="Status">Trạng thái</SelectItem>
+                <SelectItem value="InvoiceCode">Mã hóa đơn</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+
+        <Separator />
+
+        <CardContent className="px-0 rounded-md">
+          <div className="space-y-3">
+            <Label htmlFor="page-size" className="text-sm font-medium">
+              Số bản ghi/trang
+            </Label>
+            <Select
+              value={String(filters.pageSize)}
+              onValueChange={(value) => onFilterChange("pageSize", Number(value))}
+            >
+              <SelectTrigger id="page-size" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
