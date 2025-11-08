@@ -1,22 +1,9 @@
-import { useState } from "react";
 import CreateUnitDialog from "./components/create-unit.dialog";
-import EditUnitDialog from "./components/edit-unit.dialog";
-import DeleteUnitDialog from "./components/delete-unit.dialog";
 import UnitsViewLayout from "./layouts/units-view.layout";
 import useUnitsContainer from "./container/container.hooks";
 import { Card } from "~/components/ui/card";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Package } from "lucide-react";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyMedia,
-} from "~/components/ui/empty";
-import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
 import { useUnits } from "./container/unit-query.hooks";
-import { DataTable, columns } from "./components";
+import UnitsDataTable from "./components/units-list";
 
 export function clientLoader() {
   return { title: "Đơn vị tính - NOVA" };
@@ -35,30 +22,7 @@ export default function Units() {
     setCreateDialogOpen,
   } = useUnitsContainer();
 
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedUnit, setSelectedUnit] =
-    useState<UnitItemDetailResponseDto | null>(null);
-
-  const handleEdit = (unit: UnitItemDetailResponseDto) => {
-    setSelectedUnit(unit);
-    setShowEditDialog(true);
-  };
-
-  const handleDelete = (unit: UnitItemDetailResponseDto) => {
-    setSelectedUnit(unit);
-    setShowDeleteDialog(true);
-  };
-
-  const handleCloseEdit = () => {
-    setShowEditDialog(false);
-    setSelectedUnit(null);
-  };
-
-  const handleCloseDelete = () => {
-    setShowDeleteDialog(false);
-    setSelectedUnit(null);
-  };
+  const hasFilters = !!(filters.searchQuery || filters.isActive !== "all");
 
   return (
     <UnitsViewLayout
@@ -72,45 +36,13 @@ export default function Units() {
     >
       <Card className="flex-1 overflow-hidden shadow-sm">
         <div className="p-6">
-          {isPending ? (
-            <div className="space-y-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-64 w-full" />
-            </div>
-          ) : !filteredUnits || filteredUnits.length === 0 ? (
-            filters.searchQuery || filters.isActive !== "all" ? (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Package />
-                  </EmptyMedia>
-                  <EmptyTitle>Không tìm thấy kết quả</EmptyTitle>
-                  <EmptyDescription>
-                    Thử điều chỉnh bộ lọc hoặc thay đổi từ khóa tìm kiếm
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Package />
-                  </EmptyMedia>
-                  <EmptyTitle>Chưa có đơn vị tính nào</EmptyTitle>
-                  <EmptyDescription>
-                    Bắt đầu bằng cách thêm đơn vị tính đầu tiên cho hệ thống
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )
-          ) : (
-            <DataTable
-              columns={columns}
-              data={filteredUnits}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
+          <UnitsDataTable
+            units={filteredUnits}
+            isLoading={isPending}
+            hasFilters={hasFilters}
+            onAddUnit={() => setCreateDialogOpen(true)}
+            onSuccess={refetch}
+          />
         </div>
       </Card>
 
@@ -118,20 +50,6 @@ export default function Units() {
       <CreateUnitDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        onSuccess={refetch}
-      />
-
-      <EditUnitDialog
-        open={showEditDialog}
-        onOpenChange={handleCloseEdit}
-        unit={selectedUnit}
-        onSuccess={refetch}
-      />
-
-      <DeleteUnitDialog
-        open={showDeleteDialog}
-        onOpenChange={handleCloseDelete}
-        unit={selectedUnit}
         onSuccess={refetch}
       />
     </UnitsViewLayout>

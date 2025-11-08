@@ -1,17 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { MoreHorizontal, Pencil, Trash2, Package } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
 import { Checkbox } from "~/components/ui/checkbox";
+import ActionsMenuCell from "../../fragments/actions.cell";
 
 export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
   {
@@ -50,9 +41,7 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     header: "Mã đơn vị",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <span className="font-mono text-sm ">
-          {row.getValue("code")}
-        </span>
+        <span className="font-mono text-sm">{row.getValue("code")}</span>
       </div>
     ),
   },
@@ -91,36 +80,11 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     header: () => <div className="text-center">Thao tác</div>,
     cell: ({ row, table }) => {
       const unit = row.original;
-      const onEdit = (table.options.meta as any)?.onEdit;
-      const onDelete = (table.options.meta as any)?.onDelete;
+      const onSuccess = (table.options.meta as any)?.onSuccess;
 
       return (
         <div className="flex justify-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Mở menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px]">
-              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                Thao tác
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onEdit?.(unit)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Chỉnh sửa
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => onDelete?.(unit)}
-                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Xóa
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ActionsMenuCell unit={unit} onSuccess={onSuccess} />
         </div>
       );
     },

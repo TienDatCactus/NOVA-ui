@@ -34,6 +34,7 @@ interface LockUserDialogProps {
   open: boolean;
   onClose: () => void;
   mode: "lock" | "unlock";
+  onSuccess?: () => void;
 }
 
 const LockUserSchema = z.object({
@@ -58,6 +59,7 @@ export function LockUserDialog({
   open,
   onClose,
   mode,
+  onSuccess,
 }: LockUserDialogProps) {
   const { mutate: lockUser, isPending: isLocking } = useLockUser();
   const { mutate: unlockUser, isPending: isUnlocking } = useUnlockUser();
@@ -84,6 +86,7 @@ export function LockUserDialog({
         onSuccess: () => {
           form.reset();
           onClose();
+          onSuccess?.();
         },
       }
     );
@@ -93,6 +96,7 @@ export function LockUserDialog({
     unlockUser(user.id, {
       onSuccess: () => {
         onClose();
+        onSuccess?.(); 
       },
     });
   };
