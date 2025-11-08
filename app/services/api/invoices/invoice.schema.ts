@@ -15,7 +15,7 @@ const InvoiceStatusEnum = z
   .or(z.string());
 
 const InvoiceListItemSchema = z.object({
-  invoiceId: z.string().uuid(),
+  invoiceId: z.string(),
   invoiceNo: z.string(),
   invoiceType: z.string(),
   bookingCode: z.string(),
@@ -51,7 +51,7 @@ const InvoiceListResponseWithMetaSchema = z.object({
 const InvoiceDetailItemSchema = z.object({
   id: z.string().uuid(),
   itemType: z.string(),
-  itemId: z.string().uuid().optional().nullable(),
+  itemId: z.string().optional().nullable(),
   description: z.string(),
   quantity: z.number(),
   unitPrice: z.number(),
@@ -69,6 +69,14 @@ const InvoiceDetailSchema = z.object({
   status: z.string(),
   issuedAt: z.string(), // ISO date string
   items: z.array(InvoiceDetailItemSchema),
+});
+
+// Invoice Detail Response with Wrapper
+const InvoiceDetailResponseSchema = z.object({
+  success: z.boolean(),
+  statusCode: z.number(),
+  message: z.string(),
+  data: InvoiceDetailSchema,
 });
 
 // Legacy schemas (keep for backward compatibility)
@@ -91,6 +99,7 @@ export const InvoiceSchema = {
   InvoiceListResponseSchema,
   InvoiceListResponseWithMetaSchema,
   InvoiceDetailSchema,
+  InvoiceDetailResponseSchema,
   InvoiceDetailItemSchema,
   PaginationMetaSchema,
   InvoiceItemSchema,

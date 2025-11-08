@@ -29,7 +29,7 @@ export default function InvoiceDetailTab({ invoiceId }: InvoiceDetailTabProps) {
           <CardTitle>Thông tin hóa đơn</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <FileText className="h-4 w-4" />
@@ -45,10 +45,6 @@ export default function InvoiceDetailTab({ invoiceId }: InvoiceDetailTabProps) {
               <p className="font-semibold">
                 {invoice.issuedAt ? format(parseISO(invoice.issuedAt), "dd/MM/yyyy HH:mm") : "-"}
               </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Booking Room ID</p>
-              <p className="font-semibold font-mono text-sm">{invoice.bookingRoomId}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground flex items-center gap-2">

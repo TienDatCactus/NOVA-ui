@@ -15,8 +15,15 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Button } from "~/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,6 +60,27 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
       onPageChange(currentPage + 1);
     }
   };
+
+  const handleFirstPage = () => {
+    if (onPageChange) {
+      onPageChange(1);
+    }
+  };
+
+  const handleLastPage = () => {
+    if (onPageChange) {
+      onPageChange(pageCount);
+    }
+  };
+
+  const handleGoToPage = (page: string) => {
+    if (onPageChange) {
+      onPageChange(Number(page));
+    }
+  };
+
+  // Generate page options for select
+  const pageOptions = Array.from({ length: pageCount }, (_, i) => i + 1);
 
   return (
     <div className="space-y-4">
@@ -111,27 +139,55 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
       {/* Pagination Controls */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Trang {currentPage} / {pageCount}
+          Trang <span className="font-medium text-foreground">{currentPage}</span> /{" "}
+          <span className="font-medium text-foreground">{pageCount}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousPage}
-            disabled={currentPage <= 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={currentPage >= pageCount}
-          >
-            Sau
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <div className="flex items-center gap-4">
+          {/* Page selector */}
+          {pageCount > 1 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Đến trang:</span>
+              <Select
+                value={String(currentPage)}
+                onValueChange={handleGoToPage}
+              >
+                <SelectTrigger className="h-8 w-16">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageOptions.map((page) => (
+                    <SelectItem key={page} value={String(page)}>
+                      {page}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Navigation buttons */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage <= 1}
+              className="h-8 gap-1"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Trước</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage >= pageCount}
+              className="h-8 gap-1"
+            >
+              <span className="hidden sm:inline">Sau</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

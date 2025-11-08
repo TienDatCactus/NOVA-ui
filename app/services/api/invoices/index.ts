@@ -4,7 +4,7 @@ import { InvoiceSchema } from "./invoice.schema";
 import type { InvoiceListResponseDto, InvoiceDetailDto } from "./dto";
 import type { InvoiceListParams } from "./invoice.types";
 
-const { InvoiceListResponseWithMetaSchema, InvoiceDetailSchema } =
+const { InvoiceListResponseWithMetaSchema, InvoiceDetailResponseSchema } =
   InvoiceSchema;
 
 /**
@@ -32,7 +32,8 @@ async function getInvoiceList(
 async function getInvoiceDetail(invoiceId: string): Promise<InvoiceDetailDto> {
   try {
     const resp = await http.get(Invoices.detail(invoiceId));
-    return InvoiceDetailSchema.parse(resp);
+    const parsed = InvoiceDetailResponseSchema.parse(resp);
+    return parsed.data;
   } catch (error) {
     console.error(`Error fetching invoice detail for ID ${invoiceId}:`, error);
     return Promise.reject(error);

@@ -21,6 +21,17 @@ export const INVOICE_STATUSES = [
   { code: 7, value: "Voided", label: "Đã vô hiệu hóa", variant: "destructive" },
 ] as const;
 
+// Payment method mapping
+export const PAYMENT_METHODS = [
+  { value: "Unknown", label: "Chưa xác định" },
+  { value: "Cash", label: "Tiền mặt" },
+  { value: "Card", label: "Thẻ" },
+  { value: "BankTransfer", label: "Chuyển khoản" },
+  { value: "OTACollect", label: "OTA thu hộ" },
+  { value: "OTAPrepaid", label: "OTA trả trước" },
+  { value: "OnAccount", label: "Ghi nợ" },
+] as const;
+
 // Request params types
 export interface InvoiceListParams {
   Page?: number;
