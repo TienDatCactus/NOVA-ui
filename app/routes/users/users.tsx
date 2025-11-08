@@ -49,15 +49,13 @@ export default function Component() {
       onAddUser={() => setIsCreateOpen(true)}
       roles={rolesData || []}
     >
-      <Card className="flex-1 overflow-hidden shadow-sm">
-        <UsersDataTable
-          users={filteredUsers}
-          isLoading={isPending}
-          hasFilters={hasFilters}
-          onViewDetail={handleViewDetail}
-          onSuccess={handleRefresh}
-        />
-      </Card>
+      <UsersDataTable
+        users={filteredUsers}
+        isLoading={isPending}
+        hasFilters={hasFilters}
+        onViewDetail={handleViewDetail}
+        onSuccess={handleRefresh}
+      />
 
       {/* Detail Dialog */}
       {selectedUser && (

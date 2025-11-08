@@ -39,7 +39,7 @@ function UsersDataTable({
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/50">
+            <TableRow>
               <TableHead className="font-semibold">Họ và tên</TableHead>
               <TableHead className="font-semibold">Email</TableHead>
               <TableHead className="font-semibold">Số điện thoại</TableHead>

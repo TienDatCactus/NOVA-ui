@@ -34,17 +34,13 @@ export default function Units() {
       inactiveUnits={stats.inactive}
       onAddUnit={() => setCreateDialogOpen(true)}
     >
-      <Card className="flex-1 overflow-hidden shadow-sm">
-        <div className="p-6">
-          <UnitsDataTable
-            units={filteredUnits}
-            isLoading={isPending}
-            hasFilters={hasFilters}
-            onAddUnit={() => setCreateDialogOpen(true)}
-            onSuccess={refetch}
-          />
-        </div>
-      </Card>
+      <UnitsDataTable
+        units={filteredUnits}
+        isLoading={isPending}
+        hasFilters={hasFilters}
+        onAddUnit={() => setCreateDialogOpen(true)}
+        onSuccess={refetch}
+      />
 
       {/* Dialogs */}
       <CreateUnitDialog
