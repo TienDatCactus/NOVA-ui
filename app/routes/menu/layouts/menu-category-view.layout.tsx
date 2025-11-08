@@ -26,7 +26,7 @@ export default function MenuCategoryViewLayout({
   filters,
 }: MenuCategoryViewLayoutProps) {
   return (
-    <div className="flex gap-6 h-full">
+    <div className="flex gap-6 p-4 ">
       <MenuCategoryCommandBar
         filters={filters}
         updateFilter={updateFilter}

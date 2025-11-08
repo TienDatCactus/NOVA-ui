@@ -46,7 +46,7 @@ function Input({
 
   if (hasAnyAddon) {
     return (
-      <InputGroup className={cn(className)}>
+      <InputGroup className={cn("bg-background shadow-sm", className)}>
         {(startAddon || startText) && (
           <InputGroupAddon align="inline-start">
             {startText && <InputGroupText>{startText}</InputGroupText>}

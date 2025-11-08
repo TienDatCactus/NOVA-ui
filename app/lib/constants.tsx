@@ -3,6 +3,8 @@ import {
   Bath,
   HelpCircle,
   HousePlus,
+  ListOrdered,
+  MessageSquareDot,
   PackageSearch,
   ReceiptText,
   Settings,
@@ -36,29 +38,29 @@ const SIDEBAR_NAV_MAIN: Array<{
 }> = [
   {
     title: "Đặt phòng",
-    url: "/dashboard/reservation",
+    url: "/dashboard/bookings",
     icon: HousePlus,
     isActive: true,
     items: [
       {
         title: "Báo cáo",
-        url: "/dashboard/reservation",
+        url: "/dashboard/bookings",
       },
       {
         title: "Sơ đồ phòng",
-        url: "/dashboard/reservation/bookings/grid",
+        url: "/dashboard/bookings/bookings/grid",
       },
       {
         title: "Danh sách đặt phòng",
-        url: "/dashboard/reservation/bookings/list",
+        url: "/dashboard/bookings/bookings/list",
       },
       {
         title: "Hóa đơn đặt phòng",
-        url: "/dashboard/reservation/invoices",
+        url: "/dashboard/bookings/invoices",
       },
       {
         title: "Đặt phòng mới",
-        url: "/dashboard/reservation/new-booking",
+        url: "/dashboard/bookings/new-booking",
       },
     ],
   },
@@ -74,10 +76,6 @@ const SIDEBAR_NAV_MAIN: Array<{
       {
         title: "Loại phòng",
         url: "/dashboard/rooms/types",
-      },
-      {
-        title: "Bảng giá",
-        url: "/dashboard/rooms/prices",
       },
     ],
   },
@@ -105,6 +103,21 @@ const SIDEBAR_NAV_MAIN: Array<{
     ],
   },
   {
+    title: "Đơn hàng",
+    url: "/dashboard/orders",
+    icon: ListOrdered,
+    items: [
+      {
+        title: "Danh sách đơn hàng",
+        url: "/dashboard/orders",
+      },
+      {
+        title: "POS",
+        url: "/dashboard/orders/pos",
+      },
+    ],
+  },
+  {
     title: "Tài khoản",
     url: "/dashboard/users",
     icon: Users,
@@ -121,6 +134,11 @@ const SIDEBAR_PROJECTS: Array<{
   url: string;
   icon: LucideIcon;
 }> = [
+  {
+    name: "Chat",
+    url: "/dashboard/chat",
+    icon: MessageSquareDot,
+  },
   {
     name: "Đơn vị tính",
     url: "/dashboard/units",

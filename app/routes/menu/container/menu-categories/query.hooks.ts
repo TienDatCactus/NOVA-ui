@@ -7,7 +7,7 @@ import type { MenuCategoryListParams } from "~/services/api/menu-category/menu-c
  */
 export function useMenuCategories(
   params?: MenuCategoryListParams,
-  enabled: boolean = false
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ["menu-category-list", params],

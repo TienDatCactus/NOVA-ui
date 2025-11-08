@@ -24,7 +24,7 @@ export default function MenuViewLayout({
   const { data: menuCategories } = useMenuCategories();
 
   return (
-    <div className="flex gap-6 h-full">
+    <div className="flex gap-6 p-4 ">
       <MenuCommandBar
         menuCategories={menuCategories}
         filters={filters}

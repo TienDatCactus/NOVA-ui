@@ -28,7 +28,7 @@ function RoomsViewLayout({
 }: RoomsViewLayoutProps) {
   const { data: roomTypes } = useRoomTypes();
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 p-4 ">
       <RoomsFilterSidebar
         filters={filters}
         onFilterChange={onFilterChange}

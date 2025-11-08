@@ -29,7 +29,7 @@ function UnitsViewLayout({
   children,
 }: UnitsViewLayoutProps) {
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 p-4 ">
       <UnitsFilterSidebar
         filters={filters}
         onFilterChange={onFilterChange}

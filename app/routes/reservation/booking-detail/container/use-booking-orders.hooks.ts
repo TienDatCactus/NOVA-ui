@@ -2,9 +2,8 @@ import {
   useCreatePOSOrder,
   useAddItemToPOSOrder,
   useDeleteItemFromPOSOrder,
-} from "~/routes/pos-orders/container/mutation.hooks";
-
-import { usePOSOrderDetailByBooking } from "~/routes/pos-orders/container/query.hooks";
+} from "~/routes/orders/container/mutation.hooks";
+import { usePOSOrderDetailByBooking } from "~/routes/orders/container/query.hooks";
 import type { AddItemsToPOSOrderRequestDto } from "~/services/api/orders/dto";
 
 interface UseBookingOrdersProps {

@@ -299,7 +299,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full p-4 ">
       <Form {...form}>
         <div className="space-y-4">
           <div className="flex-1 flex">
@@ -802,7 +802,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               </Dialog>
             </div>
           </div>
-          <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pb-4">
             <BookingPosOrders
               hasOrder={hasOrder}
               isCreatingOrder={isCreatingOrder}
@@ -821,7 +821,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             <BookingServiceOrders />
           </div>
         </div>
-        <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 border-t">
+        <Separator />
+        <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
           <Button
             type="button"
             variant="outline"

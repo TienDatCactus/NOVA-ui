@@ -19,7 +19,7 @@ function BookingViewLayout({
   onDateChange,
 }: BookingViewLayoutProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 ">
       <div className="flex flex-col gap-4">
         <SearchRoom
           date={date}

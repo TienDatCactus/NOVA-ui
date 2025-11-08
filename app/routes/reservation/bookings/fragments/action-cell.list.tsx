@@ -40,9 +40,9 @@ export const ActionCell: React.FC<{ row: Row<BookingListItem> }> = ({
           <DropdownMenuItem onClick={() => setChangeRoomDialogOpen(true)}>
             Đổi phòng
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Link
-              to={`${DASHBOARD.reservation.bookingDetail(row.original.bookingCode!)}`}
+              to={DASHBOARD.bookings.bookingDetail(row.original.bookingCode!)}
             >
               Sửa đặt phòng
             </Link>

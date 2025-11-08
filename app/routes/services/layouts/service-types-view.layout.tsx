@@ -21,7 +21,7 @@ export default function ServiceTypesViewLayout({
   updateFilter,
 }: ServiceTypesViewLayoutProps) {
   return (
-    <div className="flex gap-6 h-full">
+    <div className="flex gap-6 p-4">
       <ServiceTypesCommandBar
         filters={filters}
         resetFilters={resetFilters}

@@ -16,14 +16,19 @@ export default [
   ]),
   route("buttons", "components/button-showcase.tsx"),
   route("colors", "components/color-showcase.tsx"),
-  ...prefix("customer", [
-    route("chat", "routes/customer/chat.tsx"),
-    route("map", "routes/customer/map.tsx"),
-    route("guides", "routes/customer/guides.tsx"),
+
+  ...prefix("dashboard", [
+    ...prefix("orders", [route("pos", "routes/orders/pos.tsx")]),
   ]),
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
-      ...prefix("reservation", [
+      ...prefix("services", [
+        index("routes/services/services.tsx"),
+        route("types", "routes/services/types.tsx"),
+        route("menu", "routes/menu/menu.tsx"),
+        route("menu-categories", "routes/menu/menu-categories.tsx"),
+      ]),
+      ...prefix("bookings", [
         index("routes/reservation/reports/reports.tsx"),
         ...prefix("bookings", [
           route("grid", "routes/reservation/bookings/grid.tsx"),
@@ -36,23 +41,17 @@ export default [
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
         route("new-booking", "routes/reservation/new-booking.tsx"),
       ]),
+      ...prefix("orders", [index("routes/orders/orders.tsx")]),
       ...prefix("rooms", [
         index("routes/rooms/rooms.tsx"),
         route("types", "routes/rooms/types.tsx"),
-        route("prices", "routes/rooms/prices.tsx"),
       ]),
-      ...prefix("services", [
-        index("routes/services/services.tsx"),
-        route("types", "routes/services/types.tsx"),
-        route("menu", "routes/menu/menu.tsx"),
-        route("menu-categories", "routes/menu/menu-categories.tsx"),
-      ]),
-
+      route("chat", "routes/chat/chat.tsx"),
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("users", "routes/users/users.tsx"),
     ]),
-    route("point-of-sale", "routes/pos/pos.tsx"),
   ]),
+
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

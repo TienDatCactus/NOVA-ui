@@ -57,7 +57,7 @@ export default function Component() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-4 ">
       <div className="flex gap-4 items-center justify-between">
         <div className="flex gap-4 items-center">
           <div className="flex gap-2 items-center">

@@ -26,7 +26,7 @@ function RoomTypesViewLayout({
   onAddRoomType,
 }: RoomTypesViewLayoutProps) {
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 p-4 ">
       <RoomTypesFilterSidebar
         filters={filters}
         onFilterChange={onFilterChange}

@@ -56,8 +56,12 @@ export const MenuListItemSchema = z.object({
   components: z.array(MenuItemComponentSchema),
 });
 
+export const MenuListByCategoryItemSchema = MenuItemDetailSchema;
+
 export const MenuListResponseSchema = z.array(MenuListItemSchema);
-export const MenuListByCategoryResponseSchema = z.array(MenuListItemSchema);
+export const MenuListByCategoryResponseSchema = z.array(
+  MenuListByCategoryItemSchema
+);
 
 export const CreateMenuItemRequestSchema = z.object({
   CategoryId: z.string(),

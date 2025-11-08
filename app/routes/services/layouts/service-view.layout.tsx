@@ -23,7 +23,7 @@ export default function ServicesViewLayout({
 }: ServicesViewLayoutProps) {
   const { data: serviceTypes } = useServiceTypes();
   return (
-    <div className="flex gap-6 h-full">
+    <div className="flex gap-6 p-4 ">
       <ServicesCommandBar
         serviceTypes={serviceTypes || []}
         filters={filters}

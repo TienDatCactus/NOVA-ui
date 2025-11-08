@@ -28,7 +28,7 @@ export default function UsersViewLayout({
   roles,
 }: UsersViewLayoutProps) {
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 p-4 ">
       <UsersCommandBar
         filters={filters}
         updateFilter={updateFilter}

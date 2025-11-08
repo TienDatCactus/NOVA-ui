@@ -1,4 +1,4 @@
-import type { Route } from "./+types/map";
+import type { Route } from "./+types/orders";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};

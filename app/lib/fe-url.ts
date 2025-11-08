@@ -5,12 +5,16 @@ const AUTH = {
 };
 
 const DASHBOARD = {
-  reservation: {
-    index: "/dashboard/reservation",
-    bookings: "/dashboard/reservation/bookings",
+  bookings: {
+    index: "/dashboard/bookings",
+    bookings: "/dashboard/bookings/bookings",
     bookingDetail: (bookingCode: string) =>
-      `/dashboard/reservation/bookings/detail/${bookingCode}`,
-    newBooking: "/dashboard/reservation/new-booking",
+      `/dashboard/bookings/bookings/detail/${bookingCode}`,
+    newBooking: "/dashboard/bookings/new-booking",
+  },
+  orders: {
+    index: "/dashboard/orders",
+    pos: "/dashboard/orders/pos",
   },
 };
 const CUSTOMER = {
