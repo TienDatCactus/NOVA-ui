@@ -53,6 +53,7 @@ import type {
 } from "~/services/api/user/dto";
 import { useEffect, useMemo, useState } from "react";
 import { UserSchema } from "~/services/api/user/user.schema";
+import { getRoleDisplayName } from "~/services/types/users.types";
 
 interface UserFormDialogProps {
   open: boolean;
@@ -87,7 +88,7 @@ export function UserFormDialog({
     if (!rolesData) return [];
     const transformed = rolesData.map((role) => ({
       id: role,
-      label: role,
+      label: getRoleDisplayName(role),
     }));
     return transformed;
   }, [rolesData, isLoadingRoles, rolesError]);

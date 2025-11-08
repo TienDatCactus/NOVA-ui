@@ -20,15 +20,13 @@ import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onEdit?: (unit: UnitItemDetailResponseDto) => void;
-  onDelete?: (unit: UnitItemDetailResponseDto) => void;
+  onSuccess?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  onEdit,
-  onDelete,
+  onSuccess,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -42,8 +40,7 @@ export function DataTable<TData, TValue>({
       sorting,
     },
     meta: {
-      onEdit,
-      onDelete,
+      onSuccess,
     },
   });
 

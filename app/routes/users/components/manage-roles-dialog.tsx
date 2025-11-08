@@ -38,6 +38,7 @@ interface ManageRolesDialogProps {
   user: UserItem;
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 const ManageRolesSchema = z.object({
@@ -51,6 +52,7 @@ export function ManageRolesDialog({
   user,
   open,
   onClose,
+  onSuccess,
 }: ManageRolesDialogProps) {
   const { data: allRoles } = useRoles();
   const { mutate: assignRoles, isPending: isAssigning } = useAssignRoles();
@@ -84,6 +86,7 @@ export function ManageRolesDialog({
         onSuccess: () => {
           form.reset();
           onClose();
+          onSuccess?.();
         },
       }
     );
@@ -101,6 +104,7 @@ export function ManageRolesDialog({
         onSuccess: () => {
           form.reset();
           onClose();
+          onSuccess?.();
         },
       }
     );
