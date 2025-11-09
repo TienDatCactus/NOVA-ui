@@ -46,7 +46,7 @@ const StaffCreateBookingSchema = z.object({
     .regex(/^[^\d]+$/, "Tên khách không được chứa số"),
   guestEmail: z.email("Email không hợp lệ").optional().or(z.literal("")),
   guestPhone: z
-    .string()
+    .email()
     .min(9, "Số điện thoại không hợp lệ")
     .max(15)
     .optional()

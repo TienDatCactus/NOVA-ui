@@ -14,7 +14,6 @@ export default [
       route("reset-password", "routes/auth/reset-password.tsx"),
     ]),
   ]),
-  route("buttons", "components/button-showcase.tsx"),
   route("colors", "components/color-showcase.tsx"),
 
   ...prefix("dashboard", [

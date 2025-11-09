@@ -27,37 +27,23 @@ export default function MenuList({
   onQuantityChange,
 }: MenuListProps) {
   return (
-    <div className="space-y-4">
-      {/* Search Bar */}
-      <div className="flex items-center justify-end">
-        <Input
-          placeholder="Tìm kiếm món ăn"
-          value={searchText}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-60"
-          endAddon={<Search />}
-        />
-      </div>
-
-      {/* Menu Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2 h-[70vh] overflow-y-auto">
-        {menuItems.length === 0 ? (
-          <div className="text-center text-muted-foreground col-span-2 py-8">
-            Không có món ăn
-          </div>
-        ) : (
-          menuItems.map((menuItem) => (
-            <MenuCard
-              key={menuItem.itemId}
-              menuItem={menuItem}
-              isSelected={isSelected(menuItem.itemId)}
-              quantity={getQuantity(menuItem.itemId)}
-              onToggle={() => onToggleSelect(menuItem.itemId)}
-              onQuantityChange={(qty) => onQuantityChange(menuItem.itemId, qty)}
-            />
-          ))
-        )}
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2 h-96 overflow-y-auto">
+      {menuItems.length === 0 ? (
+        <div className="text-center text-muted-foreground col-span-2 py-8">
+          Không có món ăn
+        </div>
+      ) : (
+        menuItems.map((menuItem) => (
+          <MenuCard
+            key={menuItem.itemId}
+            menuItem={menuItem}
+            isSelected={isSelected(menuItem.itemId)}
+            quantity={getQuantity(menuItem.itemId)}
+            onToggle={() => onToggleSelect(menuItem.itemId)}
+            onQuantityChange={(qty) => onQuantityChange(menuItem.itemId, qty)}
+          />
+        ))
+      )}
     </div>
   );
 }

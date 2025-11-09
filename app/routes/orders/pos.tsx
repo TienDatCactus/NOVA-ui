@@ -136,7 +136,7 @@ export default function Component({
       unitPrice: item.price,
       imageUrl: item.imageUrls?.[0],
     });
-    toast.success(`Đã thêm ${item.name} vào giỏ`);
+    toast.success(`Đã thêm ${item.name} vào đơn`);
   };
 
   const handleAddCustomItem = (item: {
@@ -145,7 +145,8 @@ export default function Component({
     unitPrice: number;
     quantity: number;
   }) => {
-    const customId = `CUSTOM-${Date.now()}`;
+    const id = crypto.randomUUID();
+    const customId = `CUSTOM-${id}`;
     addItem({
       id: customId,
       menuItemId: undefined,
@@ -212,7 +213,6 @@ export default function Component({
 
   const handleNewOrder = () => {
     clearOrder();
-    toast.info("Bắt đầu đơn hàng mới");
   };
 
   return (

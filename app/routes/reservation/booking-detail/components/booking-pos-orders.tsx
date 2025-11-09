@@ -3,6 +3,7 @@ import {
   Building2,
   ChevronDown,
   ChevronRight,
+  Ellipsis,
   Plus,
   ShoppingCart,
   Trash2,
@@ -13,6 +14,13 @@ import type z from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -123,21 +131,21 @@ export default function BookingPosOrders({
                 {formatMoney(grandTotal).vndFormatted}
               </span>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant={"ghost"}>
+                  <Ellipsis />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={onAddCompletedCharges}>
+                  <Plus className="h-4 w-4" />
+                  Thêm sản phẩm
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>{" "}
-        {onAddCompletedCharges && (
-          <div className="flex justify-end w-full">
-            <Button
-              type="button"
-              size="sm"
-              variant="link"
-              onClick={onAddCompletedCharges}
-            >
-              <Plus className="h-4 w-4" />
-              Thêm món đã hoàn thành
-            </Button>
-          </div>
-        )}
       </CardHeader>
       <CardContent>
         {isLoadingOrder ? (

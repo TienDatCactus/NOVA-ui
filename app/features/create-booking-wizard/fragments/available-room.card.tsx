@@ -105,7 +105,7 @@ export function AvailableRoomTypeCard({
                   const isAvailable = room.status === "Ready";
 
                   return (
-                    <div className="space-y-2" key={room.roomId}>
+                    <div className="space-y-2 bg-white" key={room.roomId}>
                       <Label
                         htmlFor={room.roomId}
                         className={cn(

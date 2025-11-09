@@ -29,7 +29,6 @@ export default function PrintPreviewDialog({
   if (!printData) return null;
 
   const handlePrint = () => {
-    // Trigger browser print dialog
     window.print();
     onPrint();
   };
@@ -40,14 +39,6 @@ export default function PrintPreviewDialog({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>Xem trước hóa đơn</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="print:hidden"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 

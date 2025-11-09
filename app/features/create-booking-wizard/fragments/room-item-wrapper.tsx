@@ -46,13 +46,5 @@ export default function RoomItemWrapper({ roomId }: RoomItemWrapperProps) {
     );
   }
 
-  return (
-    <RoomItemCard
-      roomId={roomDetail.roomId}
-      roomName={roomDetail.roomName}
-      roomTypeName={roomDetail.roomTypeName}
-      dailyPrice={roomDetail.dailyPrice}
-      imageUrl={roomDetail.imageUrls?.[0]}
-    />
-  );
+  return <RoomItemCard roomDetail={roomDetail} />;
 }

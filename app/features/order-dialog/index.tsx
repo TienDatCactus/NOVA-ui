@@ -5,11 +5,20 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Input } from "~/components/ui/input";
+import { Search } from "lucide-react";
 import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
 import useMenuFilters from "~/routes/menu/container/menu/filter.hooks";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
@@ -20,8 +29,6 @@ import { useServiceOrderStore } from "~/store/service-order.store";
 import MenuList from "./components/menu-list";
 import OrderDetail from "./components/order-detail";
 import ServiceList from "./components/service-list";
-import FilterMenuBar from "./fragments/filter-menu.bar";
-import FilterServiceBar from "./fragments/filter-service.bar";
 
 interface AddServiceDialogProps {
   open: boolean;
@@ -41,6 +48,7 @@ export default function AddServiceDialog({
   customerName,
 }: AddServiceDialogProps) {
   const [activeTab, setActiveTab] = useState<"service" | "menu">("service");
+  const [searchText, setSearchText] = useState("");
 
   // Get store methods and data
   const orderServices = useServiceOrderStore((s) => s.services);
@@ -112,6 +120,7 @@ export default function AddServiceDialog({
   const handleConfirm = () => {
     onConfirm?.();
     setActiveTab("service");
+    setSearchText("");
     onOpenChange(false);
   };
 
@@ -120,81 +129,105 @@ export default function AddServiceDialog({
   };
 
   const filteredServiceItems = useMemo(() => {
-    return filterServices(serviceItems);
-  }, [filterServices, serviceItems]);
+    const filtered = filterServices(serviceItems);
+    if (!searchText) return filtered;
+    return filtered.filter((item) =>
+      item.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [filterServices, serviceItems, searchText]);
 
   const filteredMenuItems = useMemo(() => {
-    return filterMenuItems(menuItems || []);
-  }, [filterMenuItems, menuItems]);
+    const filtered = filterMenuItems(menuItems || []);
+    if (!searchText) return filtered;
+    return filtered.filter((item) =>
+      item.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [filterMenuItems, menuItems, searchText]);
 
   const totalSelected = orderServices.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full max-h-full min-h-0 overflow-y-auto p-0 bg-white">
-        <DialogHeader className="p-4 pb-0">
-          <DialogTitle>Menu & Dịch vụ</DialogTitle>
-        </DialogHeader>
-        <div className="p-4 pb-0 grid gap-4 flex-1 ">
-          <div className="grid md:grid-cols-12 grid-cols-1 gap-4">
-            <div className="col-span-2 ">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) => setActiveTab(v as "service" | "menu")}
+      <DialogContent className="max-w-6xl max-h-[90vh] min-h-0 overflow-hidden p-0 bg-background">
+        <DialogHeader className="p-6 pb-4">
+          <DialogTitle>Chọn dịch vụ & món ăn</DialogTitle>
+          <DialogDescription>
+            Chọn các dịch vụ và món ăn cho booking. Điều chỉnh số lượng và chi
+            tiết trong phần đơn hàng.
+          </DialogDescription>
+          <div className="flex items-center gap-3">
+            <Select
+              value={activeTab}
+              onValueChange={(v) => {
+                setActiveTab(v as "service" | "menu");
+                setSearchText("");
+              }}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="service">Dịch vụ</SelectItem>
+                <SelectItem value="menu">Menu</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {activeTab === "service" ? (
+              <Select
+                value={serviceFilters.typeCode}
+                onValueChange={(code) => updateServiceFilter("typeCode", code)}
               >
-                <TabsList className="w-full">
-                  <TabsTrigger
-                    value="service"
-                    className="flex items-center gap-1 px-2.5 sm:px-3"
-                  >
-                    Dịch vụ
-                    <Badge className="h-5 min-w-5 rounded-full px-1 tabular-nums">
-                      {filteredServiceItems.length}
-                    </Badge>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="menu"
-                    className="flex items-center gap-1 px-2.5 sm:px-3"
-                  >
-                    Menu
-                    <Badge className="h-5 min-w-5 rounded-full px-1 tabular-nums">
-                      {filteredMenuItems.length}
-                    </Badge>
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="service" className="space-y-4">
-                  <FilterServiceBar
-                    serviceTypes={serviceTypes}
-                    selectedTypeCode={serviceFilters.typeCode}
-                    onTypeChange={(code) =>
-                      updateServiceFilter("typeCode", code)
-                    }
-                    onReset={resetServiceFilters}
-                  />
-                </TabsContent>
-
-                <TabsContent value="menu" className="space-y-4">
-                  <FilterMenuBar
-                    menuCategories={menuCategories}
-                    selectedCategoryCode={menuFilters.categoryCode}
-                    onCategoryChange={(code) =>
-                      updateMenuFilter("categoryCode", code)
-                    }
-                    onReset={resetMenuFilters}
-                  />
-                </TabsContent>
-              </Tabs>
+                <SelectTrigger className="w-52">
+                  <SelectValue placeholder="Tất cả loại dịch vụ" />
+                </SelectTrigger>
+                <SelectContent>
+                  {serviceTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.code}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select
+                value={menuFilters.categoryCode}
+                onValueChange={(code) => updateMenuFilter("categoryCode", code)}
+              >
+                <SelectTrigger className="w-52">
+                  <SelectValue placeholder="Tất cả danh mục" />
+                </SelectTrigger>
+                <SelectContent>
+                  {menuCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.code}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Tìm kiếm..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="pl-9"
+              />
             </div>
+          </div>
+        </DialogHeader>
 
-            <div className="col-span-7 ">
+        {/* Filters Row */}
+
+        {/* Main Content Grid */}
+        <div className="px-6 pb-4 flex-1 ">
+          <div className="grid md:grid-cols-12 grid-cols-1 gap-4 h-full">
+            <div className="md:col-span-7 col-span-12 overflow-y-auto">
               {activeTab === "service" ? (
                 <ServiceList
                   services={filteredServiceItems}
-                  searchText={serviceFilters.searchText}
-                  onSearchChange={(text) =>
-                    updateServiceFilter("searchText", text)
-                  }
+                  searchText=""
+                  onSearchChange={() => {}}
                   isSelected={isSelected}
                   getQuantity={getQuantity}
                   onToggleSelect={(id) => toggleSelectItem(id, "ServiceItem")}
@@ -203,10 +236,8 @@ export default function AddServiceDialog({
               ) : (
                 <MenuList
                   menuItems={filteredMenuItems}
-                  searchText={menuFilters.searchText}
-                  onSearchChange={(text) =>
-                    updateMenuFilter("searchText", text)
-                  }
+                  searchText=""
+                  onSearchChange={() => {}}
                   isSelected={isSelected}
                   getQuantity={getQuantity}
                   onToggleSelect={(id) => toggleSelectItem(id, "MenuItem")}
@@ -215,7 +246,7 @@ export default function AddServiceDialog({
               )}
             </div>
 
-            <div className="col-span-3">
+            <div className="md:col-span-5 col-span-12 overflow-y-auto">
               <OrderDetail
                 onClearAll={handleClearAll}
                 bookingId={bookingId}

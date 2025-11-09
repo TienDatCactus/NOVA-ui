@@ -198,18 +198,9 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       note: data.note,
       otaBookingCode: data.otaBookingCode,
       otaInformationId: data.otaInformationId,
-      // Payment/Invoice fields are updated via PaymentInvoiceModal
-      // Don't include: rooms, breakfastDates (handled separately)
     };
 
-    updateBooking(payload as any, {
-      onSuccess: () => {
-        toast.success("Cập nhật thông tin đặt phòng thành công");
-      },
-      onError: () => {
-        toast.error("Có lỗi xảy ra khi cập nhật đặt phòng");
-      },
-    });
+    updateBooking(payload, {});
   };
 
   const handleAddRoom = (roomId: string, roomTypeId: string) => {
@@ -504,65 +495,63 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                     </div>
                   )}
                   {/* Breakfast Dates Picker */}
-                  {/* {form.watch("breakfastDates") !== undefined &&
-                    form.watch("breakfastDates").length > 0 && (
-                      <FormField
-                        control={form.control}
-                        name="breakfastDates"
-                        render={({ field }) => {
-                          const checkinDate = form.watch("checkinDate");
-                          const checkoutDate = form.watch("checkoutDate");
-                          const breakfastDates = field.value || [];
-                          return (
-                            <FormItem className="flex flex-col">
-                              <FormLabel className="text-sm uppercase text-card-foreground">
-                                Ngày có bữa sáng
-                              </FormLabel>
-                              <FormControl>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        field.value?.length === 0 &&
-                                          "text-muted-foreground"
-                                      )}
-                                    >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {breakfastDates.length > 0
-                                        ? `Đã chọn ${breakfastDates.length} ngày`
-                                        : "Chọn ngày có bữa sáng"}
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent
-                                    className="w-auto p-0"
-                                    align="start"
+                  {/* {!!form.watch("breakfastDates") && (
+                    <FormField
+                      control={form.control}
+                      name="breakfastDates"
+                      render={({ field }) => {
+                        const checkinDate = form.watch("checkinDate");
+                        const checkoutDate = form.watch("checkoutDate");
+                        const breakfastDates = field.value || [];
+                        return (
+                          <FormItem className="flex flex-col">
+                            <FormLabel className="text-sm uppercase text-card-foreground">
+                              Ngày có bữa sáng
+                            </FormLabel>
+                            <FormControl>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className={cn(
+                                      "w-full justify-start text-left font-normal",
+                                      field.value?.length === 0 &&
+                                        "text-muted-foreground"
+                                    )}
                                   >
-                                    <Calendar
-                                      mode="multiple"
-                                      selected={breakfastDates}
-                                      onSelect={(dates) =>
-                                        onSelectDates(dates || [])
-                                      }
-                                      disabled={(date) =>
-                                        date <= checkinDate ||
-                                        date > checkoutDate
-                                      }
-                                      locale={vi}
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                              </FormControl>
-                              <FormDescription>
-                                Chọn các ngày khách có sử dụng bữa sáng
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    )} */}
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {breakfastDates.length > 0
+                                      ? `Đã chọn ${breakfastDates.length} ngày`
+                                      : "Chọn ngày có bữa sáng"}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-auto p-0"
+                                  align="start"
+                                >
+                                  <Calendar
+                                    mode="multiple"
+                                    selected={breakfastDates}
+                                    onSelect={(dates) =>
+                                      onSelectDates(dates || [])
+                                    }
+                                    disabled={(date) =>
+                                      date <= checkinDate || date > checkoutDate
+                                    }
+                                    locale={vi}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            </FormControl>
+                            <FormDescription>
+                              Chọn các ngày khách có sử dụng bữa sáng
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  )} */}
 
                   <div className="flex flex-col gap-2">
                     <Label className="text-sm uppercase text-card-foreground">

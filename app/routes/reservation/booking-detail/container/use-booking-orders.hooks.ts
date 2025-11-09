@@ -126,17 +126,12 @@ export function useBookingOrders({
         return await BookingService.staffAddCompletedCharges(bookingId, data);
       },
       onSuccess: () => {
-        toast.success("Đã thêm món hoàn thành thành công");
         queryClient.invalidateQueries({
           queryKey: ["bookings-detail"],
         });
         queryClient.invalidateQueries({
           queryKey: ["booking-pending-charges", bookingId],
         });
-      },
-      onError: (error: any) => {
-        console.error("Error adding completed charges:", error);
-        toast.error(error.message || "Không thể thêm món. Vui lòng thử lại.");
       },
     });
 

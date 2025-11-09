@@ -1,7 +1,13 @@
 import { RotateCcw } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import type { MenuCategoryListResponseDto } from "~/services/api/menu-category/dto";
 
 interface FilterMenuBarProps {
@@ -13,7 +19,7 @@ interface FilterMenuBarProps {
 
 /**
  * Filter bar for menu items
- * Shows menu category selection as radio buttons
+ * Shows menu category selection as compact dropdown
  */
 export default function FilterMenuBar({
   menuCategories,
@@ -22,46 +28,32 @@ export default function FilterMenuBar({
   onReset,
 }: FilterMenuBarProps) {
   return (
-    <div className="space-y-4">
-      {/* Reset Button */}
-      <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={onReset}>
-          <RotateCcw className="h-4 w-4" />
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-sm font-medium">Danh mục</Label>
+        <Button variant="ghost" size="sm" onClick={onReset} className="h-8">
+          <RotateCcw className="h-3.5 w-3.5" />
           Đặt lại
         </Button>
       </div>
 
-      {/* Menu Category Radio Group */}
-      <RadioGroup
-        className="w-full max-w-96 justify-items-center grid-cols-1 gap-3"
-        value={selectedCategoryCode}
-        onValueChange={onCategoryChange}
-      >
-        {menuCategories.map((category) => (
-          <div
-            key={category.id}
-            className="border-input shadow-none has-data-[state=checked]:shadow-sm has-data-[state=checked]:border-primary/50 relative flex w-full items-center gap-3 rounded-md border p-2 cursor-pointer outline-none"
-          >
-            <RadioGroupItem
-              value={category.code}
-              id={category.id}
-              className="order-1 size-5 after:absolute after:inset-0 [&_svg]:size-3"
-              aria-describedby={`${category.id}-description`}
-            />
-            <div className="grid grow gap-2">
-              <Label htmlFor={category.id} className="text-start line-clamp-1">
-                {category.name}
-              </Label>
-              <p
-                id={`${category.id}-description`}
-                className="text-muted-foreground text-start text-xs line-clamp-2"
-              >
-                {category.code}
-              </p>
-            </div>
-          </div>
-        ))}
-      </RadioGroup>
+      <Select value={selectedCategoryCode} onValueChange={onCategoryChange}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Chọn danh mục" />
+        </SelectTrigger>
+        <SelectContent>
+          {menuCategories.map((category) => (
+            <SelectItem key={category.id} value={category.code}>
+              <div className="flex flex-col">
+                <span className="font-medium">{category.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {category.code}
+                </span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

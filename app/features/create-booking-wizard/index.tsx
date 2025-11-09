@@ -321,7 +321,9 @@ export default function BookingFlow() {
           </div>
         </CardHeader>
 
-        <CardContent className="p-6 md:px-8">{renderStepContent()}</CardContent>
+        <CardContent className="p-6 md:px-8 ">
+          {renderStepContent()}
+        </CardContent>
         <CardFooter className="mt-8 flex items-center justify-between border-t">
           <Button
             variant="outline"
