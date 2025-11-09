@@ -69,6 +69,7 @@ import BookingPosOrders from "./components/booking-pos-orders";
 import BookingServiceOrders from "./components/booking-service-orders";
 import PaymentInvoiceModal from "./components/payment-invoice-modal";
 import { useBookingOrders } from "./container/use-booking-orders.hooks";
+import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
 import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
 
@@ -104,6 +105,9 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
+
+  // Booking update permissions
+  const permissions = useBookingUpdatePermissions(bookingDetail);
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
     bookingDetail?.id || ""
@@ -175,6 +179,19 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const checkinDate = form.watch("checkinDate");
   const checkoutDate = form.watch("checkoutDate");
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
+    // Check if attempting heavy updates
+    const hasHeavyUpdates =
+      data.checkinDate !== bookingDetail?.checkinDate ||
+      data.checkoutDate !== bookingDetail?.checkoutDate ||
+      (data.rooms && data.rooms.length > 0);
+
+    if (hasHeavyUpdates && !permissions.canDoHeavyUpdate) {
+      toast.error(
+        permissions.blockReason || "Không thể cập nhật cấu trúc booking này"
+      );
+      return;
+    }
+
     const payload: Partial<StaffUpdateBookingRequestDto> = {
       checkinDate:
         data.checkinDate instanceof Date
@@ -297,11 +314,17 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => setAddRoomModalOpen(true)}
+                      disabled={!permissions.canAddRooms}
                     >
                       <Plus className="h-4 w-4 mr-1" />
                       Thêm
                     </Button>
                   </div>
+                  {!permissions.canAddRooms && (
+                    <p className="text-xs text-destructive mt-2">
+                      {permissions.blockReason}
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent className="flex-1 overflow-y-auto space-y-2">
                   {/* Existing Rooms */}
@@ -668,8 +691,16 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                           <FormItem className="flex flex-col">
                             <FormLabel>Ngày nhận phòng</FormLabel>
                             <FormControl>
-                              <DatePicker {...field} />
+                              <DatePicker
+                                {...field}
+                                disabled={!permissions.canEditDates}
+                              />
                             </FormControl>
+                            {!permissions.canEditDates && (
+                              <FormDescription className="text-destructive text-xs">
+                                {permissions.blockReason}
+                              </FormDescription>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
@@ -682,8 +713,16 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                           <FormItem className="flex flex-col">
                             <FormLabel>Ngày trả phòng</FormLabel>
                             <FormControl>
-                              <DatePicker {...field} />
+                              <DatePicker
+                                {...field}
+                                disabled={!permissions.canEditDates}
+                              />
                             </FormControl>
+                            {!permissions.canEditDates && (
+                              <FormDescription className="text-destructive text-xs">
+                                {permissions.blockReason}
+                              </FormDescription>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
