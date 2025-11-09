@@ -39,7 +39,6 @@ export default function UpdateScheduleDialog({
   const [error, setError] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  // Initialize with current scheduled time or default to +30 minutes
   useEffect(() => {
     if (open) {
       if (currentScheduledTime) {
@@ -47,7 +46,7 @@ export default function UpdateScheduleDialog({
         setSelectedDate(scheduledDate);
         setTimeString(format(scheduledDate, "HH:mm"));
       } else {
-        const defaultTime = addMinutes(new Date(), 30);
+        const defaultTime = new Date(); // Changed from +30 minutes to now
         setSelectedDate(defaultTime);
         setTimeString(format(defaultTime, "HH:mm"));
       }

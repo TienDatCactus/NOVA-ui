@@ -29,18 +29,41 @@ import { Button } from "~/components/ui/button";
 import { useOTAInfo } from "../container/create-booking-query.hooks";
 
 // Step 2 Schema: Customer Info + Detailed Booking Type
-const CustomerInfoSchema = z.object({
-  guestFullName: z
-    .string()
-    .min(2, "Tên khách phải có ít nhất 2 ký tự")
-    .regex(/^[^\d]+$/, "Tên khách không được chứa số"),
-  guestPhone: z.string().optional(),
-  guestEmail: z.email("Email không hợp lệ").optional().or(z.literal("")),
-  // Conditional fields
-  source: z.string().optional(), // For Direct booking
-  otaInformationId: z.string().optional(), // For OTA
-  otaBookingCode: z.string().optional(), // For OTA
-});
+const CustomerInfoSchema = z
+  .object({
+    guestFullName: z
+      .string()
+      .min(2, "Tên khách phải có ít nhất 2 ký tự")
+      .regex(/^[^\d]+$/, "Tên khách không được chứa số"),
+    guestPhone: z.string().optional(),
+    guestEmail: z.email("Email không hợp lệ").optional().or(z.literal("")),
+    source: z.string().optional(), // For Direct booking
+    otaInformationId: z.string().optional(), // For OTA
+    otaBookingCode: z.string().optional(), // For OTA
+  })
+  .refine(
+    (data) => {
+      if (data.source || data.otaInformationId) {
+        return true;
+      }
+      return false;
+    },
+    {
+      message: "Vui lòng chọn nguồn đặt phòng hoặc nền tảng OTA",
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.otaInformationId && !data.otaBookingCode) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Mã đặt phòng OTA là bắt buộc khi chọn nền tảng OTA",
+      path: ["otaBookingCode"],
+    }
+  );
 
 type CustomerInfoFormData = z.infer<typeof CustomerInfoSchema>;
 
@@ -199,7 +222,9 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
               name="otaBookingCode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mã đặt phòng OTA</FormLabel>
+                  <FormLabel>
+                    Mã đặt phòng OTA <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       {...field}

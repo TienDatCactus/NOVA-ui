@@ -25,13 +25,13 @@ export default function OrderDetail({
 
   return (
     <div className="flex flex-col gap-4 p-2  h-100 overflow-y-auto">
-      <Card className="border shadow-sm">
-        <CardHeader className=" ">
+      <Card className="border py-4 shadow-sm">
+        <CardHeader className="">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">Thông tin đơn hàng</h3>
               {selectedItems.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={onClearAll}>
+                <Button variant="destructive" size="sm" onClick={onClearAll}>
                   Xóa tất cả
                 </Button>
               )}

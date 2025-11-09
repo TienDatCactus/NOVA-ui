@@ -195,6 +195,17 @@ export default function OrderActions({
               Thêm món
             </Button>
 
+            {/* Update Schedule Button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsScheduleDialogOpen(true)}
+              disabled={isUpdatingSchedule}
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              {isUpdatingSchedule ? "Đang cập nhật..." : "Đổi giờ"}
+            </Button>
+
             {/* Pay Now Dialog */}
             <Dialog open={isPayDialogOpen} onOpenChange={setIsPayDialogOpen}>
               <DialogTrigger asChild>
@@ -342,6 +353,19 @@ export default function OrderActions({
               </AlertDialogContent>
             </AlertDialog>
           </>
+        )}
+
+        {/* Update Schedule for Completed orders */}
+        {status === "Completed" && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsScheduleDialogOpen(true)}
+            disabled={isUpdatingSchedule}
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            {isUpdatingSchedule ? "Đang cập nhật..." : "Đổi giờ"}
+          </Button>
         )}
       </div>
 

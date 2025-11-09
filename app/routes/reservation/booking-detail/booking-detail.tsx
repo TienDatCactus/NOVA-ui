@@ -1,9 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
 import {
   Baby,
-  CalendarIcon,
   Ellipsis,
   Mail,
   Pen,
@@ -17,7 +15,6 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { DatePicker } from "~/components/ui/date-picker";
 import {
@@ -47,11 +44,6 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -63,23 +55,22 @@ import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
-import { cn, formatMoney, toYMD } from "~/lib/utils";
-import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
+import { formatMoney, toYMD } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
-import AddMenuItemDialog from "./components/add-menu-item-dialog";
-import { AddRoomModal } from "./components/add-room-modal";
 import CreateOrderDialog from "../bookings/components/create-order-dialog";
-import PaymentInvoiceModal from "./components/payment-invoice-modal";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
-import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
-import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
-import { useBookingOrders } from "./container/use-booking-orders.hooks";
+import type { Route } from "./+types/booking-detail";
+import AddMenuItemDialog from "./components/add-menu-item-dialog";
+import { AddRoomModal } from "./components/add-room-modal";
 import BookingPosOrders from "./components/booking-pos-orders";
 import BookingServiceOrders from "./components/booking-service-orders";
-import type { Route } from "./+types/booking-detail";
+import PaymentInvoiceModal from "./components/payment-invoice-modal";
+import { useBookingOrders } from "./container/use-booking-orders.hooks";
+import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
+import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -746,7 +737,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 form={form}
               />
 
-              {/* Note Modal */}
               <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
                 <DialogContent className="max-w-xl">
                   <DialogHeader>

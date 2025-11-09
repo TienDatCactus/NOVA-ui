@@ -1,6 +1,5 @@
 import {
   Beef,
-  Building2,
   ChevronDown,
   ChevronRight,
   Ellipsis,
@@ -18,16 +17,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
   Table,
@@ -39,7 +30,6 @@ import {
 } from "~/components/ui/table";
 import { formatMoney } from "~/lib/utils";
 import { OrderSchema } from "~/services/api/orders/order.schema";
-import type { RoomSchema } from "~/services/api/rooms/room.schema";
 
 type POSOrderFromBookingDetail = z.infer<
   typeof OrderSchema.POSOrdersListItemByBookingDetailSchema
@@ -132,7 +122,7 @@ export default function BookingPosOrders({
               </span>
             </div>
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <Button variant={"ghost"}>
                   <Ellipsis />
                 </Button>

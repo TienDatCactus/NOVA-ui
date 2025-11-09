@@ -62,7 +62,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                 )}
               </div>
 
-              <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-6 text-sm flex-wrap">
                 <div>
                   <p className="text-muted-foreground text-xs">Ngày tạo</p>
                   <p className="font-medium">
@@ -75,6 +75,22 @@ export default function OrderCard({ order }: OrderCardProps) {
                     )}
                   </p>
                 </div>
+                {order.scheduledAt && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">
+                      Thời gian phục vụ
+                    </p>
+                    <p className="font-medium">
+                      {format(
+                        parseISO(order.scheduledAt),
+                        "HH:mm - dd/MM/yyyy",
+                        {
+                          locale: vi,
+                        }
+                      )}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <p className="text-muted-foreground text-xs">Tổng tiền</p>
                   <p className="font-semibold text-primary">

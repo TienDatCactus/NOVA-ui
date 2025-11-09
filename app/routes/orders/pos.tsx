@@ -166,11 +166,13 @@ export default function Component({
   };
 
   const handleCheckoutConfirm = (mode: "walk-in" | "booking") => {
+    setCheckoutDialog(false);
+
     if (mode === "walk-in") {
-      setCheckoutDialog(false);
-      handleCreateOrder();
+      // Walk-in guests also need served time
+      setServedTimeDialog(true);
     } else {
-      setCheckoutDialog(false);
+      // Booking guests select booking first, then served time
       setBookingDialog(true);
     }
   };
@@ -195,6 +197,7 @@ export default function Component({
   };
 
   const handleCreateOrder = () => {
+    //! add note in a separated step here
     try {
       mutate({
         bookingId,

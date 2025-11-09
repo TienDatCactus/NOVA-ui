@@ -19,6 +19,12 @@ import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.
 import { FormSchema } from "~/services/schema/forms.schema";
 import { AvailableRoomTypeCard } from "../fragments/available-room.card";
 import RoomItemWrapper from "../fragments/room-item-wrapper";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Button } from "~/components/ui/button";
 
 interface RoomSelectionStepProps {
   onNext: () => void;
@@ -147,6 +153,31 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
             ) || 0}{" "}
             phòng trống
           </p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Các phòng đã chọn{" "}
+                <Badge variant={"info"}>{selectedRoomIds.length}</Badge>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent asChild className="w-96 rounded-md">
+              <Card className=" border shadow-sm gap-0">
+                <CardHeader className="pt-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">Phòng đã chọn</CardTitle>
+                    <Badge variant="secondary">
+                      {selectedRoomIds.length} phòng
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-2 flex flex-col gap-2 snap-x w-full overflow-y-auto ">
+                  {selectedRoomIds.map((roomId) => (
+                    <RoomItemWrapper key={roomId} roomId={roomId} />
+                  ))}
+                </CardContent>
+              </Card>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         {form.formState.errors.roomIds && (
           <Alert variant={"destructive"}>
@@ -186,26 +217,8 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
             </>
           )}
         </div>
-        <Separator />
 
         {/* Selected Rooms */}
-        {selectedRoomIds.length > 0 && (
-          <Card className=" border shadow-sm gap-0">
-            <CardHeader className="">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Phòng đã chọn</CardTitle>
-                <Badge variant="secondary">
-                  {selectedRoomIds.length} phòng
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 flex gap-2 snap-x w-full overflow-x-auto ">
-              {selectedRoomIds.map((roomId) => (
-                <RoomItemWrapper key={roomId} roomId={roomId} />
-              ))}
-            </CardContent>
-          </Card>
-        )}
       </form>
     </Form>
   );

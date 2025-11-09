@@ -28,44 +28,38 @@ export default function RoomItemCard({ roomDetail }: RoomItemCardProps) {
     setData({ roomIds: updatedRoomIds });
   };
   return (
-    <Card className="w-48 shadow-sm hover:shadow-md transition-shadow hover:border-primary p-0">
-      <CardContent className="p-3">
-        <div className="aspect-square rounded-md bg-gray-100 mb-2">
-          <Image
-            src={imageUrls?.[0] || ""}
-            alt={roomName}
-            height={160}
-            className="w-full h-full object-cover rounded-md"
-          />
+    <Card className="w-full shadow-sm hover:shadow-md transition-shadow hover:border-primary p-0">
+      <CardContent className="p-3 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="rounded-md bg-gray-100">
+            <Image
+              src={imageUrls?.[0] || ""}
+              alt={roomName}
+              width={80}
+              height={80}
+              className="w-full h-full object-contain rounded-md"
+            />
+          </div>
+
+          <div>
+            <CardTitle className="text-sm mb-1">{roomName}</CardTitle>
+            <CardDescription className="text-xs mb-2 line-clamp-2">
+              {roomTypeName}
+            </CardDescription>
+            <p className="text-sm font-bold">
+              {formatMoney(dailyPrice).vndFormatted}
+            </p>
+          </div>
         </div>
 
-        <CardTitle className="text-sm mb-1">{roomName}</CardTitle>
-        <CardDescription className="text-xs mb-2 line-clamp-2">
-          {roomTypeName}
-        </CardDescription>
-        <div className="flex items-center space-x-1 mb-2">
-          <div className="flex">
-            {[1, 2, 3, 4].map((star) => (
-              <StarIcon
-                key={star}
-                className="h-3 w-3 fill-yellow-400 text-yellow-400"
-              />
-            ))}
-            <StarIcon className="h-3 w-3 text-gray-300" />
-          </div>
-          <span className="text-xs text-muted-foreground">(4.0)</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-bold">{dailyPrice}</span>
-          <Button
-            onClick={handleRemove}
-            size="sm"
-            variant="destructive"
-            className="text-xs px-2 py-1 h-7"
-          >
-            Xóa
-          </Button>
-        </div>
+        <Button
+          onClick={handleRemove}
+          size="sm"
+          variant="destructive"
+          className="text-xs px-2 py-1 h-7"
+        >
+          Xóa
+        </Button>
       </CardContent>
     </Card>
   );

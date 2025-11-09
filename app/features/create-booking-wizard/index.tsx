@@ -152,7 +152,7 @@ export default function BookingFlow() {
                   "cursor-pointer transition-all",
                   bookingData.bookingType === "OTA"
                     ? "bg-muted border-primary ring-2 ring-primary"
-                    : "border-card hover:shadow-md"
+                    : "border-gray-200 hover:shadow-md"
                 )}
                 onClick={() => updateBookingData("bookingType", "OTA")}
               >
