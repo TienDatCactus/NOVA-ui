@@ -19,33 +19,27 @@ export function useCreateServiceType() {
   });
 }
 
-export function useUpdateServiceType() {
+export function useUpdateServiceType(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: UpdateServiceTypeRequestDto;
-    }) => await ServiceTypesService.updateServiceType(id, data),
+    mutationFn: async ({ data }: { data: UpdateServiceTypeRequestDto }) =>
+      await ServiceTypesService.updateServiceType(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service-types"] });
-      queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["service-types-detail", id] });
     },
   });
 }
 
-export function useDeleteServiceType() {
+export function useDeleteServiceType(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) =>
-      await ServiceTypesService.deleteServiceType(id),
+    mutationFn: async () => await ServiceTypesService.deleteServiceType(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service-types"] });
-      queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["service-types-detail", id] });
     },
   });
 }

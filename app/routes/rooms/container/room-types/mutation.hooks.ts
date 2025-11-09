@@ -18,31 +18,26 @@ export function useCreateRoomType() {
   });
 }
 
-export function useUpdateRoomType() {
+export function useUpdateRoomType(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: UpdateRoomTypesDetailRequestDto;
-    }) => RoomTypesService.updateRoomTypesDetail(id, data),
+    mutationFn: ({ data }: { data: UpdateRoomTypesDetailRequestDto }) =>
+      RoomTypesService.updateRoomTypesDetail(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room-types"] });
-      queryClient.invalidateQueries({ queryKey: ["room-type"] });
+      queryClient.invalidateQueries({ queryKey: ["room-type", id] });
     },
   });
 }
 
-export function useDeleteRoomType() {
+export function useDeleteRoomType(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => RoomTypesService.deleteRoomTypes(id),
+    mutationFn: () => RoomTypesService.deleteRoomTypes(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room-types"] });
-      queryClient.invalidateQueries({ queryKey: ["room-type"] });
+      queryClient.invalidateQueries({ queryKey: ["room-type", id] });
     },
   });
 }
