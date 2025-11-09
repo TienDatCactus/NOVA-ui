@@ -5,7 +5,7 @@ import type {
   CreatePOSOrderRequestDto,
   POSOrderPayNowRequestDto,
 } from "~/services/api/orders/dto";
-import type { PosCartItem } from "~/store/pos-order.store";
+import type { MenuPosCartItem } from "~/store/menu-pos-order.store";
 
 /**
  * Create a new POS order
@@ -39,7 +39,7 @@ function useCreatePosOrderAndItems() {
       bookingRoomId?: string | null;
       servedAt?: string | null;
       notes?: string | null;
-      items: PosCartItem[];
+      items: MenuPosCartItem[];
     }) => {
       // Step 1: Create the POS order
       const order = await OrderService.createPOSOrder({

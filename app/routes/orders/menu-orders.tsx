@@ -7,11 +7,11 @@ import {
   EmptyTitle,
 } from "~/components/ui/empty";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import type { Route } from "./+types/orders";
 import OrderCard from "./components/order-list/order-card";
 import StatusFilter from "./components/order-list/status-filter";
 import { usePOSOrderList } from "./container/order-pos/query.hooks";
 import type { OrderStatus } from "~/services/api/orders/order.types";
+import type { Route } from "./+types/menu-orders";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};

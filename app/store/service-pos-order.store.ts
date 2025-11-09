@@ -1,30 +1,30 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type PosCartItem = {
+export type ServicePosCartItem = {
   id: string; // Unique identifier for cart tracking
-  menuItemId?: string; // Optional for custom items
+  serviceItemId?: string; // Optional for custom services
   code: string;
   name: string;
   unitPrice: number;
   quantity: number;
   imageUrl?: string;
   notes?: string;
-  // For custom items
-  customItemName?: string;
-  customItemDescription?: string;
+  // For custom services
+  customServiceName?: string;
+  customServiceDescription?: string;
 };
 
-type PosOrderState = {
+type ServicePosOrderState = {
   // Order metadata
   orderId: string | null;
   bookingId: string | null;
   bookingRoomId: string | null;
-  servedAt: string | null; // Time when customer wants order served
+  scheduledAt: string | null; // Time when service is scheduled
   notes: string | null; // Optional notes for the whole order
 
   // Cart items
-  items: PosCartItem[];
+  items: ServicePosCartItem[];
 
   // Computed values
   subtotal: number;
@@ -36,44 +36,44 @@ type PosOrderState = {
     bookingId: string | null,
     bookingRoomId: string | null
   ) => void;
-  setServedAt: (servedAt: string) => void;
+  setScheduledAt: (scheduledAt: string) => void;
   setNotes: (notes: string) => void;
   clearOrder: () => void;
 
   // Actions - Cart management
   addItem: (
-    item: Omit<PosCartItem, "quantity"> & { quantity?: number }
+    item: Omit<ServicePosCartItem, "quantity"> & { quantity?: number }
   ) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   recalculateSubtotal: () => void;
 };
 
-export const usePosOrderStore = create<PosOrderState>()(
+export const useServicePosOrderStore = create<ServicePosOrderState>()(
   persist(
     (set, get) => ({
       // Initial state
       orderId: null,
       bookingId: null,
       bookingRoomId: null,
-      servedAt: null,
+      scheduledAt: null,
       notes: null,
       items: [],
       subtotal: 0,
       itemCount: 0,
 
-      // Generate unique order ID (format: #POS + timestamp)
+      // Generate unique order ID (format: #SVC + timestamp)
       generateOrderId: () => {
-        const orderId = `#POS${Date.now()}`;
+        const orderId = `#SVC${Date.now()}`;
         set({ orderId });
       },
 
       setBookingInfo: (bookingId, bookingRoomId) => {
-        set({ bookingId, bookingRoomId }); // Clear walk-in if booking selected
+        set({ bookingId, bookingRoomId });
       },
 
-      setServedAt: (servedAt) => {
-        set({ servedAt });
+      setScheduledAt: (scheduledAt) => {
+        set({ scheduledAt });
       },
 
       setNotes: (notes) => {
@@ -85,7 +85,7 @@ export const usePosOrderStore = create<PosOrderState>()(
           orderId: null,
           bookingId: null,
           bookingRoomId: null,
-          servedAt: null,
+          scheduledAt: null,
           notes: null,
           items: [],
           subtotal: 0,
@@ -151,7 +151,7 @@ export const usePosOrderStore = create<PosOrderState>()(
       },
     }),
     {
-      name: "pos-order-storage",
+      name: "service-pos-order-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )

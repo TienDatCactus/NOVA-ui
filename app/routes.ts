@@ -15,9 +15,9 @@ export default [
     ]),
   ]),
   route("colors", "components/color-showcase.tsx"),
-
   ...prefix("dashboard", [
-    ...prefix("orders", [route("pos", "routes/orders/pos.tsx")]),
+    route("menu-pos", "routes/orders/menu-pos.tsx"),
+    route("service-pos", "routes/orders/service-pos.tsx"),
   ]),
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
@@ -38,7 +38,10 @@ export default [
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
         route("new-booking", "routes/reservation/new-booking.tsx"),
       ]),
-      ...prefix("orders", [index("routes/orders/orders.tsx")]),
+      ...prefix("orders", [
+        index("routes/orders/menu-orders.tsx"),
+        route("service-orders", "routes/orders/service-orders.tsx"),
+      ]),
       ...prefix("rooms", [
         index("routes/rooms/rooms.tsx"),
         route("types", "routes/rooms/types.tsx"),

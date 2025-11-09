@@ -5,7 +5,7 @@ import { formatMoney } from "~/lib/utils";
 import { PenLine, Trash2 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import type { PosCartItem } from "~/store/pos-order.store";
+import type { PosCartItem } from "~/store/menu-pos-order.store";
 
 type CartItemProps = {
   cartItem: PosCartItem;
