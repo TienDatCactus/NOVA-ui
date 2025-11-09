@@ -47,8 +47,10 @@ export default function EditMenuCategorySheet({
   onClose,
   categoryId,
 }: EditMenuCategorySheetProps) {
-  const { data: category, isPending: isLoadingDetail } =
-    useMenuCategoryDetail(categoryId);
+  const { data: category, isPending: isLoadingDetail } = useMenuCategoryDetail(
+    categoryId ?? "",
+    { enabled: open }
+  );
   const { mutate: updateCategory, isPending: isUpdating } =
     useUpdateMenuCategory(categoryId);
 

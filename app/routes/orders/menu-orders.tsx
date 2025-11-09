@@ -1,9 +1,10 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, Package } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -64,6 +65,9 @@ export default function Component({
             ) : filteredOrders?.length === 0 ? (
               <Empty>
                 <EmptyHeader>
+                  <EmptyMedia variant={"icon"}>
+                    <Package />
+                  </EmptyMedia>
                   <EmptyTitle>Không có đơn hàng</EmptyTitle>
                   <EmptyDescription>
                     {statusFilter === "All"

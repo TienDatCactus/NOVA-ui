@@ -1,10 +1,11 @@
-import { Loader2, Plus } from "lucide-react";
+import { HandPlatter, Loader2, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -40,7 +41,7 @@ export default function Component({}: Route.ComponentProps) {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Service Orders</h1>
+              <h1 className="text-2xl font-bold">Danh sách đơn dịch vụ</h1>
               <p className="text-sm text-muted-foreground mt-1">
                 Quản lý các dịch vụ đã đặt
               </p>
@@ -73,11 +74,14 @@ export default function Component({}: Route.ComponentProps) {
             ) : filteredOrders.length === 0 ? (
               <Empty>
                 <EmptyHeader>
-                  <EmptyTitle>Không có service order</EmptyTitle>
+                  <EmptyMedia variant={"icon"}>
+                    <HandPlatter />
+                  </EmptyMedia>
+                  <EmptyTitle>Không có đơn dịch vụ</EmptyTitle>
                   <EmptyDescription>
                     {statusFilter === "All"
-                      ? "Chưa có service order nào được tạo"
-                      : `Không có service order ${
+                      ? "Chưa có đơn dịch vụ nào được tạo"
+                      : `Không có đơn dịch vụ ${
                           statusFilter === "Scheduled"
                             ? "đã lên lịch"
                             : statusFilter === "Completed"
