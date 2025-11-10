@@ -20,7 +20,7 @@ import PaymentDialog from "./payment.dialog";
 import {
   useCompleteServiceOrder,
   useCancelServiceOrder,
-} from "../../container/service-pos/mutation.hooks";
+} from "../../container/service-order-list/mutation.hooks";
 
 interface ServiceOrderActionsProps {
   order: ServiceOrderDetailDto;

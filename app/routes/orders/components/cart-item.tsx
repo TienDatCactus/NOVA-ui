@@ -5,10 +5,11 @@ import { formatMoney } from "~/lib/utils";
 import { PenLine, Trash2 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import type { PosCartItem } from "~/store/menu-pos-order.store";
+import type { MenuPosCartItem } from "~/store/menu-pos-order.store";
+import type { ServicePosCartItem } from "~/store/service-pos-order.store";
 
 type CartItemProps = {
-  cartItem: PosCartItem;
+  cartItem: MenuPosCartItem | ServicePosCartItem;
 
   onQuantityChange: (quantity: number) => void;
   onRemove: () => void;

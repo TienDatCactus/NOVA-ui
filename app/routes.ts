@@ -39,7 +39,7 @@ export default [
         route("new-booking", "routes/reservation/new-booking.tsx"),
       ]),
       ...prefix("orders", [
-        index("routes/orders/menu-orders.tsx"),
+        route("menu-orders", "routes/orders/menu-orders.tsx"),
         route("service-orders", "routes/orders/service-orders.tsx"),
       ]),
       ...prefix("rooms", [

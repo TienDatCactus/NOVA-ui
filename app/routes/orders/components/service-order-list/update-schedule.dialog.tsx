@@ -14,7 +14,7 @@ import { Input } from "~/components/ui/input";
 import { CalendarIcon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useUpdateServiceOrderSchedule } from "../../container/service-pos/mutation.hooks";
+import { useUpdateServiceOrderSchedule } from "../../container/service-order-list/mutation.hooks";
 
 interface UpdateScheduleDialogProps {
   orderId: string;

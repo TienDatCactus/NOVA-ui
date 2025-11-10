@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { OrderService } from "~/services/api/orders";
 import type {
-  AddItemsToPOSOrderRequestDto,
   CreatePOSOrderRequestDto,
   POSOrderPayNowRequestDto,
+  AddSingleItemToPOSOrderRequestDto,
+  AddBatchItemsToPOSOrderRequestDto,
 } from "~/services/api/orders/dto";
 import type { MenuPosCartItem } from "~/store/menu-pos-order.store";
 
@@ -21,49 +22,43 @@ function useCreatePOSOrder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders", "by-invoice"],
+        queryKey: ["pos-order-list"],
       });
     },
   });
 }
+
+/**
+ * DEPRECATED: This hook needs refactoring as createPOSOrder now returns void
+ * TODO: Backend should return order ID after creation for this pattern to work
+ */
 function useCreatePosOrderAndItems() {
   return useMutation({
     mutationFn: async ({
       bookingId,
       bookingRoomId,
-      servedAt,
+      scheduledAt,
       notes,
       items,
     }: {
       bookingId?: string | null;
       bookingRoomId?: string | null;
-      servedAt?: string | null;
+      scheduledAt?: string | null;
       notes?: string | null;
       items: MenuPosCartItem[];
     }) => {
-      // Step 1: Create the POS order
       const order = await OrderService.createPOSOrder({
         bookingId: bookingId || undefined,
         bookingRoomId: bookingRoomId || undefined,
-        servedAt: servedAt || undefined,
+        scheduledAt: scheduledAt || undefined,
         notes: notes || undefined,
       });
 
-      // Step 2: Add items to the order
-      for (const item of items) {
-        await OrderService.addItemsToPOSOrder(order.posOrderId, {
-          menuItemId: item.customItemName ? undefined : item.menuItemId,
-          customItemName: item.customItemName,
-          customItemDescription: item.customItemDescription,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-        });
-      }
+      await OrderService.addBatchItemsToPOSOrder(order.posOrderId, items);
 
-      // Step 3: Set scheduled time if provided
-      if (servedAt) {
+      if (scheduledAt) {
         await OrderService.setScheduledOrder(order.posOrderId, {
-          scheduledAt: new Date(servedAt),
+          scheduledAt: new Date(scheduledAt),
         });
       }
 
@@ -73,11 +68,10 @@ function useCreatePosOrderAndItems() {
 }
 
 /**
- * Add an item to an existing POS order
+ * Add a single item to an existing POS order
  * Invalidates: specific order detail and invoice orders list
- * Uses idempotency key to prevent duplicate item additions
  */
-function useAddItemToPOSOrder() {
+function useAddSingleItemToPOSOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -86,16 +80,44 @@ function useAddItemToPOSOrder() {
       data,
     }: {
       orderId: string;
-      data: AddItemsToPOSOrderRequestDto;
+      data: AddSingleItemToPOSOrderRequestDto;
     }) => {
-      return await OrderService.addItemsToPOSOrder(orderId, data);
+      return await OrderService.addItemToPOSOrder(orderId, data);
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders", "by-invoice"],
+        queryKey: ["pos-order-list"],
+      });
+    },
+  });
+}
+
+/**
+ * Add batch items to an existing POS order
+ * Invalidates: specific order detail and invoice orders list
+ */
+function useAddBatchItemsToPOSOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      data,
+    }: {
+      orderId: string;
+      data: AddBatchItemsToPOSOrderRequestDto;
+    }) => {
+      return await OrderService.addBatchItemsToPOSOrder(orderId, data);
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-list"],
       });
     },
   });
@@ -124,7 +146,7 @@ function useDeleteItemFromPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders", "by-invoice"],
+        queryKey: ["pos-order-list"],
       });
     },
   });
@@ -147,7 +169,7 @@ function useCompletePOSOrder() {
         queryKey: ["pos-order-detail", orderId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders", "by-invoice"],
+        queryKey: ["pos-order-list"],
       });
     },
   });
@@ -170,7 +192,7 @@ function useCancelPOSOrder() {
         queryKey: ["pos-order-detail", orderId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders", "by-invoice"],
+        queryKey: ["pos-order-list"],
       });
     },
   });
@@ -193,7 +215,7 @@ function usePayPOSOrderNow() {
         queryKey: ["pos-order-detail", orderId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders", "by-invoice"],
+        queryKey: ["pos-order-list"],
       });
     },
   });
@@ -222,7 +244,7 @@ function useSetScheduledOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["pos-orders"],
+        queryKey: ["pos-order-list"],
       });
     },
   });
@@ -258,8 +280,37 @@ function useSetServedOrderItem() {
   });
 }
 
+/**
+ * Update note for POS order
+ * Invalidates: specific order detail and orders list
+ */
+function useUpdatePOSOrderNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      note,
+    }: {
+      orderId: string;
+      note: string;
+    }) => {
+      return await OrderService.updatePOSOrderNote(orderId, { note });
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-list"],
+      });
+    },
+  });
+}
+
 export {
-  useAddItemToPOSOrder,
+  useAddSingleItemToPOSOrder,
+  useAddBatchItemsToPOSOrder,
   useCancelPOSOrder,
   useCompletePOSOrder,
   useCreatePOSOrder,
@@ -268,4 +319,5 @@ export {
   usePayPOSOrderNow,
   useSetScheduledOrder,
   useSetServedOrderItem,
+  useUpdatePOSOrderNote,
 };

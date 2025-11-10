@@ -17,15 +17,14 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useMenuCategories } from "../menu/container/menu-categories/query.hooks";
 import { useMenuList } from "../menu/container/menu/query.hooks";
-import BookingSelectionDialog from "./components/order-pos/booking-selection.dialog";
-import CartItem from "./components/order-pos/cart-item";
-import CartSummary from "./components/order-pos/cart-summary";
-import CheckoutConfirmDialog from "./components/order-pos/checkout-confirm.dialog";
-import ItemCustomizationDialog from "./components/order-pos/item-customization.dialog";
-import MenuItemCard from "./components/order-pos/menu-item-card";
-import OrderConfirmationDialog from "./components/order-pos/order-confirmation.dialog";
-import ServedTimeDialog from "./components/order-pos/served-time.dialog";
-import CustomItemDialog from "./components/order-pos/custom-item.dialog";
+import BookingSelectionDialog from "./components/booking-selection.dialog";
+import CartItem from "./components/cart-item";
+import CartSummary from "./components/cart-summary";
+import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
+import MenuItemCard from "./components/menu-pos/menu-item-card";
+import OrderConfirmationDialog from "./components/order-confirmation.dialog";
+import ServedTimeDialog from "./components/served-time.dialog";
+import CustomItemDialog from "./components/menu-pos/custom-item.dialog";
 
 import useMenuFilters from "../menu/container/menu/filter.hooks";
 import { Link } from "react-router";
@@ -48,10 +47,8 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  // Data fetching
   const { data: menuCategories } = useMenuCategories();
 
-  // Filters
   const { filterMenuItems, filters, resetFilters, updateFilter } =
     useMenuFilters();
   const { data: menuItems, isLoading: isLoadingMenu } = useMenuList({
@@ -73,7 +70,6 @@ export default function Component({
     const category = menuCategories?.find((cat) => cat.id === categoryId);
     const categoryCode = category?.code || "";
 
-    // Update the filter with the category code
     updateFilter("categoryCode", categoryCode);
   };
 
@@ -94,13 +90,13 @@ export default function Component({
     orderId,
     bookingId,
     bookingRoomId,
-    servedAt,
+    scheduledAt,
     notes,
     addItem,
     removeItem,
     updateQuantity,
     setBookingInfo,
-    setServedAt,
+    setScheduledAt,
     setNotes,
     clearOrder,
   } = useMenuPosOrderStore();
@@ -108,7 +104,7 @@ export default function Component({
   const isEmpty = items.length === 0;
 
   const customerDisplay = bookingId ? "Khách lẻ" : null;
-  const { mutate } = useCreatePosOrderAndItems();
+  const { mutate, isError } = useCreatePosOrderAndItems();
 
   const [checkoutDialog, setCheckoutDialog] = useState(false);
   const [bookingDialog, setBookingDialog] = useState(false);
@@ -167,10 +163,8 @@ export default function Component({
     setCheckoutDialog(false);
 
     if (mode === "walk-in") {
-      // Walk-in guests also need served time
       setServedTimeDialog(true);
     } else {
-      // Booking guests select booking first, then served time
       setBookingDialog(true);
     }
   };
@@ -182,14 +176,12 @@ export default function Component({
   ) => {
     setBookingInfo(bookingId, bookingRoomId || null);
     setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
-
-    // Show served time dialog for booking orders
     setBookingDialog(false);
     setServedTimeDialog(true);
   };
 
-  const handleServedTimeConfirm = (servedAt: string) => {
-    setServedAt(servedAt);
+  const handleServedTimeConfirm = (scheduledAt: string) => {
+    setScheduledAt(scheduledAt);
     setServedTimeDialog(false);
     handleCreateOrder();
   };
@@ -200,10 +192,14 @@ export default function Component({
       mutate({
         bookingId,
         bookingRoomId,
-        servedAt,
+        scheduledAt,
         notes,
         items: items,
       });
+      setSelectedBookingInfo(null);
+      setBookingInfo(null, null);
+      setScheduledAt("");
+      setNotes("");
       setConfirmationDialog({
         open: true,
       });
@@ -271,10 +267,9 @@ export default function Component({
           </Button>
           <Separator orientation="vertical" />
           <Button
-            variant="outline"
+            variant="info-outline"
             size="sm"
             onClick={() => setCustomItemDialog(true)}
-            className="text-primary border-primary/50 hover:bg-primary/10"
           >
             <Plus className="h-4 w-4" />
             Món tùy chỉnh
@@ -387,6 +382,7 @@ export default function Component({
       />
 
       <OrderConfirmationDialog
+        status={isError ? "error" : "success"}
         onPrintReceipt={() => {}}
         open={confirmationDialog.open}
         onOpenChange={(open) =>
