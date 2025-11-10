@@ -353,7 +353,7 @@ const BookingDetailItemSchema = z.object({
   invoices: InvoiceSchema.InvoiceListResponseSchema.optional(),
   serviceOrder:
     OrderSchema.ServiceOrderListByBookingDetailSchema.optional().nullable(),
-  posOrders: OrderSchema.POSOrderListByBookingDetailSchema.optional(),
+  posOrders: OrderSchema.POSOrderListByBookingResponseSchema.optional(),
 });
 
 const BookingOTAItem = z.object({

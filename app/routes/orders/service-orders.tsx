@@ -16,18 +16,13 @@ import { Link, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { OrderService } from "~/services/api/orders";
 import type { Route } from "./+types/service-orders";
-import { useServiceOrderList } from "./container/service-pos/query.hooks";
+import { useServiceOrderList } from "./container/service-order-list/query.hooks";
 
 type ServiceOrderStatus = ServiceOrderDetailDto["status"] | "All";
 
 export default function Component({}: Route.ComponentProps) {
-  const [searchParams] = useSearchParams();
-  const bookingId = searchParams.get("bookingId");
-
   const [statusFilter, setStatusFilter] = useState<ServiceOrderStatus>("All");
-
-  const { data: orders, isPending } = useServiceOrderList(bookingId ?? "");
-
+  const { data: orders, isPending } = useServiceOrderList();
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
     if (statusFilter === "All") return orders;

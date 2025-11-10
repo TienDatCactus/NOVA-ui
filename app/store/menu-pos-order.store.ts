@@ -20,7 +20,7 @@ type MenuPosOrderState = {
   orderId: string | null;
   bookingId: string | null;
   bookingRoomId: string | null;
-  servedAt: string | null; // Time when customer wants order served
+  scheduledAt: string | null; // Time when customer wants order served
   notes: string | null; // Optional notes for the whole order
 
   // Cart items
@@ -36,7 +36,7 @@ type MenuPosOrderState = {
     bookingId: string | null,
     bookingRoomId: string | null
   ) => void;
-  setServedAt: (servedAt: string) => void;
+  setScheduledAt: (scheduledAt: string) => void;
   setNotes: (notes: string) => void;
   clearOrder: () => void;
 
@@ -56,7 +56,7 @@ export const useMenuPosOrderStore = create<MenuPosOrderState>()(
       orderId: null,
       bookingId: null,
       bookingRoomId: null,
-      servedAt: null,
+      scheduledAt: null,
       notes: null,
       items: [],
       subtotal: 0,
@@ -72,8 +72,8 @@ export const useMenuPosOrderStore = create<MenuPosOrderState>()(
         set({ bookingId, bookingRoomId }); // Clear walk-in if booking selected
       },
 
-      setServedAt: (servedAt) => {
-        set({ servedAt });
+      setScheduledAt: (scheduledAt) => {
+        set({ scheduledAt });
       },
 
       setNotes: (notes) => {
@@ -85,7 +85,7 @@ export const useMenuPosOrderStore = create<MenuPosOrderState>()(
           orderId: null,
           bookingId: null,
           bookingRoomId: null,
-          servedAt: null,
+          scheduledAt: null,
           notes: null,
           items: [],
           subtotal: 0,

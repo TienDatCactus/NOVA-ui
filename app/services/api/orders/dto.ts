@@ -4,44 +4,44 @@ import { OrderSchema } from "./order.schema";
 const {
   ServiceOrderSchema,
   ServiceOrderItemSchema,
-  CreatePOSOrderResponseSchema,
-  AddItemsToPOSOrderRequestSchema,
-  AddItemsToPOSOrderResponseSchema,
+  AddSingleItemToPOSOrderRequestSchema,
+  AddBatchItemsToPOSOrderRequestSchema,
   POSOrderItemSchema,
   POSOrderDetailSchema,
   POSOrderDetailResponseSchema,
-  POSOrderListByInvoiceResponseSchema,
   POSOrderPrintItemSchema,
   POSOrderPrintDataSchema,
   CreatePOSOrderRequestSchema,
   POSOrderPayNowRequestSchema,
   POSOrderListByBookingResponseSchema,
+  POSOrderListResponseSchema,
   CreateServiceOrderRequestSchema,
   UpdateServiceOrderRequestSchema,
   ServiceOrderDetailSchema,
-  ServiceOrderPayNowRequestSchema,
+  OrderPayNowRequestSchema,
   SetScheduledServiceOrderRequestSchema,
   ServiceOrderListByBookingDetailSchema,
+  CreatePOSOrderResponseSchema,
+  CreateServiceOrderResponseSchema,
 } = OrderSchema;
 
 // Service Order types
 export type ServiceOrderItemDto = z.infer<typeof ServiceOrderItemSchema>;
 export type ServiceOrderDto = z.infer<typeof ServiceOrderSchema>;
 
-// POS Order Request/Response types
+// POS Order Request types
 export type CreatePOSOrderRequestDto = z.infer<
   typeof CreatePOSOrderRequestSchema
 >;
-
 export type CreatePOSOrderResponseDto = z.infer<
   typeof CreatePOSOrderResponseSchema
 >;
 
-export type AddItemsToPOSOrderRequestDto = z.infer<
-  typeof AddItemsToPOSOrderRequestSchema
+export type AddSingleItemToPOSOrderRequestDto = z.infer<
+  typeof AddSingleItemToPOSOrderRequestSchema
 >;
-export type AddItemsToPOSOrderResponseDto = z.infer<
-  typeof AddItemsToPOSOrderResponseSchema
+export type AddBatchItemsToPOSOrderRequestDto = z.infer<
+  typeof AddBatchItemsToPOSOrderRequestSchema
 >;
 
 // POS Order Detail types
@@ -53,7 +53,10 @@ export type POSOrderDetailResponseDto = z.infer<
 
 // POS Order List types
 export type POSOrderListResponseDto = z.infer<
-  typeof POSOrderListByInvoiceResponseSchema
+  typeof POSOrderListResponseSchema
+>;
+export type POSOrderListByBookingResponseDto = z.infer<
+  typeof POSOrderListByBookingResponseSchema
 >;
 
 // POS Order Print types
@@ -64,13 +67,12 @@ export type POSOrderPayNowRequestDto = z.infer<
   typeof POSOrderPayNowRequestSchema
 >;
 
-export type POSOrderListByBookingResponseDto = z.infer<
-  typeof POSOrderListByBookingResponseSchema
->;
-
 // Service Order types
 export type CreateServiceOrderRequestDto = z.infer<
   typeof CreateServiceOrderRequestSchema
+>;
+export type CreateServiceOrderResponseDto = z.infer<
+  typeof CreateServiceOrderResponseSchema
 >;
 
 export type UpdateServiceOrderRequestDto = z.infer<
@@ -80,7 +82,7 @@ export type UpdateServiceOrderRequestDto = z.infer<
 export type ServiceOrderDetailDto = z.infer<typeof ServiceOrderDetailSchema>;
 
 export type ServiceOrderPayNowRequestDto = z.infer<
-  typeof ServiceOrderPayNowRequestSchema
+  typeof OrderPayNowRequestSchema
 >;
 
 export type SetScheduledServiceOrderRequestDto = z.infer<
@@ -90,3 +92,6 @@ export type SetScheduledServiceOrderRequestDto = z.infer<
 export type ServiceOrderListByBookingDetailDto = z.infer<
   typeof ServiceOrderListByBookingDetailSchema
 >;
+
+// Common types for both POS and Service orders
+export type OrderPayNowRequestDto = z.infer<typeof OrderPayNowRequestSchema>;

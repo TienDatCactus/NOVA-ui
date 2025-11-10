@@ -119,7 +119,7 @@ const SIDEBAR_NAV_MAIN: Array<{
     items: [
       {
         title: "Đơn món ăn",
-        url: "/dashboard/orders",
+        url: "/dashboard/orders/menu-orders",
       },
       {
         title: "Đơn dịch vụ",
@@ -225,7 +225,11 @@ const COMMAND_BAR_ROUTES: Array<{
   },
 
   // Orders
-  { name: "Đơn món ăn", icon: ListOrdered, href: "/dashboard/orders" },
+  {
+    name: "Đơn món ăn",
+    icon: ListOrdered,
+    href: "/dashboard/orders/menu-orders",
+  },
   {
     name: "Đơn dịch vụ",
     icon: ListOrdered,

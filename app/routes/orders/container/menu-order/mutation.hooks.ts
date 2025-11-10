@@ -8,12 +8,14 @@ import type { PaymentSchema } from "~/services/schema/payment.schema";
  * Cancel a POS order
  * Invalidates order list to refresh UI
  */
-function useCancelOrder() {
+function useCancelPOSOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (orderId: string) => OrderService.cancelPOSOrder(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      toast.success("Đã hủy đơn hàng");
     },
   });
 }
@@ -22,13 +24,15 @@ function useCancelOrder() {
  * Complete a POS order
  * Marks order as completed and ready for checkout
  */
-function useCompleteOrder() {
+function useCompletePOSOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (orderId: string) => OrderService.completePOSOrder(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      toast.success("Đơn hàng đã hoàn thành");
     },
   });
 }
@@ -36,8 +40,9 @@ function useCompleteOrder() {
 /**
  * Pay for order immediately
  * Processes payment and updates order status
+ * Note: After successful payment, order automatically becomes "Completed"
  */
-function usePayNow() {
+function usePayPOSOrderNow() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -53,7 +58,9 @@ function usePayNow() {
       };
     }) => OrderService.payPOSOrderNow(orderId, data),
     onSuccess: () => {
+      toast.success("Thanh toán thành công! Đơn hàng đã hoàn thành.");
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
     },
   });
 }
@@ -62,7 +69,7 @@ function usePayNow() {
  * Get print data for order
  * Fetches formatted receipt data
  */
-function usePrintOrder() {
+function usePrintPOSOrder() {
   return useMutation({
     mutationFn: async (orderId: string) => {
       return await OrderService.getPOSOrderPrintData(orderId);
@@ -71,9 +78,9 @@ function usePrintOrder() {
 }
 
 /**
- * Add items to existing order
+ * Add single item to existing order
  */
-function useAddItemToOrder() {
+function useAddItemToPOSOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -92,7 +99,7 @@ function useAddItemToOrder() {
       quantity: number;
       unitPrice: number;
     }) => {
-      return await OrderService.addItemsToPOSOrder(orderId, {
+      return await OrderService.addItemToPOSOrder(orderId, {
         menuItemId,
         customItemName,
         customItemDescription,
@@ -102,6 +109,8 @@ function useAddItemToOrder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      toast.success("Đã thêm món");
     },
   });
 }
@@ -109,7 +118,7 @@ function useAddItemToOrder() {
 /**
  * Delete item from order
  */
-function useDeleteItemFromOrder() {
+function useDeleteItemFromPOSOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -124,6 +133,8 @@ function useDeleteItemFromOrder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      toast.success("Đã xóa món");
     },
   });
 }
@@ -146,6 +157,8 @@ function useUpdateScheduledTime() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      toast.success("Đã cập nhật giờ hẹn");
     },
   });
 }
@@ -172,17 +185,44 @@ function useMarkItemServed() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      toast.success("Đã đánh dấu phục vụ");
+    },
+  });
+}
+
+/**
+ * Update note for POS order
+ */
+function useUpdatePOSOrderNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      note,
+    }: {
+      orderId: string;
+      note: string;
+    }) => {
+      return await OrderService.updatePOSOrderNote(orderId, { note });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      toast.success("Đã cập nhật ghi chú");
     },
   });
 }
 
 export {
-  useCancelOrder,
-  useCompleteOrder,
-  usePayNow,
-  usePrintOrder,
-  useAddItemToOrder,
-  useDeleteItemFromOrder,
+  useCancelPOSOrder,
+  useCompletePOSOrder,
+  usePayPOSOrderNow,
+  usePrintPOSOrder,
+  useAddItemToPOSOrder,
+  useDeleteItemFromPOSOrder,
   useUpdateScheduledTime,
   useMarkItemServed,
+  useUpdatePOSOrderNote,
 };

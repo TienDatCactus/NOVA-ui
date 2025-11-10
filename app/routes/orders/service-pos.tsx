@@ -16,19 +16,19 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useServiceTypes } from "../services/container/service-types/query.hooks";
 import { useServices } from "../services/container/services/query.hooks";
-import BookingSelectionDialog from "./components/order-pos/booking-selection.dialog";
-import CartItem from "./components/order-pos/cart-item";
-import CartSummary from "./components/order-pos/cart-summary";
-import CheckoutConfirmDialog from "./components/order-pos/checkout-confirm.dialog";
-import ServiceItemCard from "./components/order-pos/service-item-card";
-import OrderConfirmationDialog from "./components/order-pos/order-confirmation.dialog";
-import ServedTimeDialog from "./components/order-pos/served-time.dialog";
-import CustomServiceDialog from "./components/order-pos/custom-service.dialog";
+import BookingSelectionDialog from "./components/booking-selection.dialog";
+import CartItem from "./components/cart-item";
+import CartSummary from "./components/cart-summary";
+import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
+import ServiceItemCard from "./components/service-pos/service-item-card";
+import OrderConfirmationDialog from "./components/order-confirmation.dialog";
+import ServedTimeDialog from "./components/served-time.dialog";
+import CustomServiceDialog from "./components/service-pos/custom-service.dialog";
 
 import useServiceFilters from "../services/container/services/filter.hooks";
 import { Link } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
-import { useCreateServicePosOrderAndItems } from "./container/service-pos/mutation.hooks";
+import { useCreateServicePosOrderAndItems } from "./container/service-order-list/mutation.hooks";
 import type { Route } from "./+types/service-pos";
 import { useServicePosOrderStore } from "~/store/service-pos-order.store";
 

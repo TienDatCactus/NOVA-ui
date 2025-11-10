@@ -4,19 +4,16 @@ import { OrderService } from "~/services/api/orders";
 /**
  * Get list of all service orders (or filter by booking)
  */
-export function useServiceOrderList(bookingId?: string) {
+export function useServiceOrderList(date?: string) {
   return useQuery({
-    queryKey: bookingId
-      ? ["service-orders", "by-booking", bookingId]
-      : ["service-orders", "all"],
+    queryKey: ["service-order-list", date],
     queryFn: async () => {
-      if (bookingId) {
-        return await OrderService.getServiceOrdersByBooking(bookingId);
-      }
-      return [];
+      return await OrderService.getServiceOrderList(date);
     },
     staleTime: 30 * 1000,
     refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: false,
   });
 }
 
