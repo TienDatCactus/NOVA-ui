@@ -4,6 +4,7 @@ import {
   Check,
   Building2,
   Globe,
+  CircleAlert,
 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -24,6 +25,10 @@ import { RoomSelectionStep } from "./components/room-selection-step";
 import { ServicesBreakfastStep } from "./components/services-breakfast-step";
 import ReviewPaymentStep from "./components/review-payment-step";
 import { useRef } from "react";
+import { Alert, AlertTitle } from "~/components/ui/alert";
+import { useForm } from "react-hook-form";
+import { data, useNavigate } from "react-router";
+import { DASHBOARD } from "~/lib/fe-url";
 
 const steps = [
   {
@@ -71,8 +76,13 @@ export default function BookingFlow() {
   const roomSelectionFormRef = useRef<HTMLFormElement>(null);
   const servicesBreakfastFormRef = useRef<HTMLFormElement>(null);
   const reviewPaymentFormRef = useRef<HTMLFormElement>(null);
-
   const handleNext = () => {
+    // For step 1, validate booking type selection
+    if (currentStep === 1) {
+      if (!bookingData.bookingType) {
+        return; // Don't proceed if no booking type selected
+      }
+    }
     if (currentStep === 2 && customerInfoFormRef.current) {
       customerInfoFormRef.current.requestSubmit();
       return;
@@ -173,6 +183,12 @@ export default function BookingFlow() {
                 </CardContent>
               </Card>
             </div>
+            {!bookingData.bookingType && (
+              <Alert variant={"destructive"}>
+                <CircleAlert className="h-4 w-4" />
+                <AlertTitle>Hãy chọn loại đặt phòng</AlertTitle>
+              </Alert>
+            )}
           </div>
         );
 
@@ -325,15 +341,16 @@ export default function BookingFlow() {
           {renderStepContent()}
         </CardContent>
         <CardFooter className="mt-8 flex items-center justify-between border-t">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span>Quay lại</span>
-          </Button>
-
+          {currentStep > 1 && currentStep < 7 && (
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span>Quay lại</span>
+            </Button>
+          )}
           {currentStep < 7 ? (
             <Button onClick={handleNext}>
               <span>
@@ -343,7 +360,6 @@ export default function BookingFlow() {
             </Button>
           ) : (
             <div className="flex gap-2">
-              <Button variant="outline">Hủy</Button>
               <Button
                 onClick={() => {
                   useCreateBookingStore.getState().reset();

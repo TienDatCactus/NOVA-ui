@@ -151,7 +151,7 @@ export const useMenuPosOrderStore = create<MenuPosOrderState>()(
       },
     }),
     {
-      name: "pos-order-storage",
+      name: "menu-pos-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )

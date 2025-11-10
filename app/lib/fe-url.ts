@@ -7,7 +7,7 @@ const AUTH = {
 const DASHBOARD = {
   bookings: {
     index: "/dashboard/bookings",
-    bookings: "/dashboard/bookings/bookings",
+    list: "/dashboard/bookings/list",
     bookingDetail: (bookingCode: string) =>
       `/dashboard/bookings/detail/${bookingCode}`,
     newBooking: "/dashboard/bookings/new-booking",
