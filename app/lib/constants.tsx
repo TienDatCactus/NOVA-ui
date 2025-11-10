@@ -10,6 +10,7 @@ import {
   Settings,
   Users,
   Utensils,
+  UserCog,
 } from "lucide-react";
 
 const SERVICE_CATEGORIES = ["Dịch vụ", "Thức ăn", "Đồ uống"];
@@ -121,6 +122,11 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Tài khoản",
     url: "/dashboard/users",
     icon: Users,
+  },
+  {
+    title: "Nhân sự",
+    url: "/dashboard/staff",
+    icon: UserCog,
   },
   {
     title: "Hóa đơn",

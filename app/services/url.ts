@@ -143,6 +143,15 @@ const Invoices = {
   listByBooking: (bookingRoomId: string) =>
     `Invoices/booking-room/${bookingRoomId}`, //? list invoices by booking ID
 };
+
+const Staff = {
+  list: "Staffs",
+  create: "Staffs",
+  detail: (id: string) => `Staffs/${id}`,
+  update: (id: string) => `Staffs/${id}`,
+  delete: (id: string) => `Staffs/${id}`,
+};
+
 export {
   Auth,
   User,
@@ -158,4 +167,5 @@ export {
   Reports,
   Orders,
   Invoices,
+  Staff,
 };
