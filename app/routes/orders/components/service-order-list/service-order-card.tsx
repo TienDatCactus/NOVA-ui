@@ -5,25 +5,29 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import { formatMoney } from "~/lib/utils";
-import type { POSOrderDetailDto } from "~/services/api/orders/dto";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { formatMoney, cn } from "~/lib/utils";
+import type { ServiceOrderDetailDto } from "~/services/api/orders/dto";
+import {
+  ChevronDown,
+  ChevronUp,
+  User,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useState } from "react";
-import OrderActions from "./order-actions";
-import OrderDetails from "./order-details";
-import { cn } from "~/lib/utils";
-import { Button } from "~/components/ui/button";
+import ServiceOrderActions from "./service-order-actions";
+import ServiceOrderDetails from "./service-order-details";
 
-interface OrderCardProps {
-  order: POSOrderDetailDto;
+interface ServiceOrderCardProps {
+  order: ServiceOrderDetailDto;
 }
 
 const statusConfig = {
-  Open: {
-    label: "Đang mở",
-    className: "bg-primary text-primary-foreground",
+  Scheduled: {
+    label: "Đã lên lịch",
+    className: "bg-blue-500 text-white",
   },
   Completed: {
     label: "Hoàn thành",
@@ -33,12 +37,15 @@ const statusConfig = {
     label: "Đã hủy",
     className: "bg-destructive text-destructive-foreground",
   },
+  NoShow: {
+    label: "Không đến",
+    className: "bg-orange-500 text-white",
+  },
 };
 
-export default function OrderCard({ order }: OrderCardProps) {
+export default function ServiceOrderCard({ order }: ServiceOrderCardProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const itemCount = order?.items?.length || 0;
   const statusInfo = statusConfig[order.status];
 
   return (
@@ -55,59 +62,67 @@ export default function OrderCard({ order }: OrderCardProps) {
                 <Badge className={cn("text-xs", statusInfo.className)}>
                   {statusInfo.label}
                 </Badge>
-                {itemCount > 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    {itemCount} món
-                  </span>
+              </div>
+
+              {/* Service Info */}
+              <div className="space-y-1">
+                <p className="font-semibold text-base">
+                  {order.serviceItemName || order.customServiceName}
+                </p>
+                {order.serviceItemCode && (
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {order.serviceItemCode}
+                  </p>
                 )}
               </div>
 
-              <div className="flex items-center gap-6 text-sm flex-wrap">
+              {/* Details Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground text-xs">Ngày tạo</p>
-                  <p className="font-medium">
-                    {format(
-                      parseISO(order.createdAt || new Date().toISOString()),
-                      "HH:mm - dd/MM/yyyy",
-                      {
-                        locale: vi,
-                      }
-                    )}
-                  </p>
+                  <p className="text-muted-foreground text-xs">Số lượng</p>
+                  <p className="font-medium">{order.quantity}x</p>
                 </div>
+
                 {order.scheduledAt && (
                   <div>
-                    <p className="text-muted-foreground text-xs">
-                      Thời gian phục vụ
-                    </p>
-                    <p className="font-medium">
-                      {format(
-                        parseISO(order.scheduledAt),
-                        "HH:mm - dd/MM/yyyy",
-                        {
-                          locale: vi,
-                        }
-                      )}
+                    <p className="text-muted-foreground text-xs">Lịch hẹn</p>
+                    <p className="font-medium flex items-center gap-1">
+                      <CalendarIcon className="h-3 w-3" />
+                      {format(parseISO(order.scheduledAt), "HH:mm - dd/MM", {
+                        locale: vi,
+                      })}
                     </p>
                   </div>
                 )}
+
+                {order.assignedToStaffName && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">Nhân viên</p>
+                    <p className="font-medium flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {order.assignedToStaffName}
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <p className="text-muted-foreground text-xs">Tổng tiền</p>
                   <p className="font-semibold text-primary">
-                    {formatMoney(order.totalAmount).vndFormatted}
+                    {formatMoney(order.total).vndFormatted}
                   </p>
                 </div>
               </div>
+
+              {order.note && (
+                <p className="text-sm text-muted-foreground italic">
+                  Ghi chú: {order.note}
+                </p>
+              )}
             </div>
 
             {/* Right: Actions */}
             <div className="flex-shrink-0">
-              <OrderActions
-                orderId={order.id}
-                status={order.status}
-                totalAmount={order.totalAmount}
-                currentScheduledTime={order.scheduledAt}
-              />
+              <ServiceOrderActions order={order} />
             </div>
           </div>
 
@@ -130,10 +145,9 @@ export default function OrderCard({ order }: OrderCardProps) {
           </CollapsibleTrigger>
         </CardHeader>
 
-        {/* Expandable Details */}
         <CollapsibleContent>
           <CardContent className="pt-0">
-            <OrderDetails order={order} />
+            <ServiceOrderDetails order={order} />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

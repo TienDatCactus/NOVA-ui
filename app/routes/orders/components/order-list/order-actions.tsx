@@ -44,6 +44,18 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { OrderSchema } from "~/services/api/orders/order.schema";
+import type { z } from "zod";
+import {
   useCancelOrder,
   useCompleteOrder,
   usePayNow,
@@ -55,6 +67,10 @@ import PrintPreviewDialog from "./print-preview.dialog";
 import AddMenuItemDialog from "./add-menu-item.dialog";
 import UpdateScheduleDialog from "./update-schedule.dialog";
 import type { POSOrderPrintDataDto } from "~/services/api/orders/dto";
+
+const { POSOrderPayNowRequestSchema } = OrderSchema;
+
+type PaymentFormData = z.infer<typeof POSOrderPayNowRequestSchema>;
 
 interface OrderActionsProps {
   orderId: string;
@@ -69,14 +85,21 @@ export default function OrderActions({
   totalAmount,
   currentScheduledTime,
 }: OrderActionsProps) {
-  const [paymentMethod, setPaymentMethod] = useState("Cash");
-  const [paidAmount, setPaidAmount] = useState(totalAmount);
-  const [transactionRef, setTransactionRef] = useState("");
   const [isPayDialogOpen, setIsPayDialogOpen] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [printData, setPrintData] = useState<POSOrderPrintDataDto | null>(null);
+
+  // Payment form
+  const paymentForm = useForm<PaymentFormData>({
+    resolver: zodResolver(POSOrderPayNowRequestSchema),
+    defaultValues: {
+      paymentMethod: "Cash",
+      paidAmount: totalAmount,
+      transactionReference: "",
+    },
+  });
 
   const { mutate: onPayNow } = usePayNow();
   const { mutate: onPrint, isPending: isPrintLoading } = usePrintOrder();
@@ -86,16 +109,19 @@ export default function OrderActions({
   const { mutate: onUpdateSchedule, isPending: isUpdatingSchedule } =
     useUpdateScheduledTime();
 
-  const handlePayNow = () => {
-    onPayNow({
-      orderId,
-      data: {
-        paymentMethod,
-        paidAmount,
-        transactionReference: transactionRef,
+  const handlePayNow = (data: PaymentFormData) => {
+    onPayNow(
+      {
+        orderId,
+        data,
       },
-    });
-    setIsPayDialogOpen(false);
+      {
+        onSuccess: () => {
+          setIsPayDialogOpen(false);
+          paymentForm.reset();
+        },
+      }
+    );
   };
 
   const handlePrintClick = () => {
@@ -169,74 +195,115 @@ export default function OrderActions({
               Thêm món
             </Button>
 
+            {/* Update Schedule Button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsScheduleDialogOpen(true)}
+              disabled={isUpdatingSchedule}
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              {isUpdatingSchedule ? "Đang cập nhật..." : "Đổi giờ"}
+            </Button>
+
             {/* Pay Now Dialog */}
             <Dialog open={isPayDialogOpen} onOpenChange={setIsPayDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" variant="default">
                   <CreditCard className="w-4 h-4 mr-2" />
-                  Thanh toán
+                  Thanh toán ngay
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Thanh toán đơn hàng</DialogTitle>
+                  <DialogTitle>Thanh toán đơn hàng ngay</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="paymentMethod">Phương thức</Label>
-                    <Select
-                      value={paymentMethod}
-                      onValueChange={setPaymentMethod}
-                    >
-                      <SelectTrigger id="paymentMethod">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Cash">Tiền mặt</SelectItem>
-                        <SelectItem value="Card">Thẻ</SelectItem>
-                        <SelectItem value="Transfer">Chuyển khoản</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="paidAmount">Số tiền</Label>
-                    <Input
-                      id="paidAmount"
-                      type="number"
-                      value={paidAmount}
-                      onChange={(e) => setPaidAmount(Number(e.target.value))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="transactionRef">Mã giao dịch</Label>
-                    <Input
-                      id="transactionRef"
-                      value={transactionRef}
-                      onChange={(e) => setTransactionRef(e.target.value)}
-                      placeholder="Nhập mã giao dịch (nếu có)"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsPayDialogOpen(false)}
+                <Form {...paymentForm}>
+                  <form
+                    onSubmit={paymentForm.handleSubmit(handlePayNow)}
+                    className="space-y-4 py-4"
                   >
-                    Hủy
-                  </Button>
-                  <Button onClick={handlePayNow}>Xác nhận</Button>
-                </div>
+                    <FormField
+                      control={paymentForm.control}
+                      name="paymentMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phương thức</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Chọn phương thức" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Cash">Tiền mặt</SelectItem>
+                              <SelectItem value="Card">Thẻ</SelectItem>
+                              <SelectItem value="BankTransfer">
+                                Chuyển khoản
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={paymentForm.control}
+                      name="paidAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Số tiền</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={paymentForm.control}
+                      name="transactionReference"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mã giao dịch</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Nhập mã giao dịch (nếu có)"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsPayDialogOpen(false)}
+                      >
+                        Hủy
+                      </Button>
+                      <Button type="submit">Xác nhận</Button>
+                    </div>
+                  </form>
+                </Form>
               </DialogContent>
             </Dialog>
 
             {/* Complete Order */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-green-600 border-green-600 hover:bg-green-50"
-                >
+                <Button size="sm" variant="success-outline">
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Hoàn thành
                 </Button>
@@ -261,11 +328,7 @@ export default function OrderActions({
             {/* Cancel Order */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-destructive border-destructive hover:bg-destructive/10"
-                >
+                <Button size="sm" variant="destructive-outline">
                   <Ban className="w-4 h-4 mr-2" />
                   Hủy đơn
                 </Button>
@@ -290,6 +353,19 @@ export default function OrderActions({
               </AlertDialogContent>
             </AlertDialog>
           </>
+        )}
+
+        {/* Update Schedule for Completed orders */}
+        {status === "Completed" && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsScheduleDialogOpen(true)}
+            disabled={isUpdatingSchedule}
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            {isUpdatingSchedule ? "Đang cập nhật..." : "Đổi giờ"}
+          </Button>
         )}
       </div>
 

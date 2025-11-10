@@ -429,6 +429,8 @@ export default function EditMenuSheet({
                           >
                             <div className="absolute top-2 left-2 z-10">
                               <Checkbox
+                                className="
+                                data-[state=checked]:bg-destructive border-destructive data-[state=checked]:border-destructive"
                                 checked={marked}
                                 onCheckedChange={() =>
                                   toggleRemoveExisting(img.mediaId)
@@ -444,9 +446,7 @@ export default function EditMenuSheet({
                             />
 
                             {marked && (
-                              <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold text-destructive-foreground">
-                                Sẽ xóa
-                              </span>
+                              <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold" />
                             )}
                           </Label>
                         );

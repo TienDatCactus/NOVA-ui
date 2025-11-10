@@ -59,7 +59,6 @@ const StaffCreateBookingSchema = z.object({
     .optional()
     .nullable(),
   internalNote: z.string().optional().nullable(),
-
   roomPayment: PaymentSchema.RoomPaymentSchema.optional().nullable(),
   serviceOrder: OrderSchema.ServiceOrderSchema.optional(),
 });

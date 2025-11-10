@@ -1,4 +1,4 @@
-import { CalendarIcon, MessageSquare, X } from "lucide-react";
+import { CalendarIcon, MessageSquare, X, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Button } from "~/components/ui/button";
@@ -13,6 +13,8 @@ import { cn, formatMoney } from "~/lib/utils";
 import { useServiceOrderStore } from "~/store/service-order.store";
 import { Calendar } from "~/components/ui/calendar";
 import { useCreateBookingStore } from "~/store/create-booking.store";
+import { Card, CardContent } from "~/components/ui/card";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 interface OrderItemCardProps {
   itemId: string;
@@ -33,7 +35,7 @@ export default function OrderItemCard({
     s.services.find((service) => service.itemId === itemId)
   );
   const { data } = useCreateBookingStore();
-  const { setNote, setScheduledDate, removeById } =
+  const { setNote, setScheduledDate, setQuantity, removeById } =
     useServiceOrderStore.getState();
 
   if (!item) return null;
@@ -52,49 +54,59 @@ export default function OrderItemCard({
     setScheduledDate(itemId, date);
   };
 
+  const handleQuantityChange = (newQty: number) => {
+    if (newQty <= 0) {
+      removeById(itemId);
+    } else {
+      setQuantity(itemId, newQty);
+    }
+  };
+
   const handleRemove = () => {
     removeById(itemId);
   };
 
   return (
-    <div className="flex items-start justify-between py-4 border-b last:border-0">
-      <div className="flex-1 space-y-3">
-        <div className="flex items-start justify-between">
-          <div className="flex flex-col">
-            <p className="text-sm font-medium leading-none">{itemName}</p>
+    <Card className=" bg-white hover:border-primary transition-colors p-0">
+      <CardContent className="flex-1 flex justify-between items-center min-w-0 p-4">
+        <div className="flex flex-col items-start justify-between gap-2">
+          <div className="flex flex-col flex-1 min-w-0">
+            <p className="text-sm font-medium leading-none truncate">
+              {itemName}
+            </p>
             <p className="text-xs text-muted-foreground">
               {formatMoney(unitPrice).vndFormatted}
             </p>
           </div>
+          <Counter
+            className="w-30"
+            value={quantity}
+            onChange={handleQuantityChange}
+          />
+        </div>
+
+        {/* Quantity Controls */}
+        <div className="flex flex-col items-end gap-2">
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive flex-shrink-0"
             onClick={handleRemove}
           >
             <X className="h-4 w-4" />
           </Button>
-        </div>
-
-        {/* Subtotal */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold">
+          <p className="text-sm font-semibold text-primary ml-auto">
             {formatMoney(subtotal).vndFormatted}
-          </span>
-        </div>
-
-        {/* Actions: Note + Date */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Note Popover */}
+          </p>
           <Popover open={noteOpen} onOpenChange={setNoteOpen}>
             <PopoverTrigger asChild>
               <Button
-                variant={note ? "default" : "info-outline"}
+                variant={note ? "default" : "outline"}
                 size="sm"
-                className="h-8 text-xs gap-1"
+                className="h-7 text-xs gap-1"
               >
                 <MessageSquare className="h-3.5 w-3.5" />
-                {note ? "Có ghi chú" : "Thêm ghi chú"}
+                {note ? "Đã ghi chú" : "Ghi chú"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-72 p-4 space-y-3" align="start">
@@ -117,11 +129,11 @@ export default function OrderItemCard({
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
+                        "w-full justify-start text-left font-normal text-xs",
                         !scheduledDate && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      <CalendarIcon className="mr-2 h-3.5 w-3.5" />
                       {scheduledDate
                         ? `Đã chọn ${scheduledDate}`
                         : "Chọn ngày phục vụ"}
@@ -130,24 +142,16 @@ export default function OrderItemCard({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={
-                        scheduledDate ? new Date(scheduledDate) : undefined
-                      }
+                      selected={new Date(scheduledDate) || data.checkinDate!}
                       disabled={(date: Date) => {
                         if (data.checkinDate) {
-                          const checkinDate = parseISO(
-                            data.checkinDate as string
-                          );
-                          if (date < checkinDate) {
+                          if (date < data.checkinDate) {
                             return true;
                           }
                         }
 
                         if (data.checkoutDate) {
-                          const checkoutDate = parseISO(
-                            data.checkoutDate as string
-                          );
-                          if (date > checkoutDate) {
+                          if (date > data.checkoutDate) {
                             return true;
                           }
                         }
@@ -171,7 +175,7 @@ export default function OrderItemCard({
             </PopoverContent>
           </Popover>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

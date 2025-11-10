@@ -10,10 +10,13 @@ export function useServiceTypes(params?: ServiceTypeListParams) {
   });
 }
 
-export function useServiceTypeDetails(id: string) {
+export function useServiceTypeDetails(
+  id: string,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["service-types-detail", id],
     queryFn: async () => await ServiceTypesService.getServiceTypeDetail(id),
-    enabled: !!id,
+    enabled: options?.enabled ?? !!id,
   });
 }

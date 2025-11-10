@@ -99,7 +99,6 @@ export default function BookingSelectionDialog({
         }
       } catch (error) {
         console.error("Failed to fetch booking detail:", error);
-        toast.error("Không thể tải thông tin booking. Vui lòng thử lại.");
         setExpandedBooking(null);
       } finally {
         setIsLoadingDetail(false);

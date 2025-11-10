@@ -130,6 +130,17 @@ const Orders = {
   setServed: (id: string, itemId: string) =>
     `PosOrders/${id}/items/${itemId}/set-served`,
   setScheduled: (id: string) => `PosOrders/${id}/set-scheduled`,
+  // Service Orders
+  createServiceOrder: "service-orders",
+  updateServiceOrder: (id: string) => `service-orders/${id}`,
+  detailServiceOrder: (id: string) => `service-orders/${id}`,
+  completeServiceOrder: (id: string) => `service-orders/${id}/complete`,
+  cancelServiceOrder: (id: string) => `service-orders/${id}/cancel`,
+  listServiceOrdersByBooking: (bookingId: string) =>
+    `service-orders/by-booking/${bookingId}`,
+  payServiceOrderNow: (id: string) => `service-orders/${id}/pay-now`,
+  setScheduledServiceOrder: (id: string) =>
+    `service-orders/${id}/set-scheduled`,
 };
 
 const Invoices = {

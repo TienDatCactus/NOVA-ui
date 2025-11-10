@@ -135,7 +135,6 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
       }
     }, [roomIds, roomsDetails, isRoomDetailsError]);
 
-    // Map room details for preview request
     const selectedRooms = useMemo(() => {
       if (!roomsDetails || roomsDetails.length === 0)
         return [] as {

@@ -152,7 +152,7 @@ export default function BookingFlow() {
                   "cursor-pointer transition-all",
                   bookingData.bookingType === "OTA"
                     ? "bg-muted border-primary ring-2 ring-primary"
-                    : "border-card hover:shadow-md"
+                    : "border-gray-200 hover:shadow-md"
                 )}
                 onClick={() => updateBookingData("bookingType", "OTA")}
               >
@@ -321,7 +321,9 @@ export default function BookingFlow() {
           </div>
         </CardHeader>
 
-        <CardContent className="p-6 md:px-8">{renderStepContent()}</CardContent>
+        <CardContent className="p-6 md:px-8 ">
+          {renderStepContent()}
+        </CardContent>
         <CardFooter className="mt-8 flex items-center justify-between border-t">
           <Button
             variant="outline"

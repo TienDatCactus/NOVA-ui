@@ -11,28 +11,26 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import type { MenuListItemSchema } from "~/services/api/menu/menu.schema";
-import type { z } from "zod";
+import type { ServiceItem } from "~/services/api/services/dto";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useMenuCategories } from "../menu/container/menu-categories/query.hooks";
-import { useMenuList } from "../menu/container/menu/query.hooks";
+import { useServiceTypes } from "../services/container/service-types/query.hooks";
+import { useServices } from "../services/container/services/query.hooks";
 import BookingSelectionDialog from "./components/order-pos/booking-selection.dialog";
 import CartItem from "./components/order-pos/cart-item";
 import CartSummary from "./components/order-pos/cart-summary";
 import CheckoutConfirmDialog from "./components/order-pos/checkout-confirm.dialog";
-import ItemCustomizationDialog from "./components/order-pos/item-customization.dialog";
-import MenuItemCard from "./components/order-pos/menu-item-card";
+import ServiceItemCard from "./components/order-pos/service-item-card";
 import OrderConfirmationDialog from "./components/order-pos/order-confirmation.dialog";
 import ServedTimeDialog from "./components/order-pos/served-time.dialog";
-import CustomItemDialog from "./components/order-pos/custom-item.dialog";
+import CustomServiceDialog from "./components/order-pos/custom-service.dialog";
 
-import useMenuFilters from "../menu/container/menu/filter.hooks";
+import useServiceFilters from "../services/container/services/filter.hooks";
 import { Link } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
-import type { Route } from "./+types/pos";
-import { usePosOrderStore } from "~/store/pos-order.store";
-import { useCreatePosOrderAndItems } from "./container/order-pos/mutation.hooks";
+import { useCreateServicePosOrderAndItems } from "./container/service-pos/mutation.hooks";
+import type { Route } from "./+types/service-pos";
+import { useServicePosOrderStore } from "~/store/service-pos-order.store";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -42,41 +40,37 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 
-type MenuItem = z.infer<typeof MenuListItemSchema>;
-
 export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
   // Data fetching
-  const { data: menuCategories } = useMenuCategories();
+  const { data: serviceTypes } = useServiceTypes();
 
   // Filters
-  const { filterMenuItems, filters, resetFilters, updateFilter } =
-    useMenuFilters();
-  const { data: menuItems, isLoading: isLoadingMenu } = useMenuList({
-    categoryCode: filters.categoryCode,
+  const { filterServices, filters, resetFilters, updateFilter } =
+    useServiceFilters();
+  const { data: services, isLoading: isLoadingServices } = useServices({
+    typeCode: filters.typeCode,
   });
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
-  );
+  const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
 
   const filteredItems = useMemo(() => {
-    if (!menuItems) return [];
-    let items = filterMenuItems(menuItems);
+    if (!services) return [];
+    let items = filterServices(services);
     return items;
-  }, [menuItems, filterMenuItems]);
+  }, [services, filterServices]);
 
-  const handleCategorySelect = (categoryId: string | null) => {
-    setSelectedCategoryId(categoryId);
+  const handleTypeSelect = (typeId: string | null) => {
+    setSelectedTypeId(typeId);
 
-    // Find the category code from the categoryId
-    const category = menuCategories?.find((cat) => cat.id === categoryId);
-    const categoryCode = category?.code || "";
+    // Find the type code from the typeId
+    const type = serviceTypes?.find((t) => t.id === typeId);
+    const typeCode = type?.code || "";
 
-    // Update the filter with the category code
-    updateFilter("categoryCode", categoryCode);
+    // Update the filter with the type code
+    updateFilter("typeCode", typeCode);
   };
 
   const handleSearchChange = (value: string) => {
@@ -85,7 +79,7 @@ export default function Component({
 
   const handleReset = () => {
     resetFilters();
-    setSelectedCategoryId(null);
+    setSelectedTypeId(null);
   };
 
   // Cart logic
@@ -96,26 +90,26 @@ export default function Component({
     orderId,
     bookingId,
     bookingRoomId,
-    servedAt,
+    scheduledAt,
     notes,
     addItem,
     removeItem,
     updateQuantity,
     setBookingInfo,
-    setServedAt,
+    setScheduledAt,
     setNotes,
     clearOrder,
-  } = usePosOrderStore();
+  } = useServicePosOrderStore();
 
   const isEmpty = items.length === 0;
 
   const customerDisplay = bookingId ? "Khách lẻ" : null;
-  const { mutate } = useCreatePosOrderAndItems();
+  const { mutate } = useCreateServicePosOrderAndItems();
 
   const [checkoutDialog, setCheckoutDialog] = useState(false);
   const [bookingDialog, setBookingDialog] = useState(false);
-  const [servedTimeDialog, setServedTimeDialog] = useState(false);
-  const [customItemDialog, setCustomItemDialog] = useState(false);
+  const [scheduledTimeDialog, setScheduledTimeDialog] = useState(false);
+  const [customServiceDialog, setCustomServiceDialog] = useState(false);
   const [selectedBookingInfo, setSelectedBookingInfo] = useState<{
     bookingId: string;
     bookingRoomId: string;
@@ -127,36 +121,37 @@ export default function Component({
   }>({ open: false });
 
   // Handlers
-  const handleAddToCart = (item: MenuItem) => {
+  const handleAddToCart = (item: ServiceItem) => {
     addItem({
-      id: item.itemId,
-      menuItemId: item.itemId,
+      id: item.serviceItemId,
+      serviceItemId: item.serviceItemId,
       code: item.code,
       name: item.name,
-      unitPrice: item.price,
+      unitPrice: item.basePrice,
       imageUrl: item.imageUrls?.[0],
     });
-    toast.success(`Đã thêm ${item.name} vào giỏ`);
+    toast.success(`Đã thêm ${item.name} vào đơn`);
   };
 
-  const handleAddCustomItem = (item: {
+  const handleAddCustomService = (service: {
     name: string;
     description?: string;
     unitPrice: number;
     quantity: number;
   }) => {
-    const customId = `CUSTOM-${Date.now()}`;
+    const id = crypto.randomUUID();
+    const customId = `CUSTOM-${id}`;
     addItem({
       id: customId,
-      menuItemId: undefined,
+      serviceItemId: undefined,
       code: "CUSTOM",
-      name: item.name,
-      unitPrice: item.unitPrice,
-      quantity: item.quantity,
-      customItemName: item.name,
-      customItemDescription: item.description,
+      name: service.name,
+      unitPrice: service.unitPrice,
+      quantity: service.quantity,
+      customServiceName: service.name,
+      customServiceDescription: service.description,
     });
-    toast.success(`Đã thêm "${item.name}" vào giỏ`);
+    toast.success(`Đã thêm "${service.name}" vào giỏ`);
   };
 
   const handleConfirm = () => {
@@ -165,11 +160,13 @@ export default function Component({
   };
 
   const handleCheckoutConfirm = (mode: "walk-in" | "booking") => {
+    setCheckoutDialog(false);
+
     if (mode === "walk-in") {
-      setCheckoutDialog(false);
-      handleCreateOrder();
+      // Walk-in guests also need scheduled time
+      setScheduledTimeDialog(true);
     } else {
-      setCheckoutDialog(false);
+      // Booking guests select booking first, then scheduled time
       setBookingDialog(true);
     }
   };
@@ -182,14 +179,14 @@ export default function Component({
     setBookingInfo(bookingId, bookingRoomId || null);
     setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
 
-    // Show served time dialog for booking orders
+    // Show scheduled time dialog for booking orders
     setBookingDialog(false);
-    setServedTimeDialog(true);
+    setScheduledTimeDialog(true);
   };
 
-  const handleServedTimeConfirm = (servedAt: string) => {
-    setServedAt(servedAt);
-    setServedTimeDialog(false);
+  const handleScheduledTimeConfirm = (scheduledTime: string) => {
+    setScheduledAt(scheduledTime);
+    setScheduledTimeDialog(false);
     handleCreateOrder();
   };
 
@@ -198,7 +195,7 @@ export default function Component({
       mutate({
         bookingId,
         bookingRoomId,
-        servedAt,
+        scheduledAt,
         notes,
         items: items,
       });
@@ -206,18 +203,17 @@ export default function Component({
         open: true,
       });
     } catch (error) {
-      console.error("Create order failed:", error);
+      console.error("Create service order failed:", error);
     }
   };
 
   const handleNewOrder = () => {
     clearOrder();
-    toast.info("Bắt đầu đơn hàng mới");
   };
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="flex items-center justify-between p-4 border-b  border-accent-foreground/20">
+      <header className="flex items-center justify-between p-4 border-b border-accent-foreground/20">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
             <Link to={DASHBOARD.orders.index}>
@@ -228,34 +224,32 @@ export default function Component({
             </Link>
             <Separator orientation="vertical" />
             <Button
-              variant={selectedCategoryId === null ? "default" : "outline"}
+              variant={selectedTypeId === null ? "default" : "outline"}
               size="sm"
-              onClick={() => handleCategorySelect(null)}
+              onClick={() => handleTypeSelect(null)}
             >
               <SquareMenu />
               Tất cả
             </Button>
             <Separator orientation="vertical" />
             <div className="flex items-center gap-2 flex-wrap">
-              {!!menuCategories &&
-                menuCategories.length > 0 &&
-                menuCategories?.map((item) => (
+              {!!serviceTypes &&
+                serviceTypes.length > 0 &&
+                serviceTypes?.map((item) => (
                   <Button
-                    variant={
-                      selectedCategoryId === item.id ? "default" : "outline"
-                    }
+                    variant={selectedTypeId === item.id ? "default" : "outline"}
                     size="sm"
                     key={item.id}
-                    onClick={() => handleCategorySelect(item.id)}
+                    onClick={() => handleTypeSelect(item.id)}
                   >
                     {item.name}
                     <Badge
                       className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums ml-1"
                       variant={
-                        selectedCategoryId === item.id ? "secondary" : "outline"
+                        selectedTypeId === item.id ? "secondary" : "outline"
                       }
                     >
-                      {item.menuItemCount}
+                      {item.serviceItemCount}
                     </Badge>
                   </Button>
                 ))}
@@ -272,16 +266,16 @@ export default function Component({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCustomItemDialog(true)}
+            onClick={() => setCustomServiceDialog(true)}
             className="text-primary border-primary/50 hover:bg-primary/10"
           >
             <Plus className="h-4 w-4" />
-            Món tùy chỉnh
+            Dịch vụ tùy chỉnh
           </Button>
           <Separator orientation="vertical" />
           <Input
             startAddon={<SearchIcon />}
-            placeholder="Tìm kiếm món..."
+            placeholder="Tìm kiếm dịch vụ..."
             value={filters.searchText}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="w-64"
@@ -289,20 +283,20 @@ export default function Component({
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden ">
-        <main className="flex-1 overflow-auto p-6 ">
-          {isLoadingMenu ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <Skeleton key={i} className="h-60 " />
+      <div className="flex flex-1 overflow-hidden">
+        <main className="flex-1 overflow-auto p-6">
+          {isLoadingServices ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-60" />
               ))}
             </div>
           ) : filteredItems && filteredItems.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredItems.map((item) => (
-                <MenuItemCard
-                  key={item.itemId}
-                  menuItem={item}
+                <ServiceItemCard
+                  key={item.serviceItemId}
+                  serviceItem={item}
                   addToOrder={() => handleAddToCart(item)}
                 />
               ))}
@@ -310,7 +304,7 @@ export default function Component({
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-muted-foreground">
-                <p className="text-lg font-medium">Không tìm thấy món</p>
+                <p className="text-lg font-medium">Không tìm thấy dịch vụ</p>
                 <p className="text-sm">Thử điều chỉnh bộ lọc của bạn</p>
               </div>
             </div>
@@ -318,9 +312,9 @@ export default function Component({
         </main>
 
         {/* Cart Sidebar */}
-        <aside className=" p-2 overflow-y-auto ">
-          <div className="w-md bg-card rounded-xl h-full border p-2 flex flex-col ">
-            <div className="flex items-center justify-between ">
+        <aside className="p-2 overflow-y-auto">
+          <div className="w-md bg-card rounded-xl h-full border p-2 flex flex-col">
+            <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Tóm tắt đơn hàng</h2>
               {orderId && (
                 <Badge variant="outline" className="font-mono">
@@ -373,16 +367,16 @@ export default function Component({
       />
 
       <ServedTimeDialog
-        open={servedTimeDialog}
-        onOpenChange={setServedTimeDialog}
-        onConfirm={handleServedTimeConfirm}
+        open={scheduledTimeDialog}
+        onOpenChange={setScheduledTimeDialog}
+        onConfirm={handleScheduledTimeConfirm}
         bookingInfo={selectedBookingInfo?.bookingCode}
       />
 
-      <CustomItemDialog
-        open={customItemDialog}
-        onOpenChange={setCustomItemDialog}
-        onConfirm={handleAddCustomItem}
+      <CustomServiceDialog
+        open={customServiceDialog}
+        onOpenChange={setCustomServiceDialog}
+        onConfirm={handleAddCustomService}
       />
 
       <OrderConfirmationDialog

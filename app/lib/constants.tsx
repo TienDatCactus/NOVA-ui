@@ -109,12 +109,20 @@ const SIDEBAR_NAV_MAIN: Array<{
     icon: ListOrdered,
     items: [
       {
-        title: "Danh sách đơn hàng",
+        title: "Đơn món ăn",
         url: "/dashboard/orders",
       },
       {
-        title: "POS",
-        url: "/dashboard/orders/pos",
+        title: "Đơn dịch vụ",
+        url: "/dashboard/orders/service-orders",
+      },
+      {
+        title: "POS Món ăn",
+        url: "/dashboard/menu-pos",
+      },
+      {
+        title: "POS Dịch vụ",
+        url: "/dashboard/service-pos",
       },
     ],
   },

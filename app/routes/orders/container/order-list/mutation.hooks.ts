@@ -1,6 +1,8 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type z from "zod";
 import { OrderService } from "~/services/api/orders";
+import type { PaymentSchema } from "~/services/schema/payment.schema";
 
 /**
  * Cancel a POS order
@@ -45,7 +47,7 @@ function usePayNow() {
     }: {
       orderId: string;
       data: {
-        paymentMethod: string;
+        paymentMethod: z.infer<typeof PaymentSchema.PaymentMethodEnum>;
         paidAmount: number;
         transactionReference: string;
       };

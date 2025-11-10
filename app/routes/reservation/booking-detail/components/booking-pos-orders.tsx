@@ -1,8 +1,8 @@
 import {
   Beef,
-  Building2,
   ChevronDown,
   ChevronRight,
+  Ellipsis,
   Plus,
   ShoppingCart,
   Trash2,
@@ -14,12 +14,11 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
   Table,
@@ -31,7 +30,6 @@ import {
 } from "~/components/ui/table";
 import { formatMoney } from "~/lib/utils";
 import { OrderSchema } from "~/services/api/orders/order.schema";
-import type { RoomSchema } from "~/services/api/rooms/room.schema";
 
 type POSOrderFromBookingDetail = z.infer<
   typeof OrderSchema.POSOrdersListItemByBookingDetailSchema
@@ -123,21 +121,21 @@ export default function BookingPosOrders({
                 {formatMoney(grandTotal).vndFormatted}
               </span>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"}>
+                  <Ellipsis />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={onAddCompletedCharges}>
+                  <Plus className="h-4 w-4" />
+                  Thêm sản phẩm
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>{" "}
-        {onAddCompletedCharges && (
-          <div className="flex justify-end w-full">
-            <Button
-              type="button"
-              size="sm"
-              variant="link"
-              onClick={onAddCompletedCharges}
-            >
-              <Plus className="h-4 w-4" />
-              Thêm món đã hoàn thành
-            </Button>
-          </div>
-        )}
       </CardHeader>
       <CardContent>
         {isLoadingOrder ? (

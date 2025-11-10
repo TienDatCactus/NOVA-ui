@@ -39,10 +39,10 @@ export default function ServedTimeDialog({
   const [error, setError] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  // Initialize with current time + 30 minutes when dialog opens
+  // Initialize with current time (now) when dialog opens
   useEffect(() => {
     if (open) {
-      const defaultTime = addMinutes(new Date(), 30);
+      const defaultTime = new Date(); // Changed from addMinutes(new Date(), 30) to now
       setSelectedDate(defaultTime);
       setTimeString(format(defaultTime, "HH:mm"));
       setError("");

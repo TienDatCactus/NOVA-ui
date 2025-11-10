@@ -32,20 +32,25 @@ export function useUpdateMenuItem(itemId: string) {
       queryClient.invalidateQueries({
         queryKey: ["menu-list-by-category"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["menu-item-detail", itemId],
+      });
     },
   });
 }
 
-export function useDeleteMenuItem() {
+export function useDeleteMenuItem(itemId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (itemId: string) =>
-      await MenuService.deleteMenuItem(itemId),
+    mutationFn: async () => await MenuService.deleteMenuItem(itemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-list"] });
       queryClient.invalidateQueries({
         queryKey: ["menu-list-by-category"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["menu-item-detail", itemId],
       });
     },
   });
