@@ -91,7 +91,7 @@ export default function EditMenuSheet({
   });
 
   const { data: menuItemDetail, isPending: isLoadingDetail } =
-    useMenuItemDetail(menuItem.itemId);
+    useMenuItemDetail(menuItem.itemId, { enabled: open });
 
   const { mutate: updateMenuItem, isPending: isUpdating } = useUpdateMenuItem(
     menuItem.itemId

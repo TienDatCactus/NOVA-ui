@@ -142,7 +142,7 @@ export default function OrderItemCard({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={new Date(scheduledDate) || data.checkinDate!}
+                      selected={new Date(scheduledDate || data.checkinDate!)}
                       disabled={(date: Date) => {
                         if (data.checkinDate) {
                           if (date < data.checkinDate) {

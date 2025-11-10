@@ -37,7 +37,7 @@ export const useCreateBookingStore = create<CreateBookingState>()(
       partialize: (state) => ({
         data: {
           ...state.data,
-          serviceOrder: undefined, // Exclude serviceOrder from persistence
+          serviceOrder: undefined,
         },
         currentStep: state.currentStep,
       }),

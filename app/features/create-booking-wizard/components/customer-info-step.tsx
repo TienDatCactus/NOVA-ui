@@ -1,9 +1,18 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
+import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import {
   Form,
   FormControl,
@@ -15,31 +24,26 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import { cn, onError } from "~/lib/utils";
-import { useCreateBookingStore } from "~/store/create-booking.store";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
-import type { BookingOTAResponseDto } from "~/services/api/booking/dto";
-import { Button } from "~/components/ui/button";
+import { useCreateBookingStore } from "~/store/create-booking.store";
 import { useOTAInfo } from "../container/create-booking-query.hooks";
+const { StaffCreateBookingSchema } = BookingSchema;
 
 // Step 2 Schema: Customer Info + Detailed Booking Type
 const CustomerInfoSchema = z
   .object({
-    guestFullName: z
-      .string()
-      .min(2, "Tên khách phải có ít nhất 2 ký tự")
-      .regex(/^[^\d]+$/, "Tên khách không được chứa số"),
-    guestPhone: z.string().optional(),
-    guestEmail: z.email("Email không hợp lệ").optional().or(z.literal("")),
-    source: z.string().optional(), // For Direct booking
-    otaInformationId: z.string().optional(), // For OTA
-    otaBookingCode: z.string().optional(), // For OTA
+    guestFullName: StaffCreateBookingSchema.shape.guestFullName,
+    guestPhone: StaffCreateBookingSchema.shape.guestPhone,
+    guestEmail: StaffCreateBookingSchema.shape.guestEmail,
+    source: StaffCreateBookingSchema.shape.source,
+    otaInformationId: StaffCreateBookingSchema.shape.otaInformationId,
+    otaBookingCode: StaffCreateBookingSchema.shape.otaBookingCode,
   })
   .refine(
     (data) => {
@@ -90,6 +94,8 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
       otaInformationId: bookingData.otaInformationId ?? undefined,
       otaBookingCode: bookingData.otaBookingCode ?? "",
     },
+    reValidateMode: "onChange",
+    mode: "onChange",
   });
 
   useEffect(() => {
@@ -177,7 +183,7 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
         )}
 
         {bookingType === "OTA" && (
-          <div className="grid grid-cols-1  gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="otaInformationId"
@@ -187,26 +193,41 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
                     Nền tảng OTA <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <div className="flex flex-wrap gap-2">
-                      {otaList?.map((ota) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
                         <Button
-                          type="button"
-                          variant="ghost"
-                          key={ota.id}
-                          onClick={() =>
-                            form.setValue("otaInformationId", ota.id)
-                          }
-                          className={cn(
-                            "rounded-lg border-2 h-12 p-4 text-center transition-all",
-                            form.getValues("otaInformationId") === ota.id
-                              ? "border-primary bg-primary/10"
-                              : ""
-                          )}
+                          variant="outline"
+                          role="combobox"
+                          className="w-full justify-between bg-secondary"
                         >
-                          {ota.name}
+                          {field.value
+                            ? otaList?.find((ota) => ota.id === field.value)
+                                ?.name
+                            : "Chọn nền tảng OTA"}
                         </Button>
-                      ))}
-                    </div>
+                      </PopoverTrigger>
+
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Tìm kiếm nền tảng..." />
+                          <CommandList>
+                            <CommandEmpty>Không có kết quả nào.</CommandEmpty>
+                            <CommandGroup>
+                              {otaList?.map((ota) => (
+                                <CommandItem
+                                  key={ota.id}
+                                  onSelect={() => {
+                                    field.onChange(ota.id);
+                                  }}
+                                >
+                                  {ota.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
 
                   <FormDescription>

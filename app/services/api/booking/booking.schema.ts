@@ -59,7 +59,6 @@ const StaffCreateBookingSchema = z.object({
     .optional()
     .nullable(),
   internalNote: z.string().optional().nullable(),
-  roomPayment: PaymentSchema.RoomPaymentSchema.optional().nullable(),
   serviceOrder: OrderSchema.ServiceOrderSchema.optional(),
 });
 
@@ -198,7 +197,6 @@ const StaffUpdateBookingRequestSchema = z.object({
     .array(
       z.object({
         date: z.string().optional(),
-        hasBreakfast: z.boolean().optional(),
       })
     )
     .optional(),

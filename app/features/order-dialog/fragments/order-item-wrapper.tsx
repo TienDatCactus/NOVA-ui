@@ -17,30 +17,25 @@ export default function OrderItemWrapper({ itemId }: OrderItemWrapperProps) {
   const item = useServiceOrderStore((s) =>
     s.services.find((service) => service.itemId === itemId)
   );
-
-  // Fetch details based on item type
-  const {
-    data: serviceDetail,
-    isLoading: isLoadingService,
-    isError: isServiceError,
-  } = useServiceDetail(itemId, {
-    enabled: item?.itemType === "ServiceItem",
-  });
-
-  const {
-    data: menuDetail,
-    isLoading: isLoadingMenu,
-    isError: isMenuError,
-  } = useMenuItemDetail(itemId, {
-    enabled: item?.itemType === "MenuItem",
-  });
-
-  const isLoading = isLoadingService || isLoadingMenu;
-  const isError = isServiceError || isMenuError;
-
   if (!item) {
     return null;
   }
+  // Fetch details based on item type
+  const { data: serviceDetail, isLoading: isLoadingService } = useServiceDetail(
+    itemId,
+    {
+      enabled: item?.itemType === "ServiceItem",
+    }
+  );
+
+  const { data: menuDetail, isLoading: isLoadingMenu } = useMenuItemDetail(
+    itemId,
+    {
+      enabled: item?.itemType === "MenuItem",
+    }
+  );
+  console.log(menuDetail);
+  const isLoading = isLoadingService || isLoadingMenu;
 
   let itemName = "";
   let unitPrice = 0;
@@ -59,17 +54,6 @@ export default function OrderItemWrapper({ itemId }: OrderItemWrapperProps) {
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-3 w-20" />
         <Skeleton className="h-6 w-24" />
-      </div>
-    );
-  }
-
-  // Show error state
-  if (isError) {
-    return (
-      <div className="py-4 border-b last:border-0">
-        <p className="text-sm text-destructive">
-          Không thể tải thông tin món: {itemId}
-        </p>
       </div>
     );
   }
