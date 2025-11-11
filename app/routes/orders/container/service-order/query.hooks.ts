@@ -20,12 +20,15 @@ export function useServiceOrderList(date?: string) {
 /**
  * Get detailed information for a single service order
  */
-export function useServiceOrderDetail(orderId: string, enabled = true) {
+export function useServiceOrderDetail(
+  orderId: string,
+  options?: { enabled: boolean }
+) {
   return useQuery({
     queryKey: ["service-order-detail", orderId],
     queryFn: async () => await OrderService.getServiceOrderDetail(orderId),
     staleTime: 30 * 1000,
-    enabled: !!orderId && enabled,
+    enabled: !!orderId && options?.enabled,
     refetchOnWindowFocus: true,
   });
 }

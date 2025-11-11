@@ -1,4 +1,8 @@
+import { AlertCircle, Hotel, Receipt, User } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "react-router";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,13 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Separator } from "~/components/ui/separator";
-import { formatMoney } from "~/lib/utils";
-import { Hotel, User, Receipt, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "~/components/ui/alert";
+import { cn, formatMoney } from "~/lib/utils";
 
 type CheckoutMode = "walk-in" | "booking";
 
@@ -34,8 +35,8 @@ export default function CheckoutConfirmDialog({
   onConfirm,
   isSubmitting = false,
 }: CheckoutConfirmDialogProps) {
-  const [mode, setMode] = useState<CheckoutMode>("walk-in");
-
+  const [mode, setMode] = useState<CheckoutMode>("booking");
+  const { pathname } = useLocation();
   const handleConfirm = () => {
     onConfirm(mode);
   };
@@ -85,9 +86,21 @@ export default function CheckoutConfirmDialog({
               onValueChange={(v) => setMode(v as CheckoutMode)}
             >
               {/* Walk-in Option */}
-              <div className="flex items-center space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50">
-                <RadioGroupItem value="walk-in" id="walk-in" />
-                <label
+              <div
+                className={cn(
+                  "flex items-center space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50",
+                  {
+                    "opacity-50 cursor-not-allowed":
+                      pathname.includes("service-pos"),
+                  }
+                )}
+              >
+                <RadioGroupItem
+                  disabled={pathname.includes("service-pos")}
+                  value="walk-in"
+                  id="walk-in"
+                />
+                <Label
                   htmlFor="walk-in"
                   className="flex-1 flex items-center gap-3 cursor-pointer"
                 >
@@ -100,13 +113,13 @@ export default function CheckoutConfirmDialog({
                       Thanh toán trực tiếp tại quầy
                     </p>
                   </div>
-                </label>
+                </Label>
               </div>
 
               {/* Booking Option */}
               <div className="flex items-center space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50">
                 <RadioGroupItem value="booking" id="booking" />
-                <label
+                <Label
                   htmlFor="booking"
                   className="flex-1 flex items-center gap-3 cursor-pointer"
                 >
@@ -119,7 +132,7 @@ export default function CheckoutConfirmDialog({
                       Tính vào hóa đơn phòng
                     </p>
                   </div>
-                </label>
+                </Label>
               </div>
             </RadioGroup>
           </div>

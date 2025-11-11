@@ -10,9 +10,9 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import OrderCard from "./components/menu-order-list/order-card";
 import StatusFilter from "./components/menu-order-list/status-filter";
-import { usePOSOrderList } from "./container/menu-order/query.hooks";
 import type { OrderStatus } from "~/services/api/orders/order.types";
 import type { Route } from "./+types/menu-orders";
+import { usePOSOrderList } from "./container/pos-orders/query.hooks";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};

@@ -13,8 +13,10 @@ const DASHBOARD = {
     newBooking: "/dashboard/bookings/new-booking",
   },
   orders: {
-    index: "/dashboard/orders",
-    pos: "/dashboard/orders/pos",
+    "service-pos": "/dashboard/orders/service-pos",
+    "service-orders": "/dashboard/orders/service-orders",
+    "menu-pos": "/dashboard/orders/menu-pos",
+    "menu-orders": "/dashboard/orders/menu-orders",
   },
 };
 const CUSTOMER = {

@@ -1,4 +1,6 @@
-import { Button } from "~/components/ui/button";
+import { Ban, Clock, CreditCard, Plus, Printer } from "lucide-react";
+import { useState } from "react";
+import type { z } from "zod";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,34 +12,26 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import {
-  Ban,
-  CheckCircle,
-  Printer,
-  CreditCard,
-  Plus,
-  Clock,
-} from "lucide-react";
-import { useState } from "react";
-import type { z } from "zod";
-import {
-  useCancelPOSOrder,
-  useCompletePOSOrder,
-  usePayPOSOrderNow,
-  usePrintPOSOrder,
-  useAddItemToPOSOrder,
-  useUpdateScheduledTime,
-} from "../../container/menu-order/mutation.hooks";
-import PrintPreviewDialog from "./print-preview.dialog";
-import AddMenuItemDialog from "./add-menu-item.dialog";
-import UpdateScheduleDialog from "./update-schedule.dialog";
-import PaymentOrderSheet from "../payment-order.sheet";
+import { Button } from "~/components/ui/button";
+
 import type { POSOrderPrintDataDto } from "~/services/api/orders/dto";
 import { OrderSchema } from "~/services/api/orders/order.schema";
+import {
+  useAddSingleItemToPOSOrder,
+  useCancelPOSOrder,
+  usePayPOSOrderNow,
+  usePrintPOSOrder,
+  useUpdateScheduledTime,
+} from "../../container/pos-orders/mutation.hooks";
+import PaymentOrderSheet from "../payment-order.sheet";
+import AddMenuItemDialog from "./add-menu-item.dialog";
+import PrintPreviewDialog from "./print-preview.dialog";
+import UpdateScheduleDialog from "./update-schedule.dialog";
+import { toast } from "sonner";
 
-const { POSOrderPayNowRequestSchema } = OrderSchema;
+const { OrderPayNowRequestSchema } = OrderSchema;
 
-type PaymentFormData = z.infer<typeof POSOrderPayNowRequestSchema>;
+type PaymentFormData = z.infer<typeof OrderPayNowRequestSchema>;
 
 interface OrderActionsProps {
   orderId: string;
@@ -62,7 +56,8 @@ export default function OrderActions({
   const { mutate: onPrint, isPending: isPrintLoading } = usePrintPOSOrder();
   const { mutate: onCancel } = useCancelPOSOrder();
   // const { mutate: onComplete } = useCompletePOSOrder();
-  const { mutate: onAddItem, isPending: isAddingItem } = useAddItemToPOSOrder();
+  const { mutate: onAddItem, isPending: isAddingItem } =
+    useAddSingleItemToPOSOrder();
   const { mutate: onUpdateSchedule, isPending: isUpdatingSchedule } =
     useUpdateScheduledTime();
 
@@ -70,11 +65,17 @@ export default function OrderActions({
     onPayNow(
       {
         orderId,
-        data,
+        data: {
+          ...data,
+          transactionReference: data.transactionReference || "",
+        },
       },
       {
         onSuccess: () => {
           setIsPaySheetOpen(false);
+        },
+        onError: () => {
+          toast.error("Thanh toán thất bại. Vui lòng thử lại.");
         },
       }
     );
@@ -97,9 +98,11 @@ export default function OrderActions({
     onAddItem(
       {
         orderId,
-        menuItemId,
-        quantity,
-        unitPrice,
+        data: {
+          menuItemId,
+          quantity,
+          unitPrice,
+        },
       },
       {
         onSuccess: () => {
@@ -122,7 +125,11 @@ export default function OrderActions({
       }
     );
   };
-
+  const canComplete = status === "Open";
+  const canCancel = status === "Open";
+  const canReschedule = status === "Open";
+  const canPay = status === "Open";
+  const canAdd = status === "Open";
   return (
     <>
       <div className="flex items-center gap-2 flex-wrap">
@@ -138,72 +145,20 @@ export default function OrderActions({
         </Button>
 
         {/* Actions for Open orders only */}
-        {status === "Open" && (
-          <>
-            {/* Add Items Button */}
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsAddItemDialogOpen(true)}
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Thêm món
-            </Button>
 
-            {/* Update Schedule Button */}
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsScheduleDialogOpen(true)}
-              disabled={isUpdatingSchedule}
-            >
-              <Clock className="w-4 h-4 mr-2" />
-              {isUpdatingSchedule ? "Đang cập nhật..." : "Đổi giờ"}
-            </Button>
-
-            {/* Pay Now Button - Opens Sheet */}
-            <Button
-              size="sm"
-              variant="default"
-              onClick={() => setIsPaySheetOpen(true)}
-            >
-              <CreditCard className="w-4 h-4 mr-2" />
-              Thanh toán ngay
-            </Button>
-
-            {/* Cancel Order */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button size="sm" variant="destructive-outline">
-                  <Ban className="w-4 h-4 mr-2" />
-                  Hủy đơn
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Hủy đơn hàng?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Hành động này không thể hoàn tác. Đơn hàng sẽ bị hủy và
-                    không thể sửa đổi.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Quay lại</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => onCancel(orderId)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    Hủy đơn
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </>
+        {/* Add Items Button */}
+        {canAdd && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsAddItemDialogOpen(true)}
+            className="gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Thêm món
+          </Button>
         )}
-
-        {/* Update Schedule for Completed orders */}
-        {status === "Completed" && (
+        {canReschedule && (
           <Button
             size="sm"
             variant="outline"
@@ -214,7 +169,47 @@ export default function OrderActions({
             {isUpdatingSchedule ? "Đang cập nhật..." : "Đổi giờ"}
           </Button>
         )}
+
+        {canPay && (
+          <Button
+            size="sm"
+            variant="default"
+            onClick={() => setIsPaySheetOpen(true)}
+          >
+            <CreditCard className="w-4 h-4 mr-2" />
+            Thanh toán
+          </Button>
+        )}
+        {canCancel && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button size="sm" variant="destructive-outline">
+                <Ban className="w-4 h-4 mr-2" />
+                Hủy đơn
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Hủy đơn hàng?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Hành động này không thể hoàn tác. Đơn hàng sẽ bị hủy và không
+                  thể sửa đổi.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Quay lại</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onCancel(orderId)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Hủy đơn
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
+      {/* Cancel Order */}
 
       {/* Print Preview Dialog */}
       <PrintPreviewDialog
@@ -231,6 +226,7 @@ export default function OrderActions({
         orderId={orderId}
         onPayNow={handlePayNow}
         isPaying={isPayingNow}
+        orderType="menu"
       />
 
       {/* Add Menu Item Dialog */}

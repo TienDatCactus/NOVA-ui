@@ -29,8 +29,6 @@ http.interceptors.request.use(
     const token = getStorage(STORAGE.TOKEN);
     token && (config.headers.Authorization = `Bearer ${token}`);
 
-    // Add Idempotency-Key for mutating requests if provided
-    // Usage: http.post(url, data, { headers: { 'Idempotency-Key': crypto.randomUUID() } })
     const idempotencyKey = config.headers?.["Idempotency-Key"];
     if (
       idempotencyKey &&
@@ -80,6 +78,8 @@ http.interceptors.response.use(
       isRefreshing = true;
       try {
         const refreshToken = getStorage(STORAGE.REFRESH_TOKEN);
+        console.log(refreshToken);
+        if (!refreshToken) throw new Error("No refresh token available");
         const rs = await AuthService.refresh(refreshToken);
         const { accessToken } = rs.data;
         setStorage(STORAGE.TOKEN, accessToken);
@@ -88,7 +88,7 @@ http.interceptors.response.use(
         return http(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        clearStorage();
+        // clearStorage();
         toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
         if (!window.location.pathname.includes("/auth/login")) {
           window.location.href = "/auth/login";

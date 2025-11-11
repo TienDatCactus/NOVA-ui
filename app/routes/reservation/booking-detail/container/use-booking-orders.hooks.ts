@@ -1,18 +1,18 @@
-import {
-  useCreatePOSOrder,
-  useAddItemToPOSOrder,
-  useDeleteItemFromPOSOrder,
-} from "~/routes/orders/container/order-pos/mutation.hooks";
-import type { AddItemsToPOSOrderRequestDto } from "~/services/api/orders/dto";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BookingService } from "~/services/api/booking";
 import type { StaffAddCompletedChargesRequestDto } from "~/services/api/booking/dto";
 import { toast } from "sonner";
 import type z from "zod";
 import { OrderSchema } from "~/services/api/orders/order.schema";
+import {
+  useAddSingleItemToPOSOrder,
+  useCreatePOSOrder,
+  useDeleteItemFromPOSOrder,
+} from "~/routes/orders/container/pos-orders/mutation.hooks";
+import type { AddSingleItemToPOSOrderRequestDto } from "~/services/api/orders/dto";
 
 type POSOrderFromBookingDetail = z.infer<
-  typeof OrderSchema.POSOrdersListItemByBookingDetailSchema
+  typeof OrderSchema.POSOrderListByBookingResponseSchema
 >;
 
 interface UseBookingOrdersProps {
@@ -28,7 +28,8 @@ export function useBookingOrders({
   const queryClient = useQueryClient();
   const { mutate: createOrder, isPending: isCreatingOrder } =
     useCreatePOSOrder();
-  const { mutate: addItem, isPending: isAddingItem } = useAddItemToPOSOrder();
+  const { mutate: addItem, isPending: isAddingItem } =
+    useAddSingleItemToPOSOrder();
   const { mutate: deleteItem, isPending: isDeletingItem } =
     useDeleteItemFromPOSOrder();
 
@@ -70,7 +71,7 @@ export function useBookingOrders({
     quantity: number,
     unitPrice: number
   ) => {
-    const item: AddItemsToPOSOrderRequestDto = {
+    const item: AddSingleItemToPOSOrderRequestDto = {
       menuItemId,
       quantity,
       unitPrice,

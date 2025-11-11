@@ -172,7 +172,10 @@ export default function BookingSelectionDialog({
 
           <div className="space-y-2">
             <Label>Booking đang ở (CheckedIn)</Label>
-            <ScrollArea className="h-96 rounded-md border">
+            <ScrollArea
+              className="h-fit
+             rounded-md border"
+            >
               <div className="p-4 space-y-2">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (

@@ -23,6 +23,8 @@ const {
   ServiceOrderListByBookingDetailSchema,
   CreatePOSOrderResponseSchema,
   CreateServiceOrderResponseSchema,
+  ServiceOrderListSchema,
+  ServiceOrderListItemSchema,
 } = OrderSchema;
 
 // Service Order types
@@ -77,6 +79,11 @@ export type CreateServiceOrderResponseDto = z.infer<
 
 export type UpdateServiceOrderRequestDto = z.infer<
   typeof UpdateServiceOrderRequestSchema
+>;
+
+export type ServiceOrderListDto = z.infer<typeof ServiceOrderListSchema>;
+export type ServiceOrderListItemDto = z.infer<
+  typeof ServiceOrderListItemSchema
 >;
 
 export type ServiceOrderDetailDto = z.infer<typeof ServiceOrderDetailSchema>;

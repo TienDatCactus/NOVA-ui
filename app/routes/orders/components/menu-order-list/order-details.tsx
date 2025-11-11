@@ -20,7 +20,7 @@ import { vi } from "date-fns/locale";
 import {
   useDeleteItemFromPOSOrder,
   useMarkItemServed,
-} from "../../container/menu-order/mutation.hooks";
+} from "../../container/pos-orders/mutation.hooks";
 
 interface OrderDetailsProps {
   order: POSOrderDetailDto;
@@ -98,7 +98,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
             order.items.map((item) => (
               <div
                 key={item.id}
-                className="flex items-start justify-between gap-4 p-3 bg-background rounded-md border"
+                className="flex items-center justify-between gap-4 p-3 bg-background rounded-md border"
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">

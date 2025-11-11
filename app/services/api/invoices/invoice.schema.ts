@@ -15,18 +15,18 @@ const InvoiceStatusEnum = z
   .or(z.string());
 
 const InvoiceListItemSchema = z.object({
-  invoiceId: z.string(),
-  invoiceNo: z.string(),
-  invoiceType: z.string(),
-  bookingCode: z.string(),
-  customerName: z.string(),
-  total: z.number(),
-  paidAmount: z.number(),
-  balance: z.number(),
-  status: z.string(),
+  invoiceId: z.string().optional().nullable(),
+  invoiceNo: z.string().optional().nullable(),
+  invoiceType: z.string().optional().nullable(),
+  bookingCode: z.string().optional().nullable(),
+  customerName: z.string().optional().nullable(),
+  total: z.number().optional().nullable(),
+  paidAmount: z.number().optional().nullable(),
+  balance: z.number().optional().nullable(),
+  status: z.string().optional().nullable(),
   paymentMethod: z.string().optional().nullable(),
-  issuedAt: z.string(),
-  itemCount: z.number(),
+  issuedAt: z.string().optional().nullable(),
+  itemCount: z.number().optional().nullable(),
 });
 
 // Pagination Meta Schema (from API response)

@@ -40,7 +40,6 @@ const SIDEBAR_NAV_MAIN: Array<{
   title: string;
   url: string;
   icon: LucideIcon;
-  isActive?: boolean;
   items?: Array<{
     title: string;
     url: string;
@@ -50,7 +49,6 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Đặt phòng",
     url: "/dashboard/bookings",
     icon: HousePlus,
-    isActive: true,
     items: [
       {
         title: "Báo cáo",

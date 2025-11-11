@@ -15,6 +15,7 @@ import type {
   UpdateServiceOrderRequestDto,
   CreatePOSOrderResponseDto,
   CreateServiceOrderResponseDto,
+  ServiceOrderListDto,
 } from "./dto";
 import { OrderSchema } from "./order.schema";
 
@@ -30,6 +31,7 @@ const {
   UpdateServiceOrderRequestSchema,
   CreatePOSOrderResponseSchema,
   CreateServiceOrderResponseSchema,
+  ServiceOrderListSchema,
 } = OrderSchema;
 
 /**
@@ -306,15 +308,12 @@ async function cancelServiceOrder(orderId: string): Promise<void> {
  */
 async function getServiceOrderList(
   date?: string
-): Promise<ServiceOrderDetailDto[]> {
+): Promise<ServiceOrderListDto> {
   try {
-    const params: Record<string, string> = {};
-    if (date) params.date = date;
-
     const resp = await http.get(Orders.listServiceOrders, {
-      params: Object.keys(params).length > 0 ? params : undefined,
+      params: date,
     });
-    return ServiceOrderDetailSchema.array().parse(resp.data);
+    return ServiceOrderListSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

@@ -21,25 +21,23 @@ import {
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 
-type ServedTimeDialogProps = {
+type ScheduledTimeDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (servedAt: string) => void;
   bookingInfo?: string;
 };
 
-export default function ServedTimeDialog({
+export default function ScheduledTimeDialog({
   open,
   onOpenChange,
   onConfirm,
   bookingInfo,
-}: ServedTimeDialogProps) {
+}: ScheduledTimeDialogProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [timeString, setTimeString] = useState("");
   const [error, setError] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
-
-  // Initialize with current time (now) when dialog opens
   useEffect(() => {
     if (open) {
       const defaultTime = new Date(); // Changed from addMinutes(new Date(), 30) to now
@@ -55,7 +53,6 @@ export default function ServedTimeDialog({
       return;
     }
 
-    // Parse time and combine with selected date
     const [hours, minutes] = timeString.split(":").map(Number);
     const finalDateTime = set(selectedDate, {
       hours,
@@ -64,9 +61,7 @@ export default function ServedTimeDialog({
       milliseconds: 0,
     });
 
-    // Format as ISO string for API
     const servedAtISO = finalDateTime.toISOString();
-
     onConfirm(servedAtISO);
     setError("");
   };
@@ -90,7 +85,6 @@ export default function ServedTimeDialog({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      // Preserve the current time when changing date
       const [hours, minutes] = timeString.split(":").map(Number);
       const newDateTime = set(date, {
         hours: hours || 0,
@@ -168,8 +162,8 @@ export default function ServedTimeDialog({
               type="time"
               value={timeString}
               onChange={handleTimeChange}
-              className="w-full"
               startAddon={<Clock className="h-4 w-4" />}
+              className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
             <p className="text-xs text-muted-foreground">

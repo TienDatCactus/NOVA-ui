@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,13 +8,19 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
 import { Label } from "~/components/ui/label";
-import { Input } from "~/components/ui/input";
-import { CalendarIcon } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { Clock, CalendarIcon } from "lucide-react";
+import { format, addMinutes, parseISO, set } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useUpdateServiceOrderSchedule } from "../../container/service-order-list/mutation.hooks";
+import { Calendar } from "~/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+import { Input } from "~/components/ui/input";
+import { useUpdateServiceOrderSchedule } from "../../container/service-order/mutation.hooks";
 
 interface UpdateScheduleDialogProps {
   orderId: string;
@@ -29,96 +35,192 @@ export default function UpdateScheduleDialog({
   open,
   onOpenChange,
 }: UpdateScheduleDialogProps) {
-  const [date, setDate] = useState<Date | undefined>(
-    currentScheduledTime ? parseISO(currentScheduledTime) : new Date()
-  );
-  const [time, setTime] = useState<string>(
-    currentScheduledTime
-      ? format(parseISO(currentScheduledTime), "HH:mm")
-      : "09:00"
-  );
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [timeString, setTimeString] = useState("");
+  const [error, setError] = useState("");
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const updateSchedule = useUpdateServiceOrderSchedule();
 
-  const handleConfirm = () => {
-    if (!date) return;
+  useEffect(() => {
+    if (open) {
+      if (currentScheduledTime) {
+        const scheduledDate = parseISO(currentScheduledTime);
+        setSelectedDate(scheduledDate);
+        setTimeString(format(scheduledDate, "HH:mm"));
+      } else {
+        const defaultTime = new Date();
+        setSelectedDate(defaultTime);
+        setTimeString(format(defaultTime, "HH:mm"));
+      }
+      setError("");
+    }
+  }, [open, currentScheduledTime]);
 
-    // Combine date and time
-    const [hours, minutes] = time.split(":").map(Number);
-    const scheduledDateTime = new Date(date);
-    scheduledDateTime.setHours(hours, minutes, 0, 0);
+  const handleConfirm = () => {
+    if (!timeString) {
+      setError("Vui lòng chọn thời gian phục vụ");
+      return;
+    }
+
+    // Parse time and combine with selected date
+    const [hours, minutes] = timeString.split(":").map(Number);
+    const finalDateTime = set(selectedDate, {
+      hours,
+      minutes,
+      seconds: 0,
+      milliseconds: 0,
+    });
 
     updateSchedule.mutate(
       {
         orderId,
-        data: { scheduledAt: scheduledDateTime.toISOString() },
+        data: { scheduledAt: finalDateTime.toISOString() },
       },
       {
         onSuccess: () => {
+          setError("");
           onOpenChange(false);
         },
       }
     );
   };
 
+  const handleCancel = () => {
+    setError("");
+    onOpenChange(false);
+  };
+
+  const handlePresetTime = (minutesOffset: number) => {
+    const newTime = addMinutes(new Date(), minutesOffset);
+    setSelectedDate(newTime);
+    setTimeString(format(newTime, "HH:mm"));
+    setError("");
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTimeString(e.target.value);
+    setError("");
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      // Preserve the current time when changing date
+      const [hours, minutes] = timeString.split(":").map(Number);
+      const newDateTime = set(date, {
+        hours: hours || 0,
+        minutes: minutes || 0,
+        seconds: 0,
+        milliseconds: 0,
+      });
+      setSelectedDate(newDateTime);
+      setCalendarOpen(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Đổi lịch hẹn</DialogTitle>
+          <DialogTitle>Cập nhật thời gian phục vụ</DialogTitle>
           <DialogDescription>
-            Chọn ngày và giờ mới cho dịch vụ này
+            Chọn ngày và thời gian mới để phục vụ đơn hàng
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Date Picker */}
-          <div className="space-y-2">
-            <Label>Chọn ngày</Label>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              locale={vi}
-              className="rounded-md border"
-              disabled={(date) =>
-                date < new Date(new Date().setHours(0, 0, 0, 0))
-              }
-            />
-          </div>
-
-          {/* Time Picker */}
-          <div className="space-y-2">
-            <Label htmlFor="time">Chọn giờ</Label>
-            <Input
-              id="time"
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
-          </div>
-
-          {/* Preview */}
-          {date && (
-            <div className="p-3 bg-muted rounded-md">
-              <p className="text-sm text-muted-foreground">Lịch hẹn mới:</p>
-              <p className="font-medium flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                {format(date, "EEEE, dd MMMM yyyy", { locale: vi })} - {time}
+          {currentScheduledTime && (
+            <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
+              <p className="font-medium text-foreground mb-1">
+                Thời gian hiện tại
+              </p>
+              <p>
+                {format(parseISO(currentScheduledTime), "HH:mm - dd/MM/yyyy", {
+                  locale: vi,
+                })}
               </p>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label htmlFor="scheduled-date" className="text-sm font-medium">
+              Ngày phục vụ <span className="text-destructive">*</span>
+            </Label>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    "hover:bg-accent"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(selectedDate, "EEEE, dd/MM/yyyy", { locale: vi })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateSelect}
+                  locale={vi}
+                  disabled={{ before: new Date() }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="scheduled-time" className="text-sm font-medium">
+              Giờ phục vụ <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="scheduled-time"
+              type="time"
+              value={timeString}
+              onChange={handleTimeChange}
+              className="w-full"
+              startAddon={<Clock className="h-4 w-4" />}
+            />
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <p className="text-xs text-muted-foreground">
+              Thời gian này sẽ được ghi nhận để bếp chuẩn bị đúng lúc
+            </p>
+          </div>
+
+          <div className="bg-muted/30 p-3 rounded-md space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              Gợi ý thời gian:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: "Ngay bây giờ", offset: 0 },
+                { label: "15 phút nữa", offset: 15 },
+                { label: "30 phút nữa", offset: 30 },
+                { label: "1 giờ nữa", offset: 60 },
+                { label: "2 giờ nữa", offset: 120 },
+              ].map((preset) => (
+                <Button
+                  key={preset.offset}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePresetTime(preset.offset)}
+                  className="text-xs"
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={handleCancel}>
             Hủy
           </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={!date || updateSchedule.isPending}
-          >
-            {updateSchedule.isPending ? "Đang cập nhật..." : "Xác nhận"}
+          <Button onClick={handleConfirm} disabled={updateSchedule.isPending}>
+            {updateSchedule.isPending ? "Đang cập nhật..." : "Cập nhật"}
           </Button>
         </DialogFooter>
       </DialogContent>

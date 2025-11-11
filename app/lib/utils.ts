@@ -32,10 +32,14 @@ export function daysBetweenFloor(a: Date, b: Date) {
 }
 
 export function formatMoney(amount: number | bigint | string) {
-  // Convert to string first to avoid precision loss
+  if (!amount) {
+    return {
+      usdFormatted: "$0",
+      vndFormatted: "0 ₫",
+    };
+  }
   const amountStr = amount.toString();
 
-  // Use BigInt for safe handling of extremely large numbers
   const bigAmount = BigInt(amountStr);
 
   // Convert BigInt to plain string with thousands separators manually

@@ -19,7 +19,7 @@ export function useCreateServiceOrder() {
     mutationFn: (data: CreateServiceOrderRequestDto) =>
       OrderService.createServiceOrder(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
       toast.success("Tạo service order thành công");
     },
   });
@@ -40,7 +40,7 @@ export function useUpdateServiceOrder() {
       data: UpdateServiceOrderRequestDto;
     }) => OrderService.updateServiceOrder(orderId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
 }
@@ -54,7 +54,7 @@ export function useCompleteServiceOrder() {
   return useMutation({
     mutationFn: (orderId: string) => OrderService.completeServiceOrder(orderId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
 }
@@ -68,7 +68,7 @@ export function useCancelServiceOrder() {
   return useMutation({
     mutationFn: (orderId: string) => OrderService.cancelServiceOrder(orderId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
 }
@@ -88,7 +88,7 @@ export function usePayServiceOrderNow() {
       data: ServiceOrderPayNowRequestDto;
     }) => OrderService.payServiceOrderNow(orderId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
 }
@@ -108,7 +108,7 @@ export function useUpdateServiceOrderSchedule() {
       data: SetScheduledServiceOrderRequestDto;
     }) => OrderService.setScheduledServiceOrder(orderId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["service-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
 }
@@ -117,41 +117,3 @@ export function useUpdateServiceOrderSchedule() {
  * Create service order with items (for Service POS)
  * Similar to menu POS but creates service orders instead
  */
-export function useCreateServicePosOrderAndItems() {
-  return useMutation({
-    mutationFn: async ({
-      bookingId,
-      bookingRoomId,
-      scheduledAt,
-      notes,
-      items,
-    }: {
-      bookingId?: string | null;
-      bookingRoomId?: string | null;
-      scheduledAt?: string | null;
-      notes?: string | null;
-      items: ServicePosCartItem[];
-    }) => {
-      // Create service orders for each item
-      const createdOrders = [];
-
-      for (const item of items) {
-        const order = await OrderService.createServiceOrder({
-          bookingId: bookingId || undefined,
-          bookingRoomId: bookingRoomId || undefined,
-          serviceItemId: item.serviceItemId || "",
-          customServiceName: item.customServiceName,
-          customServiceDescription: item.customServiceDescription,
-          scheduledAt: scheduledAt || undefined,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          note: notes || undefined,
-          assignedToStaffId: undefined, // Can be added later if needed
-        });
-        createdOrders.push(order);
-      }
-
-      return createdOrders;
-    },
-  });
-}

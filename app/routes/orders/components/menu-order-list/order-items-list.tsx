@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { formatMoney } from "~/lib/utils";
 import type { POSOrderItemDto } from "~/services/api/orders/dto";
 
@@ -38,15 +39,12 @@ export default function OrderItemsList({ items }: OrderItemsListProps) {
               </div>
               {item.servedAt && (
                 <div className="text-xs text-muted-foreground mt-1">
-                  Phục vụ lúc: {item.servedAt}
+                  Phục vụ lúc: {format(item.servedAt, "HH:mm dd/MM/yyyy")}
                 </div>
               )}
             </div>
             <div className="flex-shrink-0 text-right">
               <div className="font-semibold text-sm">{subtotal}</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {item.itemType}
-              </div>
             </div>
           </div>
         );
