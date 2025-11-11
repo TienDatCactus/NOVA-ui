@@ -48,7 +48,7 @@ export default [
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("users", "routes/users/users.tsx"),
-      route("staff", "routes/staff/staff.tsx"),
+      route("staff", "routes/staff/staff/staff.tsx"),
     ]),
   ]),
 

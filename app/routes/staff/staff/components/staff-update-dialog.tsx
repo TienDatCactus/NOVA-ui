@@ -178,7 +178,9 @@ export default function StaffUpdateDialog({
                 name="fullName"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel>Họ và tên</FormLabel>
+                    <FormLabel>
+                      Họ và tên <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Nguyễn Văn A" />
                     </FormControl>
@@ -193,7 +195,9 @@ export default function StaffUpdateDialog({
                 name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Số điện thoại</FormLabel>
+                    <FormLabel>
+                      Số điện thoại <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="0912345678" />
                     </FormControl>
@@ -305,13 +309,15 @@ export default function StaffUpdateDialog({
                 )}
               />
 
-              {/* Staff Role ID */}
+              {/* Staff Role ID - Fetch from API */}
               <FormField
                 control={form.control}
                 name="staffRoleId"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel>Vai trò nhân sự</FormLabel>
+                    <FormLabel>
+                      Vai trò nhân sự <span className="text-destructive">*</span>
+                    </FormLabel>
                     <div className="flex gap-2">
                       <Select
                         onValueChange={field.onChange}

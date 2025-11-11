@@ -164,7 +164,9 @@ export default function StaffDialog({
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mã nhân sự</FormLabel>
+                    <FormLabel>
+                      Mã nhân sự <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="NV001" />
                     </FormControl>
@@ -179,7 +181,9 @@ export default function StaffDialog({
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Họ và tên</FormLabel>
+                    <FormLabel>
+                      Họ và tên <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Nguyễn Văn A" />
                     </FormControl>
@@ -194,7 +198,9 @@ export default function StaffDialog({
                 name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Số điện thoại</FormLabel>
+                    <FormLabel>
+                      Số điện thoại <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="0912345678" />
                     </FormControl>
@@ -360,7 +366,9 @@ export default function StaffDialog({
                 name="staffRoleId"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel>Vai trò nhân sự</FormLabel>
+                    <FormLabel>
+                      Vai trò nhân sự <span className="text-destructive">*</span>
+                    </FormLabel>
                     <div className="flex gap-2">
                       <Select
                         onValueChange={field.onChange}
