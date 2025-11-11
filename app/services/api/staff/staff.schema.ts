@@ -11,6 +11,8 @@ export const StaffListItemSchema = z.object({
   dateOfBirth: z.string().optional().nullable(),
   citizenId: z.string().optional().nullable(),
   note: z.string().optional().nullable(),
+  staffRoleId: z.string().optional().nullable(),
+  staffRoleName: z.string().optional().nullable(),
 });
 
 // Staff Detail Item Schema (from GET /api/Staffs/{id} - full details)

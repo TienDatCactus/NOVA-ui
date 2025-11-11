@@ -154,6 +154,10 @@ const Staff = {
 
 const StaffRole = {
   list: "StaffRoles",
+  create: "StaffRoles",
+  detail: (id: string) => `StaffRoles/${id}`,
+  update: (id: string) => `StaffRoles/${id}`,
+  delete: (id: string) => `StaffRoles/${id}`,
 };
 
 export {

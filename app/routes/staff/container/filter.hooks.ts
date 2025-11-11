@@ -2,10 +2,12 @@ import { useState, useMemo } from "react";
 
 export interface StaffFilters {
   searchText: string;
+  staffRoleIds?: string[];
 }
 
 const DEFAULT_FILTERS: StaffFilters = {
   searchText: "",
+  staffRoleIds: [],
 };
 
 export function useStaffFilters() {
@@ -38,7 +40,6 @@ export function useStaffFilters() {
         params.fullName = searchText;
       }
     }
-
     return params;
   }, [filters.searchText]);
 

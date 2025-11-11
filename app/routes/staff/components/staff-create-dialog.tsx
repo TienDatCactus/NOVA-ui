@@ -42,9 +42,10 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { vi } from "date-fns/locale";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, Plus } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
 import { cn } from "~/lib/utils";
+import StaffRoleCreateDialog from "./staff-role-create-dialog";
 
 interface StaffDialogProps {
   open: boolean;
@@ -62,6 +63,7 @@ export default function StaffDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [roles, setRoles] = useState<StaffRoleItem[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
 
   const form = useForm<CreateStaffFormData>({
     resolver: zodResolver(CreateStaffFormSchema),
@@ -82,20 +84,32 @@ export default function StaffDialog({
   // Fetch staff roles when dialog opens
   useEffect(() => {
     if (open) {
-      setIsLoadingRoles(true);
-      StaffRoleService.getStaffRoleList()
-        .then((response) => {
-          setRoles(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching staff roles:", error);
-          toast.error("Không thể tải danh sách vai trò");
-        })
-        .finally(() => {
-          setIsLoadingRoles(false);
-        });
+      fetchRoles();
     }
   }, [open]);
+
+  const fetchRoles = () => {
+    setIsLoadingRoles(true);
+    StaffRoleService.getStaffRoleList()
+      .then((response) => {
+        setRoles(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching staff roles:", error);
+        toast.error("Không thể tải danh sách vai trò");
+      })
+      .finally(() => {
+        setIsLoadingRoles(false);
+      });
+  };
+
+  const handleRoleCreated = (roleId: string, roleName: string) => {
+    // Refresh roles list
+    fetchRoles();
+    // Auto-select the newly created role
+    form.setValue("staffRoleId", roleId);
+    toast.success(`Đã chọn vai trò: ${roleName}`);
+  };
 
   const onSubmit = async (data: CreateStaffFormData) => {
     setIsSubmitting(true);
@@ -347,30 +361,41 @@ export default function StaffDialog({
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>Vai trò nhân sự</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={isLoadingRoles}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={
-                              isLoadingRoles
-                                ? "Đang tải vai trò..."
-                                : "Chọn vai trò"
-                            }
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {roles.map((role) => (
-                          <SelectItem key={role.id} value={role.id}>
-                            {role.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={isLoadingRoles}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                isLoadingRoles
+                                  ? "Đang tải vai trò..."
+                                  : "Chọn vai trò"
+                              }
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {roles.map((role) => (
+                            <SelectItem key={role.id} value={role.id}>
+                              {role.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setIsRoleDialogOpen(true)}
+                        title="Thêm vai trò mới"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -412,6 +437,13 @@ export default function StaffDialog({
           </form>
         </Form>
       </DialogContent>
+
+      {/* Staff Role Create Dialog */}
+      <StaffRoleCreateDialog
+        open={isRoleDialogOpen}
+        onOpenChange={setIsRoleDialogOpen}
+        onSuccess={handleRoleCreated}
+      />
     </Dialog>
   );
 }

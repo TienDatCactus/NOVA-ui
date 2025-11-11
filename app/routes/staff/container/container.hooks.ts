@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useStaffFilters } from "./filter.hooks";
 import { useStaffList } from "./query.hooks";
-import type { StaffListItem } from "~/services/api/staff/dto";
 
 export function useStaffContainer() {
   const {
@@ -13,11 +12,24 @@ export function useStaffContainer() {
   } = useStaffFilters();
 
   const { data, isPending, isError, error, refetch } = useStaffList(apiParams);
-  // Chỉ cần trả về data từ API
+
+  // Filter ở frontend
   const filteredStaffs = useMemo(() => {
     if (!data?.data) return [];
-    return data.data;
-  }, [data]);
+
+    let result = data.data;
+
+    // Filter by staff roles (client-side)
+    if (filters.staffRoleIds && filters.staffRoleIds.length > 0) {
+      result = result.filter((staff) =>
+        staff.staffRoleId
+          ? filters.staffRoleIds!.includes(staff.staffRoleId)
+          : false
+      );
+    }
+
+    return result;
+  }, [data, filters.staffRoleIds]);
 
   return {
     staffs: filteredStaffs,
