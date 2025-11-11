@@ -51,6 +51,7 @@ export default [
       ...prefix("staff", [
         index("routes/staff/staff/staff.tsx"),
         route("work-shifts", "routes/staff/work-shifts/work-shifts.tsx"),
+        route("holidays", "routes/staff/holidays/holidays.tsx"),
       ]),
     ]),
   ]),
