@@ -48,7 +48,10 @@ export default [
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("users", "routes/users/users.tsx"),
-      route("staff", "routes/staff/staff/staff.tsx"),
+      ...prefix("staff", [
+        index("routes/staff/staff/staff.tsx"),
+        route("work-shifts", "routes/staff/work-shifts/work-shifts.tsx"),
+      ]),
     ]),
   ]),
 

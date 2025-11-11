@@ -26,7 +26,6 @@ export default function StaffPage() {
   const [staffToDelete, setStaffToDelete] = useState<StaffListItem | null>(
     null
   );
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
@@ -58,23 +57,6 @@ export default function StaffPage() {
 
   const handleDeleteStaff = (staff: StaffListItem) => {
     setStaffToDelete(staff);
-  };
-
-  const confirmDelete = async () => {
-    if (!staffToDelete) return;
-
-    setIsDeleting(true);
-    try {
-      await StaffService.deleteStaff(staffToDelete.id);
-      toast.success(`Đã xóa nhân sự ${staffToDelete.fullName}`);
-      setStaffToDelete(null);
-      refetch();
-    } catch (error) {
-      console.error("Delete staff error:", error);
-      toast.error("Không thể xóa nhân sự. Vui lòng thử lại.");
-    } finally {
-      setIsDeleting(false);
-    }
   };
 
   if (isError) {
@@ -150,8 +132,10 @@ export default function StaffPage() {
         open={!!staffToDelete}
         onOpenChange={(open) => !open && setStaffToDelete(null)}
         staff={staffToDelete}
-        onConfirm={confirmDelete}
-        isDeleting={isDeleting}
+        onSuccess={() => {
+          refetch();
+          setStaffToDelete(null);
+        }}
       />
     </>
   );

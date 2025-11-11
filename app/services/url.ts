@@ -160,6 +160,14 @@ const StaffRole = {
   delete: (id: string) => `StaffRoles/${id}`,
 };
 
+const WorkShift = {
+  list: "WorkShifts",
+  create: "WorkShifts",
+  detail: (id: string) => `WorkShifts/${id}`,
+  update: (id: string) => `WorkShifts/${id}`,
+  delete: (id: string) => `WorkShifts/${id}`,
+};
+
 export {
   Auth,
   User,
@@ -177,4 +185,5 @@ export {
   Invoices,
   Staff,
   StaffRole,
+  WorkShift,
 };

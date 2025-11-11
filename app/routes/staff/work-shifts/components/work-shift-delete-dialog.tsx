@@ -9,36 +9,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import type { StaffListItem } from "~/services/api/staff/dto";
-import { StaffService } from "~/services/api/staff";
+import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
+import { WorkShiftService } from "~/services/api/work-shift";
 import { toast } from "sonner";
 
-interface StaffDeleteDialogProps {
+interface DeleteWorkShiftDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  staff: StaffListItem | null;
+  workShift: WorkShiftListItem | null;
   onSuccess: () => void;
 }
 
-export default function StaffDeleteDialog({
+export default function DeleteWorkShiftDialog({
   open,
   onOpenChange,
-  staff,
+  workShift,
   onSuccess,
-}: StaffDeleteDialogProps) {
+}: DeleteWorkShiftDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
-    if (!staff) return;
+    if (!workShift) return;
 
     setIsDeleting(true);
     try {
-      await StaffService.deleteStaff(staff.id);
-      toast.success(`Đã xóa nhân sự ${staff.fullName}`);
+      await WorkShiftService.deleteWorkShift(workShift.id);
+      toast.success(`Đã xóa ca làm việc ${workShift.name}`);
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      console.error("Delete staff error:", error);
+      console.error("Delete work shift error:", error);
       // Error toast handled by http interceptor
     } finally {
       setIsDeleting(false);
@@ -49,11 +49,11 @@ export default function StaffDeleteDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Xác nhận xóa nhân sú</AlertDialogTitle>
+          <AlertDialogTitle>Xác nhận xóa ca làm việc</AlertDialogTitle>
           <AlertDialogDescription>
-            Bạn có chắc chắn muốn xóa nhân sự{" "}
-            <span className="font-semibold">{staff?.fullName}</span> (
-            {staff?.code})? Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn xóa ca làm việc{" "}
+            <span className="font-semibold">{workShift?.name}</span> (
+            {workShift?.code})? Hành động này không thể hoàn tác.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
