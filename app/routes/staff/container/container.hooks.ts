@@ -13,28 +13,11 @@ export function useStaffContainer() {
   } = useStaffFilters();
 
   const { data, isPending, isError, error, refetch } = useStaffList(apiParams);
-
-  // Client-side filtering for search text
+  // Chỉ cần trả về data từ API
   const filteredStaffs = useMemo(() => {
-    if (!data) return [];
-
-    let result: StaffListItem[] = data; // API returns array directly
-
-    // Search filter (client-side)
-    if (clientFilters.searchText) {
-      result = result.filter((staff) => {
-        const searchText = clientFilters.searchText;
-        return (
-          staff.code.toLowerCase().includes(searchText) ||
-          staff.fullName.toLowerCase().includes(searchText) ||
-          staff.position.toLowerCase().includes(searchText) ||
-          staff.department.toLowerCase().includes(searchText)
-        );
-      });
-    }
-
-    return result;
-  }, [data, clientFilters.searchText]);
+    if (!data?.data) return [];
+    return data.data;
+  }, [data]);
 
   return {
     staffs: filteredStaffs,

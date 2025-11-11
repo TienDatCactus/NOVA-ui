@@ -2,12 +2,10 @@ import { useState, useMemo } from "react";
 
 export interface StaffFilters {
   searchText: string;
-  includeInactive: boolean;
 }
 
 const DEFAULT_FILTERS: StaffFilters = {
   searchText: "",
-  includeInactive: false,
 };
 
 export function useStaffFilters() {
@@ -26,12 +24,25 @@ export function useStaffFilters() {
 
   // Convert filters to API params
   const apiParams = useMemo(() => {
-    return {
-      includeInactive: filters.includeInactive,
-    };
-  }, [filters.includeInactive]);
+    const params: { code?: string; fullName?: string } = {};
 
-  // Client-side filtering for search text
+    const searchText = filters.searchText.trim();
+    if (searchText) {
+      // API có thể support search theo cả code và fullName
+      // Nếu search text giống format code (chỉ chữ/số, không dấu), search theo code
+      // Ngược lại search theo fullName (tên có thể có dấu, khoảng trắng)
+      if (/^[A-Z0-9]+$/i.test(searchText)) {
+        params.code = searchText;
+      } else {
+        // Tìm theo tên (contains)
+        params.fullName = searchText;
+      }
+    }
+
+    return params;
+  }, [filters.searchText]);
+
+  // Client-side filtering for additional filters (if needed)
   const clientFilters = useMemo(() => {
     return {
       searchText: filters.searchText.toLowerCase().trim(),

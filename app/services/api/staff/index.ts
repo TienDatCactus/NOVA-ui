@@ -24,10 +24,8 @@ async function getStaffList(
 ): Promise<StaffListResponse> {
   try {
     const response = await http.get(Staff.list, { params });
-    console.log("Staff API Response:", response.data);
-    return StaffListResponseSchema.parse(response.data);
+    return StaffListResponseSchema.parse(response);
   } catch (error) {
-    console.error("Staff API Error:", error);
     return Promise.reject(error);
   }
 }
@@ -40,10 +38,8 @@ async function createStaff(
 ): Promise<StaffDetailResponse> {
   try {
     const response = await http.post(Staff.create, data);
-    console.log("Create Staff Response:", response);
     return StaffDetailResponseSchema.parse(response);
   } catch (error) {
-    console.error("Create Staff Error:", error);
     return Promise.reject(error);
   }
 }
@@ -54,11 +50,8 @@ async function createStaff(
 async function getStaffById(id: string): Promise<StaffDetailResponse> {
   try {
     const response = await http.get(Staff.detail(id));
-    console.log("Get Staff Detail Response:", response);
-    // http might return parsed data directly
     return StaffDetailResponseSchema.parse(response);
   } catch (error) {
-    console.error("Get Staff Detail Error:", error);
     return Promise.reject(error);
   }
 }
@@ -72,11 +65,8 @@ async function updateStaff(
 ): Promise<StaffDetailResponse> {
   try {
     const response = await http.put(Staff.update(id), data);
-    console.log("Update Staff Response:", response);
-    // http.put might return the data directly (like in UserService)
     return StaffDetailResponseSchema.parse(response);
   } catch (error) {
-    console.error("Update Staff Error:", error);
     return Promise.reject(error);
   }
 }
@@ -87,11 +77,8 @@ async function updateStaff(
 async function deleteStaff(id: string): Promise<DeleteStaffResponse> {
   try {
     const response = await http.delete(Staff.delete(id));
-    console.log("Delete Staff Response:", response);
-    // http might return parsed data directly
     return DeleteStaffResponseSchema.parse(response);
   } catch (error) {
-    console.error("Delete Staff Error:", error);
     return Promise.reject(error);
   }
 }

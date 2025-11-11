@@ -1,3 +1,4 @@
 export interface StaffListParams {
-  includeInactive?: boolean;
+  code?: string;
+  fullName?: string;
 }

@@ -152,6 +152,10 @@ const Staff = {
   delete: (id: string) => `Staffs/${id}`,
 };
 
+const StaffRole = {
+  list: "StaffRoles",
+};
+
 export {
   Auth,
   User,
@@ -168,4 +172,5 @@ export {
   Orders,
   Invoices,
   Staff,
+  StaffRole,
 };

@@ -11,7 +11,6 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { StaffService } from "~/services/api/staff";
 import type { StaffDetailItem } from "~/services/api/staff/dto";
 import { format, parseISO } from "date-fns";
-import { formatMoney } from "~/lib/utils";
 import { toast } from "sonner";
 
 interface StaffDetailDialogProps {
@@ -72,47 +71,52 @@ export default function StaffDetailDialog({
                   {staff.code}
                 </p>
               </div>
-              <Badge variant={staff.active ? "default" : "secondary"}>
-                {staff.active ? "Đang làm việc" : "Đã nghỉ việc"}
-              </Badge>
+              {staff.staffRoleName && (
+                <Badge variant="secondary">{staff.staffRoleName}</Badge>
+              )}
             </div>
 
             {/* Details Grid */}
             <div className="grid grid-cols-2 gap-4">
-              <DetailItem label="Chức vụ" value={staff.position} />
-              <DetailItem label="Phòng ban" value={staff.department} />
               <DetailItem
                 label="Số điện thoại"
                 value={staff.phoneNumber || "-"}
               />
               <DetailItem label="Email" value={staff.email || "-"} />
+              <DetailItem label="Giới tính" value={staff.gender || "-"} />
               <DetailItem
-                label="Lương cơ bản"
+                label="Ngày sinh"
                 value={
-                  staff.baseSalary
-                    ? formatMoney(staff.baseSalary).vndFormatted
+                  staff.dateOfBirth
+                    ? format(parseISO(staff.dateOfBirth), "dd/MM/yyyy")
                     : "-"
                 }
               />
               <DetailItem
-                label="Ngày vào làm"
+                label="Số CCCD"
                 value={
-                  staff.hireDate
-                    ? format(parseISO(staff.hireDate), "dd/MM/yyyy")
-                    : "-"
-                }
-              />
-              <DetailItem
-                label="User ID"
-                value={
-                  staff.userId ? (
-                    <span className="font-mono text-xs">{staff.userId}</span>
+                  staff.citizenId ? (
+                    <span className="font-mono text-sm">{staff.citizenId}</span>
                   ) : (
                     "-"
                   )
                 }
-                className="col-span-2"
               />
+              <DetailItem
+                label="Ngày bắt đầu làm việc"
+                value={
+                  staff.startDate
+                    ? format(parseISO(staff.startDate), "dd/MM/yyyy")
+                    : "-"
+                }
+              />
+              {staff.note && (
+                <DetailItem
+                  label="Ghi chú"
+                  value={staff.note}
+                  className="col-span-2"
+                />
+              )}
             </div>
           </div>
         ) : (

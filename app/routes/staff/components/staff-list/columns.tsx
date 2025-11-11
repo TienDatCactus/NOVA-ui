@@ -1,15 +1,14 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "~/components/ui/badge";
+import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react";
 import type { StaffListItem } from "~/services/api/staff/dto";
 
 interface StaffColumnsProps {
@@ -45,26 +44,17 @@ export const createStaffColumns = ({
     ),
   },
   {
-    accessorKey: "position",
-    header: "Chức vụ",
+    accessorKey: "phoneNumber",
+    header: "Số điện thoại",
     cell: ({ row }) => (
-      <Badge variant="secondary" className="font-normal">
-        {row.original.position}
-      </Badge>
+      <div className="font-mono text-sm">{row.original.phoneNumber || "-"}</div>
     ),
   },
   {
-    accessorKey: "department",
-    header: "Phòng ban",
-    cell: ({ row }) => <div className="text-sm">{row.original.department}</div>,
-  },
-  {
-    accessorKey: "active",
-    header: "Trạng thái",
+    accessorKey: "citizenId",
+    header: "CCCD",
     cell: ({ row }) => (
-      <Badge variant={row.original.active ? "default" : "secondary"}>
-        {row.original.active ? "Đang làm việc" : "Đã nghỉ việc"}
-      </Badge>
+      <div className="font-mono text-sm">{row.original.citizenId || "-"}</div>
     ),
   },
   {

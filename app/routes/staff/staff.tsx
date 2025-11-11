@@ -1,7 +1,7 @@
 import { useState } from "react";
 import StaffViewLayout from "./layouts/staff-view.layout";
 import StaffList from "./components/staff-list";
-import StaffDialog from "./components/staff-dialog";
+import StaffCreateDialog from "./components/staff-create-dialog";
 import StaffUpdateDialog from "./components/staff-update-dialog";
 import StaffDetailDialog from "./components/staff-detail-dialog";
 import StaffDeleteDialog from "./components/staff-delete-dialog";
@@ -117,7 +117,7 @@ export default function StaffPage() {
       </StaffViewLayout>
 
       {/* Create Staff Dialog */}
-      <StaffDialog
+      <StaffCreateDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         onSuccess={() => {
