@@ -211,13 +211,16 @@ const StaffUpdateBookingResponseSchema = z.object({
 
 const BookingPendingChargesResponseSchema = z.object({
   bookingId: z.string("Booking ID không hợp lệ"),
-  roomInvoice: z.object({
-    invoiceId: z.string(),
-    invoiceNo: z.string(),
-    total: z.number(),
-    paid: z.number(),
-    balance: z.number(),
-  }),
+  roomInvoice: z
+    .object({
+      invoiceId: z.string(),
+      invoiceNo: z.string(),
+      total: z.number(),
+      paid: z.number(),
+      balance: z.number(),
+    })
+    .optional()
+    .nullable(),
   pendingOrders: z.object({
     posOrders: z.array(
       z.object({
@@ -351,7 +354,7 @@ const BookingDetailItemSchema = z.object({
   }),
   rooms: z.array(RoomSchema.BookingDetailRoomItemSchema),
   invoices: InvoiceSchema.InvoiceListResponseSchema.optional(),
-  serviceOrder:
+  serviceOrders:
     OrderSchema.ServiceOrderListByBookingDetailSchema.optional().nullable(),
   posOrders: OrderSchema.POSOrderListByBookingResponseSchema.optional(),
 });
@@ -387,6 +390,19 @@ const CheckoutPaymentItemSchema = z.object({
     .min(1, "Mã giao dịch không hợp lệ")
     .optional()
     .nullable(),
+});
+
+const StaffCreateCheckoutInvoiceResponseSchema = z.object({
+  invoiceId: z.string(),
+  invoiceNo: z.string(),
+  subTotal: z.number(),
+  total: z.number(),
+  paidAmount: z.number(),
+  balance: z.number(),
+  status: z.string(),
+  paymentMethod: z.string(),
+  issuedAt: z.date(),
+  itemCount: z.number(),
 });
 
 // Yêu cầu thanh toán khi checkout (phòng + tổng thể)
@@ -445,20 +461,6 @@ const StaffAddCompletedChargesRequestSchema = z.object({
   source: z.string().optional(),
 });
 
-const StaffAddCompletedChargesResponseSchema = z.object({}).optional();
-
-// Response cho create-invoice
-const StaffCreateCheckoutInvoiceResponseSchema = z.object({}).optional();
-
-// Response cho checkout payment
-const StaffCheckoutPaymentResponseSchema = z.object({}).optional();
-
-// Response cho checkout
-const StaffCheckoutResponseSchema = z.object({}).optional();
-
-// Response cho checkout multiple
-const StaffCheckoutMultipleResponseSchema = z.object({}).optional();
-
 const AvailableRoomForChangeSchema = z.object({
   roomId: z.string(),
   roomName: z.string(),
@@ -510,9 +512,5 @@ export const BookingSchema = {
   StaffCheckoutRequestSchema,
   StaffCheckoutMultipleRequestSchema,
   StaffAddCompletedChargesRequestSchema,
-  StaffAddCompletedChargesResponseSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
-  StaffCheckoutPaymentResponseSchema,
-  StaffCheckoutResponseSchema,
-  StaffCheckoutMultipleResponseSchema,
 };

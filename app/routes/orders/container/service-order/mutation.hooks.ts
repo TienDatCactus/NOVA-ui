@@ -3,11 +3,10 @@ import { toast } from "sonner";
 import { OrderService } from "~/services/api/orders";
 import type {
   CreateServiceOrderRequestDto,
-  UpdateServiceOrderRequestDto,
   ServiceOrderPayNowRequestDto,
   SetScheduledServiceOrderRequestDto,
+  UpdateServiceOrderRequestDto,
 } from "~/services/api/orders/dto";
-import type { ServicePosCartItem } from "~/store/service-pos-order.store";
 
 /**
  * Create new service order

@@ -6,6 +6,8 @@ import type z from "zod";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 import {
   useAddSingleItemToPOSOrder,
+  useCancelPOSOrder,
+  useCompletePOSOrder,
   useCreatePOSOrder,
   useDeleteItemFromPOSOrder,
 } from "~/routes/orders/container/pos-orders/mutation.hooks";
@@ -18,7 +20,7 @@ type POSOrderFromBookingDetail = z.infer<
 interface UseBookingOrdersProps {
   bookingId: string;
   bookingRoomId?: string;
-  ordersData?: POSOrderFromBookingDetail[]; // Data from booking detail
+  ordersData?: POSOrderFromBookingDetail; // Data from booking detail
 }
 
 export function useBookingOrders({
@@ -92,9 +94,6 @@ export function useBookingOrders({
     );
   };
 
-  /**
-   * Remove an item from the order
-   */
   const handleRemoveItem = (orderId: string, itemId: string) => {
     deleteItem(
       {
@@ -111,10 +110,6 @@ export function useBookingOrders({
     );
   };
 
-  /**
-   * Add completed charges (POS items) to booking
-   * Creates a new POS order with status = Completed
-   */
   const { mutate: addCompletedCharges, isPending: isAddingCompletedCharges } =
     useMutation({
       mutationFn: async ({
@@ -151,6 +146,9 @@ export function useBookingOrders({
     });
   };
 
+  const { mutate: cancelOrder } = useCancelPOSOrder();
+  const { mutate: completeOrder } = useCompletePOSOrder();
+
   return {
     // State
 
@@ -165,5 +163,7 @@ export function useBookingOrders({
     addMenuItem: handleAddMenuItem,
     removeItem: handleRemoveItem,
     addCompletedCharges: handleAddCompletedCharges,
+    cancelOrder,
+    completeOrder,
   };
 }

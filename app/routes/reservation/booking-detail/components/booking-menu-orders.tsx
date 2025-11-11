@@ -3,6 +3,7 @@ import {
   ChevronDown,
   ChevronRight,
   Ellipsis,
+  MoreHorizontal,
   Plus,
   ShoppingCart,
   Trash2,
@@ -32,20 +33,22 @@ import { formatMoney } from "~/lib/utils";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 
 type POSOrderFromBookingDetail = z.infer<
-  typeof OrderSchema.POSOrdersListItemByBookingDetailSchema
+  typeof OrderSchema.POSOrderListByBookingResponseSchema
 >;
 
-interface BookingOrdersProps {
+interface BookingMenuOrdersProps {
   isCreatingOrder: boolean;
-  ordersList?: POSOrderFromBookingDetail[];
+  ordersList?: POSOrderFromBookingDetail;
   isLoadingOrder: boolean;
   onOpenCreateDialog: () => void;
   onAddMenuItem: (orderId: string) => void;
   onRemoveItem: (orderId: string, itemId: string) => void;
   onAddCompletedCharges?: () => void;
+  onCancelOrder: (orderId: string) => void;
+  onCompleteOrder: (orderId: string) => void;
 }
 
-export default function BookingPosOrders({
+export default function BookingMenuOrders({
   isCreatingOrder,
   ordersList = [],
   isLoadingOrder,
@@ -53,7 +56,9 @@ export default function BookingPosOrders({
   onAddMenuItem,
   onRemoveItem,
   onAddCompletedCharges,
-}: BookingOrdersProps) {
+  onCancelOrder,
+  onCompleteOrder,
+}: BookingMenuOrdersProps) {
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
 
   const toggleExpand = (orderId: string) => {
@@ -204,16 +209,32 @@ export default function BookingPosOrders({
                       </TableCell>
 
                       <TableCell className="text-right">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onAddMenuItem(order.id || "")}
-                          disabled={order.status !== "Open"}
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Thêm món
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon">
+                              <MoreHorizontal />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem
+                              onClick={() => onAddMenuItem(order.id || "")}
+                              disabled={order.status !== "Open"}
+                            >
+                              Thêm món
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onCompleteOrder(order.id || "")}
+                            >
+                              Hoàn thành
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => onCancelOrder(order.id || "")}
+                            >
+                              Hủy
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
 
@@ -252,13 +273,13 @@ export default function BookingPosOrders({
                                       <TableCell>{item.quantity}</TableCell>
                                       <TableCell>
                                         {
-                                          formatMoney(item.unitPrice)
+                                          formatMoney(item.unitPrice ?? 0)
                                             .vndFormatted
                                         }
                                       </TableCell>
                                       <TableCell className="font-semibold">
                                         {
-                                          formatMoney(item.subtotal)
+                                          formatMoney(item.subtotal ?? 0)
                                             .vndFormatted
                                         }
                                       </TableCell>

@@ -152,6 +152,8 @@ const Invoices = {
   detail: (id: string) => `Invoices/${id}`, //? get invoice details
   listByBooking: (bookingRoomId: string) =>
     `Invoices/booking-room/${bookingRoomId}`, //? list invoices by booking ID
+  calculateFees: "invoice-preview/calculate-fees",
+  previewBookingInvoice: "invoice-preview/preview",
 };
 export {
   Auth,

@@ -21,11 +21,7 @@ const {
   StaffCheckoutRequestSchema,
   StaffCheckoutMultipleRequestSchema,
   StaffAddCompletedChargesRequestSchema,
-  StaffAddCompletedChargesResponseSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
-  StaffCheckoutPaymentResponseSchema,
-  StaffCheckoutResponseSchema,
-  StaffCheckoutMultipleResponseSchema,
 } = BookingSchema;
 
 export type StaffBookingPricePreviewRequestDto = z.infer<
@@ -80,18 +76,7 @@ export type StaffCheckoutMultipleRequestDto = z.infer<
 export type StaffAddCompletedChargesRequestDto = z.infer<
   typeof StaffAddCompletedChargesRequestSchema
 >;
-export type StaffAddCompletedChargesResponseDto = z.infer<
-  typeof StaffAddCompletedChargesResponseSchema
->;
+
 export type StaffCreateCheckoutInvoiceResponseDto = z.infer<
   typeof StaffCreateCheckoutInvoiceResponseSchema
->;
-export type StaffCheckoutPaymentResponseDto = z.infer<
-  typeof StaffCheckoutPaymentResponseSchema
->;
-export type StaffCheckoutResponseDto = z.infer<
-  typeof StaffCheckoutResponseSchema
->;
-export type StaffCheckoutMultipleResponseDto = z.infer<
-  typeof StaffCheckoutMultipleResponseSchema
 >;

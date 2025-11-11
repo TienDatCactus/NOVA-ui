@@ -49,7 +49,7 @@ const InvoiceListResponseWithMetaSchema = z.object({
 
 // Invoice Detail Item Schema
 const InvoiceDetailItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   itemType: z.string(),
   itemId: z.string().optional().nullable(),
   description: z.string(),
@@ -60,9 +60,9 @@ const InvoiceDetailItemSchema = z.object({
 
 // Invoice Detail Schema (from GET /api/Invoices/{invoiceId})
 const InvoiceDetailSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   invoiceNo: z.string(),
-  bookingRoomId: z.string().uuid(),
+  bookingRoomId: z.string(),
   total: z.number(),
   paidAmount: z.number().optional().nullable().default(0),
   balance: z.number().optional().nullable().default(0),
@@ -93,6 +93,43 @@ const InvoiceItemSchema = z.object({
 const RoomInvoiceSchema = InvoiceItemSchema;
 const ServiceInvoiceSchema = InvoiceItemSchema;
 
+const InvoicePreviewRequestSchema = z.object({
+  posOrderIds: z.array(z.string()),
+  serviceOrderIds: z.array(z.string()),
+});
+
+const InvoicePreviewResponseSchema = z.object({
+  posOrderItems: z.array(
+    z.object({
+      orderId: z.string(),
+      itemName: z.string(),
+      quantity: z.number(),
+      unitPrice: z.number(),
+      amount: z.number(),
+    })
+  ),
+  serviceOrderItems: z.array(
+    z.object({
+      orderId: z.string(),
+      itemName: z.string(),
+      quantity: z.number(),
+      unitPrice: z.number(),
+      amount: z.number(),
+    })
+  ),
+  subTotal: z.number(),
+  vatAmount: z.number(),
+  serviceChargeAmount: z.number(),
+  totalAmount: z.number(),
+  totalItemCount: z.number(),
+});
+
+const InvoiceCalculateFeesResponseSchema = z.object({
+  subtotalAmount: z.number().min(0),
+  vatAmount: z.number().min(0),
+  serviceChargeAmount: z.number().min(0),
+  totalAmount: z.number().min(0),
+});
 export const InvoiceSchema = {
   InvoiceStatusEnum,
   InvoiceListItemSchema,
@@ -105,4 +142,7 @@ export const InvoiceSchema = {
   InvoiceItemSchema,
   RoomInvoiceSchema,
   ServiceInvoiceSchema,
+  InvoicePreviewRequestSchema,
+  InvoicePreviewResponseSchema,
+  InvoiceCalculateFeesResponseSchema,
 };

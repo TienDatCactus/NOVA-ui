@@ -3,7 +3,6 @@ import { differenceInDays, format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   Baby,
-  Calendar as CalendarIcon,
   Ellipsis,
   Mail,
   Pen,
@@ -74,13 +73,18 @@ import { useBookingDetail } from "../bookings/container/booking-query.hooks";
 import type { Route } from "./+types/booking-detail";
 import AddMenuItemDialog from "./components/add-menu-item-dialog";
 import { AddRoomModal } from "./components/add-room-modal";
-import BookingPosOrders from "./components/booking-pos-orders";
 import BookingServiceOrders from "./components/booking-service-orders";
+import AddServiceOrderDialog from "./components/add-service-order-dialog";
 import PaymentInvoiceModal from "./components/payment-invoice-modal";
 import { useBookingOrders } from "./container/use-booking-orders.hooks";
+import { useBookingServiceOrders } from "./container/use-booking-service-orders.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
 import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
+// In booking-detail.tsx, add:
+import BookingCheckoutSheet from "./components/checkout/booking-checkout.sheet";
+import { useQueryClient } from "@tanstack/react-query";
+import BookingMenuOrders from "./components/booking-menu-orders";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -103,11 +107,14 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     bookingCode,
     enabled: !!bookingCode,
   });
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
+  const [createServiceOrderDialogOpen, setCreateServiceOrderDialogOpen] =
+    useState(false);
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -132,10 +139,23 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     isAddingItem,
     addCompletedCharges,
     isAddingCompletedCharges,
+    cancelOrder,
+    completeOrder,
   } = useBookingOrders({
     bookingId: bookingDetail?.id || "",
     ordersData: bookingDetail ? bookingDetail.posOrders : [],
   });
+
+  const {
+    isCreatingServiceOrder,
+    createBookingServiceOrder,
+    completeServiceOrder,
+    cancelServiceOrder,
+  } = useBookingServiceOrders({
+    bookingId: bookingDetail?.id || "",
+    bookingRoomId: selectedRoomId || undefined,
+  });
+
   const form = useForm<StaffUpdateBookingRequestDto>({
     resolver: zodResolver(StaffUpdateBookingRequestSchema),
     defaultValues: {
@@ -252,6 +272,38 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const handleAddCompletedCharges = (menuItemId: string, quantity: number) => {
     const posItems = [{ menuItemId, quantity }];
     addCompletedCharges(posItems, selectedRoomId);
+  };
+
+  const handleAddServiceOrder = (
+    serviceItemId: string,
+    quantity: number,
+    unitPrice: number,
+    scheduledAt?: string,
+    note?: string
+  ) => {
+    createBookingServiceOrder(
+      serviceItemId,
+      quantity,
+      unitPrice,
+      scheduledAt,
+      note
+    );
+    setCreateServiceOrderDialogOpen(false);
+  };
+
+  const handleCompleteMenuOrder = (orderId: string) => {
+    completeOrder(orderId);
+  };
+  const handleCancelMenuOrder = (orderId: string) => {
+    cancelOrder(orderId);
+  };
+
+  const handleCompleteServiceOrder = (orderId: string) => {
+    completeServiceOrder(orderId);
+  };
+
+  const handleCancelServiceOrder = (orderId: string) => {
+    cancelServiceOrder(orderId);
   };
 
   const nights = useMemo(() => {
@@ -796,6 +848,14 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 hasMultipleRooms={(bookingDetail?.rooms.length || 0) > 1}
               />
 
+              <AddServiceOrderDialog
+                open={createServiceOrderDialogOpen}
+                onOpenChange={setCreateServiceOrderDialogOpen}
+                onConfirm={handleAddServiceOrder}
+                isAdding={isCreatingServiceOrder}
+                hasMultipleRooms={(bookingDetail?.rooms.length || 0) > 1}
+              />
+
               <PaymentInvoiceModal
                 open={paymentModalOpen}
                 onOpenChange={setPaymentModalOpen}
@@ -853,7 +913,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pb-4">
-            <BookingPosOrders
+            <BookingMenuOrders
               isCreatingOrder={isCreatingOrder}
               ordersList={bookingDetail.posOrders}
               isLoadingOrder={isLoadingOrder}
@@ -862,14 +922,27 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 setSelectedOrderId(orderId);
                 setOrderDialogOpen(true);
               }}
+              oonCancelOrder={handleCancelMenuOrder}
+              onCompleteOrder={handleCompleteMenuOrder}
               onRemoveItem={removeItem}
               onAddCompletedCharges={() => setCompletedChargesDialogOpen(true)}
             />
-            <BookingServiceOrders />
+            <BookingServiceOrders
+              ordersList={bookingDetail.serviceOrders || []}
+              isLoadingOrder={isLoadingOrder}
+              isCreatingOrder={isCreatingServiceOrder}
+              onOpenCreateDialog={() => setCreateServiceOrderDialogOpen(true)}
+              onCancelOrder={handleCancelServiceOrder}
+              onCompleteOrder={handleCompleteServiceOrder}
+            />
           </div>
         </div>
         <Separator />
         <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
+          <Button variant={"success"} onClick={() => setCheckoutOpen(true)}>
+            Checkout
+          </Button>
+
           <Button
             type="button"
             variant="outline"
@@ -886,6 +959,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           </Button>
         </div>
       </Form>
+      <BookingCheckoutSheet
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        bookingDetail={bookingDetail}
+      />
     </div>
   );
 }
