@@ -77,7 +77,7 @@ export default function ServiceOrderActions({
           </Button>
         ) : (
           <>
-            {canComplete && (
+            {/* {canComplete && (
               <Button
                 variant="success-outline"
                 size="sm"
@@ -87,7 +87,7 @@ export default function ServiceOrderActions({
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Hoàn thành
               </Button>
-            )}
+            )} */}
 
             {canReschedule && (
               <Button

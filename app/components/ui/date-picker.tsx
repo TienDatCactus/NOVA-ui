@@ -27,7 +27,7 @@ export function DatePicker({
   placeholder = "Chọn ngày",
   className,
   disablePast = false,
-  mode,
+  ...props
 }: DatePickerProps & React.ComponentProps<typeof DayPicker>) {
   const [open, setOpen] = React.useState(false);
   return (
@@ -47,6 +47,7 @@ export function DatePicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
+          {...props}
           mode="single"
           selected={
             value instanceof Date ? value : value ? new Date(value) : undefined
@@ -56,7 +57,7 @@ export function DatePicker({
             setOpen(false);
           }}
           locale={vi}
-          disabled={disablePast ? { before: new Date() } : undefined}
+          disabled={disablePast ? { before: new Date() } : props.disabled}
         />
       </PopoverContent>
     </Popover>

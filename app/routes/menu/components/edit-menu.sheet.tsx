@@ -124,7 +124,7 @@ export default function EditMenuSheet({
       setNewFiles([]);
       setNewPreviews([]);
     }
-  }, [menuItem, form, menuItemDetail]);
+  }, [menuItem, menuItemDetail]);
 
   const handleSubmit = (data: UpdateMenuFormData) => {
     updateMenuItem(

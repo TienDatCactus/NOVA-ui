@@ -134,7 +134,7 @@ export default function ServiceOrderDetails({
         </div>
 
         {/* Pricing */}
-        <Card>
+        <Card className="bg-card">
           <CardHeader>
             <CardTitle>
               <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">

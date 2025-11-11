@@ -18,6 +18,7 @@ import type {
   StaffChangeRoomRequestDto,
   StaffChangeRoomResponseDto,
   StaffCheckoutMultipleRequestDto,
+  StaffCheckoutPaymentRequestDto,
   StaffCheckoutRequestDto,
   StaffCreateBookingDto,
   StaffCreateBookingResponseDto,
@@ -46,6 +47,7 @@ const {
   StaffAddCompletedChargesRequestSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
   StaffCheckoutMultipleRequestSchema,
+  StaffCheckoutPaymentRequestSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -272,8 +274,17 @@ async function staffAddCompletedCharges(
 async function staffCreateCheckoutInvoice(
   bookingId: string
 ): Promise<StaffCreateCheckoutInvoiceResponseDto> {
+  const idempotencyKey = crypto.randomUUID();
   try {
-    const resp = await http.post(Booking.createInvoice(bookingId));
+    const resp = await http.post(
+      Booking.createInvoice(bookingId),
+      {},
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
     return StaffCreateCheckoutInvoiceResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -283,12 +294,12 @@ async function staffCreateCheckoutInvoice(
 
 async function staffCheckoutPayment(
   bookingId: string,
-  data: StaffCheckoutRequestDto
+  data: StaffCheckoutPaymentRequestDto
 ): Promise<void> {
   try {
     const resp = await http.post(
       Booking.payment(bookingId),
-      StaffCheckoutRequestSchema.parse(data)
+      StaffCheckoutPaymentRequestSchema.parse(data)
     );
     return resp.data;
   } catch (error) {
@@ -301,10 +312,16 @@ async function staffCheckout(
   bookingId: string,
   data: StaffCheckoutRequestDto
 ): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
   try {
     const resp = await http.post(
       Booking.checkout(bookingId),
-      StaffCheckoutRequestSchema.parse(data)
+      StaffCheckoutRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
     return resp.data;
   } catch (error) {

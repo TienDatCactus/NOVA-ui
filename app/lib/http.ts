@@ -59,8 +59,9 @@ http.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
-    const message = error.response?.data.message;
+    const message = error.response?.data?.message;
     const curPath = window.location.pathname;
+
     if (
       status === 401 &&
       !originalRequest._retry &&
@@ -69,26 +70,67 @@ http.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return http(originalRequest);
-        });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return http(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
       }
+
       originalRequest._retry = true;
       isRefreshing = true;
+
+      const refreshToken = getStorage(STORAGE.REFRESH_TOKEN);
+
+      if (!refreshToken) {
+        isRefreshing = false;
+        clearStorage();
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        if (!window.location.pathname.includes("/auth/login")) {
+          window.location.href = "/auth/login";
+        }
+        return Promise.reject(new Error("No refresh token available"));
+      }
+
       try {
-        const refreshToken = getStorage(STORAGE.REFRESH_TOKEN);
-        console.log(refreshToken);
-        if (!refreshToken) throw new Error("No refresh token available");
-        const rs = await AuthService.refresh(refreshToken);
-        const { accessToken } = rs.data;
-        setStorage(STORAGE.TOKEN, accessToken);
-        http.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-        processQueue(null, accessToken);
+        const refreshData = await AuthService.refresh(refreshToken);
+        console.log("Refresh response:", refreshData);
+
+        // Check if response contains new tokens
+        let newAccessToken: string | null = null;
+
+        if (refreshData && typeof refreshData === "object") {
+          // Backend returns tokens in response body
+          newAccessToken = (refreshData as any).accessToken;
+          const newRefreshToken = (refreshData as any).refreshToken;
+
+          if (newAccessToken) {
+            setStorage(STORAGE.TOKEN, newAccessToken);
+          }
+          if (newRefreshToken) {
+            setStorage(STORAGE.REFRESH_TOKEN, newRefreshToken);
+          }
+        }
+
+        // Use new token if available, otherwise try existing token
+        const token =
+          newAccessToken || getStorage(STORAGE.TOKEN) || refreshToken;
+
+        http.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+
+        // Process queued requests
+        processQueue(null, token);
+
+        // Retry original request
         return http(originalRequest);
       } catch (err) {
+        console.error("Token refresh failed:", err);
         processQueue(err, null);
-        // clearStorage();
+        clearStorage();
         toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
         if (!window.location.pathname.includes("/auth/login")) {
           window.location.href = "/auth/login";
@@ -97,9 +139,11 @@ http.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
-    } else {
+    } else if (status && status !== 401) {
+      // Only show error toast for non-401 errors (401 is handled above)
       toast.error(message || "Đã có lỗi xảy ra. Vui lòng thử lại.");
     }
+
     return Promise.reject(error);
   }
 );

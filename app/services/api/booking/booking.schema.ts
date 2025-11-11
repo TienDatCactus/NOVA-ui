@@ -227,7 +227,7 @@ const BookingPendingChargesResponseSchema = z.object({
         id: z.string(),
         status: z.string(),
         totalAmount: z.number(),
-        customerId: z.string(),
+        customerId: z.string().optional().nullable(),
         createdAt: z.string(),
         items: z.array(
           z.object({
@@ -408,7 +408,7 @@ const StaffCreateCheckoutInvoiceResponseSchema = z.object({
 // Yêu cầu thanh toán khi checkout (phòng + tổng thể)
 const StaffCheckoutPaymentRequestSchema = z.object({
   roomPayment: CheckoutPaymentItemSchema.optional().nullable(),
-  checkoutPayment: CheckoutPaymentItemSchema.optional().nullable(),
+  checkoutPayment: CheckoutPaymentItemSchema,
 });
 
 // Yêu cầu checkout 1 booking
@@ -422,7 +422,6 @@ const StaffCheckoutRequestSchema = z.object({
     ])
     .optional(),
   notes: z.string().optional().nullable(),
-  payments: StaffCheckoutPaymentRequestSchema.optional(),
 });
 
 // Yêu cầu checkout nhiều booking cùng lúc
@@ -513,4 +512,5 @@ export const BookingSchema = {
   StaffCheckoutMultipleRequestSchema,
   StaffAddCompletedChargesRequestSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
+  StaffCheckoutPaymentRequestSchema,
 };
