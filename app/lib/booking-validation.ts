@@ -112,12 +112,21 @@ export function canPerformSoftUpdate(): boolean {
 
 /**
  * Check if adding rooms is allowed
- * (Same as heavy update rules)
+ *
+ * SPECIAL RULE: CheckedIn/InHouse CAN add rooms (per doc: "CheckedIn CHO PHÉP Add Room")
+ * But still check financial lock
  */
 export function canAddRooms(
   bookingStatus: string,
   invoices: Invoice[]
 ): boolean {
+  // Special case: CheckedIn/InHouse can still add rooms
+  if (bookingStatus === "CheckedIn" || bookingStatus === "InHouse") {
+    // But still check financial lock
+    return !hasAnyLockedRoomInvoice(invoices);
+  }
+
+  // For other statuses, follow heavy update rules
   return canPerformHeavyUpdate(bookingStatus, invoices);
 }
 

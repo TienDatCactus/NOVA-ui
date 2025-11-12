@@ -55,11 +55,12 @@ const Rooms = {
   create: "Rooms",
   update: (id: string) => `Rooms/${id}`,
   getAvailableRoomsInternal: "Rooms/available-with-details",
+
   delete: (id: string) => `Rooms/${id}`,
   generateQRCode: (id: string, baseUrl?: string) =>
     `Rooms/${id}/qr-code?baseUrl=${baseUrl}`,
   regenerateQRCode: (id: string, baseUrl?: string) =>
-    `Rooms/${id}/qr-code?baseUrl=${baseUrl}`,
+    `Rooms/${id}/qr-code/regenerate?baseUrl=${baseUrl}`,
 };
 
 const RoomTypes = {

@@ -23,7 +23,6 @@ import { Separator } from "~/components/ui/separator";
 import {
   INVOICE_ITEM_TYPES,
   INVOICE_STATUSES,
-  PAYMENT_METHODS,
   type InvoiceListParams,
 } from "~/services/api/invoices/invoice.types";
 import type { DateRange } from "~/components/ui/date-range-picker";
@@ -42,6 +41,7 @@ import {
   CommandItem,
   Command,
 } from "~/components/ui/command";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
 
 interface InvoicesFilterSidebarProps {
   filters: InvoiceListParams;

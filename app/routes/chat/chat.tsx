@@ -1,209 +1,313 @@
-import { useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import type { Route } from "./+types/chat";
 import ChatHeader from "./components/chat-header";
 import ChatInput from "./components/chat-input";
 import ChatMessagesArea from "./components/chat-messages-area";
 import ChatSidebar from "./components/chat-sidebar";
+import { useChatEntry, useChatMessages } from "./container/query.hooks";
+import { useSendMessage } from "./container/mutation.hooks";
+import { useChatHub } from "./container/useChatHub";
+import { useStaffInboxContainer } from "./container/inbox.hooks";
+import type {
+  ChatMessageDto,
+  SignalRMessageEventDto,
+} from "~/services/api/chat/dto";
+import { Card } from "~/components/ui/card";
+import { MessageCircleCode } from "lucide-react";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
 };
 
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  // Extract roomToken from URL for guest entry flow
+  const url = new URL(request.url);
+  const roomToken = url.searchParams.get("roomToken");
+  return { roomToken };
 };
 
-// Types
-type MessageStatus = "sending" | "sent" | "delivered" | "read";
-
-interface Message {
+// UI Message type for rendering
+interface UIMessage {
   id: string;
   content: string;
-  timestamp: string;
+  timestamp: string; // ISO
   isOwn: boolean;
   senderName?: string;
-  status: MessageStatus;
+  status: "sending" | "sent" | "delivered" | "read";
 }
 
-// Mock data
-const mockConversations = [
-  {
-    id: "1",
-    name: "Nguyễn Văn A",
-    avatar: "",
-    lastMessage: "Cảm ơn bạn, tôi sẽ check-in lúc 2pm",
-    lastMessageTime: new Date().toISOString(),
-    unreadCount: 2,
-    isOnline: true,
-    role: "customer" as const,
-  },
-  {
-    id: "2",
-    name: "Trần Thị B",
-    avatar: "",
-    lastMessage: "Phòng có view biển không ạ?",
-    lastMessageTime: new Date(Date.now() - 3600000).toISOString(),
-    unreadCount: 0,
-    isOnline: false,
-    role: "customer" as const,
-  },
-  {
-    id: "3",
-    name: "Lễ tân - Floor 1",
-    avatar: "",
-    lastMessage: "Booking của khách đã được xác nhận",
-    lastMessageTime: new Date(Date.now() - 7200000).toISOString(),
-    unreadCount: 1,
-    isOnline: true,
-    role: "staff" as const,
-  },
-];
+export default function Component({ loaderData }: Route.ComponentProps) {
+  const { roomToken } = loaderData as { roomToken?: string };
+  const [optimisticMessages, setOptimisticMessages] = useState<UIMessage[]>([]);
 
-const mockMessages: Message[] = [
-  {
-    id: "1",
-    content: "Xin chào, tôi muốn đặt phòng cho 2 người",
-    timestamp: new Date(Date.now() - 86400000).toISOString(),
-    isOwn: false,
-    senderName: "Nguyễn Văn A",
-    status: "read",
-  },
-  {
-    id: "2",
-    content:
-      "Chào anh, em xin phép được hỗ trợ anh. Anh muốn đặt phòng loại nào ạ?",
-    timestamp: new Date(Date.now() - 86000000).toISOString(),
-    isOwn: true,
-    status: "read",
-  },
-  {
-    id: "3",
-    content: "Em muốn phòng có view biển, từ ngày 15/11 đến 17/11",
-    timestamp: new Date(Date.now() - 85000000).toISOString(),
-    isOwn: false,
-    senderName: "Nguyễn Văn A",
-    status: "read",
-  },
-  {
-    id: "4",
-    content:
-      "Dạ, em sẽ kiểm tra phòng trống cho anh ngay ạ. Anh vui lòng đợi em một chút nhé.",
-    timestamp: new Date(Date.now() - 84000000).toISOString(),
-    isOwn: true,
-    status: "read",
-  },
-  {
-    id: "5",
-    content:
-      "Em có phòng Deluxe Ocean View còn trống cho khung giờ đó ạ. Giá 2,500,000 VNĐ/đêm",
-    timestamp: new Date(Date.now() - 83000000).toISOString(),
-    isOwn: true,
-    status: "read",
-  },
-  {
-    id: "6",
-    content: "Được ạ, anh đặt phòng đó nhé",
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    isOwn: false,
-    senderName: "Nguyễn Văn A",
-    status: "read",
-  },
-  {
-    id: "7",
-    content:
-      "Dạ, em đã tạo booking cho anh. Mã booking: BK123456. Anh check-in lúc mấy giờ ạ?",
-    timestamp: new Date(Date.now() - 3000000).toISOString(),
-    isOwn: true,
-    status: "read",
-  },
-  {
-    id: "8",
-    content: "Cảm ơn bạn, tôi sẽ check-in lúc 2pm",
-    timestamp: new Date().toISOString(),
-    isOwn: false,
-    senderName: "Nguyễn Văn A",
-    status: "delivered",
-  },
-];
+  // Staff inbox mode (when no roomToken)
+  const {
+    conversations: staffConversations,
+    selectedConversation: staffSelectedConversation,
+    selectedSessionId: staffSelectedSessionId,
+    setSelectedSessionId: setStaffSelectedSessionId,
+    filters,
+    updateFilter,
+    resetFilters,
+    isLoading: inboxLoading,
+    hasNextPage,
+    fetchNextPage,
+  } = useStaffInboxContainer();
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedConversationId, setSelectedConversationId] = useState("1");
-  const [messages, setMessages] = useState(mockMessages);
+  // Guest mode state
+  const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
 
-  const selectedConversation = mockConversations.find(
-    (c) => c.id === selectedConversationId
-  );
+  // Determine active session ID based on mode
+  const activeSessionId = roomToken ? guestSessionId : staffSelectedSessionId;
+  const isGuestMode = !!roomToken;
 
-  const filteredConversations = mockConversations.filter((conv) =>
-    conv.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Guest entry flow
+  const {
+    data: entryData,
+    isLoading: entryLoading,
+    isError: entryError,
+  } = useChatEntry(roomToken || "", { enabled: isGuestMode });
 
-  const handleSendMessage = (content: string) => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
+  // Extract session info from entry response
+  useEffect(() => {
+    if (entryData?.canChat && entryData.sessionId) {
+      setGuestSessionId(entryData.sessionId);
+      toast.success(
+        `Kết nối phòng ${entryData.roomName} thành công. Bạn có thể bắt đầu chat.`
+      );
+    } else if (entryData && !entryData.canChat) {
+      toast.error(entryData.message || "Không thể vào phiên chat.");
+    }
+  }, [entryData]);
+
+  // Fetch messages from API
+  const {
+    data: messagesData,
+    isLoading: messagesLoading,
+    refetch: refetchMessages,
+  } = useChatMessages({
+    sessionId: activeSessionId || "",
+    enabled: !!activeSessionId,
+  });
+
+  // Send message mutation
+  const sendMessageMutation = useSendMessage();
+
+  // SignalR connection
+  const {
+    isConnected: signalRConnected,
+    sendMessage: sendMessageViaHub,
+    sendTyping,
+  } = useChatHub({
+    sessionId: activeSessionId || undefined,
+    autoConnect: !!activeSessionId,
+    onReceiveMessage: useCallback(
+      (msg: SignalRMessageEventDto) => {
+        // Refetch messages when new message arrives
+        refetchMessages();
+      },
+      [refetchMessages]
+    ),
+  });
+
+  // Combine API messages + optimistic messages
+  const allMessages = useMemo<UIMessage[]>(() => {
+    const apiMessages: UIMessage[] =
+      messagesData?.items.map((m: ChatMessageDto) => ({
+        id: m.id,
+        content: m.message,
+        timestamp: m.createdAt,
+        isOwn: m.sender === (isGuestMode ? "Guest" : "Staff"),
+        senderName:
+          m.sender === (isGuestMode ? "Staff" : "Guest")
+            ? isGuestMode
+              ? "Nhân viên"
+              : staffSelectedConversation?.customerName || "Khách"
+            : undefined,
+        status: "delivered" as const,
+      })) || [];
+
+    return [...apiMessages, ...optimisticMessages];
+  }, [
+    messagesData,
+    optimisticMessages,
+    isGuestMode,
+    staffSelectedConversation,
+  ]);
+
+  const handleSendMessage = async (content: string) => {
+    if (!activeSessionId) {
+      toast.error("Không có phiên chat. Vui lòng thử lại.");
+      return;
+    }
+
+    const tempId = crypto.randomUUID();
+    const optimistic: UIMessage = {
+      id: tempId,
       content,
       timestamp: new Date().toISOString(),
       isOwn: true,
       status: "sending",
     };
 
-    setMessages([...messages, newMessage]);
-    toast.success("Tin nhắn đã được gửi");
+    // Add optimistic message
+    setOptimisticMessages((prev) => [...prev, optimistic]);
 
-    // Simulate message sent
-    setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === newMessage.id ? { ...msg, status: "sent" } : msg
+    const senderValue = isGuestMode ? ("Guest" as const) : ("Staff" as const);
+    const payload = {
+      sessionId: activeSessionId,
+      message: content,
+      sender: senderValue,
+    };
+
+    try {
+      // Try SignalR first, fallback to REST
+      if (signalRConnected) {
+        await sendMessageViaHub(payload);
+      } else {
+        await sendMessageMutation.mutateAsync(payload);
+      }
+
+      // Mark as sent
+      setOptimisticMessages((prev) =>
+        prev.map((m) =>
+          m.id === tempId ? { ...m, status: "sent" as const } : m
         )
       );
-    }, 1000);
+
+      // Remove optimistic message after a delay (real message will come from refetch)
+      setTimeout(() => {
+        setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
+      }, 1000);
+    } catch (err) {
+      console.error("Send message error:", err);
+      setOptimisticMessages((prev) =>
+        prev.map((m) =>
+          m.id === tempId
+            ? {
+                ...m,
+                content: `${m.content} (gửi thất bại)`,
+                status: "delivered" as const,
+              }
+            : m
+        )
+      );
+      toast.error("Gửi tin nhắn thất bại. Vui lòng thử lại.");
+    }
   };
 
   return (
-    <div className="flex ">
-      <ChatSidebar
-        conversations={filteredConversations}
-        selectedId={selectedConversationId}
-        onSelectConversation={setSelectedConversationId}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-      <div className="flex-1 flex flex-col ">
-        {selectedConversation ? (
+    <div className="flex h-screen bg-muted">
+      {/* Sidebar - only show in staff mode */}
+      {!isGuestMode && (
+        <ChatSidebar
+          conversations={staffConversations}
+          selectedSessionId={staffSelectedSessionId}
+          onSelectConversation={setStaffSelectedSessionId}
+          filters={filters}
+          onFilterChange={updateFilter}
+          isLoading={inboxLoading}
+          hasNextPage={hasNextPage}
+          onLoadMore={fetchNextPage}
+          totalCount={staffConversations.length}
+        />
+      )}
+
+      {/* Main Chat Area */}
+      <Card className="flex-1 flex flex-col bg-card shadow-sm rounded-none">
+        {isGuestMode && entryData && !entryData.canChat && !entryLoading ? (
+          <div className="flex items-center justify-center h-full p-8">
+            <div className="max-w-md text-center space-y-4">
+              <h2 className="text-xl font-semibold text-foreground">
+                Không thể vào chat
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {entryData.message ||
+                  "Phòng này hiện không có khách lưu trú hoặc phiên đã hết hạn. Vui lòng liên hệ lễ tân để được hỗ trợ."}
+              </p>
+              {entryData.reason && (
+                <p className="text-xs text-muted-foreground font-mono">
+                  Mã lỗi: {entryData.reason}
+                </p>
+              )}
+            </div>
+          </div>
+        ) : activeSessionId || (isGuestMode && guestSessionId) ? (
           <>
             <ChatHeader
-              name={selectedConversation.name}
-              avatar={selectedConversation.avatar}
-              isOnline={selectedConversation.isOnline}
+              name={
+                isGuestMode && entryData?.canChat
+                  ? `Phòng ${entryData.roomName} - ${entryData.customerName}`
+                  : staffSelectedConversation
+                    ? `${staffSelectedConversation.roomName} - ${staffSelectedConversation.customerName}`
+                    : "Chat"
+              }
+              isOnline={signalRConnected}
               subtitle={
-                selectedConversation.role === "staff"
-                  ? "Nhân viên"
-                  : "Khách hàng"
+                isGuestMode
+                  ? "Khách hàng"
+                  : staffSelectedConversation?.assignedStaffName
+                    ? `Nhân viên: ${staffSelectedConversation.assignedStaffName}`
+                    : "Chưa phân công"
+              }
+              sessionStatus={
+                isGuestMode
+                  ? entryData?.canChat
+                    ? "Active"
+                    : "Closed"
+                  : staffSelectedConversation?.status || "Active"
+              }
+              roomName={
+                isGuestMode
+                  ? entryData?.roomName
+                  : staffSelectedConversation?.roomName
               }
             />
-            <ChatMessagesArea messages={messages} />
-            <ChatInput onSendMessage={handleSendMessage} />
+            <ChatMessagesArea
+              messages={allMessages}
+              isLoading={entryLoading || messagesLoading}
+            />
+            <div className="border-t border-border">
+              {isGuestMode && !guestSessionId ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  {entryLoading
+                    ? "Đang khởi tạo phiên chat..."
+                    : "Đang kết nối..."}
+                </div>
+              ) : (
+                <ChatInput
+                  onSendMessage={handleSendMessage}
+                  disabled={
+                    !activeSessionId ||
+                    (isGuestMode ? !entryData?.canChat : false) ||
+                    sendMessageMutation.isPending
+                  }
+                  placeholder={
+                    !activeSessionId ? "Đang kết nối..." : "Nhập tin nhắn..."
+                  }
+                />
+              )}
+            </div>
           </>
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="text-8xl mb-4">💬</div>
-              <h2 className="text-2xl font-bold mb-2">
-                Chào mừng đến với Chat
+              <div className="mb-4 flex items-center">
+                <MessageCircleCode />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 text-foreground">
+                Chat với khách hàng
               </h2>
               <p className="text-muted-foreground">
-                Chọn một cuộc trò chuyện để bắt đầu
+                {isGuestMode
+                  ? "Đang khởi tạo phiên chat..."
+                  : "Chọn một cuộc trò chuyện để bắt đầu"}
               </p>
             </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

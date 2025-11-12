@@ -194,12 +194,13 @@ async function staffUpdateBookingDetail(
 
 async function getAvailableRoomsForChange(
   bookingId: string,
-  bookingRoomId: string
+  bookingRoomId?: string
 ): Promise<AvailableRoomsForChangeResponseDto> {
   try {
-    const resp = await http.get(Booking.changeRoom(bookingId, bookingRoomId));
-    const parsed = AvailableRoomsForChangeResponseSchema.parse(resp);
-    return parsed;
+    const resp = await http.get(
+      Booking.changeRoom(bookingId, bookingRoomId || "")
+    );
+    return AvailableRoomsForChangeResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
   }

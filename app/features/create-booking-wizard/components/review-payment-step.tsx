@@ -1,7 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { BedDouble, Calendar, Loader2, Users, Utensils } from "lucide-react";
+import {
+  BedDouble,
+  Calendar,
+  DollarSign,
+  Loader2,
+  Users,
+  Utensils,
+  Wallet,
+} from "lucide-react";
 import { forwardRef, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -18,6 +26,13 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 
@@ -31,6 +46,14 @@ import { useServiceOrderStore } from "~/store/service-order.store";
 import useCreateBookingMutation from "../container/create-booking-mutation.hooks";
 import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
 import ServicePopulateItem from "../fragments/service-populate-item";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { Button } from "~/components/ui/button";
 
 const { ReviewPaymentFormSchema } = FormSchema;
 
@@ -52,6 +75,11 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
         specialRequest: storeData.specialRequest || "",
         overridePrice: storeData.overridePrice || null,
         serviceOrder: undefined, // Services come from global store
+        roomPayment: {
+          paymentMethod: undefined,
+          paidAmount: undefined,
+          paymentNote: "",
+        },
       },
       mode: "onChange",
     });
@@ -175,11 +203,20 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
         services: serviceOrderServices,
       };
 
-      // Save form data to store
+      const finalRoomPayment =
+        data.roomPayment?.paymentMethod && data.roomPayment?.paidAmount
+          ? {
+              paymentMethod: data.roomPayment.paymentMethod,
+              paidAmount: data.roomPayment.paidAmount,
+              paymentNote: data.roomPayment.paymentNote || undefined,
+            }
+          : undefined;
+
       setData({
         specialRequest: data.specialRequest,
         overridePrice: data.overridePrice,
         serviceOrder: finalServiceOrder,
+        roomPayment: finalRoomPayment,
       });
 
       try {
@@ -196,6 +233,7 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
           isBreakfastAll: storeData.isBreakfastAll ?? false,
           overridePrice: data.overridePrice == 0 ? null : data.overridePrice,
           serviceOrder: finalServiceOrder,
+          roomPayment: finalRoomPayment,
         };
 
         await mutateAsync(bookingData, {
@@ -374,10 +412,37 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                 <Separator />
 
                 {/* Total */}
-                <div className="flex justify-between text-lg font-semibold">
+                <div className="flex justify-between items-center text-lg font-semibold">
                   <span>Tổng cộng</span>
                   <span className="text-primary">
-                    {formatMoney(finalTotal).vndFormatted}
+                    <FormField
+                      control={form.control}
+                      name="overridePrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Điều chỉnh giá (Tùy chọn)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              defaultValue={
+                                formatMoney(finalTotal).vndFormatted
+                              }
+                              placeholder={`Giá gốc: ${formatMoney(serverTotalAmount).vndFormatted}`}
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                field.onChange(
+                                  value === "" ? null : Number(value)
+                                );
+                              }}
+                            />
+                          </FormControl>
+
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </span>
                 </div>
               </CardContent>
@@ -405,38 +470,129 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
             />
 
             {/* Override Price */}
-            <FormField
-              control={form.control}
-              name="overridePrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Điều chỉnh giá (Tùy chọn)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder={`Giá gốc: ${formatMoney(serverTotalAmount).vndFormatted}`}
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value === "" ? null : Number(value));
-                      }}
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="success">
+                  <DollarSign />
+                  Thanh toán
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5" />
+                    Thanh toán trước (Tùy chọn)
+                  </DialogTitle>
+                </DialogHeader>
+                <FormField
+                  control={form.control}
+                  name="roomPayment.paymentMethod"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phương thức thanh toán</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn phương thức thanh toán" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Cash">Tiền mặt</SelectItem>
+                          <SelectItem value="Card">Thẻ</SelectItem>
+                          <SelectItem value="BankTransfer">
+                            Chuyển khoản
+                          </SelectItem>
+                          <SelectItem value="OTAPrepaid">
+                            OTA Prepaid
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Để trống nếu khách chưa thanh toán (sẽ trả khi checkout)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("roomPayment.paymentMethod") && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="roomPayment.paidAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Số tiền thanh toán</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder={`Tổng cần thanh toán: ${formatMoney(finalTotal).vndFormatted}`}
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                field.onChange(
+                                  value === "" ? undefined : Number(value)
+                                );
+                              }}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            {field.value && Number(field.value) > 0 ? (
+                              <div className="space-y-1">
+                                <p className="text-primary font-medium">
+                                  Đã thanh toán:{" "}
+                                  {
+                                    formatMoney(Number(field.value))
+                                      .vndFormatted
+                                  }
+                                </p>
+                                <p className="text-muted-foreground">
+                                  Còn lại:{" "}
+                                  {
+                                    formatMoney(
+                                      finalTotal - Number(field.value)
+                                    ).vndFormatted
+                                  }
+                                </p>
+                              </div>
+                            ) : (
+                              "Nhập số tiền khách đã thanh toán (cọc hoặc toàn bộ)"
+                            )}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormDescription>
-                    {field.value && Number(field.value) > 0 ? (
-                      <span className="text-primary font-medium">
-                        Giá sau điều chỉnh:{" "}
-                        {formatMoney(Number(field.value)).vndFormatted}
-                      </span>
-                    ) : (
-                      "Để trống để sử dụng giá mặc định từ hệ thống"
-                    )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+                    <FormField
+                      control={form.control}
+                      name="roomPayment.paymentNote"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ghi chú thanh toán</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Ví dụ: Đã nhận cọc 50% qua chuyển khoản"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Thông tin bổ sung về giao dịch thanh toán
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
 
           {isSubmitting && (

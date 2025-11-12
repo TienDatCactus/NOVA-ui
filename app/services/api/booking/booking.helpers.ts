@@ -19,7 +19,7 @@ import type { UpdateBookingRoomRequestDto } from "./dto";
  *   "2025-01-10",
  *   "2025-01-15"
  * );
- * // { bookingRoomId: null, roomId: "room-301-id", fromDate: "2025-01-10", toDate: "2025-01-15" }
+ * // { action: "Add", bookingRoomId: null, roomId: "room-301-id", fromDate: "2025-01-10", toDate: "2025-01-15" }
  */
 export function createAddRoomOperation(
   roomId: string,
@@ -27,6 +27,7 @@ export function createAddRoomOperation(
   toDate: string
 ): UpdateBookingRoomRequestDto {
   return {
+    action: "Add",
     bookingRoomId: null,
     roomId,
     fromDate,
@@ -43,13 +44,14 @@ export function createAddRoomOperation(
  *   "booking-room-101-id",
  *   "room-102-id"
  * );
- * // { bookingRoomId: "booking-room-101-id", newRoomId: "room-102-id" }
+ * // { action: "Change", bookingRoomId: "booking-room-101-id", newRoomId: "room-102-id" }
  */
 export function createChangeRoomOperation(
   bookingRoomId: string,
   newRoomId: string
 ): UpdateBookingRoomRequestDto {
   return {
+    action: "Change",
     bookingRoomId,
     newRoomId,
   };
@@ -61,14 +63,14 @@ export function createChangeRoomOperation(
  *
  * @example
  * const removeRoomOp = createRemoveRoomOperation("booking-room-201-id");
- * // { bookingRoomId: "booking-room-201-id", remove: true }
+ * // { action: "Remove", bookingRoomId: "booking-room-201-id" }
  */
 export function createRemoveRoomOperation(
   bookingRoomId: string
 ): UpdateBookingRoomRequestDto {
   return {
+    action: "Remove",
     bookingRoomId,
-    remove: true,
   };
 }
 
@@ -77,24 +79,24 @@ export function createRemoveRoomOperation(
  * Check if a room operation object is valid
  *
  * @example
- * const isValid = isValidRoomOperation({ bookingRoomId: null, roomId: "123" });
- * // false (missing fromDate and toDate)
+ * const isValid = isValidRoomOperation({ action: "Add", bookingRoomId: null, roomId: "123", fromDate: "2025-01-10", toDate: "2025-01-15" });
+ * // true
  */
 export function isValidRoomOperation(
   operation: UpdateBookingRoomRequestDto
 ): boolean {
-  // ADD operation: bookingRoomId is null, requires roomId + dates
-  if (operation.bookingRoomId === null) {
+  // ADD operation: requires roomId + dates
+  if (operation.action === "Add") {
     return !!(operation.roomId && operation.fromDate && operation.toDate);
   }
 
   // CHANGE operation: requires bookingRoomId + newRoomId
-  if (operation.newRoomId) {
-    return !!operation.bookingRoomId;
+  if (operation.action === "Change") {
+    return !!(operation.bookingRoomId && operation.newRoomId);
   }
 
-  // REMOVE operation: requires bookingRoomId + remove flag
-  if (operation.remove) {
+  // REMOVE operation: requires bookingRoomId
+  if (operation.action === "Remove") {
     return !!operation.bookingRoomId;
   }
 
@@ -106,21 +108,19 @@ export function isValidRoomOperation(
  * Determine which type of operation this is
  *
  * @example
- * getOperationType({ bookingRoomId: null, roomId: "123", fromDate: "...", toDate: "..." })
+ * getOperationType({ action: "Add", roomId: "123", fromDate: "...", toDate: "..." })
  * // "ADD"
  */
 export function getOperationType(
   operation: UpdateBookingRoomRequestDto
 ): "ADD" | "CHANGE" | "REMOVE" | "INVALID" {
-  if (operation.bookingRoomId === null && operation.roomId) {
-    return "ADD";
-  }
-  if (operation.bookingRoomId && operation.newRoomId) {
-    return "CHANGE";
-  }
-  if (operation.bookingRoomId && operation.remove) {
-    return "REMOVE";
-  }
+  if (!operation.action) return "INVALID";
+
+  // Map action string to uppercase type
+  if (operation.action === "Add") return "ADD";
+  if (operation.action === "Change") return "CHANGE";
+  if (operation.action === "Remove") return "REMOVE";
+
   return "INVALID";
 }
 

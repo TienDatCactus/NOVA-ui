@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import type { KeyboardEvent } from "react";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
+import { Card } from "~/components/ui/card";
 import { Send, Paperclip, Smile, Image as ImageIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
 
@@ -44,23 +45,25 @@ export default function ChatInput({
   };
 
   return (
-    <div className="p-4 border-t bg-background">
-      <div className="flex items-center gap-2">
+    <div className="p-4 bg-card border-t border-border">
+      <div className="flex items-end gap-3">
         {/* Action buttons */}
-        <div className="flex gap-1">
+        <div className="flex gap-1 mb-2">
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 text-muted-foreground hover:text-primary"
             disabled={disabled}
+            title="Đính kèm file"
           >
             <Paperclip className="h-5 w-5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 text-muted-foreground hover:text-primary"
             disabled={disabled}
+            title="Đính kèm ảnh"
           >
             <ImageIcon className="h-5 w-5" />
           </Button>
@@ -77,14 +80,16 @@ export default function ChatInput({
             disabled={disabled}
             rows={1}
             className={cn(
-              "min-h-[40px] max-h-[150px] resize-none border border-accent py-2.5 pr-12"
+              "min-h-[44px] max-h-[150px] resize-none border border-border bg-background rounded-lg py-3 pr-12 shadow-sm focus:shadow-md transition-shadow",
+              "focus-visible:ring-2 focus-visible:ring-primary/20"
             )}
           />
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-1 bottom-1 h-8 w-8 text-muted-foreground hover:text-foreground"
+            className="absolute right-2 bottom-2 h-8 w-8 text-muted-foreground hover:text-primary"
             disabled={disabled}
+            title="Chèn emoji"
           >
             <Smile className="h-5 w-5" />
           </Button>
@@ -95,14 +100,22 @@ export default function ChatInput({
           onClick={handleSend}
           disabled={!message.trim() || disabled}
           size="icon"
-          className="h-9 w-9 rounded-full flex-shrink-0"
+          className="h-11 w-11 rounded-full flex-shrink-0 shadow-sm hover:shadow-md transition-shadow mb-1"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-5 w-5" />
         </Button>
       </div>
 
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Nhấn Enter để gửi, Shift + Enter để xuống dòng
+        Nhấn{" "}
+        <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs font-mono">
+          Enter
+        </kbd>{" "}
+        để gửi,{" "}
+        <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs font-mono">
+          Shift + Enter
+        </kbd>{" "}
+        để xuống dòng
       </p>
     </div>
   );

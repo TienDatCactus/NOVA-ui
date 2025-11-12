@@ -1,6 +1,7 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { RoomsService } from "~/services/api/rooms";
 import type { UpdateRoomDetailRequestDto } from "~/services/api/rooms/dto";
+import { toast } from "sonner";
 
 function useCreateRoom() {
   const queryClient = useQueryClient();
@@ -62,4 +63,29 @@ function useDeleteRoom() {
   });
 }
 
-export { useCreateRoom, useUpdateRoom, useUpdateRoomStatus, useDeleteRoom };
+function useRegenerateRoomQRCode() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["regenerate-room-qrcode"],
+    mutationFn: async (data: { roomId: string; baseUrl?: string }) =>
+      await RoomsService.regenerateQRCode(data.roomId, data.baseUrl),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["room-qr-code", variables.roomId],
+      });
+      toast.success("Tạo lại mã QR thành công.");
+    },
+    onError: (error) => {
+      console.error("Error regenerating QR code:", error);
+      toast.error("Không thể tạo lại mã QR. Vui lòng thử lại.");
+    },
+  });
+}
+
+export {
+  useCreateRoom,
+  useUpdateRoom,
+  useUpdateRoomStatus,
+  useDeleteRoom,
+  useRegenerateRoomQRCode,
+};

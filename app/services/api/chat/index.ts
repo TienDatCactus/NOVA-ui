@@ -1,46 +1,73 @@
 import http from "~/lib/http";
 import { Chat } from "~/services/url";
+import { ChatSchema } from "~/services/schema/chat.schema";
+import type {
+  ChatEntryResponseDto,
+  ChatSessionDto,
+  ChatMessagesResponseDto,
+  SendMessageRequestDto,
+  SendMessageResponseDto,
+  StaffInboxResponseDto,
+  AssignStaffRequestDto,
+  AssignStaffResponseDto,
+  CloseSessionResponseDto,
+} from "./dto";
 
-async function entry(roomToken: string) {
+const {
+  ChatEntryResponseSchema,
+  ChatSessionSchema,
+  ChatMessagesResponseSchema,
+  SendMessageRequestSchema,
+  SendMessageResponseSchema,
+  StaffInboxResponseSchema,
+  AssignStaffRequestSchema,
+  AssignStaffResponseSchema,
+  CloseSessionResponseSchema,
+} = ChatSchema;
+
+async function entry(roomToken: string): Promise<ChatEntryResponseDto> {
   try {
     const resp = await http.get(Chat.entry, { params: { roomToken } });
-    return resp.data;
+    return ChatEntryResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function getSession(sessionId: string) {
+async function getSession(sessionId: string): Promise<ChatSessionDto> {
   try {
     const resp = await http.get(Chat.session(sessionId));
-    return resp.data;
+    return ChatSessionSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function getMessages(sessionId: string, page = 1, pageSize = 50) {
+async function getMessages(
+  sessionId: string,
+  page = 1,
+  pageSize = 50
+): Promise<ChatMessagesResponseDto> {
   try {
     const resp = await http.get(Chat.messages(sessionId), {
       params: { page, pageSize },
     });
-    return resp.data;
+    return ChatMessagesResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function sendMessage(data: {
-  sessionId: string;
-  message: string;
-  sender: string; // "Guest" | "Staff"
-}) {
+async function sendMessage(
+  data: SendMessageRequestDto
+): Promise<SendMessageResponseDto> {
   try {
-    const resp = await http.post(Chat.sendMessage, data);
-    return resp.data;
+    const validatedData = SendMessageRequestSchema.parse(data);
+    const resp = await http.post(Chat.sendMessage, validatedData);
+    return SendMessageResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -53,32 +80,38 @@ async function getStaffInbox({
 }: {
   page?: number;
   pageSize?: number;
-}) {
+}): Promise<StaffInboxResponseDto> {
   try {
     const resp = await http.get(Chat.staffInbox, {
       params: { page, pageSize },
     });
-    return resp.data;
+    return StaffInboxResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function assignStaff(sessionId: string, staffUserId: string) {
+async function assignStaff(
+  sessionId: string,
+  data: AssignStaffRequestDto
+): Promise<AssignStaffResponseDto> {
   try {
-    const resp = await http.post(Chat.assign(sessionId), { staffUserId });
-    return resp.data;
+    const validatedData = AssignStaffRequestSchema.parse(data);
+    const resp = await http.post(Chat.assign(sessionId), validatedData);
+    return AssignStaffResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function closeSession(sessionId: string) {
+async function closeSession(
+  sessionId: string
+): Promise<CloseSessionResponseDto> {
   try {
     const resp = await http.post(Chat.close(sessionId));
-    return resp.data;
+    return CloseSessionResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

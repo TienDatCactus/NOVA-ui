@@ -68,10 +68,20 @@ function useRoomsDetailsByIds(ids: string[]) {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+function useGetRoomQrCode(roomId: string) {
+  return useQuery({
+    queryKey: ["room-qr-code", roomId],
+    queryFn: async () => await RoomsService.generateQRCode(roomId),
+    enabled: !!roomId,
+  });
+}
+
 export {
   useRooms,
   useRoomDetail,
   useRoomBookingHistory,
   useAvailableRoomsInternal,
   useRoomsDetailsByIds,
+  useGetRoomQrCode,
 };

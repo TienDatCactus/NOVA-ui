@@ -4,6 +4,7 @@ import ChatMessage from "./chat-message";
 import { format, parseISO, isSameDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import { MessageSquare } from "lucide-react";
+import { Card } from "~/components/ui/card";
 
 type Message = {
   id: string;
@@ -34,8 +35,8 @@ export default function ChatMessagesArea({
   const groupedMessages = groupMessagesByDate(messages);
 
   return (
-    <ScrollArea className="flex-1 max-h-[70vh] bg-muted/20">
-      <div ref={scrollRef} className="px-4 py-6">
+    <ScrollArea className="flex-1 bg-muted/30">
+      <div ref={scrollRef} className="px-6 py-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-3">
@@ -47,25 +48,23 @@ export default function ChatMessagesArea({
           </div>
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="text-6xl mb-4">
-                <MessageSquare />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">
+            <Card className="text-center p-8 bg-card shadow-sm rounded-2xl border border-border max-w-sm">
+              <MessageSquare className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="font-semibold text-lg mb-2 text-foreground">
                 Chưa có tin nhắn nào
               </h3>
               <p className="text-sm text-muted-foreground">
                 Gửi tin nhắn đầu tiên để bắt đầu cuộc trò chuyện
               </p>
-            </div>
+            </Card>
           </div>
         ) : (
           <>
             {Object.entries(groupedMessages).map(([date, msgs]) => (
-              <div key={date}>
+              <div key={date} className="space-y-3">
                 {/* Date divider */}
-                <div className="flex items-center justify-center my-4">
-                  <div className="bg-muted px-3 py-1 rounded-full">
+                <div className="flex items-center justify-center my-6">
+                  <div className="bg-card px-4 py-1.5 rounded-full border border-border shadow-sm">
                     <span className="text-xs text-muted-foreground font-medium">
                       {formatDateDivider(date)}
                     </span>
@@ -115,7 +114,7 @@ function groupMessagesByDate(messages: Message[]): Record<string, Message[]> {
 }
 
 function formatDateDivider(dateString: string): string {
-  const date = dateString;
+  const date = parseISO(dateString);
   const today = new Date();
 
   if (isSameDay(date, today)) {

@@ -16,6 +16,16 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -64,7 +74,8 @@ import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
-import { formatMoney, toYMD } from "~/lib/utils";
+import { toYMD } from "~/lib/utils";
+import { createRemoveRoomOperation } from "~/services/api/booking/booking.helpers";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
@@ -77,13 +88,11 @@ import { AddRoomModal } from "./components/add-room-modal";
 import AddServiceOrderDialog from "./components/add-service-order-dialog";
 import BookingServiceOrders from "./components/booking-service-orders";
 import CheckoutSheet from "./components/checkout-sheet";
-import PaymentInvoiceModal from "./components/payment-invoice-modal";
 import { useBookingOrders } from "./container/use-booking-orders.hooks";
 import { useBookingServiceOrders } from "./container/use-booking-service-orders.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
 import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
-// In booking-detail.tsx, add:
 
 import BookingMenuOrders from "./components/booking-menu-orders";
 
@@ -118,10 +127,14 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     useState(false);
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
+  const [removeRoomConfirmOpen, setRemoveRoomConfirmOpen] = useState(false);
+  const [roomToRemove, setRoomToRemove] = useState<{
+    bookingRoomId: string;
+    roomName: string;
+  } | null>(null);
 
   // Booking update permissions
   const permissions = useBookingUpdatePermissions(bookingDetail);
@@ -170,9 +183,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       rooms: [],
       breakfastDates: [],
       totalAmount: 0,
-      paidAmount: 0,
-      paymentMethod: undefined,
-      invoiceStatus: undefined,
     },
   });
 
@@ -193,16 +203,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         adultsAmount: bookingDetail.adults,
         childrenAmount: bookingDetail.children || 0,
         note: bookingDetail.note || "",
-        // Load OTA info from API if source is OTA
         otaBookingCode: bookingDetail.source === "OTA" ? "" : "",
         otaInformationId: bookingDetail.source === "OTA" ? "" : "",
         customerId: bookingDetail.customer.id,
         totalAmount: bookingDetail.totalAmount || 0,
-        paidAmount: bookingDetail.paidAmount || 0,
-        paymentMethod: bookingDetail.paymentMethod || undefined,
-        invoiceStatus: bookingDetail.invoiceStatus || undefined,
-        breakfastDates: [], // Initialize as empty array - will be loaded from API if available
-        // Don't include rooms array - handled separately via room operations
+        breakfastDates: [],
         rooms: [],
       });
     }
@@ -210,7 +215,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const checkinDate = form.watch("checkinDate");
   const checkoutDate = form.watch("checkoutDate");
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
-    // Check if attempting heavy updates
     const hasHeavyUpdates =
       data.checkinDate !== bookingDetail?.checkinDate ||
       data.checkoutDate !== bookingDetail?.checkoutDate ||
@@ -238,6 +242,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       otaBookingCode: data.otaBookingCode,
       otaInformationId: data.otaInformationId,
       breakfastDates: data.breakfastDates || [],
+      rooms: data.rooms, // Include room operations
     };
 
     updateBooking(payload, {});
@@ -245,6 +250,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
   const handleAddRoom = (roomId: string, roomTypeId: string) => {
     append({
+      action: "Add",
+      bookingRoomId: null,
       roomId,
       fromDate:
         checkinDate instanceof Date
@@ -254,7 +261,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         checkoutDate instanceof Date
           ? format(checkoutDate, "yyyy-MM-dd")
           : checkoutDate?.toString() || format(new Date(), "yyyy-MM-dd"),
-      remove: false,
     });
 
     toast.success("Đã thêm phòng mới");
@@ -305,6 +311,40 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
   const handleCancelServiceOrder = (orderId: string) => {
     cancelServiceOrder(orderId);
+  };
+
+  const handleRemoveRoom = (bookingRoomId: string, roomName: string) => {
+    setRoomToRemove({ bookingRoomId, roomName });
+    setRemoveRoomConfirmOpen(true);
+  };
+
+  const confirmRemoveRoom = () => {
+    if (!roomToRemove) return;
+
+    // Check if this room is already marked for removal
+    const currentRooms = form.getValues("rooms") || [];
+    const alreadyMarkedForRemoval = currentRooms.some(
+      (room) =>
+        room.action === "Remove" &&
+        room.bookingRoomId === roomToRemove.bookingRoomId
+    );
+
+    if (alreadyMarkedForRemoval) {
+      toast.warning("Phòng này đã được đánh dấu để xóa");
+      setRemoveRoomConfirmOpen(false);
+      setRoomToRemove(null);
+      return;
+    }
+
+    // Use helper to create proper remove operation
+    const removeOperation = createRemoveRoomOperation(
+      roomToRemove.bookingRoomId
+    );
+    append(removeOperation);
+
+    toast.success(`Phòng ${roomToRemove.roomName} sẽ bị xóa khi lưu thay đổi`);
+    setRemoveRoomConfirmOpen(false);
+    setRoomToRemove(null);
   };
 
   const nights = useMemo(() => {
@@ -400,18 +440,39 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                       isExpanded={expandedRooms.has(room.roomId)}
                       onSelect={() => setSelectedRoomId(room.roomId)}
                       onToggleExpand={() => toggleRoomExpand(room.roomId)}
+                      onRemove={() =>
+                        handleRemoveRoom(room.bookingRoomId, room.roomName)
+                      }
+                      canRemove={permissions.canRemoveRooms}
+                      removeTooltip={
+                        !permissions.canRemoveRooms
+                          ? permissions.blockReason || "Không thể xóa phòng"
+                          : undefined
+                      }
                     />
                   ))}
 
                   {/* New Rooms Being Added */}
-                  {fields.length > 0 && (
+                  {fields.filter(
+                    (_, index) => form.watch(`rooms.${index}.action`) === "Add"
+                  ).length > 0 && (
                     <>
                       <Separator className="my-3" />
                       <div className="text-xs font-semibold text-card-foreground mb-2">
-                        Phòng đang được thêm ({fields.length})
+                        Phòng đang được thêm (
+                        {
+                          fields.filter(
+                            (_, index) =>
+                              form.watch(`rooms.${index}.action`) === "Add"
+                          ).length
+                        }
+                        )
                       </div>
                       <div className="space-y-2">
                         {fields.map((field, index) => {
+                          const action = form.watch(`rooms.${index}.action`);
+                          if (action !== "Add") return null;
+
                           const roomId = form.watch(`rooms.${index}.roomId`);
                           const fromDate = form.watch(
                             `rooms.${index}.fromDate`
@@ -428,6 +489,70 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                               toDate={toDate}
                               onRemove={() => remove(index)}
                             />
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Rooms Being Removed */}
+                  {fields.filter(
+                    (_, index) =>
+                      form.watch(`rooms.${index}.action`) === "Remove"
+                  ).length > 0 && (
+                    <>
+                      <Separator className="my-3" />
+                      <div className="text-xs font-semibold text-destructive mb-2">
+                        Phòng sẽ bị xóa (
+                        {
+                          fields.filter(
+                            (_, index) =>
+                              form.watch(`rooms.${index}.action`) === "Remove"
+                          ).length
+                        }
+                        )
+                      </div>
+                      <div className="space-y-2">
+                        {fields.map((field, index) => {
+                          const action = form.watch(`rooms.${index}.action`);
+                          if (action !== "Remove") return null;
+
+                          const bookingRoomId = form.watch(
+                            `rooms.${index}.bookingRoomId`
+                          );
+                          if (!bookingRoomId) return null;
+
+                          // Find the room in existing booking rooms
+                          const existingRoom = bookingDetail.rooms.find(
+                            (r) => r.bookingRoomId === bookingRoomId
+                          );
+                          if (!existingRoom) return null;
+
+                          return (
+                            <Card
+                              key={field.id}
+                              className="bg-destructive/5 border-destructive/20"
+                            >
+                              <CardContent className="p-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-sm line-through text-muted-foreground">
+                                      {existingRoom.roomName}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {existingRoom.roomTypeName}
+                                    </div>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => remove(index)}
+                                  >
+                                    Hoàn tác
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
                           );
                         })}
                       </div>
@@ -648,21 +773,17 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
                   <div className="flex flex-col gap-2">
                     <Label className="text-sm uppercase text-card-foreground">
-                      Thanh toán & Hóa đơn
+                      Tổng tiền cần thanh toán
                     </Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => setPaymentModalOpen(true)}
-                    >
-                      <Wallet className="mr-2 h-4 w-4" />
-                      <span className="truncate line-clamp-1 w-40">
-                        {form.watch("totalAmount")
-                          ? `${formatMoney(form.watch("paidAmount") || 0).vndFormatted} / ${formatMoney(form.watch("totalAmount") || 0).vndFormatted}`
-                          : "Cập nhật thanh toán"}
-                      </span>
-                    </Button>
+                    <Input
+                      type="text"
+                      placeholder="0"
+                      value={form.watch("totalAmount") || ""}
+                      onChange={(e) =>
+                        form.setValue("totalAmount", Number(e.target.value))
+                      }
+                      startAddon={<Wallet />}
+                    />
                     <p className="text-xs text-muted-foreground">
                       Nhấn để cập nhật thông tin thanh toán
                     </p>
@@ -857,12 +978,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 hasMultipleRooms={(bookingDetail?.rooms.length || 0) > 1}
               />
 
-              <PaymentInvoiceModal
-                open={paymentModalOpen}
-                onOpenChange={setPaymentModalOpen}
-                form={form}
-              />
-
               <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
                 <DialogContent className="max-w-xl">
                   <DialogHeader>
@@ -976,6 +1091,31 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           bookingId={bookingDetail?.id || ""}
           bookingCode={bookingDetail?.bookingCode || ""}
         />
+
+        {/* Remove Room Confirmation Dialog */}
+        <AlertDialog
+          open={removeRoomConfirmOpen}
+          onOpenChange={setRemoveRoomConfirmOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Xác nhận xóa phòng</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bạn có chắc muốn xóa phòng{" "}
+                <span className="font-semibold">{roomToRemove?.roomName}</span>?
+                <br />
+                <br />
+                Thao tác này sẽ được áp dụng khi bạn lưu thay đổi.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Hủy</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmRemoveRoom}>
+                Xóa phòng
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Form>
     </div>
   );
