@@ -1,22 +1,30 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { RoomSelectionFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
-import { Button } from "~/components/ui/button";
+import { CircleX } from "lucide-react";
+import { Alert, AlertTitle } from "~/components/ui/alert";
+import { Badge } from "~/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
+import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { onError, useCalculateNights } from "~/lib/utils";
 import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { FormSchema } from "~/services/schema/forms.schema";
-import RoomItemWrapper from "../fragments/room-item-wrapper";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
 import { AvailableRoomTypeCard } from "../fragments/available-room.card";
+import RoomItemWrapper from "../fragments/room-item-wrapper";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Button } from "~/components/ui/button";
 
 interface RoomSelectionStepProps {
   onNext: () => void;
@@ -145,7 +153,40 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
             ) || 0}{" "}
             phòng trống
           </p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Các phòng đã chọn{" "}
+                <Badge variant={"info"}>{selectedRoomIds.length}</Badge>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent asChild className="w-96 rounded-md">
+              <Card className=" border shadow-sm gap-0">
+                <CardHeader className="pt-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">Phòng đã chọn</CardTitle>
+                    <Badge variant="secondary">
+                      {selectedRoomIds.length} phòng
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-2 flex flex-col gap-2 snap-x w-full overflow-y-auto ">
+                  {selectedRoomIds.map((roomId) => (
+                    <RoomItemWrapper key={roomId} roomId={roomId} />
+                  ))}
+                </CardContent>
+              </Card>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+        {form.formState.errors.roomIds && (
+          <Alert variant={"destructive"}>
+            <CircleX />
+            <AlertTitle>
+              {form.formState.errors.roomIds.message as string}
+            </AlertTitle>
+          </Alert>
+        )}
 
         <div className=" space-y-2">
           {isPending ? (
@@ -162,7 +203,7 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
             </div>
           ) : (
             <>
-              <div className="space-y-4">
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
                 {availableRooms.map((roomType) => (
                   <AvailableRoomTypeCard
                     key={roomType.roomTypeId}
@@ -173,39 +214,11 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
                   />
                 ))}
               </div>
-              {form.formState.errors.roomIds && (
-                <p className="text-sm text-destructive mt-2">
-                  {form.formState.errors.roomIds.message as string}
-                </p>
-              )}
             </>
           )}
         </div>
 
-        <div className="grid grid-cols-2">
-          {/* Selected Rooms */}
-          <Card className="col-start-2  border shadow-sm ">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Phòng đã chọn</CardTitle>
-                <Badge variant="secondary">
-                  {selectedRoomIds.length} phòng
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2 snap-y max-h-64  overflow-y-scroll ">
-              {selectedRoomIds.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Chưa chọn phòng nào
-                </p>
-              ) : (
-                selectedRoomIds.map((roomId) => (
-                  <RoomItemWrapper key={roomId} roomId={roomId} />
-                ))
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        {/* Selected Rooms */}
       </form>
     </Form>
   );

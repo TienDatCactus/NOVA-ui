@@ -17,11 +17,6 @@ export function useCreateMenuCategory() {
       await MenuCategoryService.createMenuCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-category-list"] });
-      toast.success("Thêm danh mục thành công");
-    },
-    onError: (error) => {
-      console.error("Create menu category error:", error);
-      toast.error("Có lỗi xảy ra khi thêm danh mục");
     },
   });
 }
@@ -41,11 +36,6 @@ export function useUpdateMenuCategory(categoryId: string) {
       queryClient.invalidateQueries({
         queryKey: ["menu-category-detail", categoryId],
       });
-      toast.success("Cập nhật danh mục thành công");
-    },
-    onError: (error) => {
-      console.error("Update menu category error:", error);
-      toast.error("Có lỗi xảy ra khi cập nhật danh mục");
     },
   });
 }
@@ -61,11 +51,6 @@ export function useDeleteMenuCategory() {
       await MenuCategoryService.deleteMenuCategory(categoryId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-category-list"] });
-      toast.success("Xóa danh mục thành công");
-    },
-    onError: (error) => {
-      console.error("Delete menu category error:", error);
-      toast.error("Có lỗi xảy ra khi xóa danh mục");
     },
   });
 }

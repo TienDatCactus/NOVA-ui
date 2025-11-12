@@ -57,7 +57,9 @@ export default function EditServiceSheet({
   const form = useForm({
     resolver: zodResolver(UpdateServiceItemRequestSchema),
   });
-  const { data: serviceItemDetail } = useServiceDetail(service.serviceItemId);
+  const { data: serviceItemDetail } = useServiceDetail(service.serviceItemId, {
+    enabled: open,
+  });
   const { mutate: updateService, isPending } = useUpdateService();
   const { data: units } = useUnits();
   const { data: serviceTypesData } = useServiceTypes();

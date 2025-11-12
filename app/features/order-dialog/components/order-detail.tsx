@@ -24,14 +24,14 @@ export default function OrderDetail({
   const itemCount = selectedItems.length;
 
   return (
-    <div className="h-full flex flex-col gap-3 p-0">
-      <Card className="border shadow-sm">
-        <CardHeader className=" ">
+    <div className="flex flex-col gap-4 p-2  h-100 overflow-y-auto">
+      <Card className="border py-4 shadow-sm">
+        <CardHeader className="">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">Thông tin đơn hàng</h3>
               {selectedItems.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={onClearAll}>
+                <Button variant="destructive" size="sm" onClick={onClearAll}>
                   Xóa tất cả
                 </Button>
               )}
@@ -61,15 +61,15 @@ export default function OrderDetail({
         </CardHeader>
       </Card>
 
-      <Card className="flex-1  border shadow-sm flex flex-col  p-0">
-        <CardContent className="flex-1 overflow-y-auto">
+      <Card className="border shadow-sm flex flex-col  p-0">
+        <CardContent className="p-0">
           {selectedItems.length === 0 ? (
             <div className="text-sm text-muted-foreground text-center py-12">
               <p>Chưa có món nào</p>
               <p className="text-xs mt-1">Vui lòng chọn dịch vụ hoặc món ăn</p>
             </div>
           ) : (
-            <div className="space-y-0">
+            <div className="space-y-2 ">
               {selectedItems.map((item) => (
                 <OrderItemWrapper key={item.itemId} itemId={item.itemId} />
               ))}

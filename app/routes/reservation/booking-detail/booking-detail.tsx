@@ -3,13 +3,14 @@ import { differenceInDays, format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   Baby,
-  CalendarIcon,
+  DoorOpen,
   Ellipsis,
   Mail,
   Pen,
   Phone,
   Plus,
   User,
+  Utensils,
   Wallet,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -63,23 +64,28 @@ import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
-import { cn, formatMoney, toYMD } from "~/lib/utils";
-import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
+import { formatMoney, toYMD } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
-import AddMenuItemDialog from "./components/add-menu-item-dialog";
-import { AddRoomModal } from "./components/add-room-modal";
 import CreateOrderDialog from "../bookings/components/create-order-dialog";
-import PaymentInvoiceModal from "./components/payment-invoice-modal";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
+import type { Route } from "./+types/booking-detail";
+import AddMenuItemDialog from "./components/add-menu-item-dialog";
+import { AddRoomModal } from "./components/add-room-modal";
+import AddServiceOrderDialog from "./components/add-service-order-dialog";
+import BookingServiceOrders from "./components/booking-service-orders";
+import CheckoutSheet from "./components/checkout-sheet";
+import PaymentInvoiceModal from "./components/payment-invoice-modal";
+import { useBookingOrders } from "./container/use-booking-orders.hooks";
+import { useBookingServiceOrders } from "./container/use-booking-service-orders.hooks";
+import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
 import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
-import { useBookingOrders } from "./container/use-booking-orders.hooks";
-import BookingPosOrders from "./components/booking-pos-orders";
-import BookingServiceOrders from "./components/booking-service-orders";
-import type { Route } from "./+types/booking-detail";
+// In booking-detail.tsx, add:
+
+import BookingMenuOrders from "./components/booking-menu-orders";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -102,17 +108,23 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     bookingCode,
     enabled: !!bookingCode,
   });
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
+  const [createServiceOrderDialogOpen, setCreateServiceOrderDialogOpen] =
+    useState(false);
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
+
+  // Booking update permissions
+  const permissions = useBookingUpdatePermissions(bookingDetail);
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
     bookingDetail?.id || ""
@@ -128,10 +140,23 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     isAddingItem,
     addCompletedCharges,
     isAddingCompletedCharges,
+    cancelOrder,
+    completeOrder,
   } = useBookingOrders({
     bookingId: bookingDetail?.id || "",
     ordersData: bookingDetail ? bookingDetail.posOrders : [],
   });
+
+  const {
+    isCreatingServiceOrder,
+    createBookingServiceOrder,
+    completeServiceOrder,
+    cancelServiceOrder,
+  } = useBookingServiceOrders({
+    bookingId: bookingDetail?.id || "",
+    bookingRoomId: selectedRoomId || undefined,
+  });
+
   const form = useForm<StaffUpdateBookingRequestDto>({
     resolver: zodResolver(StaffUpdateBookingRequestSchema),
     defaultValues: {
@@ -176,6 +201,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         paidAmount: bookingDetail.paidAmount || 0,
         paymentMethod: bookingDetail.paymentMethod || undefined,
         invoiceStatus: bookingDetail.invoiceStatus || undefined,
+        breakfastDates: [], // Initialize as empty array - will be loaded from API if available
         // Don't include rooms array - handled separately via room operations
         rooms: [],
       });
@@ -184,6 +210,19 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const checkinDate = form.watch("checkinDate");
   const checkoutDate = form.watch("checkoutDate");
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
+    // Check if attempting heavy updates
+    const hasHeavyUpdates =
+      data.checkinDate !== bookingDetail?.checkinDate ||
+      data.checkoutDate !== bookingDetail?.checkoutDate ||
+      (data.rooms && data.rooms.length > 0);
+
+    if (hasHeavyUpdates && !permissions.canDoHeavyUpdate) {
+      toast.error(
+        permissions.blockReason || "Không thể cập nhật cấu trúc booking này"
+      );
+      return;
+    }
+
     const payload: Partial<StaffUpdateBookingRequestDto> = {
       checkinDate:
         data.checkinDate instanceof Date
@@ -198,18 +237,10 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       note: data.note,
       otaBookingCode: data.otaBookingCode,
       otaInformationId: data.otaInformationId,
-      // Payment/Invoice fields are updated via PaymentInvoiceModal
-      // Don't include: rooms, breakfastDates (handled separately)
+      breakfastDates: data.breakfastDates || [],
     };
 
-    updateBooking(payload as any, {
-      onSuccess: () => {
-        toast.success("Cập nhật thông tin đặt phòng thành công");
-      },
-      onError: () => {
-        toast.error("Có lỗi xảy ra khi cập nhật đặt phòng");
-      },
-    });
+    updateBooking(payload, {});
   };
 
   const handleAddRoom = (roomId: string, roomTypeId: string) => {
@@ -242,6 +273,38 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const handleAddCompletedCharges = (menuItemId: string, quantity: number) => {
     const posItems = [{ menuItemId, quantity }];
     addCompletedCharges(posItems, selectedRoomId);
+  };
+
+  const handleAddServiceOrder = (
+    serviceItemId: string,
+    quantity: number,
+    unitPrice: number,
+    scheduledAt?: string,
+    note?: string
+  ) => {
+    createBookingServiceOrder(
+      serviceItemId,
+      quantity,
+      unitPrice,
+      scheduledAt,
+      note
+    );
+    setCreateServiceOrderDialogOpen(false);
+  };
+
+  const handleCompleteMenuOrder = (orderId: string) => {
+    completeOrder(orderId);
+  };
+  const handleCancelMenuOrder = (orderId: string) => {
+    cancelOrder(orderId);
+  };
+
+  const handleCompleteServiceOrder = (orderId: string) => {
+    completeServiceOrder(orderId);
+  };
+
+  const handleCancelServiceOrder = (orderId: string) => {
+    cancelServiceOrder(orderId);
   };
 
   const nights = useMemo(() => {
@@ -315,11 +378,17 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => setAddRoomModalOpen(true)}
+                      disabled={!permissions.canAddRooms}
                     >
                       <Plus className="h-4 w-4 mr-1" />
                       Thêm
                     </Button>
                   </div>
+                  {!permissions.canAddRooms && (
+                    <p className="text-xs text-destructive mt-2">
+                      {permissions.blockReason}
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent className="flex-1 overflow-y-auto space-y-2">
                   {/* Existing Rooms */}
@@ -504,65 +573,78 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                     </div>
                   )}
                   {/* Breakfast Dates Picker */}
-                  {/* {form.watch("breakfastDates") !== undefined &&
-                    form.watch("breakfastDates").length > 0 && (
-                      <FormField
-                        control={form.control}
-                        name="breakfastDates"
-                        render={({ field }) => {
-                          const checkinDate = form.watch("checkinDate");
-                          const checkoutDate = form.watch("checkoutDate");
-                          const breakfastDates = field.value || [];
-                          return (
-                            <FormItem className="flex flex-col">
-                              <FormLabel className="text-sm uppercase text-card-foreground">
-                                Ngày có bữa sáng
-                              </FormLabel>
-                              <FormControl>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        field.value?.length === 0 &&
-                                          "text-muted-foreground"
-                                      )}
-                                    >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {breakfastDates.length > 0
-                                        ? `Đã chọn ${breakfastDates.length} ngày`
-                                        : "Chọn ngày có bữa sáng"}
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent
-                                    className="w-auto p-0"
-                                    align="start"
-                                  >
-                                    <Calendar
-                                      mode="multiple"
-                                      selected={breakfastDates}
-                                      onSelect={(dates) =>
-                                        onSelectDates(dates || [])
-                                      }
-                                      disabled={(date) =>
-                                        date <= checkinDate ||
-                                        date > checkoutDate
-                                      }
-                                      locale={vi}
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                              </FormControl>
-                              <FormDescription>
-                                Chọn các ngày khách có sử dụng bữa sáng
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    )} */}
+                  <FormField
+                    control={form.control}
+                    name="breakfastDates"
+                    render={({ field }) => {
+                      const checkinDate = form.watch("checkinDate");
+                      const checkoutDate = form.watch("checkoutDate");
+                      const breakfastDates =
+                        field.value?.map((item) =>
+                          item.date ? parseISO(item.date) : new Date()
+                        ) || [];
+
+                      const handleSelectDates = (dates: Date[] | undefined) => {
+                        if (!dates) {
+                          field.onChange([]);
+                          return;
+                        }
+                        const formatted = dates.map((date) => ({
+                          date: format(date, "yyyy-MM-dd"),
+                        }));
+                        field.onChange(formatted);
+                      };
+
+                      return (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="text-sm uppercase text-card-foreground">
+                            Ngày có bữa sáng
+                          </FormLabel>
+                          <FormControl>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="w-full justify-start text-left font-normal"
+                                >
+                                  <Utensils className="mr-2 h-4 w-4" />
+                                  {breakfastDates.length > 0
+                                    ? `Đã chọn ${breakfastDates.length} ngày`
+                                    : "Chọn ngày có bữa sáng"}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="multiple"
+                                  selected={breakfastDates}
+                                  onSelect={handleSelectDates}
+                                  disabled={(date) => {
+                                    const checkin =
+                                      checkinDate instanceof Date
+                                        ? checkinDate
+                                        : parseISO(checkinDate!.toString());
+                                    const checkout =
+                                      checkoutDate instanceof Date
+                                        ? checkoutDate
+                                        : parseISO(checkoutDate!.toString());
+                                    return date < checkin || date >= checkout;
+                                  }}
+                                  locale={vi}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </FormControl>
+                          <FormDescription className="text-xs">
+                            Chọn các ngày khách có sử dụng bữa sáng
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
 
                   <div className="flex flex-col gap-2">
                     <Label className="text-sm uppercase text-card-foreground">
@@ -688,8 +770,16 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                           <FormItem className="flex flex-col">
                             <FormLabel>Ngày nhận phòng</FormLabel>
                             <FormControl>
-                              <DatePicker {...field} />
+                              <DatePicker
+                                {...field}
+                                disabled={!permissions.canEditDates}
+                              />
                             </FormControl>
+                            {!permissions.canEditDates && (
+                              <FormDescription className="text-destructive text-xs">
+                                {permissions.blockReason}
+                              </FormDescription>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
@@ -702,8 +792,16 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                           <FormItem className="flex flex-col">
                             <FormLabel>Ngày trả phòng</FormLabel>
                             <FormControl>
-                              <DatePicker {...field} />
+                              <DatePicker
+                                {...field}
+                                disabled={!permissions.canEditDates}
+                              />
                             </FormControl>
+                            {!permissions.canEditDates && (
+                              <FormDescription className="text-destructive text-xs">
+                                {permissions.blockReason}
+                              </FormDescription>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
@@ -751,13 +849,20 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 hasMultipleRooms={(bookingDetail?.rooms.length || 0) > 1}
               />
 
+              <AddServiceOrderDialog
+                open={createServiceOrderDialogOpen}
+                onOpenChange={setCreateServiceOrderDialogOpen}
+                onConfirm={handleAddServiceOrder}
+                isAdding={isCreatingServiceOrder}
+                hasMultipleRooms={(bookingDetail?.rooms.length || 0) > 1}
+              />
+
               <PaymentInvoiceModal
                 open={paymentModalOpen}
                 onOpenChange={setPaymentModalOpen}
                 form={form}
               />
 
-              {/* Note Modal */}
               <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
                 <DialogContent className="max-w-xl">
                   <DialogHeader>
@@ -809,7 +914,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pb-4">
-            <BookingPosOrders
+            <BookingMenuOrders
               isCreatingOrder={isCreatingOrder}
               ordersList={bookingDetail.posOrders}
               isLoadingOrder={isLoadingOrder}
@@ -818,14 +923,36 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 setSelectedOrderId(orderId);
                 setOrderDialogOpen(true);
               }}
+              onCancelOrder={handleCancelMenuOrder}
+              onCompleteOrder={handleCompleteMenuOrder}
               onRemoveItem={removeItem}
               onAddCompletedCharges={() => setCompletedChargesDialogOpen(true)}
             />
-            <BookingServiceOrders />
+            <BookingServiceOrders
+              ordersList={bookingDetail.serviceOrders || []}
+              isLoadingOrder={isLoadingOrder}
+              isCreatingOrder={isCreatingServiceOrder}
+              onOpenCreateDialog={() => setCreateServiceOrderDialogOpen(true)}
+              onCancelOrder={handleCancelServiceOrder}
+              onCompleteOrder={handleCompleteServiceOrder}
+            />
           </div>
         </div>
         <Separator />
         <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
+          <Button
+            variant={"success"}
+            onClick={() => setCheckoutOpen(true)}
+            disabled={
+              !bookingDetail?.id ||
+              bookingDetail?.status === "CheckedOut" ||
+              bookingDetail?.status === "Cancelled"
+            }
+          >
+            <DoorOpen className="w-4 h-4 mr-2" />
+            Checkout
+          </Button>
+
           <Button
             type="button"
             variant="outline"
@@ -841,6 +968,14 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
           </Button>
         </div>
+
+        {/* Checkout Sheet */}
+        <CheckoutSheet
+          open={checkoutOpen}
+          onOpenChange={setCheckoutOpen}
+          bookingId={bookingDetail?.id || ""}
+          bookingCode={bookingDetail?.bookingCode || ""}
+        />
       </Form>
     </div>
   );

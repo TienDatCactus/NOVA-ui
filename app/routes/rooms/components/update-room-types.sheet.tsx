@@ -1,5 +1,5 @@
-import { Eye, FileText, ImageIcon, Pencil } from "lucide-react";
-import AlertChanges from "~/components/ui/alert-changes";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -22,21 +22,29 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import {
+  Dropzone,
+  DropzoneContent,
+  DropzoneEmptyState,
+} from "~/components/ui/shadcn-io/dropzone";
+import { MinimalTiptap } from "~/components/ui/shadcn-io/minimal-tiptap";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
-import { onError, stripHtml } from "~/lib/utils";
+import { cn, onError } from "~/lib/utils";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { DescriptionDialog } from "../fragments/room-types/description.dialog";
-import { ImagePreviewDialog } from "../fragments/room-types/image-preview.dialog";
+
 import { useUpdateRoomTypeSheet } from "../container/room-types/update-container.hooks";
 
 interface EditRoomTypeSheetProps {
@@ -50,41 +58,66 @@ export function UpdateRoomTypeSheet({
   onClose,
   roomType,
 }: EditRoomTypeSheetProps) {
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [removeMediaIds, setRemoveMediaIds] = useState<string[]>([]);
+
   const {
     form,
     isPending,
     showCancelDialog,
     setShowCancelDialog,
-    showDescriptionDialog,
-    setShowDescriptionDialog,
-    showImagePreviewDialog,
-    setShowImagePreviewDialog,
-
-    // Computed values
-    removeMediaIds,
-    newImageFiles,
     existingImages,
-    remainingImages,
-    totalImagesAfterSubmit,
 
     // Handlers
     handleClose,
     handleConfirmClose,
-    handleRemoveNewFile,
-    handleMarkForDeletion,
-    handleAddImages,
     handleSubmit,
-    handleDescriptionSave,
-    handleOpenDescription,
-    dialogMode,
-    handleOpenImagePreview,
     handleDeleteRoomType,
   } = useUpdateRoomTypeSheet({ open, onClose, roomType });
+
+  useEffect(() => {
+    if (roomType) {
+      setRemoveMediaIds([]);
+      setNewFiles([]);
+      setNewPreviews([]);
+    }
+  }, [roomType]);
+
+  useEffect(() => {
+    form.setValue("images", newFiles as any);
+    form.setValue("removeMediaIds", removeMediaIds);
+  }, [newFiles, removeMediaIds, form]);
+
+  useEffect(() => {
+    const urls = newFiles.map((f) => URL.createObjectURL(f));
+    setNewPreviews(urls);
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [newFiles]);
+
+  const onDropNewFiles = (accepted: File[]) => {
+    setNewFiles((prev) => [...prev, ...accepted]);
+  };
+
+  const removeNewFile = (index: number) => {
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const toggleRemoveExisting = (id: string) => {
+    setRemoveMediaIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((mediaId) => mediaId !== id)
+        : [...prev, id]
+    );
+  };
+
   if (!roomType) return null;
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="sm:max-w-[800px] overflow-y-auto">
+        <SheetContent className="sm:max-w-[800px] h-screen overflow-y-auto">
           <SheetHeader>
             <div className="flex justify-between items-center">
               <div>
@@ -184,129 +217,135 @@ export function UpdateRoomTypeSheet({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <Card className="shadow-sm border  p-4">
-                    <CardContent className="p-0 flex flex-col justify-between h-full">
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <h3 className="text-sm font-semibold">Mô tả</h3>
+                {/* Description */}
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mô tả</FormLabel>
+                      <FormControl>
+                        <MinimalTiptap
+                          content={field.value || ""}
+                          onChange={field.onChange}
+                          placeholder="Nhập mô tả hạng phòng..."
+                          className="min-h-[200px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Images */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">
+                    Hình ảnh
+                  </h3>
+
+                  {/* Existing Images */}
+                  <div className="space-y-2">
+                    <FormLabel>Hình ảnh hiện có</FormLabel>
+                    {!existingImages || existingImages.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        Không có hình ảnh
+                      </p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {existingImages.map((img) => {
+                          const marked = removeMediaIds.includes(img.mediaId);
+                          return (
+                            <Label
+                              key={img.mediaId}
+                              className={cn(
+                                "relative group rounded-md border cursor-pointer transition-all",
+                                {
+                                  "ring-2 ring-destructive/60 border-destructive/50":
+                                    marked,
+                                  "border-border hover:border-primary/30":
+                                    !marked,
+                                }
+                              )}
+                              title={
+                                marked ? "Bỏ đánh dấu xóa" : "Đánh dấu để xóa"
+                              }
+                            >
+                              <div className="absolute top-2 left-2 z-10">
+                                <Checkbox
+                                  className="data-[state=checked]:bg-destructive border-destructive data-[state=checked]:border-destructive"
+                                  checked={marked}
+                                  onCheckedChange={() =>
+                                    toggleRemoveExisting(img.mediaId)
+                                  }
+                                />
+                              </div>
+                              <Image
+                                src={img.url}
+                                alt="existing"
+                                width={100}
+                                height={100}
+                                className="object-cover rounded-md"
+                              />
+
+                              {marked && (
+                                <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold" />
+                              )}
+                            </Label>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {removeMediaIds.length > 0 && (
+                      <p className="text-xs text-destructive">
+                        Đã đánh dấu xóa {removeMediaIds.length} ảnh
+                      </p>
+                    )}
+                  </div>
+
+                  {/* New Images Upload */}
+                  <div className="space-y-2">
+                    <FormLabel>Thêm hình ảnh</FormLabel>
+                    <Dropzone
+                      accept={{ "image/*": [] }}
+                      maxFiles={8}
+                      onDrop={(accepted) => onDropNewFiles(accepted)}
+                      src={newFiles}
+                      className="border-2 border-dashed"
+                    >
+                      <DropzoneEmptyState />
+                      <DropzoneContent />
+                    </Dropzone>
+
+                    {newPreviews.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {newPreviews.map((url, index) => (
+                          <div key={index} className="relative group">
+                            <Image
+                              src={url}
+                              alt={`new-${index}`}
+                              width={100}
+                              height={100}
+                              className="object-cover border"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => removeNewFile(index)}
+                              aria-label="Xóa ảnh mới"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
                           </div>
-                        </div>
-
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3 ">
-                          {form.watch("description")
-                            ? stripHtml(form.watch("description") || "")
-                            : "Chưa có mô tả"}
-                        </p>
+                        ))}
                       </div>
-
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenDescription("preview")}
-                          className="flex-1"
-                        >
-                          <Eye className="h-3.5 w-3.5 mr-1.5" />
-                          Xem trước
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleOpenDescription("edit")}
-                          className="flex-1"
-                        >
-                          <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                          Chỉnh sửa
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="shadow-sm border p-4">
-                    <CardContent className="p-0 flex flex-col justify-between h-full">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                          <h3 className="text-sm font-semibold">Hình ảnh</h3>
-                          <Badge variant="outline" className="text-xs">
-                            {totalImagesAfterSubmit} ảnh
-                          </Badge>
-                          {removeMediaIds.length > 0 && (
-                            <Badge variant="destructive" className="text-xs">
-                              -{removeMediaIds.length}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex gap-1.5 mb-3 min-h-[40px]">
-                        {existingImages.length === 0 &&
-                        newImageFiles.length === 0 ? (
-                          <div className="flex items-center justify-center w-full text-xs text-muted-foreground">
-                            Chưa có hình ảnh
-                          </div>
-                        ) : (
-                          <div className="text-center flex items-center justify-center flex-col text-sm text-muted-foreground w-full">
-                            <p>
-                              Sau khi lưu:{" "}
-                              <span className="font-medium text-black">
-                                {totalImagesAfterSubmit}
-                              </span>{" "}
-                              ảnh
-                            </p>
-                            {remainingImages.length > 0 && (
-                              <p className="text-xs">
-                                {remainingImages.length} cũ
-                                {removeMediaIds.length > 0 && (
-                                  <span className="text-destructive">
-                                    {" "}
-                                    (-{removeMediaIds.length})
-                                  </span>
-                                )}
-                              </p>
-                            )}
-                            {newImageFiles.length > 0 && (
-                              <p className="text-xs">
-                                +{newImageFiles.length} mới
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenImagePreview("preview")}
-                          className="flex-1"
-                          disabled={
-                            existingImages.length === 0 &&
-                            newImageFiles.length === 0
-                          }
-                        >
-                          <Eye className="h-3.5 w-3.5 mr-1.5" />
-                          Xem trước
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleOpenImagePreview("edit")}
-                          className="flex-1"
-                        >
-                          <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                          Chỉnh sửa
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Có thể tải lên tối đa 8 ảnh. Ảnh sẽ được lưu khi bạn nhấn
+                      Lưu thay đổi.
+                    </p>
+                  </div>
                 </div>
 
                 <FormField
@@ -329,35 +368,38 @@ export function UpdateRoomTypeSheet({
                     </FormItem>
                   )}
                 />
-
-                <Separator className="my-4" />
-
-                <div className="flex justify-between items-center">
-                  <Button
-                    variant={"destructive"}
-                    onClick={() => handleDeleteRoomType(roomType.id)}
-                  >
-                    Xóa hạng phòng
-                  </Button>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleClose}
-                      disabled={isPending}
-                    >
-                      Hủy
-                    </Button>
-                    <Button type="submit" disabled={isPending}>
-                      {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-                    </Button>
-                  </div>
-                </div>
               </form>
             </Form>
           </div>
+          <SheetFooter className="">
+            <div className="flex justify-between items-center">
+              <Button
+                variant={"destructive"}
+                onClick={() => handleDeleteRoomType()}
+              >
+                Xóa hạng phòng
+              </Button>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  disabled={isPending}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  onClick={form.handleSubmit(handleSubmit)}
+                  disabled={isPending}
+                >
+                  {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                </Button>
+              </div>
+            </div>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
+
       {/* cancel dialog for dirty form */}
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
@@ -375,28 +417,6 @@ export function UpdateRoomTypeSheet({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <DescriptionDialog
-        open={showDescriptionDialog}
-        onClose={setShowDescriptionDialog}
-        initialContent={form.watch("description") || ""}
-        roomTypeCode={roomType.code}
-        mode={dialogMode}
-        onSave={handleDescriptionSave}
-      />
-
-      <ImagePreviewDialog
-        open={showImagePreviewDialog}
-        onClose={setShowImagePreviewDialog}
-        existingImages={existingImages}
-        newImages={newImageFiles}
-        removeMediaIds={removeMediaIds}
-        mode={dialogMode}
-        roomTypeCode={roomType.code}
-        onAddImages={handleAddImages}
-        onRemoveNewImage={handleRemoveNewFile}
-        onMarkForDeletion={handleMarkForDeletion}
-      />
     </>
   );
 }

@@ -1,5 +1,3 @@
-import { badgeVariants } from "~/components/ui/badge";
-
 export type Room = {
   roomId: string;
   roomName: string;

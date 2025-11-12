@@ -1,4 +1,4 @@
-import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { Check, ShoppingCart } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardFooter } from "~/components/ui/card";
 import Image from "~/components/ui/image";
@@ -15,7 +15,7 @@ interface MenuCardProps {
 
 /**
  * Menu card component for order dialog
- * Shows menu item image, name, description, price, and quantity controls
+ * Shows menu item image, name, description, price, and selection toggle
  */
 export default function MenuCard({
   menuItem,
@@ -27,13 +27,14 @@ export default function MenuCard({
   return (
     <Card
       className={cn(
-        "p-3 border h-fit cursor-pointer hover:shadow-md transition-all",
+        "p-2.5 border h-fit cursor-pointer hover:shadow-md transition-all",
         isSelected && "ring-2 ring-primary"
       )}
+      onClick={onToggle}
     >
       <div className="space-y-2">
         {/* Image */}
-        <div className="h-28 bg-muted rounded-md overflow-hidden flex items-center justify-center">
+        <div className="h-20 bg-muted rounded-md overflow-hidden flex items-center justify-center">
           {menuItem.imageUrls && menuItem.imageUrls.length > 0 ? (
             <Image
               src={menuItem.imageUrls[0]}
@@ -47,8 +48,8 @@ export default function MenuCard({
 
         {/* Content */}
         <div>
-          <p className="font-medium line-clamp-1">{menuItem.name}</p>
-          <p className="text-xs text-muted-foreground line-clamp-2">
+          <p className="font-medium line-clamp-1 text-sm">{menuItem.name}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1">
             {menuItem.description}
           </p>
           <p className="text-sm font-semibold text-primary mt-1">
@@ -58,52 +59,28 @@ export default function MenuCard({
           </p>
         </div>
       </div>
-      <CardFooter className="flex justify-end p-0 pt-2 gap-2">
-        {isSelected && quantity > 0 ? (
-          <>
-            <div className="flex items-center gap-2 flex-1">
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const newQty = Math.max(1, quantity - 1);
-                  onQuantityChange?.(newQty);
-                }}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <span className="min-w-8 text-center font-medium">
-                {quantity}
-              </span>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onQuantityChange?.(quantity + 1);
-                }}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <Button
-              onClick={onToggle}
-              variant="destructive"
-              size="sm"
-              className="flex-1"
-            >
-              Xóa
-            </Button>
-          </>
-        ) : (
-          <Button onClick={onToggle} variant="outline" className="w-full">
-            Thêm vào Order
-            <ShoppingCart />
-          </Button>
-        )}
+      <CardFooter className="flex justify-end p-0 pt-2">
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+          variant={isSelected ? "default" : "outline"}
+          size="sm"
+          className="w-full h-8"
+        >
+          {isSelected ? (
+            <>
+              <Check className="h-3.5 w-3.5" />
+              Đã chọn
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="h-3.5 w-3.5" />
+              Thêm vào
+            </>
+          )}
+        </Button>
       </CardFooter>
     </Card>
   );

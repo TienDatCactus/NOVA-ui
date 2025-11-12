@@ -59,8 +59,6 @@ const StaffCreateBookingSchema = z.object({
     .optional()
     .nullable(),
   internalNote: z.string().optional().nullable(),
-
-  roomPayment: PaymentSchema.RoomPaymentSchema.optional().nullable(),
   serviceOrder: OrderSchema.ServiceOrderSchema.optional(),
 });
 
@@ -199,7 +197,6 @@ const StaffUpdateBookingRequestSchema = z.object({
     .array(
       z.object({
         date: z.string().optional(),
-        hasBreakfast: z.boolean().optional(),
       })
     )
     .optional(),
@@ -214,20 +211,23 @@ const StaffUpdateBookingResponseSchema = z.object({
 
 const BookingPendingChargesResponseSchema = z.object({
   bookingId: z.string("Booking ID không hợp lệ"),
-  roomInvoice: z.object({
-    invoiceId: z.string(),
-    invoiceNo: z.string(),
-    total: z.number(),
-    paid: z.number(),
-    balance: z.number(),
-  }),
+  roomInvoice: z
+    .object({
+      invoiceId: z.string(),
+      invoiceNo: z.string(),
+      total: z.number(),
+      paid: z.number(),
+      balance: z.number(),
+    })
+    .optional()
+    .nullable(),
   pendingOrders: z.object({
     posOrders: z.array(
       z.object({
         id: z.string(),
         status: z.string(),
         totalAmount: z.number(),
-        customerId: z.string(),
+        customerId: z.string().optional().nullable(),
         createdAt: z.string(),
         items: z.array(
           z.object({
@@ -354,9 +354,9 @@ const BookingDetailItemSchema = z.object({
   }),
   rooms: z.array(RoomSchema.BookingDetailRoomItemSchema),
   invoices: InvoiceSchema.InvoiceListResponseSchema.optional(),
-  serviceOrder:
+  serviceOrders:
     OrderSchema.ServiceOrderListByBookingDetailSchema.optional().nullable(),
-  posOrders: OrderSchema.POSOrderListByBookingDetailSchema.optional(),
+  posOrders: OrderSchema.POSOrderListByBookingResponseSchema.optional(),
 });
 
 const BookingOTAItem = z.object({
@@ -392,10 +392,23 @@ const CheckoutPaymentItemSchema = z.object({
     .nullable(),
 });
 
+const StaffCreateCheckoutInvoiceResponseSchema = z.object({
+  invoiceId: z.string(),
+  invoiceNo: z.string(),
+  subTotal: z.number(),
+  total: z.number(),
+  paidAmount: z.number(),
+  balance: z.number(),
+  status: z.string(),
+  paymentMethod: z.string(),
+  issuedAt: z.date(),
+  itemCount: z.number(),
+});
+
 // Yêu cầu thanh toán khi checkout (phòng + tổng thể)
 const StaffCheckoutPaymentRequestSchema = z.object({
   roomPayment: CheckoutPaymentItemSchema.optional().nullable(),
-  checkoutPayment: CheckoutPaymentItemSchema.optional().nullable(),
+  checkoutPayment: CheckoutPaymentItemSchema,
 });
 
 // Yêu cầu checkout 1 booking
@@ -409,7 +422,6 @@ const StaffCheckoutRequestSchema = z.object({
     ])
     .optional(),
   notes: z.string().optional().nullable(),
-  payments: StaffCheckoutPaymentRequestSchema.optional(),
 });
 
 // Yêu cầu checkout nhiều booking cùng lúc
@@ -447,20 +459,6 @@ const StaffAddCompletedChargesRequestSchema = z.object({
   bookingRoomId: z.string().optional(),
   source: z.string().optional(),
 });
-
-const StaffAddCompletedChargesResponseSchema = z.object({}).optional();
-
-// Response cho create-invoice
-const StaffCreateCheckoutInvoiceResponseSchema = z.object({}).optional();
-
-// Response cho checkout payment
-const StaffCheckoutPaymentResponseSchema = z.object({}).optional();
-
-// Response cho checkout
-const StaffCheckoutResponseSchema = z.object({}).optional();
-
-// Response cho checkout multiple
-const StaffCheckoutMultipleResponseSchema = z.object({}).optional();
 
 const AvailableRoomForChangeSchema = z.object({
   roomId: z.string(),
@@ -513,9 +511,6 @@ export const BookingSchema = {
   StaffCheckoutRequestSchema,
   StaffCheckoutMultipleRequestSchema,
   StaffAddCompletedChargesRequestSchema,
-  StaffAddCompletedChargesResponseSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
-  StaffCheckoutPaymentResponseSchema,
-  StaffCheckoutResponseSchema,
-  StaffCheckoutMultipleResponseSchema,
+  StaffCheckoutPaymentRequestSchema,
 };

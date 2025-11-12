@@ -22,12 +22,15 @@ export function useMenuCategories(
  * Hook để lấy chi tiết một menu category
  * @param categoryId - ID của category cần lấy detail
  */
-export function useMenuCategoryDetail(categoryId: string) {
+export function useMenuCategoryDetail(
+  categoryId: string,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["menu-category-detail", categoryId],
     queryFn: async () =>
       await MenuCategoryService.getMenuCategoryDetail(categoryId),
-    enabled: !!categoryId,
+    enabled: !!categoryId && options?.enabled,
     staleTime: 2 * 60 * 1000,
   });
 }
