@@ -1,92 +1,136 @@
 import { Button } from "~/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import {
   CheckCircle,
   XCircle,
   Calendar,
   CreditCard,
-  MoreVertical,
+  Loader2,
 } from "lucide-react";
 import type { ServiceOrderDetailDto } from "~/services/api/orders/dto";
 import { useState } from "react";
 import UpdateScheduleDialog from "./update-schedule.dialog";
-import PaymentDialog from "./payment.dialog";
+import PaymentOrderSheet from "../payment-order.sheet";
 import {
   useCompleteServiceOrder,
   useCancelServiceOrder,
-} from "../../container/service-pos/mutation.hooks";
+  usePayServiceOrderNow,
+} from "../../container/service-order/mutation.hooks";
+import { useServiceOrderDetail } from "../../container/service-order/query.hooks";
+import { toast } from "sonner";
+import type { PaymentSchema } from "~/services/schema/payment.schema";
+import type z from "zod";
+import { OrderSchema } from "~/services/api/orders/order.schema";
 
+const { OrderPayNowRequestSchema } = OrderSchema;
+
+type PaymentFormData = z.infer<typeof OrderPayNowRequestSchema>;
 interface ServiceOrderActionsProps {
-  order: ServiceOrderDetailDto;
+  orderId: string;
 }
 
 export default function ServiceOrderActions({
-  order,
+  orderId,
 }: ServiceOrderActionsProps) {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
+  const { data: order, isLoading } = useServiceOrderDetail(orderId, {
+    enabled: true,
+  });
   const completeOrder = useCompleteServiceOrder();
   const cancelOrder = useCancelServiceOrder();
+  const payNow = usePayServiceOrderNow();
 
-  const canComplete = order.status === "Scheduled";
-  const canCancel = order.status === "Scheduled";
-  const canReschedule = order.status === "Scheduled";
+  const canComplete = order?.status === "Scheduled";
+  const canCancel = order?.status === "Scheduled";
+  const canReschedule = order?.status === "Scheduled";
+  const canPay = order?.status === "Scheduled";
+  const handlePayNow = (data: PaymentFormData) => {
+    payNow.mutate(
+      {
+        orderId,
+        data,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Thanh toán thành công!");
+          setShowPaymentDialog(false);
+        },
+        onError: () => {
+          toast.error("Thanh toán thất bại. Vui lòng thử lại.");
+        },
+      }
+    );
+  };
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MoreVertical className="h-4 w-4" />
+      <div className="flex items-center gap-2">
+        {isLoading ? (
+          <Button variant="ghost" size="sm" disabled>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            Đang tải...
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          {canComplete && (
-            <DropdownMenuItem
-              onClick={() => completeOrder.mutate(order.id)}
-              disabled={completeOrder.isPending}
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Hoàn thành
-            </DropdownMenuItem>
-          )}
+        ) : !order ? (
+          <Button variant="ghost" size="sm" disabled>
+            Lỗi tải dữ liệu
+          </Button>
+        ) : (
+          <>
+            {/* {canComplete && (
+              <Button
+                variant="success-outline"
+                size="sm"
+                onClick={() => completeOrder.mutate(order.id)}
+                disabled={completeOrder.isPending}
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Hoàn thành
+              </Button>
+            )} */}
 
-          {canReschedule && (
-            <DropdownMenuItem onClick={() => setShowScheduleDialog(true)}>
-              <Calendar className="h-4 w-4 mr-2" />
-              Đổi lịch hẹn
-            </DropdownMenuItem>
-          )}
+            {canReschedule && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowScheduleDialog(true);
+                }}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Đổi lịch
+              </Button>
+            )}
 
-          <DropdownMenuItem onClick={() => setShowPaymentDialog(true)}>
-            <CreditCard className="h-4 w-4 mr-2" />
-            Thanh toán ngay
-          </DropdownMenuItem>
+            {canPay && (
+              <Button
+                variant="info"
+                size="sm"
+                onClick={() => {
+                  setShowPaymentDialog(true);
+                }}
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Thanh toán
+              </Button>
+            )}
 
-          {canCancel && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
+            {canCancel && (
+              <Button
+                variant="destructive-outline"
+                size="sm"
                 onClick={() => cancelOrder.mutate(order.id)}
                 disabled={cancelOrder.isPending}
-                className="text-destructive focus:text-destructive"
               >
                 <XCircle className="h-4 w-4 mr-2" />
-                Hủy service
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+                Hủy đơn
+              </Button>
+            )}
+          </>
+        )}
+      </div>
 
-      {showScheduleDialog && (
+      {order && showScheduleDialog && (
         <UpdateScheduleDialog
           orderId={order.id}
           currentScheduledTime={order.scheduledAt}
@@ -95,12 +139,14 @@ export default function ServiceOrderActions({
         />
       )}
 
-      {showPaymentDialog && (
-        <PaymentDialog
+      {order && showPaymentDialog && (
+        <PaymentOrderSheet
           orderId={order.id}
-          totalAmount={order.total}
           open={showPaymentDialog}
           onOpenChange={setShowPaymentDialog}
+          onPayNow={handlePayNow}
+          isPaying={payNow.isPending}
+          orderType="service"
         />
       )}
     </>

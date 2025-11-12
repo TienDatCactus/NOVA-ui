@@ -18,19 +18,18 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn, formatMoney } from "~/lib/utils";
-import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
+import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
+import {
+  RoomAvailabilityStatus,
+  RoomAvailabilityStatusColor,
+  RoomAvailabilityStatusLabel,
+} from "~/services/api/rooms/room.types";
+import { useChangeRoom } from "../container/booking-mutation.hooks";
 import {
   useAvailableRoomsForChange,
   useBookingDetail,
 } from "../container/booking-query.hooks";
-import { useChangeRoom } from "../container/booking-mutation.hooks";
-import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
-import {
-  RoomAvailabilityStatusLabel,
-  RoomAvailabilityStatus,
-  RoomAvailabilityStatusColor,
-} from "~/services/api/rooms/room.types";
 
 export function getRoomAvailabilityLabel(status: string): string {
   return (
@@ -68,7 +67,7 @@ export default function ChangeRoomDialog({
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const { data: bookingDetail } = useBookingDetail({
     bookingCode,
-    enabled: !!bookingCode,
+    enabled: open,
   });
 
   const bookingId = bookingDetail?.id || "";

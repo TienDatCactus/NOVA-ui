@@ -1,32 +1,37 @@
 import http from "~/lib/http";
 import { Orders } from "~/services/url";
 import type {
-  AddItemsToPOSOrderRequestDto,
-  AddItemsToPOSOrderResponseDto,
+  AddSingleItemToPOSOrderRequestDto,
+  AddBatchItemsToPOSOrderRequestDto,
   CreatePOSOrderRequestDto,
-  CreatePOSOrderResponseDto,
   CreateServiceOrderRequestDto,
   POSOrderDetailResponseDto,
-  POSOrderListByBookingResponseDto,
+  POSOrderListResponseDto,
   POSOrderPayNowRequestDto,
   POSOrderPrintDataDto,
   ServiceOrderDetailDto,
-  ServiceOrderListByBookingDetailDto,
   ServiceOrderPayNowRequestDto,
   SetScheduledServiceOrderRequestDto,
   UpdateServiceOrderRequestDto,
+  CreatePOSOrderResponseDto,
+  CreateServiceOrderResponseDto,
+  ServiceOrderListDto,
 } from "./dto";
 import { OrderSchema } from "./order.schema";
 
 const {
-  CreatePOSOrderResponseSchema,
-  AddItemsToPOSOrderResponseSchema,
+  POSOrderListResponseSchema,
   POSOrderDetailResponseSchema,
-  // POSOrderListByInvoiceResponseSchema,
   POSOrderPrintDataSchema,
-  POSOrderListByBookingResponseSchema,
   ServiceOrderDetailSchema,
-  ServiceOrderListByBookingDetailSchema,
+  CreateServiceOrderRequestSchema,
+  AddSingleItemToPOSOrderRequestSchema,
+  AddBatchItemsToPOSOrderRequestSchema,
+  POSOrderPayNowRequestSchema,
+  UpdateServiceOrderRequestSchema,
+  CreatePOSOrderResponseSchema,
+  CreateServiceOrderResponseSchema,
+  ServiceOrderListSchema,
 } = OrderSchema;
 
 /**
@@ -45,15 +50,34 @@ async function createPOSOrder(
 }
 
 /**
- *? Add items to an existing POS order
+ *? Add single item to an existing POS order
  */
-async function addItemsToPOSOrder(
+async function addItemToPOSOrder(
   orderId: string,
-  data: AddItemsToPOSOrderRequestDto
-): Promise<AddItemsToPOSOrderResponseDto> {
+  data: AddSingleItemToPOSOrderRequestDto
+): Promise<void> {
   try {
-    const resp = await http.post(Orders.addItemsToPos(orderId), data);
-    return AddItemsToPOSOrderResponseSchema.parse(resp.data);
+    await http.post(
+      Orders.addItemsToPos(orderId),
+      AddSingleItemToPOSOrderRequestSchema.parse(data)
+    );
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+/**
+ *? Add batch items to an existing POS order
+ */
+async function addBatchItemsToPOSOrder(
+  orderId: string,
+  data: AddBatchItemsToPOSOrderRequestDto
+): Promise<void> {
+  try {
+    await http.post(Orders.addBatchItemsToPos(orderId), {
+      items: AddBatchItemsToPOSOrderRequestSchema.parse(data),
+    });
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -114,40 +138,23 @@ async function getPOSOrderDetail(
   }
 }
 
+/**
+ *? Get list of POS orders by date
+ * @param date - Optional date string (yyyy-MM-dd). If not provided, returns today's orders
+ */
 async function getPosOrderList(
-  bookingId?: string,
-  bookingRoomId?: string
-): Promise<POSOrderListByBookingResponseDto> {
+  date?: string
+): Promise<POSOrderListResponseDto> {
   try {
-    // Filter out undefined params to avoid sending them to backend
-    const params: Record<string, string> = {};
-    if (bookingId) params.bookingId = bookingId;
-    if (bookingRoomId) params.bookingRoomId = bookingRoomId;
-
-    const resp = await http.get(Orders.list, {
-      params: Object.keys(params).length > 0 ? params : undefined,
+    const resp = await http.get(Orders.listPosOrders, {
+      params: date,
     });
-    return POSOrderListByBookingResponseSchema.parse(resp.data);
+    return POSOrderListResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
-
-/**
- *? Get list of POS orders by invoice ID
- */
-// async function getPOSOrdersByInvoice(
-//   invoiceId: string
-// ): Promise<POSOrderListResponseDto> {
-//   try {
-//     const resp = await http.get(Orders.listPosOrderbyInvoice(invoiceId));
-//     return POSOrderListByInvoiceResponseSchema.parse(resp.data);
-//   } catch (error) {
-//     console.error(error);
-//     return Promise.reject(error);
-//   }
-// }
 
 async function getPOSOrderPrintData(
   orderId: string
@@ -160,9 +167,13 @@ async function getPOSOrderPrintData(
     return Promise.reject(error);
   }
 }
+
 async function payPOSOrderNow(orderId: string, data: POSOrderPayNowRequestDto) {
   try {
-    const resp = await http.post(Orders.payNow(orderId), data);
+    const resp = await http.post(
+      Orders.payNow(orderId),
+      POSOrderPayNowRequestSchema.parse(data)
+    );
     return resp.data;
   } catch (error) {
     console.error(error);
@@ -198,6 +209,21 @@ async function setScheduledOrder(orderId: string, data: { scheduledAt: Date }) {
   }
 }
 
+/**
+ *? Update note for POS order
+ */
+async function updatePOSOrderNote(
+  orderId: string,
+  data: { note: string }
+): Promise<void> {
+  try {
+    await http.post(Orders.updateNote(orderId), data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 /* ----------------------------------- */
 //? Service Orders
 
@@ -206,9 +232,13 @@ async function setScheduledOrder(orderId: string, data: { scheduledAt: Date }) {
  */
 async function createServiceOrder(
   data: CreateServiceOrderRequestDto
-): Promise<void> {
+): Promise<CreateServiceOrderResponseDto> {
   try {
-    await http.post(Orders.createServiceOrder, data);
+    const resp = await http.post(
+      Orders.createServiceOrder,
+      CreateServiceOrderRequestSchema.parse(data)
+    );
+    return CreateServiceOrderResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -223,7 +253,10 @@ async function updateServiceOrder(
   data: UpdateServiceOrderRequestDto
 ): Promise<void> {
   try {
-    await http.put(Orders.updateServiceOrder(orderId), data);
+    await http.put(
+      Orders.updateServiceOrder(orderId),
+      UpdateServiceOrderRequestSchema.parse(data)
+    );
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -270,15 +303,17 @@ async function cancelServiceOrder(orderId: string): Promise<void> {
 }
 
 /**
- *? Get list of service orders by booking ID
- * @param bookingId - UUID of the booking
+ *? Get list of service orders by date
+ * @param date - Optional date string (yyyy-MM-dd). If not provided, returns today's orders
  */
-async function getServiceOrdersByBooking(
-  bookingId: string
-): Promise<ServiceOrderListByBookingDetailDto> {
+async function getServiceOrderList(
+  date?: string
+): Promise<ServiceOrderListDto> {
   try {
-    const resp = await http.get(Orders.listServiceOrdersByBooking(bookingId));
-    return ServiceOrderListByBookingDetailSchema.parse(resp.data);
+    const resp = await http.get(Orders.listServiceOrders, {
+      params: date,
+    });
+    return ServiceOrderListSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -319,7 +354,8 @@ async function setScheduledServiceOrder(
 export const OrderService = {
   // POS Orders
   createPOSOrder,
-  addItemsToPOSOrder,
+  addItemToPOSOrder,
+  addBatchItemsToPOSOrder,
   deleteItemFromPOSOrder,
   cancelPOSOrder,
   completePOSOrder,
@@ -329,13 +365,14 @@ export const OrderService = {
   getPosOrderList,
   setScheduledOrder,
   setServedOrderItem,
+  updatePOSOrderNote,
   // Service Orders
   createServiceOrder,
   updateServiceOrder,
   getServiceOrderDetail,
   completeServiceOrder,
   cancelServiceOrder,
-  getServiceOrdersByBooking,
+  getServiceOrderList,
   payServiceOrderNow,
   setScheduledServiceOrder,
 };

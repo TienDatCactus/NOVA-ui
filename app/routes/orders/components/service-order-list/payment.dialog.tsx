@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { CreditCard, DollarSign } from "lucide-react";
-import { usePayServiceOrderNow } from "../../container/service-pos/mutation.hooks";
+import { usePayServiceOrderNow } from "../../container/service-order/mutation.hooks";
 
 interface PaymentDialogProps {
   orderId: string;

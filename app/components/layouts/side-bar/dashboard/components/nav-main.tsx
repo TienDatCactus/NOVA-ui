@@ -1,6 +1,6 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import React from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Button } from "~/components/ui/button";
 
 import {
@@ -26,13 +26,13 @@ export function NavMain({
     title: string;
     url: string;
     icon?: LucideIcon;
-    isActive?: boolean;
     items?: {
       title: string;
       url: string;
     }[];
   }[];
 }) {
+  const { pathname } = useLocation();
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Quản lý</SidebarGroupLabel>
@@ -43,12 +43,15 @@ export function NavMain({
               <Collapsible
                 key={item.title}
                 asChild
-                defaultOpen={item.isActive}
+                defaultOpen={pathname.includes(item.url)}
                 className="group/collapsible"
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={item.title}>
+                    <SidebarMenuButton
+                      isActive={pathname.includes(item.url)}
+                      tooltip={item.title}
+                    >
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -71,7 +74,10 @@ export function NavMain({
               </Collapsible>
             ) : (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  isActive={pathname.includes(item.url)}
+                  asChild
+                >
                   <Link to={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>

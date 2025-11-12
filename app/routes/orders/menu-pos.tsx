@@ -17,22 +17,24 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useMenuCategories } from "../menu/container/menu-categories/query.hooks";
 import { useMenuList } from "../menu/container/menu/query.hooks";
-import BookingSelectionDialog from "./components/order-pos/booking-selection.dialog";
-import CartItem from "./components/order-pos/cart-item";
-import CartSummary from "./components/order-pos/cart-summary";
-import CheckoutConfirmDialog from "./components/order-pos/checkout-confirm.dialog";
-import ItemCustomizationDialog from "./components/order-pos/item-customization.dialog";
-import MenuItemCard from "./components/order-pos/menu-item-card";
-import OrderConfirmationDialog from "./components/order-pos/order-confirmation.dialog";
-import ServedTimeDialog from "./components/order-pos/served-time.dialog";
-import CustomItemDialog from "./components/order-pos/custom-item.dialog";
+import BookingSelectionDialog from "./components/booking-selection.dialog";
+import CartItem from "./components/cart-item";
+import CartSummary from "./components/cart-summary";
+import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
+import MenuItemCard from "./components/menu-pos/menu-item-card";
+import OrderConfirmationDialog from "./components/order-confirmation.dialog";
+import CustomItemDialog from "./components/menu-pos/custom-item.dialog";
 
 import useMenuFilters from "../menu/container/menu/filter.hooks";
 import { Link } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
-import { useCreatePosOrderAndItems } from "./container/order-pos/mutation.hooks";
 import type { Route } from "./+types/menu-pos";
 import { useMenuPosOrderStore } from "~/store/menu-pos-order.store";
+import {
+  useAddBatchItemsToPOSOrder,
+  useCreatePOSOrder,
+} from "./container/pos-orders/mutation.hooks";
+import ScheduledTimeDialog from "./components/scheduled-time.dialog";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -48,10 +50,8 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  // Data fetching
   const { data: menuCategories } = useMenuCategories();
 
-  // Filters
   const { filterMenuItems, filters, resetFilters, updateFilter } =
     useMenuFilters();
   const { data: menuItems, isLoading: isLoadingMenu } = useMenuList({
@@ -73,7 +73,6 @@ export default function Component({
     const category = menuCategories?.find((cat) => cat.id === categoryId);
     const categoryCode = category?.code || "";
 
-    // Update the filter with the category code
     updateFilter("categoryCode", categoryCode);
   };
 
@@ -94,13 +93,13 @@ export default function Component({
     orderId,
     bookingId,
     bookingRoomId,
-    servedAt,
+    scheduledAt,
     notes,
     addItem,
     removeItem,
     updateQuantity,
     setBookingInfo,
-    setServedAt,
+    setScheduledAt,
     setNotes,
     clearOrder,
   } = useMenuPosOrderStore();
@@ -108,11 +107,12 @@ export default function Component({
   const isEmpty = items.length === 0;
 
   const customerDisplay = bookingId ? "Khách lẻ" : null;
-  const { mutate } = useCreatePosOrderAndItems();
+  const { mutate: createOrder, isError } = useCreatePOSOrder();
+  const { mutate: addItems } = useAddBatchItemsToPOSOrder();
 
   const [checkoutDialog, setCheckoutDialog] = useState(false);
   const [bookingDialog, setBookingDialog] = useState(false);
-  const [servedTimeDialog, setServedTimeDialog] = useState(false);
+  const [scheduledTimeDialog, setScheduledTimeDialog] = useState(false);
   const [customItemDialog, setCustomItemDialog] = useState(false);
   const [selectedBookingInfo, setSelectedBookingInfo] = useState<{
     bookingId: string;
@@ -167,10 +167,8 @@ export default function Component({
     setCheckoutDialog(false);
 
     if (mode === "walk-in") {
-      // Walk-in guests also need served time
-      setServedTimeDialog(true);
+      setScheduledTimeDialog(true);
     } else {
-      // Booking guests select booking first, then served time
       setBookingDialog(true);
     }
   };
@@ -182,33 +180,61 @@ export default function Component({
   ) => {
     setBookingInfo(bookingId, bookingRoomId || null);
     setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
-
-    // Show served time dialog for booking orders
     setBookingDialog(false);
-    setServedTimeDialog(true);
+    setScheduledTimeDialog(true);
   };
 
-  const handleServedTimeConfirm = (servedAt: string) => {
-    setServedAt(servedAt);
-    setServedTimeDialog(false);
-    handleCreateOrder();
+  const handleScheduledTimeConfirm = (scheduledAt: string) => {
+    setScheduledAt(scheduledAt);
+    console.log("Scheduled time confirmed:", scheduledAt);
+    setScheduledTimeDialog(false);
+    handleCreateOrder(scheduledAt);
   };
+  const handleCreateOrder = (scheduledAtParam?: string) => {
+    const finalScheduledAt = scheduledAtParam || scheduledAt;
 
-  const handleCreateOrder = () => {
-    //! add note in a separated step here
+    if (!finalScheduledAt) {
+      toast.error("Vui lòng chọn thời gian phục vụ");
+      return;
+    }
+
     try {
-      mutate({
-        bookingId,
-        bookingRoomId,
-        servedAt,
-        notes,
-        items: items,
-      });
-      setConfirmationDialog({
-        open: true,
-      });
+      createOrder(
+        {
+          bookingId,
+          bookingRoomId,
+          scheduledAt: finalScheduledAt,
+          note: notes || "",
+        },
+        {
+          onSuccess: (data) => {
+            const newOrderId = data.posOrderId;
+            if (items.length > 0) {
+              addItems({
+                orderId: newOrderId,
+                data: items.map((item) => ({
+                  ...item,
+                })),
+              });
+            }
+            toast.success("Tạo đơn hàng thành công!");
+            setSelectedBookingInfo(null);
+            setBookingInfo(null, null);
+            setScheduledAt("");
+            setNotes("");
+            setConfirmationDialog({
+              open: true,
+            });
+          },
+          onError: (error) => {
+            console.error("Create order failed:", error);
+            toast.error("Không thể tạo đơn hàng. Vui lòng thử lại.");
+          },
+        }
+      );
     } catch (error) {
       console.error("Create order failed:", error);
+      toast.error("Đã xảy ra lỗi khi tạo đơn hàng");
     }
   };
 
@@ -221,7 +247,7 @@ export default function Component({
       <header className="flex items-center justify-between p-4 border-b  border-accent-foreground/20">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
-            <Link to={DASHBOARD.orders.index}>
+            <Link to={DASHBOARD.orders["menu-orders"]}>
               <Button variant="ghost" size="sm" onClick={handleReset}>
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
@@ -271,10 +297,9 @@ export default function Component({
           </Button>
           <Separator orientation="vertical" />
           <Button
-            variant="outline"
+            variant="info-outline"
             size="sm"
             onClick={() => setCustomItemDialog(true)}
-            className="text-primary border-primary/50 hover:bg-primary/10"
           >
             <Plus className="h-4 w-4" />
             Món tùy chỉnh
@@ -373,10 +398,10 @@ export default function Component({
         onSelect={handleSelectBooking}
       />
 
-      <ServedTimeDialog
-        open={servedTimeDialog}
-        onOpenChange={setServedTimeDialog}
-        onConfirm={handleServedTimeConfirm}
+      <ScheduledTimeDialog
+        open={scheduledTimeDialog}
+        onOpenChange={setScheduledTimeDialog}
+        onConfirm={handleScheduledTimeConfirm}
         bookingInfo={selectedBookingInfo?.bookingCode}
       />
 
@@ -387,7 +412,7 @@ export default function Component({
       />
 
       <OrderConfirmationDialog
-        onPrintReceipt={() => {}}
+        status={isError ? "error" : "success"}
         open={confirmationDialog.open}
         onOpenChange={(open) =>
           setConfirmationDialog({ open, orderId: undefined })

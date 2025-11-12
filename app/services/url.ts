@@ -117,27 +117,26 @@ const Reports = {
 const Orders = {
   createPosOrder: "PosOrders",
   addItemsToPos: (id: string) => `PosOrders/${id}/items`,
+  addBatchItemsToPos: (id: string) => `PosOrders/${id}/items/batch`,
   deleteItemFromPos: (orderId: string, itemId: string) =>
     `PosOrders/${orderId}/items/${itemId}`,
   cancelPosOrder: (id: string) => `PosOrders/${id}/cancel`,
   completePosOrder: (id: string) => `PosOrders/${id}/complete`,
-  detailPOS: (id: string) => `PosOrders/${id}/details`,
-  list: `PosOrders/list`,
-  // listPosOrderbyInvoice: (invoiceId: string) =>
-  //   `PosOrders/invoice/${invoiceId}`,
+  listPosOrders: `PosOrders/list`,
+  detailPOS: (id: string) => `PosOrders/${id}`,
   printPOSorder: (id: string) => `PosOrders/${id}/print-data`,
   payNow: (id: string) => `PosOrders/${id}/pay-now`,
   setServed: (id: string, itemId: string) =>
     `PosOrders/${id}/items/${itemId}/set-served`,
   setScheduled: (id: string) => `PosOrders/${id}/set-scheduled`,
+  updateNote: (id: string) => `PosOrders/${id}/update-note`,
   // Service Orders
   createServiceOrder: "service-orders",
   updateServiceOrder: (id: string) => `service-orders/${id}`,
   detailServiceOrder: (id: string) => `service-orders/${id}`,
   completeServiceOrder: (id: string) => `service-orders/${id}/complete`,
   cancelServiceOrder: (id: string) => `service-orders/${id}/cancel`,
-  listServiceOrdersByBooking: (bookingId: string) =>
-    `service-orders/by-booking/${bookingId}`,
+  listServiceOrders: `service-orders/list`,
   payServiceOrderNow: (id: string) => `service-orders/${id}/pay-now`,
   setScheduledServiceOrder: (id: string) =>
     `service-orders/${id}/set-scheduled`,
@@ -153,6 +152,8 @@ const Invoices = {
   detail: (id: string) => `Invoices/${id}`, //? get invoice details
   listByBooking: (bookingRoomId: string) =>
     `Invoices/booking-room/${bookingRoomId}`, //? list invoices by booking ID
+  calculateFees: "invoice-preview/calculate-fees",
+  previewBookingInvoice: "invoice-preview/preview",
 };
 
 const Staff = {
@@ -161,6 +162,30 @@ const Staff = {
   detail: (id: string) => `Staffs/${id}`,
   update: (id: string) => `Staffs/${id}`,
   delete: (id: string) => `Staffs/${id}`,
+};
+
+const StaffRole = {
+  list: "StaffRoles",
+  create: "StaffRoles",
+  detail: (id: string) => `StaffRoles/${id}`,
+  update: (id: string) => `StaffRoles/${id}`,
+  delete: (id: string) => `StaffRoles/${id}`,
+};
+
+const WorkShift = {
+  list: "WorkShifts",
+  create: "WorkShifts",
+  detail: (id: string) => `WorkShifts/${id}`,
+  update: (id: string) => `WorkShifts/${id}`,
+  delete: (id: string) => `WorkShifts/${id}`,
+};
+
+const Holiday = {
+  list: "Holidays",
+  create: "Holidays",
+  detail: (id: string) => `Holidays/${id}`,
+  update: (id: string) => `Holidays/${id}`,
+  delete: (id: string) => `Holidays/${id}`,
 };
 
 export {
@@ -179,4 +204,7 @@ export {
   Orders,
   Invoices,
   Staff,
+  StaffRole,
+  WorkShift,
+  Holiday,
 };

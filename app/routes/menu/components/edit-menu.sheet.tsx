@@ -91,7 +91,7 @@ export default function EditMenuSheet({
   });
 
   const { data: menuItemDetail, isPending: isLoadingDetail } =
-    useMenuItemDetail(menuItem.itemId);
+    useMenuItemDetail(menuItem.itemId, { enabled: open });
 
   const { mutate: updateMenuItem, isPending: isUpdating } = useUpdateMenuItem(
     menuItem.itemId
@@ -124,7 +124,7 @@ export default function EditMenuSheet({
       setNewFiles([]);
       setNewPreviews([]);
     }
-  }, [menuItem, form, menuItemDetail]);
+  }, [menuItem, menuItemDetail]);
 
   const handleSubmit = (data: UpdateMenuFormData) => {
     updateMenuItem(

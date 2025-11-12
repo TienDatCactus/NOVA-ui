@@ -8,11 +8,11 @@ import {
   EmptyTitle,
 } from "~/components/ui/empty";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import OrderCard from "./components/order-list/order-card";
-import StatusFilter from "./components/order-list/status-filter";
-import { usePOSOrderList } from "./container/order-pos/query.hooks";
+import OrderCard from "./components/menu-order-list/order-card";
+import StatusFilter from "./components/menu-order-list/status-filter";
 import type { OrderStatus } from "~/services/api/orders/order.types";
 import type { Route } from "./+types/menu-orders";
+import { usePOSOrderList } from "./container/pos-orders/query.hooks";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -28,7 +28,6 @@ export default function Component({
 }: Route.ComponentProps) {
   const [statusFilter, setStatusFilter] = useState<OrderStatus>("All");
   const { data: orders, isPending } = usePOSOrderList();
-
   const filteredOrders = useMemo(() => {
     if (statusFilter === "All") return orders;
     return orders?.filter((order) => order.status === statusFilter);

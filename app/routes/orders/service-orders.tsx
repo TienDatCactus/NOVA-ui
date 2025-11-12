@@ -16,18 +16,14 @@ import { Link, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { OrderService } from "~/services/api/orders";
 import type { Route } from "./+types/service-orders";
-import { useServiceOrderList } from "./container/service-pos/query.hooks";
+import { useServiceOrderList } from "./container/service-order/query.hooks";
+import STORAGE, { getStorage } from "~/lib/storage";
 
 type ServiceOrderStatus = ServiceOrderDetailDto["status"] | "All";
 
 export default function Component({}: Route.ComponentProps) {
-  const [searchParams] = useSearchParams();
-  const bookingId = searchParams.get("bookingId");
-
   const [statusFilter, setStatusFilter] = useState<ServiceOrderStatus>("All");
-
-  const { data: orders, isPending } = useServiceOrderList(bookingId ?? "");
-
+  const { data: orders, isPending } = useServiceOrderList();
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
     if (statusFilter === "All") return orders;
@@ -39,20 +35,11 @@ export default function Component({}: Route.ComponentProps) {
       {/* Header */}
       <div className="flex-shrink-0 p-6 bg-background border-b">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Danh sách đơn dịch vụ</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Quản lý các dịch vụ đã đặt
-              </p>
-            </div>
-
-            <Link to="/dashboard/services/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Tạo Service Order
-              </Button>
-            </Link>
+          <div>
+            <h1 className="text-2xl font-bold">Danh sách đơn dịch vụ</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Quản lý các dịch vụ đã đặt
+            </p>
           </div>
 
           {/* Status Filter */}

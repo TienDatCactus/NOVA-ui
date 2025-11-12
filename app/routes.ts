@@ -39,7 +39,7 @@ export default [
         route("new-booking", "routes/reservation/new-booking.tsx"),
       ]),
       ...prefix("orders", [
-        index("routes/orders/menu-orders.tsx"),
+        route("menu-orders", "routes/orders/menu-orders.tsx"),
         route("service-orders", "routes/orders/service-orders.tsx"),
       ]),
       ...prefix("rooms", [
@@ -50,7 +50,11 @@ export default [
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("users", "routes/users/users.tsx"),
-      route("staff", "routes/staff/staff.tsx"),
+      ...prefix("staff", [
+        index("routes/staff/staff/staff.tsx"),
+        route("work-shifts", "routes/staff/work-shifts/work-shifts.tsx"),
+        route("holidays", "routes/staff/holidays/holidays.tsx"),
+      ]),
     ]),
   ]),
 

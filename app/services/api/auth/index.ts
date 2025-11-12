@@ -61,7 +61,8 @@ async function resetPassword(data: ResetPasswordDto) {
 async function refresh(refreshToken: string) {
   try {
     const resp = await axios.post(Auth.refresh, { refreshToken });
-    return resp.data.data;
+    console.log("Refresh API response:", resp);
+    return resp.data?.data || resp.data;
   } catch (err) {
     if (err instanceof AxiosError) {
       toast.error(

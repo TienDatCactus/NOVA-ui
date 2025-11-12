@@ -70,7 +70,7 @@ export const useServiceOrderStore = create<ServiceOrderState>()(
         }),
     }),
     {
-      name: "service-order-store",
+      name: "service-pos-store",
       partialize: (state) => ({
         bookingId: state.bookingId,
         roomId: state.roomId,
