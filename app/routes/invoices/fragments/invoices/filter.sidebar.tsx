@@ -18,7 +18,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import type { InvoiceFilters } from "../../container/invoices/filter.hooks";
-import { INVOICE_STATUSES, PAYMENT_METHODS } from "~/services/api/invoices/invoice.types";
+import {
+  INVOICE_STATUSES,
+  PAYMENT_METHODS,
+  INVOICE_ITEM_TYPES,
+} from "~/services/api/invoices/invoice.types";
 import { DateRangePicker } from "~/components/ui/date-range-picker";
 
 interface InvoicesFilterSidebarProps {
@@ -180,6 +184,49 @@ function InvoicesFilterSidebar({
           </Collapsible>
         </CardContent>
 
+                <Separator />
+
+        <CardContent className="px-0 rounded-md">
+          <Collapsible className="space-y-3">
+            <CollapsibleTrigger>
+              <Label className="text-sm font-medium">Loại mục hóa đơn</Label>
+              <ChevronDown className="h-4 w-4" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2">
+              <RadioGroup
+                value={filters.invoiceType || ""}
+                onValueChange={(value) => {
+                  onFilterChange("invoiceType", value || undefined);
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="" id="invoice-type-all" />
+                  <Label
+                    htmlFor="invoice-type-all"
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    Tất cả
+                  </Label>
+                </div>
+                {INVOICE_ITEM_TYPES.map((type) => (
+                  <div key={type.value} className="flex items-center gap-2">
+                    <RadioGroupItem
+                      id={`invoice-type-${type.value}`}
+                      value={type.value}
+                    />
+                    <Label
+                      htmlFor={`invoice-type-${type.value}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {type.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+
         <Separator />
 
         <CardContent className="px-0 rounded-md">
@@ -208,6 +255,9 @@ function InvoicesFilterSidebar({
                 onFilterChange("bookingCode", e.target.value || undefined)
               }
             />
+            <p className="text-xs text-muted-foreground">
+              Chọn từ danh sách booking hoặc nhập thủ công
+            </p>
           </div>
         </CardContent>
 
@@ -216,42 +266,20 @@ function InvoicesFilterSidebar({
         <CardContent className="px-0 rounded-md">
           <div className="space-y-3">
             <Label htmlFor="booking-id" className="text-sm font-medium">
-              Booking ID (UUID)
+              Booking ID
             </Label>
             <Input
               id="booking-id"
-              placeholder="uuid..."
+              placeholder="UUID của booking"
               value={filters.bookingId || ""}
               onChange={(e) =>
                 onFilterChange("bookingId", e.target.value || undefined)
               }
+              className="font-mono text-xs"
             />
-          </div>
-        </CardContent>
-
-        <Separator />
-
-        <CardContent className="px-0 rounded-md">
-          <div className="space-y-3">
-            <Label htmlFor="invoice-type" className="text-sm font-medium">
-              Loại hóa đơn
-            </Label>
-            <Select
-              value={filters.invoiceType || "all"}
-              onValueChange={(value) =>
-                onFilterChange("invoiceType", value === "all" ? undefined : value)
-              }
-            >
-              <SelectTrigger id="invoice-type" className="w-full">
-                <SelectValue placeholder="Chọn loại hóa đơn" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                <SelectItem value="Room">Phòng</SelectItem>
-                <SelectItem value="Service">Dịch vụ</SelectItem>
-                <SelectItem value="Total">Tổng hợp</SelectItem>
-              </SelectContent>
-            </Select>
+            <p className="text-xs text-muted-foreground">
+              Chọn từ danh sách booking hoặc nhập UUID
+            </p>
           </div>
         </CardContent>
 

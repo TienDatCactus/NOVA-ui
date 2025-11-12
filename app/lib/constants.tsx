@@ -19,6 +19,7 @@ import {
   Tag,
   Users,
   Utensils,
+  UserCog,
   UtensilsCrossed,
 } from "lucide-react";
 
@@ -134,9 +135,37 @@ const SIDEBAR_NAV_MAIN: Array<{
     ],
   },
   {
+    title: "Nhân viên",
+    url: "/dashboard/staff",
+    icon: UserCog,
+    items: [
+      {
+        title: "Nhân sự",
+        url: "/dashboard/staff",
+      },
+      {
+        title: "Lịch làm việc",
+        url: "/dashboard/staff/staff-shifts",
+      },
+      {
+        title: "Ca làm việc",
+        url: "/dashboard/staff/work-shifts",
+      },
+      {
+        title: "Ngày lễ, tết",
+        url: "/dashboard/staff/holidays",
+      },
+    ],
+  },
+  {
     title: "Tài khoản",
     url: "/dashboard/users",
     icon: Users,
+  },
+  {
+    title: "Nhân sự",
+    url: "/dashboard/staff",
+    icon: UserCog,
   },
   {
     title: "Hóa đơn",
