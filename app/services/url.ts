@@ -56,6 +56,10 @@ const Rooms = {
   update: (id: string) => `Rooms/${id}`,
   getAvailableRoomsInternal: "Rooms/available-with-details",
   delete: (id: string) => `Rooms/${id}`,
+  generateQRCode: (id: string, baseUrl?: string) =>
+    `Rooms/${id}/qr-code?baseUrl=${baseUrl}`,
+  regenerateQRCode: (id: string, baseUrl?: string) =>
+    `Rooms/${id}/qr-code?baseUrl=${baseUrl}`,
 };
 
 const RoomTypes = {
@@ -150,10 +154,24 @@ const Invoices = {
   markPaid: (id: string) => `Invoices/${id}/mark-paid`, //? mark invoice as paid
   void: (id: string) => `Invoices/${id}/void`, //? void invoice
   detail: (id: string) => `Invoices/${id}`, //? get invoice details
-  listByBooking: (bookingRoomId: string) =>
-    `Invoices/booking-room/${bookingRoomId}`, //? list invoices by booking ID
+  listByBooking: (bookingId: string) => `Invoices/booking/${bookingId}`, //? list invoices by booking ID
   calculateFees: "invoice-preview/calculate-fees",
   previewBookingInvoice: "invoice-preview/preview",
+  finalize: (id: string) => `Invoices/${id}/finalize`, //? finalize invoice
+  payments: (id: string) => `Invoices/${id}/payments`, //? get invoice payments
+  confirmPayment: (id: string) => `Invoices/${id}/confirm-payment`, //? confirm payment
+  refund: (id: string) => `Invoices/${id}/refund`, //? refund invoice
+  export: (date?: string) => `Invoices/export?date=${date}`, //? export invoices
+};
+// Chat endpoints
+const Chat = {
+  entry: "chat/entry",
+  messages: (sessionId: string) => `chat/sessions/${sessionId}/messages`,
+  session: (sessionId: string) => `chat/sessions/${sessionId}`,
+  sendMessage: "chat/messages",
+  staffInbox: "chat/staff/inbox",
+  assign: (sessionId: string) => `chat/sessions/${sessionId}/assign`,
+  close: (sessionId: string) => `chat/sessions/${sessionId}/close`,
 };
 
 const Staff = {
@@ -207,4 +225,5 @@ export {
   StaffRole,
   WorkShift,
   Holiday,
+  Chat,
 };

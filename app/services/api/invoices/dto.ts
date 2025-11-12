@@ -2,26 +2,81 @@ import type z from "zod";
 import { InvoiceSchema } from "./invoice.schema";
 
 const {
+  InvoiceStatusEnum,
+  InvoiceTypeEnum,
+  AddCustomItemsRequestSchema,
+  ConfirmInvoicePaymentRequestSchema,
+  RefundInvoiceRequestSchema,
   InvoiceListItemSchema,
-  InvoiceListResponseWithMetaSchema,
-  InvoiceDetailSchema,
-  InvoiceDetailItemSchema,
   PaginationMetaSchema,
+  InvoiceListResponseSchema,
+  InvoiceListResponseWithMetaSchema,
+  InvoiceDetailItemSchema,
+  InvoiceDetailSchema,
+  InvoiceByIdResponseSchema,
+  InvoiceByBookingResponseSchema,
+  FinalizeInvoiceResponseSchema,
+  CreateInvoiceFromOrdersRequestSchema,
+  CreateInvoiceFromOrdersResponseSchema,
+  InvoicePaymentRequestSchema,
+  InvoicePaymentResponseSchema,
+  PaymentsFromInvoiceResponseSchema,
+  InvoiceItemSchema,
+  RoomInvoiceSchema,
+  ServiceInvoiceSchema,
   InvoicePreviewRequestSchema,
   InvoicePreviewResponseSchema,
   InvoiceCalculateFeesResponseSchema,
 } = InvoiceSchema;
 
-// Main DTO types
+// Enums
+export type InvoiceStatusEnum = z.infer<typeof InvoiceStatusEnum>;
+export type InvoiceTypeEnum = z.infer<typeof InvoiceTypeEnum>;
+
+// Request DTOs
+export type AddCustomItemsRequestDto = z.infer<
+  typeof AddCustomItemsRequestSchema
+>;
+export type ConfirmInvoicePaymentRequestDto = z.infer<
+  typeof ConfirmInvoicePaymentRequestSchema
+>;
+export type RefundInvoiceRequestDto = z.infer<
+  typeof RefundInvoiceRequestSchema
+>;
+export type CreateInvoiceFromOrdersRequestDto = z.infer<
+  typeof CreateInvoiceFromOrdersRequestSchema
+>;
+export type InvoicePaymentRequestDto = z.infer<
+  typeof InvoicePaymentRequestSchema
+>;
+
+// Response DTOs
 export type InvoiceListItemDto = z.infer<typeof InvoiceListItemSchema>;
-export type InvoiceListResponseDto = z.infer<
+export type InvoiceListResponseDto = z.infer<typeof InvoiceListResponseSchema>;
+export type InvoiceListResponseWithMetaDto = z.infer<
   typeof InvoiceListResponseWithMetaSchema
->; // Response with meta
+>;
 export type InvoiceDetailDto = z.infer<typeof InvoiceDetailSchema>;
 export type InvoiceDetailItemDto = z.infer<typeof InvoiceDetailItemSchema>;
-export type PaginationMetaDto = z.infer<typeof PaginationMetaSchema>;
-
-// Invoice Preview types
+export type InvoiceByIdResponseDto = z.infer<typeof InvoiceByIdResponseSchema>;
+export type InvoiceByBookingResponseDto = z.infer<
+  typeof InvoiceByBookingResponseSchema
+>;
+export type FinalizeInvoiceResponseDto = z.infer<
+  typeof FinalizeInvoiceResponseSchema
+>;
+export type CreateInvoiceFromOrdersResponseDto = z.infer<
+  typeof CreateInvoiceFromOrdersResponseSchema
+>;
+export type InvoicePaymentResponseDto = z.infer<
+  typeof InvoicePaymentResponseSchema
+>;
+export type PaymentsFromInvoiceResponseDto = z.infer<
+  typeof PaymentsFromInvoiceResponseSchema
+>;
+export type InvoiceItemDto = z.infer<typeof InvoiceItemSchema>;
+export type RoomInvoiceDto = z.infer<typeof RoomInvoiceSchema>;
+export type ServiceInvoiceDto = z.infer<typeof ServiceInvoiceSchema>;
 export type InvoicePreviewRequestDto = z.infer<
   typeof InvoicePreviewRequestSchema
 >;
@@ -31,3 +86,4 @@ export type InvoicePreviewResponseDto = z.infer<
 export type InvoiceCalculateFeesResponseDto = z.infer<
   typeof InvoiceCalculateFeesResponseSchema
 >;
+export type PaginationMetaDto = z.infer<typeof PaginationMetaSchema>;

@@ -13,18 +13,48 @@ const InvoiceStatusEnum = z
     "Voided",
   ])
   .or(z.string());
+const InvoiceTypeEnum = z
+  .enum(["Room", "POS", "Service", "Mixed"])
+  .or(z.string());
+
+//? ---------------------------------
+
+const AddCustomItemsRequestSchema = z.object({
+  customItemName: z.string(),
+  description: z.string(),
+  quantity: z.number(),
+  unitPrice: z.number(),
+  note: z.string(),
+});
+
+const ConfirmInvoicePaymentRequestSchema = z.object({
+  amount: z.number(),
+  paymentMethod: z.string(),
+  transactionReference: z.string(),
+  note: z.string(),
+  paidAt: z.string(),
+});
+
+const RefundInvoiceRequestSchema = z.object({
+  refundAmount: z.number(),
+  reason: z.string(),
+});
 
 const InvoiceListItemSchema = z.object({
-  invoiceId: z.string().optional().nullable(),
-  invoiceNo: z.string().optional().nullable(),
-  invoiceType: z.string().optional().nullable(),
-  bookingCode: z.string().optional().nullable(),
-  customerName: z.string().optional().nullable(),
+  invoiceId: z.string(),
+  invoiceNo: z.string(),
+  invoiceType: z.string(),
+  bookingId: z.string(),
+  bookingCode: z.string(),
+  customerName: z.string(),
+  subTotal: z.number().optional().nullable(),
+  vatAmount: z.number().optional().nullable(),
+  serviceChargeAmount: z.number().optional().nullable(),
   total: z.number().optional().nullable(),
   paidAmount: z.number().optional().nullable(),
   balance: z.number().optional().nullable(),
-  status: z.string().optional().nullable(),
-  paymentMethod: z.string().optional().nullable(),
+  status: InvoiceStatusEnum,
+  paymentMethod: PaymentSchema.PaymentMethodEnum,
   issuedAt: z.string().optional().nullable(),
   itemCount: z.number().optional().nullable(),
 });
@@ -49,36 +79,106 @@ const InvoiceListResponseWithMetaSchema = z.object({
 
 // Invoice Detail Item Schema
 const InvoiceDetailItemSchema = z.object({
-  id: z.string(),
-  itemType: z.string(),
+  id: z.string().optional().nullable(),
+  itemType: z.string().optional().nullable(),
   itemId: z.string().optional().nullable(),
-  description: z.string(),
-  quantity: z.number(),
-  unitPrice: z.number(),
-  subtotal: z.number(),
+  customItemName: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  quantity: z.number().optional().nullable(),
+  unitPrice: z.number().optional().nullable(),
+  subtotal: z.number().optional().nullable(),
 });
 
 // Invoice Detail Schema (from GET /api/Invoices/{invoiceId})
 const InvoiceDetailSchema = z.object({
-  id: z.string(),
+  id: z.string().optional().nullable(),
+  invoiceNo: z.string().optional().nullable(),
+  bookingRoomId: z.string().optional().nullable(),
+  subTotal: z.number().optional().nullable(),
+  vatAmount: z.number().optional().nullable(),
+  serviceChargeAmount: z.number().optional().nullable(),
+  total: z.number().optional().nullable(),
+  paymentMethod: z.string().optional().nullable(),
+  status: z.string().optional().nullable(),
+  issuedAt: z.string().optional().nullable(),
+  items: z.array(InvoiceDetailItemSchema).optional().nullable(),
+});
+
+const InvoiceByIdResponseSchema = InvoiceDetailSchema;
+const InvoiceByBookingResponseSchema = z.array(InvoiceDetailSchema);
+
+const FinalizeInvoiceResponseSchema = z.object({
+  invoiceId: z.string(),
   invoiceNo: z.string(),
-  bookingRoomId: z.string(),
+  subTotal: z.number(),
+  vatAmount: z.number(),
+  serviceChargeAmount: z.number(),
   total: z.number(),
-  paidAmount: z.number().optional().nullable().default(0),
-  balance: z.number().optional().nullable().default(0),
   status: z.string(),
-  issuedAt: z.string(), // ISO date string
-  items: z.array(InvoiceDetailItemSchema),
+  issuedAt: z.string(),
 });
 
-// Invoice Detail Response with Wrapper
-const InvoiceDetailResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: InvoiceDetailSchema,
+const CreateInvoiceFromOrdersRequestSchema = z.object({
+  bookingId: z.string(),
+  bookingRoomId: z.string(),
+  posOrderIds: z.array(z.string()),
+  serviceOrderIds: z.array(z.string()),
+  selectedPosOrderItemIds: z.array(z.string()),
+  discountAmount: z.number().min(0),
+  taxAmount: z.number().min(0),
+  note: z.string(),
 });
 
+const CreateInvoiceFromOrdersResponseSchema = z.object({
+  invoiceId: z.string(),
+  invoiceNo: z.string(),
+  subTotal: z.number(),
+  vatAmount: z.number(),
+  serviceChargeAmount: z.number(),
+  total: z.number(),
+  paidAmount: z.number(),
+  balance: z.number(),
+  status: z.string(),
+  itemCount: z.number(),
+});
+
+const InvoicePaymentRequestSchema = z.object({
+  amount: z.number(),
+  method: z.string(),
+  note: z.string(),
+});
+
+const InvoicePaymentResponseSchema = z.object({
+  paymentId: z.string(),
+  invoiceId: z.string(),
+  amount: z.number(),
+  method: z.string(),
+  status: z.string(),
+  createdAt: z.string(),
+  invoiceSummary: z.object({
+    invoiceNo: z.string(),
+    subTotal: z.number(),
+    vatAmount: z.number(),
+    serviceChargeAmount: z.number(),
+    total: z.number(),
+    paidAmount: z.number(),
+    balance: z.number(),
+    status: z.string(),
+  }),
+});
+
+const PaymentsFromInvoiceResponseSchema = z.array(
+  z.object({
+    paymentId: z.string(),
+    amount: z.number(),
+    method: z.string(),
+    status: z.string(),
+    createdAt: z.string(),
+    note: z.string(),
+  })
+);
+
+//! Booking related invoices
 // Legacy schemas (keep for backward compatibility)
 const InvoiceItemSchema = z.object({
   invoiceId: z.string("Invoice ID không hợp lệ"),
@@ -132,13 +232,24 @@ const InvoiceCalculateFeesResponseSchema = z.object({
 });
 export const InvoiceSchema = {
   InvoiceStatusEnum,
+  InvoiceTypeEnum,
+  AddCustomItemsRequestSchema,
+  ConfirmInvoicePaymentRequestSchema,
+  RefundInvoiceRequestSchema,
   InvoiceListItemSchema,
+  PaginationMetaSchema,
   InvoiceListResponseSchema,
   InvoiceListResponseWithMetaSchema,
-  InvoiceDetailSchema,
-  InvoiceDetailResponseSchema,
   InvoiceDetailItemSchema,
-  PaginationMetaSchema,
+  InvoiceDetailSchema,
+  InvoiceByIdResponseSchema,
+  InvoiceByBookingResponseSchema,
+  FinalizeInvoiceResponseSchema,
+  CreateInvoiceFromOrdersRequestSchema,
+  CreateInvoiceFromOrdersResponseSchema,
+  InvoicePaymentRequestSchema,
+  InvoicePaymentResponseSchema,
+  PaymentsFromInvoiceResponseSchema,
   InvoiceItemSchema,
   RoomInvoiceSchema,
   ServiceInvoiceSchema,

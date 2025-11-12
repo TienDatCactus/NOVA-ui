@@ -91,12 +91,3 @@ export const toYMD = (d: unknown) => {
   }
   return undefined;
 };
-
-export const handleLimitInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const max = 99999999999;
-  const min = 0;
-  const value = e.target.valueAsNumber;
-
-  if (value > max) e.target.value = max.toString();
-  if (value < min) e.target.value = min.toString();
-};

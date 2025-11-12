@@ -1,14 +1,16 @@
-import { ChevronDown, Search, X, ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Search, X } from "lucide-react";
+import { useDebounceCallback } from "usehooks-ts";
+import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Separator } from "~/components/ui/separator";
 import { Card, CardContent } from "~/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
+import { DateRangePicker } from "~/components/ui/date-range-picker";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import {
   Select,
@@ -17,19 +19,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type { InvoiceFilters } from "../../container/invoices/filter.hooks";
+import { Separator } from "~/components/ui/separator";
 import {
+  INVOICE_ITEM_TYPES,
   INVOICE_STATUSES,
   PAYMENT_METHODS,
-  INVOICE_ITEM_TYPES,
+  type InvoiceListParams,
 } from "~/services/api/invoices/invoice.types";
-import { DateRangePicker } from "~/components/ui/date-range-picker";
+import type { DateRange } from "~/components/ui/date-range-picker";
+import { format } from "date-fns";
+import { useBookings } from "~/routes/reservation/bookings/container/booking-query.hooks";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import {
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  Command,
+} from "~/components/ui/command";
 
 interface InvoicesFilterSidebarProps {
-  filters: InvoiceFilters;
-  onFilterChange: <K extends keyof InvoiceFilters>(
+  filters: InvoiceListParams;
+  onFilterChange: <K extends keyof InvoiceListParams>(
     key: K,
-    value: InvoiceFilters[K]
+    value: InvoiceListParams[K]
   ) => void;
   onResetFilters: () => void;
 }
@@ -40,13 +58,31 @@ function InvoicesFilterSidebar({
   onResetFilters,
 }: InvoicesFilterSidebarProps) {
   const activeFiltersCount =
-    (filters.searchText ? 1 : 0) +
-    (filters.status ? 1 : 0) +
-    (filters.paymentMethod ? 1 : 0) +
-    (filters.dateRange?.from || filters.dateRange?.to ? 1 : 0) +
-    (filters.bookingCode ? 1 : 0) +
-    (filters.bookingId ? 1 : 0) +
-    (filters.invoiceType ? 1 : 0);
+    (filters.Keyword ? 1 : 0) +
+    (filters.Status ? 1 : 0) +
+    (filters.PaymentMethod ? 1 : 0) +
+    (filters.IssuedFrom || filters.IssuedTo ? 1 : 0) +
+    (filters.BookingId ? 1 : 0) +
+    (filters.InvoiceType ? 1 : 0) +
+    (filters.BookingCode ? 1 : 0);
+
+  const handleSearch = useDebounceCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onFilterChange("Keyword", e.target.value || undefined);
+    },
+    500
+  );
+  const { data: bookings } = useBookings();
+
+  const dateRangeValue: DateRange | undefined = useMemo(() => {
+    if (filters.IssuedFrom || filters.IssuedTo) {
+      return {
+        from: filters.IssuedFrom ? new Date(filters.IssuedFrom) : undefined,
+        to: filters.IssuedTo ? new Date(filters.IssuedTo) : undefined,
+      };
+    }
+    return undefined;
+  }, [filters.IssuedFrom, filters.IssuedTo]);
 
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -76,23 +112,23 @@ function InvoicesFilterSidebar({
                 size="sm"
                 onClick={() =>
                   onFilterChange(
-                    "sortDirection",
-                    filters.sortDirection === "asc" ? "desc" : "asc"
+                    "SortDirection",
+                    filters.SortDirection === "asc" ? "desc" : "asc"
                   )
                 }
                 className="h-7 gap-1.5 px-2"
               >
                 <ArrowUpDown className="h-3.5 w-3.5" />
                 <span className="text-xs">
-                  {filters.sortDirection === "asc" ? "Tăng dần" : "Giảm dần"}
+                  {filters.SortDirection === "asc" ? "Tăng dần" : "Giảm dần"}
                 </span>
               </Button>
             </div>
             <Input
               id="search"
               placeholder="Mã hóa đơn, mã booking, tên khách..."
-              value={filters.searchText}
-              onChange={(e) => onFilterChange("searchText", e.target.value)}
+              defaultValue={filters.Keyword ?? ""}
+              onChange={(e) => handleSearch(e)}
               endAddon={<Search className="h-4 w-4 text-muted-foreground" />}
             />
           </div>
@@ -108,10 +144,10 @@ function InvoicesFilterSidebar({
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2">
               <RadioGroup
-                value={filters.status || ""}
-                onValueChange={(value) => {
-                  onFilterChange("status", value || undefined);
-                }}
+                value={filters.Status ?? ""}
+                onValueChange={(value) =>
+                  onFilterChange("Status", (value as any) || undefined)
+                }
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="" id="status-all" />
@@ -146,15 +182,17 @@ function InvoicesFilterSidebar({
         <CardContent className="px-0 rounded-md">
           <Collapsible className="space-y-3">
             <CollapsibleTrigger>
-              <Label className="text-sm font-medium">Phương thức thanh toán</Label>
+              <Label className="text-sm font-medium">
+                Phương thức thanh toán
+              </Label>
               <ChevronDown className="h-4 w-4" />
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2">
               <RadioGroup
-                value={filters.paymentMethod || ""}
-                onValueChange={(value) => {
-                  onFilterChange("paymentMethod", value || undefined);
-                }}
+                value={filters.PaymentMethod ?? ""}
+                onValueChange={(value) =>
+                  onFilterChange("PaymentMethod", (value as any) || undefined)
+                }
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="" id="payment-all" />
@@ -184,7 +222,7 @@ function InvoicesFilterSidebar({
           </Collapsible>
         </CardContent>
 
-                <Separator />
+        <Separator />
 
         <CardContent className="px-0 rounded-md">
           <Collapsible className="space-y-3">
@@ -194,10 +232,10 @@ function InvoicesFilterSidebar({
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2">
               <RadioGroup
-                value={filters.invoiceType || ""}
-                onValueChange={(value) => {
-                  onFilterChange("invoiceType", value || undefined);
-                }}
+                value={filters.InvoiceType ?? ""}
+                onValueChange={(value) =>
+                  onFilterChange("InvoiceType", (value as any) || undefined)
+                }
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="" id="invoice-type-all" />
@@ -233,8 +271,17 @@ function InvoicesFilterSidebar({
           <div className="space-y-3">
             <Label className="text-sm font-medium">Khoảng thời gian</Label>
             <DateRangePicker
-              value={filters.dateRange}
-              onChange={(range) => onFilterChange("dateRange", range)}
+              value={dateRangeValue}
+              onChange={(range) => {
+                onFilterChange(
+                  "IssuedFrom",
+                  range?.from ? format(range.from, "yyyy-MM-dd") : undefined
+                );
+                onFilterChange(
+                  "IssuedTo",
+                  range?.to ? format(range.to, "yyyy-MM-dd") : undefined
+                );
+              }}
               placeholder="Chọn khoảng ngày"
             />
           </div>
@@ -245,41 +292,40 @@ function InvoicesFilterSidebar({
         <CardContent className="px-0 rounded-md">
           <div className="space-y-3">
             <Label htmlFor="booking-code" className="text-sm font-medium">
-              Mã booking
+              Theo Booking
             </Label>
-            <Input
-              id="booking-code"
-              placeholder="BK2025..."
-              value={filters.bookingCode || ""}
-              onChange={(e) =>
-                onFilterChange("bookingCode", e.target.value || undefined)
-              }
-            />
-            <p className="text-xs text-muted-foreground">
-              Chọn từ danh sách booking hoặc nhập thủ công
-            </p>
-          </div>
-        </CardContent>
-
-        <Separator />
-
-        <CardContent className="px-0 rounded-md">
-          <div className="space-y-3">
-            <Label htmlFor="booking-id" className="text-sm font-medium">
-              Booking ID
-            </Label>
-            <Input
-              id="booking-id"
-              placeholder="UUID của booking"
-              value={filters.bookingId || ""}
-              onChange={(e) =>
-                onFilterChange("bookingId", e.target.value || undefined)
-              }
-              className="font-mono text-xs"
-            />
-            <p className="text-xs text-muted-foreground">
-              Chọn từ danh sách booking hoặc nhập UUID
-            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  {filters.BookingCode
+                    ? bookings?.find(
+                        (b) => b.bookingCode === filters.BookingCode
+                      )?.bookingCode
+                    : "Chọn booking"}
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <Command>
+                  <CommandInput placeholder="Tìm kiếm..." />
+                  <CommandList>
+                    <CommandEmpty>Không có kết quả nào.</CommandEmpty>
+                    <CommandGroup heading="Booking">
+                      {bookings?.map((booking) => (
+                        <CommandItem
+                          key={booking.bookingCode}
+                          onSelect={() =>
+                            onFilterChange("BookingCode", booking.bookingCode)
+                          }
+                        >
+                          {booking.bookingCode} - {booking.customerName}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
 
@@ -289,8 +335,8 @@ function InvoicesFilterSidebar({
           <div className="space-y-3">
             <Label className="text-sm font-medium">Sắp xếp theo</Label>
             <Select
-              value={filters.sortBy || "IssuedDate"}
-              onValueChange={(value) => onFilterChange("sortBy", value)}
+              value={filters.SortBy ?? "IssuedDate"}
+              onValueChange={(value) => onFilterChange("SortBy", value as any)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -300,30 +346,6 @@ function InvoicesFilterSidebar({
                 <SelectItem value="TotalAmount">Tổng tiền</SelectItem>
                 <SelectItem value="Status">Trạng thái</SelectItem>
                 <SelectItem value="InvoiceCode">Mã hóa đơn</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-
-        <Separator />
-
-        <CardContent className="px-0 rounded-md">
-          <div className="space-y-3">
-            <Label htmlFor="page-size" className="text-sm font-medium">
-              Số bản ghi/trang
-            </Label>
-            <Select
-              value={String(filters.pageSize)}
-              onValueChange={(value) => onFilterChange("pageSize", Number(value))}
-            >
-              <SelectTrigger id="page-size" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
               </SelectContent>
             </Select>
           </div>

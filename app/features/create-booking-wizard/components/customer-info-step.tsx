@@ -103,7 +103,7 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
       guestFullName: bookingData.guestFullName ?? "",
       guestPhone: bookingData.guestPhone ?? "",
       guestEmail: bookingData.guestEmail ?? "",
-      source: bookingData.source ?? undefined,
+      source: bookingData.source,
       otaInformationId: bookingData.otaInformationId ?? undefined,
       otaBookingCode: bookingData.otaBookingCode ?? "",
     });
@@ -115,7 +115,7 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
       if (bookingType === "OTA") {
         sourceValue = "OTA";
       } else if (bookingType === "Direct" && !values.source) {
-        sourceValue = "DirectStaff"; // Default for Direct
+        sourceValue = "DirectStaff";
       }
 
       setData({
@@ -147,7 +147,7 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
             <FormField
               control={form.control}
               name="source"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nguồn đặt phòng</FormLabel>
                   <FormControl>
@@ -158,10 +158,10 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
                             type="button"
                             variant="ghost"
                             key={source.key}
-                            onClick={() => form.setValue("source", source.key)}
+                            onClick={() => field.onChange(source.key)}
                             className={cn(
                               "rounded-lg border-2 h-12 p-4 text-center transition-all",
-                              form.getValues("source") === source.key
+                              field.value === source.key
                                 ? "border-primary bg-primary/10"
                                 : ""
                             )}

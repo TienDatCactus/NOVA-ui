@@ -36,7 +36,6 @@ import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { MenuSchema } from "~/services/api/menu/menu.schema";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useCreateMenuItem } from "../container/menu/mutation.hooks";
-import { handleLimitInput } from "~/lib/utils";
 import Image from "~/components/ui/image";
 
 const { CreateMenuItemRequestSchema } = MenuSchema;
@@ -244,7 +243,6 @@ export default function CreateMenuDialog({
                         <FormControl>
                           <Input
                             type="number"
-                            onInput={handleLimitInput}
                             placeholder="0"
                             {...field}
                             onChange={(e) =>
@@ -436,7 +434,6 @@ export default function CreateMenuDialog({
                                   <FormControl>
                                     <Input
                                       type="number"
-                                      onInput={handleLimitInput}
                                       placeholder="0"
                                       {...field}
                                       onChange={(e) =>
