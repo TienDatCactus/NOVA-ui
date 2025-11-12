@@ -1,4 +1,7 @@
 import type { Route } from "./+types/invoices";
+import InvoicesDataTable from "./components/invoices-list";
+import useInvoicesContainer from "./container/invoices/container.hooks";
+import InvoicesViewLayout from "./layouts/invoices-view.layout";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -12,10 +15,31 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
+  const {
+    invoices,
+    meta,
+    isPending,
+    filters,
+    updateFilter,
+    resetFilters,
+  } = useInvoicesContainer();
+
   return (
-    <div>
-      {/* Frontend Code here. */}
-      <h1>New Route</h1>
-    </div>
+    <InvoicesViewLayout
+      filters={filters}
+      onFilterChange={updateFilter}
+      onResetFilters={resetFilters}
+      totalInvoices={meta?.totalItems || 0}
+      totalPages={meta?.totalPages}
+      currentPage={meta?.page}
+    >
+      <InvoicesDataTable
+        invoices={invoices}
+        isLoading={isPending}
+        pageCount={meta?.totalPages}
+        currentPage={meta?.page}
+        onPageChange={(page) => updateFilter("page", page)}
+      />
+    </InvoicesViewLayout>
   );
 }

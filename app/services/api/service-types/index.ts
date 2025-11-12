@@ -1,6 +1,5 @@
 import http from "~/lib/http";
-import useServiceTypesSchema from "~/services/schema/service-types.schema";
-import type { ServiceTypeListParams } from "~/services/types/service-types.types";
+import type { ServiceTypeListParams } from "~/services/api/service-types/service-types.types";
 import { ServiceTypes } from "~/services/url";
 import type {
   CreateServiceTypeRequestDto,
@@ -10,6 +9,7 @@ import type {
   UpdateServiceTypeRequestDto,
   UpdateServiceTypeResponseDto,
 } from "./dto";
+import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
 
 const {
   CreateServiceTypeResponseSchema,
@@ -18,7 +18,7 @@ const {
   CreateServiceTypeRequestSchema,
   UpdateServiceTypeRequestSchema,
   ServiceTypeListResponseSchema,
-} = useServiceTypesSchema();
+} = ServiceTypesSchema;
 
 async function getServiceTypeList(
   params: ServiceTypeListParams
@@ -39,11 +39,10 @@ async function updateServiceType(
   try {
     const parsed = UpdateServiceTypeRequestSchema.parse(data);
 
-    // Build multipart form to support newImages and removeMediaIds
     const formData = new FormData();
     formData.append("code", parsed.code);
     formData.append("name", parsed.name);
-    formData.append("description", parsed.description);
+    formData.append("description", parsed.description ?? "");
     formData.append("active", String(parsed.active));
     if (Array.isArray(parsed.newImages)) {
       parsed.newImages.forEach((f) => {

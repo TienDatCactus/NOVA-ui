@@ -1,17 +1,31 @@
 import http from "~/lib/http";
-import useBookingSchema from "~/services/schema/booking.schema";
-import { format, parseISO } from "date-fns";
-import type { BookingListParams } from "~/services/types/booking.types";
+
+import { toYMD } from "~/lib/utils";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
+import type { BookingListParams } from "~/services/api/booking/booking.types";
 import { Booking, OTAInformation } from "../../url";
 import type {
+  AvailableRoomsForChangeResponseDto,
   BookingDetailResponseDto,
   BookingListByWeekResponseDto,
   BookingListResponseDto,
   BookingOTAResponseDto,
+  BookingPendingChargesResponseDto,
+  StaffAddCompletedChargesRequestDto,
+  StaffBookingPricePreviewRequestDto,
+  StaffBookingPricePreviewResponseDto,
+  StaffCancelBookingResponseDto,
+  StaffChangeRoomRequestDto,
+  StaffChangeRoomResponseDto,
+  StaffCheckoutMultipleRequestDto,
+  StaffCheckoutPaymentRequestDto,
+  StaffCheckoutRequestDto,
   StaffCreateBookingDto,
   StaffCreateBookingResponseDto,
+  StaffCreateCheckoutInvoiceResponseDto,
+  StaffUpdateBookingRequestDto,
+  StaffUpdateBookingResponseDto,
 } from "./dto";
-import { toYMD } from "~/lib/utils";
 
 const {
   BookingListResponseSchema,
@@ -20,7 +34,21 @@ const {
   StaffCreateBookingSchema,
   BookingDetailItemSchema,
   BookingOTAResponseSchema,
-} = useBookingSchema();
+  StaffBookingPricePreviewRequestSchema,
+  StaffBookingPricePreviewResponseSchema,
+  StaffUpdateBookingRequestSchema,
+  StaffUpdateBookingResponseSchema,
+  StaffCancelBookingResponseSchema,
+  StaffChangeRoomRequestSchema,
+  StaffChangeRoomResponseSchema,
+  BookingPendingChargesResponseSchema,
+  AvailableRoomsForChangeResponseSchema,
+  StaffCheckoutRequestSchema,
+  StaffAddCompletedChargesRequestSchema,
+  StaffCreateCheckoutInvoiceResponseSchema,
+  StaffCheckoutMultipleRequestSchema,
+  StaffCheckoutPaymentRequestSchema,
+} = BookingSchema;
 
 async function getBookingList(
   params: BookingListParams
@@ -29,6 +57,7 @@ async function getBookingList(
     const resp = await http.get(Booking.list, { params });
     return BookingListResponseSchema.parseAsync(resp.data);
   } catch (err) {
+    console.error(err);
     return Promise.reject(err);
   }
 }
@@ -41,33 +70,6 @@ async function getBookingListByWeek(
     return BookingListByWeekResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
-    return Promise.reject(error);
-  }
-}
-
-async function staffCreateBooking(
-  idempotencyKey: string,
-  data: StaffCreateBookingDto
-): Promise<StaffCreateBookingResponseDto> {
-  try {
-    const parsed = StaffCreateBookingSchema.parse(data);
-
-    const payload = {
-      ...parsed,
-      checkinDate: toYMD(parsed.checkinDate),
-      checkoutDate: toYMD(parsed.checkoutDate),
-      breakfastDates: Array.isArray(parsed.breakfastDates)
-        ? parsed.breakfastDates.map((bd) => toYMD(bd)).filter(Boolean)
-        : undefined,
-    };
-
-    const resp = await http.post(Booking.staffCreateBooking, payload, {
-      headers: {
-        "Idempotency-Key": idempotencyKey,
-      },
-    });
-    return StaffCreateBookingResponseSchema.parse(resp.data);
-  } catch (error) {
     return Promise.reject(error);
   }
 }
@@ -104,10 +106,273 @@ async function getBookingOTA(): Promise<BookingOTAResponseDto> {
     return Promise.reject(error);
   }
 }
+
+async function exportBookings(date?: string): Promise<Blob> {
+  try {
+    const params = date ? { date } : {};
+    const resp = await http.get(Booking.Export, {
+      params,
+      responseType: "blob",
+    });
+    if (resp && typeof resp === "object" && "data" in resp) {
+      return (resp as any).data;
+    }
+    return resp as Blob;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+//?-----------------------------------------
+
+// * flow staff
+
+async function staffCreateBooking(
+  idempotencyKey: string,
+  data: StaffCreateBookingDto
+): Promise<StaffCreateBookingResponseDto> {
+  try {
+    const parsed = StaffCreateBookingSchema.parse(data);
+
+    const payload = {
+      ...parsed,
+      checkinDate: toYMD(parsed.checkinDate),
+      checkoutDate: toYMD(parsed.checkoutDate),
+      breakfastDates: Array.isArray(parsed.breakfastDates)
+        ? parsed.breakfastDates.map((bd) => toYMD(bd)).filter(Boolean)
+        : undefined,
+    };
+
+    const resp = await http.post(Booking.staffCreateBooking, payload, {
+      headers: {
+        "Idempotency-Key": idempotencyKey,
+      },
+    });
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffBookingPricePreview(
+  idempotencyKey: string,
+  data: StaffBookingPricePreviewRequestDto
+): Promise<StaffBookingPricePreviewResponseDto> {
+  try {
+    const resp = await http.post(
+      Booking.preview,
+      StaffBookingPricePreviewRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+    return StaffBookingPricePreviewResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffUpdateBookingDetail(
+  id: string,
+  data: StaffUpdateBookingRequestDto
+): Promise<StaffUpdateBookingResponseDto> {
+  try {
+    const resp = await http.put(
+      Booking.update(id),
+      StaffUpdateBookingRequestSchema.parse(data)
+    );
+    return StaffUpdateBookingResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function getAvailableRoomsForChange(
+  bookingId: string,
+  bookingRoomId: string
+): Promise<AvailableRoomsForChangeResponseDto> {
+  try {
+    const resp = await http.get(Booking.changeRoom(bookingId, bookingRoomId));
+    const parsed = AvailableRoomsForChangeResponseSchema.parse(resp);
+    return parsed;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+async function staffChangeRoom(
+  id: string,
+  data: StaffChangeRoomRequestDto
+): Promise<StaffChangeRoomResponseDto> {
+  try {
+    const resp = await http.put(
+      Booking.update(id),
+      StaffChangeRoomRequestSchema.parse(data)
+    );
+    return StaffChangeRoomResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCancelBooking(
+  id: string
+): Promise<StaffCancelBookingResponseDto> {
+  const idempotencyKey = crypto.randomUUID();
+  try {
+    const resp = await http.post(
+      Booking.cancel(id),
+      {},
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+
+    return StaffCancelBookingResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function getBookingPendingCharges(
+  bookingId: string
+): Promise<BookingPendingChargesResponseDto> {
+  try {
+    const resp = await http.get(Booking.pendingCharges(bookingId));
+    return BookingPendingChargesResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffAddCompletedCharges(
+  bookingId: string,
+  data: StaffAddCompletedChargesRequestDto
+): Promise<void> {
+  try {
+    const resp = await http.post(
+      Booking.addToCompletedRoomOrder(bookingId),
+      StaffAddCompletedChargesRequestSchema.parse(data)
+    );
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCreateCheckoutInvoice(
+  bookingId: string
+): Promise<StaffCreateCheckoutInvoiceResponseDto> {
+  const idempotencyKey = crypto.randomUUID();
+  try {
+    const resp = await http.post(
+      Booking.createInvoice(bookingId),
+      {},
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+    return StaffCreateCheckoutInvoiceResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCheckoutPayment(
+  bookingId: string,
+  data: StaffCheckoutPaymentRequestDto
+): Promise<void> {
+  try {
+    const resp = await http.post(
+      Booking.payment(bookingId),
+      StaffCheckoutPaymentRequestSchema.parse(data)
+    );
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCheckout(
+  bookingId: string,
+  data: StaffCheckoutRequestDto
+): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
+  try {
+    const resp = await http.post(
+      Booking.checkout(bookingId),
+      StaffCheckoutRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCheckoutMultiple(
+  data: StaffCheckoutMultipleRequestDto
+): Promise<void> {
+  try {
+    const resp = await http.post(
+      Booking.checkoutMultiple,
+      StaffCheckoutMultipleRequestSchema.parse(data)
+    );
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function staffCreateInvoice(
+  bookingId: string
+): Promise<StaffCreateCheckoutInvoiceResponseDto> {
+  try {
+    const resp = await http.get(Booking.createInvoice(bookingId));
+    return StaffCreateCheckoutInvoiceResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
   getBookingListByWeek,
   getBookingDetail,
   getBookingOTA,
+  staffBookingPricePreview,
+  staffUpdateBookingDetail,
+  getAvailableRoomsForChange,
+  staffChangeRoom,
+  staffCancelBooking,
+  exportBookings,
+  getBookingPendingCharges,
+  staffAddCompletedCharges,
+  staffCreateCheckoutInvoice,
+  staffCheckoutPayment,
+  staffCheckout,
+  staffCheckoutMultiple,
+  staffCreateInvoice,
 };

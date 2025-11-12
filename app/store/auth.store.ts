@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { z } from "zod";
-import useAuthSchema from "~/services/schema/auth.schema";
 import { createJSONStorage, persist } from "zustand/middleware";
-const { UserSchema } = useAuthSchema();
+import { AuthSchema } from "~/services/api/auth/auth.schema";
+const { UserSchema } = AuthSchema;
 export type User = z.infer<typeof UserSchema>;
 
 interface AuthState {

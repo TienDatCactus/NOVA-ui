@@ -1,35 +1,22 @@
-import type { ServiceItem } from "~/services/api/services/dto";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Utensils } from "lucide-react";
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { Utensils } from "lucide-react";
-import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { ServiceItem } from "~/services/api/services/dto";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
 
 interface ServicesDataTableProps {
   services: ServiceItem[];
   isLoading?: boolean;
-
-  onSelectionChange?: (selectedRows: ServiceItem[]) => void;
-
-  onDelete: (service: ServiceItem) => void;
 }
 
-function ServicesDataTable({
-  services,
-  isLoading,
-
-  onSelectionChange,
-
-  onDelete,
-}: ServicesDataTableProps) {
+function ServicesDataTable({ services, isLoading }: ServicesDataTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -59,13 +46,7 @@ function ServicesDataTable({
     );
   }
 
-  return (
-    <DataTable
-      columns={columns}
-      data={services}
-      onSelectionChange={onSelectionChange}
-    />
-  );
+  return <DataTable columns={columns} data={services} />;
 }
 
 export default ServicesDataTable;

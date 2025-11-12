@@ -31,11 +31,12 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
-import useServiceSchema from "~/services/schema/service.schema";
-import { useCreateService } from "../container/service-mutation.hooks";
-import { useServiceTypes } from "../container/service-types-query.hooks";
+import { ServiceSchema } from "~/services/api/services/service.schema";
+import { useServiceTypes } from "../container/service-types/query.hooks";
+import { useCreateService } from "../container/services/mutation.hooks";
+import { handleLimitInput } from "~/lib/utils";
 
-const { CreateServiceItemRequestSchema } = useServiceSchema();
+const { CreateServiceItemRequestSchema } = ServiceSchema;
 
 type CreateServiceFormData = z.infer<typeof CreateServiceItemRequestSchema>;
 
@@ -205,6 +206,7 @@ export default function CreateServiceDialog({
                       <FormControl>
                         <Input
                           type="number"
+                          onInput={handleLimitInput}
                           placeholder="0"
                           {...field}
                           onChange={(e) =>

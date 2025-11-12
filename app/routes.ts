@@ -14,32 +14,44 @@ export default [
       route("reset-password", "routes/auth/reset-password.tsx"),
     ]),
   ]),
+  route("colors", "components/color-showcase.tsx"),
+  ...prefix("dashboard", [
+    route("menu-pos", "routes/orders/menu-pos.tsx"),
+    route("service-pos", "routes/orders/service-pos.tsx"),
+  ]),
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
-      ...prefix("reservation", [
+      ...prefix("services", [
+        index("routes/services/services.tsx"),
+        route("types", "routes/services/types.tsx"),
+        route("menu", "routes/menu/menu.tsx"),
+        route("menu-categories", "routes/menu/menu-categories.tsx"),
+      ]),
+      ...prefix("bookings", [
         index("routes/reservation/reports/reports.tsx"),
-        ...prefix("bookings", [
-          route("grid", "routes/reservation/bookings/grid.tsx"),
-          route("list", "routes/reservation/bookings/list.tsx"),
-          route("timeline", "routes/reservation/bookings/timeline.tsx"),
-        ]),
+        route("grid", "routes/reservation/bookings/grid.tsx"),
+        route("list", "routes/reservation/bookings/list.tsx"),
+        route(
+          "detail/:bookingCode",
+          "routes/reservation/booking-detail/booking-detail.tsx"
+        ),
         route("invoices", "routes/reservation/invoices/invoices.tsx"),
-        route("new-booking", "routes/reservation/new-booking/new-booking.tsx"),
+        route("new-booking", "routes/reservation/new-booking.tsx"),
+      ]),
+      ...prefix("orders", [
+        route("menu-orders", "routes/orders/menu-orders.tsx"),
+        route("service-orders", "routes/orders/service-orders.tsx"),
       ]),
       ...prefix("rooms", [
         index("routes/rooms/rooms.tsx"),
         route("types", "routes/rooms/types.tsx"),
-        route("prices", "routes/rooms/prices.tsx"),
       ]),
-      ...prefix("services", [
-        index("routes/services/services.tsx"),
-        route("types", "routes/services/types.tsx"),
-        route("menu-categories", "routes/menu/categories.tsx"),
-        route("menu-items", "routes/menu/items.tsx"),
-      ]),
+      route("chat", "routes/chat/chat.tsx"),
+      route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
-      route("customers", "routes/customers/customers.tsx"),
+      route("users", "routes/users/users.tsx"),
     ]),
   ]),
+
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

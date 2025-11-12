@@ -1,74 +1,53 @@
-import type { MenuCategoryItem } from "~/services/api/menu-category/dto";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
-import { Skeleton } from "~/components/ui/skeleton";
+import { BedDouble } from "lucide-react";
 import {
   Empty,
-  EmptyContent,
-  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
+  EmptyDescription,
 } from "~/components/ui/empty";
-import { BookOpen } from "lucide-react";
-import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { MenuCategoryListResponseDto } from "~/services/api/menu-category/dto";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 
-interface MenuCategoryDataTableProps {
-  categories: MenuCategoryItem[];
+interface MenuDataTableProps {
+  menuCategories: MenuCategoryListResponseDto;
   isLoading?: boolean;
-  onAddCategory: () => void;
-  onSelectionChange?: (selectedRows: MenuCategoryItem[]) => void;
-  onEdit: (category: MenuCategoryItem) => void;
-  onDelete: (category: MenuCategoryItem) => void;
 }
-
 function MenuCategoryDataTable({
-  categories,
+  menuCategories,
   isLoading,
-  onAddCategory,
-  onSelectionChange,
-  onEdit,
-  onDelete,
-}: MenuCategoryDataTableProps) {
+}: MenuDataTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
-        {Array(6)
+        {Array(8)
           .fill(0)
           .map((_, index) => (
-            <Skeleton key={index} className="h-16 w-full" />
+            <Skeleton key={index} className="h-14 w-full" />
           ))}
       </div>
     );
   }
 
-  if (!categories || categories.length === 0) {
+  if (!menuCategories || menuCategories.length === 0) {
     return (
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <BookOpen />
+            <BedDouble />
           </EmptyMedia>
-          <EmptyTitle>Chưa có danh mục thực đơn</EmptyTitle>
+          <EmptyTitle>Chưa có danh mục thực đơn nào</EmptyTitle>
           <EmptyDescription>
             Bạn chưa có danh mục thực đơn nào trong hệ thống. Hãy bắt đầu bằng
-            cách thêm danh mục đầu tiên.
+            cách thêm danh mục thực đơn đầu tiên.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onAddCategory}>Thêm danh mục đầu tiên</Button>
-        </EmptyContent>
       </Empty>
     );
   }
 
-  return (
-    <DataTable
-      columns={columns}
-      data={categories}
-      onSelectionChange={onSelectionChange}
-    />
-  );
+  return <DataTable columns={columns} data={menuCategories} />;
 }
-
 export default MenuCategoryDataTable;

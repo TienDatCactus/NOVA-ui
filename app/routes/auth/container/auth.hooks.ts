@@ -16,7 +16,7 @@ export function useAuth() {
     try {
       const response = await AuthService.login(data);
       setUser(response.user);
-      navigate(DASHBOARD.reservation.index);
+      navigate(DASHBOARD.bookings.index);
       return response;
     } catch (err: any) {
       setError(err.message);

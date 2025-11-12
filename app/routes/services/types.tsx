@@ -1,10 +1,8 @@
-import { useEffect } from "react";
-import ServiceTypesDataTable from "./components/service-types-list";
-import ServiceTypesViewLayout from "./layouts/service-types-view.layout";
-import useServiceTypesContainer from "./container/service-types-container.hooks";
-import CreateServiceTypeDialog from "./components/create-service-type.dialog";
-import EditServiceTypeSheet from "./components/edit-service-type.sheet";
 import type { Route } from "./+types/types";
+import ServiceTypesDataTable from "./components/service-types-list";
+import useServiceTypeFilters from "./container/service-types/filter.hooks";
+import { useServiceTypes } from "./container/service-types/query.hooks";
+import ServiceTypesViewLayout from "./layouts/service-types-view.layout";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -19,48 +17,26 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   const {
-    filteredTypes,
-    isPending,
     filters,
     updateFilter,
-    selectedTypes,
-    setSelectedTypes,
-    createDialogOpen,
-    setCreateDialogOpen,
-    editSheetOpen,
-    setEditSheetOpen,
-    editingType,
-    handleEdit,
-    handleDelete,
-    handleClearSelection,
-    handleExportExcel,
     resetFilters,
-  } = useServiceTypesContainer();
+    filterServiceTypes,
+    includeInactive,
+  } = useServiceTypeFilters();
+  const { data: serviceTypesData, isPending } = useServiceTypes({
+    includeInactive,
+  });
+
+  const filteredTypes = filterServiceTypes(serviceTypesData ?? []) ?? [];
 
   return (
     <ServiceTypesViewLayout
-      filters={filters}
-      onFilterChange={updateFilter}
       totalTypes={filteredTypes.length}
-      selectedCount={selectedTypes.length}
-      onAddType={() => setCreateDialogOpen(true)}
-      onExportExcel={handleExportExcel}
-      onClearSelection={handleClearSelection}
-      onResetFilters={resetFilters}
+      filters={filters}
+      resetFilters={resetFilters}
+      updateFilter={updateFilter}
     >
-      <ServiceTypesDataTable
-        types={filteredTypes}
-        isLoading={isPending}
-        onAddType={() => setCreateDialogOpen(true)}
-        onSelectionChange={setSelectedTypes}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-
-      <CreateServiceTypeDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-      />
+      <ServiceTypesDataTable types={filteredTypes} isLoading={isPending} />
     </ServiceTypesViewLayout>
   );
 }

@@ -28,11 +28,11 @@ import {
 } from "~/components/ui/select";
 
 import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
-import useRoomSchema from "~/services/schema/room.schema";
-import { RoomStatusEnum } from "~/services/types/room.types";
-import { useCreateRoom } from "../container/rooms-mutation.hooks";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
+import { RoomStatusEnum } from "~/services/api/rooms/room.types";
+import { useCreateRoom } from "../container/rooms/mutation.hooks";
 
-const { CreateRoomResponseSchema } = useRoomSchema();
+const { CreateRoomResponseSchema } = RoomSchema;
 const CreateRoomFormSchema = CreateRoomResponseSchema.pick({
   roomName: true,
   roomTypeId: true,
@@ -59,9 +59,12 @@ function CreateRoomDialog({ open, onClose, roomTypes }: CreateRoomDialogProps) {
   const { mutate, isPending } = useCreateRoom();
 
   const handleSubmit: SubmitHandler<CreateRoomFormData> = (data) => {
-    mutate(data);
-    form.reset();
-    onClose();
+    mutate(data, {
+      onSuccess: () => {
+        form.reset();
+        onClose();
+      },
+    });
   };
 
   const handleClose = () => {

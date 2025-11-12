@@ -1,10 +1,15 @@
 import { type ColumnDef } from "@tanstack/react-table";
+import { format, parseISO } from "date-fns";
 import { Badge } from "~/components/ui/badge";
 import { Checkbox } from "~/components/ui/checkbox";
-import type { MenuCategoryItem } from "~/services/api/menu-category/dto";
-import MenuCategoryActionsCell from "../../fragments/menu-category-actions.cell";
+import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
+import MenuCategoryActionsCell from "../../fragments/menu-categories/actions.cell";
 
-export const columns: ColumnDef<MenuCategoryItem>[] = [
+/**
+ * Factory function to create columns with action callbacks
+ * @param onEdit - Callback khi click edit
+ */
+export const columns: ColumnDef<MenuCategoryItemDto>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -40,11 +45,10 @@ export const columns: ColumnDef<MenuCategoryItem>[] = [
     accessorKey: "code",
     header: "Mã danh mục",
     cell: ({ row }) => {
-      const code = row.original.code;
       return (
-        <div className="font-mono text-sm bg-muted px-2 py-1 rounded inline-block">
-          {code}
-        </div>
+        <span className="font-mono text-sm font-medium">
+          {row.original.code}
+        </span>
       );
     },
   },
@@ -55,15 +59,22 @@ export const columns: ColumnDef<MenuCategoryItem>[] = [
       const category = row.original;
 
       return (
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{category.name}</span>
-            {!category.active && (
-              <Badge variant="secondary" className="text-xs">
-                Ngưng hoạt động
-              </Badge>
-            )}
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="font-semibold">{category.name}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "menuItemCount",
+    header: () => <p className="text-center">Số món ăn</p>,
+    cell: ({ row }) => {
+      const count = row.original.menuItemCount;
+      return (
+        <div className="flex justify-center">
+          <Badge variant="outline" className="font-normal">
+            {count} món
+          </Badge>
         </div>
       );
     },
@@ -72,23 +83,39 @@ export const columns: ColumnDef<MenuCategoryItem>[] = [
     accessorKey: "active",
     header: () => <p className="text-center">Trạng thái</p>,
     cell: ({ row }) => {
-      const active = row.original.active;
+      const isActive = row.original.active;
       return (
         <div className="flex justify-center">
-          <Badge variant={active ? "default" : "secondary"}>
-            {active ? "Hoạt động" : "Ngưng hoạt động"}
+          <Badge variant={isActive ? "success" : "warning"} className="text-xs">
+            {isActive ? "Hoạt động" : "Ngưng"}
           </Badge>
         </div>
       );
     },
   },
   {
-    id: "actions",
-    header: () => null,
+    accessorKey: "createdAt",
+    header: "Ngày tạo",
     cell: ({ row }) => {
-      return <MenuCategoryActionsCell category={row.original} />;
+      const createdAt = row.original.createdAt;
+      if (!createdAt) return <span className="text-muted-foreground">—</span>;
+
+      return (
+        <span className="text-sm text-muted-foreground">
+          {format(createdAt, "dd/MM/yyyy")}
+        </span>
+      );
     },
-    enableSorting: false,
-    enableHiding: false,
+  },
+  {
+    id: "actions",
+    header: () => <p className="text-center">Thao tác</p>,
+    cell: ({ row }) => {
+      return (
+        <div className="flex justify-center">
+          <MenuCategoryActionsCell category={row.original} />
+        </div>
+      );
+    },
   },
 ];

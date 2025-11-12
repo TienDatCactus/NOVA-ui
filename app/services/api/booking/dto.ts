@@ -1,5 +1,5 @@
 import type z from "zod";
-import useBookingSchema from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 
 const {
   BookingListResponseSchema,
@@ -8,23 +8,80 @@ const {
   StaffCreateBookingSchema,
   BookingDetailItemSchema,
   BookingOTAResponseSchema,
-} = useBookingSchema();
+  StaffBookingPricePreviewRequestSchema,
+  StaffBookingPricePreviewResponseSchema,
+  StaffUpdateBookingRequestSchema,
+  UpdateBookingRoomRequestSchema,
+  StaffUpdateBookingResponseSchema,
+  StaffCancelBookingResponseSchema,
+  StaffChangeRoomRequestSchema,
+  StaffChangeRoomResponseSchema,
+  AvailableRoomsForChangeResponseSchema,
+  BookingPendingChargesResponseSchema,
+  StaffCheckoutRequestSchema,
+  StaffCheckoutMultipleRequestSchema,
+  StaffAddCompletedChargesRequestSchema,
+  StaffCreateCheckoutInvoiceResponseSchema,
+  StaffCheckoutPaymentRequestSchema,
+} = BookingSchema;
 
-type BookingListResponseDto = z.infer<typeof BookingListResponseSchema>;
-type BookingListByWeekResponseDto = z.infer<
+export type StaffBookingPricePreviewRequestDto = z.infer<
+  typeof StaffBookingPricePreviewRequestSchema
+>;
+export type StaffBookingPricePreviewResponseDto = z.infer<
+  typeof StaffBookingPricePreviewResponseSchema
+>;
+export type StaffUpdateBookingRequestDto = z.infer<
+  typeof StaffUpdateBookingRequestSchema
+>;
+export type UpdateBookingRoomRequestDto = z.infer<
+  typeof UpdateBookingRoomRequestSchema
+>;
+export type StaffUpdateBookingResponseDto = z.infer<
+  typeof StaffUpdateBookingResponseSchema
+>;
+export type StaffCancelBookingResponseDto = z.infer<
+  typeof StaffCancelBookingResponseSchema
+>;
+export type StaffChangeRoomRequestDto = z.infer<
+  typeof StaffChangeRoomRequestSchema
+>;
+export type StaffChangeRoomResponseDto = z.infer<
+  typeof StaffChangeRoomResponseSchema
+>;
+export type AvailableRoomsForChangeResponseDto = z.infer<
+  typeof AvailableRoomsForChangeResponseSchema
+>;
+
+export type BookingListResponseDto = z.infer<typeof BookingListResponseSchema>;
+export type BookingListByWeekResponseDto = z.infer<
   typeof BookingListByWeekResponseSchema
 >;
-type StaffCreateBookingDto = z.infer<typeof StaffCreateBookingSchema>;
-type StaffCreateBookingResponseDto = z.infer<
+export type StaffCreateBookingDto = z.infer<typeof StaffCreateBookingSchema>;
+export type StaffCreateBookingResponseDto = z.infer<
   typeof StaffCreateBookingResponseSchema
 >;
-type BookingDetailResponseDto = z.infer<typeof BookingDetailItemSchema>;
-type BookingOTAResponseDto = z.infer<typeof BookingOTAResponseSchema>;
-export type {
-  BookingListResponseDto,
-  BookingListByWeekResponseDto,
-  StaffCreateBookingDto,
-  StaffCreateBookingResponseDto,
-  BookingDetailResponseDto,
-  BookingOTAResponseDto,
-};
+export type BookingDetailResponseDto = z.infer<typeof BookingDetailItemSchema>;
+export type BookingOTAResponseDto = z.infer<typeof BookingOTAResponseSchema>;
+
+export type BookingPendingChargesResponseDto = z.infer<
+  typeof BookingPendingChargesResponseSchema
+>;
+
+export type StaffCheckoutRequestDto = z.infer<
+  typeof StaffCheckoutRequestSchema
+>;
+export type StaffCheckoutMultipleRequestDto = z.infer<
+  typeof StaffCheckoutMultipleRequestSchema
+>;
+export type StaffAddCompletedChargesRequestDto = z.infer<
+  typeof StaffAddCompletedChargesRequestSchema
+>;
+
+export type StaffCreateCheckoutInvoiceResponseDto = z.infer<
+  typeof StaffCreateCheckoutInvoiceResponseSchema
+>;
+
+export type StaffCheckoutPaymentRequestDto = z.infer<
+  typeof StaffCheckoutPaymentRequestSchema
+>;

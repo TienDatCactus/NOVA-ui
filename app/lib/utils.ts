@@ -31,15 +31,26 @@ export function daysBetweenFloor(a: Date, b: Date) {
   return Math.floor((b.getTime() - a.getTime()) / msPerDay);
 }
 
-export function formatMoney(amount: number) {
-  const usdFormatted = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-  const vndFormatted = new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(amount);
+export function formatMoney(amount: number | bigint | string) {
+  if (!amount) {
+    return {
+      usdFormatted: "$0",
+      vndFormatted: "0 ₫",
+    };
+  }
+  const amountStr = amount.toString();
+
+  const bigAmount = BigInt(amountStr);
+
+  // Convert BigInt to plain string with thousands separators manually
+  const formattedBase = bigAmount
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  // Append currency symbols manually
+  const usdFormatted = `$${formattedBase}`;
+  const vndFormatted = `${formattedBase} ₫`;
+
   return { usdFormatted, vndFormatted };
 }
 
@@ -74,10 +85,18 @@ export const onError = (errors: any) => {
 export const toYMD = (d: unknown) => {
   if (d instanceof Date) return format(d, "yyyy-MM-dd");
   if (typeof d === "string") {
-    // If already yyyy-MM-dd, keep; else try to parse and format
     if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
     const dt = parseISO(d);
     if (!isNaN(dt.getTime())) return format(dt, "yyyy-MM-dd");
   }
   return undefined;
+};
+
+export const handleLimitInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const max = 99999999999;
+  const min = 0;
+  const value = e.target.valueAsNumber;
+
+  if (value > max) e.target.value = max.toString();
+  if (value < min) e.target.value = min.toString();
 };

@@ -5,8 +5,21 @@ const AUTH = {
 };
 
 const DASHBOARD = {
-  reservation: {
-    index: "/dashboard/reservation",
+  bookings: {
+    index: "/dashboard/bookings",
+    list: "/dashboard/bookings/list",
+    bookingDetail: (bookingCode: string) =>
+      `/dashboard/bookings/detail/${bookingCode}`,
+    newBooking: "/dashboard/bookings/new-booking",
+  },
+  orders: {
+    "service-pos": "/dashboard/orders/service-pos",
+    "service-orders": "/dashboard/orders/service-orders",
+    "menu-pos": "/dashboard/orders/menu-pos",
+    "menu-orders": "/dashboard/orders/menu-orders",
   },
 };
-export { AUTH, DASHBOARD };
+const CUSTOMER = {
+  chat: "/customer/chat",
+};
+export { AUTH, DASHBOARD, CUSTOMER };

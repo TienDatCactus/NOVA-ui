@@ -22,9 +22,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import useAuthSchema from "~/services/schema/auth.schema";
 import type { Route } from "./+types/forgot-password";
 import { useAuth } from "./container/auth.hooks";
+import { AuthSchema } from "~/services/api/auth/auth.schema";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -37,7 +37,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 export default function ForgotPassword() {
   const { forgotPassword, isLoading } = useAuth();
 
-  const { ForgotPasswordSchema } = useAuthSchema();
+  const { ForgotPasswordSchema } = AuthSchema;
   const forgotPasswordForm = useForm({
     resolver: zodResolver(ForgotPasswordSchema),
   });

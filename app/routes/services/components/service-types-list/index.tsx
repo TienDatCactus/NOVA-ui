@@ -18,19 +18,11 @@ type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 interface ServiceTypesDataTableProps {
   types: EnrichedServiceTypeItem[];
   isLoading?: boolean;
-  onAddType: () => void;
-  onSelectionChange?: (selectedRows: EnrichedServiceTypeItem[]) => void;
-  onEdit: (type: ServiceTypeItem) => void;
-  onDelete: (type: ServiceTypeItem) => void;
 }
 
 function ServiceTypesDataTable({
   types,
   isLoading,
-  onAddType,
-  onSelectionChange,
-  onEdit,
-  onDelete,
 }: ServiceTypesDataTableProps) {
   if (isLoading) {
     return (
@@ -57,20 +49,11 @@ function ServiceTypesDataTable({
             thêm loại dịch vụ đầu tiên.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onAddType}>Thêm loại dịch vụ đầu tiên</Button>
-        </EmptyContent>
       </Empty>
     );
   }
 
-  return (
-    <DataTable
-      columns={columns}
-      data={types}
-      onSelectionChange={onSelectionChange}
-    />
-  );
+  return <DataTable columns={columns} data={types} />;
 }
 
 export default ServiceTypesDataTable;

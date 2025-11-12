@@ -8,10 +8,9 @@ import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import ServiceTypeActionsCell from "../../fragments/service-types/actions.cell";
+import Image from "~/components/ui/image";
 
-type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
-
-export const columns: ColumnDef<EnrichedServiceTypeItem>[] = [
+export const columns: ColumnDef<ServiceTypeItem>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -50,22 +49,17 @@ export const columns: ColumnDef<EnrichedServiceTypeItem>[] = [
       const type = row.original;
       return (
         <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              "w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden bg-muted border shadow-s"
-            )}
-          >
-            <ImageIcon className="w-6 h-6 text-muted-foreground" />
-          </div>
+          <Image
+            src={type.images?.[0].url || ""}
+            className="w-6 h-6 object-contain"
+            width={48}
+            height={48}
+            alt={type.name}
+          />
 
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold truncate">{type.name}</span>
-              {!type.active && (
-                <Badge variant="secondary" className="text-xs">
-                  Ngưng hoạt động
-                </Badge>
-              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {type.code}
@@ -104,10 +98,24 @@ export const columns: ColumnDef<EnrichedServiceTypeItem>[] = [
     },
   },
   {
+    accessorKey: "active",
+    header: () => <p className="text-end">Trạng thái</p>,
+    cell: ({ row }) => {
+      const isActive = row.original.active;
+      return (
+        <div className="flex justify-end">
+          <Badge variant={isActive ? "success" : "warning"}>
+            {isActive ? "Hoạt động" : "Ngưng hoạt động"}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "serviceCount",
     header: () => <p className="text-center">Số lượng dịch vụ</p>,
     cell: ({ row }) => {
-      const count = row.original.serviceCount || 0;
+      const count = row.original.serviceItemCount || 0;
       return (
         <div className="flex justify-center">
           <Badge variant={count > 0 ? "default" : "secondary"}>

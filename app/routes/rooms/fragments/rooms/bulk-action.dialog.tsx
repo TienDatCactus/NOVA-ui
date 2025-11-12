@@ -21,7 +21,7 @@ import {
 
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { useState } from "react";
-import { RoomStatusEnum } from "~/services/types/room.types";
+import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 
 interface BulkActionsToolbarProps {
   selectedRooms: RoomListItemDto[];

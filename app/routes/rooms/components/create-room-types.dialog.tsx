@@ -22,13 +22,11 @@ import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { stripHtml } from "~/lib/utils";
-import { useCreateRoomTypeDialog } from "../container/create-room-type-container.hooks";
-import { DescriptionDialog } from "../fragments/room-types/description.dialog";
-import { ImagePreviewDialog } from "../fragments/room-types/image-preview.dialog";
 import { Card, CardContent } from "~/components/ui/card";
 import { useState } from "react";
 import AlertChanges from "~/components/ui/alert-changes";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { useCreateRoomTypeDialog } from "../container/room-types/create-container.hooks";
 
 interface CreateRoomTypeDialogProps {
   open: boolean;
@@ -197,7 +195,7 @@ export function CreateRoomTypeDialog({
                 </h3>
 
                 <div className="space-y-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="p-4 shadow-s h-18 rounded-lg border ">
+                  <Card className="p-4 shadow-sm h-18 rounded-lg border ">
                     <CardContent className="p-0 flex items-center justify-between ">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -222,7 +220,7 @@ export function CreateRoomTypeDialog({
                     </CardContent>
                   </Card>
 
-                  <Card className="p-4 shadow-s h-18 rounded-lg border">
+                  <Card className="p-4 shadow-sm h-18 rounded-lg border">
                     <CardContent className="p-0 flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-1">
                         <ImageIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -284,27 +282,6 @@ export function CreateRoomTypeDialog({
       </Dialog>
 
       {/* Description Dialog */}
-      <DescriptionDialog
-        open={showDescriptionDialog}
-        onClose={setShowDescriptionDialog}
-        initialContent={form.watch("description") || ""}
-        roomTypeCode={form.watch("code") || "MỚI"}
-        mode={dialogMode}
-        onSave={handleDescriptionSave}
-      />
-
-      <ImagePreviewDialog
-        open={showImagePreviewDialog}
-        onClose={setShowImagePreviewDialog}
-        existingImages={[]}
-        newImages={newImageFiles}
-        removeMediaIds={[]}
-        mode={dialogMode}
-        roomTypeCode={form.watch("code") || "MỚI"}
-        onAddImages={handleAddImages}
-        onRemoveNewImage={handleRemoveNewFile}
-        operation="create"
-      />
 
       <AlertChanges
         showCancelDialog={openCancelDialog}

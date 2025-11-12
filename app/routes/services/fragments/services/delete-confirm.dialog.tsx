@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import type { ServiceItem } from "~/services/api/services/dto";
-import { useDeleteService } from "../../container/service-mutation.hooks";
+import { useDeleteService } from "../../container/services/mutation.hooks";
 
 interface DeleteConfirmDialogProps {
   open: boolean;

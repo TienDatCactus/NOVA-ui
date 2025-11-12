@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -13,7 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Dropzone,
   DropzoneContent,
@@ -29,15 +32,13 @@ import {
 } from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import type { ServiceTypeItem } from "~/services/api/service-types/dto";
-import useServiceTypesSchema from "~/services/schema/service-types.schema";
-import { useUpdateServiceType } from "../container/service-type-mutation.hooks";
-import { Checkbox } from "~/components/ui/checkbox";
 import { cn } from "~/lib/utils";
-import { Label } from "~/components/ui/label";
-import Image from "~/components/ui/image";
+import type { ServiceTypeItem } from "~/services/api/service-types/dto";
+import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
+import { useUpdateServiceType } from "../container/service-types/mutation.hooks";
+import { useServiceTypeDetails } from "../container/service-types/query.hooks";
 
-const { UpdateServiceTypeRequestSchema } = useServiceTypesSchema();
+const { UpdateServiceTypeRequestSchema } = ServiceTypesSchema;
 
 type UpdateServiceTypeFormData = z.infer<typeof UpdateServiceTypeRequestSchema>;
 
@@ -52,11 +53,12 @@ export default function EditServiceTypeSheet({
   onClose,
   type,
 }: EditServiceTypeSheetProps) {
+  const { data: serviceTypeDetails } = useServiceTypeDetails(type!.id, {
+    enabled: open,
+  });
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
-  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
   const [removeMediaIds, setRemoveMediaIds] = useState<string[]>([]);
-  console.log(type);
   const form = useForm<UpdateServiceTypeFormData>({
     resolver: zodResolver(UpdateServiceTypeRequestSchema),
     defaultValues: {
@@ -67,7 +69,9 @@ export default function EditServiceTypeSheet({
     },
   });
 
-  const { mutate: updateServiceType, isPending } = useUpdateServiceType();
+  const { mutate: updateServiceType, isPending } = useUpdateServiceType(
+    type?.id || ""
+  );
   useEffect(() => {
     if (type) {
       form.reset({
@@ -76,7 +80,6 @@ export default function EditServiceTypeSheet({
         description: type.description || "",
         active: type.active,
       });
-      setExistingImageUrls(type.imageUrls || []);
       setRemoveMediaIds([]);
       setNewFiles([]);
       setNewPreviews([]);
@@ -88,7 +91,6 @@ export default function EditServiceTypeSheet({
 
     updateServiceType(
       {
-        id: type.id,
         data: {
           ...data,
           newImages: newFiles,
@@ -104,11 +106,11 @@ export default function EditServiceTypeSheet({
   };
 
   const handleClose = () => {
-    form.reset();
-    setExistingImageUrls([]);
-    setRemoveMediaIds([]);
-    setNewFiles([]);
+    newPreviews.forEach((url) => URL.revokeObjectURL(url));
     setNewPreviews([]);
+    setNewFiles([]);
+    setRemoveMediaIds([]);
+    form.reset();
     onClose();
   };
 
@@ -135,7 +137,9 @@ export default function EditServiceTypeSheet({
 
   const toggleRemoveExisting = (id: string) => {
     setRemoveMediaIds((prev) =>
-      prev.includes(id) ? prev.filter((id) => id !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((mediaId) => mediaId !== id)
+        : [...prev, id]
     );
   };
 
@@ -214,102 +218,117 @@ export default function EditServiceTypeSheet({
                 )}
               />
 
-              <div className="space-y-2">
-                <FormLabel>Hình ảnh hiện có</FormLabel>
-                {existingImageUrls.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    Không có hình ảnh
-                  </p>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {existingImageUrls.map((url) => {
-                      const marked = removeMediaIds.includes(url);
-                      return (
-                        <Label
-                          key={url}
-                          className={cn(
-                            "relative group rounded-md border cursor-pointer transition-all",
-                            {
-                              "ring-2 ring-destructive/60 border-destructive/50":
-                                marked,
-                              "border-border hover:border-primary/30": !marked,
+              {/* Images */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">
+                  Hình ảnh
+                </h3>
+
+                {/* Existing Images */}
+                <div className="space-y-2">
+                  <FormLabel>Hình ảnh hiện có</FormLabel>
+                  {!serviceTypeDetails ||
+                  serviceTypeDetails?.images?.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      Không có hình ảnh
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {serviceTypeDetails.images?.map((img) => {
+                        const marked = removeMediaIds.includes(img.mediaId);
+                        return (
+                          <Label
+                            key={img.mediaId}
+                            className={cn(
+                              "relative group rounded-md border cursor-pointer transition-all",
+                              {
+                                "ring-2 ring-destructive/60 border-destructive/50":
+                                  marked,
+                                "border-border hover:border-primary/30":
+                                  !marked,
+                              }
+                            )}
+                            title={
+                              marked ? "Bỏ đánh dấu xóa" : "Đánh dấu để xóa"
                             }
-                          )}
-                          title={marked ? "Bỏ đánh dấu xóa" : "Đánh dấu để xóa"}
-                        >
-                          <div className="absolute top-2 left-2 z-10">
-                            <Checkbox
-                              checked={marked}
-                              onCheckedChange={() => toggleRemoveExisting(url)}
+                          >
+                            <div className="absolute top-2 left-2 z-10">
+                              <Checkbox
+                                className="
+                                data-[state=checked]:bg-destructive border-destructive data-[state=checked]:border-destructive"
+                                checked={marked}
+                                onCheckedChange={() =>
+                                  toggleRemoveExisting(img.mediaId)
+                                }
+                              />
+                            </div>
+                            <Image
+                              src={img.url}
+                              alt="existing"
+                              width={100}
+                              height={100}
+                              className="object-cover rounded-md"
                             />
-                          </div>
+
+                            {marked && (
+                              <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold" />
+                            )}
+                          </Label>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {removeMediaIds.length > 0 && (
+                    <p className="text-xs text-destructive">
+                      Đã đánh dấu xóa {removeMediaIds.length} ảnh
+                    </p>
+                  )}
+                </div>
+
+                {/* New Images Upload */}
+                <div className="space-y-2">
+                  <FormLabel>Thêm hình ảnh</FormLabel>
+                  <Dropzone
+                    accept={{ "image/*": [] }}
+                    maxFiles={8}
+                    onDrop={(accepted) => onDropNewFiles(accepted)}
+                    src={newFiles}
+                    className="border-2 border-dashed"
+                  >
+                    <DropzoneEmptyState />
+                    <DropzoneContent />
+                  </Dropzone>
+
+                  {newPreviews.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {newPreviews.map((url, index) => (
+                        <div key={index} className="relative group">
                           <Image
                             src={url}
-                            alt="existing"
+                            alt={`new-${index}`}
                             width={100}
                             height={100}
-                            className="object-cover rounded-md"
+                            className="object-cover border"
                           />
-
-                          {marked && (
-                            <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold text-destructive-foreground">
-                              Sẽ xóa
-                            </span>
-                          )}
-                        </Label>
-                      );
-                    })}
-                  </div>
-                )}
-                {removeMediaIds.length > 0 && (
-                  <p className="text-xs text-destructive">
-                    Đã đánh dấu xóa {removeMediaIds.length} ảnh
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => removeNewFile(index)}
+                            aria-label="Xóa ảnh mới"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Có thể tải lên tối đa 8 ảnh. Ảnh sẽ được lưu khi bạn nhấn
+                    Lưu thay đổi.
                   </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <FormLabel>Thêm hình ảnh</FormLabel>
-                <Dropzone
-                  accept={{ "image/*": [] }}
-                  maxFiles={8}
-                  onDrop={(accepted) => onDropNewFiles(accepted)}
-                  src={newFiles}
-                  className="border-2 border-dashed"
-                >
-                  <DropzoneEmptyState />
-                  <DropzoneContent />
-                </Dropzone>
-
-                {newPreviews.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {newPreviews.map((url, index) => (
-                      <div key={index} className="relative group">
-                        <Image
-                          src={url}
-                          alt={`new-${index}`}
-                          width={100}
-                          height={100}
-                          className="object-cover  border"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => removeNewFile(index)}
-                          aria-label="Xóa ảnh mới"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Có thể tải lên tối đa 8 ảnh. Ảnh sẽ được lưu khi bạn nhấn Lưu
-                  thay đổi.
-                </p>
+                </div>
               </div>
 
               <FormField

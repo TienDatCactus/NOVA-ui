@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import type z from "zod";
+import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -21,25 +21,29 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
-import useMenuCategorySchema from "~/services/schema/menu-category.schema";
-import { useCreateMenuCategory } from "../container/menu-category-mutation.hooks";
+import { MenuCategorySchema } from "~/services/api/menu-category/menu-category.schema";
+import { useCreateMenuCategory } from "../container/menu-categories/mutation.hooks";
 
-const { CreateMenuCategoryRequestSchema } = useMenuCategorySchema();
+const { CreateMenuCategoryRequestSchema } = MenuCategorySchema;
 
-type CreateMenuCategoryFormData = z.infer<
-  typeof CreateMenuCategoryRequestSchema
->;
+type CreateCategoryFormValues = z.infer<typeof CreateMenuCategoryRequestSchema>;
 
 interface CreateMenuCategoryDialogProps {
   open: boolean;
   onClose: () => void;
 }
 
+/**
+ * Dialog để tạo menu category mới
+ * Form fields: code, name, active
+ */
 export default function CreateMenuCategoryDialog({
   open,
   onClose,
 }: CreateMenuCategoryDialogProps) {
-  const form = useForm<CreateMenuCategoryFormData>({
+  const { mutate: createCategory, isPending } = useCreateMenuCategory();
+
+  const form = useForm<CreateCategoryFormValues>({
     resolver: zodResolver(CreateMenuCategoryRequestSchema),
     defaultValues: {
       code: "",
@@ -48,10 +52,8 @@ export default function CreateMenuCategoryDialog({
     },
   });
 
-  const { mutate: createMenuCategory, isPending } = useCreateMenuCategory();
-
-  const handleSubmit = (data: CreateMenuCategoryFormData) => {
-    createMenuCategory(data, {
+  const onSubmit = (data: CreateCategoryFormValues) => {
+    createCategory(data, {
       onSuccess: () => {
         form.reset();
         onClose();
@@ -66,20 +68,16 @@ export default function CreateMenuCategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Thêm danh mục thực đơn mới</DialogTitle>
+          <DialogTitle>Thêm danh mục mới</DialogTitle>
           <DialogDescription>
-            Điền thông tin cho danh mục thực đơn mới. Tất cả các trường đánh dấu
-            * đều bắt buộc.
+            Tạo danh mục mới cho thực đơn. Các trường có dấu * là bắt buộc.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Code */}
             <FormField
               control={form.control}
@@ -91,12 +89,13 @@ export default function CreateMenuCategoryDialog({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="VD: APPETIZER, MAIN_COURSE, DESSERT"
+                      placeholder="VD: FOOD, DRINK, DESSERT..."
+                      className="font-mono"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Mã duy nhất để nhận diện danh mục
+                    Mã định danh duy nhất cho danh mục (viết hoa, không dấu)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -113,28 +112,26 @@ export default function CreateMenuCategoryDialog({
                     Tên danh mục <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="VD: Khai vị, Món chính, Tráng miệng"
-                      {...field}
-                    />
+                    <Input placeholder="VD: Món chính, Đồ uống..." {...field} />
                   </FormControl>
+                  <FormDescription>Tên hiển thị của danh mục</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Active Status */}
+            {/* Active */}
             <FormField
               control={form.control}
               name="active"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/30">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">
                       Trạng thái hoạt động
                     </FormLabel>
                     <FormDescription>
-                      Bật để danh mục có thể được sử dụng ngay
+                      Bật để danh mục có thể được sử dụng trong hệ thống
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -157,7 +154,7 @@ export default function CreateMenuCategoryDialog({
                 Hủy
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Đang thêm..." : "Thêm danh mục"}
+                {isPending ? "Đang tạo..." : "Tạo danh mục"}
               </Button>
             </DialogFooter>
           </form>

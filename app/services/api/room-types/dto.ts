@@ -1,5 +1,5 @@
 import type z from "zod";
-import useRoomTypesSchema from "~/services/schema/room-types.schema";
+import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
 
 const {
   RoomTypesListItem,
@@ -9,26 +9,24 @@ const {
   CreateRoomTypesRequestSchema,
   CreateRoomTypesResponseSchema,
   UpdateRoomTypesDetailResponseSchema,
-} = useRoomTypesSchema();
+} = RoomTypesSchema;
 
-type RoomTypesListItemDto = z.infer<typeof RoomTypesListItem>;
-type RoomTypesListResponseDto = z.infer<typeof RoomTypesListResponseSchema>;
-type RoomTypesDetailResponseDto = z.infer<typeof RoomTypesDetailResponseSchema>;
-type UpdateRoomTypesDetailRequestDto = z.infer<
+export type RoomTypesListItemDto = z.infer<typeof RoomTypesListItem>;
+export type RoomTypesListResponseDto = z.infer<
+  typeof RoomTypesListResponseSchema
+>;
+export type RoomTypesDetailResponseDto = z.infer<
+  typeof RoomTypesDetailResponseSchema
+>;
+export type UpdateRoomTypesDetailRequestDto = z.infer<
   typeof UpdateRoomTypesDetailRequestSchema
 >;
-type UpdateRoomTypesDetailResponseDto = z.infer<
+export type UpdateRoomTypesDetailResponseDto = z.infer<
   typeof UpdateRoomTypesDetailResponseSchema
 >;
-type CreateRoomTypesRequestDto = z.infer<typeof CreateRoomTypesRequestSchema>;
-type CreateRoomTypesResponseDto = z.infer<typeof CreateRoomTypesResponseSchema>;
-
-export type {
-  RoomTypesListItemDto,
-  RoomTypesListResponseDto,
-  RoomTypesDetailResponseDto,
-  UpdateRoomTypesDetailRequestDto,
-  CreateRoomTypesResponseDto,
-  UpdateRoomTypesDetailResponseDto,
-  CreateRoomTypesRequestDto,
-};
+export type CreateRoomTypesRequestDto = z.infer<
+  typeof CreateRoomTypesRequestSchema
+>;
+export type CreateRoomTypesResponseDto = z.infer<
+  typeof CreateRoomTypesResponseSchema
+>;

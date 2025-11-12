@@ -1,30 +1,41 @@
-import type z from "zod";
-import useMenuCategorySchema from "~/services/schema/menu-category.schema";
+import type { z } from "zod";
+import { MenuCategorySchema } from "~/services/api/menu-category/menu-category.schema";
 
 const {
   MenuCategoryItemSchema,
-  MenuCategoryListResponseSchema,
-  MenuCategoryDetailSchema,
+  EditMenuCategoryRequestSchema,
+  UpdateMenuCategoryRequestSchema,
   CreateMenuCategoryRequestSchema,
   CreateMenuCategoryResponseSchema,
-  UpdateMenuCategoryRequestSchema,
-  UpdateMenuCategoryResponseSchema,
-} = useMenuCategorySchema();
+  MenuCategoryListResponseSchema,
+} = MenuCategorySchema;
 
-export type MenuCategoryItem = z.infer<typeof MenuCategoryItemSchema>;
+// Menu Category Item types
+export type MenuCategoryItemDto = z.infer<typeof MenuCategoryItemSchema>;
+
+// Menu Category Detail type (same as item)
+export type MenuCategoryDetailDto = z.infer<typeof MenuCategoryItemSchema>;
+
+// Menu Category List types
 export type MenuCategoryListResponseDto = z.infer<
   typeof MenuCategoryListResponseSchema
 >;
-export type MenuCategoryDetailDto = z.infer<typeof MenuCategoryDetailSchema>;
+
+// Create Menu Category types
 export type CreateMenuCategoryRequestDto = z.infer<
   typeof CreateMenuCategoryRequestSchema
 >;
 export type CreateMenuCategoryResponseDto = z.infer<
   typeof CreateMenuCategoryResponseSchema
 >;
+
+// Update Menu Category types
 export type UpdateMenuCategoryRequestDto = z.infer<
   typeof UpdateMenuCategoryRequestSchema
 >;
-export type UpdateMenuCategoryResponseDto = z.infer<
-  typeof UpdateMenuCategoryResponseSchema
+export type UpdateMenuCategoryResponseDto = MenuCategoryItemDto;
+
+// Edit Menu Category type (shared schema)
+export type EditMenuCategoryRequestDto = z.infer<
+  typeof EditMenuCategoryRequestSchema
 >;

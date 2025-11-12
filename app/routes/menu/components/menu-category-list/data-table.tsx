@@ -1,9 +1,9 @@
 import {
-  type ColumnDef,
-  type RowSelectionState,
   flexRender,
   getCoreRowModel,
   useReactTable,
+  type ColumnDef,
+  type RowSelectionState,
 } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import {
@@ -14,19 +14,17 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { cn } from "~/lib/utils";
-import type { MenuCategoryItem } from "~/services/api/menu-category/dto";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
-export function DataTable<TData extends MenuCategoryItem, TValue>({
+export function DataTable<TData extends MenuCategoryItemDto, TValue>({
   columns,
   data,
-  onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -41,62 +39,44 @@ export function DataTable<TData extends MenuCategoryItem, TValue>({
     getRowId: (row) => row.id,
   });
 
-  // Notify parent of selection changes
-  useEffect(() => {
-    const selectedRows = table
-      .getSelectedRowModel()
-      .rows.map((row) => row.original);
-    onSelectionChange?.(selectedRows);
-  }, [rowSelection, onSelectionChange, table]);
-
   return (
-    <div className="rounded-md border bg-card">
+    <div className="rounded-md border bg-card shadow-sm">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => {
-              return (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={cn("h-16 transition-all")}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                className="h-14 transition-all"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center text-muted-foreground"
-              >
-                Không có dữ liệu
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                <p className="text-muted-foreground">Không có dữ liệu.</p>
               </TableCell>
             </TableRow>
           )}

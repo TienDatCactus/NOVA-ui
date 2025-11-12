@@ -1,256 +1,28 @@
 import {
-  BadgeQuestionMark,
+  type LucideIcon,
   Bath,
-  BookMarked,
-  ClipboardMinus,
-  HandPlatter,
-  Handshake,
+  BarChart3,
+  Calendar,
+  FileText,
+  Grid3x3,
+  HelpCircle,
   HousePlus,
-  IdCardLanyard,
-  LayoutDashboard,
+  List,
+  ListOrdered,
+  LogIn,
+  MessageSquareDot,
+  PackageSearch,
+  Plus,
   ReceiptText,
-  Search,
   Settings,
+  ShoppingCart,
+  Tag,
   Users,
-  Warehouse,
+  Utensils,
+  UtensilsCrossed,
 } from "lucide-react";
-import type { JSX } from "react";
-
-const NAV_ITEMS: Array<{ title: string; icon: JSX.Element }> = [
-  {
-    title: "Bảng điều khiển",
-    icon: <LayoutDashboard />,
-  },
-  {
-    title: "Đối tác",
-    icon: <Handshake />,
-  },
-  {
-    title: "Phòng",
-    icon: <Bath />,
-  },
-  {
-    title: "Hàng hóa",
-    icon: <Warehouse />,
-  },
-  {
-    title: "Nhân viên",
-    icon: <IdCardLanyard />,
-  },
-  { title: "Báo cáo", icon: <ClipboardMinus /> },
-];
-
-const SERVICES_ITEMS: Array<{
-  title: string;
-  description: string;
-  category: string[];
-}> = [
-  {
-    title: "Bảng điều khiển",
-    description:
-      "Cung cấp cái nhìn tổng quan về hoạt động hệ thống, thống kê và báo cáo nhanh.",
-    category: ["Thông tin", "Quản trị"],
-  },
-  {
-    title: "Nhân viên",
-    description:
-      "Quản lý hồ sơ, phân quyền và thông tin nhân sự trong tổ chức.",
-    category: ["Thông tin", "Quản trị"],
-  },
-  {
-    title: "Đối tác",
-    description:
-      "Quản lý danh sách nhà cung cấp, khách hàng, đối tác chiến lược và các hợp đồng liên quan.",
-    category: ["Đối tác", "Quan hệ"],
-  },
-  {
-    title: "Phòng",
-    description:
-      "Quản lý cơ sở vật chất, phòng ban hoặc khu vực sử dụng dịch vụ.",
-    category: ["Cơ sở hạ tầng", "Dịch vụ"],
-  },
-  {
-    title: "Hàng hóa",
-    description:
-      "Theo dõi tình trạng hàng hóa, tồn kho và quản lý luồng nhập – xuất.",
-    category: ["Cơ sở hạ tầng", "Dịch vụ"],
-  },
-];
 
 const SERVICE_CATEGORIES = ["Dịch vụ", "Thức ăn", "Đồ uống"];
-const DASHBOARD_ITEMS_RECEPTIONIST: Array<{
-  id: number;
-  title: string;
-  icon: JSX.Element;
-  href: string;
-  children?: Array<{ title: string; href: string }>;
-}> = [
-  {
-    id: 1,
-    title: "Đặt phòng",
-    icon: <HousePlus />,
-    href: "/dashboard/reservation",
-  },
-  {
-    id: 2,
-    title: "Buồng phòng",
-    icon: <Bath />,
-    href: "/dashboard/rooms",
-  },
-  {
-    id: 4,
-    title: "Dịch vụ",
-    icon: <HandPlatter />,
-    href: "/dashboard/services",
-  },
-  {
-    id: 5,
-    title: "Hóa đơn",
-    icon: <ReceiptText />,
-    href: "/dashboard/invoices",
-  },
-];
-const SUB_DASHBOARD_ITEMS: Array<{
-  id: number;
-  title: string;
-  icon: JSX.Element;
-  href: string;
-}> = [
-  {
-    id: 1,
-    title: "Cài đặt",
-    icon: <Settings />,
-    href: "/dashboard",
-  },
-  {
-    id: 2,
-    title: "Tìm kiếm",
-    icon: <Search />,
-    href: "/dashboard",
-  },
-  {
-    id: 3,
-    title: "Trợ giúp",
-    icon: <BadgeQuestionMark />,
-    href: "/dashboard",
-  },
-];
-
-const RESERVATION_TOP_NAV_ITEMS: Array<{
-  icon?: JSX.Element;
-  title: string;
-  href?: string;
-  children?: Array<{ title: string; href: string }>;
-}> = [
-  {
-    icon: <ClipboardMinus size={16} />,
-    title: "Báo cáo Lễ tân",
-    href: "/dashboard/reservation",
-  },
-  {
-    icon: <HousePlus size={16} />,
-    title: "Lịch đặt phòng",
-    children: [
-      { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
-      {
-        title: "Timeline",
-        href: "/dashboard/reservation/bookings/timeline",
-      },
-      { title: "Danh sách", href: "/dashboard/reservation/bookings/list" },
-    ],
-  },
-  {
-    icon: <ReceiptText size={16} />,
-    title: "Hóa đơn",
-    href: "/dashboard/reservation/invoices",
-  },
-];
-const ROOMS_TOP_NAV_ITEMS: Array<{
-  icon?: JSX.Element;
-  title: string;
-  href?: string;
-  children?: Array<{ title: string; href: string }>;
-}> = [
-  {
-    icon: <HousePlus size={16} />,
-    title: "Phòng",
-    href: "/dashboard/rooms",
-  },
-  {
-    icon: <ClipboardMinus size={16} />,
-    title: "Hạng phòng",
-    href: "/dashboard/rooms/types",
-  },
-
-  {
-    icon: <ReceiptText size={16} />,
-    title: "Thiết lập giá phòng",
-    href: "/dashboard/rooms/prices",
-  },
-];
-const SERVICES_TOP_NAV_ITEMS: Array<{
-  icon?: JSX.Element;
-  title: string;
-  href?: string;
-  children?: Array<{ title: string; href: string }>;
-}> = [
-  {
-    icon: <ClipboardMinus size={16} />,
-    title: "Dịch vụ",
-    href: "/dashboard/services",
-  },
-  {
-    icon: <ClipboardMinus size={16} />,
-    title: "Loại dịch vụ",
-    href: "/dashboard/services/types",
-  },
-  {
-    icon: <BookMarked size={16} />,
-    title: "Danh mục thực đơn",
-    href: "/dashboard/services/menu-categories",
-  },
-  {
-    icon: <HandPlatter size={16} />,
-    title: "Thực đơn",
-    href: "/dashboard/services/menu-items",
-  },
-];
-const INVOICES_TOP_NAV_ITEMS: Array<{
-  icon?: JSX.Element;
-  title: string;
-  href?: string;
-  children?: Array<{ title: string; href: string }>;
-}> = [
-  {
-    icon: <ClipboardMinus size={16} />,
-    title: "Báo cáo Lễ tân",
-    href: "/dashboard/reservation",
-  },
-  {
-    icon: <HousePlus size={16} />,
-    title: "Lịch đặt phòng",
-    children: [
-      { title: "Sơ đồ", href: "/dashboard/reservation/bookings/grid" },
-      {
-        title: "Timeline",
-        href: "/dashboard/reservation/bookings/timeline",
-      },
-      { title: "Danh sách", href: "/dashboard/reservation/bookings/list" },
-    ],
-  },
-  {
-    icon: <ReceiptText size={16} />,
-    title: "Hóa đơn",
-    href: "/dashboard/reservation/new",
-  },
-];
-
-const TOP_NAV_CONFIG = {
-  "/reservation": RESERVATION_TOP_NAV_ITEMS,
-  "/rooms": ROOMS_TOP_NAV_ITEMS,
-  "/services": SERVICES_TOP_NAV_ITEMS,
-  "/invoices": INVOICES_TOP_NAV_ITEMS,
-} as const;
 
 const ROOM_COUNT = 13;
 const DAYS_COUNT = 7;
@@ -262,20 +34,225 @@ const totalSubCols = DAYS_COUNT * SUBS_PER_DAY;
 
 const CHECK_IN_TIME = "13:00 PM";
 const CHECK_OUT_TIME = "11:00 AM";
+
+// Sidebar Navigation Data
+const SIDEBAR_NAV_MAIN: Array<{
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  items?: Array<{
+    title: string;
+    url: string;
+  }>;
+}> = [
+  {
+    title: "Đặt phòng",
+    url: "/dashboard/bookings",
+    icon: HousePlus,
+    items: [
+      {
+        title: "Báo cáo",
+        url: "/dashboard/bookings",
+      },
+      {
+        title: "Sơ đồ phòng",
+        url: "/dashboard/bookings/grid",
+      },
+      {
+        title: "Danh sách đặt phòng",
+        url: "/dashboard/bookings/list",
+      },
+      {
+        title: "Hóa đơn đặt phòng",
+        url: "/dashboard/bookings/invoices",
+      },
+      {
+        title: "Đặt phòng mới",
+        url: "/dashboard/bookings/new-booking",
+      },
+    ],
+  },
+  {
+    title: "Buồng phòng",
+    url: "/dashboard/rooms",
+    icon: Bath,
+    items: [
+      {
+        title: "Danh sách phòng",
+        url: "/dashboard/rooms",
+      },
+      {
+        title: "Loại phòng",
+        url: "/dashboard/rooms/types",
+      },
+    ],
+  },
+  {
+    title: "Dịch vụ",
+    url: "/dashboard/services",
+    icon: Utensils,
+    items: [
+      {
+        title: "Danh sách dịch vụ",
+        url: "/dashboard/services",
+      },
+      {
+        title: "Loại dịch vụ",
+        url: "/dashboard/services/types",
+      },
+      {
+        title: "Thực đơn",
+        url: "/dashboard/services/menu",
+      },
+      {
+        title: "Danh mục món ăn",
+        url: "/dashboard/services/menu-categories",
+      },
+    ],
+  },
+  {
+    title: "Đơn hàng",
+    url: "/dashboard/orders",
+    icon: ListOrdered,
+    items: [
+      {
+        title: "Đơn món ăn",
+        url: "/dashboard/orders/menu-orders",
+      },
+      {
+        title: "Đơn dịch vụ",
+        url: "/dashboard/orders/service-orders",
+      },
+      {
+        title: "POS Món ăn",
+        url: "/dashboard/menu-pos",
+      },
+      {
+        title: "POS Dịch vụ",
+        url: "/dashboard/service-pos",
+      },
+    ],
+  },
+  {
+    title: "Tài khoản",
+    url: "/dashboard/users",
+    icon: Users,
+  },
+  {
+    title: "Hóa đơn",
+    url: "/dashboard/invoices",
+    icon: ReceiptText,
+  },
+];
+
+const SIDEBAR_PROJECTS: Array<{
+  name: string;
+  url: string;
+  icon: LucideIcon;
+}> = [
+  {
+    name: "Chat",
+    url: "/dashboard/chat",
+    icon: MessageSquareDot,
+  },
+  {
+    name: "Đơn vị tính",
+    url: "/dashboard/units",
+    icon: PackageSearch,
+  },
+  {
+    name: "Cài đặt",
+    url: "/settings",
+    icon: Settings,
+  },
+  {
+    name: "Trợ giúp",
+    url: "/help",
+    icon: HelpCircle,
+  },
+];
+
+const SIDEBAR_TEAMS = [
+  {
+    name: "NOVA Resort",
+    logo: HousePlus,
+    plan: "Enterprise",
+  },
+];
+
+// Command Bar Navigation - Flat list of all routes
+const COMMAND_BAR_ROUTES: Array<{
+  name: string;
+  icon: LucideIcon;
+  href: string;
+}> = [
+  // Auth
+
+  // Bookings
+  { name: "Báo cáo đặt phòng", icon: BarChart3, href: "/dashboard/bookings" },
+  { name: "Sơ đồ phòng", icon: Grid3x3, href: "/dashboard/bookings/grid" },
+  { name: "Danh sách đặt phòng", icon: List, href: "/dashboard/bookings/list" },
+  {
+    name: "Hóa đơn đặt phòng",
+    icon: FileText,
+    href: "/dashboard/bookings/invoices",
+  },
+  {
+    name: "Đặt phòng mới",
+    icon: Plus,
+    href: "/dashboard/bookings/new-booking",
+  },
+
+  // Rooms
+  { name: "Danh sách phòng", icon: Bath, href: "/dashboard/rooms" },
+  { name: "Loại phòng", icon: Tag, href: "/dashboard/rooms/types" },
+
+  // Services
+  { name: "Danh sách dịch vụ", icon: Utensils, href: "/dashboard/services" },
+  { name: "Loại dịch vụ", icon: Tag, href: "/dashboard/services/types" },
+  { name: "Thực đơn", icon: UtensilsCrossed, href: "/dashboard/services/menu" },
+  {
+    name: "Danh mục món ăn",
+    icon: List,
+    href: "/dashboard/services/menu-categories",
+  },
+
+  // Orders
+  {
+    name: "Đơn món ăn",
+    icon: ListOrdered,
+    href: "/dashboard/orders/menu-orders",
+  },
+  {
+    name: "Đơn dịch vụ",
+    icon: ListOrdered,
+    href: "/dashboard/orders/service-orders",
+  },
+  { name: "POS Món ăn", icon: ShoppingCart, href: "/dashboard/menu-pos" },
+  { name: "POS Dịch vụ", icon: ShoppingCart, href: "/dashboard/service-pos" },
+
+  // Others
+  { name: "Tài khoản", icon: Users, href: "/dashboard/users" },
+  { name: "Hóa đơn", icon: ReceiptText, href: "/dashboard/invoices" },
+  { name: "Chat", icon: MessageSquareDot, href: "/dashboard/chat" },
+  { name: "Đơn vị tính", icon: PackageSearch, href: "/dashboard/units" },
+  { name: "Cài đặt", icon: Settings, href: "/settings" },
+  { name: "Trợ giúp", icon: HelpCircle, href: "/help" },
+];
+
 export {
-  NAV_ITEMS,
-  SERVICES_ITEMS,
-  DASHBOARD_ITEMS_RECEPTIONIST,
-  SUB_DASHBOARD_ITEMS,
-  ROOM_COUNT,
-  DAYS_COUNT,
-  SUBS_PER_DAY,
-  headerRows,
-  rowHeight,
-  firstColWidth,
-  totalSubCols,
-  TOP_NAV_CONFIG,
-  SERVICE_CATEGORIES,
   CHECK_IN_TIME,
   CHECK_OUT_TIME,
+  COMMAND_BAR_ROUTES,
+  DAYS_COUNT,
+  firstColWidth,
+  headerRows,
+  ROOM_COUNT,
+  rowHeight,
+  SERVICE_CATEGORIES,
+  SIDEBAR_NAV_MAIN,
+  SIDEBAR_PROJECTS,
+  SIDEBAR_TEAMS,
+  SUBS_PER_DAY,
+  totalSubCols,
 };

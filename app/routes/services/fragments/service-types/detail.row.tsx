@@ -1,11 +1,18 @@
-import { Badge } from "~/components/ui/badge";
-import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import { format } from "date-fns";
-import { is, vi } from "date-fns/locale";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
+import { vi } from "date-fns/locale";
+import { Badge } from "~/components/ui/badge";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
 import Image from "~/components/ui/image";
+import { DetailItem, DetailSection } from "~/components/ui/section-detail";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
-import { useServiceTypeDetails } from "../../container/service-types-query.hooks";
+import type { ServiceTypeItem } from "~/services/api/service-types/dto";
+import { useServiceTypeDetails } from "../../container/service-types/query.hooks";
 
 interface ServiceTypeDetailRowProps {
   type: ServiceTypeItem;
@@ -14,44 +21,46 @@ interface ServiceTypeDetailRowProps {
 export default function ServiceTypeDetailRow({
   type,
 }: ServiceTypeDetailRowProps) {
-  const hasImages = Array.isArray(type.imageUrls) && type.imageUrls.length > 0;
+  const hasImages = Array.isArray(type.images) && type.images.length > 0;
   const { data: detailData, isPending } = useServiceTypeDetails(type.id);
 
   if (isPending) {
     return <div>Đang tải chi tiết...</div>;
   }
   return (
-    <div className="p-6 bg-muted/30 border-l-4 border-l-primary/20 animate-in slide-in-from-top-2 duration-200">
+    <div className="p-6 bg-muted/30 border-l-4 border-l-primary/20  gap-4 flex">
       {hasImages && (
-        <div className="mb-6">
+        <div className="mb-6 w-80">
           <h4 className="font-semibold text-sm mb-3">Hình ảnh</h4>
-          <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-            <div className="flex gap-4 p-4">
-              {type.imageUrls.map((url, index) => (
-                <div
-                  key={index}
-                  className="relative rounded-lg overflow-hidden border-2 border-border flex-shrink-0"
-                >
-                  <ImageZoom>
-                    <Image
-                      src={url}
-                      width={200}
-                      height={200}
-                      alt={`${type.name} - ${index + 1}`}
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                    />
-                  </ImageZoom>
-                </div>
-              ))}
+          <div className="flex flex-col max-h-[300px] overflow-y-auto gap-4 ">
+            <div className="max-h-[400px] grid place-items-center overflow-y-auto">
+              <Carousel>
+                <CarouselContent className="w-60 h-fit">
+                  {type.images?.map((img, index) => (
+                    <CarouselItem key={index}>
+                      <div className="p-1">
+                        <ImageZoom>
+                          <Image
+                            src={img.url}
+                            height={200}
+                            width={200}
+                            alt={`${type.name} - ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </ImageZoom>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
             </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          </div>
         </div>
       )}
 
-      {/* Details Grid */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Left Column */}
+      <div className="flex-1 grid grid-cols-1 col-span-2">
         <div className="space-y-4">
           <DetailSection title="Thông tin cơ bản">
             <DetailItem label="Mã loại dịch vụ" value={type.code} />
@@ -67,12 +76,11 @@ export default function ServiceTypeDetailRow({
           </DetailSection>
         </div>
 
-        {/* Right Column */}
         <div className="space-y-4">
           <DetailSection title="Mô tả">
-            <p className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground text-wrap">
               {type.description || "Không có mô tả"}
-            </p>
+            </div>
           </DetailSection>
 
           {type.createdAt && type.updatedAt && (
@@ -93,37 +101,6 @@ export default function ServiceTypeDetailRow({
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-// Helper components
-function DetailSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-3">
-      <h4 className="font-semibold text-sm">{title}</h4>
-      <div className="space-y-2">{children}</div>
-    </div>
-  );
-}
-
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="flex justify-between items-center">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm font-medium">{value}</span>
     </div>
   );
 }

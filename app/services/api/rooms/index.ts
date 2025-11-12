@@ -3,7 +3,7 @@ import type {
   RoomBookingHistoryParams,
   RoomDetailParams,
   RoomListParams,
-} from "~/services/types/room.types";
+} from "~/services/api/rooms/room.types";
 import type {
   RoomDetailResponseDto,
   UpdateRoomStatusResponseDto,
@@ -17,7 +17,7 @@ import type {
 } from "./dto";
 import http from "~/lib/http";
 import { Rooms } from "~/services/url";
-import useRoomSchema from "~/services/schema/room.schema";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 
 const {
   RoomDetailSchema,
@@ -29,7 +29,7 @@ const {
   AvailableRoomsInternalResponseSchema,
   CreateRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
-} = useRoomSchema();
+} = RoomSchema;
 
 async function getRoomList(
   params: RoomListParams
@@ -127,6 +127,16 @@ async function getAvailableRoomsInternal(
     return Promise.reject(error);
   }
 }
+
+async function deleteRoom(id: string) {
+  try {
+    await http.delete(Rooms.delete(id));
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const RoomsService = {
   getRoomList,
   getRoomDetails,
@@ -135,4 +145,5 @@ export const RoomsService = {
   createRoom,
   updateRoomDetail,
   getAvailableRoomsInternal,
+  deleteRoom,
 };

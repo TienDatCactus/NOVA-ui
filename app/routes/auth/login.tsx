@@ -20,13 +20,14 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import useAuthSchema from "~/services/schema/auth.schema";
 import type { LoginDto } from "~/services/api/auth/dto";
 import { useAuth } from "./container/auth.hooks";
+import { AuthSchema } from "~/services/api/auth/auth.schema";
+import PasswordInput from "~/components/ui/password-input";
 
 export default function Login() {
-  const { login, isLoading, error: apiError } = useAuth();
-  const { LoginSchema } = useAuthSchema();
+  const { login, isLoading } = useAuth();
+  const { LoginSchema } = AuthSchema;
   const loginForm = useForm({
     resolver: zodResolver(LoginSchema),
   });
@@ -38,7 +39,7 @@ export default function Login() {
     }
   };
   return (
-    <Card className="w-124 pb-0 max-w-md shadow-none border-none">
+    <Card className="w-124 max-w-md bg-transparent border-none shadow-none">
       <CardHeader className="text-center">
         <CardTitle className="font-bold text-3xl">
           Chào mừng trở lại với NOVA
@@ -60,10 +61,10 @@ export default function Login() {
                       <FormLabel>Mã quản lý</FormLabel>
                       <FormControl>
                         <Input
+                          {...field}
                           autoFocus
                           type="text"
                           placeholder="nova-admin"
-                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -79,10 +80,10 @@ export default function Login() {
                     <FormItem>
                       <FormLabel>Mật khẩu</FormLabel>
                       <FormControl>
-                        <Input
+                        <PasswordInput
+                          {...field}
                           type="password"
                           placeholder="nova-password"
-                          {...field}
                         />
                       </FormControl>
                       <FormMessage />

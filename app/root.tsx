@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AlertTriangle } from "lucide-react";
 import {
   isRouteErrorResponse,
   Links,
@@ -8,7 +9,7 @@ import {
   ScrollRestoration,
   useNavigation,
 } from "react-router";
-import type { Route } from "./+types/root";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,13 +18,12 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { AlertTriangle } from "lucide-react";
+import type { Route } from "./+types/root";
 import "./index.css";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/sonner";
-import GlobalLoader from "./features/loading";
+import { SpinnerLoader } from "./features/loading";
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -64,9 +64,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       {isNavigating && (
-        <div className="absolute inset-0 flex items-center justify-center z-50 bg-white">
-          <GlobalLoader />
-        </div>
+        <SpinnerLoader fullScreen size="lg" text="Đang tải..." />
       )}
       <Outlet />
     </QueryClientProvider>

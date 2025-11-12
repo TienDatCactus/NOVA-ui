@@ -1,7 +1,11 @@
-import { useRooms } from "~/routes/rooms/container/rooms-query.hooks";
+import { useNavigate } from "react-router";
+import { Card, CardContent } from "~/components/ui/card";
+import { Badge } from "~/components/ui/badge";
 import type { Route } from "./+types/grid";
-
-import BookingGrid from "./components/booking.grid";
+import BookingGrid from "./components/booking-grid";
+import BookingGridFilters from "./fragments/booking-grid-filters";
+import { useAvailableRoomsFilter } from "./container/available-booking-filter.hooks";
+import { useAvailableRooms } from "./container/booking-query.hooks";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -15,10 +19,38 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { data, isPending, refetch } = useRooms();
+  const navigate = useNavigate();
+  const { filters, updateFilter, resetFilters, filterAvailableRooms } =
+    useAvailableRoomsFilter();
+
+  const {
+    data: rooms,
+    refetch,
+    isLoading,
+  } = useAvailableRooms({
+    checkinDate: filters.startDate ?? new Date(),
+    checkoutDate: filters.endDate ?? new Date(),
+    guests: filters.guests ?? 1,
+    enabled: filters != null,
+  });
+
+  const filteredRooms = filterAvailableRooms(rooms ?? []);
+
   return (
-    <>
-      <BookingGrid rooms={data} isLoading={isPending} refetch={refetch} />
-    </>
+    <div className="flex p-4  flex-col space-y-4 h-full">
+      <BookingGridFilters
+        filters={filters}
+        updateFilters={updateFilter}
+        resetFilters={resetFilters}
+      />
+
+      <div className="flex-1 overflow-auto">
+        <BookingGrid
+          rooms={filteredRooms}
+          isLoading={isLoading}
+          refetch={refetch}
+        />
+      </div>
+    </div>
   );
 }

@@ -1,16 +1,21 @@
 import type z from "zod";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import useBookingSchema from "~/services/schema/booking.schema";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 
-const { StaffCreateBookingSchema } = useBookingSchema();
+const { StaffCreateBookingSchema } = BookingSchema;
 type CreateBookingInput = z.infer<typeof StaffCreateBookingSchema>;
+
+// Extended type to include bookingType for UI flow
+type CreateBookingData = Partial<CreateBookingInput> & {
+  bookingType?: "Direct" | "OTA";
+};
 
 // -------------
 interface CreateBookingState {
-  data: Partial<CreateBookingInput>;
+  data: CreateBookingData;
   currentStep: number;
-  setData: (data: Partial<CreateBookingInput>) => void;
+  setData: (data: Partial<CreateBookingData>) => void;
   setStep: (step: number) => void;
   reset: () => void;
 }
@@ -29,6 +34,13 @@ export const useCreateBookingStore = create<CreateBookingState>()(
     }),
     {
       name: "nova-create-booking",
+      partialize: (state) => ({
+        data: {
+          ...state.data,
+          serviceOrder: undefined,
+        },
+        currentStep: state.currentStep,
+      }),
     }
   )
 );

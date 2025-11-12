@@ -32,12 +32,12 @@ import type {
   RoomListItemDto,
   UpdateRoomDetailRequestDto,
 } from "~/services/api/rooms/dto";
-import useRoomSchema from "~/services/schema/room.schema";
-import { RoomStatusEnum } from "~/services/types/room.types";
-import { useRoomTypes } from "../container/room-types-query.hooks";
-import { useUpdateRoom } from "../container/rooms-mutation.hooks";
+import { RoomStatusEnum } from "~/services/api/rooms/room.types";
+import { useRoomTypes } from "../container/room-types/query.hooks";
+import { useUpdateRoom } from "../container/rooms/mutation.hooks";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 
-const { UpdateRoomDetailRequestSchema } = useRoomSchema();
+const { UpdateRoomDetailRequestSchema } = RoomSchema;
 
 interface UpdateRoomSheetProps {
   open: boolean;

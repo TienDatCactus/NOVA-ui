@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Upload, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -22,19 +21,19 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
-import { Switch } from "~/components/ui/switch";
-import { Textarea } from "~/components/ui/textarea";
-import useServiceTypesSchema from "~/services/schema/service-types.schema";
-import { useCreateServiceType } from "../container/service-type-mutation.hooks";
 import {
   Dropzone,
   DropzoneContent,
   DropzoneEmptyState,
 } from "~/components/ui/shadcn-io/dropzone";
-import Image from "~/components/ui/image";
+import { Switch } from "~/components/ui/switch";
+import { Textarea } from "~/components/ui/textarea";
+import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
+import { useCreateServiceType } from "../container/service-types/mutation.hooks";
 
-const { CreateServiceTypeRequestSchema } = useServiceTypesSchema();
+const { CreateServiceTypeRequestSchema } = ServiceTypesSchema;
 
 type CreateServiceTypeFormData = z.infer<typeof CreateServiceTypeRequestSchema>;
 

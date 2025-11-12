@@ -6,12 +6,12 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { useState } from "react";
 import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import { formatMoney } from "~/lib/utils";
-import useRoomSchema from "~/services/schema/room.schema";
-import RoomDetailDialog from "../rooms-detail.dialog";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 import RoomActionsCell from "../../fragments/rooms/actions.cell";
 import RoomStatusCell from "../../fragments/rooms/status.cell";
+import RoomDetailDialog from "../rooms-detail.dialog";
 
-const { RoomListItemSchema } = useRoomSchema();
+const { RoomListItemSchema } = RoomSchema;
 type RoomListItem = z.infer<typeof RoomListItemSchema>;
 
 export const columns: ColumnDef<RoomListItem>[] = [

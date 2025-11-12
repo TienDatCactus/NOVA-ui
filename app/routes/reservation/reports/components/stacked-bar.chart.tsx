@@ -1,5 +1,3 @@
-"use client";
-
 import { TrendingUp } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -23,16 +21,6 @@ import {
 export const description =
   "A stacked bar chart showing daily room status breakdown";
 
-const bookingData = [
-  { date: "01/12", booked: 6, checkin: 3, checkout: 2, available: 5 },
-  { date: "02/12", booked: 5, checkin: 4, checkout: 3, available: 4 },
-  { date: "03/12", booked: 7, checkin: 2, checkout: 4, available: 3 },
-  { date: "04/12", booked: 4, checkin: 5, checkout: 2, available: 5 },
-  { date: "05/12", booked: 6, checkin: 3, checkout: 3, available: 4 },
-  { date: "06/12", booked: 5, checkin: 4, checkout: 2, available: 5 },
-  { date: "07/12", booked: 8, checkin: 2, checkout: 1, available: 5 },
-];
-
 const chartConfig = {
   booked: {
     label: "Đã đặt",
@@ -52,7 +40,24 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function BookingStackedBarChart({ className }: { className?: string }) {
+interface BookingStackedBarChartProps {
+  className?: string;
+  data?: Array<{
+    date: string;
+    booked: number;
+    checkin: number;
+    checkout: number;
+    available: number;
+  }>;
+}
+
+export function BookingStackedBarChart({
+  className,
+  data,
+}: BookingStackedBarChartProps) {
+  // Use provided data or fallback to empty array
+  const chartData = data || [];
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -62,51 +67,57 @@ export function BookingStackedBarChart({ className }: { className?: string }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={bookingData}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => `${value}`}
-            />
-            <ChartTooltip
-              content={<ChartTooltipContent />}
-              cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Bar
-              dataKey="available"
-              stackId="a"
-              fill="var(--color-available)"
-              radius={[0, 0, 0, 0]}
-            />
-            <Bar
-              dataKey="booked"
-              stackId="a"
-              fill="var(--color-booked)"
-              radius={[0, 0, 0, 0]}
-            />
-            <Bar
-              dataKey="checkin"
-              stackId="a"
-              fill="var(--color-checkin)"
-              radius={[0, 0, 0, 0]}
-            />
-            <Bar
-              dataKey="checkout"
-              stackId="a"
-              fill="var(--color-checkout)"
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ChartContainer>
+        {chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-[350px] text-muted-foreground">
+            Không có dữ liệu
+          </div>
+        ) : (
+          <ChartContainer config={chartConfig}>
+            <BarChart accessibilityLayer data={chartData}>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => `${value}`}
+              />
+              <ChartTooltip
+                content={<ChartTooltipContent />}
+                cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar
+                dataKey="available"
+                stackId="a"
+                fill="var(--color-available)"
+                radius={[0, 0, 0, 0]}
+              />
+              <Bar
+                dataKey="booked"
+                stackId="a"
+                fill="var(--color-booked)"
+                radius={[0, 0, 0, 0]}
+              />
+              <Bar
+                dataKey="checkin"
+                stackId="a"
+                fill="var(--color-checkin)"
+                radius={[0, 0, 0, 0]}
+              />
+              <Bar
+                dataKey="checkout"
+                stackId="a"
+                fill="var(--color-checkout)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
       </CardContent>
       <CardFooter>
         <legend className="text-muted-foreground leading-none text-sm italic">

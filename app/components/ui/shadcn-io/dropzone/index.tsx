@@ -1,5 +1,3 @@
-"use client";
-
 import { UploadIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { createContext, useContext } from "react";
@@ -143,7 +141,7 @@ export const DropzoneContent = ({
           : new Intl.ListFormat("en").format(src.map((file) => file.name))}
       </p>
       <p className="w-full text-wrap text-muted-foreground text-xs">
-        Drag and drop or click to replace
+        Kéo và thả hoặc nhấp để tải lên
       </p>
     </div>
   );

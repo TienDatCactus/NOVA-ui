@@ -1,29 +1,93 @@
+import { BookDown, SearchIcon } from "lucide-react";
 import React from "react";
-import { Outlet, useSearchParams } from "react-router";
-import DashboardHeader from "~/components/layouts/headers/header.dashboard";
-import DashboardSidebar from "~/components/layouts/side-bar/dashboard/side-bar.dashboard";
-import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
-import { SidebarToggleProvider } from "~/context/sidebar.context";
+import { Link, Outlet } from "react-router";
+import { AppSidebar } from "~/components/layouts/side-bar/dashboard/side-bar.dashboard";
+import { Button } from "~/components/ui/button";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
+import { Input } from "~/components/ui/input";
+import { Kbd } from "~/components/ui/kbd";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "~/components/ui/sidebar";
+import { COMMAND_BAR_ROUTES } from "~/lib/constants";
+import { DASHBOARD } from "~/lib/fe-url";
 import { cn } from "~/lib/utils";
 const DashboardLayout: React.FC = () => {
+  const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "k") {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
   return (
-    <SidebarToggleProvider>
+    <>
       <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-hidden">
-          <DashboardSidebar />
-          <main className="flex-1 flex flex-col overflow-hidden relative">
-            <DashboardHeader />
-            <div
-              className={cn(
-                "rounded-md p-4 w-full mx-auto bg-background  h-full overflow-auto"
-              )}
-            >
-              <Outlet />
+        <AppSidebar />
+        <SidebarInset className="flex-1 flex flex-col overflow-hidden relative ml-0">
+          <header className="h-12 shadow-sm py-6 px-4 z-10 bg-white flex items-center w-full sticky top-0 justify-between border-b">
+            <SidebarTrigger />
+            <div className="flex gap-2 items-center">
+              <Button asChild variant={"info-outline"}>
+                <Link to={DASHBOARD.bookings.newBooking}>
+                  Đặt phòng <BookDown />
+                </Link>
+              </Button>
+
+              <Input
+                placeholder="Tìm kiếm..."
+                className="w-64 h-8 placeholder:text-sm"
+                startAddon={<SearchIcon />}
+                onClick={() => setOpen(true)}
+                endAddon={
+                  <Kbd>
+                    <pre>Ctrl + K</pre>
+                  </Kbd>
+                }
+              />
             </div>
-          </main>
-        </div>
+          </header>
+          <div
+            className={cn(
+              "rounded-md w-full mx-auto bg-background flex-1 overflow-auto"
+            )}
+          >
+            <Outlet />
+          </div>
+        </SidebarInset>
       </SidebarProvider>
-    </SidebarToggleProvider>
+      <CommandDialog className="w-xl" open={open} onOpenChange={setOpen}>
+        <CommandInput placeholder="Tìm kiếm module..." />
+        <CommandList>
+          <CommandEmpty>Không tìm thấy kết quả nào.</CommandEmpty>
+          <CommandGroup heading="Đường dẫn">
+            {COMMAND_BAR_ROUTES.map((route) => (
+              <CommandItem key={route.name}>
+                <Link to={route.href}>
+                  {route.icon && <route.icon className="mr-2 inline-block" />}
+                  <span>{route.name}</span>
+                </Link>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
+    </>
   );
 };
 
