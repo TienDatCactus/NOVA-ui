@@ -155,6 +155,39 @@ const Invoices = {
   calculateFees: "invoice-preview/calculate-fees",
   previewBookingInvoice: "invoice-preview/preview",
 };
+
+const Staff = {
+  list: "Staffs",
+  create: "Staffs",
+  detail: (id: string) => `Staffs/${id}`,
+  update: (id: string) => `Staffs/${id}`,
+  delete: (id: string) => `Staffs/${id}`,
+};
+
+const StaffRole = {
+  list: "StaffRoles",
+  create: "StaffRoles",
+  detail: (id: string) => `StaffRoles/${id}`,
+  update: (id: string) => `StaffRoles/${id}`,
+  delete: (id: string) => `StaffRoles/${id}`,
+};
+
+const WorkShift = {
+  list: "WorkShifts",
+  create: "WorkShifts",
+  detail: (id: string) => `WorkShifts/${id}`,
+  update: (id: string) => `WorkShifts/${id}`,
+  delete: (id: string) => `WorkShifts/${id}`,
+};
+
+const Holiday = {
+  list: "Holidays",
+  create: "Holidays",
+  detail: (id: string) => `Holidays/${id}`,
+  update: (id: string) => `Holidays/${id}`,
+  delete: (id: string) => `Holidays/${id}`,
+};
+
 export {
   Auth,
   User,
@@ -170,4 +203,8 @@ export {
   Reports,
   Orders,
   Invoices,
+  Staff,
+  StaffRole,
+  WorkShift,
+  Holiday,
 };
