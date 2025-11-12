@@ -32,6 +32,15 @@ export const PAYMENT_METHODS = [
   { value: "OnAccount", label: "Ghi nợ" },
 ] as const;
 
+// Invoice item type mapping (aligned with InvoiceItemType enum)
+// Room = 1, MenuItem = 2, ServiceItem = 3, Custom = 4
+export const INVOICE_ITEM_TYPES = [
+  { code: 1, value: "Room", label: "Phòng" },
+  { code: 2, value: "MenuItem", label: "Món ăn/Đồ uống" },
+  { code: 3, value: "ServiceItem", label: "Dịch vụ" },
+  { code: 4, value: "Custom", label: "Tùy chỉnh" },
+] as const;
+
 // Request params types
 export interface InvoiceListParams {
   Page?: number;
@@ -40,10 +49,10 @@ export interface InvoiceListParams {
   SortDirection?: string;
   Status?: string; // Unpaid, DepositOnly, PartiallyPaid, Paid, Overpaid, Refunded, Chargeback, Voided
   PaymentMethod?: string; // Unknown, Cash, Card, BankTransfer, OTACollect, OTAPrepaid, OnAccount
-  BookingId?: string;
-  BookingCode?: string;
+  BookingId?: string; // Select from booking list
+  BookingCode?: string; // Select from booking list
   Keyword?: string;
   IssuedFrom?: string; // date-time string
   IssuedTo?: string; // date-time string
-  InvoiceType?: string;
+  InvoiceType?: string; // Room, MenuItem, ServiceItem, Custom (from InvoiceItemType enum)
 }

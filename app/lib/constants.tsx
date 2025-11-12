@@ -163,6 +163,11 @@ const SIDEBAR_NAV_MAIN: Array<{
     icon: Users,
   },
   {
+    title: "Nhân sự",
+    url: "/dashboard/staff",
+    icon: UserCog,
+  },
+  {
     title: "Hóa đơn",
     url: "/dashboard/invoices",
     icon: ReceiptText,
