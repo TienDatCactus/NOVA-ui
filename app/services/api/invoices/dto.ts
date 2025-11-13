@@ -5,7 +5,6 @@ const {
   InvoiceStatusEnum,
   InvoiceTypeEnum,
   AddCustomItemsRequestSchema,
-  ConfirmInvoicePaymentRequestSchema,
   RefundInvoiceRequestSchema,
   InvoiceListItemSchema,
   PaginationMetaSchema,
@@ -15,9 +14,6 @@ const {
   InvoiceDetailSchema,
   InvoiceByIdResponseSchema,
   InvoiceByBookingResponseSchema,
-  FinalizeInvoiceResponseSchema,
-  CreateInvoiceFromOrdersRequestSchema,
-  CreateInvoiceFromOrdersResponseSchema,
   InvoicePaymentRequestSchema,
   InvoicePaymentResponseSchema,
   PaymentsFromInvoiceResponseSchema,
@@ -37,15 +33,11 @@ export type InvoiceTypeEnum = z.infer<typeof InvoiceTypeEnum>;
 export type AddCustomItemsRequestDto = z.infer<
   typeof AddCustomItemsRequestSchema
 >;
-export type ConfirmInvoicePaymentRequestDto = z.infer<
-  typeof ConfirmInvoicePaymentRequestSchema
->;
+
 export type RefundInvoiceRequestDto = z.infer<
   typeof RefundInvoiceRequestSchema
 >;
-export type CreateInvoiceFromOrdersRequestDto = z.infer<
-  typeof CreateInvoiceFromOrdersRequestSchema
->;
+
 export type InvoicePaymentRequestDto = z.infer<
   typeof InvoicePaymentRequestSchema
 >;
@@ -62,12 +54,7 @@ export type InvoiceByIdResponseDto = z.infer<typeof InvoiceByIdResponseSchema>;
 export type InvoiceByBookingResponseDto = z.infer<
   typeof InvoiceByBookingResponseSchema
 >;
-export type FinalizeInvoiceResponseDto = z.infer<
-  typeof FinalizeInvoiceResponseSchema
->;
-export type CreateInvoiceFromOrdersResponseDto = z.infer<
-  typeof CreateInvoiceFromOrdersResponseSchema
->;
+
 export type InvoicePaymentResponseDto = z.infer<
   typeof InvoicePaymentResponseSchema
 >;

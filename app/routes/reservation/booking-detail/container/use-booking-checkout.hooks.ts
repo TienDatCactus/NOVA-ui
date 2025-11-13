@@ -56,6 +56,7 @@ export function useCheckoutPayment(bookingId: string) {
     },
     onError: (error: any) => {
       console.error("Checkout payment failed:", error);
+      toast.error("Thanh toán thất bại. Điều chỉnh số tiền và thử lại.");
     },
   });
 }

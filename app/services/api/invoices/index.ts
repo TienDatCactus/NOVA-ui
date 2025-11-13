@@ -2,10 +2,6 @@ import http from "~/lib/http";
 import { Invoices } from "~/services/url";
 import type {
   AddCustomItemsRequestDto,
-  ConfirmInvoicePaymentRequestDto,
-  CreateInvoiceFromOrdersRequestDto,
-  CreateInvoiceFromOrdersResponseDto,
-  FinalizeInvoiceResponseDto,
   InvoiceByBookingResponseDto,
   InvoiceCalculateFeesResponseDto,
   InvoiceDetailDto,
@@ -25,14 +21,10 @@ const {
   InvoiceDetailSchema,
   InvoiceByBookingResponseSchema,
   PaymentsFromInvoiceResponseSchema,
-  CreateInvoiceFromOrdersRequestSchema,
-  CreateInvoiceFromOrdersResponseSchema,
   AddCustomItemsRequestSchema,
-  ConfirmInvoicePaymentRequestSchema,
   RefundInvoiceRequestSchema,
   InvoicePaymentRequestSchema,
   InvoicePaymentResponseSchema,
-  FinalizeInvoiceResponseSchema,
   InvoiceCalculateFeesResponseSchema,
   InvoicePreviewResponseSchema,
   InvoicePreviewRequestSchema,
@@ -134,26 +126,6 @@ async function getInvoicePayments(
 }
 
 /**
- * Create invoice from orders
- * @param data - Request data for creating invoice from orders
- * @returns Promise with create response
- */
-async function createInvoiceFromOrders(
-  data: CreateInvoiceFromOrdersRequestDto
-): Promise<CreateInvoiceFromOrdersResponseDto> {
-  try {
-    const resp = await http.post(
-      Invoices.create,
-      CreateInvoiceFromOrdersRequestSchema.parse(data)
-    );
-    return CreateInvoiceFromOrdersResponseSchema.parse(resp.data);
-  } catch (error) {
-    console.error("Error creating invoice from orders:", error);
-    return Promise.reject(error);
-  }
-}
-
-/**
  * Add custom items to invoice
  * @param invoiceId - UUID of the invoice
  * @param data - Custom item data
@@ -164,35 +136,19 @@ async function addCustomItemsToInvoice(
   data: AddCustomItemsRequestDto
 ): Promise<any> {
   try {
+    const idempotencyKey = crypto.randomUUID();
     const resp = await http.post(
       Invoices.addCustomItems(invoiceId),
-      AddCustomItemsRequestSchema.parse(data)
+      AddCustomItemsRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
     return resp.data;
   } catch (error) {
     console.error(`Error adding custom items to invoice ${invoiceId}:`, error);
-    return Promise.reject(error);
-  }
-}
-
-/**
- * Confirm invoice payment
- * @param invoiceId - UUID of the invoice
- * @param data - Payment confirmation data
- * @returns Promise with response
- */
-async function confirmInvoicePayment(
-  invoiceId: string,
-  data: ConfirmInvoicePaymentRequestDto
-): Promise<any> {
-  try {
-    const resp = await http.post(
-      Invoices.confirmPayment(invoiceId),
-      ConfirmInvoicePaymentRequestSchema.parse(data)
-    );
-    return resp.data;
-  } catch (error) {
-    console.error(`Error confirming payment for invoice ${invoiceId}:`, error);
     return Promise.reject(error);
   }
 }
@@ -208,9 +164,15 @@ async function refundInvoice(
   data: RefundInvoiceRequestDto
 ): Promise<any> {
   try {
+    const idempotencyKey = crypto.randomUUID();
     const resp = await http.post(
       Invoices.refund(invoiceId),
-      RefundInvoiceRequestSchema.parse(data)
+      RefundInvoiceRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
     return resp.data;
   } catch (error) {
@@ -230,30 +192,19 @@ async function addInvoicePayment(
   data: InvoicePaymentRequestDto
 ): Promise<InvoicePaymentResponseDto> {
   try {
+    const idempotencyKey = crypto.randomUUID();
     const resp = await http.post(
       Invoices.payments(invoiceId),
-      InvoicePaymentRequestSchema.parse(data)
+      InvoicePaymentRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
     return InvoicePaymentResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(`Error adding payment to invoice ${invoiceId}:`, error);
-    return Promise.reject(error);
-  }
-}
-
-/**
- * Finalize invoice
- * @param invoiceId - UUID of the invoice
- * @returns Promise with finalize response
- */
-async function finalizeInvoice(
-  invoiceId: string
-): Promise<FinalizeInvoiceResponseDto> {
-  try {
-    const resp = await http.post(Invoices.finalize(invoiceId));
-    return FinalizeInvoiceResponseSchema.parse(resp.data);
-  } catch (error) {
-    console.error(`Error finalizing invoice ${invoiceId}:`, error);
     return Promise.reject(error);
   }
 }
@@ -265,7 +216,16 @@ async function finalizeInvoice(
  */
 async function voidInvoice(invoiceId: string): Promise<any> {
   try {
-    const resp = await http.post(Invoices.void(invoiceId));
+    const idempotencyKey = crypto.randomUUID();
+    const resp = await http.post(
+      Invoices.void(invoiceId),
+      {},
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
     return resp.data;
   } catch (error) {
     console.error(`Error voiding invoice ${invoiceId}:`, error);
@@ -298,12 +258,9 @@ export const InvoicesService = {
   getInvoiceDetail,
   getInvoicesByBooking,
   getInvoicePayments,
-  createInvoiceFromOrders,
   addCustomItemsToInvoice,
-  confirmInvoicePayment,
   refundInvoice,
   addInvoicePayment,
-  finalizeInvoice,
   voidInvoice,
   exportInvoices,
   calculateInvoiceFees,

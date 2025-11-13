@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { AlertCircle, CreditCard, Info, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  CreditCard,
+  Info,
+  Loader2,
+  PlusCircle,
+} from "lucide-react";
 import { z } from "zod";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -26,6 +33,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { Badge } from "~/components/ui/badge";
 import {
   Sheet,
   SheetContent,
@@ -55,22 +63,27 @@ import {
   useCheckout,
   useCheckoutPayment,
   useCreateCheckoutInvoice,
-} from "../container/useCheckout.hooks";
+} from "../container/use-booking-checkout.hooks";
+import { InvoicesService } from "~/services/api/invoices";
+import { BookingService } from "~/services/api/booking";
 
 const { StaffCheckoutPaymentRequestSchema } = BookingSchema;
 
-// Status color mapping (simple text color classes)
-const INVOICE_STATUS_STYLES: Record<string, string> = {
-  Unpaid: "text-red-600",
-  Paid: "text-green-600",
-  PartiallyPaid: "text-yellow-600",
-  Overpaid: "text-orange-600",
-  Voided: "text-muted-foreground line-through",
+// Badge variants mapping for invoice statuses
+const INVOICE_STATUS_BADGE: Record<
+  string,
+  { variant: any; className?: string }
+> = {
+  Unpaid: { variant: "destructive" },
+  Paid: { variant: "success" },
+  PartiallyPaid: { variant: "warning" },
+  Overpaid: { variant: "info" },
+  Voided: { variant: "outline", className: "line-through opacity-70" },
 };
 
 type CheckoutPaymentFormData = z.infer<
   typeof BookingSchema.StaffCheckoutPaymentRequestSchema
->["checkoutPayment"];
+>;
 
 interface CheckoutSheetProps {
   open: boolean;
@@ -79,6 +92,32 @@ interface CheckoutSheetProps {
   bookingCode: string;
 }
 
+/**
+ * CheckoutSheet Component
+ *
+ * Implements checkout flow per FE-Flow-Checkout.md specification.
+ *
+ * CASE Coverage:
+ * - ✅ CASE 1: Simple checkout (no charges) → direct finalize
+ * - ✅ CASE 2: Room balance → payment required
+ * - ✅ CASE 3: POS/Service charges → manual invoice creation
+ * - ✅ CASE 4: Room + Service (unified) → backend auto-routes payment, single form
+ * - ⏸️ CASE 5: Multi-booking → DEFERRED (TODO marker exists)
+ * - ⏸️ CASE 6: Partial payment → DEFERRED (backend enforces full payment)
+ * - ✅ CASE 7: Cancel service → handled in booking-detail.tsx
+ * - ✅ CASE 8: Add last-minute charges → handled in booking-detail.tsx
+ *
+ * Business Rules:
+ * - Strict full payment enforcement (balance must = 0 before checkout)
+ * - Manual invoice creation via button (no auto-create)
+ * - Existing invoice pre-check via getInvoicesByBooking
+ * - Payment retry allowed on error
+ * - Overpayment displays change amount (staff returns to customer)
+ *
+ * Schema:
+ * - StaffCheckoutPaymentRequestSchema = CheckoutPaymentItemSchema (unified, flat)
+ * - No nested `checkoutPayment` wrapper anymore (updated per user decision Q2/Q4/Q7)
+ */
 export default function CheckoutSheet({
   open,
   onOpenChange,
@@ -92,8 +131,10 @@ export default function CheckoutSheet({
     data: pendingCharges,
     isPending: isLoadingCharges,
     error: chargesError,
+    refetch: refetchPendingCharges,
   } = useBookingPendingCharges(bookingId, open);
 
+  // Manual invoice creation mutation (POST)
   const {
     mutate: createInvoice,
     isPending: isCreatingInvoice,
@@ -108,10 +149,8 @@ export default function CheckoutSheet({
     isCreatingInvoice || isProcessingPayment || isCheckingOut;
 
   // Payment form
-  const paymentForm = useForm({
-    resolver: zodResolver(
-      StaffCheckoutPaymentRequestSchema.shape.checkoutPayment
-    ),
+  const paymentForm = useForm<CheckoutPaymentFormData>({
+    resolver: zodResolver(StaffCheckoutPaymentRequestSchema),
     defaultValues: {
       method: "Cash",
       amount: 0,
@@ -161,18 +200,37 @@ export default function CheckoutSheet({
     }
   }, [open, paymentForm]);
 
-  // Auto create invoice when sheet opens & there is something to pay
+  // Fetch existing booking invoices (GET list) – identify if a checkout invoice already exists.
+  const { data: bookingInvoices } = useQuery({
+    queryKey: ["invoices", "booking", bookingId, open],
+    enabled: open,
+    queryFn: () => InvoicesService.getInvoicesByBooking(bookingId),
+  });
+
+  // If invoices exist, load summary via GET createInvoice (idempotent, returns existing) ONCE.
   useEffect(() => {
-    if (
-      open &&
-      pendingCharges &&
-      totalDue > 0 &&
-      !checkoutInvoice &&
-      !isCreatingInvoice
-    ) {
-      createInvoice();
+    let ignore = false;
+    async function loadExistingInvoice() {
+      if (
+        open &&
+        !checkoutInvoice &&
+        bookingInvoices &&
+        bookingInvoices.length > 0 &&
+        totalDue > 0
+      ) {
+        try {
+          const existing = await BookingService.staffCreateInvoice(bookingId);
+          if (!ignore) setCheckoutInvoice(existing);
+        } catch (err) {
+          console.error("Không thể tải hóa đơn sẵn có", err);
+        }
+      }
     }
-  }, [pendingCharges, createInvoice]);
+    loadExistingInvoice();
+    return () => {
+      ignore = true;
+    };
+  }, [bookingInvoices, open, checkoutInvoice, bookingId, totalDue]);
 
   useEffect(() => {
     if (invoiceData) {
@@ -190,14 +248,26 @@ export default function CheckoutSheet({
     }
 
     const paymentData: StaffCheckoutPaymentRequestDto = {
-      checkoutPayment: {
-        method: data.method,
-        amount: data.amount,
-        transactionReference: data.transactionReference || undefined,
-      },
+      method: data.method,
+      amount: data.amount,
+      transactionReference: data.transactionReference || undefined,
     };
 
-    processPayment(paymentData);
+    // Payment retry handling: keep invoice state; auto finalize on full payment
+    processPayment(paymentData, {
+      onSuccess: () => {
+        // If invoice exists and now should be zero balance, finalize
+        if (checkoutInvoice) {
+          // Optimistically finalize; backend enforces full payment rule
+          handleFinalCheckout();
+        } else if (!checkoutInvoice && totalDue === 0) {
+          handleFinalCheckout();
+        }
+      },
+      onError: () => {
+        // Allow retry; form stays as-is
+      },
+    });
   };
 
   // Step 3: Finalize checkout
@@ -435,15 +505,34 @@ export default function CheckoutSheet({
                                 {checkoutInvoice.invoiceNo}
                               </p>
                             </div>
-                            <div className="space-y-1">
-                              <p className="text-muted-foreground">
-                                Trạng thái
+                            <div className="space-y-1 flex flex-col">
+                              <p className="text-muted-foreground flex items-center justify-between">
+                                <span>Trạng thái</span>
+                                {checkoutInvoice.balance > 0 && (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-5 px-2 text-[10px]"
+                                    onClick={() => refetchPendingCharges()}
+                                    disabled={isLoadingCharges}
+                                  >
+                                    {isLoadingCharges ? "Đang tải" : "Làm mới"}
+                                  </Button>
+                                )}
                               </p>
-                              <p
-                                className={`font-medium ${INVOICE_STATUS_STYLES[checkoutInvoice.status] || "text-muted-foreground"}`}
+                              <Badge
+                                variant={
+                                  INVOICE_STATUS_BADGE[checkoutInvoice.status]
+                                    ?.variant || "secondary"
+                                }
+                                className={
+                                  INVOICE_STATUS_BADGE[checkoutInvoice.status]
+                                    ?.className
+                                }
                               >
                                 {checkoutInvoice.status}
-                              </p>
+                              </Badge>
                             </div>
                             <div className="space-y-1">
                               <p className="text-muted-foreground">Ngày tạo</p>
@@ -521,9 +610,30 @@ export default function CheckoutSheet({
                           Đã thanh toán đủ – không cần tạo hóa đơn
                         </p>
                       ) : (
-                        <p className="text-xs text-muted-foreground">
-                          Đang tạo hóa đơn...
-                        </p>
+                        <div className="flex flex-col gap-2 text-xs">
+                          <p className="text-muted-foreground">
+                            Chưa có hóa đơn checkout
+                          </p>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => createInvoice()}
+                            disabled={isCreatingInvoice || isProcessing}
+                          >
+                            {isCreatingInvoice ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Đang tạo...
+                              </>
+                            ) : (
+                              <>
+                                <PlusCircle className="w-4 h-4 mr-2" />
+                                Tạo hóa đơn checkout
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       )}
                     </div>
 
@@ -538,14 +648,7 @@ export default function CheckoutSheet({
                           </AlertDescription>
                         </Alert>
                       )}
-                      {totalDue > 0 && !checkoutInvoice && (
-                        <Alert>
-                          <Info className="h-4 w-4" />
-                          <AlertDescription>
-                            Đang tạo hóa đơn tổng hợp...
-                          </AlertDescription>
-                        </Alert>
-                      )}
+                      {/* No auto-create alert anymore per manual trigger design */}
                       {canProceedToPayment &&
                         checkoutInvoice &&
                         checkoutInvoice.balance > 0 && (
@@ -720,7 +823,8 @@ export default function CheckoutSheet({
                     )}
                   </Button>
                 )}
-                {totalDue === 0 && (
+                {(checkoutInvoice && checkoutInvoice.balance === 0) ||
+                (!checkoutInvoice && totalDue === 0) ? (
                   <Button
                     type="button"
                     onClick={handleFinalCheckout}
@@ -735,7 +839,7 @@ export default function CheckoutSheet({
                       "Hoàn tất Checkout"
                     )}
                   </Button>
-                )}
+                ) : null}
               </div>
             </SheetFooter>
           </>

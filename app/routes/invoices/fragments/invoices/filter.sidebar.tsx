@@ -1,4 +1,4 @@
-import { ArrowUpDown, ChevronDown, Search, X } from "lucide-react";
+import { ArrowUpDown, Search, X, ChevronDown } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
@@ -27,20 +27,7 @@ import {
 } from "~/services/api/invoices/invoice.types";
 import type { DateRange } from "~/components/ui/date-range-picker";
 import { format } from "date-fns";
-import { useBookings } from "~/routes/reservation/bookings/container/booking-query.hooks";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import {
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  Command,
-} from "~/components/ui/command";
+// Removed booking selection dependencies per updated requirements
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 
 interface InvoicesFilterSidebarProps {
@@ -62,9 +49,7 @@ function InvoicesFilterSidebar({
     (filters.Status ? 1 : 0) +
     (filters.PaymentMethod ? 1 : 0) +
     (filters.IssuedFrom || filters.IssuedTo ? 1 : 0) +
-    (filters.BookingId ? 1 : 0) +
-    (filters.InvoiceType ? 1 : 0) +
-    (filters.BookingCode ? 1 : 0);
+    (filters.InvoiceType ? 1 : 0);
 
   const handleSearch = useDebounceCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +57,7 @@ function InvoicesFilterSidebar({
     },
     500
   );
-  const { data: bookings } = useBookings();
+  // Booking filters removed
 
   const dateRangeValue: DateRange | undefined = useMemo(() => {
     if (filters.IssuedFrom || filters.IssuedTo) {
@@ -289,47 +274,7 @@ function InvoicesFilterSidebar({
 
         <Separator />
 
-        <CardContent className="px-0 rounded-md">
-          <div className="space-y-3">
-            <Label htmlFor="booking-code" className="text-sm font-medium">
-              Theo Booking
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  {filters.BookingCode
-                    ? bookings?.find(
-                        (b) => b.bookingCode === filters.BookingCode
-                      )?.bookingCode
-                    : "Chọn booking"}
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent>
-                <Command>
-                  <CommandInput placeholder="Tìm kiếm..." />
-                  <CommandList>
-                    <CommandEmpty>Không có kết quả nào.</CommandEmpty>
-                    <CommandGroup heading="Booking">
-                      {bookings?.map((booking) => (
-                        <CommandItem
-                          key={booking.bookingCode}
-                          onSelect={() =>
-                            onFilterChange("BookingCode", booking.bookingCode)
-                          }
-                        >
-                          {booking.bookingCode} - {booking.customerName}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </CardContent>
-
-        <Separator />
+        {/* Booking filter removed */}
 
         <CardContent className="px-0 rounded-md">
           <div className="space-y-3">

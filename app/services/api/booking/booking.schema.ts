@@ -5,7 +5,7 @@ import { OrderSchema } from "../orders/order.schema";
 import { RoomSchema } from "../rooms/room.schema";
 
 const BookingSourceEnum = z.enum(
-  ["DirectStaff", "DirectCustomer", "OTA", "Agency"],
+  ["DirectStaff", "DirectCustomer", "OTA", "Agency", "RoomBlock"],
   "Nguồn đặt phòng không hợp lệ"
 );
 
@@ -427,15 +427,12 @@ const StaffCreateCheckoutInvoiceResponseSchema = z.object({
   balance: z.number(),
   status: z.string(),
   paymentMethod: z.string(),
-  issuedAt: z.date(),
+  issuedAt: z.string(),
   itemCount: z.number(),
 });
 
 // Yêu cầu thanh toán khi checkout (phòng + tổng thể)
-const StaffCheckoutPaymentRequestSchema = z.object({
-  roomPayment: CheckoutPaymentItemSchema.optional().nullable(),
-  checkoutPayment: CheckoutPaymentItemSchema,
-});
+const StaffCheckoutPaymentRequestSchema = CheckoutPaymentItemSchema;
 
 // Yêu cầu checkout 1 booking
 const StaffCheckoutRequestSchema = z.object({

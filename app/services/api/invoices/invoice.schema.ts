@@ -27,14 +27,6 @@ const AddCustomItemsRequestSchema = z.object({
   note: z.string(),
 });
 
-const ConfirmInvoicePaymentRequestSchema = z.object({
-  amount: z.number(),
-  paymentMethod: z.string(),
-  transactionReference: z.string(),
-  note: z.string(),
-  paidAt: z.string(),
-});
-
 const RefundInvoiceRequestSchema = z.object({
   refundAmount: z.number(),
   reason: z.string(),
@@ -106,41 +98,6 @@ const InvoiceDetailSchema = z.object({
 
 const InvoiceByIdResponseSchema = InvoiceDetailSchema;
 const InvoiceByBookingResponseSchema = z.array(InvoiceDetailSchema);
-
-const FinalizeInvoiceResponseSchema = z.object({
-  invoiceId: z.string(),
-  invoiceNo: z.string(),
-  subTotal: z.number(),
-  vatAmount: z.number(),
-  serviceChargeAmount: z.number(),
-  total: z.number(),
-  status: z.string(),
-  issuedAt: z.string(),
-});
-
-const CreateInvoiceFromOrdersRequestSchema = z.object({
-  bookingId: z.string(),
-  bookingRoomId: z.string(),
-  posOrderIds: z.array(z.string()),
-  serviceOrderIds: z.array(z.string()),
-  selectedPosOrderItemIds: z.array(z.string()),
-  discountAmount: z.number().min(0),
-  taxAmount: z.number().min(0),
-  note: z.string(),
-});
-
-const CreateInvoiceFromOrdersResponseSchema = z.object({
-  invoiceId: z.string(),
-  invoiceNo: z.string(),
-  subTotal: z.number(),
-  vatAmount: z.number(),
-  serviceChargeAmount: z.number(),
-  total: z.number(),
-  paidAmount: z.number(),
-  balance: z.number(),
-  status: z.string(),
-  itemCount: z.number(),
-});
 
 const InvoicePaymentRequestSchema = z.object({
   amount: z.number(),
@@ -234,7 +191,6 @@ export const InvoiceSchema = {
   InvoiceStatusEnum,
   InvoiceTypeEnum,
   AddCustomItemsRequestSchema,
-  ConfirmInvoicePaymentRequestSchema,
   RefundInvoiceRequestSchema,
   InvoiceListItemSchema,
   PaginationMetaSchema,
@@ -244,9 +200,6 @@ export const InvoiceSchema = {
   InvoiceDetailSchema,
   InvoiceByIdResponseSchema,
   InvoiceByBookingResponseSchema,
-  FinalizeInvoiceResponseSchema,
-  CreateInvoiceFromOrdersRequestSchema,
-  CreateInvoiceFromOrdersResponseSchema,
   InvoicePaymentRequestSchema,
   InvoicePaymentResponseSchema,
   PaymentsFromInvoiceResponseSchema,

@@ -31,6 +31,7 @@ import {
 } from "~/components/ui/table";
 import { formatMoney } from "~/lib/utils";
 import { OrderSchema } from "~/services/api/orders/order.schema";
+import { ORDER_STATUSES } from "~/services/api/orders/order.types";
 
 type POSOrderFromBookingDetail = z.infer<
   typeof OrderSchema.POSOrderListByBookingResponseSchema
@@ -195,7 +196,11 @@ export default function BookingMenuOrders({
                                 : "success"
                           }
                         >
-                          {order.status}
+                          {
+                            ORDER_STATUSES.find(
+                              (item) => item.value == order.status
+                            )?.label
+                          }
                         </Badge>
                       </TableCell>
                       <TableCell>

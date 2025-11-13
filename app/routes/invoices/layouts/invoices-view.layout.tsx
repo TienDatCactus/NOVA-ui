@@ -54,7 +54,21 @@ function InvoicesViewLayout({
     onFilterChange("page" as keyof InvoiceListParams, page as any);
   };
   const handleExport = async () => {
-    return await InvoicesService.exportInvoices();
+    // Export all invoices filtered by starting date (IssuedFrom) if provided, else today
+    const date = filters.IssuedFrom || filters.IssuedTo || undefined;
+    try {
+      const blob = await InvoicesService.exportInvoices(date);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `invoices-report${date ? `-${date}` : ""}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const { pages } = makePageRange(currentPage, totalPages, 7);
@@ -81,7 +95,7 @@ function InvoicesViewLayout({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="success" className="gap-2">
+            <Button variant="success" className="gap-2" onClick={handleExport}>
               <FileText className="h-4 w-4" />
               Xuất báo cáo
             </Button>

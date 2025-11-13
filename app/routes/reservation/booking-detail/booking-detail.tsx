@@ -9,6 +9,7 @@ import {
   Pen,
   Phone,
   Plus,
+  RotateCcw,
   User,
   Utensils,
   Wallet,
@@ -522,7 +523,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                           );
                           if (!bookingRoomId) return null;
 
-                          // Find the room in existing booking rooms
                           const existingRoom = bookingDetail.rooms.find(
                             (r) => r.bookingRoomId === bookingRoomId
                           );
@@ -531,7 +531,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                           return (
                             <Card
                               key={field.id}
-                              className="bg-destructive/5 border-destructive/20"
+                              className="bg-destructive/5 border-destructive/20 p-0"
                             >
                               <CardContent className="p-3">
                                 <div className="flex items-center justify-between">
@@ -544,11 +544,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                                     </div>
                                   </div>
                                   <Button
-                                    variant="ghost"
+                                    variant="outline"
                                     size="sm"
                                     onClick={() => remove(index)}
                                   >
-                                    Hoàn tác
+                                    <RotateCcw /> Hoàn tác
                                   </Button>
                                 </div>
                               </CardContent>

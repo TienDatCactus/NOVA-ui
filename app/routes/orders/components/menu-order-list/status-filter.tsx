@@ -1,6 +1,6 @@
 import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
-import { StatusOptions } from "~/services/api/orders/order.types";
+import { ORDER_STATUSES } from "~/services/api/orders/order.types";
 
 type OrderStatus = "All" | "Open" | "Completed" | "Cancelled";
 
@@ -15,7 +15,7 @@ export default function StatusFilter({
 }: StatusFilterProps) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      {StatusOptions.map((option) => {
+      {ORDER_STATUSES.map((option) => {
         const isActive = activeStatus === option.value;
 
         return (

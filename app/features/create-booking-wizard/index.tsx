@@ -1,34 +1,31 @@
 import {
+  Building2,
+  Check,
   ChevronLeft,
   ChevronRight,
-  Check,
-  Building2,
-  Globe,
   CircleAlert,
+  Globe,
 } from "lucide-react";
 
+import { useRef } from "react";
+import { Alert, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "~/components/ui/card";
-import { cn } from "~/lib/utils";
 import { useStep } from "~/hooks/use-step";
+import { cn } from "~/lib/utils";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { CustomerInfoStep } from "./components/customer-info-step";
-import { StayDetailsStep } from "./components/stay-details-step";
+import ReviewPaymentStep from "./components/review-payment-step";
 import { RoomSelectionStep } from "./components/room-selection-step";
 import { ServicesBreakfastStep } from "./components/services-breakfast-step";
-import ReviewPaymentStep from "./components/review-payment-step";
-import { useRef } from "react";
-import { Alert, AlertTitle } from "~/components/ui/alert";
-import { useForm } from "react-hook-form";
-import { data, useNavigate } from "react-router";
-import { DASHBOARD } from "~/lib/fe-url";
+import { StayDetailsStep } from "./components/stay-details-step";
 
 const steps = [
   {
@@ -130,7 +127,7 @@ export default function BookingFlow() {
               </CardDescription>
             </CardHeader>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Card
                 className={cn(
                   "cursor-pointer transition-all ",
@@ -178,6 +175,31 @@ export default function BookingFlow() {
                     </h3>
                     <p className="text-muted-foreground text-sm">
                       Booking.com, Agoda, Expedia, Traveloka, v.v.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card
+                className={cn(
+                  "cursor-pointer transition-all",
+                  bookingData.bookingType === "RoomBlock"
+                    ? "bg-muted border-primary ring-2 ring-primary"
+                    : "border-gray-200 hover:shadow-md"
+                )}
+                onClick={() => updateBookingData("bookingType", "RoomBlock")}
+              >
+                <CardContent className="flex items-start space-x-4 p-6">
+                  <div className="flex-shrink-0">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                      <Globe className="h-6 w-6 text-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="mb-1 font-semibold text-foreground">
+                      Room Block
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      Đặt phòng theo nhóm, thường được sử dụng cho các sự kiện
                     </p>
                   </div>
                 </CardContent>

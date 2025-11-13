@@ -147,7 +147,7 @@ async function getPosOrderList(
 ): Promise<POSOrderListResponseDto> {
   try {
     const resp = await http.get(Orders.listPosOrders, {
-      params: date,
+      params: date ? { date } : undefined,
     });
     return POSOrderListResponseSchema.parse(resp.data);
   } catch (error) {
@@ -311,7 +311,7 @@ async function getServiceOrderList(
 ): Promise<ServiceOrderListDto> {
   try {
     const resp = await http.get(Orders.listServiceOrders, {
-      params: date,
+      params: date ? { date } : undefined,
     });
     return ServiceOrderListSchema.parse(resp.data);
   } catch (error) {

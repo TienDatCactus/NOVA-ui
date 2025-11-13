@@ -12,7 +12,7 @@ import { Button } from "~/components/ui/button";
 
 type UnifiedConfirmDialogProps = {
   open: boolean;
-  type: "void" | "finalize";
+  type: "void"; // finalize removed per requirements
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -23,12 +23,6 @@ const DIALOG_CONFIG = {
     description:
       "Hóa đơn này sẽ bị hủy vĩnh viễn. Bạn có chắc chắn muốn tiếp tục?",
     actionLabel: "Hủy hóa đơn",
-  },
-  finalize: {
-    title: "Chốt hóa đơn",
-    description:
-      "Sau khi chốt, hóa đơn sẽ không thể chỉnh sửa. Bạn có chắc chắn muốn tiếp tục?",
-    actionLabel: "Chốt hóa đơn",
   },
 };
 
@@ -52,12 +46,7 @@ export function UnifiedConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter className="flex flex-row gap-4 justify-end pt-4">
           <AlertDialogCancel asChild>
-            <Button
-              variant={
-                type == "finalize" ? "destructive-outline" : "destructive-ghost"
-              }
-              onClick={onCancel}
-            >
+            <Button variant={"destructive-ghost"} onClick={onCancel}>
               Hủy
             </Button>
           </AlertDialogCancel>

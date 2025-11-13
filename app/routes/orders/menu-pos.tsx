@@ -106,7 +106,8 @@ export default function Component({
 
   const isEmpty = items.length === 0;
 
-  const customerDisplay = bookingId ? "Khách lẻ" : null;
+  // Display customer type: Walk-in (no booking) vs In-house (has booking)
+  const customerDisplay = bookingId ? "Khách đặt phòng" : "Khách lẻ";
   const { mutate: createOrder, isError } = useCreatePOSOrder();
   const { mutate: addItems } = useAddBatchItemsToPOSOrder();
 
