@@ -129,7 +129,7 @@ const SIDEBAR_NAV_MAIN: Array<{
       },
       {
         title: "Lịch làm việc",
-        url: "/dashboard/staff/staff-shifts",
+        url: "/dashboard/staff/schedules",
       },
       {
         title: "Ca làm việc",

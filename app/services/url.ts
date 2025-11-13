@@ -176,6 +176,14 @@ const Holiday = {
   delete: (id: string) => `Holidays/${id}`,
 };
 
+const StaffShift = {
+  list: "StaffShifts",
+  schedule: "StaffShifts/schedule",
+  detail: (id: string) => `StaffShifts/${id}`,
+  update: (id: string) => `StaffShifts/${id}/schedule`,
+  delete: (id: string) => `StaffShifts/${id}`,
+};
+
 export {
   Auth,
   User,
@@ -195,4 +203,5 @@ export {
   StaffRole,
   WorkShift,
   Holiday,
+  StaffShift,
 };
