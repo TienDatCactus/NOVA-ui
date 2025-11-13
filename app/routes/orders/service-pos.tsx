@@ -101,14 +101,12 @@ export default function Component({
     updateServiceNote,
     setBookingInfo,
     setScheduledAt,
-    clearOrder,
   } = useServicePosOrderStore();
 
   const isEmpty = !selectedService;
   const itemCount = selectedService?.quantity || 0;
 
   const { mutate, isPending, isError } = useCreateServiceOrder();
-
   const [checkoutDialog, setCheckoutDialog] = useState(false);
   const [bookingDialog, setBookingDialog] = useState(false);
   const [scheduledTimeDialog, setScheduledTimeDialog] = useState(false);
@@ -121,6 +119,7 @@ export default function Component({
   const [confirmationDialog, setConfirmationDialog] = useState<{
     open: boolean;
     orderId?: string;
+    customerType?: "In-House" | "Walk-In";
   }>({ open: false });
 
   // Handlers
@@ -211,11 +210,14 @@ export default function Component({
         {
           onSuccess: () => {
             toast.success("Tạo đơn dịch vụ thành công!");
+            // Capture customer type before clearing
+            const wasBooking = !!bookingId;
             setSelectedBookingInfo(null);
             setBookingInfo(null, null);
             setScheduledAt("");
             setConfirmationDialog({
               open: true,
+              customerType: wasBooking ? "In-House" : "Walk-In",
             });
           },
           onError: (error) => {
@@ -480,7 +482,13 @@ export default function Component({
         orderId={confirmationDialog.orderId || ""}
         orderTotal={subtotal}
         itemCount={itemCount}
-        customerInfo={bookingId ? `Booking: ${bookingId}` : "Khách đặt phòng"}
+        customerInfo={
+          confirmationDialog.customerType === "In-House"
+            ? "Khách đặt phòng"
+            : confirmationDialog.customerType === "Walk-In"
+              ? "Khách lẻ"
+              : "Khách đặt phòng"
+        }
         onNewOrder={handleNewOrder}
       />
     </div>

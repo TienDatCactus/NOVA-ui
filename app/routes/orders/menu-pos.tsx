@@ -106,8 +106,6 @@ export default function Component({
 
   const isEmpty = items.length === 0;
 
-  // Display customer type: Walk-in (no booking) vs In-house (has booking)
-  const customerDisplay = bookingId ? "Khách đặt phòng" : "Khách lẻ";
   const { mutate: createOrder, isError } = useCreatePOSOrder();
   const { mutate: addItems } = useAddBatchItemsToPOSOrder();
 
@@ -123,6 +121,7 @@ export default function Component({
   const [confirmationDialog, setConfirmationDialog] = useState<{
     open: boolean;
     orderId?: string;
+    customerType?: "In-House" | "Walk-In";
   }>({ open: false });
 
   // Handlers
@@ -219,12 +218,15 @@ export default function Component({
               });
             }
             toast.success("Tạo đơn hàng thành công!");
+            // Capture customer type before clearing
+            const wasBooking = !!bookingId;
             setSelectedBookingInfo(null);
             setBookingInfo(null, null);
             setScheduledAt("");
             setNotes("");
             setConfirmationDialog({
               open: true,
+              customerType: wasBooking ? "In-House" : "Walk-In",
             });
           },
           onError: (error) => {
@@ -421,7 +423,13 @@ export default function Component({
         orderId={confirmationDialog.orderId || ""}
         orderTotal={subtotal}
         itemCount={itemCount}
-        customerInfo={customerDisplay || "Khách vãng lai"}
+        customerInfo={
+          confirmationDialog.customerType === "In-House"
+            ? "Khách đặt phòng"
+            : confirmationDialog.customerType === "Walk-In"
+              ? "Khách lẻ"
+              : "Khách vãng lai"
+        }
         onNewOrder={handleNewOrder}
       />
     </div>
