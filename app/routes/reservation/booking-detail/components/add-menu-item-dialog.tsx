@@ -1,6 +1,8 @@
 import { Search, Utensils } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -11,15 +13,12 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
 import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
-import { Badge } from "~/components/ui/badge";
-import { Card } from "~/components/ui/card";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import Image from "~/components/ui/image";
 
 interface AddMenuItemDialogProps {
   open: boolean;
@@ -195,13 +194,6 @@ export default function AddMenuItemDialog({
                             {formatMoney(item.price).vndFormatted}
                           </p>
                         </div>
-                        {item.imageUrls && item.imageUrls.length > 0 && (
-                          <Image
-                            src={item.imageUrls[0]}
-                            alt={item.name}
-                            className="w-16 h-16 object-cover rounded"
-                          />
-                        )}
                       </div>
                     </Card>
                   ))}

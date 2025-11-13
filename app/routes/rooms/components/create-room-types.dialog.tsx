@@ -22,8 +22,6 @@ import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { stripHtml } from "~/lib/utils";
-import { DescriptionDialog } from "../fragments/room-types/description.dialog";
-import { ImagePreviewDialog } from "../fragments/room-types/image-preview.dialog";
 import { Card, CardContent } from "~/components/ui/card";
 import { useState } from "react";
 import AlertChanges from "~/components/ui/alert-changes";
@@ -284,27 +282,6 @@ export function CreateRoomTypeDialog({
       </Dialog>
 
       {/* Description Dialog */}
-      <DescriptionDialog
-        open={showDescriptionDialog}
-        onClose={setShowDescriptionDialog}
-        initialContent={form.watch("description") || ""}
-        roomTypeCode={form.watch("code") || "MỚI"}
-        mode={dialogMode}
-        onSave={handleDescriptionSave}
-      />
-
-      <ImagePreviewDialog
-        open={showImagePreviewDialog}
-        onClose={setShowImagePreviewDialog}
-        existingImages={[]}
-        newImages={newImageFiles}
-        removeMediaIds={[]}
-        mode={dialogMode}
-        roomTypeCode={form.watch("code") || "MỚI"}
-        onAddImages={handleAddImages}
-        onRemoveNewImage={handleRemoveNewFile}
-        operation="create"
-      />
 
       <AlertChanges
         showCancelDialog={openCancelDialog}

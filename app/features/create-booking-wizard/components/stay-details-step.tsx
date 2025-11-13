@@ -95,7 +95,7 @@ export function StayDetailsStep({ onNext, formRef }: StayDetailsStepProps) {
       <form
         ref={formRef}
         onSubmit={form.handleSubmit(onSubmit, onError)}
-        className="space-y-6"
+        className="space-y-4"
       >
         {/* Date Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -192,7 +192,6 @@ export function StayDetailsStep({ onNext, formRef }: StayDetailsStepProps) {
           />
         </div>
 
-        {/* Nights Calculation Display */}
         {nights > 0 && (
           <div className="flex items-center justify-center p-4 bg-primary/10 rounded-lg border border-primary/20">
             <p className="text-sm font-medium">

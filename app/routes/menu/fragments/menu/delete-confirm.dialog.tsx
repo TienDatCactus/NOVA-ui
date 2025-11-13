@@ -23,14 +23,13 @@ export default function DeleteConfirmDialog({
   onOpenChange,
   menuItem,
 }: DeleteConfirmDialogProps) {
-  const { mutate: deleteMenuItem, isPending } = useDeleteMenuItem();
+  const { mutate: deleteMenuItem, isPending } = useDeleteMenuItem(
+    menuItem.itemId
+  );
 
   const handleConfirm = () => {
-    deleteMenuItem(menuItem.itemId, {
-      onSuccess: () => {
-        onOpenChange(false);
-      },
-    });
+    deleteMenuItem();
+    onOpenChange(false);
   };
 
   return (

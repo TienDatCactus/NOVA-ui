@@ -27,39 +27,25 @@ export default function ServiceList({
   onQuantityChange,
 }: ServiceListProps) {
   return (
-    <div className="space-y-4">
-      {/* Search Bar */}
-      <div className="flex items-center justify-end">
-        <Input
-          placeholder="Tìm kiếm dịch vụ"
-          value={searchText}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-60"
-          endAddon={<Search />}
-        />
-      </div>
-
-      {/* Service Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2 h-[70vh] overflow-y-auto">
-        {services.length === 0 ? (
-          <div className="text-center text-muted-foreground col-span-2 py-8">
-            Không có dịch vụ
-          </div>
-        ) : (
-          services.map((service) => (
-            <ServiceCard
-              key={service.serviceItemId}
-              service={service}
-              isSelected={isSelected(service.serviceItemId)}
-              quantity={getQuantity(service.serviceItemId)}
-              onToggle={() => onToggleSelect(service.serviceItemId)}
-              onQuantityChange={(qty) =>
-                onQuantityChange(service.serviceItemId, qty)
-              }
-            />
-          ))
-        )}
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2 h-96 overflow-y-auto">
+      {services.length === 0 ? (
+        <div className="text-center text-muted-foreground col-span-2 py-8">
+          Không có dịch vụ
+        </div>
+      ) : (
+        services.map((service) => (
+          <ServiceCard
+            key={service.serviceItemId}
+            service={service}
+            isSelected={isSelected(service.serviceItemId)}
+            quantity={getQuantity(service.serviceItemId)}
+            onToggle={() => onToggleSelect(service.serviceItemId)}
+            onQuantityChange={(qty) =>
+              onQuantityChange(service.serviceItemId, qty)
+            }
+          />
+        ))
+      )}
     </div>
   );
 }

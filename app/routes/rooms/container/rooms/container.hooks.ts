@@ -37,7 +37,6 @@ function useRoomsContainer() {
       toast.success(`Đã xóa ${roomIds.length} phòng`);
       setSelectedRooms([]);
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi xóa phòng");
       console.error(error);
     }
   };
@@ -47,12 +46,9 @@ function useRoomsContainer() {
     newStatus: number
   ) => {
     try {
-      console.log("Updating room status:", { roomIds, newStatus });
-      toast.success(`Đã cập nhật trạng thái cho ${roomIds.length} phòng`);
       setSelectedRooms([]);
       refetch();
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi cập nhật trạng thái");
       console.error(error);
     }
   };

@@ -177,8 +177,7 @@ const Image = forwardRef<HTMLImageElement, ComponentProps<"img"> & ImageProps>(
             className
           )}
         >
-          <ImageOff className="h-8 w-8" />
-          <p className="text-xs">Không có hình ảnh</p>
+          <ImageOff className="h-6 w-6" />
         </div>
       );
     }
@@ -208,9 +207,7 @@ const Image = forwardRef<HTMLImageElement, ComponentProps<"img"> & ImageProps>(
                   roundedClass
                 )}
               >
-                <span className="text-sm text-muted-foreground">
-                  Đang tải...
-                </span>
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </Skeleton>
             )}
           </>

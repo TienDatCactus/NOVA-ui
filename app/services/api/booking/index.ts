@@ -11,23 +11,20 @@ import type {
   BookingListResponseDto,
   BookingOTAResponseDto,
   BookingPendingChargesResponseDto,
+  StaffAddCompletedChargesRequestDto,
   StaffBookingPricePreviewRequestDto,
   StaffBookingPricePreviewResponseDto,
   StaffCancelBookingResponseDto,
   StaffChangeRoomRequestDto,
   StaffChangeRoomResponseDto,
+  StaffCheckoutMultipleRequestDto,
+  StaffCheckoutPaymentRequestDto,
+  StaffCheckoutRequestDto,
   StaffCreateBookingDto,
   StaffCreateBookingResponseDto,
+  StaffCreateCheckoutInvoiceResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
-  StaffCheckoutRequestDto,
-  StaffCheckoutResponseDto,
-  StaffCheckoutMultipleRequestDto,
-  StaffCheckoutMultipleResponseDto,
-  StaffAddCompletedChargesRequestDto,
-  StaffAddCompletedChargesResponseDto,
-  StaffCreateCheckoutInvoiceResponseDto,
-  StaffCheckoutPaymentResponseDto,
 } from "./dto";
 
 const {
@@ -47,13 +44,10 @@ const {
   BookingPendingChargesResponseSchema,
   AvailableRoomsForChangeResponseSchema,
   StaffCheckoutRequestSchema,
-  StaffCheckoutResponseSchema,
   StaffAddCompletedChargesRequestSchema,
-  StaffAddCompletedChargesResponseSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
-  StaffCheckoutPaymentResponseSchema,
   StaffCheckoutMultipleRequestSchema,
-  StaffCheckoutMultipleResponseSchema,
+  StaffCheckoutPaymentRequestSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -264,13 +258,13 @@ async function getBookingPendingCharges(
 async function staffAddCompletedCharges(
   bookingId: string,
   data: StaffAddCompletedChargesRequestDto
-): Promise<StaffAddCompletedChargesResponseDto> {
+): Promise<void> {
   try {
     const resp = await http.post(
       Booking.addToCompletedRoomOrder(bookingId),
       StaffAddCompletedChargesRequestSchema.parse(data)
     );
-    return StaffAddCompletedChargesResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -280,8 +274,17 @@ async function staffAddCompletedCharges(
 async function staffCreateCheckoutInvoice(
   bookingId: string
 ): Promise<StaffCreateCheckoutInvoiceResponseDto> {
+  const idempotencyKey = crypto.randomUUID();
   try {
-    const resp = await http.post(Booking.createInvoice(bookingId));
+    const resp = await http.post(
+      Booking.createInvoice(bookingId),
+      {},
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
     return StaffCreateCheckoutInvoiceResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -291,14 +294,14 @@ async function staffCreateCheckoutInvoice(
 
 async function staffCheckoutPayment(
   bookingId: string,
-  data: StaffCheckoutRequestDto
-): Promise<StaffCheckoutPaymentResponseDto> {
+  data: StaffCheckoutPaymentRequestDto
+): Promise<void> {
   try {
     const resp = await http.post(
       Booking.payment(bookingId),
-      StaffCheckoutRequestSchema.parse(data)
+      StaffCheckoutPaymentRequestSchema.parse(data)
     );
-    return StaffCheckoutPaymentResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -308,13 +311,19 @@ async function staffCheckoutPayment(
 async function staffCheckout(
   bookingId: string,
   data: StaffCheckoutRequestDto
-): Promise<StaffCheckoutResponseDto> {
+): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
   try {
     const resp = await http.post(
       Booking.checkout(bookingId),
-      StaffCheckoutRequestSchema.parse(data)
+      StaffCheckoutRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
-    return StaffCheckoutResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -323,23 +332,25 @@ async function staffCheckout(
 
 async function staffCheckoutMultiple(
   data: StaffCheckoutMultipleRequestDto
-): Promise<StaffCheckoutMultipleResponseDto> {
+): Promise<void> {
   try {
     const resp = await http.post(
       Booking.checkoutMultiple,
       StaffCheckoutMultipleRequestSchema.parse(data)
     );
-    return StaffCheckoutMultipleResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function staffCreateInvoice(bookingId: string) {
+async function staffCreateInvoice(
+  bookingId: string
+): Promise<StaffCreateCheckoutInvoiceResponseDto> {
   try {
-    const resp = await http.get(Booking.pendingCharges(bookingId));
-    return BookingPendingChargesResponseSchema.parse(resp.data);
+    const resp = await http.get(Booking.createInvoice(bookingId));
+    return StaffCreateCheckoutInvoiceResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -363,4 +374,5 @@ export const BookingService = {
   staffCheckoutPayment,
   staffCheckout,
   staffCheckoutMultiple,
+  staffCreateInvoice,
 };

@@ -12,7 +12,8 @@ export function useOTAInfo({ selection }: { selection: boolean }) {
 }
 
 export function usePreviewBookingPrice(
-  data: StaffBookingPricePreviewRequestDto
+  data: StaffBookingPricePreviewRequestDto,
+  options?: { enabled: boolean }
 ) {
   return useQuery({
     queryKey: ["preview-booking-price", data],
@@ -24,6 +25,6 @@ export function usePreviewBookingPrice(
       );
     },
     staleTime: 30 * 1000, // 30 seconds - shorter for real-time pricing
-    enabled: !!(data.checkinDate && data.checkoutDate),
+    enabled: !!options?.enabled && !!(data.checkinDate && data.checkoutDate),
   });
 }

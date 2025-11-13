@@ -29,8 +29,10 @@ export function useUpdateRoomTypeSheet({
   onClose,
   roomType,
 }: UseUpdateRoomTypeSheetProps) {
-  const { mutate, isPending } = useUpdateRoomType();
-  const { mutate: deleteRoomType } = useDeleteRoomType();
+  const { mutate: updateRoomType, isPending } = useUpdateRoomType(
+    roomType?.id || ""
+  );
+  const { mutate: deleteRoomType } = useDeleteRoomType(roomType?.id || "");
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const { data: roomTypeDetail } = useRoomTypeDetail({
@@ -125,9 +127,8 @@ export function useUpdateRoomTypeSheet({
   const submitForm = (data: EditRoomTypeFormData) => {
     if (!roomType) return;
 
-    mutate(
+    updateRoomType(
       {
-        id: roomType.id,
         data: {
           ...data,
           images: data.images || [],
@@ -143,9 +144,6 @@ export function useUpdateRoomTypeSheet({
     );
   };
 
-  const handleDeleteRoomType = (id: string) => {
-    deleteRoomType(id);
-  };
   return {
     // Form
     form,
@@ -170,7 +168,7 @@ export function useUpdateRoomTypeSheet({
     totalImagesAfterSubmit,
 
     // Handlers
-    handleDeleteRoomType,
+    handleDeleteRoomType: deleteRoomType,
     handleClose,
     handleConfirmClose,
     handleRemoveNewFile,

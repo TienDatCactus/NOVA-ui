@@ -22,9 +22,9 @@ export default function DeleteConfirmDialog({
   onClose,
   type,
 }: DeleteConfirmDialogProps) {
-  const { mutate } = useDeleteServiceType();
+  const { mutate } = useDeleteServiceType(type.id);
   const handleConfirm = () => {
-    mutate(type.id);
+    mutate();
     onClose();
   };
 

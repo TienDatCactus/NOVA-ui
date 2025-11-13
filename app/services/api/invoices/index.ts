@@ -1,11 +1,22 @@
 import http from "~/lib/http";
 import { Invoices } from "~/services/url";
 import { InvoiceSchema } from "./invoice.schema";
-import type { InvoiceListResponseDto, InvoiceDetailDto } from "./dto";
+import type {
+  InvoiceListResponseDto,
+  InvoiceDetailDto,
+  InvoiceCalculateFeesResponseDto,
+  InvoicePreviewRequestDto,
+  InvoicePreviewResponseDto,
+} from "./dto";
 import type { InvoiceListParams } from "./invoice.types";
 
-const { InvoiceListResponseWithMetaSchema, InvoiceDetailResponseSchema } =
-  InvoiceSchema;
+const {
+  InvoiceListResponseWithMetaSchema,
+  InvoiceDetailResponseSchema,
+  InvoiceCalculateFeesResponseSchema,
+  InvoicePreviewResponseSchema,
+  InvoicePreviewRequestSchema,
+} = InvoiceSchema;
 
 /**
  * Get list of invoices with pagination and filters
@@ -40,7 +51,38 @@ async function getInvoiceDetail(invoiceId: string): Promise<InvoiceDetailDto> {
   }
 }
 
+async function calculateInvoiceFees({
+  subtotalAmount,
+}: {
+  subtotalAmount: number;
+}): Promise<InvoiceCalculateFeesResponseDto> {
+  try {
+    const resp = await http.post(Invoices.calculateFees, { subtotalAmount });
+    return InvoiceCalculateFeesResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function previewBookingInvoice(
+  data: InvoicePreviewRequestDto
+): Promise<InvoicePreviewResponseDto> {
+  try {
+    const resp = await http.post(
+      Invoices.previewBookingInvoice,
+      InvoicePreviewRequestSchema.parse(data)
+    );
+    return InvoicePreviewResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const InvoicesService = {
   getInvoiceList,
   getInvoiceDetail,
+  calculateInvoiceFees,
+  previewBookingInvoice,
 };

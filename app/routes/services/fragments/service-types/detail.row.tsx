@@ -28,14 +28,14 @@ export default function ServiceTypeDetailRow({
     return <div>Đang tải chi tiết...</div>;
   }
   return (
-    <div className="p-6 bg-muted/30 border-l-4 border-l-primary/20 animate-in slide-in-from-top-2 duration-200 grid md:grid-cols-3 grid-cols-1 gap-4">
+    <div className="p-6 bg-muted/30 border-l-4 border-l-primary/20  gap-4 flex">
       {hasImages && (
-        <div className="mb-6 col-span-1">
+        <div className="mb-6 w-80">
           <h4 className="font-semibold text-sm mb-3">Hình ảnh</h4>
           <div className="flex flex-col max-h-[300px] overflow-y-auto gap-4 ">
             <div className="max-h-[400px] grid place-items-center overflow-y-auto">
-              <Carousel className="w-fit">
-                <CarouselContent>
+              <Carousel>
+                <CarouselContent className="w-60 h-fit">
                   {type.images?.map((img, index) => (
                     <CarouselItem key={index}>
                       <div className="p-1">
@@ -60,7 +60,7 @@ export default function ServiceTypeDetailRow({
         </div>
       )}
 
-      <div className="grid grid-cols-1 col-span-2">
+      <div className="flex-1 grid grid-cols-1 col-span-2">
         <div className="space-y-4">
           <DetailSection title="Thông tin cơ bản">
             <DetailItem label="Mã loại dịch vụ" value={type.code} />
