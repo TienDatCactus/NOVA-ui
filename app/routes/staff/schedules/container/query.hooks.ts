@@ -26,3 +26,15 @@ export function useWorkShiftList() {
     refetchOnMount: false,
   });
 }
+
+// GET /api/WorkShifts/active - Query hook for active work shift list only
+export function useActiveWorkShiftList() {
+  return useQuery({
+    queryKey: ["work-shifts-active"],
+    queryFn: async () => await WorkShiftService.getActiveWorkShiftList(),
+    staleTime: 10 * 60 * 1000, // 10 minutes (work shifts change less frequently)
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+}

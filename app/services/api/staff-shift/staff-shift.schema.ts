@@ -11,6 +11,19 @@ const StaffShiftListItemSchema = z.object({
   status: z.string().optional(),
 });
 
+// StaffShift Detail Item Schema (from GET /api/StaffShifts/{id})
+const StaffShiftDetailItemSchema = z.object({
+  id: z.string(),
+  staffId: z.string(),
+  staffName: z.string().optional(),
+  workShiftId: z.string(),
+  shiftName: z.string().optional(),
+  workDate: z.string(), // "yyyy-MM-dd"
+  status: z.string().optional(),
+  weekDays: z.array(z.number()).optional().nullable(),
+  includeHolidays: z.boolean().optional().nullable(),
+});
+
 // GET /api/StaffShifts - List response with query params (staffId, from, to)
 const StaffShiftListResponseSchema = z.array(StaffShiftListItemSchema);
 
@@ -19,7 +32,7 @@ const StaffShiftDetailResponseSchema = z.object({
   success: z.boolean(),
   statusCode: z.number(),
   message: z.string(),
-  data: StaffShiftListItemSchema,
+  data: StaffShiftDetailItemSchema,
   meta: z.string().optional().nullable(),
 });
 
@@ -59,6 +72,7 @@ const StaffShiftMutationResponseSchema = z
 
 export const StaffShiftSchema = {
   StaffShiftListItemSchema,
+  StaffShiftDetailItemSchema,
   StaffShiftListResponseSchema,
   StaffShiftDetailResponseSchema,
   CreateShiftScheduleRequestSchema,

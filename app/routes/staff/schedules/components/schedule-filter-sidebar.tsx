@@ -32,8 +32,8 @@ export default function ScheduleFilterSidebar({
   });
 
   const { data: workShifts } = useQuery({
-    queryKey: ["work-shifts"],
-    queryFn: async () => await WorkShiftService.getWorkShiftList(),
+    queryKey: ["work-shifts-active"],
+    queryFn: async () => await WorkShiftService.getActiveWorkShiftList(),
   });
 
   const staffList = staffListResponse?.data || [];
@@ -163,7 +163,7 @@ export default function ScheduleFilterSidebar({
                       <div className="flex flex-col">
                         <span>{shift.name}</span>
                         <span className="text-xs text-muted-foreground">
-                          {shift.startTime} - {shift.endTime}
+                          {shift.startTime.substring(0, 5)} - {shift.endTime.substring(0, 5)}
                         </span>
                       </div>
                     </Label>

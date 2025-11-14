@@ -3,6 +3,7 @@ import { StaffShiftSchema } from "./staff-shift.schema";
 
 const {
   StaffShiftListItemSchema,
+  StaffShiftDetailItemSchema,
   StaffShiftListResponseSchema,
   StaffShiftDetailResponseSchema,
   CreateShiftScheduleRequestSchema,
@@ -12,6 +13,7 @@ const {
 
 // Export types
 export type StaffShiftListItem = z.infer<typeof StaffShiftListItemSchema>;
+export type StaffShiftDetailItem = z.infer<typeof StaffShiftDetailItemSchema>;
 export type StaffShiftListResponseDto = z.infer<
   typeof StaffShiftListResponseSchema
 >;

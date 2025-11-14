@@ -34,6 +34,8 @@ export default function Schedules() {
     handlePrevWeek,
     handleNextWeek,
     handleToday,
+    isExporting,
+    handleExport,
   } = useSchedulesContainer();
 
   const handleAddStaff = (shiftId: string, date: string) => {
@@ -49,6 +51,8 @@ export default function Schedules() {
       onResetFilter={resetFilter}
       totalShifts={shifts.length}
       onAddSchedule={() => setCreateDialogOpen(true)}
+      onExport={handleExport}
+      isExporting={isExporting}
       currentWeekStart={currentWeekStart}
       weekEnd={weekEnd}
       onPrevWeek={handlePrevWeek}

@@ -1,16 +1,24 @@
 import { useState, useMemo, useEffect } from "react";
-import { useStaffShiftList, useWorkShiftList } from "./query.hooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStaffShiftList, useActiveWorkShiftList } from "./query.hooks";
 import { useScheduleFilter } from "./filter.hooks";
+import { useScheduleExport } from "./export.hooks";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 import type { StaffShiftListItem } from "~/services/api/staff-shift/dto";
 
 export function useSchedulesContainer() {
+  const queryClient = useQueryClient();
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
     startOfWeek(new Date(), { weekStartsOn: 1 }) // Start from Monday
   );
 
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 });
   const { filterState, updateFilter, resetFilter } = useScheduleFilter();
+  const { isExporting, handleExport } = useScheduleExport({
+    currentWeekStart,
+    weekEnd,
+    selectedStaffId: filterState.selectedStaffId,
+  });
 
   // Query params for API
   const queryParams = {
@@ -23,7 +31,7 @@ export function useSchedulesContainer() {
 
   const { data, isPending, refetch } = useStaffShiftList(queryParams);
   const { data: workShifts, isPending: isWorkShiftsLoading } =
-    useWorkShiftList();
+    useActiveWorkShiftList();
 
   // Refetch when staffId filter changes
   useEffect(() => {
@@ -68,18 +76,21 @@ export function useSchedulesContainer() {
   const handleCreateSuccess = () => {
     setCreateDialogOpen(false);
     refetch();
+    queryClient.invalidateQueries({ queryKey: ["staff-attendances"] });
   };
 
   const handleDeleteSuccess = () => {
     setSelectedShift(null);
     setDeleteDialogOpen(false);
     refetch();
+    queryClient.invalidateQueries({ queryKey: ["staff-attendances"] });
   };
 
   const handleUpdateSuccess = () => {
     setSelectedShift(null);
     setUpdateDialogOpen(false);
     refetch();
+    queryClient.invalidateQueries({ queryKey: ["staff-attendances"] });
   };
 
   // Dialog handlers
@@ -135,5 +146,7 @@ export function useSchedulesContainer() {
     handlePrevWeek,
     handleNextWeek,
     handleToday,
+    isExporting,
+    handleExport,
   };
 }

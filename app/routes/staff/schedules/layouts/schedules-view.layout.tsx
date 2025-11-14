@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Download, Loader2 } from "lucide-react";
 import ScheduleFilterSidebar from "../components/schedule-filter-sidebar";
 import type { ScheduleFilterState } from "../container/filter.hooks";
 import { format } from "date-fns";
@@ -13,6 +13,8 @@ interface SchedulesViewLayoutProps {
   onResetFilter: () => void;
   totalShifts: number;
   onAddSchedule: () => void;
+  onExport: () => void;
+  isExporting: boolean;
   currentWeekStart: Date;
   weekEnd: Date;
   onPrevWeek: () => void;
@@ -27,6 +29,8 @@ export default function SchedulesViewLayout({
   onResetFilter,
   totalShifts,
   onAddSchedule,
+  onExport,
+  isExporting,
   currentWeekStart,
   weekEnd,
   onPrevWeek,
@@ -52,10 +56,21 @@ export default function SchedulesViewLayout({
                 {totalShifts} ca làm
               </Badge>
             </div>
-            <Button onClick={onAddSchedule}>
-              <Plus className="mr-2 h-4 w-4" />
-              Xuất file
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={onExport} disabled={isExporting} variant="outline">
+                {isExporting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang xuất...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Xuất Excel
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Week Navigator */}

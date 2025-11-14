@@ -113,7 +113,7 @@ export default function ScheduleCalendarView({
                 <div className="space-y-1">
                   <div className="font-semibold text-sm">{shift.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {shift.startTime} - {shift.endTime}
+                    {shift.startTime.substring(0, 5)} - {shift.endTime.substring(0, 5)}
                   </div>
                 </div>
               </td>

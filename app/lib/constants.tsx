@@ -148,6 +148,10 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: "/dashboard/staff/schedules",
       },
       {
+        title: "Bảng chấm công",
+        url: "/dashboard/staff/attendance",
+      },
+      {
         title: "Ca làm việc",
         url: "/dashboard/staff/work-shifts",
       },

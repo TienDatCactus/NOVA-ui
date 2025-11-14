@@ -82,10 +82,46 @@ async function updateShiftSchedule(
   }
 }
 
+// GET /api/StaffShifts/export-weekly-matrix - Export weekly matrix (no staff filter)
+async function exportWeeklyMatrix(params?: {
+  from?: string;
+  to?: string;
+}): Promise<Blob> {
+  try {
+    const resp = await http.get(StaffShift.exportWeeklyMatrix, {
+      params,
+      responseType: "blob",
+    });
+    const blob = resp.data instanceof Blob ? resp.data : new Blob([resp.data]);
+    return blob;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+// GET /api/StaffShifts/{staffId}/export-weekly-detail - Export weekly detail (with staff filter)
+async function exportWeeklyDetail(
+  staffId: string,
+  params?: { from?: string; to?: string }
+): Promise<Blob> {
+  try {
+    const resp = await http.get(StaffShift.exportWeeklyDetail(staffId), {
+      params,
+      responseType: "blob",
+    });
+    const blob = resp.data instanceof Blob ? resp.data : new Blob([resp.data]);
+    return blob;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 export const StaffShiftService = {
   getStaffShiftList,
   createShiftSchedule,
   getStaffShiftById,
   deleteStaffShift,
   updateShiftSchedule,
+  exportWeeklyMatrix,
+  exportWeeklyDetail,
 };

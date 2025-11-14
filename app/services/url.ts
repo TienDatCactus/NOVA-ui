@@ -174,6 +174,7 @@ const StaffRole = {
 
 const WorkShift = {
   list: "WorkShifts",
+  active: "WorkShifts/active",
   create: "WorkShifts",
   detail: (id: string) => `WorkShifts/${id}`,
   update: (id: string) => `WorkShifts/${id}`,
@@ -194,6 +195,15 @@ const StaffShift = {
   detail: (id: string) => `StaffShifts/${id}`,
   update: (id: string) => `StaffShifts/${id}/schedule`,
   delete: (id: string) => `StaffShifts/${id}`,
+  exportWeeklyMatrix: "StaffShifts/export-weekly-matrix",
+  exportWeeklyDetail: (staffId: string) =>
+    `StaffShifts/${staffId}/export-weekly-detail`,
+};
+
+const StaffAttendance = {
+  list: "StaffShifts/attendance",
+  absent: (assignmentId: string) => `StaffShifts/${assignmentId}/absent`,
+  present: (assignmentId: string) => `StaffShifts/${assignmentId}/present`,
 };
 
 export {
@@ -216,4 +226,5 @@ export {
   WorkShift,
   Holiday,
   StaffShift,
+  StaffAttendance,
 };

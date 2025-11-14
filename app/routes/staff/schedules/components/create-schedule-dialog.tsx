@@ -69,8 +69,8 @@ export default function CreateScheduleDialog({
     queryFn: async () => await StaffService.getStaffList(),
   });
   const { data: workShifts } = useQuery({
-    queryKey: ["work-shifts"],
-    queryFn: async () => await WorkShiftService.getWorkShiftList(),
+    queryKey: ["work-shifts-active"],
+    queryFn: async () => await WorkShiftService.getActiveWorkShiftList(),
   });
   const staffList = staffListResponse?.data || [];
 
@@ -519,7 +519,7 @@ export default function CreateScheduleDialog({
                         <FormControl>
                           <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">Làm việc cả ngày lễ tết</FormLabel>
+                        <FormLabel className="font-normal cursor-pointer">Không xếp lịch vào ngày lễ</FormLabel>
                       </FormItem>
                     )}
                   />
