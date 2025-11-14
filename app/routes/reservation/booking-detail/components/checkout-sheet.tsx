@@ -192,7 +192,8 @@ export default function CheckoutSheet({
         totalDue > 0
       ) {
         try {
-          const existing = await BookingService.staffCreateInvoice(bookingId);
+          const existing =
+            await BookingService.staffCreateCheckoutInvoice(bookingId);
           if (!ignore) setCheckoutInvoice(existing);
         } catch (err) {
           console.error("Không thể tải hóa đơn sẵn có", err);

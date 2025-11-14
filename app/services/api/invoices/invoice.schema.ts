@@ -33,12 +33,12 @@ const RefundInvoiceRequestSchema = z.object({
 });
 
 const InvoiceListItemSchema = z.object({
-  invoiceId: z.string(),
-  invoiceNo: z.string(),
-  invoiceType: z.string(),
-  bookingId: z.string(),
-  bookingCode: z.string(),
-  customerName: z.string(),
+  invoiceId: z.string().optional(),
+  invoiceNo: z.string().optional(),
+  invoiceType: z.string().optional(),
+  bookingId: z.string().optional(),
+  bookingCode: z.string().optional(),
+  customerName: z.string().optional(),
   subTotal: z.number().optional().nullable(),
   vatAmount: z.number().optional().nullable(),
   serviceChargeAmount: z.number().optional().nullable(),

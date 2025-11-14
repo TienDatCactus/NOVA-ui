@@ -11,6 +11,8 @@ import type {
   BookingListResponseDto,
   BookingOTAResponseDto,
   BookingPendingChargesResponseDto,
+  ConfirmBookingPaymentRequestDto,
+  ConfirmBookingPaymentResponseDto,
   StaffAddCompletedChargesRequestDto,
   StaffBookingPricePreviewRequestDto,
   StaffBookingPricePreviewResponseDto,
@@ -25,6 +27,8 @@ import type {
   StaffCreateCheckoutInvoiceResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
+  UpdateBookingStatusRequestDto,
+  UpdateBookingStatusResponseDto,
 } from "./dto";
 
 const {
@@ -48,6 +52,10 @@ const {
   StaffCreateCheckoutInvoiceResponseSchema,
   StaffCheckoutMultipleRequestSchema,
   StaffCheckoutPaymentRequestSchema,
+  ConfirmBookingPaymentRequestSchema,
+  ConfirmBookingPaymentResponseSchema,
+  UpdateBookingStatusRequestSchema,
+  UpdateBookingStatusResponseSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -119,6 +127,21 @@ async function exportBookings(date?: string): Promise<Blob> {
     }
     return resp as Blob;
   } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+async function updateBookingStatus(
+  data: UpdateBookingStatusRequestDto
+): Promise<UpdateBookingStatusResponseDto> {
+  try {
+    const resp = await http.put(
+      Booking.updateStatus(data.bookingId),
+      UpdateBookingStatusRequestSchema.parse(data)
+    );
+    return UpdateBookingStatusResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -346,12 +369,16 @@ async function staffCheckoutMultiple(
   }
 }
 
-async function staffCreateInvoice(
-  bookingId: string
-): Promise<StaffCreateCheckoutInvoiceResponseDto> {
+async function staffConfirmBookingPayment(
+  bookingId: string,
+  data: ConfirmBookingPaymentRequestDto
+): Promise<ConfirmBookingPaymentResponseDto> {
   try {
-    const resp = await http.get(Booking.createInvoice(bookingId));
-    return StaffCreateCheckoutInvoiceResponseSchema.parse(resp.data);
+    const resp = await http.post(
+      Booking.confirmPayment(bookingId),
+      ConfirmBookingPaymentRequestSchema.parse(data)
+    );
+    return ConfirmBookingPaymentResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -375,5 +402,7 @@ export const BookingService = {
   staffCheckoutPayment,
   staffCheckout,
   staffCheckoutMultiple,
-  staffCreateInvoice,
+
+  updateBookingStatus,
+  staffConfirmBookingPayment,
 };

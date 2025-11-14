@@ -81,23 +81,23 @@ import { toYMD } from "~/lib/utils";
 import { createRemoveRoomOperation } from "~/services/api/booking/booking.helpers";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
-import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
-import CreateOrderDialog from "../bookings/components/create-order-dialog";
+import type {
+  StaffUpdateBookingRequestDto,
+  ConfirmBookingPaymentRequestDto,
+} from "~/services/api/booking/dto";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
 import type { Route } from "./+types/booking-detail";
-import AddMenuItemDialog from "./components/add-menu-item-dialog";
 import { AddRoomModal } from "./components/add-room-modal";
-import AddServiceOrderDialog from "./components/add-service-order-dialog";
-import BookingServiceOrders from "./components/booking-service-orders";
+import AddCompletedChargesDialog from "./components/add-completed-charges-dialog";
+import PendingChargesSection from "./components/pending-charges-section";
 import CheckoutSheet from "./components/checkout-sheet";
-import { useBookingOrders } from "./container/use-booking-orders.hooks";
-import { useBookingServiceOrders } from "./container/use-booking-service-orders.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
 import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
-
-import BookingMenuOrders from "./components/booking-menu-orders";
+import { BookingService } from "~/services/api/booking";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import {
   Empty,
   EmptyHeader,
@@ -106,6 +106,7 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "~/components/ui/empty";
+import { useConfirmBookingPayment } from "./container/use-booking-checkout.hooks";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -129,13 +130,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     enabled: !!bookingCode,
   });
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
-  const [createServiceOrderDialogOpen, setCreateServiceOrderDialogOpen] =
-    useState(false);
+  const [confirmPaymentOpen, setConfirmPaymentOpen] = useState(false);
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
@@ -146,39 +141,26 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     bookingRoomId: string;
     roomName: string;
   } | null>(null);
+  const [isAddingCompletedCharges, setIsAddingCompletedCharges] =
+    useState(false);
 
   // Booking update permissions
   const permissions = useBookingUpdatePermissions(bookingDetail);
+  const queryClient = useQueryClient();
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
     bookingDetail?.id || ""
   );
 
-  const {
-    isCreatingOrder,
-    isLoadingOrder,
-    createBookingOrder,
-    createRoomOrder,
-    addMenuItem,
-    removeItem,
-    isAddingItem,
-    addCompletedCharges,
-    isAddingCompletedCharges,
-    cancelOrder,
-    completeOrder,
-  } = useBookingOrders({
-    bookingId: bookingDetail?.id || "",
-    ordersData: bookingDetail ? bookingDetail.posOrders : [],
-  });
+  const { mutate: confirmPayment, isPending: isConfirmingPayment } =
+    useConfirmBookingPayment(bookingDetail?.id || "");
 
-  const {
-    isCreatingServiceOrder,
-    createBookingServiceOrder,
-    completeServiceOrder,
-    cancelServiceOrder,
-  } = useBookingServiceOrders({
-    bookingId: bookingDetail?.id || "",
-    bookingRoomId: selectedRoomId || undefined,
+  const paymentForm = useForm<ConfirmBookingPaymentRequestDto>({
+    resolver: zodResolver(BookingSchema.ConfirmBookingPaymentRequestSchema),
+    defaultValues: {
+      paymentMethod: "Cash",
+      paidAmount: 0,
+    },
   });
 
   const form = useForm<StaffUpdateBookingRequestDto>({
@@ -278,51 +260,28 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     toast.success("Đã thêm phòng mới");
   };
 
-  const handleAddMenuItem = (
-    menuItemId: string,
-    quantity: number,
-    unitPrice: number
-  ) => {
-    if (selectedOrderId) {
-      addMenuItem(selectedOrderId, menuItemId, quantity, unitPrice);
+  const handleAddCompletedCharges = async (data: {
+    posItems?: Array<{ menuItemId: string; quantity: number }>;
+    serviceItems?: Array<{ serviceItemId: string; quantity: number }>;
+  }) => {
+    if (!bookingDetail?.id) return;
+
+    setIsAddingCompletedCharges(true);
+    try {
+      await BookingService.staffAddCompletedCharges(bookingDetail.id, data);
+      queryClient.invalidateQueries({
+        queryKey: ["booking-pending-charges", bookingDetail.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", bookingDetail.id],
+      });
+      toast.success("Đã thêm completed charges thành công");
+      setCompletedChargesDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to add completed charges:", error);
+    } finally {
+      setIsAddingCompletedCharges(false);
     }
-  };
-
-  const handleAddCompletedCharges = (menuItemId: string, quantity: number) => {
-    const posItems = [{ menuItemId, quantity }];
-    addCompletedCharges(posItems, selectedRoomId);
-  };
-
-  const handleAddServiceOrder = (
-    serviceItemId: string,
-    quantity: number,
-    unitPrice: number,
-    scheduledAt?: string,
-    note?: string
-  ) => {
-    createBookingServiceOrder(
-      serviceItemId,
-      quantity,
-      unitPrice,
-      scheduledAt,
-      note
-    );
-    setCreateServiceOrderDialogOpen(false);
-  };
-
-  const handleCompleteMenuOrder = (orderId: string) => {
-    completeOrder(orderId);
-  };
-  const handleCancelMenuOrder = (orderId: string) => {
-    cancelOrder(orderId);
-  };
-
-  const handleCompleteServiceOrder = (orderId: string) => {
-    completeServiceOrder(orderId);
-  };
-
-  const handleCancelServiceOrder = (orderId: string) => {
-    cancelServiceOrder(orderId);
   };
 
   const handleRemoveRoom = (bookingRoomId: string, roomName: string) => {
@@ -448,9 +407,9 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                     <ExistingRoomItemWrapper
                       key={room.roomId}
                       room={room}
-                      isSelected={selectedRoomId === room.roomId}
+                      isSelected={false}
                       isExpanded={expandedRooms.has(room.roomId)}
-                      onSelect={() => setSelectedRoomId(room.roomId)}
+                      onSelect={() => toggleRoomExpand(room.roomId)}
                       onToggleExpand={() => toggleRoomExpand(room.roomId)}
                       onRemove={() =>
                         handleRemoveRoom(room.bookingRoomId, room.roomName)
@@ -819,15 +778,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle className="flex gap-1">
-                        <h1>
-                          {selectedRoomId
-                            ? `Phòng: ${
-                                bookingDetail.rooms.find(
-                                  (room) => room.roomId == selectedRoomId
-                                )?.roomName
-                              }`
-                            : `Thông tin đặt phòng : ${bookingCode}`}
-                        </h1>
+                        <h1>Thông tin đặt phòng: {bookingCode}</h1>
                         <sup>
                           <Badge
                             variant={
@@ -870,40 +821,10 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                         </DropdownMenu>
                       </div>
                     </div>
-                    {selectedRoomId && (
-                      <div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setSelectedRoomId("")}
-                        >
-                          Xem đơn đặt phòng
-                        </Button>
-                      </div>
-                    )}
                   </CardHeader>
 
                   <CardContent className="space-y-4">
                     <div className="flex items-center gap-6">
-                      <div className="grid gap-2">
-                        <Label>Phòng</Label>
-                        <Select
-                          value={selectedRoomId ?? ""}
-                          onValueChange={setSelectedRoomId}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn phòng" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {bookingDetail.rooms.map((room) => (
-                              <SelectItem key={room.roomId} value={room.roomId}>
-                                {room.roomName}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
                       <FormField
                         control={form.control}
                         name="checkinDate"
@@ -967,35 +888,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 bookingDetail={bookingDetail}
               />
 
-              <AddMenuItemDialog
-                open={orderDialogOpen}
-                onOpenChange={setOrderDialogOpen}
-                onConfirm={handleAddMenuItem}
-                isAdding={isAddingItem}
-              />
-
-              <AddMenuItemDialog
+              <AddCompletedChargesDialog
                 open={completedChargesDialogOpen}
                 onOpenChange={setCompletedChargesDialogOpen}
                 onConfirm={handleAddCompletedCharges}
                 isAdding={isAddingCompletedCharges}
-              />
-
-              <CreateOrderDialog
-                open={createOrderDialogOpen}
-                onOpenChange={setCreateOrderDialogOpen}
-                onCreateBookingOrder={createBookingOrder}
-                onCreateRoomOrder={createRoomOrder}
-                isCreating={isCreatingOrder}
-                hasMultipleRooms={(bookingDetail?.rooms.length || 0) > 1}
-              />
-
-              <AddServiceOrderDialog
-                open={createServiceOrderDialogOpen}
-                onOpenChange={setCreateServiceOrderDialogOpen}
-                onConfirm={handleAddServiceOrder}
-                isAdding={isCreatingServiceOrder}
-                hasMultipleRooms={(bookingDetail?.rooms.length || 0) > 1}
               />
 
               <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
@@ -1048,33 +945,33 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               </Dialog>
             </div>
           </div>
-          <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pb-4">
-            <BookingMenuOrders
-              isCreatingOrder={isCreatingOrder}
-              ordersList={bookingDetail.posOrders}
-              isLoadingOrder={isLoadingOrder}
-              onOpenCreateDialog={() => setCreateOrderDialogOpen(true)}
-              onAddMenuItem={(orderId) => {
-                setSelectedOrderId(orderId);
-                setOrderDialogOpen(true);
-              }}
-              onCancelOrder={handleCancelMenuOrder}
-              onCompleteOrder={handleCompleteMenuOrder}
-              onRemoveItem={removeItem}
+
+          {/* Pending Charges Section - Financial Dashboard */}
+          <div className="pb-4">
+            <PendingChargesSection
+              bookingId={bookingDetail.id}
               onAddCompletedCharges={() => setCompletedChargesDialogOpen(true)}
-            />
-            <BookingServiceOrders
-              ordersList={bookingDetail.serviceOrders || []}
-              isLoadingOrder={isLoadingOrder}
-              isCreatingOrder={isCreatingServiceOrder}
-              onOpenCreateDialog={() => setCreateServiceOrderDialogOpen(true)}
-              onCancelOrder={handleCancelServiceOrder}
-              onCompleteOrder={handleCompleteServiceOrder}
+              canAddCharges={
+                bookingDetail.status !== "CheckedOut" &&
+                bookingDetail.status !== "Cancelled"
+              }
             />
           </div>
         </div>
         <Separator />
         <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
+          <Button
+            variant={"outline"}
+            onClick={() => setConfirmPaymentOpen(true)}
+            disabled={
+              !bookingDetail?.id ||
+              bookingDetail?.status === "CheckedOut" ||
+              bookingDetail?.status === "Cancelled"
+            }
+          >
+            <Wallet className="w-4 h-4 mr-2" />
+            Xác nhận thanh toán
+          </Button>
           <Button
             variant={"success"}
             onClick={() => setCheckoutOpen(true)}
@@ -1112,7 +1009,134 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           bookingCode={bookingDetail?.bookingCode || ""}
         />
 
-        {/* Remove Room Confirmation Dialog */}
+        {/* Confirm Payment Dialog */}
+        <Dialog open={confirmPaymentOpen} onOpenChange={setConfirmPaymentOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Xác nhận thanh toán</DialogTitle>
+              <DialogDescription>
+                Xác nhận thanh toán cho đặt phòng #{bookingDetail?.bookingCode}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...paymentForm}>
+              <form
+                onSubmit={paymentForm.handleSubmit((data) =>
+                  confirmPayment(data)
+                )}
+                className="space-y-4"
+              >
+                <div className="space-y-4">
+                  {/* Payment Summary */}
+                  <div className="bg-muted/30 p-4 rounded-lg space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Tổng tiền:</span>
+                      <span className="font-mono font-semibold">
+                        {bookingDetail?.totalAmount?.toLocaleString("vi-VN")}{" "}
+                        VNĐ
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Đã thanh toán:
+                      </span>
+                      <span className="font-mono">
+                        {bookingDetail?.paidAmount?.toLocaleString("vi-VN")} VNĐ
+                      </span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between text-sm font-semibold">
+                      <span>Còn lại:</span>
+                      <span className="font-mono text-destructive">
+                        {(
+                          (bookingDetail?.totalAmount || 0) -
+                          (bookingDetail?.paidAmount || 0)
+                        ).toLocaleString("vi-VN")}{" "}
+                        VNĐ
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Payment Method */}
+                  <FormField
+                    control={paymentForm.control}
+                    name="paymentMethod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phương thức thanh toán</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Chọn phương thức" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PAYMENT_METHODS.filter((pm) => !pm.disabled).map(
+                              (pm) => (
+                                <SelectItem key={pm.value} value={pm.value}>
+                                  <div className="flex items-center gap-2">
+                                    <pm.icon className="w-4 h-4" />
+                                    {pm.label}
+                                  </div>
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Paid Amount */}
+                  <FormField
+                    control={paymentForm.control}
+                    name="paidAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Số tiền thanh toán</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Nhập số tiền"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value) || 0)
+                            }
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Số tiền tối thiểu: 0.01 VNĐ
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setConfirmPaymentOpen(false);
+                      paymentForm.reset();
+                    }}
+                    disabled={isConfirmingPayment}
+                  >
+                    Hủy
+                  </Button>
+                  <Button type="submit" disabled={isConfirmingPayment}>
+                    {isConfirmingPayment ? "Xử lý..." : "Xác nhận thanh toán"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
         <AlertDialog
           open={removeRoomConfirmOpen}
           onOpenChange={setRemoveRoomConfirmOpen}

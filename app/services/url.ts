@@ -40,8 +40,11 @@ const Booking = {
   detailById: (id: string) => `Bookings/${id}/details`,
   detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
   Export: `Bookings/export`,
+  updateStatus: (id: string) => `Bookings/${id}/update-status`,
+
   addToCompletedRoomOrder: (bookingId: string) =>
     `/StaffBookings/${bookingId}/add-completed-charges`,
+  confirmPayment: (id: string) => `StaffBookings/${id}/confirm-payment`,
 };
 
 const OTAInformation = {
@@ -60,7 +63,9 @@ const Rooms = {
   generateQRCode: (id: string, baseUrl?: string) =>
     `Rooms/${id}/qr-code?baseUrl=${baseUrl}`,
   regenerateQRCode: (id: string, baseUrl?: string) =>
-    `Rooms/${id}/qr-code/regenerate?baseUrl=${baseUrl}`,
+    baseUrl
+      ? `Rooms/${id}/qr-code/regenerate?baseUrl=${baseUrl}`
+      : `Rooms/${id}/qr-code/regenerate`,
 };
 
 const RoomTypes = {
@@ -158,9 +163,7 @@ const Invoices = {
   listByBooking: (bookingId: string) => `Invoices/booking/${bookingId}`, //? list invoices by booking ID
   calculateFees: "invoice-preview/calculate-fees",
   previewBookingInvoice: "invoice-preview/preview",
-  finalize: (id: string) => `Invoices/${id}/finalize`, //? finalize invoice
   payments: (id: string) => `Invoices/${id}/payments`, //? get invoice payments
-  confirmPayment: (id: string) => `Invoices/${id}/confirm-payment`, //? confirm payment
   refund: (id: string) => `Invoices/${id}/refund`, //? refund invoice
   export: (date?: string) =>
     date ? `Invoices/export?date=${date}` : `Invoices/export`, //? export invoices

@@ -77,18 +77,6 @@ export default function ServiceOrderActions({
           </Button>
         ) : (
           <>
-            {/* {canComplete && (
-              <Button
-                variant="success-outline"
-                size="sm"
-                onClick={() => completeOrder.mutate(order.id)}
-                disabled={completeOrder.isPending}
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Hoàn thành
-              </Button>
-            )} */}
-
             {canReschedule && (
               <Button
                 variant="outline"
@@ -101,7 +89,17 @@ export default function ServiceOrderActions({
                 Đổi lịch
               </Button>
             )}
-
+            {canComplete && (
+              <Button
+                variant="success"
+                size="sm"
+                onClick={() => completeOrder.mutate(order.id)}
+                disabled={completeOrder.isPending}
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Hoàn thành
+              </Button>
+            )}
             {canPay && (
               <Button
                 variant="info"

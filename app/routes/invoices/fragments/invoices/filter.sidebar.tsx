@@ -252,8 +252,6 @@ function InvoicesFilterSidebar({
         </CardContent>
 
         <Separator />
-
-        <Separator />
         <CardContent className="px-0 rounded-md">
           <div className="space-y-3">
             <Label htmlFor="booking-code" className="text-sm font-medium">

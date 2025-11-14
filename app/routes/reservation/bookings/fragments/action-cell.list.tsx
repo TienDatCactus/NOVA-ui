@@ -36,7 +36,6 @@ export const ActionCell: React.FC<{ row: Row<BookingListItem> }> = ({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Tiện ích</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Thêm sản phẩm, dịch vụ</DropdownMenuItem>
           <DropdownMenuItem onClick={() => setChangeRoomDialogOpen(true)}>
             Đổi phòng
           </DropdownMenuItem>

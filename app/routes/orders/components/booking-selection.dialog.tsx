@@ -187,7 +187,7 @@ export default function BookingSelectionDialog({
               className="h-fit
              rounded-md border"
             >
-              <div className="p-4 space-y-2">
+              <div className="p-4 space-y-2 overflow-y-auto max-h-96">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <div

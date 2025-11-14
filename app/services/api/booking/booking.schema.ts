@@ -515,6 +515,23 @@ const UpdateBookingStatusResponseSchema = z.object({
   newStatus: BookingStatusEnum,
   updatedAt: z.string().optional(),
 });
+
+const ConfirmBookingPaymentRequestSchema = z.object({
+  paymentMethod: PaymentSchema.PaymentMethodEnum,
+  paidAmount: z.number().min(0.01, "Số tiền thanh toán không hợp lệ"),
+});
+const ConfirmBookingPaymentResponseSchema = z.object({
+  bookingId: z.string().optional(),
+  invoiceId: z.string().optional(),
+  invoiceNo: z.string().optional(),
+  paymentId: z.string().optional(),
+  paidAmount: z.number().optional(),
+  invoiceTotal: z.number().optional(),
+  remainingAmount: z.number().optional(),
+  invoiceStatus: z.string().optional(),
+  message: z.string().optional(),
+});
+
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -549,4 +566,8 @@ export const BookingSchema = {
   //! update booking status
   UpdateBookingStatusRequestSchema,
   UpdateBookingStatusResponseSchema,
+
+  //! confirm booking payment
+  ConfirmBookingPaymentRequestSchema,
+  ConfirmBookingPaymentResponseSchema,
 };

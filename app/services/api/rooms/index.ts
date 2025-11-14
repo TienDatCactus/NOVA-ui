@@ -14,7 +14,6 @@ import type {
   AvailableRoomsInternalResponseDto,
   UpdateRoomDetailRequestDto,
   CreateRoomRequestDto,
-  QRCodeResponseDto,
 } from "./dto";
 import http from "~/lib/http";
 import { Rooms } from "~/services/url";
@@ -153,7 +152,7 @@ async function generateQRCode(roomId: string, baseUrl?: string) {
 //! Tạo lại ChatToken MỚI và trả về QR code image (PNG). Endpoint này sẽ TẠO token mới, vô hiệu hóa QR code cũ, và trả về QR code mới.
 async function regenerateQRCode(roomId: string, baseUrl?: string) {
   try {
-    const resp = await http.get(Rooms.regenerateQRCode(roomId), {
+    const resp = await http.post(Rooms.regenerateQRCode(roomId), {
       responseType: "blob",
     });
     return resp;
