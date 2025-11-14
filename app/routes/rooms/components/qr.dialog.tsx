@@ -33,21 +33,13 @@ export function QrDialog({
     isLoading,
     isError,
     isFetching,
-  } = useGetRoomQrCode(roomId);
+    refetch,
+  } = useGetRoomQrCode(roomId, { enabled: open });
   const {
     mutate: regenerateQR,
     isPending: isRegenerating,
     isError: isRegenerateError,
-    reset: resetRegenerate,
   } = useRegenerateRoomQRCode();
-
-  // Reset error state on dialog open
-  React.useEffect(() => {
-    if (open) {
-      resetRegenerate();
-    }
-  }, [open, resetRegenerate]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -78,29 +70,21 @@ export function QrDialog({
             </div>
           </DialogHeader>
 
-          <div className="flex flex-col items-center gap-4 py-4">
+          <div className="flex flex-col items-center gap-4 py-2">
             {isLoading || isFetching ? (
               <Skeleton className="w-48 h-48 rounded-lg bg-muted" />
             ) : isError ? (
               <div className="text-destructive text-sm">
                 Không thể tải mã QR.{" "}
-                <Button
-                  variant="link"
-                  size="sm"
-                  onClick={() => regenerateQR({ roomId })}
-                >
+                <Button variant="link" size="sm" onClick={() => refetch()}>
                   Thử lại
                 </Button>
               </div>
             ) : qrData ? (
               <Image
-                src={
-                  typeof qrData === "string"
-                    ? qrData
-                    : qrData?.qrCodeUrl || qrData?.dataUrl
-                }
+                src={qrData} // qrData is now a string data URL
                 alt="QR code phòng"
-                className="w-48 h-48 rounded-lg border border-border bg-background aspect-square"
+                className="w-64 h-64 rounded-lg border border-border bg-background aspect-square"
                 draggable={false}
               />
             ) : null}

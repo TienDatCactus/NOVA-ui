@@ -7,6 +7,9 @@ export function useServiceTypes(params?: ServiceTypeListParams) {
     queryKey: ["service-types", params],
     queryFn: async () =>
       await ServiceTypesService.getServiceTypeList(params || {}),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 

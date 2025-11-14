@@ -238,15 +238,12 @@ async function voidInvoice(invoiceId: string): Promise<any> {
  * @param params - Export parameters
  * @returns Promise with exported data
  */
-async function exportInvoices(date?: string): Promise<any> {
+async function exportInvoices(date?: string) {
   try {
     const resp = await http.get(Invoices.export(date), {
       responseType: "blob",
     });
-    const blob = new Blob([resp.data], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    return blob;
+    return resp;
   } catch (error) {
     console.error("Error exporting invoices:", error);
     return Promise.reject(error);

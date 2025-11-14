@@ -73,11 +73,6 @@ function useRegenerateRoomQRCode() {
       queryClient.invalidateQueries({
         queryKey: ["room-qr-code", variables.roomId],
       });
-      toast.success("Tạo lại mã QR thành công.");
-    },
-    onError: (error) => {
-      console.error("Error regenerating QR code:", error);
-      toast.error("Không thể tạo lại mã QR. Vui lòng thử lại.");
     },
   });
 }

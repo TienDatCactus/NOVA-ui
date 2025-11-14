@@ -1,5 +1,5 @@
 import { ArrowUpRightIcon, FolderCode } from "lucide-react";
-import type z from "zod";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Empty,
@@ -10,9 +10,10 @@ import {
   EmptyTitle,
 } from "~/components/ui/empty";
 import { Skeleton } from "~/components/ui/skeleton";
-import { RoomSchema } from "~/services/api/rooms/room.schema";
 import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
-import RoomTypeCard from "../../../booking-detail/fragments/room.card";
+import RoomCardGrid from "../../../booking-detail/fragments/room.card";
+import { Separator } from "~/components/ui/separator";
+import { formatMoney } from "~/lib/utils";
 
 interface BookingGridProps {
   rooms?: AvailableRoomsInternalResponseDto;
@@ -25,6 +26,22 @@ function BookingGrid({
   isLoading = false,
   refetch,
 }: BookingGridProps) {
+  const data = {
+    roomTypeId: "eda03359-37c8-4ec8-b6a4-8dd1be756d32",
+    roomTypeCode: "STD",
+    roomTypeName: "Standard",
+    baseRatePerNight: 500000,
+    maxOccupancy: 3,
+    totalRooms: 2,
+    availableCount: 1,
+    availableRooms: [
+      {
+        roomId: "22222222-2222-2222-2222-222222222222",
+        roomName: "STD-101",
+        status: "Ready",
+      },
+    ],
+  };
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -72,9 +89,35 @@ function BookingGrid({
   }
 
   return (
-    <div className="grid auto-rows-fr gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="">
       {rooms.map((room) => (
-        <RoomTypeCard key={room.roomTypeId} roomType={room} />
+        <div key={room.roomTypeId} className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-xl font-semibold">
+              <span>{room.roomTypeName}</span>
+              <sup> ({room.availableCount})</sup>
+            </div>
+            <div className="border-b flex-1" />
+            <div className="flex items-center gap-2">
+              <Badge variant="info">
+                <span>Giá 1 đêm: </span>
+                <data>{formatMoney(room.baseRatePerNight).vndFormatted}</data>
+              </Badge>
+              <Badge variant={"warning"}>
+                <span>Số người tối đa: </span>
+                <data>{room.maxOccupancy}</data>
+              </Badge>
+            </div>
+          </div>
+          <div className="grid auto-rows-fr gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            {room.availableRooms.map((availableRoom) => (
+              <RoomCardGrid
+                key={availableRoom.roomId}
+                roomId={availableRoom.roomId}
+              />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );

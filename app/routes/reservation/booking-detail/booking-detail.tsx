@@ -5,6 +5,8 @@ import {
   Baby,
   DoorOpen,
   Ellipsis,
+  FileWarning,
+  Icon,
   Mail,
   Pen,
   Phone,
@@ -96,6 +98,14 @@ import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
 
 import BookingMenuOrders from "./components/booking-menu-orders";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "~/components/ui/empty";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -243,6 +253,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       otaBookingCode: data.otaBookingCode,
       otaInformationId: data.otaInformationId,
       breakfastDates: data.breakfastDates || [],
+      totalAmount: data.totalAmount,
       rooms: data.rooms, // Include room operations
     };
 
@@ -322,7 +333,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const confirmRemoveRoom = () => {
     if (!roomToRemove) return;
 
-    // Check if this room is already marked for removal
     const currentRooms = form.getValues("rooms") || [];
     const alreadyMarkedForRemoval = currentRooms.some(
       (room) =>
@@ -337,7 +347,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       return;
     }
 
-    // Use helper to create proper remove operation
     const removeOperation = createRemoveRoomOperation(
       roomToRemove.bookingRoomId
     );
@@ -387,18 +396,20 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
   if (error || !bookingDetail) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-destructive">Lỗi</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-card-foreground">
-              Không thể tải thông tin đặt phòng. Vui lòng thử lại.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FileWarning />
+          </EmptyMedia>
+          <EmptyTitle>Lỗi</EmptyTitle>
+          <EmptyDescription>
+            Không thể tải thông tin đặt phòng. Vui lòng thử lại.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button>Add data</Button>
+        </EmptyContent>
+      </Empty>
     );
   }
 
@@ -563,7 +574,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             </aside>
             <div className="grid flex-1 gap-4 px-6">
               <Card className="border-b w-full h-fit shadow-sm">
-                <CardContent className="flex justify-around items-start gap-6 flex-wrap">
+                <CardContent className="flex items-start gap-4 flex-wrap">
                   <div className="grid gap-2">
                     <h1 className="uppercase font-medium text-card-foreground text-sm">
                       Khách hàng
@@ -755,7 +766,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                                       checkoutDate instanceof Date
                                         ? checkoutDate
                                         : parseISO(checkoutDate!.toString());
-                                    return date < checkin || date >= checkout;
+                                    return date <= checkin || date >= checkout;
                                   }}
                                   locale={vi}
                                 />
@@ -771,24 +782,33 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                     }}
                   />
 
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-sm uppercase text-card-foreground">
-                      Tổng tiền cần thanh toán
-                    </Label>
-                    <Input
-                      type="text"
-                      placeholder="0"
-                      value={form.watch("totalAmount") || ""}
-                      onChange={(e) =>
-                        form.setValue("totalAmount", Number(e.target.value))
-                      }
-                      startAddon={<Wallet />}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Nhấn để cập nhật thông tin thanh toán
-                    </p>
-                  </div>
-                  {/* Note Modal Button */}
+                  <FormField
+                    control={form.control}
+                    name="totalAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm text-card-foreground uppercase">
+                          Tổng tiền cần thanh toán
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="w-fit"
+                            min={0}
+                            {...field}
+                            onChange={(value) =>
+                              field.onChange(value.target.valueAsNumber)
+                            }
+                            startAddon={<Wallet />}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Nhấn để cập nhật thông tin thanh toán
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
               <form

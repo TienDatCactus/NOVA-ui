@@ -92,32 +92,6 @@ interface CheckoutSheetProps {
   bookingCode: string;
 }
 
-/**
- * CheckoutSheet Component
- *
- * Implements checkout flow per FE-Flow-Checkout.md specification.
- *
- * CASE Coverage:
- * - ✅ CASE 1: Simple checkout (no charges) → direct finalize
- * - ✅ CASE 2: Room balance → payment required
- * - ✅ CASE 3: POS/Service charges → manual invoice creation
- * - ✅ CASE 4: Room + Service (unified) → backend auto-routes payment, single form
- * - ⏸️ CASE 5: Multi-booking → DEFERRED (TODO marker exists)
- * - ⏸️ CASE 6: Partial payment → DEFERRED (backend enforces full payment)
- * - ✅ CASE 7: Cancel service → handled in booking-detail.tsx
- * - ✅ CASE 8: Add last-minute charges → handled in booking-detail.tsx
- *
- * Business Rules:
- * - Strict full payment enforcement (balance must = 0 before checkout)
- * - Manual invoice creation via button (no auto-create)
- * - Existing invoice pre-check via getInvoicesByBooking
- * - Payment retry allowed on error
- * - Overpayment displays change amount (staff returns to customer)
- *
- * Schema:
- * - StaffCheckoutPaymentRequestSchema = CheckoutPaymentItemSchema (unified, flat)
- * - No nested `checkoutPayment` wrapper anymore (updated per user decision Q2/Q4/Q7)
- */
 export default function CheckoutSheet({
   open,
   onOpenChange,
@@ -207,7 +181,6 @@ export default function CheckoutSheet({
     queryFn: () => InvoicesService.getInvoicesByBooking(bookingId),
   });
 
-  // If invoices exist, load summary via GET createInvoice (idempotent, returns existing) ONCE.
   useEffect(() => {
     let ignore = false;
     async function loadExistingInvoice() {

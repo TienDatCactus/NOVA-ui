@@ -27,6 +27,9 @@ function useBookingDetail({
         id: bookingId,
       }),
     enabled: enabled && (!!bookingCode || !!bookingId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 function useBookingRoomsWeek(params?: BookingListParams) {

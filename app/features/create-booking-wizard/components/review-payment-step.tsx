@@ -4,6 +4,7 @@ import { vi } from "date-fns/locale";
 import {
   BedDouble,
   Calendar,
+  CircleAlert,
   DollarSign,
   Loader2,
   Users,
@@ -67,19 +68,23 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
     const setData = useCreateBookingStore((s) => s.setData);
     const serviceOrderServices = useServiceOrderStore((s) => s.services);
 
+    const isRoomBlock = storeData.bookingType === "RoomBlock";
+
     const { mutateAsync, isPending: isSubmitting } = useCreateBookingMutation();
 
     const form = useForm<ReviewPaymentFormData>({
       resolver: zodResolver(ReviewPaymentFormSchema),
       defaultValues: {
         specialRequest: storeData.specialRequest || "",
-        overridePrice: storeData.overridePrice || null,
+        overridePrice: isRoomBlock ? 0 : storeData.overridePrice || null,
         serviceOrder: undefined, // Services come from global store
-        roomPayment: {
-          paymentMethod: undefined,
-          paidAmount: undefined,
-          paymentNote: "",
-        },
+        roomPayment: isRoomBlock
+          ? null
+          : {
+              paymentMethod: undefined,
+              paidAmount: undefined,
+              paymentNote: "",
+            },
       },
       mode: "onChange",
     });
@@ -198,13 +203,17 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
     const finalTotal = getFinalTotal();
 
     const onSubmit = async (data: ReviewPaymentFormData) => {
-      // Build service order from global store
-      const finalServiceOrder = {
-        services: serviceOrderServices,
-      };
+      // Build service order from global store (null for RoomBlock)
+      const finalServiceOrder = isRoomBlock
+        ? undefined
+        : {
+            services: serviceOrderServices,
+          };
 
-      const finalRoomPayment =
-        data.roomPayment?.paymentMethod && data.roomPayment?.paidAmount
+      // Payment handling (null for RoomBlock)
+      const finalRoomPayment = isRoomBlock
+        ? undefined
+        : data.roomPayment?.paymentMethod && data.roomPayment?.paidAmount
           ? {
               paymentMethod: data.roomPayment.paymentMethod,
               paidAmount: data.roomPayment.paidAmount,
@@ -214,7 +223,7 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
 
       setData({
         specialRequest: data.specialRequest,
-        overridePrice: data.overridePrice,
+        overridePrice: isRoomBlock ? 0 : data.overridePrice,
         serviceOrder: finalServiceOrder,
         roomPayment: finalRoomPayment,
       });
@@ -230,8 +239,20 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
           adultsAmount: storeData.adultsAmount!,
           childrenAmount: storeData.childrenAmount ?? 0,
           guestFullName: storeData.guestFullName!,
-          isBreakfastAll: storeData.isBreakfastAll ?? false,
-          overridePrice: data.overridePrice == 0 ? null : data.overridePrice,
+          guestPhone: isRoomBlock ? "" : storeData.guestPhone || "",
+          guestEmail: isRoomBlock ? "" : storeData.guestEmail || "",
+          isBreakfastAll: isRoomBlock
+            ? false
+            : (storeData.isBreakfastAll ?? false),
+          breakfastDates: isRoomBlock ? [] : storeData.breakfastDates,
+          overridePrice: isRoomBlock
+            ? 0
+            : data.overridePrice == 0
+              ? null
+              : data.overridePrice,
+          internalNote: isRoomBlock
+            ? `ROOM BLOCK - ${storeData.guestFullName}`
+            : storeData.internalNote,
           serviceOrder: finalServiceOrder,
           roomPayment: finalRoomPayment,
         };
@@ -471,128 +492,160 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
 
             {/* Override Price */}
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="success">
-                  <DollarSign />
-                  Thanh toán
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Wallet className="h-5 w-5" />
-                    Thanh toán trước (Tùy chọn)
-                  </DialogTitle>
-                </DialogHeader>
-                <FormField
-                  control={form.control}
-                  name="roomPayment.paymentMethod"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phương thức thanh toán</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn phương thức thanh toán" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Cash">Tiền mặt</SelectItem>
-                          <SelectItem value="Card">Thẻ</SelectItem>
-                          <SelectItem value="BankTransfer">
-                            Chuyển khoản
-                          </SelectItem>
-                          <SelectItem value="OTAPrepaid">
-                            OTA Prepaid
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Để trống nếu khách chưa thanh toán (sẽ trả khi checkout)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
+            {/* Room Block Notice - No Payment */}
+            {isRoomBlock && (
+              <Card className="bg-muted/50 border-dashed border-destructive p-0">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <CircleAlert className="h-5 w-5 text-destructive mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-destructive">
+                        Khóa phòng (Room Block)
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Phòng sẽ được khóa với giá{" "}
+                        <strong className="text-foreground">0 VND</strong>.
+                        Không cần thanh toán và dịch vụ bổ sung. Phòng không thể
+                        được đặt bởi khách hàng khác trong thời gian này.
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Lý do khóa:{" "}
+                        <span className="text-foreground font-medium">
+                          {storeData.guestFullName}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Payment Dialog - Hidden for RoomBlock */}
+            {!isRoomBlock && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="success">
+                    <DollarSign />
+                    Thanh toán
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Wallet className="h-5 w-5" />
+                      Thanh toán trước (Tùy chọn)
+                    </DialogTitle>
+                  </DialogHeader>
+                  <FormField
+                    control={form.control}
+                    name="roomPayment.paymentMethod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phương thức thanh toán</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Chọn phương thức thanh toán" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Cash">Tiền mặt</SelectItem>
+                            <SelectItem value="Card">Thẻ</SelectItem>
+                            <SelectItem value="BankTransfer">
+                              Chuyển khoản
+                            </SelectItem>
+                            <SelectItem value="OTAPrepaid">
+                              OTA Prepaid
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Để trống nếu khách chưa thanh toán (sẽ trả khi
+                          checkout)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("roomPayment.paymentMethod") && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="roomPayment.paidAmount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Số tiền thanh toán</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder={`Tổng cần thanh toán: ${formatMoney(finalTotal).vndFormatted}`}
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
+                                }}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              {field.value && Number(field.value) > 0 ? (
+                                <div className="space-y-1">
+                                  <p className="text-primary font-medium">
+                                    Đã thanh toán:{" "}
+                                    {
+                                      formatMoney(Number(field.value))
+                                        .vndFormatted
+                                    }
+                                  </p>
+                                  <p className="text-muted-foreground">
+                                    Còn lại:{" "}
+                                    {
+                                      formatMoney(
+                                        finalTotal - Number(field.value)
+                                      ).vndFormatted
+                                    }
+                                  </p>
+                                </div>
+                              ) : (
+                                "Nhập số tiền khách đã thanh toán (cọc hoặc toàn bộ)"
+                              )}
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="roomPayment.paymentNote"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Ghi chú thanh toán</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Ví dụ: Đã nhận cọc 50% qua chuyển khoản"
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Thông tin bổ sung về giao dịch thanh toán
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
                   )}
-                />
-
-                {form.watch("roomPayment.paymentMethod") && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="roomPayment.paidAmount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Số tiền thanh toán</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder={`Tổng cần thanh toán: ${formatMoney(finalTotal).vndFormatted}`}
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                field.onChange(
-                                  value === "" ? undefined : Number(value)
-                                );
-                              }}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {field.value && Number(field.value) > 0 ? (
-                              <div className="space-y-1">
-                                <p className="text-primary font-medium">
-                                  Đã thanh toán:{" "}
-                                  {
-                                    formatMoney(Number(field.value))
-                                      .vndFormatted
-                                  }
-                                </p>
-                                <p className="text-muted-foreground">
-                                  Còn lại:{" "}
-                                  {
-                                    formatMoney(
-                                      finalTotal - Number(field.value)
-                                    ).vndFormatted
-                                  }
-                                </p>
-                              </div>
-                            ) : (
-                              "Nhập số tiền khách đã thanh toán (cọc hoặc toàn bộ)"
-                            )}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="roomPayment.paymentNote"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ghi chú thanh toán</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Ví dụ: Đã nhận cọc 50% qua chuyển khoản"
-                              {...field}
-                              value={field.value || ""}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Thông tin bổ sung về giao dịch thanh toán
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-              </DialogContent>
-            </Dialog>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
 
           {isSubmitting && (

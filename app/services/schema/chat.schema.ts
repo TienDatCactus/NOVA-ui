@@ -1,12 +1,13 @@
 import { z } from "zod";
 
 // Enums
-const ChatSenderSchema = z.enum(["Guest", "Staff"]);
-const ChatSessionStatusSchema = z.enum(["Active", "Closed", "Expired"]);
+const ChatSenderSchema = z.enum(["Guest", "Staff", "System"]);
+const ChatSessionStatusSchema = z.enum(["Open", "Closed", "Expired"]);
 const ChatEntryFailureReasonSchema = z.enum([
   "NO_ACTIVE_STAY",
   "CHAT_SESSION_EXPIRED",
   "INVALID_TOKEN",
+  "INVALID_ROOM_TOKEN",
 ]);
 
 // Chat Entry Response (Success)
@@ -67,6 +68,7 @@ const SendMessageRequestSchema = z.object({
   sessionId: z.string().uuid(),
   message: z.string().min(1, "Tin nhắn không được để trống"),
   sender: ChatSenderSchema,
+  staffUserId: z.string().uuid().optional(), // Required when sender = "Staff"
 });
 
 // Send Message Response

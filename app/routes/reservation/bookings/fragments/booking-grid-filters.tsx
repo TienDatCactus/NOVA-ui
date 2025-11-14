@@ -79,7 +79,7 @@ export default function BookingGridFilters({
 
             {/* Guests Input */}
             <div>
-              <Label htmlFor="guests">Ngày bắt đầu</Label>
+              <Label htmlFor="guests">Số lượng khách</Label>
               <Counter
                 value={filters.guests ?? 0}
                 onChange={(value) =>

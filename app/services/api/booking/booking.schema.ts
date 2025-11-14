@@ -13,14 +13,14 @@ const BookingOperationTypeEnum = z.enum(
   ["Add", "Change", "Remove"],
   "Loại thao tác đặt phòng không hợp lệ"
 );
-const BookingStatusEnum = z.enum({
-  Pending: 0,
-  Confirmed: 1,
-  CheckedIn: 2,
-  InHouse: 3,
-  CheckedOut: 4,
-  Cancelled: 5,
-});
+const BookingStatusEnum = z.enum([
+  "Pending",
+  "Confirmed",
+  "CheckedIn",
+  "InHouse",
+  "CheckedOut",
+  "Cancelled",
+]);
 
 const StaffCreateBookingSchema = z
   .object({
@@ -65,7 +65,7 @@ const StaffCreateBookingSchema = z
       .nullable(),
     internalNote: z.string().optional().nullable(),
     serviceOrder: OrderSchema.ServiceOrderSchema.optional(),
-    roomPayment: PaymentSchema.RoomPaymentSchema.optional(),
+    roomPayment: PaymentSchema.RoomPaymentSchema.optional().nullable(),
   })
   .refine(
     (data) => {
@@ -218,7 +218,10 @@ const StaffUpdateBookingRequestSchema = z.object({
   customerId: z.string("Customer ID không hợp lệ").optional(),
 
   // ========== THANH TOÁN ==========
-  totalAmount: z.number().min(0, "Tổng tiền không hợp lệ").optional(),
+  totalAmount: z
+    .number("Giá trị không hợp lệ")
+    .min(0, "Tổng tiền không hợp lệ")
+    .optional(),
   breakfastDates: z
     .array(
       z.object({
@@ -339,13 +342,7 @@ const BookingItemByWeekSchema = z.object({
       z.object({
         bookingId: z.string("bookingId phải là string hợp lệ"),
         bookingCode: z.string(),
-        status: z.enum([
-          "Confirmed",
-          "CheckedIn",
-          "Cancelled",
-          "Pending",
-          "CheckedOut",
-        ]),
+        status: BookingStatusEnum,
         checkinDate: z.string(),
         checkoutDate: z.string(),
         segmentFrom: z.string(),
@@ -506,6 +503,18 @@ const AvailableRoomForChangeSchema = z.object({
 const AvailableRoomsForChangeResponseSchema = z.array(
   AvailableRoomForChangeSchema
 );
+
+const UpdateBookingStatusRequestSchema = z.object({
+  bookingId: z.string("Booking ID không hợp lệ"),
+  newStatus: BookingStatusEnum,
+});
+const UpdateBookingStatusResponseSchema = z.object({
+  bookingId: z.string(),
+  bookingCode: z.string().optional,
+  oldStatus: BookingStatusEnum,
+  newStatus: BookingStatusEnum,
+  updatedAt: z.string().optional(),
+});
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -517,19 +526,27 @@ export const BookingSchema = {
   BookingOTAResponseSchema,
   BookingSourceEnum,
   BookingStatusEnum,
+  UpdateBookingRoomRequestSchema,
+  BookingPendingChargesResponseSchema,
+
+  //! staff operations
   StaffBookingPricePreviewRequestSchema,
   StaffBookingPricePreviewResponseSchema,
   StaffUpdateBookingRequestSchema,
-  UpdateBookingRoomRequestSchema,
   StaffUpdateBookingResponseSchema,
   StaffCancelBookingResponseSchema,
   StaffChangeRoomRequestSchema,
   StaffChangeRoomResponseSchema,
   AvailableRoomsForChangeResponseSchema,
-  BookingPendingChargesResponseSchema,
+
+  //! checkout booking
   StaffCheckoutRequestSchema,
   StaffCheckoutMultipleRequestSchema,
   StaffAddCompletedChargesRequestSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
   StaffCheckoutPaymentRequestSchema,
+
+  //! update booking status
+  UpdateBookingStatusRequestSchema,
+  UpdateBookingStatusResponseSchema,
 };

@@ -260,9 +260,7 @@ export default function StaffDialog({
                         {...field}
                         type="number"
                         placeholder="10000000"
-                        onChange={(e) =>
-                          field.onChange(Number(e.target.value))
-                        }
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormDescription>

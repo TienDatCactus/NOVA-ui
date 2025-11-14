@@ -162,7 +162,8 @@ const Invoices = {
   payments: (id: string) => `Invoices/${id}/payments`, //? get invoice payments
   confirmPayment: (id: string) => `Invoices/${id}/confirm-payment`, //? confirm payment
   refund: (id: string) => `Invoices/${id}/refund`, //? refund invoice
-  export: (date?: string) => `Invoices/export?date=${date}`, //? export invoices
+  export: (date?: string) =>
+    date ? `Invoices/export?date=${date}` : `Invoices/export`, //? export invoices
 };
 // Chat endpoints
 const Chat = {
@@ -207,6 +208,10 @@ const Holiday = {
   delete: (id: string) => `Holidays/${id}`,
 };
 
+const Discount = {
+  apply: "discount/apply",
+  override: "discount/override",
+};
 export {
   Auth,
   User,
@@ -227,4 +232,5 @@ export {
   WorkShift,
   Holiday,
   Chat,
+  Discount,
 };

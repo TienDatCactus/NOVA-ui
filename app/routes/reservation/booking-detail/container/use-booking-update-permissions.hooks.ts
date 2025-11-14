@@ -2,12 +2,12 @@ import { useMemo } from "react";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import {
   canPerformHeavyUpdate,
+  getLockedRoomInvoices,
+  getHeavyUpdateBlockReason,
+  canChangeDates,
   canAddRooms,
   canRemoveRooms,
-  canChangeDates,
-  getHeavyUpdateBlockReason,
-  getLockedRoomInvoices,
-} from "~/lib/booking-validation";
+} from "./booking-validation";
 
 /**
  * Hook to determine what update operations are allowed on a booking

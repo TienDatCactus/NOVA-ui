@@ -15,9 +15,6 @@ type Invoice = z.infer<typeof InvoiceSchema.InvoiceListItemSchema>;
  */
 const LOCKED_INVOICE_STATUSES = ["PartiallyPaid", "Paid", "Overpaid"] as const;
 
-/**
- * Invoice statuses that allow modifications
- */
 const UNLOCKED_INVOICE_STATUSES = ["Unpaid", "DepositOnly"] as const;
 
 /**

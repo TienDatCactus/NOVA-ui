@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
 import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
-import type { DateRange } from "~/components/ui/date-range-picker";
 import { format } from "date-fns";
 
 const DEFAULT_FILTERS: InvoiceListParams = {

@@ -1,5 +1,6 @@
-import { FileText } from "lucide-react";
+import { ChevronRight, FileText } from "lucide-react";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   Pagination,
@@ -14,6 +15,18 @@ import { cn } from "~/lib/utils";
 import { InvoicesService } from "~/services/api/invoices";
 import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
 import InvoicesFilterSidebar from "../fragments/invoices/filter.sidebar";
+import { Label } from "~/components/ui/label";
+import { DatePicker } from "~/components/ui/date-picker";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "~/components/ui/dialog";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface InvoicesViewLayoutProps {
   children: ReactNode;
@@ -49,25 +62,37 @@ function InvoicesViewLayout({
   totalPages = 1,
   currentPage = 1,
 }: InvoicesViewLayoutProps) {
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportDate, setExportDate] = useState<string | undefined>(undefined);
+
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages || page === currentPage) return;
     onFilterChange("page" as keyof InvoiceListParams, page as any);
   };
+
   const handleExport = async () => {
-    // Export all invoices filtered by starting date (IssuedFrom) if provided, else today
-    const date = filters.IssuedFrom || filters.IssuedTo || undefined;
     try {
-      const blob = await InvoicesService.exportInvoices(date);
-      const url = window.URL.createObjectURL(blob);
+      const blob = await InvoicesService.exportInvoices(exportDate);
+      console.log("Blob received:", blob);
+
+      const url = window.URL.createObjectURL(blob as any);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `invoices-report${date ? `-${date}` : ""}.xlsx`;
+      const filename = exportDate
+        ? `invoices-report-${exportDate}.xlsx`
+        : "invoices-report.xlsx";
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+
+      toast.success("Xuất báo cáo thành công");
+      setExportDialogOpen(false);
+      setExportDate(undefined);
     } catch (e) {
       console.error(e);
+      toast.error("Xuất báo cáo thất bại");
     }
   };
 
@@ -95,10 +120,69 @@ function InvoicesViewLayout({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="success" className="gap-2" onClick={handleExport}>
-              <FileText className="h-4 w-4" />
-              Xuất báo cáo
-            </Button>
+            <div>
+              <DatePicker
+                mode="single"
+                value={filters.IssuedFrom}
+                onChange={(value) => {
+                  onFilterChange("IssuedFrom", value?.toISOString());
+                }}
+              />
+            </div>
+            <ChevronRight />
+            <div>
+              <DatePicker
+                mode="single"
+                value={filters.IssuedTo}
+                onChange={(value) => {
+                  onFilterChange("IssuedTo", value?.toISOString());
+                }}
+              />
+            </div>
+
+            <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="success" className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Xuất báo cáo
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Xuất báo cáo hóa đơn</DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                  <Label className="mb-2 block">
+                    Chọn ngày xuất báo cáo (tùy chọn)
+                  </Label>
+                  <DatePicker
+                    value={exportDate}
+                    onChange={(date) =>
+                      setExportDate(format(date ?? "", "yyyy-MM-dd"))
+                    }
+                    placeholder="Chọn ngày hoặc để trống cho tất cả"
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Để trống để xuất tất cả hóa đơn
+                  </p>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setExportDialogOpen(false);
+                      setExportDate(undefined);
+                    }}
+                  >
+                    Hủy
+                  </Button>
+                  <Button variant="success" onClick={handleExport}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Xuất file
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <div className="flex-1 overflow-auto">{children}</div>

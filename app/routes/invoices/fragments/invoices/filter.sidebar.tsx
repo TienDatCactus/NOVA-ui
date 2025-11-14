@@ -1,6 +1,5 @@
-import { ArrowUpDown, Search, X, ChevronDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Search, X } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
-import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -8,7 +7,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import { DateRangePicker } from "~/components/ui/date-range-picker";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
@@ -25,9 +23,21 @@ import {
   INVOICE_STATUSES,
   type InvoiceListParams,
 } from "~/services/api/invoices/invoice.types";
-import type { DateRange } from "~/components/ui/date-range-picker";
-import { format } from "date-fns";
 // Removed booking selection dependencies per updated requirements
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { useBookings } from "~/routes/reservation/bookings/container/booking-query.hooks";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 
 interface InvoicesFilterSidebarProps {
@@ -58,16 +68,7 @@ function InvoicesFilterSidebar({
     500
   );
   // Booking filters removed
-
-  const dateRangeValue: DateRange | undefined = useMemo(() => {
-    if (filters.IssuedFrom || filters.IssuedTo) {
-      return {
-        from: filters.IssuedFrom ? new Date(filters.IssuedFrom) : undefined,
-        to: filters.IssuedTo ? new Date(filters.IssuedTo) : undefined,
-      };
-    }
-    return undefined;
-  }, [filters.IssuedFrom, filters.IssuedTo]);
+  const { data: bookings } = useBookings();
 
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -252,26 +253,46 @@ function InvoicesFilterSidebar({
 
         <Separator />
 
+        <Separator />
         <CardContent className="px-0 rounded-md">
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Khoảng thời gian</Label>
-            <DateRangePicker
-              value={dateRangeValue}
-              onChange={(range) => {
-                onFilterChange(
-                  "IssuedFrom",
-                  range?.from ? format(range.from, "yyyy-MM-dd") : undefined
-                );
-                onFilterChange(
-                  "IssuedTo",
-                  range?.to ? format(range.to, "yyyy-MM-dd") : undefined
-                );
-              }}
-              placeholder="Chọn khoảng ngày"
-            />
+            <Label htmlFor="booking-code" className="text-sm font-medium">
+              Theo Booking
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  {filters.BookingCode
+                    ? bookings?.find(
+                        (b) => b.bookingCode === filters.BookingCode
+                      )?.bookingCode
+                    : "Chọn booking"}
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <Command>
+                  <CommandInput placeholder="Tìm kiếm..." />
+                  <CommandList>
+                    <CommandEmpty>Không có kết quả nào.</CommandEmpty>
+                    <CommandGroup heading="Booking">
+                      {bookings?.map((booking) => (
+                        <CommandItem
+                          key={booking.bookingCode}
+                          onSelect={() =>
+                            onFilterChange("BookingCode", booking.bookingCode)
+                          }
+                        >
+                          {booking.bookingCode} - {booking.customerName}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
-
         <Separator />
 
         {/* Booking filter removed */}
