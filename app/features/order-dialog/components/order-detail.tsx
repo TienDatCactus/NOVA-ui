@@ -62,7 +62,7 @@ export default function OrderDetail({
       </Card>
 
       <Card className="border shadow-sm flex flex-col  p-0">
-        <CardContent className="p-0">
+        <CardContent className="p-2">
           {selectedItems.length === 0 ? (
             <div className="text-sm text-muted-foreground text-center py-12">
               <p>Chưa có món nào</p>

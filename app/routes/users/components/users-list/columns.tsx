@@ -61,10 +61,11 @@ export const columns: ColumnDef<UserItem>[] = [
     header: "Trạng thái",
     cell: ({ row }) => {
       const user = row.original;
-      
+
       // Check if user is locked: lockoutEnd exists and is in the future
-      const isLocked = user.lockoutEnd && new Date(user.lockoutEnd) > new Date();
-      
+      const isLocked =
+        user.lockoutEnd && new Date(user.lockoutEnd) > new Date();
+
       return isLocked ? (
         <Badge variant="destructive" className="shadow-sm">
           Bị khóa

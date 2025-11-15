@@ -16,6 +16,7 @@ function useUpdateBooking(bookingId: string) {
       // Don't toast here - let the component handle success message
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
       queryClient.invalidateQueries({ queryKey: ["bookings-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["available-rooms"] });
     },
   });
 }

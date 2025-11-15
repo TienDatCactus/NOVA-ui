@@ -45,29 +45,48 @@ const CustomerInfoSchema = z
     otaInformationId: StaffCreateBookingSchema.shape.otaInformationId,
     otaBookingCode: StaffCreateBookingSchema.shape.otaBookingCode,
   })
-  .refine(
-    (data) => {
-      if (data.source || data.otaInformationId) {
-        return true;
+  .superRefine((data, ctx) => {
+    // For OTA bookings: require otaInformationId and otaBookingCode
+    if (data.source === "OTA" || data.otaInformationId) {
+      if (!data.otaInformationId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Vui lòng chọn nền tảng OTA",
+          path: ["otaInformationId"],
+        });
       }
-      return false;
-    },
-    {
-      message: "Vui lòng chọn nguồn đặt phòng hoặc nền tảng OTA",
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.otaInformationId && !data.otaBookingCode) {
-        return false;
+      if (!data.otaBookingCode) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Mã đặt phòng OTA là bắt buộc",
+          path: ["otaBookingCode"],
+        });
       }
-      return true;
-    },
-    {
-      message: "Mã đặt phòng OTA là bắt buộc khi chọn nền tảng OTA",
-      path: ["otaBookingCode"],
     }
-  );
+
+    // For RoomBlock: only require guestFullName (reason)
+    if (data.source === "RoomBlock") {
+      if (!data.guestFullName || data.guestFullName.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Vui lòng nhập lý do khóa phòng",
+          path: ["guestFullName"],
+        });
+      }
+      return; // Skip other validations for RoomBlock
+    }
+
+    // For normal Direct/Agency bookings: require at least phone OR email
+    if (data.source === "DirectStaff" || data.source === "Agency") {
+      if (!data.guestPhone && !data.guestEmail) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Vui lòng nhập ít nhất số điện thoại hoặc email",
+          path: ["guestPhone"],
+        });
+      }
+    }
+  });
 
 type CustomerInfoFormData = z.infer<typeof CustomerInfoSchema>;
 
@@ -103,7 +122,7 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
       guestFullName: bookingData.guestFullName ?? "",
       guestPhone: bookingData.guestPhone ?? "",
       guestEmail: bookingData.guestEmail ?? "",
-      source: bookingData.source ?? undefined,
+      source: bookingData.source,
       otaInformationId: bookingData.otaInformationId ?? undefined,
       otaBookingCode: bookingData.otaBookingCode ?? "",
     });
@@ -112,22 +131,31 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
   const onSubmit = async (values: CustomerInfoFormData) => {
     try {
       let sourceValue = values.source;
-      if (bookingType === "OTA") {
+
+      // Set source based on bookingType
+      if (bookingType === "RoomBlock") {
+        sourceValue = "RoomBlock";
+      } else if (bookingType === "OTA") {
         sourceValue = "OTA";
       } else if (bookingType === "Direct" && !values.source) {
-        sourceValue = "DirectStaff"; // Default for Direct
+        sourceValue = "DirectStaff";
       }
 
       setData({
         guestFullName: values.guestFullName,
-        guestPhone: values.guestPhone,
-        guestEmail: values.guestEmail,
+        guestPhone: bookingType === "RoomBlock" ? "" : values.guestPhone || "",
+        guestEmail: bookingType === "RoomBlock" ? "" : values.guestEmail || "",
         source: sourceValue as any,
-        otaInformationId: values.otaInformationId,
-        otaBookingCode: values.otaBookingCode,
+        otaInformationId:
+          bookingType === "OTA" ? values.otaInformationId : undefined,
+        otaBookingCode: bookingType === "OTA" ? values.otaBookingCode : "",
       });
 
-      toast.success("Đã lưu thông tin khách hàng");
+      toast.success(
+        bookingType === "RoomBlock"
+          ? "Đã lưu lý do khóa phòng"
+          : "Đã lưu thông tin khách hàng"
+      );
       onNext();
     } catch (error) {
       console.error("Form submission error:", error);
@@ -147,29 +175,29 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
             <FormField
               control={form.control}
               name="source"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nguồn đặt phòng</FormLabel>
                   <FormControl>
                     <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
-                      {BOOKING_SOURCES.filter((s) => s.key !== "OTA").map(
-                        (source) => (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            key={source.key}
-                            onClick={() => form.setValue("source", source.key)}
-                            className={cn(
-                              "rounded-lg border-2 h-12 p-4 text-center transition-all",
-                              form.getValues("source") === source.key
-                                ? "border-primary bg-primary/10"
-                                : ""
-                            )}
-                          >
-                            {source.label}
-                          </Button>
-                        )
-                      )}
+                      {BOOKING_SOURCES.filter(
+                        (s) => s.key !== "OTA" && s.key !== "RoomBlock"
+                      ).map((source) => (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          key={source.key}
+                          onClick={() => field.onChange(source.key)}
+                          className={cn(
+                            "rounded-lg border-2 h-12 p-4 text-center transition-all",
+                            field.value === source.key
+                              ? "border-primary bg-primary/10"
+                              : ""
+                          )}
+                        >
+                          {source.label}
+                        </Button>
+                      ))}
                     </div>
                   </FormControl>
                   <FormDescription>
@@ -267,12 +295,19 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Họ và tên <span className="text-destructive">*</span>
+                  {bookingType === "RoomBlock"
+                    ? "Lý do khóa phòng"
+                    : "Họ và tên"}{" "}
+                  <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Nguyễn Văn A"
+                    placeholder={
+                      bookingType === "RoomBlock"
+                        ? "VD: Bảo trì hệ thống điện"
+                        : "Nguyễn Văn A"
+                    }
                     className="bg-secondary"
                   />
                 </FormControl>

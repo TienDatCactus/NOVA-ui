@@ -33,7 +33,6 @@ type ServicePosOrderState = {
     bookingRoomId: string | null
   ) => void;
   setScheduledAt: (scheduledAt: string) => void;
-  clearOrder: () => void;
 
   // Actions - Single service management
   selectService: (
@@ -64,16 +63,6 @@ export const useServicePosOrderStore = create<ServicePosOrderState>()(
 
       setScheduledAt: (scheduledAt) => {
         set({ scheduledAt });
-      },
-
-      clearOrder: () => {
-        set({
-          bookingId: null,
-          bookingRoomId: null,
-          scheduledAt: null,
-          selectedService: null,
-          subtotal: 0,
-        });
       },
 
       selectService: (item) => {

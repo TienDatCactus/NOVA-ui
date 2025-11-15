@@ -68,10 +68,36 @@ function useRoomsDetailsByIds(ids: string[]) {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+function useGetRoomQrCode(roomId: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ["room-qr-code", roomId],
+    queryFn: async () => {
+      const blob = await RoomsService.generateQRCode(roomId);
+      console.log(blob);
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === "string") {
+            resolve(reader.result);
+          } else {
+            reject(new Error("Failed to convert blob to data URL"));
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob as any);
+      });
+    },
+    enabled: !!roomId && options?.enabled !== false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
+}
 export {
   useRooms,
   useRoomDetail,
   useRoomBookingHistory,
   useAvailableRoomsInternal,
   useRoomsDetailsByIds,
+  useGetRoomQrCode,
 };

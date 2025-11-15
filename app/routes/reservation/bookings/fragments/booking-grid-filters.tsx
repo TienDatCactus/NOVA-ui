@@ -1,13 +1,13 @@
-import { Filter, RotateCcw, Search, User } from "lucide-react";
+import { Filter, RotateCcw, Search } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import { DatePicker } from "~/components/ui/date-picker";
 import { Input } from "~/components/ui/input";
-import { cn, handleLimitInput } from "~/lib/utils";
-import type { AvailableBookingFilters } from "../container/available-booking-filter.hooks";
 import { Label } from "~/components/ui/label";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import { Card, CardContent } from "~/components/ui/card";
+import { cn } from "~/lib/utils";
+import type { AvailableBookingFilters } from "../container/available-booking-filter.hooks";
 
 interface BookingGridFiltersProps {
   filters: AvailableBookingFilters;
@@ -79,9 +79,8 @@ export default function BookingGridFilters({
 
             {/* Guests Input */}
             <div>
-              <Label htmlFor="guests">Ngày bắt đầu</Label>
+              <Label htmlFor="guests">Số lượng khách</Label>
               <Counter
-                onInput={handleLimitInput}
                 value={filters.guests ?? 0}
                 onChange={(value) =>
                   updateFilters("guests", value ? Number(value) : null)

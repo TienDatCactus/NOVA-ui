@@ -1,21 +1,22 @@
 import http from "~/lib/http";
 import { Orders } from "~/services/url";
 import type {
-  AddSingleItemToPOSOrderRequestDto,
   AddBatchItemsToPOSOrderRequestDto,
+  AddSingleItemToPOSOrderRequestDto,
   CreatePOSOrderRequestDto,
+  CreatePOSOrderResponseDto,
   CreateServiceOrderRequestDto,
+  CreateServiceOrderResponseDto,
+  OrderPayNowRequestDto,
   POSOrderDetailResponseDto,
   POSOrderListResponseDto,
-  POSOrderPayNowRequestDto,
+  POSOrderPayNowResponseDto,
   POSOrderPrintDataDto,
   ServiceOrderDetailDto,
+  ServiceOrderListDto,
   ServiceOrderPayNowRequestDto,
   SetScheduledServiceOrderRequestDto,
   UpdateServiceOrderRequestDto,
-  CreatePOSOrderResponseDto,
-  CreateServiceOrderResponseDto,
-  ServiceOrderListDto,
 } from "./dto";
 import { OrderSchema } from "./order.schema";
 
@@ -23,15 +24,16 @@ const {
   POSOrderListResponseSchema,
   POSOrderDetailResponseSchema,
   POSOrderPrintDataSchema,
+  POSOrderPayNowResponseSchema,
   ServiceOrderDetailSchema,
   CreateServiceOrderRequestSchema,
   AddSingleItemToPOSOrderRequestSchema,
   AddBatchItemsToPOSOrderRequestSchema,
-  POSOrderPayNowRequestSchema,
   UpdateServiceOrderRequestSchema,
   CreatePOSOrderResponseSchema,
   CreateServiceOrderResponseSchema,
   ServiceOrderListSchema,
+  OrderPayNowRequestSchema,
 } = OrderSchema;
 
 /**
@@ -147,7 +149,7 @@ async function getPosOrderList(
 ): Promise<POSOrderListResponseDto> {
   try {
     const resp = await http.get(Orders.listPosOrders, {
-      params: date,
+      params: date ? { date } : undefined,
     });
     return POSOrderListResponseSchema.parse(resp.data);
   } catch (error) {
@@ -168,13 +170,16 @@ async function getPOSOrderPrintData(
   }
 }
 
-async function payPOSOrderNow(orderId: string, data: POSOrderPayNowRequestDto) {
+async function payPOSOrderNow(
+  orderId: string,
+  data: OrderPayNowRequestDto
+): Promise<POSOrderPayNowResponseDto> {
   try {
     const resp = await http.post(
       Orders.payNow(orderId),
-      POSOrderPayNowRequestSchema.parse(data)
+      OrderPayNowRequestSchema.parse(data)
     );
-    return resp.data;
+    return POSOrderPayNowResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -311,7 +316,7 @@ async function getServiceOrderList(
 ): Promise<ServiceOrderListDto> {
   try {
     const resp = await http.get(Orders.listServiceOrders, {
-      params: date,
+      params: date ? { date } : undefined,
     });
     return ServiceOrderListSchema.parse(resp.data);
   } catch (error) {

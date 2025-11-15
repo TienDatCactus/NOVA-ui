@@ -4,7 +4,7 @@ import type {
   CreatePOSOrderRequestDto,
   AddSingleItemToPOSOrderRequestDto,
   AddBatchItemsToPOSOrderRequestDto,
-  POSOrderPayNowRequestDto,
+  OrderPayNowRequestDto,
 } from "~/services/api/orders/dto";
 
 /**
@@ -169,7 +169,7 @@ export function usePayPOSOrderNow() {
       data,
     }: {
       orderId: string;
-      data: POSOrderPayNowRequestDto;
+      data: OrderPayNowRequestDto;
     }) => {
       return await OrderService.payPOSOrderNow(orderId, data);
     },
@@ -245,34 +245,6 @@ export function useSetServedPOSOrderItem() {
 }
 
 /**
- * Update note/comment for POS order
- * @param orderId - POS Order ID
- * @param note - Note text to save
- * Invalidates: specific order detail + pos-order-list
- */
-export function useUpdatePOSOrderNote() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      orderId,
-      note,
-    }: {
-      orderId: string;
-      note: string;
-    }) => {
-      return await OrderService.updatePOSOrderNote(orderId, { note });
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["pos-order-detail", variables.orderId],
-      });
-      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
-    },
-  });
-}
-
-/**
  * Get print data for a POS order (mutation version)
  * Fetches formatted receipt data for printing
  * @param orderId - POS Order ID
@@ -322,6 +294,34 @@ export function useMarkItemServed() {
       return await OrderService.setServedOrderItem(orderId, itemId, {
         servedAt,
       });
+    },
+  });
+}
+
+/**
+ * Update note/comment for POS order
+ * @param orderId - POS Order ID
+ * @param note - Note text to save
+ * Invalidates: specific order detail + pos-order-list
+ */
+export function useUpdatePOSOrderNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      note,
+    }: {
+      orderId: string;
+      note: string;
+    }) => {
+      return await OrderService.updatePOSOrderNote(orderId, { note });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }

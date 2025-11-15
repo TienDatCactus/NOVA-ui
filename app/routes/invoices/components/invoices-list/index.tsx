@@ -48,8 +48,8 @@ function InvoicesDataTable({
           </EmptyMedia>
           <EmptyTitle>Không tìm thấy hóa đơn</EmptyTitle>
           <EmptyDescription>
-            Không có hóa đơn nào phù hợp với bộ lọc hiện tại.
-            Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm khác.
+            Không có hóa đơn nào phù hợp với bộ lọc hiện tại. Hãy thử điều chỉnh
+            bộ lọc hoặc tìm kiếm khác.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
@@ -59,15 +59,7 @@ function InvoicesDataTable({
     );
   }
 
-  return (
-    <DataTable
-      columns={columns}
-      data={invoices}
-      pageCount={pageCount}
-      currentPage={currentPage}
-      onPageChange={onPageChange}
-    />
-  );
+  return <DataTable columns={columns} data={invoices} />;
 }
 
 export default InvoicesDataTable;

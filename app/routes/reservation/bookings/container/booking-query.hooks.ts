@@ -6,17 +6,15 @@ import type { BookingListParams } from "~/services/api/booking/booking.types";
 import { RoomsService } from "~/services/api/rooms";
 import type { GetAvailableRoomsInternalParams } from "~/services/api/rooms/room.types";
 
-interface UseBookingDetailProps {
-  bookingCode?: string;
-  bookingId?: string;
-  enabled?: boolean;
-}
-
 function useBookingDetail({
   bookingCode,
   bookingId,
   enabled = true,
-}: UseBookingDetailProps) {
+}: {
+  bookingCode?: string;
+  bookingId?: string;
+  enabled?: boolean;
+}) {
   return useQuery({
     queryKey: [
       "bookings-detail",
@@ -29,6 +27,9 @@ function useBookingDetail({
         id: bookingId,
       }),
     enabled: enabled && (!!bookingCode || !!bookingId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 function useBookingRoomsWeek(params?: BookingListParams) {
@@ -53,19 +54,17 @@ function useBookings(params?: BookingListParams) {
   });
 }
 
-interface UseAvailableRoomsParams {
-  checkinDate: Date | string;
-  checkoutDate: Date | string;
-  guests?: number;
-  enabled?: boolean;
-}
-
 function useAvailableRooms({
   checkinDate,
   checkoutDate,
   guests = 1,
   enabled = false,
-}: UseAvailableRoomsParams) {
+}: {
+  checkinDate: Date | string;
+  checkoutDate: Date | string;
+  guests?: number;
+  enabled?: boolean;
+}) {
   const params: GetAvailableRoomsInternalParams = {
     CheckInDate:
       checkinDate instanceof Date
@@ -86,23 +85,21 @@ function useAvailableRooms({
   });
 }
 
-interface UseAvailableRoomsForChangeParams {
-  bookingId: string;
-  bookingRoomId: string;
-  enabled?: boolean;
-}
-
 function useAvailableRoomsForChange({
   bookingId,
   bookingRoomId,
   enabled = false,
-}: UseAvailableRoomsForChangeParams) {
+}: {
+  bookingId: string;
+  bookingRoomId: string;
+  enabled?: boolean;
+}) {
   return useQuery({
     queryKey: ["available-rooms-for-change", bookingId, bookingRoomId],
     queryFn: async () =>
       await BookingService.getAvailableRoomsForChange(bookingId, bookingRoomId),
     staleTime: 2 * 60 * 1000,
-    enabled: enabled && !!bookingId && !!bookingRoomId,
+    enabled: enabled && !!bookingId,
   });
 }
 

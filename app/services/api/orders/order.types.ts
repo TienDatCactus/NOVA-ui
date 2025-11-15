@@ -1,5 +1,5 @@
 export type OrderStatus = "All" | "Open" | "Completed" | "Cancelled";
-export const StatusOptions: Array<{
+export const ORDER_STATUSES: Array<{
   value: OrderStatus;
   label: string;
   key: string;
