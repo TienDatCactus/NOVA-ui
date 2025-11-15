@@ -1,10 +1,10 @@
-import { useState, useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useStaffShiftList, useActiveWorkShiftList } from "./query.hooks";
-import { useScheduleFilter } from "./filter.hooks";
-import { useScheduleExport } from "./export.hooks";
-import { format, startOfWeek, endOfWeek } from "date-fns";
+import { endOfWeek, format, startOfWeek } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
 import type { StaffShiftListItem } from "~/services/api/staff-shift/dto";
+import { useScheduleExport } from "./export.hooks";
+import { useScheduleFilter } from "./filter.hooks";
+import { useActiveWorkShiftList, useStaffShiftList } from "./query.hooks";
 
 export function useSchedulesContainer() {
   const queryClient = useQueryClient();
@@ -14,11 +14,12 @@ export function useSchedulesContainer() {
 
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 });
   const { filterState, updateFilter, resetFilter } = useScheduleFilter();
-  const { isExporting, handleExport } = useScheduleExport({
-    currentWeekStart,
-    weekEnd,
-    selectedStaffId: filterState.selectedStaffId,
-  });
+  const { isExporting, handleExportMatrix, handleExportForm2 } =
+    useScheduleExport({
+      currentWeekStart,
+      weekEnd,
+      selectedStaffId: filterState.selectedStaffId,
+    });
 
   // Query params for API
   const queryParams = {
@@ -147,6 +148,7 @@ export function useSchedulesContainer() {
     handleNextWeek,
     handleToday,
     isExporting,
-    handleExport,
+    handleExportMatrix,
+    handleExportForm2,
   };
 }

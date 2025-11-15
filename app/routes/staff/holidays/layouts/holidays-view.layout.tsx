@@ -32,7 +32,7 @@ export default function HolidaysViewLayout({
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">Quản lý ngày nghỉ lễ</h1>
+              <h1 className="text-2xl font-bold">Quản lý ngày nghỉ</h1>
               <Badge variant="secondary" className="text-sm">
                 {totalHolidays} ngày nghỉ
               </Badge>

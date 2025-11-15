@@ -1,32 +1,30 @@
+import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { StaffAttendanceSchema } from "~/services/api/staff-attendance/staff-attendance.schema";
-import { StaffAttendanceService } from "~/services/api/staff-attendance";
-import type {
-  MarkAbsentRequest,
-  StaffAttendanceListItem,
-} from "~/services/api/staff-attendance/dto";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "~/components/ui/dialog";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "~/components/ui/form";
 import { Textarea } from "~/components/ui/textarea";
-import { format, parseISO } from "date-fns";
+import { StaffAttendanceService } from "~/services/api/staff-attendance";
+import type {
+    MarkAbsentRequest,
+    StaffAttendanceListItem,
+} from "~/services/api/staff-attendance/dto";
+import { StaffAttendanceSchema } from "~/services/api/staff-attendance/staff-attendance.schema";
 
 const { MarkAbsentRequestSchema } = StaffAttendanceSchema;
 

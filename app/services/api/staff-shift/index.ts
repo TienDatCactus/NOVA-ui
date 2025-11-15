@@ -92,25 +92,35 @@ async function exportWeeklyMatrix(params?: {
       params,
       responseType: "blob",
     });
-    const blob = resp.data instanceof Blob ? resp.data : new Blob([resp.data]);
-    return blob;
+    let blobData = resp;
+    if (blobData instanceof Blob) {
+      return blobData;
+    }
+    const blobContent =
+      typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
+    return new Blob([blobContent as BlobPart]);
   } catch (error) {
     return Promise.reject(error);
   }
 }
 
-// GET /api/StaffShifts/{staffId}/export-weekly-detail - Export weekly detail (with staff filter)
-async function exportWeeklyDetail(
-  staffId: string,
-  params?: { from?: string; to?: string }
-): Promise<Blob> {
+// GET /api/StaffShifts/export-weekly-form2 - Export weekly form 2 (with from/to params)
+async function exportWeeklyForm2(params: {
+  from: string;
+  to: string;
+}): Promise<Blob> {
   try {
-    const resp = await http.get(StaffShift.exportWeeklyDetail(staffId), {
+    const resp = await http.get(StaffShift.exportWeeklyForm2, {
       params,
       responseType: "blob",
     });
-    const blob = resp.data instanceof Blob ? resp.data : new Blob([resp.data]);
-    return blob;
+    let blobData = resp;
+    if (blobData instanceof Blob) {
+      return blobData;
+    }
+    const blobContent =
+      typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
+    return new Blob([blobContent as BlobPart]);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -123,5 +133,5 @@ export const StaffShiftService = {
   deleteStaffShift,
   updateShiftSchedule,
   exportWeeklyMatrix,
-  exportWeeklyDetail,
+  exportWeeklyForm2,
 };

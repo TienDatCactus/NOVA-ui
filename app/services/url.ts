@@ -196,8 +196,7 @@ const StaffShift = {
   update: (id: string) => `StaffShifts/${id}/schedule`,
   delete: (id: string) => `StaffShifts/${id}`,
   exportWeeklyMatrix: "StaffShifts/export-weekly-matrix",
-  exportWeeklyDetail: (staffId: string) =>
-    `StaffShifts/${staffId}/export-weekly-detail`,
+  exportWeeklyForm2: "StaffShifts/export-weekly-form2",
 };
 
 const StaffAttendance = {

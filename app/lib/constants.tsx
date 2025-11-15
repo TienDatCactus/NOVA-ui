@@ -144,19 +144,15 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: "/dashboard/staff",
       },
       {
-        title: "Lịch làm việc",
-        url: "/dashboard/staff/schedules",
-      },
-      {
-        title: "Bảng chấm công",
-        url: "/dashboard/staff/attendance",
-      },
-      {
         title: "Ca làm việc",
         url: "/dashboard/staff/work-shifts",
       },
       {
-        title: "Ngày lễ, tết",
+        title: "Lịch làm việc",
+        url: "/dashboard/staff/schedules",
+      },
+      {
+        title: "Ngày nghỉ",
         url: "/dashboard/staff/holidays",
       },
     ],

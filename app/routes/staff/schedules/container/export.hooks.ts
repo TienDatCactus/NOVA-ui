@@ -16,46 +16,58 @@ export function useScheduleExport({
 }: UseScheduleExportProps) {
   const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = async () => {
+  const downloadFile = (blob: Blob, filename: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExportMatrix = async () => {
     setIsExporting(true);
 
     try {
-      // Format dates for API (yyyy-MM-dd)
       const fromDate = format(currentWeekStart, "yyyy-MM-dd");
       const toDate = format(weekEnd, "yyyy-MM-dd");
-      let blob: Blob;
-      let filename: string;
 
-      // If staff is selected, export detail; otherwise export matrix
-      if (selectedStaffId) {
-        console.log("  → Calling exportWeeklyDetail (staff filter)");
-        blob = await StaffShiftService.exportWeeklyDetail(selectedStaffId, {
-          from: fromDate,
-          to: toDate,
-        });
-        filename = `lich-lam-viec-chi-tiet-${fromDate}-${toDate}.xlsx`;
-      } else {
-        console.log("  → Calling exportWeeklyMatrix (no staff filter)");
-        blob = await StaffShiftService.exportWeeklyMatrix({
-          from: fromDate,
-          to: toDate,
-        });
-        filename = `lich-lam-viec-tuan-${fromDate}-${toDate}.xlsx`;
-      }
+      console.log("  → Calling exportWeeklyMatrix (file kiểm mới)");
+      const blob = await StaffShiftService.exportWeeklyMatrix({
+        from: fromDate,
+        to: toDate,
+      });
 
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
+      const filename = `lich-lam-viec-kiem-moi-${fromDate}-${toDate}.xlsx`;
+      downloadFile(blob, filename);
 
-      // Cleanup
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      toast.success("Xuất file kiểm mới thành công");
+    } catch (error) {
+      toast.error("Xuất file thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
-      toast.success("Xuất file thành công");
+  const handleExportForm2 = async () => {
+    setIsExporting(true);
+
+    try {
+      const fromDate = format(currentWeekStart, "yyyy-MM-dd");
+      const toDate = format(weekEnd, "yyyy-MM-dd");
+
+      console.log("  → Calling exportWeeklyForm2 (file kiểm cũ)");
+      const blob = await StaffShiftService.exportWeeklyForm2({
+        from: fromDate,
+        to: toDate,
+      });
+
+      const filename = `lich-lam-viec-kiem-cu-${fromDate}-${toDate}.xlsx`;
+      downloadFile(blob, filename);
+
+      toast.success("Xuất file kiểm cũ thành công");
     } catch (error) {
       toast.error("Xuất file thất bại. Vui lòng thử lại.");
     } finally {
@@ -65,6 +77,7 @@ export function useScheduleExport({
 
   return {
     isExporting,
-    handleExport,
+    handleExportMatrix,
+    handleExportForm2,
   };
 }

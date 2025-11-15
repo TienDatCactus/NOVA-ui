@@ -1,19 +1,18 @@
+import { format, parseISO } from "date-fns";
+import { CheckCircle2, Clock } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "~/components/ui/dialog";
 import { StaffAttendanceService } from "~/services/api/staff-attendance";
 import type { StaffAttendanceListItem } from "~/services/api/staff-attendance/dto";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { format, parseISO } from "date-fns";
-import { Badge } from "~/components/ui/badge";
-import { CheckCircle2, Clock } from "lucide-react";
 
 interface MarkAttendanceDialogProps {
   open: boolean;
