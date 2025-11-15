@@ -2,7 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { ServiceTypesService } from "~/services/api/service-types";
 import type { ServiceTypeListParams } from "~/services/api/service-types/service-types.types";
 
-export function useServiceTypes(params?: ServiceTypeListParams) {
+export function useServiceTypes(
+  params?: ServiceTypeListParams,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["service-types", params],
     queryFn: async () =>
@@ -10,6 +13,8 @@ export function useServiceTypes(params?: ServiceTypeListParams) {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
+
+    enabled: options?.enabled,
   });
 }
 

@@ -167,6 +167,7 @@ const Invoices = {
   refund: (id: string) => `Invoices/${id}/refund`, //? refund invoice
   export: (date?: string) =>
     date ? `Invoices/export?date=${date}` : `Invoices/export`, //? export invoices
+  update: (id: string) => `Invoices/${id}`, //? update invoice details
 };
 // Chat endpoints
 const Chat = {

@@ -28,3 +28,14 @@ export function useInvoiceDetail(
     enabled: options?.enabled && !!invoiceId,
   });
 }
+
+export function useInvoicesByBooking(
+  bookingId: string,
+  options?: { open: boolean }
+) {
+  return useQuery({
+    queryKey: ["booking-invoices", bookingId, options?.open],
+    queryFn: () => InvoicesService.getInvoicesByBooking(bookingId),
+    enabled: options?.open && !!bookingId,
+  });
+}

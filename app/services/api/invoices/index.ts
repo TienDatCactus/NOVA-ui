@@ -3,6 +3,7 @@ import { Invoices } from "~/services/url";
 import type {
   AddCustomItemsRequestDto,
   InvoiceByBookingResponseDto,
+  InvoiceCalculateFeesRequestDto,
   InvoiceCalculateFeesResponseDto,
   InvoiceDetailDto,
   InvoiceListResponseWithMetaDto,
@@ -12,6 +13,7 @@ import type {
   InvoicePreviewResponseDto,
   PaymentsFromInvoiceResponseDto,
   RefundInvoiceRequestDto,
+  UpdateInvoiceRequestDto,
 } from "./dto";
 import { InvoiceSchema } from "./invoice.schema";
 import type { InvoiceListParams } from "./invoice.types";
@@ -28,6 +30,8 @@ const {
   InvoiceCalculateFeesResponseSchema,
   InvoicePreviewResponseSchema,
   InvoicePreviewRequestSchema,
+  InvoiceCalculateFeesRequestSchema,
+  UpdateInvoiceRequestSchema,
 } = InvoiceSchema;
 
 /**
@@ -62,13 +66,14 @@ async function getInvoiceDetail(invoiceId: string): Promise<InvoiceDetailDto> {
   }
 }
 
-async function calculateInvoiceFees({
-  subtotalAmount,
-}: {
-  subtotalAmount: number;
-}): Promise<InvoiceCalculateFeesResponseDto> {
+async function calculateInvoiceFees(
+  data: InvoiceCalculateFeesRequestDto
+): Promise<InvoiceCalculateFeesResponseDto> {
   try {
-    const resp = await http.post(Invoices.calculateFees, { subtotalAmount });
+    const resp = await http.post(
+      Invoices.calculateFees,
+      InvoiceCalculateFeesRequestSchema.parse(data)
+    );
     return InvoiceCalculateFeesResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -250,6 +255,21 @@ async function exportInvoices(date?: string) {
   }
 }
 
+async function updateInvoice(
+  invoiceId: string,
+  data: UpdateInvoiceRequestDto
+): Promise<void> {
+  try {
+    await http.put(
+      Invoices.update(invoiceId),
+      UpdateInvoiceRequestSchema.parse(data)
+    );
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const InvoicesService = {
   getInvoiceList,
   getInvoiceDetail,
@@ -262,4 +282,5 @@ export const InvoicesService = {
   exportInvoices,
   calculateInvoiceFees,
   previewBookingInvoice,
+  updateInvoice,
 };

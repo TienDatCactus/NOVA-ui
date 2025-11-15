@@ -7,6 +7,12 @@ import type {
   StaffCheckoutPaymentRequestDto,
   StaffCheckoutRequestDto,
 } from "~/services/api/booking/dto";
+import { InvoicesService } from "~/services/api/invoices";
+import type {
+  InvoicePreviewRequestDto,
+  InvoiceCalculateFeesRequestDto,
+  UpdateInvoiceRequestDto,
+} from "~/services/api/invoices/dto";
 
 /**
  * Hook to fetch pending charges for a booking
@@ -19,6 +25,66 @@ export function useBookingPendingCharges(bookingId: string, enabled = true) {
     staleTime: 0, // Always fetch fresh data
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+  });
+}
+
+/**
+ * Hook to preview booking invoice before creation
+ */
+export function useInvoicePreview(
+  data: InvoicePreviewRequestDto,
+  enabled = false
+) {
+  return useQuery({
+    queryKey: ["invoice-preview", data],
+    queryFn: () => InvoicesService.previewBookingInvoice(data),
+    enabled:
+      enabled &&
+      (data.posOrderIds.length > 0 || data.serviceOrderIds.length > 0),
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * Hook to calculate invoice fees with VAT/Service Charge toggles
+ */
+export function useCalculateInvoiceFees(
+  data: InvoiceCalculateFeesRequestDto,
+  enabled = false
+) {
+  return useQuery({
+    queryKey: ["calculate-fees", data],
+    queryFn: () => InvoicesService.calculateInvoiceFees(data),
+    enabled: enabled && data.subtotalAmount > 0,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * Hook to fetch invoice detail by ID
+ */
+export function useInvoiceDetail(invoiceId: string, enabled = true) {
+  return useQuery({
+    queryKey: ["invoice-detail", invoiceId],
+    queryFn: () => InvoicesService.getInvoiceDetail(invoiceId),
+    enabled: enabled && !!invoiceId,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * Hook to fetch invoices by booking ID
+ */
+export function useInvoicesByBooking(bookingId: string, enabled = true) {
+  return useQuery({
+    queryKey: ["invoices-by-booking", bookingId],
+    queryFn: () => InvoicesService.getInvoicesByBooking(bookingId),
+    enabled: enabled && !!bookingId,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -81,6 +147,30 @@ export function useCheckout(bookingId: string) {
     onError: (error: any) => {
       console.error("Checkout failed:", error);
       toast.error(error?.message || "Checkout thất bại. Vui lòng thử lại.");
+    },
+  });
+}
+
+/**
+ * Hook to update invoice fees
+ */
+export function useUpdateInvoice(invoiceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: UpdateInvoiceRequestDto) =>
+      InvoicesService.updateInvoice(invoiceId, data),
+    onSuccess: () => {
+      toast.success("Cập nhật invoice thành công");
+      queryClient.invalidateQueries({
+        queryKey: ["invoice-detail", invoiceId],
+      });
+    },
+    onError: (error: any) => {
+      console.error("Update invoice failed:", error);
+      toast.error(
+        error?.message || "Cập nhật invoice thất bại. Vui lòng thử lại."
+      );
     },
   });
 }

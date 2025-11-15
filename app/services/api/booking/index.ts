@@ -320,10 +320,16 @@ async function staffCheckoutPayment(
   bookingId: string,
   data: StaffCheckoutPaymentRequestDto
 ): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
   try {
     const resp = await http.post(
       Booking.payment(bookingId),
-      StaffCheckoutPaymentRequestSchema.parse(data)
+      StaffCheckoutPaymentRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
     return resp.data;
   } catch (error) {
@@ -373,10 +379,16 @@ async function staffConfirmBookingPayment(
   bookingId: string,
   data: ConfirmBookingPaymentRequestDto
 ): Promise<ConfirmBookingPaymentResponseDto> {
+  const idempotencyKey = crypto.randomUUID();
   try {
     const resp = await http.post(
       Booking.confirmPayment(bookingId),
-      ConfirmBookingPaymentRequestSchema.parse(data)
+      ConfirmBookingPaymentRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
     return ConfirmBookingPaymentResponseSchema.parse(resp.data);
   } catch (error) {

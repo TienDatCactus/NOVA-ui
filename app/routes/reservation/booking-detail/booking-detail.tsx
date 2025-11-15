@@ -1,54 +1,27 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { differenceInDays, format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
-import {
-  Baby,
-  DoorOpen,
-  Ellipsis,
-  FileWarning,
-  Icon,
-  Mail,
-  Pen,
-  Phone,
-  Plus,
-  RotateCcw,
-  User,
-  Utensils,
-  Wallet,
-} from "lucide-react";
+import { differenceInDays, parseISO } from "date-fns";
+import { DoorOpen, FileWarning, Wallet } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
-import { Badge } from "~/components/ui/badge";
+
 import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { DatePicker } from "~/components/ui/date-picker";
+import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "~/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
 import {
   Form,
   FormControl,
@@ -59,12 +32,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -73,40 +40,30 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
 import { toYMD } from "~/lib/utils";
-import { createRemoveRoomOperation } from "~/services/api/booking/booking.helpers";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type {
-  StaffUpdateBookingRequestDto,
   ConfirmBookingPaymentRequestDto,
+  StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
 import type { Route } from "./+types/booking-detail";
-import { AddRoomModal } from "./components/add-room-modal";
 import AddCompletedChargesDialog from "./components/add-completed-charges-dialog";
+import BookingRoomsBar from "./components/booking-rooms-bar";
+import CustomerInfoBar from "./components/customer-info-bar";
 import PendingChargesSection from "./components/pending-charges-section";
-import CheckoutSheet from "./components/checkout-sheet";
-import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
-import ExistingRoomItemWrapper from "./fragments/existing-room-item-wrapper";
-import NewRoomItemWrapper from "./fragments/new-room-item-wrapper";
-import { BookingService } from "~/services/api/booking";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import StayDetailBar from "./components/stay-detail-bar";
 import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyContent,
-} from "~/components/ui/empty";
-import { useConfirmBookingPayment } from "./container/use-booking-checkout.hooks";
+  useAddCompletedCharges,
+  useConfirmBookingPayment,
+} from "./container/use-booking-checkout.hooks";
+import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
+import CheckoutSheet from "./components/checkout-sheet";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -130,23 +87,14 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     enabled: !!bookingCode,
   });
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [confirmPaymentOpen, setConfirmPaymentOpen] = useState(false);
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
-  const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
-  const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
-  const [removeRoomConfirmOpen, setRemoveRoomConfirmOpen] = useState(false);
-  const [roomToRemove, setRoomToRemove] = useState<{
-    bookingRoomId: string;
-    roomName: string;
-  } | null>(null);
+
   const [isAddingCompletedCharges, setIsAddingCompletedCharges] =
     useState(false);
 
-  // Booking update permissions
   const permissions = useBookingUpdatePermissions(bookingDetail);
-  const queryClient = useQueryClient();
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
     bookingDetail?.id || ""
@@ -179,7 +127,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const roomsFieldArray = useFieldArray({
     control: form.control,
     name: "rooms",
   });
@@ -205,8 +153,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       });
     }
   }, [bookingDetail, form]);
-  const checkinDate = form.watch("checkinDate");
-  const checkoutDate = form.watch("checkoutDate");
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
     const hasHeavyUpdates =
       data.checkinDate !== bookingDetail?.checkinDate ||
@@ -242,78 +188,25 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     updateBooking(payload, {});
   };
 
-  const handleAddRoom = (roomId: string, roomTypeId: string) => {
-    append({
-      action: "Add",
-      bookingRoomId: null,
-      roomId,
-      fromDate:
-        checkinDate instanceof Date
-          ? format(checkinDate, "yyyy-MM-dd")
-          : checkinDate?.toString() || format(new Date(), "yyyy-MM-dd"),
-      toDate:
-        checkoutDate instanceof Date
-          ? format(checkoutDate, "yyyy-MM-dd")
-          : checkoutDate?.toString() || format(new Date(), "yyyy-MM-dd"),
-    });
-
-    toast.success("Đã thêm phòng mới");
-  };
-
-  const handleAddCompletedCharges = async (data: {
+  const { mutate: addCompletedCharges } = useAddCompletedCharges(
+    bookingDetail?.id || ""
+  );
+  const handleAddCompletedCharges = (data: {
     posItems?: Array<{ menuItemId: string; quantity: number }>;
     serviceItems?: Array<{ serviceItemId: string; quantity: number }>;
+    bookingRoomId?: string;
+    source?: string;
   }) => {
     if (!bookingDetail?.id) return;
-
     setIsAddingCompletedCharges(true);
     try {
-      await BookingService.staffAddCompletedCharges(bookingDetail.id, data);
-      queryClient.invalidateQueries({
-        queryKey: ["booking-pending-charges", bookingDetail.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["checkout", "pending-charges", bookingDetail.id],
-      });
-      toast.success("Đã thêm completed charges thành công");
+      addCompletedCharges(data);
       setCompletedChargesDialogOpen(false);
     } catch (error) {
       console.error("Failed to add completed charges:", error);
     } finally {
       setIsAddingCompletedCharges(false);
     }
-  };
-
-  const handleRemoveRoom = (bookingRoomId: string, roomName: string) => {
-    setRoomToRemove({ bookingRoomId, roomName });
-    setRemoveRoomConfirmOpen(true);
-  };
-
-  const confirmRemoveRoom = () => {
-    if (!roomToRemove) return;
-
-    const currentRooms = form.getValues("rooms") || [];
-    const alreadyMarkedForRemoval = currentRooms.some(
-      (room) =>
-        room.action === "Remove" &&
-        room.bookingRoomId === roomToRemove.bookingRoomId
-    );
-
-    if (alreadyMarkedForRemoval) {
-      toast.warning("Phòng này đã được đánh dấu để xóa");
-      setRemoveRoomConfirmOpen(false);
-      setRoomToRemove(null);
-      return;
-    }
-
-    const removeOperation = createRemoveRoomOperation(
-      roomToRemove.bookingRoomId
-    );
-    append(removeOperation);
-
-    toast.success(`Phòng ${roomToRemove.roomName} sẽ bị xóa khi lưu thay đổi`);
-    setRemoveRoomConfirmOpen(false);
-    setRoomToRemove(null);
   };
 
   const nights = useMemo(() => {
@@ -325,18 +218,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       checkout instanceof Date ? checkout : parseISO(checkout!.toString());
     return differenceInDays(checkoutDate, checkinDate);
   }, [form.watch("checkinDate"), form.watch("checkoutDate")]);
-
-  const toggleRoomExpand = (roomId: string) => {
-    setExpandedRooms((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(roomId)) {
-        newSet.delete(roomId);
-      } else {
-        newSet.add(roomId);
-      }
-      return newSet;
-    });
-  };
 
   if (isPending) {
     return (
@@ -365,613 +246,247 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             Không thể tải thông tin đặt phòng. Vui lòng thử lại.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button>Add data</Button>
-        </EmptyContent>
       </Empty>
     );
   }
 
   return (
-    <div className="flex flex-col h-full p-4 ">
+    <div className="flex flex-col h-full p-4 gap-4">
       <Form {...form}>
-        <div className="space-y-4">
-          <div className="flex-1 flex">
-            <aside className="w-80 flex-shrink-0  flex flex-col">
-              <Card className="flex-1 flex flex-col  border-accent-foreground">
-                <CardHeader className="text-card-foreground">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-medium uppercase">
-                      Danh sách phòng
-                    </CardTitle>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setAddRoomModalOpen(true)}
-                      disabled={!permissions.canAddRooms}
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Thêm
-                    </Button>
-                  </div>
-                  {!permissions.canAddRooms && (
-                    <p className="text-xs text-destructive mt-2">
-                      {permissions.blockReason}
-                    </p>
-                  )}
-                </CardHeader>
-                <CardContent className="flex-1 overflow-y-auto space-y-2">
-                  {/* Existing Rooms */}
-                  {bookingDetail.rooms.map((room) => (
-                    <ExistingRoomItemWrapper
-                      key={room.roomId}
-                      room={room}
-                      isSelected={false}
-                      isExpanded={expandedRooms.has(room.roomId)}
-                      onSelect={() => toggleRoomExpand(room.roomId)}
-                      onToggleExpand={() => toggleRoomExpand(room.roomId)}
-                      onRemove={() =>
-                        handleRemoveRoom(room.bookingRoomId, room.roomName)
-                      }
-                      canRemove={permissions.canRemoveRooms}
-                      removeTooltip={
-                        !permissions.canRemoveRooms
-                          ? permissions.blockReason || "Không thể xóa phòng"
-                          : undefined
-                      }
-                    />
-                  ))}
-
-                  {/* New Rooms Being Added */}
-                  {fields.filter(
-                    (_, index) => form.watch(`rooms.${index}.action`) === "Add"
-                  ).length > 0 && (
-                    <>
-                      <Separator className="my-3" />
-                      <div className="text-xs font-semibold text-card-foreground mb-2">
-                        Phòng đang được thêm (
-                        {
-                          fields.filter(
-                            (_, index) =>
-                              form.watch(`rooms.${index}.action`) === "Add"
-                          ).length
-                        }
-                        )
-                      </div>
-                      <div className="space-y-2">
-                        {fields.map((field, index) => {
-                          const action = form.watch(`rooms.${index}.action`);
-                          if (action !== "Add") return null;
-
-                          const roomId = form.watch(`rooms.${index}.roomId`);
-                          const fromDate = form.watch(
-                            `rooms.${index}.fromDate`
-                          );
-                          const toDate = form.watch(`rooms.${index}.toDate`);
-
-                          if (!roomId || !fromDate || !toDate) return null;
-
-                          return (
-                            <NewRoomItemWrapper
-                              key={field.id}
-                              roomId={roomId}
-                              fromDate={fromDate}
-                              toDate={toDate}
-                              onRemove={() => remove(index)}
-                            />
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
-
-                  {/* Rooms Being Removed */}
-                  {fields.filter(
-                    (_, index) =>
-                      form.watch(`rooms.${index}.action`) === "Remove"
-                  ).length > 0 && (
-                    <>
-                      <Separator className="my-3" />
-                      <div className="text-xs font-semibold text-destructive mb-2">
-                        Phòng sẽ bị xóa (
-                        {
-                          fields.filter(
-                            (_, index) =>
-                              form.watch(`rooms.${index}.action`) === "Remove"
-                          ).length
-                        }
-                        )
-                      </div>
-                      <div className="space-y-2">
-                        {fields.map((field, index) => {
-                          const action = form.watch(`rooms.${index}.action`);
-                          if (action !== "Remove") return null;
-
-                          const bookingRoomId = form.watch(
-                            `rooms.${index}.bookingRoomId`
-                          );
-                          if (!bookingRoomId) return null;
-
-                          const existingRoom = bookingDetail.rooms.find(
-                            (r) => r.bookingRoomId === bookingRoomId
-                          );
-                          if (!existingRoom) return null;
-
-                          return (
-                            <Card
-                              key={field.id}
-                              className="bg-destructive/5 border-destructive/20 p-0"
-                            >
-                              <CardContent className="p-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                    <div className="font-medium text-sm line-through text-muted-foreground">
-                                      {existingRoom.roomName}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {existingRoom.roomTypeName}
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => remove(index)}
-                                  >
-                                    <RotateCcw /> Hoàn tác
-                                  </Button>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </aside>
-            <div className="grid flex-1 gap-4 px-6">
-              <Card className="border-b w-full h-fit shadow-sm">
-                <CardContent className="flex items-start gap-4 flex-wrap">
-                  <div className="grid gap-2">
-                    <h1 className="uppercase font-medium text-card-foreground text-sm">
-                      Khách hàng
-                    </h1>
-                    <p className="text-sm">{bookingDetail.customer.fullName}</p>
-                  </div>
-                  {(bookingDetail.customer.email ||
-                    bookingDetail.customer.phoneNumber) && (
-                    <div className="grid gap-2">
-                      <h1 className="font-medium uppercase text-card-foreground text-sm">
-                        Phương thức liên lạc
-                      </h1>
-                      <div className="flex flex-col gap-1 text-sm">
-                        {bookingDetail.customer.email && (
-                          <a
-                            href={`mailto:${bookingDetail.customer.email}`}
-                            className="hover:underline flex items-center gap-2 "
-                          >
-                            <Mail className="h-3 w-3" />
-                            {bookingDetail.customer.email}
-                          </a>
-                        )}
-                        {bookingDetail.customer.phoneNumber && (
-                          <a
-                            href={`tel:${bookingDetail.customer.phoneNumber}`}
-                            className="hover:underline flex items-center gap-2"
-                          >
-                            <Phone className="h-3 w-3" />
-                            {bookingDetail.customer.phoneNumber}
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  <FormField
-                    control={form.control}
-                    name="adultsAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm uppercase text-card-foreground">
-                          Số lượng người lớn
-                        </FormLabel>
-                        <FormControl className="text-sm">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            <Counter className="w-30 " {...field} />
-                          </div>
-                        </FormControl>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {form.watch("childrenAmount")! > 0 && (
-                    <FormField
-                      control={form.control}
-                      name="childrenAmount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm uppercase text-card-foreground">
-                            Số lượng trẻ em
-                          </FormLabel>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Baby className="h-4 w-4" />
-                              <Counter className="w-30" {...field} />
-                            </div>
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {/* Source */}
-                  {form.watch("otaInformationId") && (
-                    <div className="flex items-center gap-6">
-                      <FormField
-                        control={form.control}
-                        name="otaInformationId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm text-card-foreground uppercase">
-                              Nền tảng OTA
-                            </FormLabel>
-                            <FormControl>
-                              <div className="flex items-center gap-2">
-                                <Select
-                                  value={field.value}
-                                  onValueChange={field.onChange}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="w-full bg-secondary">
-                                      <SelectValue placeholder="Chọn nền tảng OTA" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {OTAList?.map((ota) => (
-                                      <SelectItem key={ota.id} value={ota.id}>
-                                        {ota.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="otaBookingCode"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm text-card-foreground uppercase">
-                              Mã đặt phòng OTA
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                className="w-full bg-secondary"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  )}
-                  {/* Breakfast Dates Picker */}
-                  <FormField
-                    control={form.control}
-                    name="breakfastDates"
-                    render={({ field }) => {
-                      const checkinDate = form.watch("checkinDate");
-                      const checkoutDate = form.watch("checkoutDate");
-                      const breakfastDates =
-                        field.value?.map((item) =>
-                          item.date ? parseISO(item.date) : new Date()
-                        ) || [];
-
-                      const handleSelectDates = (dates: Date[] | undefined) => {
-                        if (!dates) {
-                          field.onChange([]);
-                          return;
-                        }
-                        const formatted = dates.map((date) => ({
-                          date: format(date, "yyyy-MM-dd"),
-                        }));
-                        field.onChange(formatted);
-                      };
-
-                      return (
-                        <FormItem className="flex flex-col">
-                          <FormLabel className="text-sm uppercase text-card-foreground">
-                            Ngày có bữa sáng
-                          </FormLabel>
-                          <FormControl>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="w-full justify-start text-left font-normal"
-                                >
-                                  <Utensils className="mr-2 h-4 w-4" />
-                                  {breakfastDates.length > 0
-                                    ? `Đã chọn ${breakfastDates.length} ngày`
-                                    : "Chọn ngày có bữa sáng"}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-auto p-0"
-                                align="start"
-                              >
-                                <Calendar
-                                  mode="multiple"
-                                  selected={breakfastDates}
-                                  onSelect={handleSelectDates}
-                                  disabled={(date) => {
-                                    const checkin =
-                                      checkinDate instanceof Date
-                                        ? checkinDate
-                                        : parseISO(checkinDate!.toString());
-                                    const checkout =
-                                      checkoutDate instanceof Date
-                                        ? checkoutDate
-                                        : parseISO(checkoutDate!.toString());
-                                    return date <= checkin || date >= checkout;
-                                  }}
-                                  locale={vi}
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          </FormControl>
-                          <FormDescription className="text-xs">
-                            Chọn các ngày khách có sử dụng bữa sáng
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      );
-                    }}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="totalAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-card-foreground uppercase">
-                          Tổng tiền cần thanh toán
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="w-fit"
-                            min={0}
-                            {...field}
-                            onChange={(value) =>
-                              field.onChange(value.target.valueAsNumber)
-                            }
-                            startAddon={<Wallet />}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Nhấn để cập nhật thông tin thanh toán
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-              <form
-                onSubmit={form.handleSubmit(handleSubmit)}
-                className="space-y-6"
-              >
-                <Card className="shadow-sm">
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="flex gap-1">
-                        <h1>Thông tin đặt phòng: {bookingCode}</h1>
-                        <sup>
-                          <Badge
-                            variant={
-                              BOOKING_STATUSES.find(
-                                (status) => status.value == bookingDetail.status
-                              )?.variant
-                            }
-                          >
-                            {
-                              BOOKING_STATUSES.find(
-                                (status) => status.value == bookingDetail.status
-                              )?.label
-                            }
-                          </Badge>
-                        </sup>
-                      </CardTitle>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          onClick={() => setNoteModalOpen(true)}
-                          variant="outline"
-                        >
-                          <Pen />
-                        </Button>
-                        <Button variant={"success"}>Nhận phòng</Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size={"icon"}>
-                              <Ellipsis />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>Profile</DropdownMenuItem>
-                            <DropdownMenuItem>Billing</DropdownMenuItem>
-                            <DropdownMenuItem>Team</DropdownMenuItem>
-                            <DropdownMenuItem>Subscription</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-6">
-                      <FormField
-                        control={form.control}
-                        name="checkinDate"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel>Ngày nhận phòng</FormLabel>
-                            <FormControl>
-                              <DatePicker
-                                {...field}
-                                disabled={!permissions.canEditDates}
-                              />
-                            </FormControl>
-                            {!permissions.canEditDates && (
-                              <FormDescription className="text-destructive text-xs">
-                                {permissions.blockReason}
-                              </FormDescription>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="checkoutDate"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel>Ngày trả phòng</FormLabel>
-                            <FormControl>
-                              <DatePicker
-                                {...field}
-                                disabled={!permissions.canEditDates}
-                              />
-                            </FormControl>
-                            {!permissions.canEditDates && (
-                              <FormDescription className="text-destructive text-xs">
-                                {permissions.blockReason}
-                              </FormDescription>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="grid gap-2">
-                        <span className="text-sm font-medium">Số đêm:</span>
-                        <span className="text-lg font-bold text-primary">
-                          {nights} đêm
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Save Button */}
-              </form>
-
-              <AddRoomModal
-                open={addRoomModalOpen}
-                onOpenChange={setAddRoomModalOpen}
-                onAddRoom={handleAddRoom}
+        <div className="grid flex-1 gap-4 ">
+          <CustomerInfoBar
+            bookingDetail={bookingDetail}
+            form={form}
+            OTAList={OTAList || []}
+          />
+          <div className="flex items-start gap-2">
+            <div>
+              <BookingRoomsBar
                 bookingDetail={bookingDetail}
+                form={form}
+                roomsFieldArray={roomsFieldArray}
+                permissions={permissions}
               />
-
-              <AddCompletedChargesDialog
-                open={completedChargesDialogOpen}
-                onOpenChange={setCompletedChargesDialogOpen}
-                onConfirm={handleAddCompletedCharges}
-                isAdding={isAddingCompletedCharges}
+            </div>
+            <div className="flex-1 space-y-2">
+              <StayDetailBar
+                bookingCode={bookingCode}
+                bookingDetail={bookingDetail}
+                form={form}
+                permissions={permissions}
+                nights={nights}
+                setNoteModalOpen={setNoteModalOpen}
+                handleSubmit={handleSubmit}
               />
-
-              <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
-                <DialogContent className="max-w-xl">
-                  <DialogHeader>
-                    <DialogTitle>Ghi chú đặt phòng</DialogTitle>
-                    <DialogDescription>
-                      Xem và chỉnh sửa các ghi chú liên quan đến đặt phòng này
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="note"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ghi chú</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              placeholder="Nhập ghi chú về đặt phòng..."
-                              rows={6}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Ghi chú nội bộ về đặt phòng này (khách hàng không
-                            thấy)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setNoteModalOpen(false)}
-                      >
-                        Đóng
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setNoteModalOpen(false);
-                        }}
-                      >
-                        Lưu ghi chú
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <PendingChargesSection
+                bookingId={bookingDetail.id}
+                onAddCompletedCharges={() =>
+                  setCompletedChargesDialogOpen(true)
+                }
+                canAddCharges={
+                  bookingDetail.status !== "CheckedOut" &&
+                  bookingDetail.status !== "Cancelled"
+                }
+              />
             </div>
           </div>
 
-          {/* Pending Charges Section - Financial Dashboard */}
-          <div className="pb-4">
-            <PendingChargesSection
-              bookingId={bookingDetail.id}
-              onAddCompletedCharges={() => setCompletedChargesDialogOpen(true)}
-              canAddCharges={
-                bookingDetail.status !== "CheckedOut" &&
-                bookingDetail.status !== "Cancelled"
-              }
-            />
-          </div>
+          <AddCompletedChargesDialog
+            open={completedChargesDialogOpen}
+            onOpenChange={setCompletedChargesDialogOpen}
+            onConfirm={handleAddCompletedCharges}
+            isAdding={isAddingCompletedCharges}
+          />
+
+          <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
+            <DialogContent className="max-w-xl">
+              <DialogHeader>
+                <DialogTitle>Ghi chú đặt phòng</DialogTitle>
+                <DialogDescription>
+                  Xem và chỉnh sửa các ghi chú liên quan đến đặt phòng này
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="note"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ghi chú</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Nhập ghi chú về đặt phòng..."
+                          rows={6}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Ghi chú nội bộ về đặt phòng này (khách hàng không thấy)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setNoteModalOpen(false)}
+                  >
+                    Đóng
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setNoteModalOpen(false);
+                    }}
+                  >
+                    Lưu ghi chú
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
         <Separator />
         <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
-          <Button
-            variant={"outline"}
-            onClick={() => setConfirmPaymentOpen(true)}
-            disabled={
-              !bookingDetail?.id ||
-              bookingDetail?.status === "CheckedOut" ||
-              bookingDetail?.status === "Cancelled"
-            }
-          >
-            <Wallet className="w-4 h-4 mr-2" />
-            Xác nhận thanh toán
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant={"outline"}
+                disabled={
+                  !bookingDetail?.id ||
+                  bookingDetail?.status === "CheckedOut" ||
+                  bookingDetail?.status === "Cancelled"
+                }
+              >
+                <Wallet className="w-4 h-4 mr-2" />
+                Xác nhận thanh toán
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Xác nhận thanh toán</DialogTitle>
+                <DialogDescription>
+                  Xác nhận thanh toán cho đặt phòng #
+                  {bookingDetail?.bookingCode}
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...paymentForm}>
+                <form
+                  onSubmit={paymentForm.handleSubmit((data) =>
+                    confirmPayment(data)
+                  )}
+                  className="space-y-4"
+                >
+                  <div className="space-y-4">
+                    <FormField
+                      control={paymentForm.control}
+                      name="paymentMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phương thức thanh toán</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Chọn phương thức" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {PAYMENT_METHODS.filter((pm) => !pm.disabled).map(
+                                (pm) => (
+                                  <SelectItem key={pm.value} value={pm.value}>
+                                    <div className="flex items-center gap-2">
+                                      <pm.icon className="w-4 h-4" />
+                                      {pm.label}
+                                    </div>
+                                  </SelectItem>
+                                )
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Paid Amount */}
+                    <FormField
+                      control={paymentForm.control}
+                      name="paidAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Số tiền thanh toán</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Nhập số tiền"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseFloat(e.target.value) || 0)
+                              }
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Số tiền tối thiểu: 0.01 VNĐ
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Card className="p-4 bg-white gap-0 rounded-lg space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          Tổng tiền:
+                        </span>
+                        <span className="font-mono font-semibold">
+                          {bookingDetail?.totalAmount?.toLocaleString("vi-VN")}{" "}
+                          VNĐ
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          Đã thanh toán:
+                        </span>
+                        <span className="font-mono">
+                          {bookingDetail?.paidAmount?.toLocaleString("vi-VN")}{" "}
+                          VNĐ
+                        </span>
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between text-sm font-semibold">
+                        <span>Còn lại:</span>
+                        <span className="font-mono text-destructive">
+                          {(
+                            (bookingDetail?.totalAmount || 0) -
+                            (bookingDetail?.paidAmount || 0)
+                          ).toLocaleString("vi-VN")}{" "}
+                          VNĐ
+                        </span>
+                      </div>
+                    </Card>
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        paymentForm.reset();
+                      }}
+                      disabled={isConfirmingPayment}
+                    >
+                      Hủy
+                    </Button>
+                    <Button type="submit" disabled={isConfirmingPayment}>
+                      {isConfirmingPayment ? "Xử lý..." : "Xác nhận thanh toán"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
           <Button
             variant={"success"}
             onClick={() => setCheckoutOpen(true)}
@@ -1010,156 +525,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         />
 
         {/* Confirm Payment Dialog */}
-        <Dialog open={confirmPaymentOpen} onOpenChange={setConfirmPaymentOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Xác nhận thanh toán</DialogTitle>
-              <DialogDescription>
-                Xác nhận thanh toán cho đặt phòng #{bookingDetail?.bookingCode}
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...paymentForm}>
-              <form
-                onSubmit={paymentForm.handleSubmit((data) =>
-                  confirmPayment(data)
-                )}
-                className="space-y-4"
-              >
-                <div className="space-y-4">
-                  {/* Payment Summary */}
-                  <div className="bg-muted/30 p-4 rounded-lg space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Tổng tiền:</span>
-                      <span className="font-mono font-semibold">
-                        {bookingDetail?.totalAmount?.toLocaleString("vi-VN")}{" "}
-                        VNĐ
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Đã thanh toán:
-                      </span>
-                      <span className="font-mono">
-                        {bookingDetail?.paidAmount?.toLocaleString("vi-VN")} VNĐ
-                      </span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between text-sm font-semibold">
-                      <span>Còn lại:</span>
-                      <span className="font-mono text-destructive">
-                        {(
-                          (bookingDetail?.totalAmount || 0) -
-                          (bookingDetail?.paidAmount || 0)
-                        ).toLocaleString("vi-VN")}{" "}
-                        VNĐ
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Payment Method */}
-                  <FormField
-                    control={paymentForm.control}
-                    name="paymentMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phương thức thanh toán</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Chọn phương thức" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PAYMENT_METHODS.filter((pm) => !pm.disabled).map(
-                              (pm) => (
-                                <SelectItem key={pm.value} value={pm.value}>
-                                  <div className="flex items-center gap-2">
-                                    <pm.icon className="w-4 h-4" />
-                                    {pm.label}
-                                  </div>
-                                </SelectItem>
-                              )
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Paid Amount */}
-                  <FormField
-                    control={paymentForm.control}
-                    name="paidAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Số tiền thanh toán</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Nhập số tiền"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Số tiền tối thiểu: 0.01 VNĐ
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setConfirmPaymentOpen(false);
-                      paymentForm.reset();
-                    }}
-                    disabled={isConfirmingPayment}
-                  >
-                    Hủy
-                  </Button>
-                  <Button type="submit" disabled={isConfirmingPayment}>
-                    {isConfirmingPayment ? "Xử lý..." : "Xác nhận thanh toán"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-
-        <AlertDialog
-          open={removeRoomConfirmOpen}
-          onOpenChange={setRemoveRoomConfirmOpen}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Xác nhận xóa phòng</AlertDialogTitle>
-              <AlertDialogDescription>
-                Bạn có chắc muốn xóa phòng{" "}
-                <span className="font-semibold">{roomToRemove?.roomName}</span>?
-                <br />
-                <br />
-                Thao tác này sẽ được áp dụng khi bạn lưu thay đổi.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Hủy</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmRemoveRoom}>
-                Xóa phòng
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </Form>
     </div>
   );

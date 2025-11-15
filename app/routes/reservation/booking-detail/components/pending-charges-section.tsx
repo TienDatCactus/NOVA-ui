@@ -1,13 +1,29 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Info, Utensils, Sparkles, AlertCircle } from "lucide-react";
+import { Info, Utensils, Sparkles, AlertCircle, Plus } from "lucide-react";
 import PendingPosTable from "../fragments/pending-pos-table";
 import PendingServicesTable from "../fragments/pending-services-table";
 import { formatMoney } from "~/lib/utils";
 import { useBookingPendingCharges } from "../container/use-booking-checkout.hooks";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { format, parseISO } from "date-fns";
+import { vi } from "date-fns/locale";
 
 interface PendingChargesSectionProps {
   bookingId: string;
@@ -28,7 +44,7 @@ export default function PendingChargesSection({
 
   if (isPending) {
     return (
-      <Card className="shadow-sm">
+      <Card className="shadow-sm ">
         <CardHeader>
           <Skeleton className="h-6 w-48" />
         </CardHeader>
@@ -46,7 +62,7 @@ export default function PendingChargesSection({
 
   if (error) {
     return (
-      <Card className="shadow-sm border-destructive/50">
+      <Card className="shadow-sm px-0 py-4">
         <CardContent className="pt-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -81,116 +97,184 @@ export default function PendingChargesSection({
     ) || 0;
 
   return (
-    <Card className="shadow-sm">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Chi phí chưa thanh toán</CardTitle>
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground mb-1">Tổng nợ</p>
-            <p className="text-2xl font-bold font-mono text-destructive">
-              {formatMoney(totalDue).vndFormatted}
-            </p>
-          </div>
-        </div>
-        {canAddCharges && (
-          <Alert variant={"info"}>
-            <Info className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span className="text-sm">
-                Khách sử dụng món chưa order trước? (minibar, snacks...)
-              </span>
-              <Button
-                variant="link"
-                size="sm"
-                onClick={onAddCompletedCharges}
-                className="ml-2 h-auto p-0"
-              >
-                Thêm phí ngoài order
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+    <Card className="shadow-sm p-0 py-4">
+      <CardHeader className="">
+        <CardTitle className="text-lg">Chi phí chưa thanh toán </CardTitle>
+        <CardAction>
+          {canAddCharges && (
+            <Button
+              variant="link"
+              size="sm"
+              onClick={onAddCompletedCharges}
+              className="ml-2 h-auto p-0"
+            >
+              <Plus />
+              Thêm phí ngoài order
+            </Button>
+          )}
+        </CardAction>
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* <div className="grid grid-cols-3 gap-4">
-          <Card className=" bg-white p-0">
-            <CardContent className="p-4 space-y-2">
-              <p className="text-xs text-muted-foreground font-medium">
-                Chi phí phòng
-              </p>
-              <p className="text-xl font-bold font-mono">
-                {formatMoney(roomInvoice?.balance || 0).vndFormatted}
-              </p>
-              <div className="text-xs text-muted-foreground space-y-1">
-                <div className="flex justify-between">
-                  <span>Tổng:</span>
-                  <span className="font-mono">
-                    {formatMoney(roomInvoice?.total || 0).vndFormatted}
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-sm">Đồ ăn/Đồ uống</h4>
+                  <span className="text-xs text-muted-foreground">
+                    {pendingCharges.pendingOrders.posOrders.length} đơn
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Đã trả:</span>
-                  <span className="font-mono text-green-600">
-                    -{formatMoney(roomInvoice?.paid || 0).vndFormatted}
-                  </span>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tên món</TableHead>
+                        <TableHead className="text-right">SL</TableHead>
+                        <TableHead className="text-right">Đơn giá</TableHead>
+                        <TableHead className="text-right">Thành tiền</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingCharges.pendingOrders.posOrders.length === 0 && (
+                        <TableRow>
+                          <TableCell
+                            colSpan={4}
+                            className="text-center text-xs text-muted-foreground"
+                          >
+                            Không có món chưa thanh toán
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {pendingCharges.pendingOrders.posOrders.map((order) =>
+                        order.items.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="font-medium truncate max-w-[160px]">
+                              {item.itemName}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-xs">
+                              {item.quantity}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-xs">
+                              {formatMoney(item.unitPrice).vndFormatted}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums font-semibold text-xs">
+                              {formatMoney(item.subtotal).vndFormatted}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900 p-0">
-            <CardContent className="p-4 space-y-2">
-              <p className="text-xs text-muted-foreground font-medium">
-                Đồ ăn/Đồ uống
-              </p>
-              <p className="text-xl font-bold font-mono text-orange-600 dark:text-orange-400">
-                {formatMoney(posTotal).vndFormatted}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {pendingOrders.posOrders?.length || 0} đơn chưa thanh toán
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900 p-0">
-            <CardContent className="p-4 space-y-2">
-              <p className="text-xs text-muted-foreground font-medium">
-                Dịch vụ
-              </p>
-              <p className="text-xl font-bold font-mono text-blue-600 dark:text-blue-400">
-                {formatMoney(serviceTotal).vndFormatted}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {pendingOrders.serviceOrders?.length || 0} đơn chưa thanh toán
-              </p>
-            </CardContent>
-          </Card>
-        </div> */}
-
-        {/* Tabbed Tables */}
-        <Tabs defaultValue="pos" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="pos">
-              <Utensils className="h-4 w-4 mr-2" />
-              Đồ ăn/Đồ uống ({pendingOrders.posOrders?.length || 0})
-            </TabsTrigger>
-            <TabsTrigger value="service">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Dịch vụ ({pendingOrders.serviceOrders?.length || 0})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="pos" className="space-y-4 mt-4">
-            <PendingPosTable orders={pendingOrders.posOrders || []} />
-
-            {/* Quick Add Completed Charges */}
-          </TabsContent>
-
-          <TabsContent value="service" className="mt-4">
-            <PendingServicesTable orders={pendingOrders.serviceOrders || []} />
-          </TabsContent>
-        </Tabs>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-sm">Dịch vụ</h4>
+                  <span className="text-xs text-muted-foreground">
+                    {pendingCharges.pendingOrders.serviceOrders.length} đơn
+                  </span>
+                </div>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tên dịch vụ</TableHead>
+                        <TableHead className="text-right">SL</TableHead>
+                        <TableHead className="text-right">Đơn giá</TableHead>
+                        <TableHead className="text-right">Lên lịch</TableHead>
+                        <TableHead className="text-right">Thành tiền</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingCharges.pendingOrders.serviceOrders.length ===
+                        0 && (
+                        <TableRow>
+                          <TableCell
+                            colSpan={5}
+                            className="text-center text-xs text-muted-foreground"
+                          >
+                            Không có dịch vụ chưa thanh toán
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {pendingCharges.pendingOrders.serviceOrders.map(
+                        (service) => (
+                          <TableRow key={service.id}>
+                            <TableCell className="font-medium truncate max-w-[160px]">
+                              {service.serviceName}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-xs">
+                              {service.quantity}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-xs">
+                              {formatMoney(service.unitPrice).vndFormatted}
+                            </TableCell>
+                            <TableCell className="text-right text-[10px] text-muted-foreground">
+                              {format(
+                                parseISO(service.scheduledAt),
+                                "dd/MM/yyyy HH:mm",
+                                { locale: vi }
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums font-semibold text-xs">
+                              {formatMoney(service.subtotal).vndFormatted}
+                            </TableCell>
+                          </TableRow>
+                        )
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+            <Card className="space-y-3 gap-0 order-last p-4 rounded-lg  border">
+              <CardHeader className="p-0">
+                <CardTitle className="font-semibold text-sm">
+                  Chi phí phòng
+                </CardTitle>
+              </CardHeader>
+              {pendingCharges.roomInvoice ? (
+                <>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Tổng</span>
+                    <span className="font-medium tabular-nums">
+                      {
+                        formatMoney(pendingCharges.roomInvoice.total)
+                          .vndFormatted
+                      }
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Đã thanh toán</span>
+                    <span className="font-medium tabular-nums text-green-600">
+                      -
+                      {
+                        formatMoney(pendingCharges.roomInvoice.paid)
+                          .vndFormatted
+                      }
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span>Còn lại</span>
+                    <span className="tabular-nums">
+                      {
+                        formatMoney(pendingCharges.roomInvoice.balance)
+                          .vndFormatted
+                      }
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Không có chi phí phòng chưa thanh toán
+                </p>
+              )}
+            </Card>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

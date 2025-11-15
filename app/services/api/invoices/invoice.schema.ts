@@ -90,6 +90,8 @@ const InvoiceDetailSchema = z.object({
   vatAmount: z.number().optional().nullable(),
   serviceChargeAmount: z.number().optional().nullable(),
   total: z.number().optional().nullable(),
+  paidAmount: z.number().optional().nullable(),
+  balance: z.number().optional().nullable(),
   paymentMethod: z.string().optional().nullable(),
   status: z.string().optional().nullable(),
   issuedAt: z.string().optional().nullable(),
@@ -153,6 +155,8 @@ const ServiceInvoiceSchema = InvoiceItemSchema;
 const InvoicePreviewRequestSchema = z.object({
   posOrderIds: z.array(z.string()),
   serviceOrderIds: z.array(z.string()),
+  applyVat: z.boolean().default(true),
+  applyServiceCharge: z.boolean().default(true),
 });
 
 const InvoicePreviewResponseSchema = z.object({
@@ -187,6 +191,23 @@ const InvoiceCalculateFeesResponseSchema = z.object({
   serviceChargeAmount: z.number().min(0),
   totalAmount: z.number().min(0),
 });
+const InvoiceCalculateFeesRequestSchema = z.object({
+  subtotalAmount: z.number().min(0),
+  applyVat: z.boolean().default(true),
+  applyServiceCharge: z.boolean().default(true),
+});
+
+const UpdateInvoiceRequestSchema = z.object({
+  vatAmount: z.number("Số tiền VAT không hợp lệ").min(0).default(0).optional(),
+  serviceChargeAmount: z
+    .number("Số tiền phí dịch vụ không hợp lệ")
+    .min(0)
+    .default(0)
+    .optional(),
+  paymentMethod: z.string("Phương thức thanh toán không hợp lệ"),
+  note: z.string("Ghi chú không hợp lệ").optional(),
+});
+
 export const InvoiceSchema = {
   InvoiceStatusEnum,
   InvoiceTypeEnum,
@@ -209,4 +230,6 @@ export const InvoiceSchema = {
   InvoicePreviewRequestSchema,
   InvoicePreviewResponseSchema,
   InvoiceCalculateFeesResponseSchema,
+  InvoiceCalculateFeesRequestSchema,
+  UpdateInvoiceRequestSchema,
 };
