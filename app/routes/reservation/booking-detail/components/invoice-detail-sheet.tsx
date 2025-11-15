@@ -58,6 +58,18 @@ import {
   useInvoiceDetail,
   useUpdateInvoice,
 } from "../container/use-booking-checkout.hooks";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "~/components/ui/empty";
+import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import {
+  canInvoiceAcceptPayment,
+  validatePaymentAmount,
+} from "../container/payment-validation";
 
 const { StaffCheckoutPaymentRequestSchema } = BookingSchema;
 
@@ -179,12 +191,28 @@ export default function InvoiceDetailSheet({
 
     updateInvoice(updateData);
   };
+  const paymentEligibility = useMemo(() => {
+    if (!invoiceDetail?.status) return { canProceed: false };
+    return canInvoiceAcceptPayment(invoiceDetail.status);
+  }, [invoiceDetail?.status]);
+
+  // Enhanced payment validation
+  const paymentValidation = useMemo(() => {
+    if (!invoiceDetail) return { isValid: false };
+
+    return validatePaymentAmount(
+      amount,
+      invoiceDetail.balance || 0,
+      calculatedFees?.totalAmount || invoiceDetail.total || 0,
+      invoiceDetail.status || ""
+    );
+  }, [amount, invoiceDetail, calculatedFees]);
 
   // Handler to process payment
   const handlePayment = (data: CheckoutPaymentFormData) => {
-    if (!isPaymentValid) {
+    if (!paymentValidation.isValid) {
       paymentForm.setError("amount", {
-        message: "Phải thanh toán đủ số tiền còn thiếu",
+        message: paymentValidation.error || "Số tiền không hợp lệ",
       });
       return;
     }
@@ -232,7 +260,7 @@ export default function InvoiceDetailSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[90vw] lg:max-w-4xl p-0 flex flex-col"
+        className="w-full sm:max-w-[90vw] lg:max-w-6xl p-0 flex flex-col"
       >
         <SheetHeader className="p-6 pb-4 border-b">
           <SheetTitle className="text-xl">
@@ -249,64 +277,63 @@ export default function InvoiceDetailSheet({
           </div>
         ) : invoiceDetail ? (
           <>
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Invoice Info Card */}
-              <Card className="shadow-sm">
-                <CardHeader className="border-b bg-muted/30">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex-1 ">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">Thông tin hóa đơn</CardTitle>
+                    <h1 className="font-semibold">Thông tin hóa đơn</h1>
                     <Badge
                       variant={
-                        invoiceDetail.status === "Paid"
-                          ? "success"
-                          : invoiceDetail.status === "Unpaid"
-                            ? "destructive"
-                            : "warning"
+                        INVOICE_STATUSES.find(
+                          (s) => s.value === invoiceDetail.status
+                        )?.variant
                       }
                     >
-                      {invoiceDetail.status}
+                      {
+                        INVOICE_STATUSES.find(
+                          (s) => s.value === invoiceDetail.status
+                        )?.label
+                      }
                     </Badge>
                   </div>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Số hóa đơn</p>
-                      <p className="font-mono font-semibold">
-                        {invoiceDetail.invoiceNo}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Ngày tạo</p>
-                      <p className="font-medium">
-                        {invoiceDetail.issuedAt
-                          ? format(
-                              parseISO(invoiceDetail.issuedAt),
-                              "dd/MM/yyyy HH:mm",
-                              { locale: vi }
-                            )
-                          : "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">
-                        Phương thức thanh toán
-                      </p>
-                      <p className="font-medium">
-                        {invoiceDetail.paymentMethod || "Chưa xác định"}
-                      </p>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Số hóa đơn</p>
+                        <p className="font-mono font-semibold">
+                          {invoiceDetail.invoiceNo}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Ngày tạo</p>
+                        <p className="font-medium">
+                          {invoiceDetail.issuedAt
+                            ? format(
+                                parseISO(invoiceDetail.issuedAt),
+                                "dd/MM/yyyy HH:mm",
+                                { locale: vi }
+                              )
+                            : "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">
+                          Phương thức thanh toán
+                        </p>
+                        <p className="font-medium">
+                          {
+                            PAYMENT_METHODS.find(
+                              (pm) => pm.value === invoiceDetail.paymentMethod
+                            )?.label
+                          }
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Invoice Items Table */}
-              {invoiceDetail.items && invoiceDetail.items.length > 0 && (
-                <Card className="shadow-sm">
-                  <CardHeader className="border-b bg-muted/30">
-                    <CardTitle className="text-lg">Chi tiết mục</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
+                </div>
+                <Separator className="my-6" />
+                <div>
+                  {invoiceDetail.items && invoiceDetail.items.length > 0 ? (
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -337,290 +364,309 @@ export default function InvoiceDetailSheet({
                         ))}
                       </TableBody>
                     </Table>
+                  ) : (
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <Info />
+                        </EmptyMedia>
+                        <EmptyTitle>Không có mục nào</EmptyTitle>
+                        <EmptyDescription>
+                          Hóa đơn này chưa có mục chi tiết nào
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Card className="shadow-sm gap-2 p-4">
+                  <CardHeader className="p-0">
+                    <CardTitle>Tính phí & Tổng tiền</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0 space-y-4">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Tạm tính:</span>
+                        <span className="font-mono">
+                          {
+                            formatMoney(invoiceDetail.subTotal || 0)
+                              .vndFormatted
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="flex gap-2 items-center">
+                          <span className="text-muted-foreground">VAT: </span>{" "}
+                          <Switch
+                            id="vat-toggle"
+                            checked={applyVat}
+                            onCheckedChange={setApplyVat}
+                          />
+                        </div>
+                        <span className="font-mono">
+                          {
+                            formatMoney(
+                              calculatedFees?.vatAmount ||
+                                invoiceDetail.vatAmount ||
+                                0
+                            ).vndFormatted
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="flex gap-2 items-center">
+                          <span className="text-muted-foreground">
+                            Phí dịch vụ:
+                          </span>
+                          <Switch
+                            id="service-charge-toggle"
+                            checked={applyServiceCharge}
+                            onCheckedChange={setApplyServiceCharge}
+                          />
+                        </div>
+                        <span className="font-mono">
+                          {
+                            formatMoney(
+                              calculatedFees?.serviceChargeAmount ||
+                                invoiceDetail.serviceChargeAmount ||
+                                0
+                            ).vndFormatted
+                          }
+                        </span>
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between text-base font-semibold">
+                        <span>Tổng cộng:</span>
+                        <span className="font-mono text-primary">
+                          {
+                            formatMoney(
+                              calculatedFees?.totalAmount ||
+                                invoiceDetail.total ||
+                                0
+                            ).vndFormatted
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Đã thanh toán:
+                        </span>
+                        <span className="font-mono">
+                          {
+                            formatMoney(invoiceDetail.paidAmount || 0)
+                              .vndFormatted
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-base font-bold">
+                        <span>Còn lại:</span>
+                        <span className="font-mono text-destructive">
+                          {formatMoney(invoiceDetail.balance || 0).vndFormatted}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Update Invoice Button */}
+                    {hasFeesChanged && paymentEligibility.canProceed && (
+                      <Button
+                        onClick={handleUpdateInvoice}
+                        disabled={isUpdatingInvoice}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {isUpdatingInvoice ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Đang cập nhật...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Cập nhật Invoice
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
-              )}
-
-              {/* Fee Calculation & Toggles */}
-              <Card className="shadow-sm">
-                <CardHeader className="border-b bg-muted/30">
-                  <CardTitle className="text-lg">
-                    Tính phí & Tổng tiền
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  {/* VAT Toggle */}
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
-                    <div className="flex flex-col gap-1">
-                      <Label htmlFor="vat-toggle" className="font-semibold">
-                        Áp dụng VAT
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        Thuế giá trị gia tăng
-                      </p>
-                    </div>
-                    <Switch
-                      id="vat-toggle"
-                      checked={applyVat}
-                      onCheckedChange={setApplyVat}
-                    />
-                  </div>
-
-                  {/* Service Charge Toggle */}
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
-                    <div className="flex flex-col gap-1">
-                      <Label
-                        htmlFor="service-charge-toggle"
-                        className="font-semibold"
-                      >
-                        Áp dụng Phí dịch vụ
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        Service charge
-                      </p>
-                    </div>
-                    <Switch
-                      id="service-charge-toggle"
-                      checked={applyServiceCharge}
-                      onCheckedChange={setApplyServiceCharge}
-                    />
-                  </div>
-
-                  <Separator />
-
-                  {/* Summary */}
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tạm tính:</span>
-                      <span className="font-mono">
-                        {formatMoney(invoiceDetail.subTotal || 0).vndFormatted}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">VAT:</span>
-                      <span className="font-mono">
-                        {
-                          formatMoney(
-                            calculatedFees?.vatAmount ||
-                              invoiceDetail.vatAmount ||
-                              0
-                          ).vndFormatted
-                        }
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Phí dịch vụ:
-                      </span>
-                      <span className="font-mono">
-                        {
-                          formatMoney(
-                            calculatedFees?.serviceChargeAmount ||
-                              invoiceDetail.serviceChargeAmount ||
-                              0
-                          ).vndFormatted
-                        }
-                      </span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between text-base font-semibold">
-                      <span>Tổng cộng:</span>
-                      <span className="font-mono text-primary">
-                        {
-                          formatMoney(
-                            calculatedFees?.totalAmount ||
-                              invoiceDetail.total ||
-                              0
-                          ).vndFormatted
-                        }
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Đã thanh toán:
-                      </span>
-                      <span className="font-mono">
-                        {
-                          formatMoney(invoiceDetail.paidAmount || 0)
-                            .vndFormatted
-                        }
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-base font-bold">
-                      <span>Còn lại:</span>
-                      <span className="font-mono text-destructive">
-                        {formatMoney(invoiceDetail.balance || 0).vndFormatted}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Update Invoice Button */}
-                  {hasFeesChanged && (
-                    <Button
-                      onClick={handleUpdateInvoice}
-                      disabled={isUpdatingInvoice}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      {isUpdatingInvoice ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Đang cập nhật...
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          Cập nhật Invoice
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Payment Form (only if balance > 0) */}
-              {invoiceDetail.status != "Paid" && (
-                <Card className="shadow-sm">
-                  <CardHeader className="border-b bg-muted/30">
-                    <CardTitle className="text-lg">Thanh toán</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <Form {...paymentForm}>
-                      <form className="space-y-4">
-                        <FormField
-                          control={paymentForm.control}
-                          name="method"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Phương thức thanh toán</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Chọn phương thức" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {PAYMENT_METHODS.filter(
-                                    (pm) => !pm.disabled
-                                  ).map((pm) => (
-                                    <SelectItem key={pm.value} value={pm.value}>
-                                      <div className="flex items-center gap-2">
-                                        <pm.icon className="w-4 h-4" />
-                                        {pm.label}
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={paymentForm.control}
-                          name="amount"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Số tiền thanh toán</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  placeholder="Nhập số tiền"
-                                  {...field}
-                                  onChange={(e) =>
-                                    field.onChange(
-                                      parseFloat(e.target.value) || 0
-                                    )
-                                  }
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                Phải thanh toán đủ:{" "}
-                                {
-                                  formatMoney(invoiceDetail.balance || 0)
-                                    .vndFormatted
-                                }
-                              </FormDescription>
-                              {changeAmount > 0 && (
-                                <FormDescription className="text-success font-semibold">
-                                  Tiền thừa:{" "}
-                                  {formatMoney(changeAmount).vndFormatted}
-                                </FormDescription>
-                              )}
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {method !== "Cash" && (
+                <Separator className="my-6" />
+                {!paymentEligibility.canProceed && (
+                  <Alert variant="destructive" className="mb-4">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      {paymentEligibility.userMessage}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {paymentEligibility.canProceed &&
+                  invoiceDetail?.status !== "Paid" && (
+                    <div>
+                      <Form {...paymentForm}>
+                        <form className="space-y-4">
                           <FormField
                             control={paymentForm.control}
-                            name="transactionReference"
+                            name="method"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Mã giao dịch</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Nhập mã giao dịch (tùy chọn)"
-                                    {...field}
-                                    value={field.value || ""}
-                                  />
-                                </FormControl>
+                                <FormLabel>Phương thức thanh toán</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Chọn phương thức" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {PAYMENT_METHODS.filter(
+                                      (pm) => !pm.disabled
+                                    ).map((pm) => (
+                                      <SelectItem
+                                        key={pm.value}
+                                        value={pm.value}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <pm.icon className="w-4 h-4" />
+                                          {pm.label}
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                        )}
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              )}
+                          <FormField
+                            control={paymentForm.control}
+                            name="amount"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Số tiền thanh toán</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) => {
+                                      const value =
+                                        parseFloat(e.target.value) || 0;
+                                      if (value < 0) {
+                                        field.onChange(0);
+                                        return;
+                                      }
+                                      field.onChange(value);
+
+                                      // Real-time validation using new helper
+                                      const validation = validatePaymentAmount(
+                                        value,
+                                        invoiceDetail.balance || 0,
+                                        calculatedFees?.totalAmount ||
+                                          invoiceDetail.total ||
+                                          0,
+                                        invoiceDetail.status || ""
+                                      );
+
+                                      if (!validation.isValid) {
+                                        paymentForm.setError("amount", {
+                                          message: validation.error,
+                                        });
+                                      } else {
+                                        paymentForm.clearErrors("amount");
+                                      }
+                                    }}
+                                    className={
+                                      paymentForm.formState.errors.amount
+                                        ? "border-destructive focus-visible:ring-destructive"
+                                        : ""
+                                    }
+                                  />
+                                </FormControl>
+                                <div className="space-y-1">
+                                  <FormDescription className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">
+                                      Số tiền còn thiếu:
+                                    </span>
+                                    <span className="font-mono font-semibold text-destructive">
+                                      {
+                                        formatMoney(invoiceDetail?.balance || 0)
+                                          .vndFormatted
+                                      }
+                                    </span>
+                                  </FormDescription>
+                                  <FormDescription className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">
+                                      Tổng hóa đơn:
+                                    </span>
+                                    <span className="font-mono font-semibold text-primary">
+                                      {
+                                        formatMoney(
+                                          calculatedFees?.totalAmount ||
+                                            invoiceDetail?.total ||
+                                            0
+                                        ).vndFormatted
+                                      }
+                                    </span>
+                                  </FormDescription>
+                                  {changeAmount > 0 && (
+                                    <FormDescription className="flex items-center justify-between text-orange-600">
+                                      <span>Tiền thừa:</span>
+                                      <span className="font-mono font-semibold">
+                                        {formatMoney(changeAmount).vndFormatted}
+                                      </span>
+                                    </FormDescription>
+                                  )}
+                                </div>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          {method !== "Cash" && (
+                            <FormField
+                              control={paymentForm.control}
+                              name="transactionReference"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Mã giao dịch</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Nhập mã giao dịch (tùy chọn)"
+                                      {...field}
+                                      value={field.value || ""}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </form>
+                      </Form>
+                    </div>
+                  )}
+              </div>
             </div>
 
             {/* Footer Actions */}
-            <SheetFooter className="p-6 border-t flex-col gap-3">
-              {(invoiceDetail.balance || 0) > 0 && isPaymentValid && (
-                <Alert className="w-full">
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    Thanh toán đủ sẽ tự động hoàn tất checkout
-                  </AlertDescription>
-                </Alert>
-              )}
-              <div className="flex justify-end items-center w-full gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onBack}
-                  disabled={isProcessing}
-                >
-                  Quay lại
+            <SheetFooter>
+              {paymentEligibility.suggestedAction === "checkout" && (
+                <Button variant={"info-outline"} onClick={handleFinalCheckout}>
+                  Hoàn tất Checkout
                 </Button>
-                {invoiceDetail.status != "Paid" && (
-                  <Button
-                    type="button"
-                    onClick={paymentForm.handleSubmit(handlePayment)}
-                    disabled={isProcessingPayment || !isPaymentValid}
-                  >
-                    {isProcessingPayment ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Đang xử lý...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="w-4 h-4 mr-2" />
-                        Xác nhận thanh toán
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
+              )}
+              {paymentEligibility.suggestedAction === "refund" && (
+                <Button variant="destructive">Xử lý hoàn trả</Button>
+              )}
+              {paymentEligibility.canProceed && (
+                <Button
+                  onClick={paymentForm.handleSubmit(handlePayment)}
+                  disabled={!paymentValidation.isValid}
+                >
+                  Xác nhận thanh toán
+                </Button>
+              )}
             </SheetFooter>
           </>
         ) : null}

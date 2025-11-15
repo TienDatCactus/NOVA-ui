@@ -40,8 +40,7 @@ const Booking = {
   detailById: (id: string) => `Bookings/${id}/details`,
   detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
   Export: `Bookings/export`,
-  updateStatus: (id: string) => `Bookings/${id}/update-status`,
-
+  updateStatus: "Bookings/update-status",
   addToCompletedRoomOrder: (bookingId: string) =>
     `/StaffBookings/${bookingId}/add-completed-charges`,
   confirmPayment: (id: string) => `StaffBookings/${id}/confirm-payment`,

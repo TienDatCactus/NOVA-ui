@@ -406,8 +406,9 @@ const StaffChangeRoomResponseSchema = z.object({
 
 // Common payment item schema
 const CheckoutPaymentItemSchema = z.object({
-  method: PaymentSchema.PaymentMethodEnum,
-  amount: z.number().min(0, "Số tiền không hợp lệ"),
+  amount: z.number("Vui lòng nhập số tiền").min(0.01, "Số tiền phải lớn hơn 0"),
+
+  method: z.string().min(1, "Vui lòng chọn phương thức thanh toán"),
   transactionReference: z.string().optional().nullable(),
 });
 

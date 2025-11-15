@@ -100,17 +100,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     bookingDetail?.id || ""
   );
 
-  const { mutate: confirmPayment, isPending: isConfirmingPayment } =
-    useConfirmBookingPayment(bookingDetail?.id || "");
-
-  const paymentForm = useForm<ConfirmBookingPaymentRequestDto>({
-    resolver: zodResolver(BookingSchema.ConfirmBookingPaymentRequestSchema),
-    defaultValues: {
-      paymentMethod: "Cash",
-      paidAmount: 0,
-    },
-  });
-
   const form = useForm<StaffUpdateBookingRequestDto>({
     resolver: zodResolver(StaffUpdateBookingRequestSchema),
     defaultValues: {
@@ -348,145 +337,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         </div>
         <Separator />
         <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant={"outline"}
-                disabled={
-                  !bookingDetail?.id ||
-                  bookingDetail?.status === "CheckedOut" ||
-                  bookingDetail?.status === "Cancelled"
-                }
-              >
-                <Wallet className="w-4 h-4 mr-2" />
-                Xác nhận thanh toán
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Xác nhận thanh toán</DialogTitle>
-                <DialogDescription>
-                  Xác nhận thanh toán cho đặt phòng #
-                  {bookingDetail?.bookingCode}
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...paymentForm}>
-                <form
-                  onSubmit={paymentForm.handleSubmit((data) =>
-                    confirmPayment(data)
-                  )}
-                  className="space-y-4"
-                >
-                  <div className="space-y-4">
-                    <FormField
-                      control={paymentForm.control}
-                      name="paymentMethod"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phương thức thanh toán</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Chọn phương thức" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {PAYMENT_METHODS.filter((pm) => !pm.disabled).map(
-                                (pm) => (
-                                  <SelectItem key={pm.value} value={pm.value}>
-                                    <div className="flex items-center gap-2">
-                                      <pm.icon className="w-4 h-4" />
-                                      {pm.label}
-                                    </div>
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Paid Amount */}
-                    <FormField
-                      control={paymentForm.control}
-                      name="paidAmount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Số tiền thanh toán</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Nhập số tiền"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value) || 0)
-                              }
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Số tiền tối thiểu: 0.01 VNĐ
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Card className="p-4 bg-white gap-0 rounded-lg space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Tổng tiền:
-                        </span>
-                        <span className="font-mono font-semibold">
-                          {bookingDetail?.totalAmount?.toLocaleString("vi-VN")}{" "}
-                          VNĐ
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Đã thanh toán:
-                        </span>
-                        <span className="font-mono">
-                          {bookingDetail?.paidAmount?.toLocaleString("vi-VN")}{" "}
-                          VNĐ
-                        </span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between text-sm font-semibold">
-                        <span>Còn lại:</span>
-                        <span className="font-mono text-destructive">
-                          {(
-                            (bookingDetail?.totalAmount || 0) -
-                            (bookingDetail?.paidAmount || 0)
-                          ).toLocaleString("vi-VN")}{" "}
-                          VNĐ
-                        </span>
-                      </div>
-                    </Card>
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        paymentForm.reset();
-                      }}
-                      disabled={isConfirmingPayment}
-                    >
-                      Hủy
-                    </Button>
-                    <Button type="submit" disabled={isConfirmingPayment}>
-                      {isConfirmingPayment ? "Xử lý..." : "Xác nhận thanh toán"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
           <Button
             variant={"success"}
             onClick={() => setCheckoutOpen(true)}
@@ -497,7 +347,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             }
           >
             <DoorOpen className="w-4 h-4 mr-2" />
-            Checkout
+            Checkout và Thanh toán
           </Button>
 
           <Button

@@ -100,6 +100,12 @@ export function useCreateCheckoutInvoice(bookingId: string) {
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", bookingId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["booking-invoices"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+      });
     },
   });
 }
@@ -119,7 +125,13 @@ export function useCheckoutPayment(bookingId: string) {
         queryKey: ["checkout", "pending-charges", bookingId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["bookings", "detail"],
+        queryKey: ["bookings-detail"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["invoices-by-booking", bookingId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["invoice-detail"],
       });
     },
     onError: (error: any) => {
@@ -139,14 +151,15 @@ export function useCheckout(bookingId: string) {
     mutationFn: (data: StaffCheckoutRequestDto) =>
       BookingService.staffCheckout(bookingId, data),
     onSuccess: () => {
-      // Invalidate all booking-related queries
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
       });
-    },
-    onError: (error: any) => {
-      console.error("Checkout failed:", error);
-      toast.error(error?.message || "Checkout thất bại. Vui lòng thử lại.");
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["invoices-by-booking", bookingId],
+      });
     },
   });
 }
@@ -164,6 +177,12 @@ export function useUpdateInvoice(invoiceId: string) {
       toast.success("Cập nhật invoice thành công");
       queryClient.invalidateQueries({
         queryKey: ["invoice-detail", invoiceId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["invoices-by-booking"],
       });
     },
     onError: (error: any) => {
@@ -183,10 +202,10 @@ export function useConfirmBookingPayment(bookingId: string) {
     onSuccess: (response) => {
       toast.success(response.message || "Xác nhận thanh toán thành công");
       queryClient.invalidateQueries({
-        queryKey: ["booking-detail", bookingId],
+        queryKey: ["bookings-detail"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["invoices", "booking", bookingId],
+        queryKey: ["invoices-by-booking", bookingId],
       });
     },
   });
@@ -204,6 +223,12 @@ export function useAddCompletedCharges(bookingId: string) {
       });
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", bookingId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["invoices-by-booking", bookingId],
       });
     },
     onError: (error: any) => {

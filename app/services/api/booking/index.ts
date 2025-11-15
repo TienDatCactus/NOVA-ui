@@ -135,8 +135,8 @@ async function updateBookingStatus(
   data: UpdateBookingStatusRequestDto
 ): Promise<UpdateBookingStatusResponseDto> {
   try {
-    const resp = await http.put(
-      Booking.updateStatus(data.bookingId),
+    const resp = await http.post(
+      Booking.updateStatus,
       UpdateBookingStatusRequestSchema.parse(data)
     );
     return UpdateBookingStatusResponseSchema.parse(resp.data);

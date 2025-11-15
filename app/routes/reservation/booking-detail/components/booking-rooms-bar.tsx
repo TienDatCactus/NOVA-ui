@@ -136,11 +136,6 @@ export default function BookingRoomsBar({
               Thêm
             </Button>
           </div>
-          {!permissions.canAddRooms && (
-            <p className="text-xs text-destructive mt-2">
-              {permissions.blockReason}
-            </p>
-          )}
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2">
           {/* Existing Rooms */}

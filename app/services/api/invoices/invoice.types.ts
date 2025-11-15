@@ -26,15 +26,12 @@ export const INVOICE_STATUSES = [
   { code: 7, value: "Voided", label: "Đã vô hiệu hóa", variant: "destructive" },
 ] as const;
 
-// Invoice item type mapping (aligned with InvoiceItemType enum)
-// Room = 1, MenuItem = 2, ServiceItem = 3, Custom = 4
-export const INVOICE_ITEM_TYPES = [
-  { code: 1, value: "Room", label: "Phòng" },
-  { code: 2, value: "MenuItem", label: "Món ăn/Đồ uống" },
-  { code: 3, value: "ServiceItem", label: "Dịch vụ" },
-  { code: 4, value: "Custom", label: "Tùy chỉnh" },
+export const INVOICE_TYPES = [
+  { code: 1, value: "Deposit", label: "Hóa đơn cọc" },
+  { code: 2, value: "RoomCharges", label: "Hóa đơn tiền phòng" },
+  { code: 3, value: "ServiceCharges", label: "Hóa đơn dịch vụ" },
+  { code: 4, value: "Checkout", label: "Hóa đơn checkout" },
 ] as const;
-
 export interface InvoiceListParams {
   Page?: number;
   PageSize?: number;

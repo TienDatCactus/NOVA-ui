@@ -39,13 +39,7 @@ export function formatMoney(amount: number | bigint | string) {
     };
   }
   const amountStr = amount.toString();
-
-  const bigAmount = BigInt(amountStr);
-
-  // Convert BigInt to plain string with thousands separators manually
-  const formattedBase = bigAmount
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formattedBase = amountStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   // Append currency symbols manually
   const usdFormatted = `$${formattedBase}`;
