@@ -56,16 +56,12 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: "/dashboard/bookings",
       },
       {
-        title: "Sơ đồ phòng",
+        title: "Kiểm tra phòng trống",
         url: "/dashboard/bookings/grid",
       },
       {
         title: "Danh sách đặt phòng",
         url: "/dashboard/bookings/list",
-      },
-      {
-        title: "Hóa đơn đặt phòng",
-        url: "/dashboard/bookings/invoices",
       },
       {
         title: "Đặt phòng mới",
@@ -161,6 +157,11 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Tài khoản",
     url: "/dashboard/users",
     icon: Users,
+  },
+  {
+    title: "Nhân sự",
+    url: "/dashboard/staff",
+    icon: UserCog,
   },
   {
     title: "Hóa đơn",

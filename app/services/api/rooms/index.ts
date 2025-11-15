@@ -29,6 +29,7 @@ const {
   AvailableRoomsInternalResponseSchema,
   CreateRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
+  QRCodeResponseSchema,
 } = RoomSchema;
 
 async function getRoomList(
@@ -136,7 +137,30 @@ async function deleteRoom(id: string) {
     return Promise.reject(error);
   }
 }
-
+// !Lấy QR code image (PNG) cho phòng với ChatToken hiện tại. Endpoint này CHỈ trả về QR code từ ChatToken đã tồn tại, KHÔNG tạo token mới.
+async function generateQRCode(roomId: string, baseUrl?: string) {
+  try {
+    const resp = await http.get(Rooms.generateQRCode(roomId), {
+      responseType: "blob",
+    });
+    return resp;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+//! Tạo lại ChatToken MỚI và trả về QR code image (PNG). Endpoint này sẽ TẠO token mới, vô hiệu hóa QR code cũ, và trả về QR code mới.
+async function regenerateQRCode(roomId: string, baseUrl?: string) {
+  try {
+    const resp = await http.post(Rooms.regenerateQRCode(roomId), {
+      responseType: "blob",
+    });
+    return resp;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const RoomsService = {
   getRoomList,
   getRoomDetails,
@@ -146,4 +170,6 @@ export const RoomsService = {
   updateRoomDetail,
   getAvailableRoomsInternal,
   deleteRoom,
+  generateQRCode,
+  regenerateQRCode,
 };

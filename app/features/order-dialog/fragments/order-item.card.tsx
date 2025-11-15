@@ -66,7 +66,7 @@ export default function OrderItemCard({
     removeById(itemId);
   };
   return (
-    <Card className=" bg-white hover:border-primary transition-colors p-0">
+    <Card className="hover:border-primary transition-colors p-0">
       <CardContent className="flex-1 flex justify-between items-center min-w-0 p-4">
         <div className="flex flex-col items-start justify-between gap-2">
           <div className="flex flex-col flex-1 min-w-0">

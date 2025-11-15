@@ -17,13 +17,21 @@ import { useQuery } from "@tanstack/react-query";
 import { OrderService } from "~/services/api/orders";
 import type { Route } from "./+types/service-orders";
 import { useServiceOrderList } from "./container/service-order/query.hooks";
+import { DatePicker } from "~/components/ui/date-picker";
+import { format } from "date-fns";
 import STORAGE, { getStorage } from "~/lib/storage";
 
 type ServiceOrderStatus = ServiceOrderDetailDto["status"] | "All";
 
 export default function Component({}: Route.ComponentProps) {
   const [statusFilter, setStatusFilter] = useState<ServiceOrderStatus>("All");
-  const { data: orders, isPending } = useServiceOrderList();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const formattedDate = selectedDate
+    ? format(selectedDate, "yyyy-MM-dd")
+    : undefined;
+  const { data: orders, isPending } = useServiceOrderList(formattedDate);
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
     if (statusFilter === "All") return orders;
@@ -43,10 +51,20 @@ export default function Component({}: Route.ComponentProps) {
           </div>
 
           {/* Status Filter */}
-          <StatusFilter
-            activeStatus={statusFilter}
-            onStatusChange={setStatusFilter}
-          />
+          <div className="flex items-center gap-4 flex-wrap">
+            <StatusFilter
+              activeStatus={statusFilter}
+              onStatusChange={setStatusFilter}
+            />
+            <div className="ml-auto">
+              <DatePicker
+                value={selectedDate}
+                onChange={setSelectedDate}
+                placeholder="Chọn ngày"
+                className="w-[220px]"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

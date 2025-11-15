@@ -23,11 +23,10 @@ export function RoomTypeActionsCell({ roomType }: RoomTypeActionsCellProps) {
     <>
       <Button
         variant={"outline"}
-        className="w-fit"
+        size="icon"
         onClick={() => setUpdateSheetOpen(true)}
       >
-        <Pencil className="mr-2 h-4 w-4" />
-        Chỉnh sửa
+        <Pencil />
       </Button>
       <UpdateRoomTypeSheet
         open={updateSheetOpen}

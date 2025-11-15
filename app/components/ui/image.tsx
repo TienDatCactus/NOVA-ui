@@ -220,7 +220,7 @@ const Image = forwardRef<HTMLImageElement, ComponentProps<"img"> & ImageProps>(
           alt={alt}
           onLoad={handleLoad}
           onError={handleError}
-          loading="lazy"
+          loading="eager"
           className={cn(
             "h-full w-full transition-all duration-300",
             objectFitClass,

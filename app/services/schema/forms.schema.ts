@@ -12,6 +12,9 @@ const ServicesBreakfastFormSchema = z.object({
     BookingSchema.StaffCreateBookingSchema.shape.isBreakfastAll.optional(),
   breakfastDates:
     BookingSchema.StaffCreateBookingSchema.shape.breakfastDates.optional(),
+  // Add checkin/checkout dates for validation context
+  checkinDate: z.union([z.date(), z.string()]).optional(),
+  checkoutDate: z.union([z.date(), z.string()]).optional(),
 });
 
 const ReviewPaymentFormSchema = z.object({
@@ -20,6 +23,7 @@ const ReviewPaymentFormSchema = z.object({
     .or(z.literal("")),
   overridePrice: BookingSchema.StaffCreateBookingSchema.shape.overridePrice,
   serviceOrder: OrderSchema.ServiceOrderSchema.optional(),
+  roomPayment: PaymentSchema.RoomPaymentSchema.optional().nullable(),
 });
 
 export const FormSchema = {

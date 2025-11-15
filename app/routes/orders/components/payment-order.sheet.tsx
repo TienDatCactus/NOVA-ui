@@ -95,6 +95,7 @@ export default function PaymentOrderSheet({
 
   const paymentForm = useForm<PaymentFormData>({
     resolver: zodResolver(OrderPayNowRequestSchema),
+    mode: "onChange",
     defaultValues: {
       paymentMethod: "Cash",
       paidAmount: totalAmount,
@@ -107,10 +108,8 @@ export default function PaymentOrderSheet({
     return paidAmount > totalAmount ? paidAmount - totalAmount : 0;
   }, [paidAmount, totalAmount]);
 
-  // Check if payment is valid
   const isPaymentValid = paidAmount >= totalAmount;
 
-  // Update form when order detail loads
   useEffect(() => {
     if (totalAmount > 0) {
       paymentForm.setValue("paidAmount", totalAmount);

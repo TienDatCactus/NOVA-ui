@@ -2,12 +2,10 @@ import { useInvoices } from "./query.hooks";
 import useInvoiceFilters from "./filter.hooks";
 
 function useInvoicesContainer() {
-  const { filters, apiParams, updateFilter, resetFilters, filterInvoices } =
-    useInvoiceFilters();
+  const { filters, updateFilter, resetFilters } = useInvoiceFilters();
 
-  const { data: response, isPending, refetch } = useInvoices(apiParams);
+  const { data: response, isPending, refetch } = useInvoices(filters);
 
-  // Response now has data array and meta object
   const invoices = response?.data || [];
   const meta = response?.meta || {
     page: 1,

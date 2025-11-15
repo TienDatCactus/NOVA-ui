@@ -7,7 +7,7 @@ import {
   RotateCcw,
   XCircle,
 } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -199,7 +199,6 @@ export default function OrderConfirmationDialog({
         {/* Info Note */}
         <div className="text-center text-xs text-muted-foreground">
           <p>Đơn hàng đã được thêm vào hóa đơn</p>
-          <p>Bếp/Bar sẽ bắt đầu chuẩn bị món</p>
         </div>
       </div>
     );
@@ -209,6 +208,7 @@ export default function OrderConfirmationDialog({
     if (status === "loading") {
       return null; // No buttons while loading
     }
+    const curPath = useLocation().pathname;
 
     if (status === "error") {
       return (
@@ -229,7 +229,13 @@ export default function OrderConfirmationDialog({
     // Success state
     return (
       <DialogFooter className="flex justify-between gap-2">
-        <Link to={DASHBOARD.orders["service-orders"]}>
+        <Link
+          to={
+            curPath.includes("menu-pos")
+              ? DASHBOARD.orders["menu-orders"]
+              : DASHBOARD.orders["service-orders"]
+          }
+        >
           <Button variant="outline">
             <RotateCcw className="h-4 w-4 mr-2" />
             Quay lại danh sách đơn hàng

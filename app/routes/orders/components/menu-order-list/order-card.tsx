@@ -15,6 +15,7 @@ import OrderActions from "./order-actions";
 import OrderDetails from "./order-details";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
+import InlineNoteEditor from "./inline-note-editor";
 
 interface OrderCardProps {
   order: POSOrderDetailDto;
@@ -102,10 +103,12 @@ export default function OrderCard({ order }: OrderCardProps) {
                 </div>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">Ghi chú:</p>
-                <p className="text-sm  break-words">
-                  {order.note || "Không có"}
-                </p>
+                <p className="text-muted-foreground text-xs mb-1">Ghi chú:</p>
+                <InlineNoteEditor
+                  orderId={order.id}
+                  initialNote={order.note}
+                  disabled={order.status !== "Open"}
+                />
               </div>
             </div>
 
@@ -116,6 +119,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                 status={order.status}
                 totalAmount={order.totalAmount}
                 currentScheduledTime={order.scheduledAt}
+                invoiceId={order.invoiceId}
               />
             </div>
           </div>
