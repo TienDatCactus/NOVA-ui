@@ -198,6 +198,7 @@ const StaffRole = {
 
 const WorkShift = {
   list: "WorkShifts",
+  active: "WorkShifts/active",
   create: "WorkShifts",
   detail: (id: string) => `WorkShifts/${id}`,
   update: (id: string) => `WorkShifts/${id}`,
@@ -210,6 +211,22 @@ const Holiday = {
   detail: (id: string) => `Holidays/${id}`,
   update: (id: string) => `Holidays/${id}`,
   delete: (id: string) => `Holidays/${id}`,
+};
+
+const StaffShift = {
+  list: "StaffShifts",
+  schedule: "StaffShifts/schedule",
+  detail: (id: string) => `StaffShifts/${id}`,
+  update: (id: string) => `StaffShifts/${id}/schedule`,
+  delete: (id: string) => `StaffShifts/${id}`,
+  exportWeeklyMatrix: "StaffShifts/export-weekly-matrix",
+  exportWeeklyForm2: "StaffShifts/export-weekly-form2",
+};
+
+const StaffAttendance = {
+  list: "StaffShifts/attendance",
+  absent: (assignmentId: string) => `StaffShifts/${assignmentId}/absent`,
+  present: (assignmentId: string) => `StaffShifts/${assignmentId}/present`,
 };
 
 const Discount = {
@@ -235,6 +252,8 @@ export {
   StaffRole,
   WorkShift,
   Holiday,
+  StaffShift,
+  StaffAttendance,
   Chat,
   Discount,
 };

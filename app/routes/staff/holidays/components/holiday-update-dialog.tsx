@@ -270,7 +270,7 @@ export default function UpdateHolidayDialog({
                       <div className="flex items-center justify-between space-x-4">
                         <div className="flex-1 space-y-1">
                           <FormLabel className="text-sm font-semibold">
-                            Ngày lễ quốc gia
+                            Trạng thái ngày nghỉ
                           </FormLabel>
                           <FormDescription className="text-xs">
                             Đánh dấu là ngày lễ chính thức của quốc gia

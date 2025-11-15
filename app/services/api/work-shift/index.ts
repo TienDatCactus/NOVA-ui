@@ -26,6 +26,17 @@ async function getWorkShiftList(): Promise<WorkShiftListResponseDto> {
   }
 }
 
+// GET /api/WorkShifts/active - Get list of active work shifts only
+async function getActiveWorkShiftList(): Promise<WorkShiftListResponseDto> {
+  try {
+    const resp = await http.get(WorkShift.active);
+    return WorkShiftListResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error("Error fetching active work shift list:", error);
+    return Promise.reject(error);
+  }
+}
+
 // POST /api/WorkShifts - Create new work shift
 async function createWorkShift(
   data: CreateWorkShiftRequest
@@ -77,6 +88,7 @@ async function deleteWorkShift(
 
 export const WorkShiftService = {
   getWorkShiftList,
+  getActiveWorkShiftList,
   createWorkShift,
   getWorkShiftById,
   updateWorkShift,
