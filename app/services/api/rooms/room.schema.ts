@@ -113,6 +113,16 @@ const BookingDetailRoomItemSchema = z.object({
   fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
   toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
 });
+
+// QR Code Response (base64 image or URL)
+const QRCodeResponseSchema = z.union([
+  z.string(), // base64 data URL or image URL
+  z.object({
+    qrCodeUrl: z.string(),
+    dataUrl: z.string().optional(),
+  }),
+]);
+
 export const RoomSchema = {
   RoomTypeEnum,
   RoomStatusEnum,
@@ -130,4 +140,5 @@ export const RoomSchema = {
   AvailableRoomItemSchema,
   RoomListResponseSchema,
   BookingDetailRoomItemSchema,
+  QRCodeResponseSchema,
 };

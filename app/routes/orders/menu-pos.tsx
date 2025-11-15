@@ -23,15 +23,18 @@ import CartSummary from "./components/cart-summary";
 import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
 import MenuItemCard from "./components/menu-pos/menu-item-card";
 import OrderConfirmationDialog from "./components/order-confirmation.dialog";
-import ServedTimeDialog from "./components/served-time.dialog";
 import CustomItemDialog from "./components/menu-pos/custom-item.dialog";
 
 import useMenuFilters from "../menu/container/menu/filter.hooks";
 import { Link } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
-import { useCreatePosOrderAndItems } from "./container/order-pos/mutation.hooks";
 import type { Route } from "./+types/menu-pos";
 import { useMenuPosOrderStore } from "~/store/menu-pos-order.store";
+import {
+  useAddBatchItemsToPOSOrder,
+  useCreatePOSOrder,
+} from "./container/pos-orders/mutation.hooks";
+import ScheduledTimeDialog from "./components/scheduled-time.dialog";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -103,12 +106,12 @@ export default function Component({
 
   const isEmpty = items.length === 0;
 
-  const customerDisplay = bookingId ? "Khách lẻ" : null;
-  const { mutate, isError } = useCreatePosOrderAndItems();
+  const { mutate: createOrder, isError } = useCreatePOSOrder();
+  const { mutate: addItems } = useAddBatchItemsToPOSOrder();
 
   const [checkoutDialog, setCheckoutDialog] = useState(false);
   const [bookingDialog, setBookingDialog] = useState(false);
-  const [servedTimeDialog, setServedTimeDialog] = useState(false);
+  const [scheduledTimeDialog, setScheduledTimeDialog] = useState(false);
   const [customItemDialog, setCustomItemDialog] = useState(false);
   const [selectedBookingInfo, setSelectedBookingInfo] = useState<{
     bookingId: string;
@@ -118,6 +121,7 @@ export default function Component({
   const [confirmationDialog, setConfirmationDialog] = useState<{
     open: boolean;
     orderId?: string;
+    customerType?: "In-House" | "Walk-In";
   }>({ open: false });
 
   // Handlers
@@ -163,7 +167,7 @@ export default function Component({
     setCheckoutDialog(false);
 
     if (mode === "walk-in") {
-      setServedTimeDialog(true);
+      setScheduledTimeDialog(true);
     } else {
       setBookingDialog(true);
     }
@@ -177,34 +181,63 @@ export default function Component({
     setBookingInfo(bookingId, bookingRoomId || null);
     setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
     setBookingDialog(false);
-    setServedTimeDialog(true);
+    setScheduledTimeDialog(true);
   };
 
-  const handleServedTimeConfirm = (scheduledAt: string) => {
+  const handleScheduledTimeConfirm = (scheduledAt: string) => {
     setScheduledAt(scheduledAt);
-    setServedTimeDialog(false);
-    handleCreateOrder();
+    console.log("Scheduled time confirmed:", scheduledAt);
+    setScheduledTimeDialog(false);
+    handleCreateOrder(scheduledAt);
   };
+  const handleCreateOrder = (scheduledAtParam?: string) => {
+    const finalScheduledAt = scheduledAtParam || scheduledAt;
 
-  const handleCreateOrder = () => {
-    //! add note in a separated step here
+    if (!finalScheduledAt) {
+      toast.error("Vui lòng chọn thời gian phục vụ");
+      return;
+    }
+
     try {
-      mutate({
-        bookingId,
-        bookingRoomId,
-        scheduledAt,
-        notes,
-        items: items,
-      });
-      setSelectedBookingInfo(null);
-      setBookingInfo(null, null);
-      setScheduledAt("");
-      setNotes("");
-      setConfirmationDialog({
-        open: true,
-      });
+      createOrder(
+        {
+          bookingId,
+          bookingRoomId,
+          scheduledAt: finalScheduledAt,
+          note: notes || "",
+        },
+        {
+          onSuccess: (data) => {
+            const newOrderId = data.posOrderId;
+            if (items.length > 0) {
+              addItems({
+                orderId: newOrderId,
+                data: items.map((item) => ({
+                  ...item,
+                })),
+              });
+            }
+            toast.success("Tạo đơn hàng thành công!");
+            // Capture customer type before clearing
+            const wasBooking = !!bookingId;
+            setSelectedBookingInfo(null);
+            setBookingInfo(null, null);
+            setScheduledAt("");
+            setNotes("");
+            setConfirmationDialog({
+              open: true,
+              customerType: wasBooking ? "In-House" : "Walk-In",
+            });
+          },
+          onError: (error) => {
+            console.error("Create order failed:", error);
+            toast.error("Không thể tạo đơn hàng. Vui lòng thử lại.");
+          },
+        }
+      );
     } catch (error) {
       console.error("Create order failed:", error);
+      toast.error("Đã xảy ra lỗi khi tạo đơn hàng");
     }
   };
 
@@ -217,7 +250,7 @@ export default function Component({
       <header className="flex items-center justify-between p-4 border-b  border-accent-foreground/20">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
-            <Link to={DASHBOARD.orders.index}>
+            <Link to={DASHBOARD.orders["menu-orders"]}>
               <Button variant="ghost" size="sm" onClick={handleReset}>
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
@@ -368,10 +401,10 @@ export default function Component({
         onSelect={handleSelectBooking}
       />
 
-      <ServedTimeDialog
-        open={servedTimeDialog}
-        onOpenChange={setServedTimeDialog}
-        onConfirm={handleServedTimeConfirm}
+      <ScheduledTimeDialog
+        open={scheduledTimeDialog}
+        onOpenChange={setScheduledTimeDialog}
+        onConfirm={handleScheduledTimeConfirm}
         bookingInfo={selectedBookingInfo?.bookingCode}
       />
 
@@ -383,7 +416,6 @@ export default function Component({
 
       <OrderConfirmationDialog
         status={isError ? "error" : "success"}
-        onPrintReceipt={() => {}}
         open={confirmationDialog.open}
         onOpenChange={(open) =>
           setConfirmationDialog({ open, orderId: undefined })
@@ -391,7 +423,13 @@ export default function Component({
         orderId={confirmationDialog.orderId || ""}
         orderTotal={subtotal}
         itemCount={itemCount}
-        customerInfo={customerDisplay || "Khách vãng lai"}
+        customerInfo={
+          confirmationDialog.customerType === "In-House"
+            ? "Khách đặt phòng"
+            : confirmationDialog.customerType === "Walk-In"
+              ? "Khách lẻ"
+              : "Khách vãng lai"
+        }
         onNewOrder={handleNewOrder}
       />
     </div>

@@ -17,20 +17,26 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { useServiceTypes } from "../services/container/service-types/query.hooks";
 import { useServices } from "../services/container/services/query.hooks";
 import BookingSelectionDialog from "./components/booking-selection.dialog";
-import CartItem from "./components/cart-item";
 import CartSummary from "./components/cart-summary";
 import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
 import ServiceItemCard from "./components/service-pos/service-item-card";
 import OrderConfirmationDialog from "./components/order-confirmation.dialog";
-import ServedTimeDialog from "./components/served-time.dialog";
+import ServedTimeDialog from "./components/scheduled-time.dialog";
 import CustomServiceDialog from "./components/service-pos/custom-service.dialog";
 
 import useServiceFilters from "../services/container/services/filter.hooks";
 import { Link } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
-import { useCreateServicePosOrderAndItems } from "./container/service-order-list/mutation.hooks";
+import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
 import type { Route } from "./+types/service-pos";
 import { useServicePosOrderStore } from "~/store/service-pos-order.store";
+import { Image as ImageIcon } from "lucide-react";
+import { Textarea } from "~/components/ui/textarea";
+import { Label } from "~/components/ui/label";
+import { formatMoney } from "~/lib/utils";
+import Image from "~/components/ui/image";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Card } from "~/components/ui/card";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -82,30 +88,25 @@ export default function Component({
     setSelectedTypeId(null);
   };
 
-  // Cart logic
+  // Single service selection logic
   const {
-    items,
+    selectedService,
     subtotal,
-    itemCount,
-    orderId,
     bookingId,
     bookingRoomId,
     scheduledAt,
-    notes,
-    addItem,
-    removeItem,
-    updateQuantity,
+    selectService,
+    clearService,
+    updateServiceQuantity,
+    updateServiceNote,
     setBookingInfo,
     setScheduledAt,
-    setNotes,
-    clearOrder,
   } = useServicePosOrderStore();
 
-  const isEmpty = items.length === 0;
+  const isEmpty = !selectedService;
+  const itemCount = selectedService?.quantity || 0;
 
-  const customerDisplay = bookingId ? "Khách lẻ" : null;
-  const { mutate } = useCreateServicePosOrderAndItems();
-
+  const { mutate, isPending, isError } = useCreateServiceOrder();
   const [checkoutDialog, setCheckoutDialog] = useState(false);
   const [bookingDialog, setBookingDialog] = useState(false);
   const [scheduledTimeDialog, setScheduledTimeDialog] = useState(false);
@@ -118,11 +119,12 @@ export default function Component({
   const [confirmationDialog, setConfirmationDialog] = useState<{
     open: boolean;
     orderId?: string;
+    customerType?: "In-House" | "Walk-In";
   }>({ open: false });
 
   // Handlers
-  const handleAddToCart = (item: ServiceItem) => {
-    addItem({
+  const handleSelectService = (item: ServiceItem) => {
+    selectService({
       id: item.serviceItemId,
       serviceItemId: item.serviceItemId,
       code: item.code,
@@ -130,7 +132,7 @@ export default function Component({
       unitPrice: item.basePrice,
       imageUrl: item.imageUrls?.[0],
     });
-    toast.success(`Đã thêm ${item.name} vào đơn`);
+    toast.success(`Đã chọn ${item.name}`);
   };
 
   const handleAddCustomService = (service: {
@@ -141,7 +143,7 @@ export default function Component({
   }) => {
     const id = crypto.randomUUID();
     const customId = `CUSTOM-${id}`;
-    addItem({
+    selectService({
       id: customId,
       serviceItemId: undefined,
       code: "CUSTOM",
@@ -151,7 +153,7 @@ export default function Component({
       customServiceName: service.name,
       customServiceDescription: service.description,
     });
-    toast.success(`Đã thêm "${service.name}" vào giỏ`);
+    toast.success(`Đã chọn "${service.name}"`);
   };
 
   const handleConfirm = () => {
@@ -159,16 +161,9 @@ export default function Component({
     setCheckoutDialog(true);
   };
 
-  const handleCheckoutConfirm = (mode: "walk-in" | "booking") => {
+  const handleCheckoutConfirm = () => {
     setCheckoutDialog(false);
-
-    if (mode === "walk-in") {
-      // Walk-in guests also need scheduled time
-      setScheduledTimeDialog(true);
-    } else {
-      // Booking guests select booking first, then scheduled time
-      setBookingDialog(true);
-    }
+    setBookingDialog(true);
   };
 
   const handleSelectBooking = (
@@ -179,36 +174,68 @@ export default function Component({
     setBookingInfo(bookingId, bookingRoomId || null);
     setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
 
-    // Show scheduled time dialog for booking orders
     setBookingDialog(false);
     setScheduledTimeDialog(true);
   };
 
   const handleScheduledTimeConfirm = (scheduledTime: string) => {
     setScheduledAt(scheduledTime);
+    console.log("Scheduled time confirmed:", scheduledTime);
     setScheduledTimeDialog(false);
-    handleCreateOrder();
+    handleCreateOrder(scheduledTime);
   };
 
-  const handleCreateOrder = () => {
+  const handleCreateOrder = (scheduledAtParam?: string) => {
+    const finalScheduledAt = scheduledAtParam || scheduledAt;
+
+    if (!selectedService || !bookingId || !finalScheduledAt) {
+      toast.error("Thiếu thông tin đơn hàng");
+      return;
+    }
+
     try {
-      mutate({
-        bookingId,
-        bookingRoomId,
-        scheduledAt,
-        notes,
-        items: items,
-      });
-      setConfirmationDialog({
-        open: true,
-      });
+      mutate(
+        {
+          bookingId,
+          bookingRoomId: bookingRoomId || undefined,
+          serviceItemId: selectedService.serviceItemId || "",
+          customServiceName: selectedService.customServiceName,
+          customServiceDescription: selectedService.customServiceDescription,
+          scheduledAt: finalScheduledAt,
+          quantity: selectedService.quantity,
+          unitPrice: selectedService.unitPrice,
+          note: selectedService.note || undefined,
+          assignedToStaffId: undefined,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Tạo đơn dịch vụ thành công!");
+            // Capture customer type before clearing
+            const wasBooking = !!bookingId;
+            setSelectedBookingInfo(null);
+            setBookingInfo(null, null);
+            setScheduledAt("");
+            setConfirmationDialog({
+              open: true,
+              customerType: wasBooking ? "In-House" : "Walk-In",
+            });
+          },
+          onError: (error) => {
+            console.error("Create service order failed:", error);
+            toast.error("Không thể tạo đơn dịch vụ. Vui lòng thử lại.");
+          },
+        }
+      );
     } catch (error) {
       console.error("Create service order failed:", error);
+      toast.error("Đã xảy ra lỗi khi tạo đơn dịch vụ");
     }
   };
 
   const handleNewOrder = () => {
-    clearOrder();
+    // Keep service selected, only reset booking info
+    setBookingInfo(null, null);
+    setConfirmationDialog({ open: false });
   };
 
   return (
@@ -216,7 +243,7 @@ export default function Component({
       <header className="flex items-center justify-between p-4 border-b border-accent-foreground/20">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
-            <Link to={DASHBOARD.orders.index}>
+            <Link to={DASHBOARD.orders["service-orders"]}>
               <Button variant="ghost" size="sm" onClick={handleReset}>
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
@@ -297,7 +324,10 @@ export default function Component({
                 <ServiceItemCard
                   key={item.serviceItemId}
                   serviceItem={item}
-                  addToOrder={() => handleAddToCart(item)}
+                  addToOrder={() => handleSelectService(item)}
+                  isSelected={
+                    selectedService?.serviceItemId === item.serviceItemId
+                  }
                 />
               ))}
             </div>
@@ -311,43 +341,107 @@ export default function Component({
           )}
         </main>
 
-        {/* Cart Sidebar */}
-        <aside className="p-2 overflow-y-auto">
-          <div className="w-md bg-card rounded-xl h-full border p-2 flex flex-col">
+        {/* Cart Sidebar - Single Service Selection */}
+        <aside className="p-2">
+          <div className="w-md bg-card rounded-xl h-full border p-4  overflow-y-auto flex flex-col">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Tóm tắt đơn hàng</h2>
-              {orderId && (
-                <Badge variant="outline" className="font-mono">
-                  {orderId}
-                </Badge>
-              )}
+              <h2 className="text-lg font-semibold">Dịch vụ đã chọn</h2>
             </div>
             <Separator className="my-2" />
-            <div className="flex-1 flex flex-col justify-between space-y-2">
-              {items.length > 0 && (
-                <div className="space-y-4 p-2 overflow-y-auto h-72 snap-y">
-                  {items.map((item) => (
-                    <CartItem
-                      key={item.id}
-                      cartItem={item}
-                      onQuantityChange={(qty) => updateQuantity(item.id, qty)}
-                      onRemove={() => removeItem(item.id)}
-                    />
-                  ))}
-                </div>
-              )}
 
-              {/* Cart Summary */}
-              <CartSummary
-                itemCount={itemCount}
-                subtotal={subtotal}
-                isEmpty={isEmpty}
-                notes={notes}
-                onNotesChange={setNotes}
-                onConfirm={handleConfirm}
-                onClearCart={clearOrder}
-              />
-            </div>
+            {/* Empty State */}
+            {isEmpty && (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center text-muted-foreground space-y-2">
+                  <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
+                  <p className="text-sm font-medium">Chưa chọn dịch vụ</p>
+                  <p className="text-xs">Chọn dịch vụ để bắt đầu</p>
+                </div>
+              </div>
+            )}
+
+            {/* Selected Service */}
+            {selectedService && (
+              <div className="flex-1 flex flex-col justify-between space-y-4">
+                {/* Service Info Card */}
+                <Card className="rounded-lg border p-3 ">
+                  {selectedService.imageUrl && (
+                    <Image
+                      src={selectedService.imageUrl}
+                      alt={selectedService.name}
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-sm">
+                      {selectedService.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedService.code}
+                    </p>
+                    <p className="text-sm font-mono font-bold text-primary mt-1">
+                      {formatMoney(selectedService.unitPrice).vndFormatted}
+                    </p>
+                  </div>
+
+                  {/* Quantity Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity" className="text-xs">
+                      Số lượng
+                    </Label>
+                    <Counter
+                      value={selectedService.quantity}
+                      onChange={(e) => updateServiceQuantity(e || 1)}
+                    />
+                  </div>
+
+                  {/* Notes Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="note" className="text-xs">
+                      Ghi chú
+                    </Label>
+                    <Textarea
+                      id="note"
+                      placeholder="Ghi chú cho dịch vụ..."
+                      value={selectedService.note || ""}
+                      onChange={(e) => updateServiceNote(e.target.value)}
+                      rows={3}
+                      className="text-sm resize-none"
+                    />
+                  </div>
+
+                  {/* Subtotal */}
+                  <div className="pt-2 border-t">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Tổng cộng</span>
+                      <span className="text-lg font-bold text-primary font-mono">
+                        {formatMoney(subtotal).vndFormatted}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  <Button
+                    onClick={handleConfirm}
+                    className="w-full"
+                    size="lg"
+                    disabled={isEmpty}
+                  >
+                    Xác nhận đơn
+                  </Button>
+                  <Button
+                    onClick={clearService}
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                  >
+                    Xóa dịch vụ
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
       </div>
@@ -380,7 +474,7 @@ export default function Component({
       />
 
       <OrderConfirmationDialog
-        onPrintReceipt={() => {}}
+        status={isPending ? "loading" : isError ? "error" : "success"}
         open={confirmationDialog.open}
         onOpenChange={(open) =>
           setConfirmationDialog({ open, orderId: undefined })
@@ -388,7 +482,13 @@ export default function Component({
         orderId={confirmationDialog.orderId || ""}
         orderTotal={subtotal}
         itemCount={itemCount}
-        customerInfo={customerDisplay || "Khách vãng lai"}
+        customerInfo={
+          confirmationDialog.customerType === "In-House"
+            ? "Khách đặt phòng"
+            : confirmationDialog.customerType === "Walk-In"
+              ? "Khách lẻ"
+              : "Khách đặt phòng"
+        }
         onNewOrder={handleNewOrder}
       />
     </div>

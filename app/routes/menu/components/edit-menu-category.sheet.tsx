@@ -53,7 +53,6 @@ export default function EditMenuCategorySheet({
   );
   const { mutate: updateCategory, isPending: isUpdating } =
     useUpdateMenuCategory(categoryId);
-
   const form = useForm<UpdateCategoryFormValues>({
     resolver: zodResolver(UpdateMenuCategoryRequestSchema),
     defaultValues: {

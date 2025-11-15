@@ -1,7 +1,14 @@
 import { format, parseISO } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useInvoiceDetail } from "~/routes/invoices/container/invoices/query.hooks";
@@ -43,7 +50,9 @@ export default function InvoiceDetailTab({ invoiceId }: InvoiceDetailTabProps) {
                 Ngày phát hành
               </p>
               <p className="font-semibold">
-                {invoice.issuedAt ? format(parseISO(invoice.issuedAt), "dd/MM/yyyy HH:mm") : "-"}
+                {invoice.issuedAt
+                  ? format(parseISO(invoice.issuedAt), "dd/MM/yyyy HH:mm")
+                  : "-"}
               </p>
             </div>
             <div className="space-y-1">
@@ -51,10 +60,11 @@ export default function InvoiceDetailTab({ invoiceId }: InvoiceDetailTabProps) {
                 <CreditCard className="h-4 w-4" />
                 Trạng thái
               </p>
-              <Badge variant={(status?.variant as any) || "default"}>{status?.label || invoice.status}</Badge>
+              <Badge variant={(status?.variant as any) || "default"}>
+                {status?.label || invoice.status}
+              </Badge>
             </div>
           </div>
-
         </CardContent>
       </Card>
 
@@ -75,24 +85,36 @@ export default function InvoiceDetailTab({ invoiceId }: InvoiceDetailTabProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoice.items.map((item, idx) => (
+              {invoice.items?.map((item, idx) => (
                 <TableRow key={item.id}>
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell>{item.itemType}</TableCell>
                   <TableCell>
                     <div className="max-w-md">
                       <p className="font-medium">{item.description}</p>
-                      {item.itemId && <p className="text-xs text-muted-foreground font-mono">ID: {item.itemId}</p>}
+                      {item.itemId && (
+                        <p className="text-xs text-muted-foreground font-mono">
+                          ID: {item.itemId}
+                        </p>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-center">{item.quantity}</TableCell>
-                  <TableCell className="text-right">{formatMoney(item.unitPrice).vndFormatted}</TableCell>
-                  <TableCell className="text-right font-semibold">{formatMoney(item.subtotal).vndFormatted}</TableCell>
+                  <TableCell className="text-right">
+                    {formatMoney(item.unitPrice ?? 0).vndFormatted}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold">
+                    {formatMoney(item.subtotal ?? 0).vndFormatted}
+                  </TableCell>
                 </TableRow>
               ))}
               <TableRow className="bg-muted/50">
-                <TableCell colSpan={5} className="text-right font-semibold">Tổng cộng</TableCell>
-                <TableCell className="text-right font-bold text-lg">{formatMoney(invoice.total).vndFormatted}</TableCell>
+                <TableCell colSpan={5} className="text-right font-semibold">
+                  Tổng cộng
+                </TableCell>
+                <TableCell className="text-right font-bold text-lg">
+                  {formatMoney(invoice.total ?? 0).vndFormatted}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>

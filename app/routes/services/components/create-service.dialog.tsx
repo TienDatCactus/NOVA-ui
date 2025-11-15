@@ -34,7 +34,7 @@ import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { ServiceSchema } from "~/services/api/services/service.schema";
 import { useServiceTypes } from "../container/service-types/query.hooks";
 import { useCreateService } from "../container/services/mutation.hooks";
-import { handleLimitInput } from "~/lib/utils";
+import {} from "~/lib/utils";
 
 const { CreateServiceItemRequestSchema } = ServiceSchema;
 
@@ -206,7 +206,6 @@ export default function CreateServiceDialog({
                       <FormControl>
                         <Input
                           type="number"
-                          onInput={handleLimitInput}
                           placeholder="0"
                           {...field}
                           onChange={(e) =>

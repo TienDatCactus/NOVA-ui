@@ -40,14 +40,12 @@ export default function StaffPage() {
   };
 
   const handleEditStaff = async (staff: StaffListItem) => {
-    // Fetch full details before editing
     try {
       const response = await StaffService.getStaffById(staff.id);
       setStaffToEdit(response.data);
       setIsUpdateDialogOpen(true);
     } catch (error) {
       console.error("Error fetching staff detail:", error);
-      toast.error("Không thể tải thông tin nhân sự");
     }
   };
 

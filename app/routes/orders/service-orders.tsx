@@ -16,13 +16,22 @@ import { Link, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { OrderService } from "~/services/api/orders";
 import type { Route } from "./+types/service-orders";
-import { useServiceOrderList } from "./container/service-order-list/query.hooks";
+import { useServiceOrderList } from "./container/service-order/query.hooks";
+import { DatePicker } from "~/components/ui/date-picker";
+import { format } from "date-fns";
+import STORAGE, { getStorage } from "~/lib/storage";
 
 type ServiceOrderStatus = ServiceOrderDetailDto["status"] | "All";
 
 export default function Component({}: Route.ComponentProps) {
   const [statusFilter, setStatusFilter] = useState<ServiceOrderStatus>("All");
-  const { data: orders, isPending } = useServiceOrderList();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const formattedDate = selectedDate
+    ? format(selectedDate, "yyyy-MM-dd")
+    : undefined;
+  const { data: orders, isPending } = useServiceOrderList(formattedDate);
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
     if (statusFilter === "All") return orders;
@@ -34,27 +43,28 @@ export default function Component({}: Route.ComponentProps) {
       {/* Header */}
       <div className="flex-shrink-0 p-6 bg-background border-b">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Danh sách đơn dịch vụ</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Quản lý các dịch vụ đã đặt
-              </p>
-            </div>
-
-            <Link to="/dashboard/services/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Tạo Service Order
-              </Button>
-            </Link>
+          <div>
+            <h1 className="text-2xl font-bold">Danh sách đơn dịch vụ</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Quản lý các dịch vụ đã đặt
+            </p>
           </div>
 
           {/* Status Filter */}
-          <StatusFilter
-            activeStatus={statusFilter}
-            onStatusChange={setStatusFilter}
-          />
+          <div className="flex items-center gap-4 flex-wrap">
+            <StatusFilter
+              activeStatus={statusFilter}
+              onStatusChange={setStatusFilter}
+            />
+            <div className="ml-auto">
+              <DatePicker
+                value={selectedDate}
+                onChange={setSelectedDate}
+                placeholder="Chọn ngày"
+                className="w-[220px]"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

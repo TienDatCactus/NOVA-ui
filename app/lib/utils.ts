@@ -32,10 +32,14 @@ export function daysBetweenFloor(a: Date, b: Date) {
 }
 
 export function formatMoney(amount: number | bigint | string) {
-  // Convert to string first to avoid precision loss
+  if (!amount) {
+    return {
+      usdFormatted: "$0",
+      vndFormatted: "0 ₫",
+    };
+  }
   const amountStr = amount.toString();
 
-  // Use BigInt for safe handling of extremely large numbers
   const bigAmount = BigInt(amountStr);
 
   // Convert BigInt to plain string with thousands separators manually
@@ -86,13 +90,4 @@ export const toYMD = (d: unknown) => {
     if (!isNaN(dt.getTime())) return format(dt, "yyyy-MM-dd");
   }
   return undefined;
-};
-
-export const handleLimitInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const max = 99999999999;
-  const min = 0;
-  const value = e.target.valueAsNumber;
-
-  if (value > max) e.target.value = max.toString();
-  if (value < min) e.target.value = min.toString();
 };

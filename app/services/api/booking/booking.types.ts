@@ -1,5 +1,3 @@
-import { badgeVariants } from "~/components/ui/badge";
-
 export type Room = {
   roomId: string;
   roomName: string;
@@ -38,6 +36,7 @@ export const BOOKING_SOURCES = [
   { value: 0, label: "Trực tiếp (Nhân viên)", key: "DirectStaff" },
   { value: 2, label: "OTA", key: "OTA" },
   { value: 3, label: "Đại lý", key: "Agency" },
+  { value: 4, label: "Khóa phòng (Room Block)", key: "RoomBlock" },
 ] as const;
 
 export const BOOKING_SOURCE_ENUM = [
@@ -45,4 +44,5 @@ export const BOOKING_SOURCE_ENUM = [
   "DirectCustomer",
   "OTA",
   "Agency",
+  "RoomBlock",
 ];

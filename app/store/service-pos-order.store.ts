@@ -9,7 +9,7 @@ export type ServicePosCartItem = {
   unitPrice: number;
   quantity: number;
   imageUrl?: string;
-  notes?: string;
+  note?: string; // Item-level note
   // For custom services
   customServiceName?: string;
   customServiceDescription?: string;
@@ -17,35 +17,33 @@ export type ServicePosCartItem = {
 
 type ServicePosOrderState = {
   // Order metadata
-  orderId: string | null;
   bookingId: string | null;
   bookingRoomId: string | null;
   scheduledAt: string | null; // Time when service is scheduled
-  notes: string | null; // Optional notes for the whole order
 
-  // Cart items
-  items: ServicePosCartItem[];
+  // Single selected service (replaces items array)
+  selectedService: ServicePosCartItem | null;
 
   // Computed values
   subtotal: number;
-  itemCount: number;
 
   // Actions - Order management
-  generateOrderId: () => void;
   setBookingInfo: (
     bookingId: string | null,
     bookingRoomId: string | null
   ) => void;
   setScheduledAt: (scheduledAt: string) => void;
-  setNotes: (notes: string) => void;
-  clearOrder: () => void;
 
-  // Actions - Cart management
-  addItem: (
-    item: Omit<ServicePosCartItem, "quantity"> & { quantity?: number }
+  // Actions - Single service management
+  selectService: (
+    item: Omit<ServicePosCartItem, "quantity" | "note"> & {
+      quantity?: number;
+      note?: string;
+    }
   ) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  clearService: () => void;
+  updateServiceQuantity: (quantity: number) => void;
+  updateServiceNote: (note: string) => void;
   recalculateSubtotal: () => void;
 };
 
@@ -53,20 +51,11 @@ export const useServicePosOrderStore = create<ServicePosOrderState>()(
   persist(
     (set, get) => ({
       // Initial state
-      orderId: null,
       bookingId: null,
       bookingRoomId: null,
       scheduledAt: null,
-      notes: null,
-      items: [],
+      selectedService: null,
       subtotal: 0,
-      itemCount: 0,
-
-      // Generate unique order ID (format: #SVC + timestamp)
-      generateOrderId: () => {
-        const orderId = `#SVC${Date.now()}`;
-        set({ orderId });
-      },
 
       setBookingInfo: (bookingId, bookingRoomId) => {
         set({ bookingId, bookingRoomId });
@@ -76,78 +65,53 @@ export const useServicePosOrderStore = create<ServicePosOrderState>()(
         set({ scheduledAt });
       },
 
-      setNotes: (notes) => {
-        set({ notes });
-      },
-
-      clearOrder: () => {
-        set({
-          orderId: null,
-          bookingId: null,
-          bookingRoomId: null,
-          scheduledAt: null,
-          notes: null,
-          items: [],
-          subtotal: 0,
-          itemCount: 0,
-        });
-      },
-
-      addItem: (item) => {
-        const items = get().items;
-        const existingItem = items.find((i) => i.id === item.id);
-
-        if (existingItem) {
-          // Increment quantity if item already in cart
-          set({
-            items: items.map((i) =>
-              i.id === item.id
-                ? { ...i, quantity: i.quantity + (item.quantity || 1) }
-                : i
-            ),
-          });
-        } else {
-          // Add new item to cart
-          set({
-            items: [
-              ...items,
-              {
-                ...item,
-                quantity: item.quantity || 1,
-              },
-            ],
-          });
-        }
+      selectService: (item) => {
+        // Replace current selection (silent replacement)
+        const newService: ServicePosCartItem = {
+          ...item,
+          quantity: item.quantity || 1,
+          note: item.note || "",
+        };
+        set({ selectedService: newService });
         get().recalculateSubtotal();
       },
 
-      removeItem: (id) => {
-        set({
-          items: get().items.filter((i) => i.id !== id),
-        });
-        get().recalculateSubtotal();
+      clearService: () => {
+        set({ selectedService: null, subtotal: 0 });
       },
 
-      updateQuantity: (id, quantity) => {
+      updateServiceQuantity: (quantity) => {
+        const service = get().selectedService;
+        if (!service) return;
+
         if (quantity <= 0) {
-          get().removeItem(id);
+          get().clearService();
           return;
         }
 
         set({
-          items: get().items.map((i) => (i.id === id ? { ...i, quantity } : i)),
+          selectedService: { ...service, quantity },
         });
         get().recalculateSubtotal();
       },
 
+      updateServiceNote: (note) => {
+        const service = get().selectedService;
+        if (!service) return;
+
+        set({
+          selectedService: { ...service, note },
+        });
+      },
+
       recalculateSubtotal: () => {
-        const items = get().items;
-        const subtotal = items.reduce(
-          (sum, item) => sum + item.unitPrice * item.quantity,
-          0
-        );
-        const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-        set({ subtotal, itemCount });
+        const service = get().selectedService;
+        if (!service) {
+          set({ subtotal: 0 });
+          return;
+        }
+        const subtotal = service.unitPrice * service.quantity;
+        set({ subtotal });
       },
     }),
     {

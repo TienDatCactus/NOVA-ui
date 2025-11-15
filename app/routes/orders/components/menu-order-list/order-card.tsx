@@ -15,6 +15,7 @@ import OrderActions from "./order-actions";
 import OrderDetails from "./order-details";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
+import InlineNoteEditor from "./inline-note-editor";
 
 interface OrderCardProps {
   order: POSOrderDetailDto;
@@ -23,15 +24,15 @@ interface OrderCardProps {
 const statusConfig = {
   Open: {
     label: "Đang mở",
-    className: "bg-primary text-primary-foreground",
+    variant: "info",
   },
   Completed: {
     label: "Hoàn thành",
-    className: "bg-green-500 text-white",
+    variant: "success",
   },
   Cancelled: {
     label: "Đã hủy",
-    className: "bg-destructive text-destructive-foreground",
+    variant: "warning",
   },
 };
 
@@ -52,7 +53,10 @@ export default function OrderCard({ order }: OrderCardProps) {
                 <Badge variant="outline" className="font-mono text-xs">
                   #{order.id.slice(0, 8)}
                 </Badge>
-                <Badge className={cn("text-xs", statusInfo.className)}>
+                <Badge
+                  variant={statusInfo.variant as any}
+                  className={cn("text-xs")}
+                >
                   {statusInfo.label}
                 </Badge>
                 {itemCount > 0 && (
@@ -98,6 +102,14 @@ export default function OrderCard({ order }: OrderCardProps) {
                   </p>
                 </div>
               </div>
+              <div>
+                <p className="text-muted-foreground text-xs mb-1">Ghi chú:</p>
+                <InlineNoteEditor
+                  orderId={order.id}
+                  initialNote={order.note}
+                  disabled={order.status !== "Open"}
+                />
+              </div>
             </div>
 
             {/* Right: Actions */}
@@ -107,6 +119,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                 status={order.status}
                 totalAmount={order.totalAmount}
                 currentScheduledTime={order.scheduledAt}
+                invoiceId={order.invoiceId}
               />
             </div>
           </div>

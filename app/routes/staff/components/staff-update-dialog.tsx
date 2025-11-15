@@ -28,7 +28,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { UpdateStaffRequestSchema } from "~/services/api/staff/staff.schema";
-import type { UpdateStaffRequest, StaffDetailItem } from "~/services/api/staff/dto";
+import type {
+  UpdateStaffRequest,
+  StaffDetailItem,
+} from "~/services/api/staff/dto";
 import { StaffService } from "~/services/api/staff";
 import { UserService } from "~/services/api/user";
 import { getRoleDisplayName } from "~/services/types/users.types";

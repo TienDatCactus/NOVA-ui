@@ -1,10 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
-import { ImagePlus, Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -16,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -41,14 +40,13 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { cn, handleLimitInput } from "~/lib/utils";
-import { useMenuCategories } from "../container/menu-categories/query.hooks";
-import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
-import { useMenuItemDetail } from "../container/menu/query.hooks";
+import { cn } from "~/lib/utils";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { MenuSchema } from "~/services/api/menu/menu.schema";
-import Image from "~/components/ui/image";
+import { useMenuCategories } from "../container/menu-categories/query.hooks";
+import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
+import { useMenuItemDetail } from "../container/menu/query.hooks";
 
 const { UpdateMenuItemRequestSchema } = MenuSchema;
 
@@ -124,7 +122,7 @@ export default function EditMenuSheet({
       setNewFiles([]);
       setNewPreviews([]);
     }
-  }, [menuItem, form, menuItemDetail]);
+  }, [menuItem, menuItemDetail]);
 
   const handleSubmit = (data: UpdateMenuFormData) => {
     updateMenuItem(
@@ -323,7 +321,6 @@ export default function EditMenuSheet({
                         <FormControl>
                           <Input
                             type="number"
-                            onInput={handleLimitInput}
                             placeholder="0"
                             {...field}
                             onChange={(e) =>
@@ -570,7 +567,6 @@ export default function EditMenuSheet({
                                   <FormControl>
                                     <Input
                                       type="number"
-                                      onInput={handleLimitInput}
                                       placeholder="0"
                                       {...field}
                                       onChange={(e) =>

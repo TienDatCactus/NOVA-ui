@@ -10,9 +10,11 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import OrderCard from "./components/menu-order-list/order-card";
 import StatusFilter from "./components/menu-order-list/status-filter";
-import { usePOSOrderList } from "./container/menu-order/query.hooks";
 import type { OrderStatus } from "~/services/api/orders/order.types";
 import type { Route } from "./+types/menu-orders";
+import { usePOSOrderList } from "./container/pos-orders/query.hooks";
+import { DatePicker } from "~/components/ui/date-picker";
+import { format } from "date-fns";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   return {};
@@ -27,7 +29,13 @@ export default function Component({
   actionData,
 }: Route.ComponentProps) {
   const [statusFilter, setStatusFilter] = useState<OrderStatus>("All");
-  const { data: orders, isPending } = usePOSOrderList();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const formattedDate = selectedDate
+    ? format(selectedDate, "yyyy-MM-dd")
+    : undefined;
+  const { data: orders, isPending } = usePOSOrderList(formattedDate);
   const filteredOrders = useMemo(() => {
     if (statusFilter === "All") return orders;
     return orders?.filter((order) => order.status === statusFilter);
@@ -46,10 +54,20 @@ export default function Component({
           </div>
 
           {/* Status Filter */}
-          <StatusFilter
-            activeStatus={statusFilter}
-            onStatusChange={setStatusFilter}
-          />
+          <div className="flex items-center gap-4 flex-wrap">
+            <StatusFilter
+              activeStatus={statusFilter}
+              onStatusChange={setStatusFilter}
+            />
+            <div className="ml-auto">
+              <DatePicker
+                value={selectedDate}
+                onChange={setSelectedDate}
+                placeholder="Chọn ngày"
+                className="w-[220px]"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

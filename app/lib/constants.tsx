@@ -19,6 +19,10 @@ import {
   Tag,
   Users,
   Utensils,
+<<<<<<< HEAD
+=======
+  UserCog,
+>>>>>>> bb1232f3ee30713f200a377f1bc722d237c41827
   UtensilsCrossed,
 } from "lucide-react";
 
@@ -40,7 +44,6 @@ const SIDEBAR_NAV_MAIN: Array<{
   title: string;
   url: string;
   icon: LucideIcon;
-  isActive?: boolean;
   items?: Array<{
     title: string;
     url: string;
@@ -50,23 +53,18 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Đặt phòng",
     url: "/dashboard/bookings",
     icon: HousePlus,
-    isActive: true,
     items: [
       {
         title: "Báo cáo",
         url: "/dashboard/bookings",
       },
       {
-        title: "Sơ đồ phòng",
+        title: "Kiểm tra phòng trống",
         url: "/dashboard/bookings/grid",
       },
       {
         title: "Danh sách đặt phòng",
         url: "/dashboard/bookings/list",
-      },
-      {
-        title: "Hóa đơn đặt phòng",
-        url: "/dashboard/bookings/invoices",
       },
       {
         title: "Đặt phòng mới",
@@ -132,6 +130,29 @@ const SIDEBAR_NAV_MAIN: Array<{
       {
         title: "POS Dịch vụ",
         url: "/dashboard/service-pos",
+      },
+    ],
+  },
+  {
+    title: "Nhân viên",
+    url: "/dashboard/staff",
+    icon: UserCog,
+    items: [
+      {
+        title: "Nhân sự",
+        url: "/dashboard/staff",
+      },
+      {
+        title: "Ca làm việc",
+        url: "/dashboard/staff/work-shifts",
+      },
+      {
+        title: "Lịch làm việc",
+        url: "/dashboard/staff/schedules",
+      },
+      {
+        title: "Ngày nghỉ",
+        url: "/dashboard/staff/holidays",
       },
     ],
   },

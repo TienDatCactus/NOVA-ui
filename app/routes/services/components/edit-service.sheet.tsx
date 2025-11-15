@@ -37,7 +37,6 @@ import { ServiceSchema } from "~/services/api/services/service.schema";
 import { useServiceTypes } from "../container/service-types/query.hooks";
 import { useUpdateService } from "../container/services/mutation.hooks";
 import { useServiceDetail } from "../container/services/query.hooks";
-import { handleLimitInput } from "~/lib/utils";
 
 const { UpdateServiceItemRequestSchema } = ServiceSchema;
 
@@ -215,7 +214,6 @@ export default function EditServiceSheet({
                     <FormControl>
                       <Input
                         type="number"
-                        onInput={handleLimitInput}
                         placeholder="0"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}

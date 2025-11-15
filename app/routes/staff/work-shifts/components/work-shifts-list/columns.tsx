@@ -1,0 +1,118 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "~/components/ui/badge";
+import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
+import { Checkbox } from "~/components/ui/checkbox";
+import ActionsMenuCell from "../../fragments/actions.cell";
+
+export const columns: ColumnDef<WorkShiftListItem>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <div className="flex items-center">
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Chọn tất cả"
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Chọn dòng"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "index",
+    header: "STT",
+    cell: ({ row }) => {
+      return <span className="font-medium">{row.index + 1}</span>;
+    },
+  },
+  {
+    accessorKey: "code",
+    header: "Mã ca",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-sm">{row.getValue("code")}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "name",
+    header: "Tên ca làm việc",
+    cell: ({ row }) => (
+      <div className="flex flex-col">
+        <span className="font-medium">{row.getValue("name")}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "startTime",
+    header: "Giờ bắt đầu",
+    cell: ({ row }) => {
+      const time = row.getValue("startTime") as string;
+      const displayTime = time ? time.substring(0, 5) : "";
+      return (
+        <div className="flex items-center gap-2">
+          <span className="font-mono">{displayTime}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "endTime",
+    header: "Giờ kết thúc",
+    cell: ({ row }) => {
+      const time = row.getValue("endTime") as string;
+      const displayTime = time ? time.substring(0, 5) : "";
+      return (
+        <div className="flex items-center gap-2">
+          <span className="font-mono">{displayTime}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "active",
+    header: () => <div className="text-center">Trạng thái</div>,
+    cell: ({ row }) => {
+      const active = row.getValue("active") as boolean;
+      return (
+        <div className="flex justify-center">
+          <Badge
+            variant={active ? "default" : "secondary"}
+            className={
+              active
+                ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
+            }
+          >
+            {active ? "Hoạt động" : "Ngừng hoạt động"}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: () => <div className="text-center">Thao tác</div>,
+    cell: ({ row, table }) => {
+      const workShift = row.original;
+      const onSuccess = (table.options.meta as any)?.onSuccess;
+
+      return (
+        <div className="flex justify-center">
+          <ActionsMenuCell workShift={workShift} onSuccess={onSuccess} />
+        </div>
+      );
+    },
+  },
+];

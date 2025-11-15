@@ -1,34 +1,32 @@
 import {
+  Ban,
+  Building2,
+  Check,
   ChevronLeft,
   ChevronRight,
-  Check,
-  Building2,
-  Globe,
   CircleAlert,
+  Globe,
 } from "lucide-react";
 
+import { useRef } from "react";
+import { Alert, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "~/components/ui/card";
-import { cn } from "~/lib/utils";
 import { useStep } from "~/hooks/use-step";
+import { cn } from "~/lib/utils";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { CustomerInfoStep } from "./components/customer-info-step";
-import { StayDetailsStep } from "./components/stay-details-step";
+import ReviewPaymentStep from "./components/review-payment-step";
 import { RoomSelectionStep } from "./components/room-selection-step";
 import { ServicesBreakfastStep } from "./components/services-breakfast-step";
-import ReviewPaymentStep from "./components/review-payment-step";
-import { useRef } from "react";
-import { Alert, AlertTitle } from "~/components/ui/alert";
-import { useForm } from "react-hook-form";
-import { data, useNavigate } from "react-router";
-import { DASHBOARD } from "~/lib/fe-url";
+import { StayDetailsStep } from "./components/stay-details-step";
 
 const steps = [
   {
@@ -77,6 +75,8 @@ export default function BookingFlow() {
   const servicesBreakfastFormRef = useRef<HTMLFormElement>(null);
   const reviewPaymentFormRef = useRef<HTMLFormElement>(null);
   const handleNext = () => {
+    const isRoomBlock = bookingData.bookingType === "RoomBlock";
+
     // For step 1, validate booking type selection
     if (currentStep === 1) {
       if (!bookingData.bookingType) {
@@ -92,12 +92,13 @@ export default function BookingFlow() {
       stayDetailsFormRef.current.requestSubmit();
       return;
     }
-    // For step 4, trigger form submission
+    // For step 4 (room selection), skip to step 6 for RoomBlock
     if (currentStep === 4 && roomSelectionFormRef.current) {
       roomSelectionFormRef.current.requestSubmit();
       return;
     }
-    // For step 5, trigger form submission
+    // For step 5 (services), trigger form submission for normal bookings
+    // RoomBlock will skip this step entirely
     if (currentStep === 5 && servicesBreakfastFormRef.current) {
       servicesBreakfastFormRef.current.requestSubmit();
       return;
@@ -111,6 +112,15 @@ export default function BookingFlow() {
   };
 
   const handlePrevious = () => {
+    const isRoomBlock = bookingData.bookingType === "RoomBlock";
+
+    // Skip services step when going back from review for RoomBlock
+    if (currentStep === 6 && isRoomBlock) {
+      goToPrevStep(); // Go to step 5
+      goToPrevStep(); // Go to step 4 (room selection)
+      return;
+    }
+
     goToPrevStep();
   };
 
@@ -130,10 +140,10 @@ export default function BookingFlow() {
               </CardDescription>
             </CardHeader>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Card
                 className={cn(
-                  "cursor-pointer transition-all ",
+                  "cursor-pointer transition-all h-fit p-0",
                   bookingData.bookingType === "Direct"
                     ? "bg-muted border-primary ring-2 ring-primary"
                     : "border-gray-200 hover:shadow-md"
@@ -159,7 +169,7 @@ export default function BookingFlow() {
 
               <Card
                 className={cn(
-                  "cursor-pointer transition-all",
+                  "cursor-pointer transition-all  h-fit p-0",
                   bookingData.bookingType === "OTA"
                     ? "bg-muted border-primary ring-2 ring-primary"
                     : "border-gray-200 hover:shadow-md"
@@ -178,6 +188,31 @@ export default function BookingFlow() {
                     </h3>
                     <p className="text-muted-foreground text-sm">
                       Booking.com, Agoda, Expedia, Traveloka, v.v.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card
+                className={cn(
+                  "cursor-pointer transition-all  h-fit p-0",
+                  bookingData.bookingType === "RoomBlock"
+                    ? "bg-muted border-destructive ring-2 ring-destructive"
+                    : "border-gray-200 hover:shadow-md"
+                )}
+                onClick={() => updateBookingData("bookingType", "RoomBlock")}
+              >
+                <CardContent className="flex items-start space-x-4 p-6">
+                  <div className="flex-shrink-0">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-destructive/10">
+                      <Ban className="h-6 w-6 text-destructive" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="mb-1 font-semibold text-foreground">
+                      Room Block
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      Khóa phòng để bảo trì, sửa chữa hoặc các mục đích nội bộ
                     </p>
                   </div>
                 </CardContent>
@@ -292,7 +327,7 @@ export default function BookingFlow() {
 
   return (
     <div className="flex h-full items-center justify-center p-4">
-      <Card className="w-full max-w-4xl bg-white shadow-lg ">
+      <Card className="w-full max-w-6xl bg-white shadow-md ">
         <CardHeader className="p-6">
           <div className="flex items-center justify-between">
             {steps.map((step) => (

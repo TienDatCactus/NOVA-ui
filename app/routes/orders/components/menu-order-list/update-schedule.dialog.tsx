@@ -109,17 +109,10 @@ export default function UpdateScheduleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle>Cập nhật thời gian phục vụ</DialogTitle>
-              <DialogDescription>
-                Chọn ngày và thời gian mới để phục vụ đơn hàng
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle>Cập nhật thời gian phục vụ</DialogTitle>
+          <DialogDescription>
+            Chọn ngày và thời gian mới để phục vụ đơn hàng
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

@@ -1,4 +1,16 @@
 import {
+  AlertTriangle,
+  CheckCircle2,
+  Loader2,
+  Printer,
+  Receipt,
+  RotateCcw,
+  XCircle,
+} from "lucide-react";
+import { Link, useLocation } from "react-router";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -6,21 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import {
-  CheckCircle2,
-  Printer,
-  Receipt,
-  XCircle,
-  Loader2,
-  AlertTriangle,
-} from "lucide-react";
-import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import { formatMoney } from "~/lib/utils";
 import { DASHBOARD } from "~/lib/fe-url";
-import { Link } from "react-router";
-import { Alert, AlertDescription } from "~/components/ui/alert";
+import { formatMoney } from "~/lib/utils";
 
 type OrderDialogStatus = "success" | "error" | "loading";
 
@@ -35,7 +35,6 @@ type OrderConfirmationDialogProps = {
   error?: string;
   onNewOrder: () => void;
   onRetry?: () => void;
-  onPrintReceipt?: () => void;
 };
 
 export default function OrderConfirmationDialog({
@@ -48,7 +47,6 @@ export default function OrderConfirmationDialog({
   error,
   onNewOrder,
   onRetry,
-  onPrintReceipt,
 }: OrderConfirmationDialogProps) {
   const handleNewOrder = () => {
     onNewOrder();
@@ -201,7 +199,6 @@ export default function OrderConfirmationDialog({
         {/* Info Note */}
         <div className="text-center text-xs text-muted-foreground">
           <p>Đơn hàng đã được thêm vào hóa đơn</p>
-          <p>Bếp/Bar sẽ bắt đầu chuẩn bị món</p>
         </div>
       </div>
     );
@@ -211,6 +208,7 @@ export default function OrderConfirmationDialog({
     if (status === "loading") {
       return null; // No buttons while loading
     }
+    const curPath = useLocation().pathname;
 
     if (status === "error") {
       return (
@@ -230,23 +228,23 @@ export default function OrderConfirmationDialog({
 
     // Success state
     return (
-      <DialogFooter className="flex gap-2">
-        {onPrintReceipt && (
-          <Button variant="outline" onClick={onPrintReceipt}>
-            <Printer className="h-4 w-4 mr-2" />
-            In hóa đơn
+      <DialogFooter className="flex justify-between gap-2">
+        <Link
+          to={
+            curPath.includes("menu-pos")
+              ? DASHBOARD.orders["menu-orders"]
+              : DASHBOARD.orders["service-orders"]
+          }
+        >
+          <Button variant="outline">
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Quay lại danh sách đơn hàng
           </Button>
-        )}
-        <Button variant="outline" onClick={handleNewOrder}>
+        </Link>
+        <Button variant="success" onClick={handleNewOrder}>
           <Receipt className="h-4 w-4 mr-2" />
           Đơn hàng mới
         </Button>
-        <Link to={DASHBOARD.orders.index}>
-          <Button>
-            <Receipt className="h-4 w-4 mr-2" />
-            Xem đơn hàng
-          </Button>
-        </Link>
       </DialogFooter>
     );
   };

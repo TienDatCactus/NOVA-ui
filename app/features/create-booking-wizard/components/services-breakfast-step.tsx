@@ -15,9 +15,10 @@ import AddServiceDialog from "~/features/order-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import { Coffee, UtensilsCrossed, Plus } from "lucide-react";
+import { Coffee, UtensilsCrossed, Plus, AlertCircleIcon } from "lucide-react";
 import { ServiceOrderItem } from "../fragments/service-order-item";
 import { BreakfastSelection } from "../fragments/breakfast-selection";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 interface ServicesBreakfastStepProps {
   onNext: () => void;
@@ -45,6 +46,8 @@ export function ServicesBreakfastStep({
             d instanceof Date ? d : new Date(d)
           )
         : [],
+      checkinDate: storeData.checkinDate,
+      checkoutDate: storeData.checkoutDate,
     },
   });
 
@@ -62,10 +65,35 @@ export function ServicesBreakfastStep({
             d instanceof Date ? d : new Date(d)
           )
         : [],
+      checkinDate: storeData.checkinDate,
+      checkoutDate: storeData.checkoutDate,
     });
   }, [storeData, form]);
 
   const onSubmit = (data: ServicesBreakfastFormData) => {
+    // Validate service order dates are within booking range
+    if (
+      services.length > 0 &&
+      storeData.checkinDate &&
+      storeData.checkoutDate
+    ) {
+      const checkinDate = new Date(storeData.checkinDate);
+      const checkoutDate = new Date(storeData.checkoutDate);
+
+      const invalidServices = services.filter((service) => {
+        if (!service.scheduledDate) return false; // Optional field
+        const scheduledDate = new Date(service.scheduledDate);
+        return scheduledDate < checkinDate || scheduledDate > checkoutDate;
+      });
+
+      if (invalidServices.length > 0) {
+        toast.error(
+          "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú (từ ngày nhận phòng đến ngày trả phòng)"
+        );
+        return;
+      }
+    }
+
     setData({
       isBreakfastAll: data.isBreakfastAll,
       breakfastDates: data.breakfastDates?.map((i) => new Date(i)) || [],
@@ -78,6 +106,22 @@ export function ServicesBreakfastStep({
   const hasBreakfast =
     form.watch("isBreakfastAll") ||
     (form.watch("breakfastDates") || []).length > 0;
+
+  // Check for invalid service dates
+  const getInvalidServices = () => {
+    if (!storeData.checkinDate || !storeData.checkoutDate) return [];
+
+    const checkinDate = new Date(storeData.checkinDate);
+    const checkoutDate = new Date(storeData.checkoutDate);
+
+    return services.filter((service) => {
+      if (!service.scheduledDate) return false;
+      const scheduledDate = new Date(service.scheduledDate);
+      return scheduledDate < checkinDate || scheduledDate > checkoutDate;
+    });
+  };
+
+  const invalidServices = getInvalidServices();
 
   const handleConfirmServices = () => {
     // Services are already in the global store when dialog confirms
@@ -149,14 +193,46 @@ export function ServicesBreakfastStep({
                       <h4 className="font-semibold text-sm">
                         Dịch vụ đã chọn ({services.length})
                       </h4>
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                        {services.map((service) => (
-                          <ServiceOrderItem
-                            key={service.itemId}
-                            service={service}
-                            onRemove={() => removeById(service.itemId)}
-                          />
-                        ))}
+
+                      {/* Validation Warning */}
+                      {invalidServices.length > 0 && (
+                        <Alert variant="destructive">
+                          <AlertCircleIcon />
+                          <AlertTitle>
+                            Có {invalidServices.length} dịch vụ có ngày thực
+                            hiện nằm ngoài khoảng thời gian lưu trú
+                          </AlertTitle>
+                          <AlertDescription>
+                            <p className="text-xs text-destructive/80 mt-1">
+                              Vui lòng chỉnh sửa hoặc xóa các dịch vụ này trước
+                              khi tiếp tục
+                            </p>
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto p-2">
+                        {services.map((service) => {
+                          const isInvalid = invalidServices.some(
+                            (inv) => inv.itemId === service.itemId
+                          );
+
+                          return (
+                            <div
+                              key={service.itemId}
+                              className={
+                                isInvalid
+                                  ? "ring-2 ring-destructive rounded-md"
+                                  : ""
+                              }
+                            >
+                              <ServiceOrderItem
+                                service={service}
+                                onRemove={() => removeById(service.itemId)}
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </>

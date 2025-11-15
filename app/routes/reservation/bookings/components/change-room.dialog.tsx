@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
@@ -18,19 +19,19 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn, formatMoney } from "~/lib/utils";
-import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
+import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
+import {
+  RoomAvailabilityStatus,
+  RoomAvailabilityStatusColor,
+  RoomAvailabilityStatusLabel,
+} from "~/services/api/rooms/room.types";
+import { createChangeRoomOperation } from "~/services/api/booking/booking.helpers";
+import { useUpdateBooking } from "../container/booking-mutation.hooks";
 import {
   useAvailableRoomsForChange,
   useBookingDetail,
 } from "../container/booking-query.hooks";
-import { useChangeRoom } from "../container/booking-mutation.hooks";
-import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
-import {
-  RoomAvailabilityStatusLabel,
-  RoomAvailabilityStatus,
-  RoomAvailabilityStatusColor,
-} from "~/services/api/rooms/room.types";
 
 export function getRoomAvailabilityLabel(status: string): string {
   return (
@@ -68,13 +69,13 @@ export default function ChangeRoomDialog({
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const { data: bookingDetail } = useBookingDetail({
     bookingCode,
-    enabled: !!bookingCode,
+    enabled: open,
   });
 
   const bookingId = bookingDetail?.id || "";
   const hasMultipleRooms = (bookingDetail?.rooms.length || 0) > 1;
   const currentRoom = bookingDetail?.rooms[currentRoomIndex];
-  const { mutate: changeRoom, isPending } = useChangeRoom(bookingId);
+  const { mutate: updateBooking, isPending } = useUpdateBooking(bookingId);
 
   const { data: availableRoomsData, isLoading: loadingRooms } =
     useAvailableRoomsForChange({
@@ -83,7 +84,7 @@ export default function ChangeRoomDialog({
       enabled: open && !!currentRoom && !!currentRoom.bookingRoomId,
     });
 
-  const availableRooms = availableRoomsData?.data || [];
+  const availableRooms = availableRoomsData || [];
 
   // Reset selection when dialog opens or room changes
   useEffect(() => {
@@ -125,20 +126,21 @@ export default function ChangeRoomDialog({
   const handleConfirm = () => {
     if (!currentRoom || !selectedRoomId) return;
 
-    const payload = {
-      rooms: [
-        {
-          bookingRoomId: currentRoom.bookingRoomId,
-          newRoomId: selectedRoomId,
-        },
-      ],
-    };
+    // Use createChangeRoomOperation helper to build proper payload
+    const changeOperation = createChangeRoomOperation(
+      currentRoom.bookingRoomId,
+      selectedRoomId
+    );
 
-    changeRoom(payload, {
-      onSuccess: () => {
-        onOpenChange(false);
-      },
-    });
+    updateBooking(
+      { rooms: [changeOperation] },
+      {
+        onSuccess: () => {
+          toast.success("Đổi phòng thành công");
+          onOpenChange(false);
+        },
+      }
+    );
   };
 
   if (!bookingDetail || !currentRoom) return null;
@@ -148,10 +150,13 @@ export default function ChangeRoomDialog({
     (g) => g.roomTypeId === selectedRoomTypeId
   );
 
-  // Get rooms for selected room type (filter available only)
+  // Get rooms for selected room type
+  // Show Available and SwapPossible, hide Occupied
   const roomsForSelectedType =
     selectedRoomType?.rooms.filter(
-      (r) => r.availabilityStatus === "Available"
+      (r) =>
+        r.availabilityStatus === "Available" ||
+        r.availabilityStatus === "SwapPossible"
     ) || [];
 
   // Get selected room details
@@ -297,6 +302,9 @@ export default function ChangeRoomDialog({
                       const statusLabel = getRoomAvailabilityLabel(
                         room.availabilityStatus
                       );
+                      const hasConflict = room.conflictInfo !== null;
+                      const isSwapPossible =
+                        room.availabilityStatus === "SwapPossible";
 
                       return (
                         <Card
@@ -304,23 +312,57 @@ export default function ChangeRoomDialog({
                           className={cn(
                             "p-3 cursor-pointer transition-all hover:border-primary",
                             selectedRoomId === room.roomId &&
-                              "border-primary bg-primary/5"
+                              "border-primary bg-primary/5",
+                            isSwapPossible && "border-orange-200"
                           )}
                           onClick={() => setSelectedRoomId(room.roomId)}
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-sm">
-                              {room.roomName}
-                            </span>
-                            <span
-                              className={cn(
-                                "text-xs px-2 py-0.5 rounded",
-                                statusColor.bg,
-                                statusColor.text
+                          <div className="space-y-2">
+                            {/* Room name and status */}
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-medium text-sm">
+                                {room.roomName}
+                              </span>
+                              <span
+                                className={cn(
+                                  "text-xs px-2 py-0.5 rounded",
+                                  statusColor.bg,
+                                  statusColor.text
+                                )}
+                              >
+                                {statusLabel}
+                              </span>
+                            </div>
+
+                            {/* Conflict info warning */}
+                            {hasConflict &&
+                              isSwapPossible &&
+                              room.conflictInfo && (
+                                <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-200">
+                                  <div className="font-semibold mb-1">
+                                    ⚠️ Cần hoán đổi với booking khác
+                                  </div>
+                                  <div className="space-y-0.5 text-muted-foreground">
+                                    <div>
+                                      Booking:{" "}
+                                      <span className="font-mono">
+                                        {room.conflictInfo.bookingCode}
+                                      </span>
+                                    </div>
+                                    {room.conflictInfo.customerName && (
+                                      <div>
+                                        Khách:{" "}
+                                        <span className="font-medium">
+                                          {room.conflictInfo.customerName}
+                                        </span>
+                                      </div>
+                                    )}
+                                    <div className="text-xs italic mt-1">
+                                      {room.conflictInfo.message}
+                                    </div>
+                                  </div>
+                                </div>
                               )}
-                            >
-                              {statusLabel}
-                            </span>
                           </div>
                         </Card>
                       );

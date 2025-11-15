@@ -21,7 +21,10 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { BookingService } from "~/services/api/booking";
-import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+import type {
+  BookingDetailResponseDto,
+  BookingListResponseDto,
+} from "~/services/api/booking/dto";
 import { Skeleton } from "~/components/ui/skeleton";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -32,6 +35,8 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import { useBookings } from "~/routes/reservation/bookings/container/booking-query.hooks";
+import type { BookingSchema } from "~/services/api/booking/booking.schema";
+import type z from "zod";
 
 type BookingSelectionDialogProps = {
   open: boolean;
@@ -60,14 +65,20 @@ export default function BookingSelectionDialog({
 
   const { data: bookings, isLoading } = useBookings({});
 
-  const filteredBookings = bookings?.filter((booking: any) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      booking.bookingCode?.toLowerCase().includes(query) ||
-      booking.customerName?.toLowerCase().includes(query)
-    );
-  });
+  const filteredBookings = bookings?.filter(
+    (booking: z.infer<typeof BookingSchema.BookingListItemSchema>) => {
+      if (booking.status == "CheckedOut" || booking.status === "Cancelled") {
+        return false;
+      }
+
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        booking.bookingCode?.toLowerCase().includes(query) ||
+        booking.customerName?.toLowerCase().includes(query)
+      );
+    }
+  );
 
   const handleToggleBooking = async (bookingCode: string) => {
     if (expandedBooking === bookingCode) {
@@ -172,8 +183,11 @@ export default function BookingSelectionDialog({
 
           <div className="space-y-2">
             <Label>Booking đang ở (CheckedIn)</Label>
-            <ScrollArea className="h-96 rounded-md border">
-              <div className="p-4 space-y-2">
+            <ScrollArea
+              className="h-fit
+             rounded-md border"
+            >
+              <div className="p-4 space-y-2 overflow-y-auto max-h-96">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <div

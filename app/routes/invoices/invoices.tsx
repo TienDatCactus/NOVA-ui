@@ -15,14 +15,8 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const {
-    invoices,
-    meta,
-    isPending,
-    filters,
-    updateFilter,
-    resetFilters,
-  } = useInvoicesContainer();
+  const { invoices, meta, isPending, filters, updateFilter, resetFilters } =
+    useInvoicesContainer();
 
   return (
     <InvoicesViewLayout
@@ -38,7 +32,7 @@ export default function Component({
         isLoading={isPending}
         pageCount={meta?.totalPages}
         currentPage={meta?.page}
-        onPageChange={(page) => updateFilter("page", page)}
+        onPageChange={(page) => updateFilter("Page", page)}
       />
     </InvoicesViewLayout>
   );

@@ -35,7 +35,6 @@ export default function Component({
   });
 
   const filteredRooms = filterAvailableRooms(rooms ?? []);
-
   return (
     <div className="flex p-4  flex-col space-y-4 h-full">
       <BookingGridFilters

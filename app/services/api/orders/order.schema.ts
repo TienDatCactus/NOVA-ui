@@ -3,6 +3,7 @@ import { PaymentSchema } from "~/services/schema/payment.schema";
 
 ///* booking related orders
 const PosOrderStatusEnum = z.enum(["Open", "Completed", "Cancelled"]);
+const CustomerTypeEnum = z.enum(["In-House", "Walk-In"]);
 
 const ServiceOrderItemSchema = z.object({
   itemType: z.enum(["ServiceItem", "MenuItem"]),
@@ -52,7 +53,7 @@ const POSOrderItemSchema = z.object({
   itemName: z.string().optional().nullable(),
   quantity: z.number().min(0),
   unitPrice: z.number().min(0),
-  servedAt: z.date().optional().nullable(),
+  servedAt: z.string().optional().nullable(),
   subtotal: z.number().min(0),
 });
 const POSOrderDetailSchema = z.object({
@@ -67,7 +68,7 @@ const POSOrderDetailSchema = z.object({
   scheduledAt: z.string().optional().nullable(),
   note: z.string().optional().nullable(),
   createdAt: z.string(),
-  customerType: z.string().optional(),
+  customerType: CustomerTypeEnum.optional(),
   items: z.array(POSOrderItemSchema).optional(),
 });
 
@@ -81,7 +82,7 @@ const CreatePOSOrderRequestSchema = z.object({
   bookingId: z.string().optional().nullable(),
   bookingRoomId: z.string().optional().nullable(),
   scheduledAt: z.string().optional().nullable(),
-  notes: z.string().max(500).optional().nullable(),
+  note: z.string().max(500).optional().nullable(),
 });
 const CreatePOSOrderResponseSchema = z.object({
   posOrderId: z.string(),
@@ -119,12 +120,6 @@ const POSOrderPrintDataSchema = z.object({
   bookingCode: z.string().min(1).optional().nullable(),
 });
 
-const POSOrderPayNowRequestSchema = z.object({
-  paymentMethod: PaymentSchema.PaymentMethodEnum,
-  paidAmount: z.number().min(0),
-  transactionReference: z.string(),
-});
-
 // -----------------------------------------------
 //? Service Orders
 const ServiceOrderStatusEnum = z.enum([
@@ -136,20 +131,20 @@ const ServiceOrderStatusEnum = z.enum([
 
 const ServiceOrderBookingItemSchema = z.object({
   id: z.string().optional(),
-  bookingRoomId: z.string().optional(),
+  bookingRoomId: z.string().optional().nullable(),
   serviceItemId: z.string().optional(),
   serviceItemName: z.string().optional(),
   serviceItemCode: z.string().optional(),
-  scheduledAt: z.string().optional(),
-  performedAt: z.string().optional(),
-  completedAt: z.string().optional(),
+  scheduledAt: z.string().optional().nullable(),
+  performedAt: z.string().optional().nullable(),
+  completedAt: z.string().optional().nullable(),
   quantity: z.number().min(0).optional(),
   unitPrice: z.number().min(0).optional(),
   discountAmount: z.number().min(0).optional(),
   total: z.number().min(0).optional(),
-  note: z.string().optional(),
-  assignedToStaffId: z.string().optional(),
-  assignedToStaffName: z.string().optional(),
+  note: z.string().optional().nullable(),
+  assignedToStaffId: z.string().optional().nullable(),
+  assignedToStaffName: z.string().optional().nullable(),
   status: z.string().optional(),
   createdAt: z.string().optional(),
 });
@@ -163,13 +158,13 @@ const ServiceOrderListItemSchema = z.object({
   id: z.string().optional(),
   bookingId: z.string().optional(),
   serviceItemId: z.string().optional(),
-  customServiceName: z.string().optional(),
+  customServiceName: z.string().optional().nullable(),
   serviceName: z.string().optional(),
   quantity: z.number().min(0),
   unitPrice: z.number().min(0),
   scheduledAt: z.string().optional(),
-  performedAt: z.string().optional(),
-  status: z.string().optional(),
+  performedAt: z.string().optional().nullable(),
+  status: ServiceOrderStatusEnum,
 });
 
 const ServiceOrderListSchema = z.array(ServiceOrderListItemSchema);
@@ -189,7 +184,7 @@ const CreateServiceOrderRequestSchema = z.object({
 const CreateServiceOrderResponseSchema = z.object({
   serviceOrderId: z.string().optional(),
   serviceItemId: z.string().optional(),
-  customServiceName: z.string().optional(),
+  customServiceName: z.string().optional().nullable(),
   serviceItemName: z.string().optional(),
   scheduledAt: z.string().optional(),
   quantity: z.number().min(0).optional(),
@@ -210,14 +205,14 @@ const UpdateServiceOrderRequestSchema = z.object({
 const ServiceOrderDetailSchema = z.object({
   id: z.string(),
   bookingId: z.string(),
-  bookingRoomId: z.string().optional(),
+  bookingRoomId: z.string().optional().nullable(),
   serviceItemId: z.string(),
-  customServiceName: z.string().optional(),
+  customServiceName: z.string().optional().nullable(),
   serviceItemName: z.string(),
   serviceItemCode: z.string(),
-  scheduledAt: z.string().optional(),
-  performedAt: z.string().optional(),
-  completedAt: z.string().optional(),
+  scheduledAt: z.string().optional().nullable(),
+  performedAt: z.string().optional().nullable(),
+  completedAt: z.string().optional().nullable(),
   quantity: z.number().min(1),
   unitPrice: z.number().min(0),
   discountAmount: z.number().min(0),
@@ -225,8 +220,8 @@ const ServiceOrderDetailSchema = z.object({
   vatAmount: z.number().min(0),
   serviceChargeAmount: z.number().min(0),
   total: z.number().min(0),
-  note: z.string().optional(),
-  assignedToStaffId: z.string().optional(),
+  note: z.string().optional().nullable(),
+  assignedToStaffId: z.string().optional().nullable(),
   status: ServiceOrderStatusEnum,
   source: z.string().optional().nullable(),
   createdAt: z.string(),
@@ -236,6 +231,13 @@ const OrderPayNowRequestSchema = z.object({
   paymentMethod: PaymentSchema.PaymentMethodEnum,
   paidAmount: z.number().min(0),
   transactionReference: z.string().optional().nullable(),
+});
+
+const POSOrderPayNowResponseSchema = z.object({
+  invoiceId: z.string(),
+  invoiceNo: z.string(),
+  total: z.number().min(0),
+  status: z.string(),
 });
 
 const SetScheduledServiceOrderRequestSchema = z.object({
@@ -251,6 +253,7 @@ export const OrderSchema = {
   AddSingleItemToPOSOrderRequestSchema,
   AddBatchItemsToPOSOrderRequestSchema,
   PosOrderStatusEnum,
+  CustomerTypeEnum,
   POSOrderListResponseSchema,
   POSOrderItemSchema,
   POSOrderDetailSchema,
@@ -258,7 +261,7 @@ export const OrderSchema = {
   POSOrderPrintItemSchema,
   POSOrderPrintDataSchema,
   CreatePOSOrderRequestSchema,
-  POSOrderPayNowRequestSchema,
+  POSOrderPayNowResponseSchema,
   POSOrderListByBookingResponseSchema,
 
   // 🔹 Service Orders
@@ -272,4 +275,5 @@ export const OrderSchema = {
   SetScheduledServiceOrderRequestSchema,
   CreatePOSOrderResponseSchema,
   CreateServiceOrderResponseSchema,
+  ServiceOrderListItemSchema,
 };
