@@ -30,9 +30,7 @@ export default function DeleteScheduleDialog({
   shift,
   onSuccess,
 }: DeleteScheduleDialogProps) {
-  const [deleteScope, setDeleteScope] = useState<DeleteScope>(
-    DeleteScope.Single
-  );
+  const [deleteScope, setDeleteScope] = useState<DeleteScope>(DeleteScope.Single);
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!shift) return null;
@@ -40,11 +38,11 @@ export default function DeleteScheduleDialog({
   const workDate = shift.workDate ? parseISO(shift.workDate) : new Date();
   const formattedDate = format(workDate, "dd/MM/yyyy");
 
-  // Calculate end date if series exists (mock - would come from API/groupId data)
+  // Calculate end date if series exists
   const endDate = format(
     new Date(workDate.getTime() + 18 * 24 * 60 * 60 * 1000),
     "dd/MM/yyyy"
-  ); // Mock: +18 days
+  );
 
   const handleDelete = async () => {
     if (!shift.id) {
@@ -60,94 +58,82 @@ export default function DeleteScheduleDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Failed to delete shift schedule:", error);
-      // Error toast already handled by http interceptor
     } finally {
       setIsDeleting(false);
     }
   };
 
+  // Định nghĩa các options với description
+  const deleteScopeOptions = [
+    {
+      value: DeleteScope.Single,
+      id: "single",
+      label: `Chỉ ngày ${formattedDate}`,
+      description: "Xóa chỉ lịch làm việc này",
+    },
+    {
+      value: DeleteScope.FromThisDateForward,
+      id: "forward",
+      label: `Từ ngày ${formattedDate} đến ngày ${endDate}`,
+      description: "Xóa lịch làm việc từ ngày này trở đi với cùng nhân viên và ca làm",
+    },
+    {
+      value: DeleteScope.AllInSeries,
+      id: "all",
+      label: "Tất cả các ngày",
+      description: "Xóa tất cả lịch làm việc trong cùng chuỗi lặp lại",
+    },
+  ];
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-lg">
         <AlertDialogHeader>
           <AlertDialogTitle>Xóa lịch làm việc</AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+            <div className="space-y-4 pt-2">
+              {/* Info text */}
+              <p className="text-sm">
                 Bạn có chắc chắn muốn xóa lịch làm việc của{" "}
-                <span className="font-semibold text-foreground">
-                  {shift.staffName}
-                </span>{" "}
+                <span className="font-semibold text-foreground">{shift.staffName}</span>{" "}
                 trong ca{" "}
-                <span className="font-semibold text-foreground">
-                  {shift.shiftName}
-                </span>
-                ?
+                <span className="font-semibold text-foreground">{shift.shiftName}</span>?
               </p>
 
-              {/* Delete Scope Options */}
+              {/* Delete Scope Radio Group - Description bên ngoài */}
               <RadioGroup
                 value={deleteScope}
                 onValueChange={(value) => setDeleteScope(value as DeleteScope)}
-                className="space-y-3"
+                className="space-y-2"
               >
-                {/* Single Day */}
-                <div className="flex items-start space-x-3 border rounded-md p-3 hover:bg-muted/50 transition-colors">
-                  <RadioGroupItem value={DeleteScope.Single} id="single" />
-                  <Label
-                    htmlFor="single"
-                    className="flex-1 cursor-pointer font-normal"
-                  >
-                    <div className="font-medium">Chỉ ngày {formattedDate}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Xóa chỉ lịch làm việc này
+                {deleteScopeOptions.map((option) => (
+                  <div key={option.id} className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value={option.value} id={option.id} />
+                      <Label
+                        htmlFor={option.id}
+                        className="font-medium cursor-pointer flex-1"
+                      >
+                        {option.label}
+                      </Label>
                     </div>
-                  </Label>
-                </div>
-
-                {/* From This Date Forward */}
-                <div className="flex items-start space-x-3 border rounded-md p-3 hover:bg-muted/50 transition-colors">
-                  <RadioGroupItem
-                    value={DeleteScope.FromThisDateForward}
-                    id="forward"
-                  />
-                  <Label
-                    htmlFor="forward"
-                    className="flex-1 cursor-pointer font-normal"
-                  >
-                    <div className="font-medium">
-                      Từ ngày {formattedDate} đến ngày {endDate}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Xóa lịch làm việc từ ngày này trở đi với cùng nhân viên và
-                      ca làm
-                    </div>
-                  </Label>
-                </div>
-
-                {/* All In Series */}
-                <div className="flex items-start space-x-3 border rounded-md p-3 hover:bg-muted/50 transition-colors">
-                  <RadioGroupItem
-                    value={DeleteScope.AllInSeries}
-                    id="all"
-                  />
-                  <Label
-                    htmlFor="all"
-                    className="flex-1 cursor-pointer font-normal"
-                  >
-                    <div className="font-medium">Tất cả các ngày</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Xóa tất cả lịch làm việc trong cùng chuỗi lặp lại
-                    </div>
-                  </Label>
-                </div>
+                    {/* Description chỉ hiện khi selected */}
+                    {deleteScope === option.value && (
+                      <p className="text-xs text-muted-foreground ml-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                        {option.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </RadioGroup>
 
               {/* Warning Note */}
-              <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+              <div className="flex items-start gap-2 bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                <span className="text-xs font-semibold text-destructive mt-0.5">
+                  Lưu ý:
+                </span>
                 <p className="text-xs text-destructive">
-                  <span className="font-semibold">Lưu ý:</span> Hành động này
-                  không thể hoàn tác. Vui lòng kiểm tra kỹ trước khi xóa.
+                  Hành động này không thể hoàn tác. Vui lòng kiểm tra kỹ trước khi xóa.
                 </p>
               </div>
             </div>
