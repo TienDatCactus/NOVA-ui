@@ -1,21 +1,30 @@
 import { useState } from "react";
 import type { Route } from "./+types/list";
 import BookingList from "./components/booking-list";
+import { BookingGridView } from "./components/booking-grid-view";
 import useSearchBooking from "./container/booking-filter.hooks";
 import { useBookings } from "./container/booking-query.hooks";
 import BookingViewLayout from "./layouts/booking-view.layout";
 import { format } from "date-fns";
+import { Button } from "~/components/ui/button";
+import { Grid3x3, List } from "lucide-react";
+import { cn } from "~/lib/utils";
+
+type ViewMode = "grid" | "list";
 
 export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+
   const { data, isPending, refetch } = useBookings({
     date: date ? format(date, "yyyy-MM-dd") : undefined,
   });
   const { filters, filteredBookings, handleFiltersChange, handleResetFilters } =
     useSearchBooking(data);
+
   return (
     <BookingViewLayout
       date={date}
@@ -25,12 +34,22 @@ export default function Component({
       filters={filters}
       onFiltersChange={handleFiltersChange}
       onResetFilters={handleResetFilters}
+      viewMode={viewMode}
+      onViewModeChange={setViewMode}
     >
-      <BookingList
-        bookings={filteredBookings}
-        isLoading={isPending}
-        refetch={refetch}
-      />
+      {viewMode === "grid" ? (
+        <BookingGridView
+          bookings={filteredBookings}
+          isLoading={isPending}
+          refetch={refetch}
+        />
+      ) : (
+        <BookingList
+          bookings={filteredBookings}
+          isLoading={isPending}
+          refetch={refetch}
+        />
+      )}
     </BookingViewLayout>
   );
 }
