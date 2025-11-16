@@ -53,11 +53,11 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useCheckoutStore } from "~/store/checkout.store";
 import {
   useCalculateInvoiceFees,
-  useCheckout,
   useCheckoutPayment,
   useInvoiceDetail,
   useUpdateInvoice,
 } from "../container/use-booking-checkout.hooks";
+import { useInvoicePayment } from "~/routes/invoices/container/invoices/mutation.hooks";
 import {
   Empty,
   EmptyHeader,
@@ -65,7 +65,10 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from "~/components/ui/empty";
-import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import {
+  INVOICE_STATUSES,
+  INVOICE_TYPES,
+} from "~/services/api/invoices/invoice.types";
 import {
   canInvoiceAcceptPayment,
   validatePaymentAmount,
@@ -83,6 +86,7 @@ interface InvoiceDetailSheetProps {
   bookingId: string;
   invoiceId: string;
   onBack: () => void;
+  isNewlyCreatedInvoice?: boolean; // Invoice vừa được tạo từ checkout flow
 }
 
 export default function InvoiceDetailSheet({
@@ -91,6 +95,7 @@ export default function InvoiceDetailSheet({
   bookingId,
   invoiceId,
   onBack,
+  isNewlyCreatedInvoice = false,
 }: InvoiceDetailSheetProps) {
   const { applyVat, applyServiceCharge, setApplyVat, setApplyServiceCharge } =
     useCheckoutStore();
@@ -119,18 +124,22 @@ export default function InvoiceDetailSheet({
     }
   }, [applyVat, applyServiceCharge, invoiceDetail, open, refetchFees]);
 
-  // Mutations
+  const isCheckoutInvoice =
+    isNewlyCreatedInvoice || invoiceDetail?.invoiceType === "Checkout";
+
   const { mutate: updateInvoice, isPending: isUpdatingInvoice } =
     useUpdateInvoice(invoiceId);
 
-  const { mutate: processPayment, isPending: isProcessingPayment } =
+  const { mutate: checkoutPayment, isPending: isProcessingCheckoutPayment } =
     useCheckoutPayment(bookingId);
 
-  const { mutate: finalizeCheckout, isPending: isCheckingOut } =
-    useCheckout(bookingId);
+  const { mutate: invoicePayment, isPending: isProcessingInvoicePayment } =
+    useInvoicePayment(invoiceId);
 
   const isProcessing =
-    isUpdatingInvoice || isProcessingPayment || isCheckingOut;
+    isUpdatingInvoice ||
+    isProcessingCheckoutPayment ||
+    isProcessingInvoicePayment;
 
   // Payment form
   const paymentForm = useForm<CheckoutPaymentFormData>({
@@ -142,7 +151,6 @@ export default function InvoiceDetailSheet({
     },
   });
 
-  const method = paymentForm.watch("method");
   const amount = paymentForm.watch("amount");
 
   // Check if fees have changed
@@ -169,12 +177,6 @@ export default function InvoiceDetailSheet({
   const changeAmount = useMemo(() => {
     const balance = invoiceDetail?.balance || 0;
     return amount > balance ? amount - balance : 0;
-  }, [amount, invoiceDetail]);
-
-  // Validate payment: must pay in full
-  const isPaymentValid = useMemo(() => {
-    const balance = invoiceDetail?.balance || 0;
-    return balance === 0 || amount >= balance;
   }, [amount, invoiceDetail]);
 
   // Handler to update invoice fees
@@ -217,39 +219,36 @@ export default function InvoiceDetailSheet({
       return;
     }
 
-    const balance = invoiceDetail?.balance || 0;
-    const willBeFullyPaid = data.amount >= balance;
+    // Use different payment endpoint based on invoice type
+    if (isCheckoutInvoice) {
+      // Checkout invoice: use staffCheckoutPayment (booking-level)
+      const paymentData: StaffCheckoutPaymentRequestDto = {
+        method: data.method,
+        amount: data.amount,
+        transactionReference: data.transactionReference || undefined,
+      };
 
-    const paymentData: StaffCheckoutPaymentRequestDto = {
-      method: data.method,
-      amount: data.amount,
-      transactionReference: data.transactionReference || undefined,
-    };
-
-    processPayment(paymentData, {
-      onSuccess: () => {
-        // Q4-A: Auto-checkout chỉ khi balance === 0 (thanh toán đủ)
-        if (willBeFullyPaid) {
-          handleFinalCheckout();
-        }
-      },
-    });
-  };
-
-  // Handler to finalize checkout
-  const handleFinalCheckout = () => {
-    finalizeCheckout(
-      {
-        actualCheckoutTime: new Date().toISOString(),
-        notes: undefined,
-      },
-      {
+      checkoutPayment(paymentData, {
         onSuccess: () => {
-          onOpenChange(false);
+          // Quay về checkout sheet sau khi thanh toán thành công
           onBack();
         },
-      }
-    );
+      });
+    } else {
+      // Other invoice types: use proceedInvoicePayment (invoice-level)
+      const paymentData = {
+        method: data.method,
+        amount: data.amount,
+        note: data.transactionReference || "",
+      };
+
+      invoicePayment(paymentData, {
+        onSuccess: () => {
+          // Quay về checkout sheet sau khi thanh toán thành công
+          onBack();
+        },
+      });
+    }
   };
 
   if (!invoiceDetail && !isLoadingInvoice) {
@@ -303,6 +302,22 @@ export default function InvoiceDetailSheet({
                         <p className="font-mono font-semibold">
                           {invoiceDetail.invoiceNo}
                         </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Loại hóa đơn</p>
+                        <Badge
+                          variant={
+                            INVOICE_TYPES.find(
+                              (t) => t.value === invoiceDetail.invoiceType
+                            )?.variant
+                          }
+                        >
+                          {
+                            INVOICE_TYPES.find(
+                              (t) => t.value === invoiceDetail.invoiceType
+                            )?.label
+                          }
+                        </Badge>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Ngày tạo</p>
@@ -549,23 +564,36 @@ export default function InvoiceDetailSheet({
                                 <FormControl>
                                   <Input
                                     type="number"
+                                    placeholder="Nhập số tiền"
                                     {...field}
+                                    value={field.value || ""}
+                                    min={0}
                                     onChange={(e) => {
-                                      const value =
+                                      const inputValue =
                                         parseFloat(e.target.value) || 0;
-                                      if (value < 0) {
+                                      const maxAmount =
+                                        calculatedFees?.totalAmount ||
+                                        invoiceDetail.total ||
+                                        0;
+
+                                      // Validate min
+                                      if (inputValue < 0) {
                                         field.onChange(0);
                                         return;
                                       }
+
+                                      // Validate max - không cho nhập quá tổng hóa đơn
+                                      const value =
+                                        inputValue > maxAmount
+                                          ? maxAmount
+                                          : inputValue;
                                       field.onChange(value);
 
                                       // Real-time validation using new helper
                                       const validation = validatePaymentAmount(
                                         value,
                                         invoiceDetail.balance || 0,
-                                        calculatedFees?.totalAmount ||
-                                          invoiceDetail.total ||
-                                          0,
+                                        maxAmount,
                                         invoiceDetail.status || ""
                                       );
 
@@ -623,25 +651,28 @@ export default function InvoiceDetailSheet({
                               </FormItem>
                             )}
                           />
-                          {method !== "Cash" && (
-                            <FormField
-                              control={paymentForm.control}
-                              name="transactionReference"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Mã giao dịch</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="Nhập mã giao dịch (tùy chọn)"
-                                      {...field}
-                                      value={field.value || ""}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          )}
+                          <FormField
+                            control={paymentForm.control}
+                            name="transactionReference"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Ghi chú / Mã giao dịch</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Nhập ghi chú hoặc mã giao dịch (tùy chọn)"
+                                    {...field}
+                                    value={field.value || ""}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  {isCheckoutInvoice
+                                    ? "Mã giao dịch cho thanh toán qua thẻ/chuyển khoản"
+                                    : "Ghi chú thanh toán cho hóa đơn này"}
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </form>
                       </Form>
                     </div>
@@ -651,20 +682,17 @@ export default function InvoiceDetailSheet({
 
             {/* Footer Actions */}
             <SheetFooter>
-              {paymentEligibility.suggestedAction === "checkout" && (
-                <Button variant={"info-outline"} onClick={handleFinalCheckout}>
-                  Hoàn tất Checkout
-                </Button>
-              )}
               {paymentEligibility.suggestedAction === "refund" && (
                 <Button variant="destructive">Xử lý hoàn trả</Button>
               )}
               {paymentEligibility.canProceed && (
                 <Button
                   onClick={paymentForm.handleSubmit(handlePayment)}
-                  disabled={!paymentValidation.isValid}
+                  disabled={!paymentValidation.isValid || isProcessing}
                 >
-                  Xác nhận thanh toán
+                  {isProcessingCheckoutPayment || isProcessingInvoicePayment
+                    ? "Đang xử lý..."
+                    : "Xác nhận thanh toán"}
                 </Button>
               )}
             </SheetFooter>

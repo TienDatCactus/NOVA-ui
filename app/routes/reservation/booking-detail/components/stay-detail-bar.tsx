@@ -24,6 +24,7 @@ import type z from "zod";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -227,23 +228,30 @@ export default function StayDetailBar({
                                     type="number"
                                     step="0.01"
                                     min="0.01"
-                                    max={
-                                      paymentSummary.totalAmount -
-                                      paymentSummary.previouslyPaid
-                                    }
                                     placeholder="Nhập số tiền"
                                     {...field}
                                     onChange={(e) => {
-                                      const value = e.target.value;
-                                      // Chỉ parse khi có giá trị
-                                      if (value === "") {
+                                      const inputValue = e.target.value;
+                                      const maxAmount =
+                                        paymentSummary.totalAmount -
+                                        paymentSummary.previouslyPaid;
+
+                                      // Parse giá trị
+                                      if (inputValue === "") {
                                         field.onChange(0);
-                                      } else {
-                                        const parsed = parseFloat(value);
-                                        field.onChange(
-                                          isNaN(parsed) ? 0 : parsed
-                                        );
+                                        return;
                                       }
+
+                                      const parsed = parseFloat(inputValue);
+                                      if (isNaN(parsed) || parsed < 0) {
+                                        field.onChange(0);
+                                        return;
+                                      }
+
+                                      // Giới hạn không quá maxAmount
+                                      const value =
+                                        parsed > maxAmount ? maxAmount : parsed;
+                                      field.onChange(value);
                                     }}
                                   />
                                 </FormControl>
@@ -334,16 +342,18 @@ export default function StayDetailBar({
                         </div>
 
                         <div className="flex justify-end gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => {
-                              paymentForm.reset();
-                            }}
-                            disabled={isConfirmingPayment}
-                          >
-                            Hủy
-                          </Button>
+                          <DialogClose asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => {
+                                paymentForm.reset();
+                              }}
+                              disabled={isConfirmingPayment}
+                            >
+                              Hủy
+                            </Button>
+                          </DialogClose>
                           <Button type="submit" disabled={isConfirmingPayment}>
                             {isConfirmingPayment
                               ? "Xử lý..."

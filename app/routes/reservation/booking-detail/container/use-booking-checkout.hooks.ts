@@ -22,9 +22,7 @@ export function useBookingPendingCharges(bookingId: string, enabled = true) {
     queryKey: ["checkout", "pending-charges", bookingId],
     queryFn: () => BookingService.getBookingPendingCharges(bookingId),
     enabled: enabled && !!bookingId,
-    staleTime: 0, // Always fetch fresh data
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    staleTime: 6000, // Always fetch fresh data
   });
 }
 
@@ -80,7 +78,7 @@ export function useInvoiceDetail(invoiceId: string, enabled = true) {
  */
 export function useInvoicesByBooking(bookingId: string, enabled = true) {
   return useQuery({
-    queryKey: ["invoices-by-booking", bookingId],
+    queryKey: ["booking-invoices", bookingId],
     queryFn: () => InvoicesService.getInvoicesByBooking(bookingId),
     enabled: enabled && !!bookingId,
     staleTime: 0,
@@ -101,7 +99,7 @@ export function useCreateCheckoutInvoice(bookingId: string) {
         queryKey: ["checkout", "pending-charges", bookingId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["booking-invoices"],
+        queryKey: ["booking-invoices", bookingId],
       });
       queryClient.invalidateQueries({
         queryKey: ["bookings-detail"],
@@ -128,7 +126,7 @@ export function useCheckoutPayment(bookingId: string) {
         queryKey: ["bookings-detail"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["invoices-by-booking", bookingId],
+        queryKey: ["booking-invoices", bookingId],
       });
       queryClient.invalidateQueries({
         queryKey: ["invoice-detail"],
@@ -158,7 +156,7 @@ export function useCheckout(bookingId: string) {
         queryKey: ["bookings-detail"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["invoices-by-booking", bookingId],
+        queryKey: ["booking-invoices", bookingId],
       });
     },
   });
@@ -182,7 +180,7 @@ export function useUpdateInvoice(invoiceId: string) {
         queryKey: ["bookings-detail"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["invoices-by-booking"],
+        queryKey: ["booking-invoices"],
       });
     },
     onError: (error: any) => {
@@ -205,7 +203,7 @@ export function useConfirmBookingPayment(bookingId: string) {
         queryKey: ["bookings-detail"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["invoices-by-booking", bookingId],
+        queryKey: ["booking-invoices", bookingId],
       });
     },
   });
@@ -228,7 +226,7 @@ export function useAddCompletedCharges(bookingId: string) {
         queryKey: ["bookings-detail"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["invoices-by-booking", bookingId],
+        queryKey: ["booking-invoices", bookingId],
       });
     },
     onError: (error: any) => {

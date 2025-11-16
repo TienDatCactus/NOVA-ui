@@ -32,10 +32,14 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { formatMoney } from "~/lib/utils";
-import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import {
+  INVOICE_STATUSES,
+  INVOICE_TYPES,
+} from "~/services/api/invoices/invoice.types";
 import { useCheckoutStore } from "~/store/checkout.store";
 import {
   useBookingPendingCharges,
+  useCheckout,
   useCreateCheckoutInvoice,
   useInvoicePreview,
   useInvoicesByBooking,
@@ -78,11 +82,34 @@ export default function CheckoutSheet({
   const { mutate: createInvoice, isPending: isCreatingInvoice } =
     useCreateCheckoutInvoice(bookingId);
 
+  const { mutate: finalizeCheckout, isPending: isCheckingOut } =
+    useCheckout(bookingId);
+
   const hasRoomBalance = useMemo(() => {
     return (pendingCharges?.roomInvoice?.balance || 0) > 0;
   }, [pendingCharges]);
 
   const shouldShowPreview = hasRoomBalance;
+
+  // Kiểm tra điều kiện để enable Checkout
+  const canCheckout = useMemo(() => {
+    // Điều kiện 1: Không có pending charges (room balance = 0)
+    if (hasRoomBalance) return false;
+
+    // Điều kiện 2: Không có pending POS/Service orders
+    const hasPendingOrders =
+      (pendingCharges?.pendingOrders?.posOrders?.length || 0) > 0 ||
+      (pendingCharges?.pendingOrders?.serviceOrders?.length || 0) > 0;
+    if (hasPendingOrders) return false;
+
+    // Điều kiện 3: Tất cả invoices phải có status = "Paid"
+    if (!existingInvoices || existingInvoices.length === 0) return false;
+    const allInvoicesPaid = existingInvoices.every(
+      (invoice) => invoice.status === "Paid"
+    );
+
+    return allInvoicesPaid;
+  }, [pendingCharges, existingInvoices, hasRoomBalance]);
 
   const previewData = useMemo(() => {
     if (!pendingCharges?.pendingOrders) {
@@ -126,11 +153,44 @@ export default function CheckoutSheet({
       },
     });
   };
+
   // Handler to select existing invoice
   const handleSelectInvoice = (invoiceId: string) => {
     setSelectedInvoiceId(invoiceId);
     setShowInvoiceDetail(true);
   };
+
+  // Handler to finalize checkout
+  const handleFinalCheckout = () => {
+    finalizeCheckout(
+      {
+        actualCheckoutTime: new Date().toISOString(),
+        notes: undefined,
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+      }
+    );
+  };
+
+  // Điều kiện hiển nút "Tạo Invoice":
+  // - Có pending charges (room balance > 0), HOẶC
+  // - Không có invoice nào với status khác "Paid"
+  const shouldShowCreateInvoice = useMemo(() => {
+    // Nếu có pending charges thì luôn hiển
+    if (shouldShowPreview) return true;
+
+    // Nếu không có invoice nào
+    if (!existingInvoices || existingInvoices.length === 0) return false;
+
+    // Nếu có bất kỳ invoice nào chưa Paid
+    const hasUnpaidInvoice = existingInvoices.some(
+      (invoice) => invoice.status !== "Paid"
+    );
+    return hasUnpaidInvoice;
+  }, [shouldShowPreview, existingInvoices]);
 
   // Handler to go back from invoice detail
   const handleBackFromDetail = () => {
@@ -486,12 +546,21 @@ export default function CheckoutSheet({
                                         )
                                       : "N/A"}
                                   </p>
-                                  <p className="text-sm font-mono">
-                                    {
-                                      formatMoney(invoice.total || 0)
-                                        .vndFormatted
+                                  <Badge
+                                    variant={
+                                      INVOICE_TYPES.find(
+                                        (item) =>
+                                          item.value === invoice.invoiceType
+                                      )?.variant
                                     }
-                                  </p>
+                                  >
+                                    {
+                                      INVOICE_TYPES.find(
+                                        (item) =>
+                                          item.value === invoice.invoiceType
+                                      )?.label
+                                    }
+                                  </Badge>
                                 </div>
                                 <div className="text-right space-y-2">
                                   <Badge
@@ -554,9 +623,7 @@ export default function CheckoutSheet({
           )}
           <SheetFooter className="p-6 pt-4 border-t">
             <div className="w-full flex justify-end space-x-3">
-              {(shouldShowPreview ||
-                !existingInvoices ||
-                existingInvoices.length === 0) && (
+              {shouldShowCreateInvoice && (
                 <Button
                   onClick={handleCreateInvoice}
                   disabled={isCreatingInvoice}
@@ -575,6 +642,22 @@ export default function CheckoutSheet({
                   )}
                 </Button>
               )}
+              {canCheckout && (
+                <Button
+                  onClick={handleFinalCheckout}
+                  disabled={isCheckingOut}
+                  variant="success"
+                >
+                  {isCheckingOut ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Đang checkout...
+                    </>
+                  ) : (
+                    "Hoàn tất Checkout"
+                  )}
+                </Button>
+              )}
             </div>
           </SheetFooter>
         </SheetContent>
@@ -588,6 +671,7 @@ export default function CheckoutSheet({
           bookingId={bookingId}
           invoiceId={activeInvoiceId}
           onBack={handleBackFromDetail}
+          isNewlyCreatedInvoice={!!createdInvoiceId} // Invoice vừa tạo → Checkout type
         />
       )}
     </>

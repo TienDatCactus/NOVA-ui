@@ -192,7 +192,7 @@ async function refundInvoice(
  * @param data - Payment data
  * @returns Promise with payment response
  */
-async function addInvoicePayment(
+async function proceedInvoicePayment(
   invoiceId: string,
   data: InvoicePaymentRequestDto
 ): Promise<InvoicePaymentResponseDto> {
@@ -277,7 +277,7 @@ export const InvoicesService = {
   getInvoicePayments,
   addCustomItemsToInvoice,
   refundInvoice,
-  addInvoicePayment,
+  proceedInvoicePayment,
   voidInvoice,
   exportInvoices,
   calculateInvoiceFees,

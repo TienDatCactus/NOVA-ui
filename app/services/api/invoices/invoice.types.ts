@@ -27,10 +27,20 @@ export const INVOICE_STATUSES = [
 ] as const;
 
 export const INVOICE_TYPES = [
-  { code: 1, value: "Deposit", label: "Hóa đơn cọc" },
-  { code: 2, value: "RoomCharges", label: "Hóa đơn tiền phòng" },
-  { code: 3, value: "ServiceCharges", label: "Hóa đơn dịch vụ" },
-  { code: 4, value: "Checkout", label: "Hóa đơn checkout" },
+  { code: 1, value: "Deposit", label: "Hóa đơn cọc", variant: "info" },
+  {
+    code: 2,
+    value: "RoomCharges",
+    label: "Hóa đơn tiền phòng",
+    variant: "success",
+  },
+  {
+    code: 3,
+    value: "ServiceCharges",
+    label: "Hóa đơn dịch vụ",
+    variant: "default",
+  },
+  { code: 4, value: "Checkout", label: "Hóa đơn checkout", variant: "warning" },
 ] as const;
 export interface InvoiceListParams {
   Page?: number;

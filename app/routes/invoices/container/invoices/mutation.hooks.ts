@@ -24,7 +24,7 @@ const useInvoicePayment = (invoiceId: string) => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: InvoicePaymentRequestDto) =>
-      InvoicesService.addInvoicePayment(invoiceId, data),
+      InvoicesService.proceedInvoicePayment(invoiceId, data),
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["invoice-detail", invoiceId] });
       qc.invalidateQueries({ queryKey: ["invoices"] });

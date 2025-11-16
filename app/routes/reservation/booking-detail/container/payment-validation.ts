@@ -32,7 +32,6 @@ export const PAYMENT_RULES: Record<
     userMessage: "Đã thanh toán một phần - cần thanh toán phần còn lại",
   },
 
-  // ✅ Fully paid - no more payment needed
   Paid: {
     canAcceptPayment: false,
     canCheckout: true,

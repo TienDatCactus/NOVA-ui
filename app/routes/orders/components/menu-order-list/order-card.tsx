@@ -106,7 +106,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                 <p className="text-muted-foreground text-xs mb-1">Ghi chú:</p>
                 <InlineNoteEditor
                   orderId={order.id}
-                  initialNote={order.note}
+                  initialNote={order.note || ""}
                   disabled={order.status !== "Open"}
                 />
               </div>
