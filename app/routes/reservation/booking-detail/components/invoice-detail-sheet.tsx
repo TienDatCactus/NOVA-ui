@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { CreditCard, Info, Loader2, RefreshCw } from "lucide-react";
+import { CreditCard, Info, Loader2 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -124,6 +124,32 @@ export default function InvoiceDetailSheet({
     }
   }, [applyVat, applyServiceCharge, invoiceDetail, open, refetchFees]);
 
+  // Auto-update invoice when fees change
+  useEffect(() => {
+    if (!invoiceDetail || !calculatedFees || !open) return;
+    if (!paymentEligibility.canProceed) return;
+
+    const vatChanged =
+      (calculatedFees.vatAmount || 0) !== (invoiceDetail.vatAmount || 0);
+    const serviceChargeChanged =
+      (calculatedFees.serviceChargeAmount || 0) !==
+      (invoiceDetail.serviceChargeAmount || 0);
+
+    const hasFeesChanged = vatChanged || serviceChargeChanged;
+
+    if (hasFeesChanged) {
+      const updateData: UpdateInvoiceRequestDto = {
+        vatAmount: applyVat ? calculatedFees.vatAmount : 0,
+        serviceChargeAmount: applyServiceCharge
+          ? calculatedFees.serviceChargeAmount
+          : 0,
+        paymentMethod: invoiceDetail.paymentMethod || "Cash",
+      };
+
+      updateInvoice(updateData);
+    }
+  }, [calculatedFees, invoiceDetail, applyVat, applyServiceCharge, open]);
+
   const isCheckoutInvoice =
     isNewlyCreatedInvoice || invoiceDetail?.invoiceType === "Checkout";
 
@@ -153,19 +179,6 @@ export default function InvoiceDetailSheet({
 
   const amount = paymentForm.watch("amount");
 
-  // Check if fees have changed
-  const hasFeesChanged = useMemo(() => {
-    if (!invoiceDetail || !calculatedFees) return false;
-
-    const vatChanged =
-      (calculatedFees.vatAmount || 0) !== (invoiceDetail.vatAmount || 0);
-    const serviceChargeChanged =
-      (calculatedFees.serviceChargeAmount || 0) !==
-      (invoiceDetail.serviceChargeAmount || 0);
-
-    return vatChanged || serviceChargeChanged;
-  }, [invoiceDetail, calculatedFees]);
-
   // Auto-fill payment amount with invoice balance
   useEffect(() => {
     if (invoiceDetail?.balance && invoiceDetail.balance > 0) {
@@ -179,20 +192,6 @@ export default function InvoiceDetailSheet({
     return amount > balance ? amount - balance : 0;
   }, [amount, invoiceDetail]);
 
-  // Handler to update invoice fees
-  const handleUpdateInvoice = () => {
-    if (!calculatedFees || !invoiceDetail) return;
-
-    const updateData: UpdateInvoiceRequestDto = {
-      vatAmount: applyVat ? calculatedFees.vatAmount : 0,
-      serviceChargeAmount: applyServiceCharge
-        ? calculatedFees.serviceChargeAmount
-        : 0,
-      paymentMethod: invoiceDetail.paymentMethod || "Cash",
-    };
-
-    updateInvoice(updateData);
-  };
   const paymentEligibility = useMemo(() => {
     if (!invoiceDetail?.status) return { canProceed: false };
     return canInvoiceAcceptPayment(invoiceDetail.status);
@@ -482,28 +481,6 @@ export default function InvoiceDetailSheet({
                         </span>
                       </div>
                     </div>
-
-                    {/* Update Invoice Button */}
-                    {hasFeesChanged && paymentEligibility.canProceed && (
-                      <Button
-                        onClick={handleUpdateInvoice}
-                        disabled={isUpdatingInvoice}
-                        variant="outline"
-                        className="w-full"
-                      >
-                        {isUpdatingInvoice ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Đang cập nhật...
-                          </>
-                        ) : (
-                          <>
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            Cập nhật Invoice
-                          </>
-                        )}
-                      </Button>
-                    )}
                   </CardContent>
                 </Card>
                 <Separator className="my-6" />

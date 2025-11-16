@@ -28,6 +28,7 @@ export const BOOKING_STATUSES = [
   { value: "all", label: "Tất cả trạng thái", variant: "secondary" },
   { value: "Confirmed", label: "Đã xác nhận", variant: "default" },
   { value: "CheckedIn", label: "Đã nhận phòng", variant: "success" },
+  { value: "InHouse", label: "Đã nhận phòng", variant: "ghost" },
   { value: "CheckedOut", label: "Đã trả phòng", variant: "outline" },
   { value: "Pending", label: "Chờ xử lý", variant: "warning" },
   { value: "Cancelled", label: "Đã hủy", variant: "destructive" },

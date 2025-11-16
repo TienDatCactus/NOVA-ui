@@ -36,12 +36,16 @@ interface CustomerInfoBarProps {
   bookingDetail: BookingDetailResponseDto;
   form: UseFormReturn<StaffUpdateBookingRequestDto>;
   OTAList?: Array<{ id: string; name: string }>;
+  permissions: {
+    canDoSoftUpdate: boolean;
+  };
 }
 
 export default function CustomerInfoBar({
   bookingDetail,
   form,
   OTAList,
+  permissions,
 }: CustomerInfoBarProps) {
   return (
     <Card className="w-full h-fit shadow-sm">
@@ -92,7 +96,11 @@ export default function CustomerInfoBar({
               <FormControl className="text-sm">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  <Counter className="w-30 " {...field} />
+                  <Counter
+                    className="w-30 "
+                    {...field}
+                    isDisabled={!permissions.canDoSoftUpdate}
+                  />
                 </div>
               </FormControl>
 
@@ -113,7 +121,11 @@ export default function CustomerInfoBar({
                 <FormControl>
                   <div className="flex items-center gap-2">
                     <Baby className="h-4 w-4" />
-                    <Counter className="w-30" {...field} />
+                    <Counter
+                      className="w-30"
+                      {...field}
+                      isDisabled={!permissions.canDoSoftUpdate}
+                    />
                   </div>
                 </FormControl>
 
@@ -210,6 +222,7 @@ export default function CustomerInfoBar({
                       <Button
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
+                        disabled={!permissions.canDoSoftUpdate}
                       >
                         <Utensils className="mr-2 h-4 w-4" />
                         {breakfastDates.length > 0
@@ -265,6 +278,7 @@ export default function CustomerInfoBar({
                     field.onChange(value.target.valueAsNumber)
                   }
                   startAddon={<Wallet />}
+                  disabled={!permissions.canDoSoftUpdate}
                 />
               </FormControl>
               <FormDescription>

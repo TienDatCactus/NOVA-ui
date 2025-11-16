@@ -1,19 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, parseISO } from "date-fns";
-import { DoorOpen, FileWarning, Wallet } from "lucide-react";
+import { DoorOpen, FileWarning } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
 import {
   Empty,
@@ -31,39 +29,24 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
 import { toYMD } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import type {
-  ConfirmBookingPaymentRequestDto,
-  StaffUpdateBookingRequestDto,
-} from "~/services/api/booking/dto";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
 import type { Route } from "./+types/booking-detail";
 import AddCompletedChargesDialog from "./components/add-completed-charges-dialog";
 import BookingRoomsBar from "./components/booking-rooms-bar";
+import CheckoutSheet from "./components/checkout-sheet";
 import CustomerInfoBar from "./components/customer-info-bar";
 import PendingChargesSection from "./components/pending-charges-section";
 import StayDetailBar from "./components/stay-detail-bar";
-import {
-  useAddCompletedCharges,
-  useConfirmBookingPayment,
-} from "./container/use-booking-checkout.hooks";
+import { useAddCompletedCharges } from "./container/use-booking-checkout.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
-import CheckoutSheet from "./components/checkout-sheet";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -171,7 +154,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       otaInformationId: data.otaInformationId,
       breakfastDates: data.breakfastDates || [],
       totalAmount: data.totalAmount,
-      rooms: data.rooms, // Include room operations
+      rooms: data.rooms,
     };
 
     updateBooking(payload, {});
@@ -247,6 +230,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             bookingDetail={bookingDetail}
             form={form}
             OTAList={OTAList || []}
+            permissions={permissions}
           />
           <div className="flex items-start gap-2">
             <div>

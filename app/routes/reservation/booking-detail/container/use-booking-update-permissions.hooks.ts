@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import {
   canPerformHeavyUpdate,
+  canPerformSoftUpdate,
   getLockedRoomInvoices,
   getHeavyUpdateBlockReason,
   canChangeDates,
@@ -43,7 +44,7 @@ export function useBookingUpdatePermissions(
     return {
       // Permissions
       canDoHeavyUpdate: canHeavyUpdate,
-      canDoSoftUpdate: true, // Always allowed
+      canDoSoftUpdate: canPerformSoftUpdate(status),
       canEditDates: canChangeDates(status, invoices),
       canAddRooms: canAddRooms(status, invoices),
       canRemoveRooms: canRemoveRooms(status, invoices),

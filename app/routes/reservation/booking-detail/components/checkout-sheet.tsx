@@ -89,7 +89,7 @@ export default function CheckoutSheet({
     return (pendingCharges?.roomInvoice?.balance || 0) > 0;
   }, [pendingCharges]);
 
-  const shouldShowPreview = hasRoomBalance;
+  const shouldShowPreview = true;
 
   // Kiểm tra điều kiện để enable Checkout
   const canCheckout = useMemo(() => {
@@ -179,14 +179,9 @@ export default function CheckoutSheet({
   // - Có pending charges (room balance > 0), HOẶC
   // - Không có invoice nào với status khác "Paid"
   const shouldShowCreateInvoice = useMemo(() => {
-    // Nếu có pending charges thì luôn hiển
     if (shouldShowPreview) return true;
 
-    // Nếu không có invoice nào
-    if (!existingInvoices || existingInvoices.length === 0) return false;
-
-    // Nếu có bất kỳ invoice nào chưa Paid
-    const hasUnpaidInvoice = existingInvoices.some(
+    const hasUnpaidInvoice = existingInvoices?.some(
       (invoice) => invoice.status !== "Paid"
     );
     return hasUnpaidInvoice;

@@ -45,7 +45,14 @@ export function isInvoiceFinanciallyLocked(invoice: Invoice): boolean {
  * Check if any room invoice in the booking has financial lock
  */
 export function hasAnyLockedRoomInvoice(invoices: Invoice[]): boolean {
-  const roomInvoices = invoices.filter((inv) => inv.invoiceType === "Room");
+  // Room-related invoices: RoomCharges (tiền phòng), Deposit (cọc phòng), Checkout (tổng hợp)
+  // ServiceCharges (F&B, Spa, etc.) không block room changes
+  const roomInvoices = invoices.filter(
+    (inv) =>
+      inv.invoiceType === "RoomCharges" ||
+      inv.invoiceType === "Deposit" ||
+      inv.invoiceType === "Checkout"
+  );
   return roomInvoices.some((inv) => isInvoiceFinanciallyLocked(inv));
 }
 
@@ -101,9 +108,14 @@ export function getHeavyUpdateBlockReason(
 }
 
 /**
- * Soft updates are always allowed regardless of status
+ * Soft updates (adults, children, totalAmount, breakfast, notes) are allowed
+ * EXCEPT when booking is completed (CheckedOut) or Cancelled
  */
-export function canPerformSoftUpdate(): boolean {
+export function canPerformSoftUpdate(bookingStatus: string): boolean {
+  // Block updates on finalized bookings
+  if (bookingStatus === "CheckedOut" || bookingStatus === "Cancelled") {
+    return false;
+  }
   return true;
 }
 
@@ -152,7 +164,12 @@ export function canChangeDates(
  * Helper to get all room invoices from invoice list
  */
 export function getRoomInvoices(invoices: Invoice[]): Invoice[] {
-  return invoices.filter((inv) => inv.invoiceType === "Room");
+  return invoices.filter(
+    (inv) =>
+      inv.invoiceType === "RoomCharges" ||
+      inv.invoiceType === "Deposit" ||
+      inv.invoiceType === "Checkout"
+  );
 }
 
 /**
