@@ -1,14 +1,11 @@
+import { format } from "date-fns";
 import { useState } from "react";
-import type { Route } from "./+types/list";
-import BookingList from "./components/booking-list";
 import { BookingGridView } from "./components/booking-grid-view";
+import BookingList from "./components/booking-list";
 import useSearchBooking from "./container/booking-filter.hooks";
 import { useBookings } from "./container/booking-query.hooks";
 import BookingViewLayout from "./layouts/booking-view.layout";
-import { format } from "date-fns";
-import { Button } from "~/components/ui/button";
-import { Grid3x3, List } from "lucide-react";
-import { cn } from "~/lib/utils";
+import type { Route } from "./+types/list";
 
 type ViewMode = "grid" | "list";
 
