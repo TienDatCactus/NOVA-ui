@@ -48,7 +48,7 @@ export default function ScheduleStaffView({
 
   // Group shifts by staff and date
   const groupedByStaff: Record<string, StaffShiftListItem[]> = {};
-  
+
   // Only group shifts that have active work shifts
   shifts.forEach((shift) => {
     const workShift = workShifts.find((ws) => ws.id === shift.shiftId);
@@ -90,19 +90,34 @@ export default function ScheduleStaffView({
 
   const getStatusBadge = (status?: string) => {
     if (!status || status.toLowerCase() === "assigned") {
-      return { variant: "secondary" as const, label: "Chưa chấm", showLabel: true };
+      return {
+        variant: "secondary" as const,
+        label: "Chưa chấm",
+        showLabel: true,
+      };
     }
     if (status.toLowerCase() === "present") {
-      return { variant: "default" as const, label: "Đã chấm công", showLabel: false };
+      return {
+        variant: "default" as const,
+        label: "Đã chấm công",
+        showLabel: false,
+      };
     }
     if (status.toLowerCase() === "absent") {
-      return { variant: "destructive" as const, label: "Vắng mặt", showLabel: true };
+      return {
+        variant: "destructive" as const,
+        label: "Vắng mặt",
+        showLabel: true,
+      };
     }
     return { variant: "secondary" as const, label: status, showLabel: true };
   };
 
   // Get shifts for a staff on a specific date
-  const getStaffShiftsForDate = (staffId: string, date: Date): StaffShiftListItem[] => {
+  const getStaffShiftsForDate = (
+    staffId: string,
+    date: Date
+  ): StaffShiftListItem[] => {
     const dateStr = format(date, "yyyy-MM-dd");
     return groupedByStaff[staffId]?.filter((s) => s.workDate === dateStr) || [];
   };
@@ -167,8 +182,9 @@ export default function ScheduleStaffView({
                 {/* Staff Info Column */}
                 <td className="border p-3">
                   <div className="space-y-1">
-                    <div className="font-semibold text-sm">{staff.staffName}</div>
-
+                    <div className="font-semibold text-sm">
+                      {staff.staffName}
+                    </div>
                   </div>
                 </td>
 
@@ -193,11 +209,18 @@ export default function ScheduleStaffView({
                               shift.shiftId,
                               shift.workDate
                             );
-                            const statusBadge = getStatusBadge(attendance?.status);
-                            const isAbsent = attendance?.status.toLowerCase() === "absent";
-                            const isPresent = attendance?.status.toLowerCase() === "present";
-                            const isAssigned = !attendance || attendance?.status.toLowerCase() === "assigned";
-                            const hasReason = isAbsent && attendance?.absentReason;
+                            const statusBadge = getStatusBadge(
+                              attendance?.status
+                            );
+                            const isAbsent =
+                              attendance?.status.toLowerCase() === "absent";
+                            const isPresent =
+                              attendance?.status.toLowerCase() === "present";
+                            const isAssigned =
+                              !attendance ||
+                              attendance?.status.toLowerCase() === "assigned";
+                            const hasReason =
+                              isAbsent && attendance?.absentReason;
 
                             const cardContent = (
                               <div
@@ -211,15 +234,25 @@ export default function ScheduleStaffView({
                                   <div className="text-xs font-medium truncate">
                                     {shift.shiftName || "N/A"}
                                   </div>
-                                  {workShifts.find((ws) => ws.id === shift.shiftId) && (
+                                  {workShifts.find(
+                                    (ws) => ws.id === shift.shiftId
+                                  ) && (
                                     <div className="text-[10px] text-muted-foreground">
-                                      {workShifts.find((ws) => ws.id === shift.shiftId)?.startTime.substring(0, 5)} -{" "}
-                                      {workShifts.find((ws) => ws.id === shift.shiftId)?.endTime.substring(0, 5)}
+                                      {workShifts
+                                        .find((ws) => ws.id === shift.shiftId)
+                                        ?.startTime.substring(0, 5)}{" "}
+                                      -{" "}
+                                      {workShifts
+                                        .find((ws) => ws.id === shift.shiftId)
+                                        ?.endTime.substring(0, 5)}
                                     </div>
                                   )}
                                   {/* Chỉ hiển thị badge nếu có label */}
                                   {statusBadge.showLabel && (
-                                    <Badge variant={statusBadge.variant} className="text-[10px] h-5">
+                                    <Badge
+                                      variant={statusBadge.variant}
+                                      className="text-[10px] h-5"
+                                    >
                                       {statusBadge.label}
                                     </Badge>
                                   )}
@@ -313,9 +346,16 @@ export default function ScheduleStaffView({
                                   <TooltipTrigger asChild>
                                     {cardContent}
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="max-w-xs">
-                                    <p className="text-xs font-semibold mb-1">Lý do vắng mặt:</p>
-                                    <p className="text-xs">{attendance?.absentReason}</p>
+                                  <TooltipContent
+                                    side="top"
+                                    className="max-w-xs"
+                                  >
+                                    <p className="text-xs font-semibold mb-1">
+                                      Lý do vắng mặt:
+                                    </p>
+                                    <p className="text-xs">
+                                      {attendance?.absentReason}
+                                    </p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>

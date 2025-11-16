@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, parseISO } from "date-fns";
-import { DoorOpen, FileWarning } from "lucide-react";
+import { CreditCard, DoorOpen, FileWarning, Receipt } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import { Badge } from "~/components/ui/badge";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -33,7 +35,7 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
-import { toYMD } from "~/lib/utils";
+import { formatMoney, toYMD } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
@@ -46,6 +48,7 @@ import CustomerInfoBar from "./components/customer-info-bar";
 import PendingChargesSection from "./components/pending-charges-section";
 import StayDetailBar from "./components/stay-detail-bar";
 import { useAddCompletedCharges } from "./container/use-booking-checkout.hooks";
+import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
@@ -78,6 +81,9 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     useState(false);
 
   const permissions = useBookingUpdatePermissions(bookingDetail);
+
+  // Calculate financial status from invoices
+  const financialSummary = useBookingFinancialStatus(bookingDetail?.invoices);
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
     bookingDetail?.id || ""
@@ -289,6 +295,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                       <FormControl>
                         <Textarea
                           {...field}
+                          disabled={!permissions.canDoSoftUpdate}
                           placeholder="Nhập ghi chú về đặt phòng..."
                           rows={6}
                         />
@@ -321,12 +328,39 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         </div>
         <Separator />
         <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
-          {bookingDetail?.status === "CheckedIn" && (
+          {/* Checkout button for InHouse/CheckedIn */}
+          {(bookingDetail?.status === "InHouse" ||
+            bookingDetail?.status === "CheckedIn") && (
             <Button variant={"success"} onClick={() => setCheckoutOpen(true)}>
               <DoorOpen className="w-4 h-4 mr-2" />
               Checkout và Thanh toán
             </Button>
           )}
+
+          {/* Post-checkout payment button */}
+          {bookingDetail?.status === "CheckedOut" &&
+            financialSummary.totalBalance > 0 && (
+              <Button
+                variant="default"
+                onClick={() => setCheckoutOpen(true)}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                Thu tiền sau checkout
+                <Badge variant="destructive" className="ml-2">
+                  {formatMoney(financialSummary.totalBalance).vndFormatted}
+                </Badge>
+              </Button>
+            )}
+
+          {/* View invoices for settled checkouts */}
+          {bookingDetail?.status === "CheckedOut" &&
+            financialSummary.totalBalance === 0 && (
+              <Button variant="outline" onClick={() => setCheckoutOpen(true)}>
+                <Receipt className="w-4 h-4 mr-2" />
+                Xem hóa đơn
+              </Button>
+            )}
 
           <Button
             type="button"
@@ -350,6 +384,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           onOpenChange={setCheckoutOpen}
           bookingId={bookingDetail?.id || ""}
           bookingCode={bookingDetail?.bookingCode || ""}
+          bookingDetail={bookingDetail}
         />
 
         {/* Confirm Payment Dialog */}

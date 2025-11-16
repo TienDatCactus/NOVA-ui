@@ -1,7 +1,14 @@
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Info, Loader2, Receipt } from "lucide-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  Loader2,
+  Receipt,
+} from "lucide-react";
 import { useMemo } from "react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -44,13 +51,17 @@ import {
   useInvoicePreview,
   useInvoicesByBooking,
 } from "../container/use-booking-checkout.hooks";
+import { useCheckoutEligibility } from "../container/use-booking-financial-status.hooks";
 import InvoiceDetailSheet from "./invoice-detail-sheet";
+
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
 interface CheckoutSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   bookingId: string;
   bookingCode: string;
+  bookingDetail?: BookingDetailResponseDto; // NEW: Pass booking detail for validation
 }
 
 export default function CheckoutSheet({
@@ -58,6 +69,7 @@ export default function CheckoutSheet({
   onOpenChange,
   bookingId,
   bookingCode,
+  bookingDetail,
 }: CheckoutSheetProps) {
   const {
     selectedInvoiceId,
@@ -85,31 +97,18 @@ export default function CheckoutSheet({
   const { mutate: finalizeCheckout, isPending: isCheckingOut } =
     useCheckout(bookingId);
 
-  const hasRoomBalance = useMemo(() => {
-    return (pendingCharges?.roomInvoice?.balance || 0) > 0;
-  }, [pendingCharges]);
+  // NEW: Use enhanced checkout eligibility validation
+  const checkoutEligibility = useCheckoutEligibility(bookingDetail, {
+    pendingOrders: pendingCharges?.pendingOrders,
+  });
+  const {
+    canProceed: canCheckout,
+    blockingReasons,
+    warnings,
+  } = checkoutEligibility;
 
-  const shouldShowPreview = true;
-
-  // Kiểm tra điều kiện để enable Checkout
-  const canCheckout = useMemo(() => {
-    // Điều kiện 1: Không có pending charges (room balance = 0)
-    if (hasRoomBalance) return false;
-
-    // Điều kiện 2: Không có pending POS/Service orders
-    const hasPendingOrders =
-      (pendingCharges?.pendingOrders?.posOrders?.length || 0) > 0 ||
-      (pendingCharges?.pendingOrders?.serviceOrders?.length || 0) > 0;
-    if (hasPendingOrders) return false;
-
-    // Điều kiện 3: Tất cả invoices phải có status = "Paid"
-    if (!existingInvoices || existingInvoices.length === 0) return false;
-    const allInvoicesPaid = existingInvoices.every(
-      (invoice) => invoice.status === "Paid"
-    );
-
-    return allInvoicesPaid;
-  }, [pendingCharges, existingInvoices, hasRoomBalance]);
+  // Detect if this is post-checkout mode
+  const isPostCheckout = bookingDetail?.status === "CheckedOut";
 
   const previewData = useMemo(() => {
     if (!pendingCharges?.pendingOrders) {
@@ -136,10 +135,7 @@ export default function CheckoutSheet({
   }, [pendingCharges, applyVat, applyServiceCharge]);
 
   // Use invoice preview hook
-  const { data: invoicePreview } = useInvoicePreview(
-    previewData,
-    shouldShowPreview && open
-  );
+  const { data: invoicePreview } = useInvoicePreview(previewData, open);
 
   const activeInvoiceId = selectedInvoiceId || createdInvoiceId;
 
@@ -175,26 +171,22 @@ export default function CheckoutSheet({
     );
   };
 
-  // Điều kiện hiển nút "Tạo Invoice":
-  // - Có pending charges (room balance > 0), HOẶC
-  // - Không có invoice nào với status khác "Paid"
   const shouldShowCreateInvoice = useMemo(() => {
-    if (shouldShowPreview) return true;
-
+    if (!existingInvoices || existingInvoices.length === 0) {
+      return true;
+    }
     const hasUnpaidInvoice = existingInvoices?.some(
       (invoice) => invoice.status !== "Paid"
     );
     return hasUnpaidInvoice;
-  }, [shouldShowPreview, existingInvoices]);
+  }, [, existingInvoices]);
 
-  // Handler to go back from invoice detail
   const handleBackFromDetail = () => {
     setShowInvoiceDetail(false);
     setSelectedInvoiceId(null);
     setCreatedInvoiceId(null);
   };
 
-  // Handler when sheet closes
   const handleSheetClose = (isOpen: boolean) => {
     if (!isOpen) {
       reset(); // Reset all checkout state
@@ -212,10 +204,14 @@ export default function CheckoutSheet({
         >
           <SheetHeader className="p-6 pb-4 border-b">
             <SheetTitle className="text-xl">
-              Checkout đơn đặt phòng #{bookingCode}
+              {isPostCheckout
+                ? `Thu tiền sau checkout - #{bookingCode}`
+                : `Checkout đơn đặt phòng #{bookingCode}`}
             </SheetTitle>
             <SheetDescription>
-              Xem tổng quan chi phí và hoàn tất checkout
+              {isPostCheckout
+                ? "Booking đã checkout. Vui lòng thanh toán các hóa đơn còn nợ."
+                : "Xem tổng quan chi phí và hoàn tất checkout"}
             </SheetDescription>
           </SheetHeader>
 
@@ -617,42 +613,92 @@ export default function CheckoutSheet({
             </Empty>
           )}
           <SheetFooter className="p-6 pt-4 border-t">
-            <div className="w-full flex justify-end space-x-3">
-              {shouldShowCreateInvoice && (
-                <Button
-                  onClick={handleCreateInvoice}
-                  disabled={isCreatingInvoice}
-                  variant={"success-outline"}
-                >
-                  {isCreatingInvoice ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Đang tạo invoice...
-                    </>
-                  ) : (
-                    <>
-                      <Receipt className="w-4 h-4 mr-2" />
-                      Tạo Invoice
-                    </>
-                  )}
-                </Button>
+            <div className="w-full space-y-3">
+              {/* Blocking Reasons Alert */}
+              {!canCheckout && blockingReasons.length > 0 && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Không thể checkout</AlertTitle>
+                  <AlertDescription>
+                    <ul className="list-disc list-inside space-y-1">
+                      {blockingReasons.map((reason, i) => (
+                        <li key={i}>{reason}</li>
+                      ))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
               )}
-              {canCheckout && (
-                <Button
-                  onClick={handleFinalCheckout}
-                  disabled={isCheckingOut}
-                  variant="success"
+
+              {/* Warnings Alert */}
+              {warnings.length > 0 && (
+                <Alert
+                  variant="default"
+                  className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950"
                 >
-                  {isCheckingOut ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Đang checkout...
-                    </>
-                  ) : (
-                    "Hoàn tất Checkout"
-                  )}
-                </Button>
+                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                  <AlertTitle className="text-yellow-600">Cảnh báo</AlertTitle>
+                  <AlertDescription className="text-yellow-600">
+                    <ul className="list-disc list-inside space-y-1">
+                      {warnings.map((warning, i) => (
+                        <li key={i}>{warning}</li>
+                      ))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
               )}
+
+              {/* Post-checkout info */}
+              {isPostCheckout && (
+                <Alert
+                  variant="default"
+                  className="border-blue-500 bg-blue-50 dark:bg-blue-950"
+                >
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-600">
+                    Booking đã checkout. Chỉ có thể thanh toán các hóa đơn còn
+                    nợ.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="flex justify-end space-x-3">
+                {shouldShowCreateInvoice && !isPostCheckout && (
+                  <Button
+                    onClick={handleCreateInvoice}
+                    disabled={isCreatingInvoice}
+                    variant={"success-outline"}
+                  >
+                    {isCreatingInvoice ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Đang tạo invoice...
+                      </>
+                    ) : (
+                      <>
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Tạo Invoice
+                      </>
+                    )}
+                  </Button>
+                )}
+                {/* Only show checkout button if not in post-checkout mode */}
+                {!isPostCheckout && canCheckout && (
+                  <Button
+                    onClick={handleFinalCheckout}
+                    disabled={isCheckingOut}
+                    variant="success"
+                  >
+                    {isCheckingOut ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Đang checkout...
+                      </>
+                    ) : (
+                      "Hoàn tất Checkout"
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           </SheetFooter>
         </SheetContent>

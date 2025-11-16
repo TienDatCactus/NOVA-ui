@@ -15,23 +15,6 @@ type Invoice = z.infer<typeof InvoiceSchema.InvoiceListItemSchema>;
  */
 const LOCKED_INVOICE_STATUSES = ["PartiallyPaid", "Paid", "Overpaid"] as const;
 
-const UNLOCKED_INVOICE_STATUSES = ["Unpaid", "DepositOnly"] as const;
-
-/**
- * Booking statuses that allow heavy updates
- */
-const HEAVY_UPDATE_ALLOWED_STATUSES = ["Pending", "Confirmed"] as const;
-
-/**
- * Booking statuses that restrict heavy updates
- */
-const HEAVY_UPDATE_RESTRICTED_STATUSES = [
-  "CheckedIn",
-  "InHouse",
-  "CheckedOut",
-  "Cancelled",
-] as const;
-
 /**
  * Check if a room invoice has financial lock (money collected)
  */
@@ -42,11 +25,9 @@ export function isInvoiceFinanciallyLocked(invoice: Invoice): boolean {
 }
 
 /**
- * Check if any room invoice in the booking has financial lock
+ * Check if any room-related invoice has been paid
  */
 export function hasAnyLockedRoomInvoice(invoices: Invoice[]): boolean {
-  // Room-related invoices: RoomCharges (tiền phòng), Deposit (cọc phòng), Checkout (tổng hợp)
-  // ServiceCharges (F&B, Spa, etc.) không block room changes
   const roomInvoices = invoices.filter(
     (inv) =>
       inv.invoiceType === "RoomCharges" ||
@@ -57,31 +38,20 @@ export function hasAnyLockedRoomInvoice(invoices: Invoice[]): boolean {
 }
 
 /**
- * Check if booking status allows heavy updates
- */
-export function isBookingStatusAllowingHeavyUpdates(status: string): boolean {
-  return HEAVY_UPDATE_ALLOWED_STATUSES.includes(
-    status as (typeof HEAVY_UPDATE_ALLOWED_STATUSES)[number]
-  );
-}
-
-/**
- * Main validation: Can perform heavy updates?
+ * Main validation: Can perform heavy updates (rooms, dates)?
  *
  * Returns true only if:
- * - BookingStatus is Pending or Confirmed
- * - AND all room invoices are Unpaid or DepositOnly
+ * - BookingStatus is Pending
+ * - AND no room invoices have been paid
  */
 export function canPerformHeavyUpdate(
   bookingStatus: string,
   invoices: Invoice[]
 ): boolean {
-  // Check booking status
-  if (!isBookingStatusAllowingHeavyUpdates(bookingStatus)) {
+  if (bookingStatus !== "Pending") {
     return false;
   }
 
-  // Check invoice financial lock
   if (hasAnyLockedRoomInvoice(invoices)) {
     return false;
   }
@@ -96,7 +66,7 @@ export function getHeavyUpdateBlockReason(
   bookingStatus: string,
   invoices: Invoice[]
 ): string | null {
-  if (!isBookingStatusAllowingHeavyUpdates(bookingStatus)) {
+  if (bookingStatus !== "Pending") {
     return "Không thể thay đổi cấu trúc booking khi khách đã check-in hoặc booking đã hoàn tất. Vui lòng sử dụng chức năng Void/Refund.";
   }
 
@@ -108,34 +78,21 @@ export function getHeavyUpdateBlockReason(
 }
 
 /**
- * Soft updates (adults, children, totalAmount, breakfast, notes) are allowed
- * EXCEPT when booking is completed (CheckedOut) or Cancelled
+ * Soft updates (adults, children, totalAmount, breakfast, notes)
+ * Only allowed in Pending status
  */
 export function canPerformSoftUpdate(bookingStatus: string): boolean {
-  // Block updates on finalized bookings
-  if (bookingStatus === "CheckedOut" || bookingStatus === "Cancelled") {
-    return false;
-  }
-  return true;
+  return bookingStatus === "Pending";
 }
 
 /**
  * Check if adding rooms is allowed
- *
- * SPECIAL RULE: CheckedIn/InHouse CAN add rooms (per doc: "CheckedIn CHO PHÉP Add Room")
- * But still check financial lock
+ * Only Pending status with no payments
  */
 export function canAddRooms(
   bookingStatus: string,
   invoices: Invoice[]
 ): boolean {
-  // Special case: CheckedIn/InHouse can still add rooms
-  if (bookingStatus === "CheckedIn" || bookingStatus === "InHouse") {
-    // But still check financial lock
-    return !hasAnyLockedRoomInvoice(invoices);
-  }
-
-  // For other statuses, follow heavy update rules
   return canPerformHeavyUpdate(bookingStatus, invoices);
 }
 
@@ -152,31 +109,53 @@ export function canRemoveRooms(
 
 /**
  * Check if changing dates is allowed
+ *
+ * STRICT RULE: Only Pending status with no payments
  */
 export function canChangeDates(
   bookingStatus: string,
   invoices: Invoice[]
 ): boolean {
-  return canPerformHeavyUpdate(bookingStatus, invoices);
+  if (bookingStatus !== "Pending") {
+    return false;
+  }
+
+  // Cannot change if any payment exists
+  return !invoices.some((inv) => isInvoiceFinanciallyLocked(inv));
 }
 
 /**
- * Helper to get all room invoices from invoice list
+ * Get detailed reason why date change is blocked
  */
-export function getRoomInvoices(invoices: Invoice[]): Invoice[] {
-  return invoices.filter(
-    (inv) =>
-      inv.invoiceType === "RoomCharges" ||
-      inv.invoiceType === "Deposit" ||
-      inv.invoiceType === "Checkout"
-  );
-}
+export function getDateChangeBlockReason(
+  bookingStatus: string,
+  invoices: Invoice[]
+): string | null {
+  // Check status first
+  if (
+    bookingStatus === "CheckedIn" ||
+    bookingStatus === "InHouse" ||
+    bookingStatus === "CheckedOut" ||
+    bookingStatus === "Cancelled" ||
+    bookingStatus === "NoShow"
+  ) {
+    return "Không thể thay đổi ngày check-in/check-out sau khi khách đã nhận phòng hoặc booking đã hoàn tất.";
+  }
 
-/**
- * Helper to get locked room invoices
- */
-export function getLockedRoomInvoices(invoices: Invoice[]): Invoice[] {
-  return getRoomInvoices(invoices).filter((inv) =>
-    isInvoiceFinanciallyLocked(inv)
-  );
+  if (bookingStatus === "Confirmed") {
+    return "Không thể thay đổi ngày sau khi booking đã được xác nhận.";
+  }
+
+  // Check payment lock
+  const hasAnyPayment = invoices.some((inv) => isInvoiceFinanciallyLocked(inv));
+
+  if (hasAnyPayment) {
+    const paidInvoices = invoices.filter((inv) =>
+      isInvoiceFinanciallyLocked(inv)
+    );
+    const invoiceTypes = paidInvoices.map((inv) => inv.invoiceType).join(", ");
+    return `Không thể thay đổi ngày check-in/check-out vì đã có thanh toán (${invoiceTypes}). Vui lòng hoàn trả thanh toán trước khi thay đổi ngày.`;
+  }
+
+  return null;
 }

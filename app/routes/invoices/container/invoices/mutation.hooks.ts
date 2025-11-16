@@ -55,4 +55,20 @@ const useVoidInvoice = (invoiceId: string) => {
   });
 };
 
-export { useAddCustomItem, useInvoicePayment, useRefund, useVoidInvoice };
+const useSyncInvoiceWithOrders = (invoiceId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => InvoicesService.syncInvoiceWithOrders(invoiceId),
+    onSuccess: async () => {
+      qc.invalidateQueries({ queryKey: ["invoice-detail", invoiceId] });
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+    },
+  });
+};
+export {
+  useAddCustomItem,
+  useInvoicePayment,
+  useRefund,
+  useVoidInvoice,
+  useSyncInvoiceWithOrders,
+};

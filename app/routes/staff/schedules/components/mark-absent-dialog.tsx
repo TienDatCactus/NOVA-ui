@@ -4,25 +4,25 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "~/components/ui/dialog";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
 import { Textarea } from "~/components/ui/textarea";
 import { StaffAttendanceService } from "~/services/api/staff-attendance";
 import type {
-    MarkAbsentRequest,
-    StaffAttendanceListItem,
+  MarkAbsentRequest,
+  StaffAttendanceListItem,
 } from "~/services/api/staff-attendance/dto";
 import { StaffAttendanceSchema } from "~/services/api/staff-attendance/staff-attendance.schema";
 
@@ -57,8 +57,8 @@ export default function MarkAbsentDialog({
 
     // Validate length
     if (data.reason.length > 200) {
-      form.setError("reason", { 
-        message: "Lý do không được vượt quá 200 ký tự" 
+      form.setError("reason", {
+        message: "Lý do không được vượt quá 200 ký tự",
       });
       return;
     }
@@ -66,10 +66,10 @@ export default function MarkAbsentDialog({
     setIsSubmitting(true);
     try {
       // Only send reason if it's not empty
-      const payload: MarkAbsentRequest = { 
-        reason: data.reason.trim() || "" 
+      const payload: MarkAbsentRequest = {
+        reason: data.reason.trim() || "",
       };
-      
+
       await StaffAttendanceService.markAbsent(attendance.id, payload);
       toast.success("Đánh dấu vắng mặt thành công");
       form.reset();
@@ -84,14 +84,18 @@ export default function MarkAbsentDialog({
 
   if (!attendance) return null;
 
-  const workDate = attendance.workDate ? parseISO(attendance.workDate) : new Date();
+  const workDate = attendance.workDate
+    ? parseISO(attendance.workDate)
+    : new Date();
   const formattedDate = format(workDate, "dd/MM/yyyy");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Đánh dấu vắng mặt cho một phân công ca làm việc</DialogTitle>
+          <DialogTitle>
+            Đánh dấu vắng mặt cho một phân công ca làm việc
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3 py-4">
@@ -104,7 +108,8 @@ export default function MarkAbsentDialog({
               <span className="text-muted-foreground">Ca làm việc:</span>
               <span className="font-medium">{attendance.shiftName}</span>
               <span className="text-xs text-muted-foreground">
-                ({attendance.startTime.substring(0, 5)} - {attendance.endTime.substring(0, 5)})
+                ({attendance.startTime.substring(0, 5)} -{" "}
+                {attendance.endTime.substring(0, 5)})
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -148,7 +153,11 @@ export default function MarkAbsentDialog({
                 >
                   Hủy
                 </Button>
-                <Button type="submit" variant="destructive" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Đang lưu..." : "Đánh dấu vắng mặt"}
                 </Button>
               </DialogFooter>

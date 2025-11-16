@@ -25,6 +25,7 @@ const {
   InvoiceCalculateFeesResponseSchema,
   InvoiceCalculateFeesRequestSchema,
   UpdateInvoiceRequestSchema,
+  SyncInvoiceWithOrdersResponseSchema,
 } = InvoiceSchema;
 
 // Enums
@@ -82,4 +83,8 @@ export type PaginationMetaDto = z.infer<typeof PaginationMetaSchema>;
 
 export type UpdateInvoiceRequestDto = z.infer<
   typeof UpdateInvoiceRequestSchema
+>;
+
+export type SyncInvoiceWithOrdersResponseDto = z.infer<
+  typeof SyncInvoiceWithOrdersResponseSchema
 >;

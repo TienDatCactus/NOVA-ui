@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { CreditCard, Info, Loader2 } from "lucide-react";
+import { CreditCard, Info, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type { z } from "zod";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
@@ -57,7 +58,10 @@ import {
   useInvoiceDetail,
   useUpdateInvoice,
 } from "../container/use-booking-checkout.hooks";
-import { useInvoicePayment } from "~/routes/invoices/container/invoices/mutation.hooks";
+import {
+  useInvoicePayment,
+  useSyncInvoiceWithOrders,
+} from "~/routes/invoices/container/invoices/mutation.hooks";
 import {
   Empty,
   EmptyHeader,
@@ -162,10 +166,14 @@ export default function InvoiceDetailSheet({
   const { mutate: invoicePayment, isPending: isProcessingInvoicePayment } =
     useInvoicePayment(invoiceId);
 
+  const { mutate: syncInvoice, isPending: isSyncingInvoice } =
+    useSyncInvoiceWithOrders(invoiceId);
+
   const isProcessing =
     isUpdatingInvoice ||
     isProcessingCheckoutPayment ||
-    isProcessingInvoicePayment;
+    isProcessingInvoicePayment ||
+    isSyncingInvoice;
 
   // Payment form
   const paymentForm = useForm<CheckoutPaymentFormData>({
@@ -208,6 +216,28 @@ export default function InvoiceDetailSheet({
       invoiceDetail.status || ""
     );
   }, [amount, invoiceDetail, calculatedFees]);
+
+  // Handler to sync invoice with pending orders
+  const handleSyncInvoice = () => {
+    syncInvoice(undefined, {
+      onSuccess: (data) => {
+        const { posOrdersAdded, serviceOrdersAdded, addedAmount, message } =
+          data;
+        const totalOrdersAdded =
+          (posOrdersAdded || 0) + (serviceOrdersAdded || 0);
+
+        if (totalOrdersAdded === 0) {
+          toast.info(message || "Không có order mới để đồng bộ");
+        } else {
+          toast.success(
+            `Đã đồng bộ ${totalOrdersAdded} order (POS: ${posOrdersAdded || 0}, Dịch vụ: ${
+              serviceOrdersAdded || 0
+            }). Tăng thêm ${formatMoney(addedAmount || 0).vndFormatted}`
+          );
+        }
+      },
+    });
+  };
 
   // Handler to process payment
   const handlePayment = (data: CheckoutPaymentFormData) => {
@@ -280,19 +310,41 @@ export default function InvoiceDetailSheet({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h1 className="font-semibold">Thông tin hóa đơn</h1>
-                    <Badge
-                      variant={
-                        INVOICE_STATUSES.find(
-                          (s) => s.value === invoiceDetail.status
-                        )?.variant
-                      }
-                    >
-                      {
-                        INVOICE_STATUSES.find(
-                          (s) => s.value === invoiceDetail.status
-                        )?.label
-                      }
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {isCheckoutInvoice &&
+                        invoiceDetail.status !== "Paid" &&
+                        invoiceDetail.status !== "Void" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleSyncInvoice}
+                            disabled={isSyncingInvoice}
+                            className="gap-2"
+                          >
+                            <RefreshCw
+                              className={`h-4 w-4 ${
+                                isSyncingInvoice ? "animate-spin" : ""
+                              }`}
+                            />
+                            {isSyncingInvoice
+                              ? "Đang đồng bộ..."
+                              : "Đồng bộ order"}
+                          </Button>
+                        )}
+                      <Badge
+                        variant={
+                          INVOICE_STATUSES.find(
+                            (s) => s.value === invoiceDetail.status
+                          )?.variant
+                        }
+                      >
+                        {
+                          INVOICE_STATUSES.find(
+                            (s) => s.value === invoiceDetail.status
+                          )?.label
+                        }
+                      </Badge>
+                    </div>
                   </div>
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
@@ -592,7 +644,7 @@ export default function InvoiceDetailSheet({
                                 <div className="space-y-1">
                                   <FormDescription className="flex items-center justify-between">
                                     <span className="text-muted-foreground">
-                                      Số tiền còn thiếu:
+                                      Số dư phòng:
                                     </span>
                                     <span className="font-mono font-semibold text-destructive">
                                       {

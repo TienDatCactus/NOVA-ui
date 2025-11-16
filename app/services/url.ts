@@ -44,6 +44,7 @@ const Booking = {
   addToCompletedRoomOrder: (bookingId: string) =>
     `/StaffBookings/${bookingId}/add-completed-charges`,
   confirmPayment: (id: string) => `StaffBookings/${id}/confirm-payment`,
+  orderableBookings: "StaffBookings/orderable",
 };
 
 const OTAInformation = {
@@ -167,6 +168,8 @@ const Invoices = {
   export: (date?: string) =>
     date ? `Invoices/export?date=${date}` : `Invoices/export`, //? export invoices
   update: (id: string) => `Invoices/${id}`, //? update invoice details
+  syncInvoice: (invoiceId: string) =>
+    `Invoices/${invoiceId}/sync-pending-orders`, //? sync invoice with pending orders
 };
 // Chat endpoints
 const Chat = {

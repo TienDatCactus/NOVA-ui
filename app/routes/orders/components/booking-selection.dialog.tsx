@@ -21,10 +21,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { BookingService } from "~/services/api/booking";
-import type {
-  BookingDetailResponseDto,
-  BookingListResponseDto,
-} from "~/services/api/booking/dto";
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import { Skeleton } from "~/components/ui/skeleton";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -34,9 +31,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import { useBookings } from "~/routes/reservation/bookings/container/booking-query.hooks";
-import type { BookingSchema } from "~/services/api/booking/booking.schema";
-import type z from "zod";
+import { useOrderableBookings } from "~/routes/reservation/bookings/container/booking-query.hooks";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 type BookingSelectionDialogProps = {
   open: boolean;
@@ -63,14 +59,21 @@ export default function BookingSelectionDialog({
     new Map()
   );
 
-  const { data: bookings, isLoading } = useBookings({});
+  const { data: orderableBookings, isLoading } = useOrderableBookings();
 
-  const filteredBookings = bookings?.filter(
-    (booking: z.infer<typeof BookingSchema.BookingListItemSchema>) => {
-      if (booking.status == "CheckedOut" || booking.status === "Cancelled") {
-        return false;
-      }
+  const filteredActiveBookings = orderableBookings?.activeBookings.filter(
+    (booking) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        booking.bookingCode?.toLowerCase().includes(query) ||
+        booking.customerName?.toLowerCase().includes(query)
+      );
+    }
+  );
 
+  const filteredConfirmedBookings = orderableBookings?.confirmedBookings.filter(
+    (booking) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
       return (
@@ -152,21 +155,200 @@ export default function BookingSelectionDialog({
     setSearchQuery("");
   };
 
+  const renderBookingList = (
+    bookings: any[] | undefined,
+    emptyMessage: string
+  ) => {
+    if (isLoading) {
+      return Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 p-3 rounded-lg border">
+          <Skeleton className="h-12 w-12 rounded-md" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+        </div>
+      ));
+    }
+
+    if (!bookings || bookings.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <Hotel className="h-12 w-12 text-muted-foreground mb-3" />
+          <p className="font-medium text-sm">
+            {searchQuery ? "Không tìm thấy booking" : emptyMessage}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {searchQuery ? "Thử tìm kiếm với từ khóa khác" : ""}
+          </p>
+        </div>
+      );
+    }
+
+    return bookings.map((booking) => {
+      const bookingDetail = bookingDetails.get(booking.bookingCode);
+      const isExpanded = expandedBooking === booking.bookingCode;
+      const selectedRoomId = selectedRooms.get(booking.bookingCode);
+
+      return (
+        <Collapsible
+          key={booking.bookingCode}
+          open={isExpanded}
+          onOpenChange={() => handleToggleBooking(booking.bookingCode)}
+        >
+          <div className="rounded-lg border">
+            {/* Booking Header */}
+            <CollapsibleTrigger asChild className="mb-0">
+              <div className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-semibold text-sm">
+                      {booking.bookingCode}
+                    </p>
+                    {booking.status && (
+                      <Badge variant="secondary" className="text-xs">
+                        {booking.status}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {booking.customerName}
+                    </span>
+                    {booking.checkinDate && booking.checkoutDate && (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {format(parseISO(booking.checkinDate), "dd/MM")} -{" "}
+                        {format(parseISO(booking.checkoutDate), "dd/MM")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+            </CollapsibleTrigger>
+
+            {/* Room Selection */}
+            <CollapsibleContent>
+              <div className="border-t p-4 bg-muted/20">
+                {isLoadingDetail && !bookingDetail ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                ) : bookingDetail &&
+                  bookingDetail.rooms &&
+                  bookingDetail.rooms.length > 0 ? (
+                  <div className="space-y-3">
+                    {/* Create order for entire booking */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">
+                        Tạo đơn hàng cho toàn bộ booking
+                      </Label>
+                      <Button
+                        onClick={() =>
+                          handleConfirmBookingOnly(booking.bookingCode)
+                        }
+                        className="w-full"
+                        variant="secondary"
+                      >
+                        Tạo đơn cho booking (tất cả {bookingDetail.rooms.length}{" "}
+                        phòng)
+                      </Button>
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-muted/20 px-2 text-muted-foreground">
+                          Hoặc chọn phòng cụ thể
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Select specific room */}
+                    <Label className="text-sm font-medium">
+                      Chọn phòng ({bookingDetail.rooms.length} phòng)
+                    </Label>
+                    <RadioGroup
+                      value={selectedRoomId}
+                      onValueChange={(value) =>
+                        handleRoomSelect(booking.bookingCode, value)
+                      }
+                    >
+                      <div className="space-y-2">
+                        {bookingDetail.rooms.map((room, index) => (
+                          <div
+                            key={room.bookingRoomId}
+                            className="flex items-center space-x-3 rounded-md border p-3 hover:bg-muted/50"
+                          >
+                            <RadioGroupItem
+                              value={room.bookingRoomId}
+                              id={`room-${room.bookingRoomId}`}
+                            />
+                            <Label
+                              htmlFor={`room-${room.bookingRoomId}`}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">
+                                  Phòng {room.roomName}
+                                </span>
+                                {index === 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    Phòng chính
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {room.roomTypeName} •{" "}
+                                {format(parseISO(room.fromDate), "dd/MM")} -{" "}
+                                {format(parseISO(room.toDate), "dd/MM")}
+                              </div>
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </RadioGroup>
+                    <Button
+                      onClick={() => handleConfirmBooking(booking.bookingCode)}
+                      className="w-full mt-2"
+                      disabled={!selectedRoomId}
+                    >
+                      Tạo đơn hàng cho phòng đã chọn
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Booking này không có phòng nào
+                  </p>
+                )}
+              </div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+      );
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl h-fit">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Hotel className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle>Chọn booking</DialogTitle>
-              <DialogDescription>
-                Chọn booking để tính vào hóa đơn phòng
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle>Chọn booking</DialogTitle>
+          <DialogDescription>
+            Chọn booking để tính vào hóa đơn phòng
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -181,234 +363,38 @@ export default function BookingSelectionDialog({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Booking đang ở (CheckedIn)</Label>
-            <ScrollArea
-              className="h-fit
-             rounded-md border"
-            >
-              <div className="p-4 space-y-2 overflow-y-auto max-h-96">
-                {isLoading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 p-3 rounded-lg border"
-                    >
-                      <Skeleton className="h-12 w-12 rounded-md" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-3 w-48" />
-                      </div>
-                    </div>
-                  ))
-                ) : filteredBookings && filteredBookings.length > 0 ? (
-                  filteredBookings.map((booking: any) => {
-                    const bookingDetail = bookingDetails.get(
-                      booking.bookingCode
-                    );
-                    const isExpanded = expandedBooking === booking.bookingCode;
-                    const selectedRoomId = selectedRooms.get(
-                      booking.bookingCode
-                    );
+          <Tabs defaultValue="active" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="active">
+                Đang ở ({filteredActiveBookings?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="confirmed">
+                Đã xác nhận ({filteredConfirmedBookings?.length || 0})
+              </TabsTrigger>
+            </TabsList>
 
-                    return (
-                      <Collapsible
-                        key={booking.bookingCode}
-                        open={isExpanded}
-                        onOpenChange={() =>
-                          handleToggleBooking(booking.bookingCode)
-                        }
-                      >
-                        <div className="rounded-lg border">
-                          {/* Booking Header */}
-                          <CollapsibleTrigger asChild>
-                            <div className="w-full flex items-center gap-3 ">
-                              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 flex-shrink-0">
-                                <Hotel className="h-6 w-6 text-primary" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="font-semibold text-sm">
-                                    {booking.bookingCode}
-                                  </p>
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {booking.status}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                  <span className="flex items-center gap-1">
-                                    <User className="h-3 w-3" />
-                                    {booking.customerName}
-                                  </span>
-                                  {booking.checkinDate &&
-                                    booking.checkoutDate && (
-                                      <span className="flex items-center gap-1">
-                                        <Calendar className="h-3 w-3" />
-                                        {format(
-                                          parseISO(booking.checkinDate),
-                                          "dd/MM"
-                                        )}{" "}
-                                        -{" "}
-                                        {format(
-                                          parseISO(booking.checkoutDate),
-                                          "dd/MM"
-                                        )}
-                                      </span>
-                                    )}
-                                </div>
-                              </div>
-                              {isExpanded ? (
-                                <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </div>
-                          </CollapsibleTrigger>
+            <TabsContent value="active" className="mt-4">
+              <ScrollArea className="rounded-md border">
+                <div className="p-4 space-y-2 overflow-y-auto max-h-96">
+                  {renderBookingList(
+                    filteredActiveBookings,
+                    "Không có booking đang ở"
+                  )}
+                </div>
+              </ScrollArea>
+            </TabsContent>
 
-                          {/* Room Selection */}
-                          <CollapsibleContent>
-                            <div className="border-t p-4 bg-muted/20">
-                              {isLoadingDetail && !bookingDetail ? (
-                                <div className="space-y-2">
-                                  <Skeleton className="h-4 w-full" />
-                                  <Skeleton className="h-4 w-3/4" />
-                                </div>
-                              ) : bookingDetail &&
-                                bookingDetail.rooms.length > 0 ? (
-                                <div className="space-y-3">
-                                  {/* Create order for entire booking */}
-                                  <div className="space-y-2">
-                                    <Label className="text-sm font-medium">
-                                      Tạo đơn hàng cho toàn bộ booking
-                                    </Label>
-                                    <Button
-                                      onClick={() =>
-                                        handleConfirmBookingOnly(
-                                          booking.bookingCode
-                                        )
-                                      }
-                                      className="w-full"
-                                      variant="secondary"
-                                    >
-                                      Tạo đơn cho booking (tất cả{" "}
-                                      {bookingDetail.rooms.length} phòng)
-                                    </Button>
-                                  </div>
-
-                                  <div className="relative">
-                                    <div className="absolute inset-0 flex items-center">
-                                      <span className="w-full border-t" />
-                                    </div>
-                                    <div className="relative flex justify-center text-xs uppercase">
-                                      <span className="bg-muted/20 px-2 text-muted-foreground">
-                                        Hoặc chọn phòng cụ thể
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {/* Select specific room */}
-                                  <Label className="text-sm font-medium">
-                                    Chọn phòng ({bookingDetail.rooms.length}{" "}
-                                    phòng)
-                                  </Label>
-                                  <RadioGroup
-                                    value={selectedRoomId}
-                                    onValueChange={(value) =>
-                                      handleRoomSelect(
-                                        booking.bookingCode,
-                                        value
-                                      )
-                                    }
-                                  >
-                                    <div className="space-y-2">
-                                      {bookingDetail.rooms.map(
-                                        (room, index) => (
-                                          <div
-                                            key={room.bookingRoomId}
-                                            className="flex items-center space-x-3 rounded-md border p-3 hover:bg-muted/50"
-                                          >
-                                            <RadioGroupItem
-                                              value={room.bookingRoomId}
-                                              id={`room-${room.bookingRoomId}`}
-                                            />
-                                            <Label
-                                              htmlFor={`room-${room.bookingRoomId}`}
-                                              className="flex-1 cursor-pointer"
-                                            >
-                                              <div className="flex items-center gap-2">
-                                                <span className="font-medium">
-                                                  Phòng {room.roomName}
-                                                </span>
-                                                {index === 0 && (
-                                                  <Badge
-                                                    variant="secondary"
-                                                    className="text-xs"
-                                                  >
-                                                    Phòng chính
-                                                  </Badge>
-                                                )}
-                                              </div>
-                                              <div className="text-xs text-muted-foreground mt-1">
-                                                {room.roomTypeName} •{" "}
-                                                {format(
-                                                  parseISO(room.fromDate),
-                                                  "dd/MM"
-                                                )}{" "}
-                                                -{" "}
-                                                {format(
-                                                  parseISO(room.toDate),
-                                                  "dd/MM"
-                                                )}
-                                              </div>
-                                            </Label>
-                                          </div>
-                                        )
-                                      )}
-                                    </div>
-                                  </RadioGroup>
-                                  <Button
-                                    onClick={() =>
-                                      handleConfirmBooking(booking.bookingCode)
-                                    }
-                                    className="w-full mt-2"
-                                    disabled={!selectedRoomId}
-                                  >
-                                    Tạo đơn hàng cho phòng đã chọn
-                                  </Button>
-                                </div>
-                              ) : (
-                                <p className="text-sm text-muted-foreground">
-                                  Booking này không có phòng nào
-                                </p>
-                              )}
-                            </div>
-                          </CollapsibleContent>
-                        </div>
-                      </Collapsible>
-                    );
-                  })
-                ) : (
-                  // Empty state
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Hotel className="h-12 w-12 text-muted-foreground mb-3" />
-                    <p className="font-medium text-sm">
-                      {searchQuery
-                        ? "Không tìm thấy booking"
-                        : "Không có booking CheckedIn"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {searchQuery
-                        ? "Thử tìm kiếm với từ khóa khác"
-                        : "Hiện tại không có khách đang ở"}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
+            <TabsContent value="confirmed" className="mt-4">
+              <ScrollArea className="rounded-md border">
+                <div className="p-4 space-y-2 overflow-y-auto max-h-96">
+                  {renderBookingList(
+                    filteredConfirmedBookings,
+                    "Không có booking đã xác nhận"
+                  )}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
         </div>
 
         <DialogFooter>

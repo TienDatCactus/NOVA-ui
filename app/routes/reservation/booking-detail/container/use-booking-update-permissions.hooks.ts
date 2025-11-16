@@ -3,8 +3,9 @@ import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import {
   canPerformHeavyUpdate,
   canPerformSoftUpdate,
-  getLockedRoomInvoices,
+  hasAnyLockedRoomInvoice,
   getHeavyUpdateBlockReason,
+  getDateChangeBlockReason,
   canChangeDates,
   canAddRooms,
   canRemoveRooms,
@@ -29,8 +30,8 @@ export function useBookingUpdatePermissions(
 
         // Metadata
         blockReason: "Đang tải thông tin booking...",
+        dateChangeBlockReason: "Đang tải thông tin booking...",
         hasLockedInvoices: false,
-        lockedInvoiceCount: 0,
       };
     }
 
@@ -38,8 +39,9 @@ export function useBookingUpdatePermissions(
     const status = bookingDetail.status;
 
     const canHeavyUpdate = canPerformHeavyUpdate(status, invoices);
-    const lockedInvoices = getLockedRoomInvoices(invoices);
+    const hasLockedInvoices = hasAnyLockedRoomInvoice(invoices);
     const blockReason = getHeavyUpdateBlockReason(status, invoices);
+    const dateChangeBlockReason = getDateChangeBlockReason(status, invoices);
 
     return {
       // Permissions
@@ -51,9 +53,8 @@ export function useBookingUpdatePermissions(
 
       // Metadata
       blockReason,
-      hasLockedInvoices: lockedInvoices.length > 0,
-      lockedInvoiceCount: lockedInvoices.length,
-      lockedInvoices,
+      dateChangeBlockReason,
+      hasLockedInvoices,
     };
   }, [bookingDetail]);
 }

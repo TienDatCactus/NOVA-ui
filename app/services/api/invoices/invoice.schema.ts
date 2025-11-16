@@ -212,6 +212,17 @@ const UpdateInvoiceRequestSchema = z.object({
   note: z.string("Ghi chú không hợp lệ").optional(),
 });
 
+const SyncInvoiceWithOrdersResponseSchema = z.object({
+  invoiceId: z.string().optional(),
+  invoiceNo: z.string().optional(),
+  posOrdersAdded: z.number().optional(),
+  serviceOrdersAdded: z.number().optional(),
+  previousTotal: z.number().optional(),
+  newTotal: z.number().optional(),
+  addedAmount: z.number().optional(),
+  message: z.string().optional(),
+});
+
 export const InvoiceSchema = {
   InvoiceStatusEnum,
   InvoiceTypeEnum,
@@ -236,4 +247,5 @@ export const InvoiceSchema = {
   InvoiceCalculateFeesResponseSchema,
   InvoiceCalculateFeesRequestSchema,
   UpdateInvoiceRequestSchema,
+  SyncInvoiceWithOrdersResponseSchema,
 };

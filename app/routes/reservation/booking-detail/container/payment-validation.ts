@@ -131,13 +131,5 @@ export function validatePaymentAmount(
     };
   }
 
-  // NOVA business rule: must pay in full (strict policy)
-  if (amount < balance && Math.abs(amount - balance) > EPSILON) {
-    return {
-      isValid: false,
-      error: "Phải thanh toán đủ số tiền còn thiếu",
-    };
-  }
-
   return { isValid: true };
 }

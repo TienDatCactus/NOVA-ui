@@ -103,10 +103,22 @@ function useAvailableRoomsForChange({
   });
 }
 
+function useOrderableBookings() {
+  return useQuery({
+    queryKey: ["orderable-bookings"],
+    queryFn: async () => await BookingService.getOrderableBookings(),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+}
+
 export {
   useAvailableRooms,
   useAvailableRoomsForChange,
   useBookingDetail,
   useBookingRoomsWeek,
   useBookings,
+  useOrderableBookings,
 };

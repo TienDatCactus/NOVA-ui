@@ -316,7 +316,8 @@ export default function StaffUpdateDialog({
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>
-                      Vai trò nhân sự <span className="text-destructive">*</span>
+                      Vai trò nhân sự{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <div className="flex gap-2">
                       <Select

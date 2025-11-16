@@ -4,12 +4,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "~/components/ui/dialog";
 import { StaffAttendanceService } from "~/services/api/staff-attendance";
 import type { StaffAttendanceListItem } from "~/services/api/staff-attendance/dto";
@@ -50,7 +50,9 @@ export default function MarkAttendanceDialog({
 
   if (!attendance) return null;
 
-  const workDate = attendance.workDate ? parseISO(attendance.workDate) : new Date();
+  const workDate = attendance.workDate
+    ? parseISO(attendance.workDate)
+    : new Date();
   const formattedDate = format(workDate, "dd/MM/yyyy");
   const isAlreadyPresent = attendance.status.toLowerCase() === "present";
 
@@ -71,26 +73,39 @@ export default function MarkAttendanceDialog({
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Thông tin ca làm việc</span>
             </div>
-            
+
             <div className="space-y-2 pl-6">
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground min-w-[100px]">Nhân viên:</span>
+                <span className="text-muted-foreground min-w-[100px]">
+                  Nhân viên:
+                </span>
                 <span className="font-medium">{attendance.staffName}</span>
-                <span className="text-xs text-muted-foreground">({attendance.staffCode})</span>
+                <span className="text-xs text-muted-foreground">
+                  ({attendance.staffCode})
+                </span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground min-w-[100px]">Ca làm việc:</span>
+                <span className="text-muted-foreground min-w-[100px]">
+                  Ca làm việc:
+                </span>
                 <span className="font-medium">{attendance.shiftName}</span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground min-w-[100px]">Thời gian:</span>
-                <span className="font-medium">{attendance.startTime.substring(0, 5)} - {attendance.endTime.substring(0, 5)}</span>
+                <span className="text-muted-foreground min-w-[100px]">
+                  Thời gian:
+                </span>
+                <span className="font-medium">
+                  {attendance.startTime.substring(0, 5)} -{" "}
+                  {attendance.endTime.substring(0, 5)}
+                </span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground min-w-[100px]">Ngày làm việc:</span>
+                <span className="text-muted-foreground min-w-[100px]">
+                  Ngày làm việc:
+                </span>
                 <span className="font-medium">{formattedDate}</span>
               </div>
             </div>
@@ -133,12 +148,9 @@ export default function MarkAttendanceDialog({
           >
             {isAlreadyPresent ? "Đóng" : "Hủy"}
           </Button>
-          
+
           {!isAlreadyPresent && (
-            <Button 
-              onClick={handleMarkPresent} 
-              disabled={isSubmitting}
-            >
+            <Button onClick={handleMarkPresent} disabled={isSubmitting}>
               {isSubmitting ? "Đang xử lý..." : "Xác nhận điểm danh"}
             </Button>
           )}

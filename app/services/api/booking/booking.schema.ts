@@ -20,6 +20,7 @@ const BookingStatusEnum = z.enum([
   "InHouse",
   "CheckedOut",
   "Cancelled",
+  "NoShow",
 ]);
 
 const StaffCreateBookingSchema = z
@@ -529,6 +530,55 @@ const ConfirmBookingPaymentResponseSchema = z.object({
   message: z.string().optional(),
 });
 
+const OrderableBookingResponseSchema = z.object({
+  activeBookings: z.array(
+    z.object({
+      bookingId: z.string(),
+      bookingCode: z.string(),
+      customerName: z.string(),
+      status: z.string(),
+      checkinDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+      checkoutDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+      rooms: z.array(
+        z.object({
+          bookingRoomId: z.string(),
+          roomId: z.string(),
+          roomName: z.string(),
+          roomTypeName: z.string(),
+        })
+      ),
+      hasUnpaidCheckoutInvoice: z.boolean(),
+      checkoutInvoiceBalance: z.number(),
+    })
+  ),
+
+  confirmedBookings: z.array(
+    z.object({
+      bookingId: z.string(),
+      bookingCode: z.string(),
+      customerName: z.string(),
+      checkinDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+      checkoutDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+      rooms: z.array(
+        z.object({
+          bookingRoomId: z.string(),
+          roomId: z.string(),
+          roomName: z.string(),
+          roomTypeName: z.string(),
+        })
+      ),
+    })
+  ),
+});
+
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -567,4 +617,7 @@ export const BookingSchema = {
   //! confirm booking payment
   ConfirmBookingPaymentRequestSchema,
   ConfirmBookingPaymentResponseSchema,
+
+  //! orderable bookings (for POS/Service order creation)
+  OrderableBookingResponseSchema,
 };

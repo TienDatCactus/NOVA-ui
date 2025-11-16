@@ -1,4 +1,12 @@
-import { ListTodo, Loader, Pen, Receipt, Wallet } from "lucide-react";
+import {
+  ListTodo,
+  Loader,
+  Pen,
+  Receipt,
+  Wallet,
+  XCircle,
+  UserX,
+} from "lucide-react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -45,6 +53,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { useMemo } from "react";
+import { isAfter, isBefore, isSameDay, parseISO, startOfDay } from "date-fns";
 
 interface StayDetailBarProps {
   bookingCode: string;
@@ -53,6 +62,7 @@ interface StayDetailBarProps {
   permissions: {
     canEditDates: boolean;
     blockReason?: string | null;
+    dateChangeBlockReason?: string | null;
   };
   nights: number;
   setNoteModalOpen: (open: boolean) => void;
@@ -68,12 +78,17 @@ export default function StayDetailBar({
   setNoteModalOpen,
   handleSubmit,
 }: StayDetailBarProps) {
-  const { mutate: updateBookingStatus, isPending: isUpdatingStatus } =
+  const { mutateAsync: updateBookingStatus, isPending: isUpdatingStatus } =
     useUpdateBookingStatus(bookingDetail.id!);
-  const handleUpdateBookingStatus = (
+  const handleUpdateBookingStatus = async (
     status: z.infer<typeof BookingSchema.BookingStatusEnum>
   ) => {
-    updateBookingStatus(status);
+    if (status === "CheckedIn") {
+      await updateBookingStatus("CheckedIn");
+      await updateBookingStatus("InHouse");
+    } else {
+      updateBookingStatus(status);
+    }
   };
   const { mutate: confirmPayment, isPending: isConfirmingPayment } =
     useConfirmBookingPayment(bookingDetail?.id || "");
@@ -104,6 +119,28 @@ export default function StayDetailBar({
     };
   }, [bookingDetail, paidAmount]);
 
+  // Check date conditions for button states
+  const buttonStates = useMemo(() => {
+    const today = startOfDay(new Date());
+    const checkinDate = startOfDay(parseISO(bookingDetail.checkinDate));
+
+    // Hôm nay < ngày check-in → disable cả nhận phòng và no show
+    const isTodayBeforeCheckin = isBefore(today, checkinDate);
+
+    // Hôm nay > ngày check-in → enable no show
+    const isTodayAfterCheckin = isAfter(today, checkinDate);
+
+    // Hôm nay >= ngày check-in → enable nhận phòng
+    const canCheckIn =
+      isAfter(today, checkinDate) || isSameDay(today, checkinDate);
+
+    return {
+      canCheckIn,
+      canNoShow: isTodayAfterCheckin,
+      isBeforeCheckin: isTodayBeforeCheckin,
+    };
+  }, [bookingDetail.checkinDate]);
+
   return (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
@@ -132,25 +169,54 @@ export default function StayDetailBar({
             </CardTitle>
 
             <div className="flex items-center gap-2">
-              <Button
-                onClick={() => setNoteModalOpen(true)}
-                variant="outline"
-                type="button"
-              >
-                <Pen />
-                Ghi chú
-              </Button>
-              {bookingDetail.status === "Confirmed" && (
+              {/* Cancel Button - for Pending/Confirmed */}
+              {(bookingDetail.status === "Pending" ||
+                bookingDetail.status === "Confirmed") && (
                 <Button
                   disabled={isUpdatingStatus}
-                  variant={"success"}
-                  onClick={() => handleUpdateBookingStatus("CheckedIn")}
+                  variant="destructive-outline"
+                  onClick={() => handleUpdateBookingStatus("Cancelled")}
                   type="button"
                 >
-                  <ListTodo />
-                  Nhận phòng
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Hủy booking
                 </Button>
               )}
+
+              {/* No Show Button - for Confirmed only */}
+              {buttonStates.canNoShow &&
+                bookingDetail.status === "Confirmed" && (
+                  <Button
+                    disabled={isUpdatingStatus}
+                    variant="destructive"
+                    onClick={() => handleUpdateBookingStatus("NoShow")}
+                    type="button"
+                    title={
+                      !buttonStates.canNoShow
+                        ? "Chỉ có thể đánh dấu No Show sau ngày check-in"
+                        : ""
+                    }
+                  >
+                    <UserX className="w-4 h-4 mr-2" />
+                    No Show
+                  </Button>
+                )}
+
+              {/* Check-in Button - for Confirmed (goes directly to InHouse) */}
+              {buttonStates.canCheckIn &&
+                bookingDetail.status === "Confirmed" && (
+                  <Button
+                    disabled={isUpdatingStatus}
+                    variant={"success"}
+                    onClick={() => handleUpdateBookingStatus("CheckedIn")}
+                    type="button"
+                  >
+                    <ListTodo />
+                    Nhận phòng
+                  </Button>
+                )}
+
+              {/* Payment Confirmation Dialog - for Pending */}
               {bookingDetail.status === "Pending" && (
                 <Dialog>
                   <DialogTrigger asChild>
@@ -370,6 +436,15 @@ export default function StayDetailBar({
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {!permissions.canEditDates && permissions.dateChangeBlockReason && (
+            <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground border border-border">
+              <p className="font-medium text-foreground mb-1">
+                Không thể thay đổi ngày check-in/check-out
+              </p>
+              <p>{permissions.dateChangeBlockReason}</p>
+            </div>
+          )}
+
           <div className="flex items-center gap-6">
             <FormField
               control={form.control}
@@ -380,6 +455,7 @@ export default function StayDetailBar({
                   <FormControl>
                     <DatePicker
                       {...field}
+                      defaultMonth={new Date(field.value || "")}
                       disabled={!permissions.canEditDates}
                     />
                   </FormControl>
@@ -397,6 +473,7 @@ export default function StayDetailBar({
                   <FormLabel>Ngày trả phòng</FormLabel>
                   <FormControl>
                     <DatePicker
+                      defaultMonth={new Date(field.value || "")}
                       {...field}
                       disabled={!permissions.canEditDates}
                     />
@@ -411,6 +488,15 @@ export default function StayDetailBar({
               <span className="text-lg font-bold text-primary">
                 {nights} đêm
               </span>
+            </div>
+            <div className="grid gap-2">
+              <span className="text-sm font-medium">Ghi chú:</span>
+              <Input
+                startAddon={<Pen />}
+                className="w-36"
+                placeholder="Ghi chú về đơn đặt phòng"
+                onFocus={() => setNoteModalOpen(true)}
+              />
             </div>
           </div>
         </CardContent>

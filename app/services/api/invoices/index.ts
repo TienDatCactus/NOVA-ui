@@ -32,6 +32,7 @@ const {
   InvoicePreviewRequestSchema,
   InvoiceCalculateFeesRequestSchema,
   UpdateInvoiceRequestSchema,
+  SyncInvoiceWithOrdersResponseSchema,
 } = InvoiceSchema;
 
 /**
@@ -269,6 +270,24 @@ async function updateInvoice(
     return Promise.reject(error);
   }
 }
+async function syncInvoiceWithOrders(invoiceId: string) {
+  try {
+    const idempotencyKey = crypto.randomUUID();
+    const resp = await http.post(
+      Invoices.syncInvoice(invoiceId),
+      {},
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+    return SyncInvoiceWithOrdersResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 
 export const InvoicesService = {
   getInvoiceList,
@@ -283,4 +302,5 @@ export const InvoicesService = {
   calculateInvoiceFees,
   previewBookingInvoice,
   updateInvoice,
+  syncInvoiceWithOrders,
 };
