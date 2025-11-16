@@ -64,7 +64,7 @@ export function ServiceOrderItem({ service, onRemove }: ServiceOrderItemProps) {
           Ngày thực hiện: {service.scheduledDate}
         </p>
         {service.note && (
-          <p className="text-xs text-muted-foreground italic">
+          <p className="text-xs text-muted-foreground italic truncate line-clamp-1 max-w-xs">
             Ghi chú: {service.note}
           </p>
         )}

@@ -711,19 +711,22 @@ export default function InvoiceDetailSheet({
 
             {/* Footer Actions */}
             <SheetFooter>
-              {paymentEligibility.suggestedAction === "refund" && (
-                <Button variant="destructive">Xử lý hoàn trả</Button>
-              )}
-              {paymentEligibility.canProceed && (
-                <Button
-                  onClick={paymentForm.handleSubmit(handlePayment)}
-                  disabled={!paymentValidation.isValid || isProcessing}
-                >
-                  {isProcessingCheckoutPayment || isProcessingInvoicePayment
-                    ? "Đang xử lý..."
-                    : "Xác nhận thanh toán"}
-                </Button>
-              )}
+              <div className="flex items-center justify-end gap-4 w-full">
+                {paymentEligibility.suggestedAction === "refund" && (
+                  <Button variant="destructive">Xử lý hoàn trả</Button>
+                )}
+                {paymentEligibility.canProceed && (
+                  <Button
+                    variant="success-outline"
+                    onClick={paymentForm.handleSubmit(handlePayment)}
+                    disabled={!paymentValidation.isValid || isProcessing}
+                  >
+                    {isProcessingCheckoutPayment || isProcessingInvoicePayment
+                      ? "Đang xử lý..."
+                      : "Xác nhận thanh toán"}
+                  </Button>
+                )}
+              </div>
             </SheetFooter>
           </>
         ) : null}

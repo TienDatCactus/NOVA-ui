@@ -60,11 +60,6 @@ export default function OrderItemCard({
   }, []);
 
   // Get current scheduled date or default
-  const currentDate = scheduledDate
-    ? parseISO(scheduledDate)
-    : data.checkinDate
-      ? addDays(new Date(data.checkinDate), 1)
-      : new Date();
 
   // Handler functions
   const handleNoteChange = (newNote: string) => {
@@ -159,7 +154,14 @@ export default function OrderItemCard({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={currentDate}
+                defaultMonth={
+                  data.checkinDate ? new Date(data.checkinDate) : undefined
+                }
+                selected={
+                  scheduledDate
+                    ? parseISO(scheduledDate)
+                    : addDays(new Date(data.checkinDate!), 1)
+                }
                 onSelect={handleScheduledDateChange}
                 disabled={(date: Date) => {
                   if (data.checkinDate && date < new Date(data.checkinDate)) {
@@ -171,7 +173,6 @@ export default function OrderItemCard({
                   return false;
                 }}
                 locale={vi}
-                initialFocus
               />
             </PopoverContent>
           </Popover>

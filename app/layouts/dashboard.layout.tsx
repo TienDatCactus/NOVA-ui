@@ -1,6 +1,6 @@
-import { BookDown, SearchIcon } from "lucide-react";
+import { BookDown, SearchIcon, Undo2 } from "lucide-react";
 import React from "react";
-import { Link, Outlet } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 import { AppSidebar } from "~/components/layouts/side-bar/dashboard/side-bar.dashboard";
 import { Button } from "~/components/ui/button";
 import {
@@ -23,7 +23,7 @@ import { DASHBOARD } from "~/lib/fe-url";
 import { cn } from "~/lib/utils";
 const DashboardLayout: React.FC = () => {
   const [open, setOpen] = React.useState(false);
-
+  const navigate = useNavigate();
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "k") {
@@ -41,7 +41,12 @@ const DashboardLayout: React.FC = () => {
         <AppSidebar />
         <SidebarInset className="flex-1 flex flex-col overflow-hidden relative ml-0">
           <header className="h-12 shadow-sm py-6 px-4 z-10 bg-white flex items-center w-full sticky top-0 justify-between border-b">
-            <SidebarTrigger />
+            <div className="flex gap-2 items-center">
+              <SidebarTrigger />
+              <Button onClick={() => navigate(-1)} variant={"outline"}>
+                <Undo2 /> Quay lại
+              </Button>
+            </div>
             <div className="flex gap-2 items-center">
               <Button asChild size={"sm"} variant={"info-outline"}>
                 <Link to={DASHBOARD.bookings.newBooking}>

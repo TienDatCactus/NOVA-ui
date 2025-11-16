@@ -38,7 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { formatMoney } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import {
   INVOICE_STATUSES,
   INVOICE_TYPES,
@@ -176,7 +176,7 @@ export default function CheckoutSheet({
       return true;
     }
     const hasUnpaidInvoice = existingInvoices?.some(
-      (invoice) => invoice.status !== "Paid"
+      (invoice) => invoice.invoiceType !== "Checkout" && invoice.balance! > 0
     );
     return hasUnpaidInvoice;
   }, [, existingInvoices]);
@@ -205,8 +205,8 @@ export default function CheckoutSheet({
           <SheetHeader className="p-6 pb-4 border-b">
             <SheetTitle className="text-xl">
               {isPostCheckout
-                ? `Thu tiền sau checkout - #{bookingCode}`
-                : `Checkout đơn đặt phòng #{bookingCode}`}
+                ? `Thu tiền sau checkout - #${bookingCode}`
+                : `Checkout đơn đặt phòng #${bookingCode}`}
             </SheetTitle>
             <SheetDescription>
               {isPostCheckout
@@ -613,7 +613,16 @@ export default function CheckoutSheet({
             </Empty>
           )}
           <SheetFooter className="p-6 pt-4 border-t">
-            <div className="w-full space-y-3">
+            <div
+              className={cn("w-full flex space-y-3", {
+                "justify-between":
+                  warnings.length > 0 ||
+                  (!canCheckout && blockingReasons.length > 0),
+                "justify-end":
+                  warnings.length === 0 &&
+                  (canCheckout || blockingReasons.length === 0),
+              })}
+            >
               {/* Blocking Reasons Alert */}
               {!canCheckout && blockingReasons.length > 0 && (
                 <Alert variant="destructive">
@@ -631,13 +640,10 @@ export default function CheckoutSheet({
 
               {/* Warnings Alert */}
               {warnings.length > 0 && (
-                <Alert
-                  variant="default"
-                  className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950"
-                >
-                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                  <AlertTitle className="text-yellow-600">Cảnh báo</AlertTitle>
-                  <AlertDescription className="text-yellow-600">
+                <Alert variant="warning">
+                  <AlertTriangle />
+                  <AlertTitle>Cảnh báo</AlertTitle>
+                  <AlertDescription>
                     <ul className="list-disc list-inside space-y-1">
                       {warnings.map((warning, i) => (
                         <li key={i}>{warning}</li>
@@ -649,12 +655,9 @@ export default function CheckoutSheet({
 
               {/* Post-checkout info */}
               {isPostCheckout && (
-                <Alert
-                  variant="default"
-                  className="border-blue-500 bg-blue-50 dark:bg-blue-950"
-                >
-                  <Info className="h-4 w-4 text-blue-600" />
-                  <AlertDescription className="text-blue-600">
+                <Alert variant="info">
+                  <Info className="h-4 w-4 " />
+                  <AlertDescription>
                     Booking đã checkout. Chỉ có thể thanh toán các hóa đơn còn
                     nợ.
                   </AlertDescription>

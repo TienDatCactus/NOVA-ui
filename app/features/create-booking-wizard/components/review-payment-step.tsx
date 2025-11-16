@@ -395,11 +395,13 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                             ? `Tất cả (${nights} ngày)`
                             : `${storeData.breakfastDates?.length} ngày`}{" "}
                           :{" "}
-                          <span className="font-medium">
-                            {storeData.breakfastDates
-                              ?.map((date) => format(new Date(date), "dd/MM"))
-                              .join(", ")}
-                          </span>
+                          {!storeData.isBreakfastAll && (
+                            <span className="font-medium">
+                              {storeData.breakfastDates
+                                ?.map((date) => format(new Date(date), "dd/MM"))
+                                .join(", ")}
+                            </span>
+                          )}
                         </span>
                         <span className="font-medium">
                           {formatMoney(breakfastTotal).vndFormatted}
@@ -426,6 +428,11 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                             note={service.note || ""}
                           />
                         ))}
+                      </div>
+                      <div className="flex justify-end text-sm">
+                        <span className="font-medium">
+                          {formatMoney(serviceTotal).vndFormatted}
+                        </span>
                       </div>
                     </div>
                   </>

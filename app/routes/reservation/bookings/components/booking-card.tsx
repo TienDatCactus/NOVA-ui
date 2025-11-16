@@ -66,8 +66,8 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [noShowDialogOpen, setNoShowDialogOpen] = useState(false);
 
-  const updateStatus = useUpdateBookingStatus(booking.bookingCode || "");
-  const cancelBooking = useCancelBooking(booking.bookingCode || "");
+  const updateStatus = useUpdateBookingStatus(booking.bookingId || "");
+  const cancelBooking = useCancelBooking(booking.bookingId || "");
   const navigate = useNavigate();
 
   const statusConfig = BOOKING_STATUSES.find((s) => s.value === booking.status);
@@ -80,7 +80,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     : null;
 
   const isArrivingToday = !!(checkinDate && isToday(checkinDate));
-  const isDepartingToday = !!(checkoutDate && isToday(checkoutDate));
   const isPastCheckinDate = !!(checkinDate && isAfter(new Date(), checkinDate));
 
   const canConfirmPayment = booking.status === "Pending";
@@ -98,9 +97,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const handleConfirmPayment = async () => {
     setIsProcessing(true);
     try {
-      await updateStatus.mutateAsync("Confirmed");
-      toast.success("Xác nhận thanh toán thành công");
-      refetch?.();
+      navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
     } catch {
       toast.error("Xác nhận thất bại");
     } finally {
@@ -111,7 +108,9 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const handleCheckIn = async () => {
     setIsProcessing(true);
     try {
+      await updateStatus.mutateAsync("CheckedIn");
       await updateStatus.mutateAsync("InHouse");
+
       toast.success("Check-in thành công");
       refetch?.();
     } catch {
@@ -178,6 +177,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         <Button
           size="sm"
           className="flex-1"
+          variant="success"
           onClick={handleCheckIn}
           disabled={isProcessing}
         >
@@ -191,7 +191,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       return (
         <Button
           size="sm"
-          variant="default"
+          variant="warning"
           className="flex-1"
           onClick={handleCheckout}
         >
@@ -267,12 +267,11 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         )}
       >
         <CardContent className="p-0 space-y-4">
-          {/* Header: Booking Code + Status */}
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <Link
                 to={DASHBOARD.bookings.bookingDetail(booking.bookingCode!)}
-                className="font-mono text-sm font-semibold text-primary hover:underline"
+                className="font-mono text-sm font-semibold text-primary hover:underline truncate line-clamp-1 w-20"
               >
                 {booking.bookingCode}
               </Link>
@@ -312,7 +311,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
           {/* Guest Name */}
           <div>
-            <p className="text-lg font-semibold text-foreground">
+            <p className=" font-semibold text-foreground">
               {booking.customerName || "Khách chưa xác định"}
             </p>
           </div>

@@ -26,9 +26,11 @@ const BookingStatusEnum = z.enum([
 const StaffCreateBookingSchema = z
   .object({
     source: BookingSourceEnum,
-    otaInformationId: z.string().optional(),
-    otaBookingCode: z.string().optional(),
-    roomIds: z.array(z.string()).min(1, "Phải chọn ít nhất 1 phòng cụ thể"),
+    otaInformationId: z.string("Mã thông tin OTA không hợp lệ").optional(),
+    otaBookingCode: z.string("Mã OTA booking không hợp lệ").optional(),
+    roomIds: z
+      .array(z.string("Mã phòng không hợp lệ"))
+      .min(1, "Phải chọn ít nhất 1 phòng cụ thể"),
     checkinDate: z.union([
       z.date("Ngày nhận phòng không hợp lệ"),
       z.string().refine((val) => !isNaN(Date.parse(val)), {
@@ -41,10 +43,17 @@ const StaffCreateBookingSchema = z
         message: "Ngày không hợp lệ",
       }),
     ]),
-    adultsAmount: z.number().int().min(1, "Phải có ít nhất 1 người lớn"),
-    childrenAmount: z.number().int().min(0).default(0),
-    isBreakfastAll: z.boolean().default(false),
-    breakfastDates: z.array(z.date()).optional(),
+    adultsAmount: z
+      .number("Số lượng người lớn không hợp lệ")
+      .int()
+      .min(1, "Phải có ít nhất 1 người lớn"),
+    childrenAmount: z
+      .number("Số lượng trẻ em không hợp lệ")
+      .int()
+      .min(0)
+      .default(0),
+    isBreakfastAll: z.boolean("Thông tin bữa sáng không hợp lệ").default(false),
+    breakfastDates: z.array(z.date("Ngày không hợp lệ")).optional(),
 
     guestFullName: z
       .string()
@@ -53,10 +62,13 @@ const StaffCreateBookingSchema = z
     guestEmail: z.email("Email không hợp lệ").optional().or(z.literal("")),
     guestPhone: z
       .string()
-      .min(9, "Số điện thoại không hợp lệ")
-      .max(15)
       .optional()
-      .or(z.literal("")),
+      .or(z.literal("")) // cho phép empty
+      .refine(
+        (val) =>
+          val === "" || /^((\+84|84|0)(3|5|7|8|9)[0-9]{8})$/.test(val || ""),
+        "Số điện thoại không hợp lệ"
+      ),
 
     specialRequest: z.string().optional(),
     overridePrice: z
@@ -323,6 +335,7 @@ const StaffCreateBookingResponseSchema = z.object({
   serviceInvoice: InvoiceSchema.ServiceInvoiceSchema.optional().nullable(),
 });
 const BookingListItemSchema = z.object({
+  bookingId: z.string().optional(),
   bookingCode: z.string().optional(),
   customerName: z.string().optional(),
   checkinDate: z.string().optional(),
@@ -552,7 +565,7 @@ const OrderableBookingResponseSchema = z.object({
         })
       ),
       hasUnpaidCheckoutInvoice: z.boolean(),
-      checkoutInvoiceBalance: z.number(),
+      checkoutInvoiceBalance: z.number().optional().nullable(),
     })
   ),
 

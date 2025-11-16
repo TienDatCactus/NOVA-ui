@@ -95,6 +95,7 @@ export function BreakfastSelection({
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="multiple"
+                  defaultMonth={checkinDate ? new Date(checkinDate) : undefined}
                   selected={breakfastDates}
                   onSelect={(dates) => onSelectDates(dates || [])}
                   disabled={(date) =>

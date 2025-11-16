@@ -61,7 +61,7 @@ const SIDEBAR_NAV_MAIN: Array<{
       },
       {
         title: "Danh sách đặt phòng",
-        url: "/dashboard/bookings/list",
+        url: "/dashboard/bookings",
       },
       {
         title: "Đặt phòng mới",

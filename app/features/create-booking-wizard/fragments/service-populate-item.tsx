@@ -32,9 +32,6 @@ function ServicePopulateItem({
         <p className=" text-muted-foreground">{data?.name}</p>
         <sup>x {quantity}</sup>
       </span>
-      <p className="text-muted-foreground hover:line-clamp-none line-clamp-2">
-        {note}
-      </p>
     </div>
   );
 }
