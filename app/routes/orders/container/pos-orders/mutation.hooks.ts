@@ -21,6 +21,9 @@ export function useCreatePOSOrder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail"],
+      });
     },
   });
 }

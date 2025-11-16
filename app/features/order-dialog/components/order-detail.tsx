@@ -15,52 +15,15 @@ interface OrderDetailProps {
   checkoutDate?: Date | string;
 }
 
-export default function OrderDetail({
-  onClearAll,
-  bookingId,
-  customerName,
-}: OrderDetailProps) {
+export default function OrderDetail({ onClearAll }: OrderDetailProps) {
   const selectedItems = useServiceOrderStore((s) => s.services);
   const itemCount = selectedItems.length;
 
   return (
     <div className="flex flex-col gap-4 p-2  h-100 overflow-y-auto">
-      <Card className="border py-4 shadow-sm">
-        <CardHeader className="">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold">Thông tin đơn hàng</h3>
-              {selectedItems.length > 0 && (
-                <Button variant="destructive" size="sm" onClick={onClearAll}>
-                  Xóa tất cả
-                </Button>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              <div className="flex items-center justify-between">
-                <span>Khách hàng</span>
-                <span className="text-right font-medium text-foreground">
-                  {customerName || "---"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Mã đơn</span>
-                <span className="text-right font-mono text-foreground tabular-nums">
-                  #{bookingId || "---"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span>Ngày</span>
-                <span className="text-right text-foreground tabular-nums">
-                  {format(new Date(), "dd/MM/yyyy", { locale: vi })}
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
-
+      <Button onClick={onClearAll} variant={"destructive-outline"}>
+        Xóa tất cả
+      </Button>
       <Card className="border shadow-sm flex flex-col  p-0">
         <CardContent className="p-2">
           {selectedItems.length === 0 ? (

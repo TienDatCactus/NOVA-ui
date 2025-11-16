@@ -7,7 +7,6 @@ import type { ServicesBreakfastFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { useServiceOrderStore } from "~/store/service-order.store";
 
-import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { onError, useCalculateNights } from "~/lib/utils";
 import { FormSchema } from "~/services/schema/forms.schema";
@@ -15,10 +14,17 @@ import AddServiceDialog from "~/features/order-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import { Coffee, UtensilsCrossed, Plus, AlertCircleIcon } from "lucide-react";
+import {
+  Coffee,
+  UtensilsCrossed,
+  Plus,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { ServiceOrderItem } from "../fragments/service-order-item";
 import { BreakfastSelection } from "../fragments/breakfast-selection";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
 
 interface ServicesBreakfastStepProps {
   onNext: () => void;
@@ -103,10 +109,6 @@ export function ServicesBreakfastStep({
     onNext();
   };
 
-  const hasBreakfast =
-    form.watch("isBreakfastAll") ||
-    (form.watch("breakfastDates") || []).length > 0;
-
   // Check for invalid service dates
   const getInvalidServices = () => {
     if (!storeData.checkinDate || !storeData.checkoutDate) return [];
@@ -124,7 +126,6 @@ export function ServicesBreakfastStep({
   const invalidServices = getInvalidServices();
 
   const handleConfirmServices = () => {
-    // Services are already in the global store when dialog confirms
     setServiceDialogOpen(false);
   };
 
@@ -135,9 +136,24 @@ export function ServicesBreakfastStep({
         onSubmit={form.handleSubmit(onSubmit, onError)}
         className="space-y-6"
       >
+        {/* Validation Warning - Top Level */}
+        {invalidServices.length > 0 && (
+          <Alert variant="destructive" className="shadow-sm">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>
+              Có {invalidServices.length} dịch vụ nằm ngoài khoảng thời gian lưu
+              trú
+            </AlertTitle>
+            <AlertDescription>
+              Ngày thực hiện dịch vụ phải nằm trong khoảng từ ngày nhận phòng
+              đến ngày trả phòng. Vui lòng chỉnh sửa hoặc xóa các dịch vụ này.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Breakfast Selection */}
-          <div>
+          <div className="space-y-4">
             {storeData.checkinDate && storeData.checkoutDate && (
               <BreakfastSelection
                 isBreakfastAll={form.watch("isBreakfastAll") || false}
@@ -154,30 +170,41 @@ export function ServicesBreakfastStep({
           </div>
 
           {/* Services Selection */}
-          <div>
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <UtensilsCrossed className="h-5 w-5" />
-                    Dịch vụ kèm theo
-                  </CardTitle>
-                  <Badge variant="secondary" className="text-xs">
-                    Tùy chọn
-                  </Badge>
+          <div className="space-y-4">
+            <Card className="shadow-sm">
+              <CardHeader className="space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <CardTitle className="text-lg">
+                        Dịch vụ kèm theo
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Tùy chọn thêm
+                      </p>
+                    </div>
+                  </div>
+                  {services.length > 0 && (
+                    <Badge variant="default" className="text-xs font-medium">
+                      {services.length} dịch vụ
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
+
               <CardContent className="space-y-4">
                 {/* Add Service Button */}
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
+                  className="w-full shadow-sm hover:shadow-md transition-shadow"
                   onClick={() => setServiceDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Thêm dịch vụ
                 </Button>
+
                 <AddServiceDialog
                   open={serviceDialogOpen}
                   onOpenChange={setServiceDialogOpen}
@@ -190,28 +217,16 @@ export function ServicesBreakfastStep({
                   <>
                     <Separator />
                     <div className="space-y-3">
-                      <h4 className="font-semibold text-sm">
-                        Dịch vụ đã chọn ({services.length})
-                      </h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold">
+                          Danh sách dịch vụ
+                        </h4>
+                        <Badge variant="outline" className="text-xs">
+                          {services.length} món
+                        </Badge>
+                      </div>
 
-                      {/* Validation Warning */}
-                      {invalidServices.length > 0 && (
-                        <Alert variant="destructive">
-                          <AlertCircleIcon />
-                          <AlertTitle>
-                            Có {invalidServices.length} dịch vụ có ngày thực
-                            hiện nằm ngoài khoảng thời gian lưu trú
-                          </AlertTitle>
-                          <AlertDescription>
-                            <p className="text-xs text-destructive/80 mt-1">
-                              Vui lòng chỉnh sửa hoặc xóa các dịch vụ này trước
-                              khi tiếp tục
-                            </p>
-                          </AlertDescription>
-                        </Alert>
-                      )}
-
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto p-2">
+                      <div className="space-y-2 max-h-[320px] overflow-y-auto  p-2">
                         {services.map((service) => {
                           const isInvalid = invalidServices.some(
                             (inv) => inv.itemId === service.itemId
@@ -222,7 +237,7 @@ export function ServicesBreakfastStep({
                               key={service.itemId}
                               className={
                                 isInvalid
-                                  ? "ring-2 ring-destructive rounded-md"
+                                  ? "border-dashed border border-destructive rounded-lg"
                                   : ""
                               }
                             >
@@ -237,10 +252,14 @@ export function ServicesBreakfastStep({
                     </div>
                   </>
                 ) : (
-                  <div className="text-center py-8 text-sm text-muted-foreground">
-                    <UtensilsCrossed className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                    <p>Chưa có dịch vụ nào</p>
-                    <p className="text-xs mt-1">
+                  <div className="rounded-lg border-2 border-dashed bg-muted/30 p-8 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mx-auto mb-3">
+                      <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium mb-1">
+                      Chưa có dịch vụ nào
+                    </p>
+                    <p className="text-xs text-muted-foreground">
                       Nhấn "Thêm dịch vụ" để đặt dịch vụ kèm theo
                     </p>
                   </div>
@@ -253,27 +272,6 @@ export function ServicesBreakfastStep({
                 </p>
               </CardContent>
             </Card>
-          </div>
-        </div>
-
-        {/* Summary Info */}
-        <div className="flex items-center justify-center gap-4 p-4 rounded-lg bg-muted/30">
-          <div className="flex items-center gap-2">
-            <Coffee className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              {hasBreakfast
-                ? form.watch("isBreakfastAll")
-                  ? `Bữa sáng: Tất cả ${nights} ngày`
-                  : `Bữa sáng: ${(form.watch("breakfastDates") || []).length} ngày`
-                : "Không có bữa sáng"}
-            </span>
-          </div>
-          <div className="h-4 w-px bg-border" />
-          <div className="flex items-center gap-2">
-            <UtensilsCrossed className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              Dịch vụ: {services.length} món
-            </span>
           </div>
         </div>
       </form>

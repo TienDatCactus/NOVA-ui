@@ -54,8 +54,9 @@ function useAvailableRoomsInternal(params: GetAvailableRoomsInternalParams) {
   return useQuery({
     queryKey: ["available-rooms-internal", params],
     queryFn: async () => await RoomsService.getAvailableRoomsInternal(params),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60,
     enabled: () => !!params.CheckInDate && !!params.CheckOutDate,
+    refetchOnWindowFocus: true,
   });
 }
 

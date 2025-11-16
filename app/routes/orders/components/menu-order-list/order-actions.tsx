@@ -34,9 +34,9 @@ import {
 import PaymentOrderSheet from "../payment-order.sheet";
 import AddMenuItemDialog from "./add-menu-item.dialog";
 import PrintPreviewDialog from "./print-preview.dialog";
-import UpdateScheduleDialog from "./update-schedule.dialog";
 import { toast } from "sonner";
 import { InvoiceDetailDialog } from "~/routes/invoices/components/invoice-detail/invoice-detail.dialog";
+import UpdateScheduleDialog from "../update-schedule.dialog";
 
 const { OrderPayNowRequestSchema } = OrderSchema;
 

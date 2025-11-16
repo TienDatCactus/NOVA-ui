@@ -507,7 +507,7 @@ const UpdateBookingStatusRequestSchema = z.object({
 });
 const UpdateBookingStatusResponseSchema = z.object({
   bookingId: z.string(),
-  bookingCode: z.string().optional,
+  bookingCode: z.string().optional(),
   oldStatus: BookingStatusEnum,
   newStatus: BookingStatusEnum,
   updatedAt: z.string().optional(),

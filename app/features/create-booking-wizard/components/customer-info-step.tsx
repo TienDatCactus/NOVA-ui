@@ -33,6 +33,7 @@ import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { useOTAInfo } from "../container/create-booking-query.hooks";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 const { StaffCreateBookingSchema } = BookingSchema;
 
 // Step 2 Schema: Customer Info + Detailed Booking Type
@@ -44,43 +45,42 @@ const CustomerInfoSchema = z
     source: StaffCreateBookingSchema.shape.source,
     otaInformationId: StaffCreateBookingSchema.shape.otaInformationId,
     otaBookingCode: StaffCreateBookingSchema.shape.otaBookingCode,
+    adultsAmount: StaffCreateBookingSchema.shape.adultsAmount,
+    childrenAmount: StaffCreateBookingSchema.shape.childrenAmount,
   })
   .superRefine((data, ctx) => {
-    // For OTA bookings: require otaInformationId and otaBookingCode
     if (data.source === "OTA" || data.otaInformationId) {
       if (!data.otaInformationId) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: "Vui lòng chọn nền tảng OTA",
           path: ["otaInformationId"],
         });
       }
       if (!data.otaBookingCode) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: "Mã đặt phòng OTA là bắt buộc",
           path: ["otaBookingCode"],
         });
       }
     }
 
-    // For RoomBlock: only require guestFullName (reason)
     if (data.source === "RoomBlock") {
       if (!data.guestFullName || data.guestFullName.trim().length < 2) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: "Vui lòng nhập lý do khóa phòng",
           path: ["guestFullName"],
         });
       }
-      return; // Skip other validations for RoomBlock
+      return;
     }
 
-    // For normal Direct/Agency bookings: require at least phone OR email
     if (data.source === "DirectStaff" || data.source === "Agency") {
       if (!data.guestPhone && !data.guestEmail) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: "Vui lòng nhập ít nhất số điện thoại hoặc email",
           path: ["guestPhone"],
         });
@@ -103,7 +103,7 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
     selection: bookingType === "OTA",
   });
 
-  const form = useForm<CustomerInfoFormData>({
+  const form = useForm({
     resolver: zodResolver(CustomerInfoSchema),
     defaultValues: {
       guestFullName: bookingData.guestFullName ?? "",
@@ -112,6 +112,8 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
       source: bookingData.source ?? undefined,
       otaInformationId: bookingData.otaInformationId ?? undefined,
       otaBookingCode: bookingData.otaBookingCode ?? "",
+      adultsAmount: bookingData.adultsAmount ?? 1,
+      childrenAmount: bookingData.childrenAmount ?? 0,
     },
     reValidateMode: "onChange",
     mode: "onChange",
@@ -125,6 +127,8 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
       source: bookingData.source,
       otaInformationId: bookingData.otaInformationId ?? undefined,
       otaBookingCode: bookingData.otaBookingCode ?? "",
+      adultsAmount: bookingData.adultsAmount ?? 1,
+      childrenAmount: bookingData.childrenAmount ?? 0,
     });
   }, [bookingData, form]);
 
@@ -149,6 +153,8 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
         otaInformationId:
           bookingType === "OTA" ? values.otaInformationId : undefined,
         otaBookingCode: bookingType === "OTA" ? values.otaBookingCode : "",
+        adultsAmount: values.adultsAmount,
+        childrenAmount: values.childrenAmount,
       });
 
       toast.success(
@@ -339,7 +345,6 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="guestEmail"
@@ -364,7 +369,52 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
             )}
           />
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="adultsAmount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Số người lớn <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Counter
+                    {...field}
+                    minValue={1}
+                    maxValue={10}
+                    isDisabled={form.formState.isSubmitting}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          <FormField
+            control={form.control}
+            name="childrenAmount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Số trẻ em{" "}
+                  <span className="text-muted-foreground text-xs">
+                    (&lt; 6 tuổi)
+                  </span>
+                </FormLabel>
+                <FormControl>
+                  <Counter
+                    {...field}
+                    minValue={0}
+                    maxValue={10}
+                    isDisabled={form.formState.isSubmitting}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         {/* Conditional Fields based on Booking Type */}
       </form>
     </Form>

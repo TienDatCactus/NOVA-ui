@@ -52,7 +52,10 @@ export function useCompleteServiceOrder() {
 
   return useMutation({
     mutationFn: (orderId: string) => OrderService.completeServiceOrder(orderId),
-    onSuccess: () => {
+    onSuccess: (_, orderId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", orderId],
+      });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
@@ -66,7 +69,10 @@ export function useCancelServiceOrder() {
 
   return useMutation({
     mutationFn: (orderId: string) => OrderService.cancelServiceOrder(orderId),
-    onSuccess: () => {
+    onSuccess: (_, orderId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", orderId],
+      });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
@@ -86,7 +92,10 @@ export function usePayServiceOrderNow() {
       orderId: string;
       data: ServiceOrderPayNowRequestDto;
     }) => OrderService.payServiceOrderNow(orderId, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", variables.orderId],
+      });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
@@ -99,14 +108,21 @@ export function useUpdateServiceOrderSchedule() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       orderId,
-      data,
+      scheduledAt,
     }: {
       orderId: string;
-      data: SetScheduledServiceOrderRequestDto;
-    }) => OrderService.setScheduledServiceOrder(orderId, data),
-    onSuccess: () => {
+      scheduledAt: Date;
+    }) => {
+      return await OrderService.setScheduledServiceOrder(orderId, {
+        scheduledAt: scheduledAt.toISOString(),
+      });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", variables.orderId],
+      });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });

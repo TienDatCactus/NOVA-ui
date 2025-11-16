@@ -26,7 +26,6 @@ import { CustomerInfoStep } from "./components/customer-info-step";
 import ReviewPaymentStep from "./components/review-payment-step";
 import { RoomSelectionStep } from "./components/room-selection-step";
 import { ServicesBreakfastStep } from "./components/services-breakfast-step";
-import { StayDetailsStep } from "./components/stay-details-step";
 
 const steps = [
   {
@@ -36,31 +35,27 @@ const steps = [
   },
   {
     id: 2,
-    title: "Thông tin khách",
+    title: "Thông tin khách & lưu trú",
     description: "Thông tin liên hệ",
   },
+
   {
     id: 3,
-    title: "Chi tiết lưu trú",
-    description: "Ngày và số lượng khách",
-  },
-  {
-    id: 4,
     title: "Chọn phòng",
     description: "Lựa chọn phòng",
   },
   {
-    id: 5,
+    id: 4,
     title: "Bữa sáng & Dịch vụ",
     description: "Dịch vụ bổ sung",
   },
   {
-    id: 6,
+    id: 5,
     title: "Thanh toán",
     description: "Xác nhận và thanh toán",
   },
   {
-    id: 7,
+    id: 6,
     title: "Hoàn tất",
     description: "Đặt phòng thành công",
   },
@@ -70,13 +65,10 @@ export default function BookingFlow() {
   const [currentStep, { goToNextStep, goToPrevStep }] = useStep(7);
   const { data: bookingData, setData } = useCreateBookingStore();
   const customerInfoFormRef = useRef<HTMLFormElement>(null);
-  const stayDetailsFormRef = useRef<HTMLFormElement>(null);
   const roomSelectionFormRef = useRef<HTMLFormElement>(null);
   const servicesBreakfastFormRef = useRef<HTMLFormElement>(null);
   const reviewPaymentFormRef = useRef<HTMLFormElement>(null);
   const handleNext = () => {
-    const isRoomBlock = bookingData.bookingType === "RoomBlock";
-
     // For step 1, validate booking type selection
     if (currentStep === 1) {
       if (!bookingData.bookingType) {
@@ -87,24 +79,20 @@ export default function BookingFlow() {
       customerInfoFormRef.current.requestSubmit();
       return;
     }
-    // For step 3, trigger form submission
-    if (currentStep === 3 && stayDetailsFormRef.current) {
-      stayDetailsFormRef.current.requestSubmit();
-      return;
-    }
+
     // For step 4 (room selection), skip to step 6 for RoomBlock
-    if (currentStep === 4 && roomSelectionFormRef.current) {
+    if (currentStep === 3 && roomSelectionFormRef.current) {
       roomSelectionFormRef.current.requestSubmit();
       return;
     }
     // For step 5 (services), trigger form submission for normal bookings
     // RoomBlock will skip this step entirely
-    if (currentStep === 5 && servicesBreakfastFormRef.current) {
+    if (currentStep === 4 && servicesBreakfastFormRef.current) {
       servicesBreakfastFormRef.current.requestSubmit();
       return;
     }
     // For step 6, trigger form submission to create booking
-    if (currentStep === 6 && reviewPaymentFormRef.current) {
+    if (currentStep === 5 && reviewPaymentFormRef.current) {
       reviewPaymentFormRef.current.requestSubmit();
       return;
     }
@@ -115,9 +103,9 @@ export default function BookingFlow() {
     const isRoomBlock = bookingData.bookingType === "RoomBlock";
 
     // Skip services step when going back from review for RoomBlock
-    if (currentStep === 6 && isRoomBlock) {
-      goToPrevStep(); // Go to step 5
-      goToPrevStep(); // Go to step 4 (room selection)
+    if (currentStep === 5 && isRoomBlock) {
+      goToPrevStep(); // Go to step 4
+      goToPrevStep(); // Go to step 3 (room selection)
       return;
     }
 
@@ -247,22 +235,6 @@ export default function BookingFlow() {
         return (
           <div className="space-y-6">
             <CardHeader className="px-0 pt-0">
-              <CardTitle>Chi tiết lưu trú</CardTitle>
-              <CardDescription>
-                Chọn ngày nhận/trả phòng và số lượng khách
-              </CardDescription>
-            </CardHeader>
-            <StayDetailsStep
-              onNext={goToNextStep}
-              formRef={stayDetailsFormRef}
-            />
-          </div>
-        );
-
-      case 4:
-        return (
-          <div className="space-y-6">
-            <CardHeader className="px-0 pt-0">
               <CardTitle>Chọn phòng</CardTitle>
               <CardDescription>
                 Lựa chọn phòng phù hợp cho kỳ nghỉ
@@ -275,7 +247,7 @@ export default function BookingFlow() {
           </div>
         );
 
-      case 5:
+      case 4:
         return (
           <div className="space-y-6">
             <CardHeader className="px-0 pt-0">
@@ -291,12 +263,12 @@ export default function BookingFlow() {
           </div>
         );
 
-      case 6:
+      case 5:
         return (
           <ReviewPaymentStep onNext={goToNextStep} ref={reviewPaymentFormRef} />
         );
 
-      case 7:
+      case 6:
         return (
           <div className="space-y-6">
             <CardHeader className="px-0 pt-0">
@@ -375,8 +347,8 @@ export default function BookingFlow() {
         <CardContent className="p-6 md:px-8 ">
           {renderStepContent()}
         </CardContent>
-        <CardFooter className="mt-8 flex items-center justify-between border-t">
-          {currentStep > 1 && currentStep < 7 && (
+        <CardFooter className="mt-8 flex gap-4 items-center justify-end border-t">
+          {currentStep > 1 && currentStep < 6 && (
             <Button
               variant="outline"
               onClick={handlePrevious}
@@ -386,10 +358,10 @@ export default function BookingFlow() {
               <span>Quay lại</span>
             </Button>
           )}
-          {currentStep < 7 ? (
+          {currentStep < 6 ? (
             <Button onClick={handleNext}>
               <span>
-                {currentStep === 6 ? "Xác nhận đặt phòng" : "Tiếp theo"}
+                {currentStep === 5 ? "Xác nhận đặt phòng" : "Tiếp theo"}
               </span>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -398,7 +370,6 @@ export default function BookingFlow() {
               <Button
                 onClick={() => {
                   useCreateBookingStore.getState().reset();
-                  window.location.reload();
                 }}
               >
                 Tạo đặt phòng mới

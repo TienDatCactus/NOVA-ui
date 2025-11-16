@@ -43,6 +43,7 @@ import {
 } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
+import { useMemo } from "react";
 
 interface StayDetailBarProps {
   bookingCode: string;
@@ -83,6 +84,25 @@ export default function StayDetailBar({
       paidAmount: 0,
     },
   });
+
+  // Watch paidAmount để tính số tiền còn lại động
+  const paidAmount = paymentForm.watch("paidAmount");
+
+  const paymentSummary = useMemo(() => {
+    const totalAmount = bookingDetail?.totalAmount || 0;
+    const previouslyPaid = bookingDetail?.paidAmount || 0;
+    const currentPaid = paidAmount || 0;
+    const remaining = totalAmount - previouslyPaid - currentPaid;
+
+    return {
+      totalAmount,
+      previouslyPaid,
+      currentPaid,
+      remaining,
+      newTotal: previouslyPaid + currentPaid,
+    };
+  }, [bookingDetail, paidAmount]);
+
   return (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
@@ -196,7 +216,6 @@ export default function StayDetailBar({
                             )}
                           />
 
-                          {/* Paid Amount */}
                           <FormField
                             control={paymentForm.control}
                             name="paidAmount"
@@ -206,29 +225,48 @@ export default function StayDetailBar({
                                 <FormControl>
                                   <Input
                                     type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                    max={
+                                      paymentSummary.totalAmount -
+                                      paymentSummary.previouslyPaid
+                                    }
                                     placeholder="Nhập số tiền"
                                     {...field}
-                                    onChange={(e) =>
-                                      field.onChange(
-                                        parseFloat(e.target.value) || 0
-                                      )
-                                    }
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      // Chỉ parse khi có giá trị
+                                      if (value === "") {
+                                        field.onChange(0);
+                                      } else {
+                                        const parsed = parseFloat(value);
+                                        field.onChange(
+                                          isNaN(parsed) ? 0 : parsed
+                                        );
+                                      }
+                                    }}
                                   />
                                 </FormControl>
                                 <FormDescription>
-                                  Số tiền tối thiểu: 0.01 VNĐ
+                                  Tối thiểu: 0.01 VNĐ • Tối đa:{" "}
+                                  {(
+                                    paymentSummary.totalAmount -
+                                    paymentSummary.previouslyPaid
+                                  ).toLocaleString("vi-VN")}{" "}
+                                  VNĐ
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          <Card className="p-4 bg-white gap-0 rounded-lg space-y-2">
+
+                          <Card className="p-4 bg-muted gap-0 rounded-lg space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">
                                 Tổng tiền:
                               </span>
                               <span className="font-mono font-semibold">
-                                {bookingDetail?.totalAmount?.toLocaleString(
+                                {paymentSummary.totalAmount.toLocaleString(
                                   "vi-VN"
                                 )}{" "}
                                 VNĐ
@@ -239,23 +277,59 @@ export default function StayDetailBar({
                                 Đã thanh toán:
                               </span>
                               <span className="font-mono">
-                                {bookingDetail?.paidAmount?.toLocaleString(
+                                {paymentSummary.previouslyPaid.toLocaleString(
                                   "vi-VN"
                                 )}{" "}
                                 VNĐ
                               </span>
                             </div>
+                            {paymentSummary.currentPaid > 0 && (
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Thanh toán lần này:
+                                </span>
+                                <span className="font-mono text-primary font-semibold">
+                                  +
+                                  {paymentSummary.currentPaid.toLocaleString(
+                                    "vi-VN"
+                                  )}{" "}
+                                  VNĐ
+                                </span>
+                              </div>
+                            )}
                             <Separator />
                             <div className="flex justify-between text-sm font-semibold">
                               <span>Còn lại:</span>
-                              <span className="font-mono text-destructive">
-                                {(
-                                  (bookingDetail?.totalAmount || 0) -
-                                  (bookingDetail?.paidAmount || 0)
-                                ).toLocaleString("vi-VN")}{" "}
+                              <span
+                                className={`font-mono ${
+                                  paymentSummary.remaining === 0
+                                    ? "text-green-600"
+                                    : paymentSummary.remaining < 0
+                                      ? "text-orange-600"
+                                      : "text-destructive"
+                                }`}
+                              >
+                                {paymentSummary.remaining.toLocaleString(
+                                  "vi-VN"
+                                )}{" "}
                                 VNĐ
                               </span>
                             </div>
+                            {paymentSummary.remaining === 0 &&
+                              paymentSummary.currentPaid > 0 && (
+                                <div className="text-xs text-green-600 text-center pt-2">
+                                  ✓ Đã thanh toán đủ
+                                </div>
+                              )}
+                            {paymentSummary.remaining < 0 && (
+                              <div className="text-xs text-orange-600 text-center pt-2">
+                                Thanh toán thừa{" "}
+                                {Math.abs(
+                                  paymentSummary.remaining
+                                ).toLocaleString("vi-VN")}{" "}
+                                VNĐ
+                              </div>
+                            )}
                           </Card>
                         </div>
 

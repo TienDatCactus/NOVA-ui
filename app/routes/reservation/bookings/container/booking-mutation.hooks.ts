@@ -65,9 +65,18 @@ function useUpdateBookingStatus(bookingId: string) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      toast.success("Cập nhật trạng thái thành công");
+
       queryClient.invalidateQueries({
-        queryKey: ["booking-detail", bookingId],
+        queryKey: ["bookings-detail"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-rooms-week"],
       });
     },
   });

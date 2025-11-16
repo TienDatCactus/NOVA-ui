@@ -337,18 +337,12 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         </div>
         <Separator />
         <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
-          <Button
-            variant={"success"}
-            onClick={() => setCheckoutOpen(true)}
-            disabled={
-              !bookingDetail?.id ||
-              bookingDetail?.status === "CheckedOut" ||
-              bookingDetail?.status === "Cancelled"
-            }
-          >
-            <DoorOpen className="w-4 h-4 mr-2" />
-            Checkout và Thanh toán
-          </Button>
+          {bookingDetail?.status === "CheckedIn" && (
+            <Button variant={"success"} onClick={() => setCheckoutOpen(true)}>
+              <DoorOpen className="w-4 h-4 mr-2" />
+              Checkout và Thanh toán
+            </Button>
+          )}
 
           <Button
             type="button"
