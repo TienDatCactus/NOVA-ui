@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { ChatSchema } from "~/services/schema/chat.schema";
+import { ChatSchema } from "~/services/api/chat/chat.schema";
 
 // Extract types from schemas
 export type ChatSender = z.infer<typeof ChatSchema.ChatSenderSchema>;

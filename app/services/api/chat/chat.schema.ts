@@ -10,30 +10,6 @@ const ChatEntryFailureReasonSchema = z.enum([
   "INVALID_ROOM_TOKEN",
 ]);
 
-// Chat Entry Response (Success)
-const ChatEntrySuccessResponseSchema = z.object({
-  canChat: z.literal(true),
-  sessionId: z.string().uuid(),
-  roomName: z.string(),
-  customerName: z.string(),
-  checkinDate: z.string(),
-  checkoutDate: z.string(),
-});
-
-// Chat Entry Response (Failure)
-const ChatEntryFailureResponseSchema = z.object({
-  canChat: z.literal(false),
-  reason: ChatEntryFailureReasonSchema,
-  message: z.string(),
-  roomName: z.string().optional(),
-});
-
-// Union type for Chat Entry Response
-const ChatEntryResponseSchema = z.discriminatedUnion("canChat", [
-  ChatEntrySuccessResponseSchema,
-  ChatEntryFailureResponseSchema,
-]);
-
 // Chat Message
 const ChatMessageSchema = z.object({
   id: z.string().uuid(),
@@ -132,9 +108,6 @@ export const ChatSchema = {
   ChatSenderSchema,
   ChatSessionStatusSchema,
   ChatEntryFailureReasonSchema,
-  ChatEntrySuccessResponseSchema,
-  ChatEntryFailureResponseSchema,
-  ChatEntryResponseSchema,
   ChatMessageSchema,
   ChatMessagesResponseSchema,
   ChatSessionSchema,

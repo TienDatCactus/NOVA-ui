@@ -1,6 +1,6 @@
 import http from "~/lib/http";
 import { Chat } from "~/services/url";
-import { ChatSchema } from "~/services/schema/chat.schema";
+import { ChatSchema } from "~/services/api/chat/chat.schema";
 import type {
   ChatEntryResponseDto,
   ChatSessionDto,

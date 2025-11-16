@@ -26,6 +26,8 @@ import { CustomerInfoStep } from "./components/customer-info-step";
 import ReviewPaymentStep from "./components/review-payment-step";
 import { RoomSelectionStep } from "./components/room-selection-step";
 import { ServicesBreakfastStep } from "./components/services-breakfast-step";
+import { Link } from "react-router";
+import { DASHBOARD } from "~/lib/fe-url";
 
 const steps = [
   {
@@ -367,6 +369,10 @@ export default function BookingFlow() {
             </Button>
           ) : (
             <div className="flex gap-2">
+              <Button variant={"outline"} asChild>
+                <Link to={DASHBOARD.bookings.list}>Tạo đặt phòng mới</Link>
+              </Button>
+
               <Button
                 onClick={() => {
                   useCreateBookingStore.getState().reset();
