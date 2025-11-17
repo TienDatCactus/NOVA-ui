@@ -7,24 +7,18 @@ import type { ServicesBreakfastFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { useServiceOrderStore } from "~/store/service-order.store";
 
+import { AlertCircle, Plus, UtensilsCrossed } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
+import { Separator } from "~/components/ui/separator";
+import AddServiceDialog from "~/features/order-dialog";
 import { onError, useCalculateNights } from "~/lib/utils";
 import { FormSchema } from "~/services/schema/forms.schema";
-import AddServiceDialog from "~/features/order-dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
-import {
-  Coffee,
-  UtensilsCrossed,
-  Plus,
-  AlertCircle,
-  CheckCircle2,
-} from "lucide-react";
-import { ServiceOrderItem } from "../fragments/service-order-item";
 import { BreakfastSelection } from "../fragments/breakfast-selection";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { Button } from "~/components/ui/button";
+import { ServiceOrderTable } from "../fragments/service-order-table";
 
 interface ServicesBreakfastStepProps {
   onNext: () => void;
@@ -109,7 +103,6 @@ export function ServicesBreakfastStep({
     onNext();
   };
 
-  // Check for invalid service dates
   const getInvalidServices = () => {
     if (!storeData.checkinDate || !storeData.checkoutDate) return [];
 
@@ -151,9 +144,9 @@ export function ServicesBreakfastStep({
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Breakfast Selection */}
-          <div className="space-y-4">
+          <div className="space-y-4 h-full">
             {storeData.checkinDate && storeData.checkoutDate && (
               <BreakfastSelection
                 isBreakfastAll={form.watch("isBreakfastAll") || false}
@@ -170,8 +163,8 @@ export function ServicesBreakfastStep({
           </div>
 
           {/* Services Selection */}
-          <div className="space-y-4">
-            <Card className="shadow-sm">
+          <div className="space-y-4 h-full">
+            <Card className="shadow-sm h-full">
               <CardHeader className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
@@ -210,6 +203,8 @@ export function ServicesBreakfastStep({
                   onOpenChange={setServiceDialogOpen}
                   onConfirm={handleConfirmServices}
                   customerName={storeData.guestFullName}
+                  checkinDate={storeData.checkinDate}
+                  checkoutDate={storeData.checkoutDate}
                 />
 
                 {/* Services List */}
@@ -226,28 +221,14 @@ export function ServicesBreakfastStep({
                         </Badge>
                       </div>
 
-                      <div className="space-y-2 max-h-[320px] overflow-y-auto  p-2">
-                        {services.map((service) => {
-                          const isInvalid = invalidServices.some(
-                            (inv) => inv.itemId === service.itemId
-                          );
-
-                          return (
-                            <div
-                              key={service.itemId}
-                              className={
-                                isInvalid
-                                  ? "border-dashed border border-destructive rounded-lg"
-                                  : ""
-                              }
-                            >
-                              <ServiceOrderItem
-                                service={service}
-                                onRemove={() => removeById(service.itemId)}
-                              />
-                            </div>
-                          );
-                        })}
+                      <div className="max-h-[400px] overflow-y-auto">
+                        <ServiceOrderTable
+                          services={services}
+                          onRemove={removeById}
+                          invalidServiceIds={invalidServices.map(
+                            (s) => s.itemId
+                          )}
+                        />
                       </div>
                     </div>
                   </>

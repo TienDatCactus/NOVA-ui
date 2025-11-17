@@ -6,13 +6,19 @@ import OrderItemCard from "./order-item.card";
 
 interface OrderItemWrapperProps {
   itemId: string;
+  checkinDate?: Date | string;
+  checkoutDate?: Date | string;
 }
 
 /**
  * Wrapper component that fetches item details from global store and API
  * Connects OrderItemCard to the global service-order store
  */
-export default function OrderItemWrapper({ itemId }: OrderItemWrapperProps) {
+export default function OrderItemWrapper({
+  itemId,
+  checkinDate,
+  checkoutDate,
+}: OrderItemWrapperProps) {
   // Get item from global store
   const item = useServiceOrderStore((s) =>
     s.services.find((service) => service.itemId === itemId)
@@ -59,6 +65,12 @@ export default function OrderItemWrapper({ itemId }: OrderItemWrapperProps) {
   }
 
   return (
-    <OrderItemCard itemId={itemId} itemName={itemName} unitPrice={unitPrice} />
+    <OrderItemCard
+      itemId={itemId}
+      itemName={itemName}
+      unitPrice={unitPrice}
+      checkinDate={checkinDate}
+      checkoutDate={checkoutDate}
+    />
   );
 }

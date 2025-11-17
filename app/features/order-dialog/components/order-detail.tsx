@@ -1,65 +1,78 @@
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useMemo } from "react";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { formatMoney } from "~/lib/utils";
-import OrderItemWrapper from "../fragments/order-item-wrapper";
+import { PackageSearch } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
 import { useServiceOrderStore } from "~/store/service-order.store";
+import OrderItemWrapper from "../fragments/order-item-wrapper";
+import { Separator } from "~/components/ui/separator";
 
 interface OrderDetailProps {
-  onClearAll: () => void;
-  bookingId?: string;
   customerName?: string;
   checkinDate?: Date | string;
   checkoutDate?: Date | string;
 }
 
-export default function OrderDetail({ onClearAll }: OrderDetailProps) {
+export default function OrderDetail({
+  customerName,
+  checkinDate,
+  checkoutDate,
+}: OrderDetailProps) {
   const selectedItems = useServiceOrderStore((s) => s.services);
   const itemCount = selectedItems.length;
 
   return (
-    <div className="flex flex-col gap-4 p-2  h-100 overflow-y-auto">
-      <Button onClick={onClearAll} variant={"destructive-outline"}>
-        Xóa tất cả
-      </Button>
-      <Card className="border shadow-sm flex flex-col  p-0">
-        <CardContent className="p-2">
-          {selectedItems.length === 0 ? (
-            <div className="text-sm text-muted-foreground text-center py-12">
-              <p>Chưa có món nào</p>
-              <p className="text-xs mt-1">Vui lòng chọn dịch vụ hoặc món ăn</p>
-            </div>
-          ) : (
-            <div className="space-y-2 ">
-              {selectedItems.map((item) => (
-                <OrderItemWrapper key={item.itemId} itemId={item.itemId} />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+    <Card className="flex flex-col h-full p-4 overflow-y-auto flex-1">
+      <CardHeader className="p-0">
+        <CardTitle>Khách hàng: {customerName}</CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">
+          {checkinDate && checkoutDate
+            ? `Từ ${format(new Date(checkinDate), "dd/MM/yyyy", { locale: vi })} đến ${format(
+                new Date(checkoutDate),
+                "dd/MM/yyyy",
+                { locale: vi }
+              )}`
+            : "Chưa chọn ngày"}
+        </CardDescription>
+      </CardHeader>
+      <Separator />
+      <div className="space-y-2 p-2 overflow-y-auto max-h-[50vh] flex-1">
+        {selectedItems.length === 0 ? (
+          <Empty className="gap-2">
+            <EmptyMedia variant={"icon"}>
+              <PackageSearch className="h-8 w-8 text-muted-foreground" />
+            </EmptyMedia>
 
-      {/* Order Summary Card */}
-      {selectedItems.length > 0 && (
-        <Card className="border shadow-sm bg-muted/40  p-0">
-          <CardContent className="p-4 space-y-3">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Số lượng món:</span>
-                <span className="tabular-nums font-medium">{itemCount}</span>
-              </div>
-            </div>
+            <EmptyTitle>Chưa có món nào</EmptyTitle>
 
-            <div className="flex justify-between items-center pt-2 border-t">
-              <span className="font-medium text-muted-foreground text-sm">
-                Tổng cộng sẽ được tính khi xác nhận
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+            <EmptyDescription>
+              Vui lòng chọn dịch vụ hoặc món ăn
+            </EmptyDescription>
+          </Empty>
+        ) : (
+          <div className="space-y-2">
+            {selectedItems.map((item) => (
+              <OrderItemWrapper
+                key={item.itemId}
+                itemId={item.itemId}
+                checkinDate={checkinDate}
+                checkoutDate={checkoutDate}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }

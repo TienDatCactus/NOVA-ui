@@ -6,7 +6,6 @@ import {
   Calendar,
   CircleAlert,
   DollarSign,
-  Loader2,
   Users,
   Utensils,
   Wallet,
@@ -37,16 +36,8 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 
-import { formatMoney, onError, useCalculateNights } from "~/lib/utils";
-import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
-import type { StaffBookingPricePreviewRequestDto } from "~/services/api/booking/dto";
-import { FormSchema } from "~/services/schema/forms.schema";
-import type { ReviewPaymentFormData } from "~/services/types/forms.types";
-import { useCreateBookingStore } from "~/store/create-booking.store";
-import { useServiceOrderStore } from "~/store/service-order.store";
-import useCreateBookingMutation from "../container/create-booking-mutation.hooks";
-import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
-import ServicePopulateItem from "../fragments/service-populate-item";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -56,8 +47,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { formatMoney, onError, useCalculateNights } from "~/lib/utils";
+import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
+import type { StaffBookingPricePreviewRequestDto } from "~/services/api/booking/dto";
+import { FormSchema } from "~/services/schema/forms.schema";
+import type { ReviewPaymentFormData } from "~/services/types/forms.types";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { useCreateBookingStore } from "~/store/create-booking.store";
+import { useServiceOrderStore } from "~/store/service-order.store";
+import useCreateBookingMutation from "../container/create-booking-mutation.hooks";
+import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
+import ServicePopulateItem from "../fragments/service-populate-item";
 
 const { ReviewPaymentFormSchema } = FormSchema;
 
@@ -376,6 +376,12 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                       ))}
                     </div>
                   )}
+                  <span className="flex gap-2 justify-end border-t-2 pt-2">
+                    Tổng:{" "}
+                    <span className="text-primary">
+                      {formatMoney(roomTotal).vndFormatted}
+                    </span>
+                  </span>
                 </div>
 
                 {/* Breakfast */}
@@ -422,6 +428,7 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                       <div className="flex flex-wrap gap-4">
                         {serviceOrderServices.map((service, idx) => (
                           <ServicePopulateItem
+                            key={idx}
                             itemType={service.itemType}
                             id={service.itemId}
                             quantity={service.quantity}
@@ -429,11 +436,12 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                           />
                         ))}
                       </div>
-                      <div className="flex justify-end text-sm">
-                        <span className="font-medium">
+                      <span className="flex gap-2 justify-end ">
+                        Tổng:{" "}
+                        <span className="text-primary">
                           {formatMoney(serviceTotal).vndFormatted}
                         </span>
-                      </div>
+                      </span>
                     </div>
                   </>
                 )}
@@ -528,19 +536,19 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Chọn phương thức thanh toán" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="Cash">Tiền mặt</SelectItem>
-                              <SelectItem value="Card">Thẻ</SelectItem>
-                              <SelectItem value="BankTransfer">
-                                Chuyển khoản
-                              </SelectItem>
-                              <SelectItem value="OTAPrepaid">
-                                OTA Prepaid
-                              </SelectItem>
+                              {PAYMENT_METHODS.map((method) => (
+                                <SelectItem
+                                  key={method.value}
+                                  value={method.value}
+                                >
+                                  {method.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormDescription>
@@ -563,15 +571,13 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                               <FormControl>
                                 <Input
                                   type="number"
+                                  max={finalTotal}
                                   placeholder={`Tổng cần thanh toán: ${formatMoney(finalTotal).vndFormatted}`}
                                   {...field}
                                   value={field.value ?? ""}
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-                                    field.onChange(
-                                      value === "" ? undefined : Number(value)
-                                    );
-                                  }}
+                                  onChange={(event) =>
+                                    field.onChange(+event.target.value)
+                                  }
                                 />
                               </FormControl>
                               <FormDescription>
@@ -584,14 +590,25 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                                           .vndFormatted
                                       }
                                     </p>
-                                    <p className="text-muted-foreground">
-                                      Còn lại:{" "}
-                                      {
-                                        formatMoney(
-                                          finalTotal - Number(field.value)
-                                        ).vndFormatted
-                                      }
-                                    </p>
+                                    {Number(field.value) <= finalTotal ? (
+                                      <p className="text-muted-foreground">
+                                        Còn lại:{" "}
+                                        {
+                                          formatMoney(
+                                            finalTotal - Number(field.value)
+                                          ).vndFormatted
+                                        }
+                                      </p>
+                                    ) : (
+                                      <p className="text-destructive font-medium">
+                                        Vượt quá tổng hóa đơn{" "}
+                                        {
+                                          formatMoney(
+                                            Number(field.value) - finalTotal
+                                          ).vndFormatted
+                                        }
+                                      </p>
+                                    )}
                                   </div>
                                 ) : (
                                   "Nhập số tiền khách đã thanh toán (cọc hoặc toàn bộ)"
@@ -601,7 +618,6 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                             </FormItem>
                           )}
                         />
-
                         <FormField
                           control={form.control}
                           name="roomPayment.paymentNote"
