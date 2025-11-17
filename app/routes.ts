@@ -47,6 +47,7 @@ export default [
       ]),
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
+      route("chat", "routes/chat/chat.tsx"),
       route("users", "routes/users/users.tsx"),
       ...prefix("staff", [
         index("routes/staff/staff/staff.tsx"),
@@ -56,6 +57,7 @@ export default [
       ]),
     ]),
   ]),
+  route("chat", "routes/customer/chat/chat.tsx"),
 
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

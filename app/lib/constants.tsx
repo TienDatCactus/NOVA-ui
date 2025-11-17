@@ -25,6 +25,18 @@ import {
 
 const SERVICE_CATEGORIES = ["Dịch vụ", "Thức ăn", "Đồ uống"];
 
+// Translation supported languages
+const SUPPORTED_LANGUAGES = [
+  { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "ja", label: "日本語", flag: "🇯🇵" },
+  { code: "ko", label: "한국어", flag: "🇰🇷" },
+  { code: "zh", label: "中文", flag: "🇨🇳" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "es", label: "Español", flag: "🇪🇸" },
+];
+
 const ROOM_COUNT = 13;
 const DAYS_COUNT = 7;
 const SUBS_PER_DAY = 2;
@@ -280,5 +292,6 @@ export {
   SIDEBAR_PROJECTS,
   SIDEBAR_TEAMS,
   SUBS_PER_DAY,
+  SUPPORTED_LANGUAGES,
   totalSubCols,
 };

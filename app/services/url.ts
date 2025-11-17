@@ -173,7 +173,7 @@ const Invoices = {
 };
 // Chat endpoints
 const Chat = {
-  entry: "chat/entry",
+  entry: (roomToken: string) => `chat/entry?roomToken=${roomToken}`,
   messages: (sessionId: string) => `chat/sessions/${sessionId}/messages`,
   session: (sessionId: string) => `chat/sessions/${sessionId}`,
   sendMessage: "chat/messages",
@@ -235,6 +235,11 @@ const Discount = {
   apply: "discount/apply",
   override: "discount/override",
 };
+
+const Translation = {
+  translate: "Translation/translate",
+  detect: (text: string) => `Translation/detect-language?text=${text}`,
+};
 export {
   Auth,
   User,
@@ -258,4 +263,5 @@ export {
   StaffAttendance,
   Chat,
   Discount,
+  Translation,
 };
