@@ -233,6 +233,25 @@ const Discount = {
   apply: "discount/apply",
   override: "discount/override",
 };
+
+const StaffPayroll = {
+  grid: "StaffPayrolls/grid",
+  generate: "StaffPayrolls/generate",
+  detail: (id: string) => `StaffPayrolls/${id}`,
+  update: (id: string) => `StaffPayrolls/${id}`,
+  generateSingle: (staffId: string) =>
+    `StaffPayrolls/staff/${staffId}/generate`,
+  applyUnusedLeave: (id: string) => `StaffPayrolls/${id}/apply-unused-leave`,
+  lock: (id: string) => `StaffPayrolls/${id}/lock`,
+  unlock: (id: string) => `StaffPayrolls/${id}/unlock`,
+  getComponents: (id: string) => `StaffPayrolls/${id}/components`,
+  addComponent: (id: string) => `StaffPayrolls/${id}/components`,
+  updateComponent: (componentId: string) =>
+    `StaffPayrolls/components/${componentId}`,
+  deleteComponent: (componentId: string) =>
+    `StaffPayrolls/components/${componentId}`,
+};
+
 export {
   Auth,
   User,
@@ -256,4 +275,5 @@ export {
   StaffAttendance,
   Chat,
   Discount,
+  StaffPayroll,
 };

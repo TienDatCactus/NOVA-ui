@@ -151,6 +151,10 @@ const SIDEBAR_NAV_MAIN: Array<{
         title: "Ngày nghỉ",
         url: "/dashboard/staff/holidays",
       },
+      {
+        title: "Bảng lương",
+        url: "/dashboard/staff/payrolls",
+      },
     ],
   },
   {

@@ -53,6 +53,7 @@ export default [
         route("work-shifts", "routes/staff/work-shifts/work-shifts.tsx"),
         route("holidays", "routes/staff/holidays/holidays.tsx"),
         route("schedules", "routes/staff/schedules/schedules.tsx"),
+        route("payrolls", "routes/staff/payrolls/payrolls.tsx"),
       ]),
     ]),
   ]),
