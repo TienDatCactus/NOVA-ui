@@ -8,6 +8,7 @@ const {
   ChatSendHttpMessageRequestSchema,
   ChatSendHttpMessageResponseSchema,
   StaffChatInboxResponseSchema,
+  StaffChatInboxItemSchema,
 } = ChatSchema;
 
 // Response DTOs
@@ -25,3 +26,5 @@ export type StaffChatInboxResponseDto = z.infer<
 export type ChatSendHttpMessageRequestDto = z.infer<
   typeof ChatSendHttpMessageRequestSchema
 >;
+
+export type StaffChatInboxItemDto = z.infer<typeof StaffChatInboxItemSchema>;

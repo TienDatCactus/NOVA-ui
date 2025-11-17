@@ -1,8 +1,13 @@
 import http from "~/lib/http";
-import type { TranslateTextRequestDto, TranslateTextResponseDto } from "./dto";
+import type {
+  DetectLanguageResponseDto,
+  TranslateTextRequestDto,
+  TranslateTextResponseDto,
+} from "./dto";
 import { Translation } from "~/services/url";
 import { TranslationSchema } from "./translation.schema";
-const { TranslateTextResponseSchema } = TranslationSchema;
+const { TranslateTextResponseSchema, DetectLanguageResponseSchema } =
+  TranslationSchema;
 
 async function translateText(
   data: TranslateTextRequestDto
@@ -16,12 +21,15 @@ async function translateText(
   }
 }
 
-async function detectLanguage(text: string) {
+async function detectLanguage(
+  text: string
+): Promise<DetectLanguageResponseDto> {
   try {
     const resp = await http.get(Translation.detect(text));
-    return resp.data;
+    return DetectLanguageResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
+    return Promise.reject(error);
   }
 }
 export const TranslationService = {

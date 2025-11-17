@@ -68,4 +68,5 @@ export const ChatSchema = {
   ChatSendHttpMessageRequestSchema,
   ChatSendHttpMessageResponseSchema,
   StaffChatInboxResponseSchema,
+  StaffChatInboxItemSchema,
 };

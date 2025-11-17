@@ -3,8 +3,6 @@ import { useSearchParams, useNavigate } from "react-router";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { Switch } from "~/components/ui/switch";
-import { Label } from "~/components/ui/label";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -20,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Send, Loader2, Languages, Globe } from "lucide-react";
+import { Send, Loader2, Globe, ChevronUp } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
   useChatEntry,
@@ -28,159 +26,29 @@ import {
   useChatSession,
 } from "~/routes/chat/container/query.hooks";
 import { useTranslateMessage } from "~/routes/chat/container/translation.hooks";
-import { signalRChatService, type ChatMessage } from "~/lib/signalr";
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { useChatConnection } from "~/routes/chat/container/use-chat-connection.hooks";
+import { MessageBubble } from "~/routes/chat/fragments/message-bubble";
+import type { ChatMessage } from "~/lib/signalr";
 import { toast } from "sonner";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
 import { SUPPORTED_LANGUAGES } from "~/lib/constants";
 import type { Route } from "./+types/chat";
 import Image from "~/components/ui/image";
 
-interface MessageBubbleProps {
-  message: ChatMessage;
-  onTranslate?: (message: ChatMessage) => void;
-  isGuest?: boolean;
-}
-
-const MessageBubble = ({
-  message,
-  onTranslate,
-  isGuest = false,
-}: MessageBubbleProps) => {
-  const isStaff = message.sender === "Staff";
-  const isSystem = message.sender === "System";
-  const isOwnMessage = isGuest && message.sender === "Guest";
-
-  if (isSystem) {
-    return (
-      <div className="flex justify-center my-4">
-        <div className="bg-muted px-4 py-2 rounded-full">
-          <p className="text-xs text-muted-foreground">{message.message}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex items-start gap-3",
-        isOwnMessage ? "justify-end" : "justify-start"
-      )}
-    >
-      {!isOwnMessage && (
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>
-            {isStaff ? message.staffName?.[0] || "S" : "K"}
-          </AvatarFallback>
-        </Avatar>
-      )}
-      <div
-        className={cn(
-          "max-w-[70%] rounded-lg p-3",
-          isOwnMessage
-            ? "bg-primary text-primary-foreground rounded-br-none"
-            : "bg-muted rounded-bl-none"
-        )}
-      >
-        {isStaff && message.staffName && (
-          <p className="text-xs font-semibold mb-1 opacity-90">
-            {message.staffName}
-          </p>
-        )}
-        <p className="text-sm whitespace-pre-wrap break-words">
-          {message.message}
-        </p>
-
-        {message.translatedText && message.showTranslation && (
-          <div
-            className={cn(
-              "mt-2 pt-2 border-t",
-              isOwnMessage
-                ? "border-primary-foreground/20"
-                : "border-muted-foreground/20"
-            )}
-          >
-            <p
-              className={cn(
-                "text-xs mb-1",
-                isOwnMessage ? "opacity-70" : "text-muted-foreground"
-              )}
-            >
-              Đã dịch từ {message.detectedLanguage || "ngôn ngữ khác"}
-            </p>
-            <p className="text-sm whitespace-pre-wrap break-words opacity-90">
-              {message.translatedText}
-            </p>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between mt-1 gap-2">
-          <p
-            className={cn(
-              "text-xs",
-              isOwnMessage ? "opacity-70" : "text-muted-foreground"
-            )}
-          >
-            {format(parseISO(message.createdAt), "HH:mm", { locale: vi })}
-          </p>
-
-          {!isSystem && onTranslate && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className={cn(
-                "h-6 px-2 py-0",
-                isOwnMessage
-                  ? "hover:bg-primary-foreground/20 text-primary-foreground"
-                  : "hover:bg-muted-foreground/10"
-              )}
-              onClick={() => onTranslate(message)}
-              disabled={message.isTranslating}
-            >
-              {message.isTranslating ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <>
-                  <Languages className="h-3 w-3 mr-1" />
-                  <span className="text-xs">
-                    {message.showTranslation ? "Bản gốc" : "Dịch"}
-                  </span>
-                </>
-              )}
-            </Button>
-          )}
-        </div>
-      </div>
-      {isOwnMessage && (
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>B</AvatarFallback>
-        </Avatar>
-      )}
-    </div>
-  );
-};
-
 export default function GuestChat({}: Route.ComponentProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const roomToken = searchParams.get("roomToken");
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const {
-    userLanguage,
-    autoTranslateEnabled,
-    setUserLanguage,
-    setAutoTranslate,
-  } = useChatTranslationStore();
-  const { translateMessage, autoTranslateMessage } = useTranslateMessage();
+  const { userLanguage, setUserLanguage } = useChatTranslationStore();
+  const { translateMessage } = useTranslateMessage();
 
   const currentLanguage =
     SUPPORTED_LANGUAGES.find((lang) => lang.code === userLanguage) ||
@@ -198,12 +66,49 @@ export default function GuestChat({}: Route.ComponentProps) {
     isLoading: isLoadingSession,
     error: sessionError,
   } = useChatSession(sessionId || "", !!sessionId);
+
+  // Query for messages with manual pagination
   const {
-    data: messageHistory,
+    data: messagesData,
     isLoading: isLoadingMessages,
     error: messagesError,
-  } = useChatMessages(sessionId || "", !!sessionId);
+    isFetching,
+  } = useChatMessages(sessionId || "", !!sessionId, {
+    page: currentPage,
+    pageSize: 50,
+  });
 
+  const {
+    messages,
+    isConnecting,
+    updateMessage,
+    sendMessage: sendMessageViaSignalR,
+    loadMessages,
+  } = useChatConnection({
+    sessionId,
+    isGuest: true,
+  });
+
+  // Accumulate messages from multiple pages
+  useEffect(() => {
+    if (messagesData) {
+      setAllMessages((prev) => {
+        // Prepend new page messages (older messages go to top)
+        const existingIds = new Set(prev.map((m) => m.id));
+        const newMessages = messagesData.filter((m) => !existingIds.has(m.id));
+        return [...newMessages, ...prev];
+      });
+    }
+  }, [messagesData]);
+
+  // Load accumulated messages into SignalR state
+  useEffect(() => {
+    if (allMessages.length > 0) {
+      loadMessages(allMessages);
+    }
+  }, [allMessages, loadMessages]);
+
+  // Entry validation
   useEffect(() => {
     if (!roomToken) {
       setErrorMessage("Không tìm thấy mã phòng. Vui lòng quét lại mã QR.");
@@ -228,58 +133,18 @@ export default function GuestChat({}: Route.ComponentProps) {
     }
   }, [roomToken, entry, entryError]);
 
-  useEffect(() => {
-    if (!sessionId) return;
-
-    const connectSignalR = async () => {
-      setIsConnecting(true);
-      try {
-        await signalRChatService.connect(import.meta.env.VITE_CHAT_HUB_URL);
-        await signalRChatService.joinSession(sessionId);
-
-        signalRChatService.onReceiveMessage(async (message: ChatMessage) => {
-          if (autoTranslateEnabled && message.sender === "Staff") {
-            const translatedMessage = await autoTranslateMessage(message);
-            setMessages((prev) => {
-              if (prev.some((m) => m.id === translatedMessage.id)) return prev;
-              return [...prev, translatedMessage];
-            });
-          } else {
-            setMessages((prev) => {
-              if (prev.some((m) => m.id === message.id)) return prev;
-              return [...prev, message];
-            });
-          }
-        });
-
-        console.log("[Guest Chat] Connected to session:", sessionId);
-      } catch (error) {
-        toast.error("Không thể kết nối chat. Vui lòng tải lại trang.");
-        console.error(error);
-      } finally {
-        setIsConnecting(false);
-      }
-    };
-
-    connectSignalR();
-
-    return () => {
-      if (sessionId) {
-        signalRChatService.leaveSession(sessionId);
-      }
-      signalRChatService.offAll("ReceiveMessage");
-    };
-  }, [sessionId, autoTranslateEnabled, autoTranslateMessage]);
-
-  useEffect(() => {
-    if (messageHistory) {
-      setMessages(messageHistory);
-    }
-  }, [messageHistory]);
-
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Load more handler
+  const handleLoadMore = () => {
+    setCurrentPage((prev) => prev + 1);
+  };
+
+  // Check if there might be more messages
+  const hasMore = messagesData && messagesData.length === 50;
 
   // Debug logging
   useEffect(() => {
@@ -292,12 +157,6 @@ export default function GuestChat({}: Route.ComponentProps) {
     });
   }, [sessionId, session, isLoadingSession, sessionError, entry]);
 
-  const updateMessage = (messageId: string, updates: Partial<ChatMessage>) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === messageId ? { ...msg, ...updates } : msg))
-    );
-  };
-
   const handleTranslate = (message: ChatMessage) => {
     translateMessage(message, updateMessage);
   };
@@ -306,15 +165,10 @@ export default function GuestChat({}: Route.ComponentProps) {
     if (!inputMessage.trim() || !sessionId) return;
 
     try {
-      await signalRChatService.sendMessage({
-        sessionId,
-        message: inputMessage.trim(),
-        sender: "Guest",
-      });
+      await sendMessageViaSignalR(inputMessage);
       setInputMessage("");
     } catch (error) {
-      toast.error("Không thể gửi tin nhắn");
-      console.error(error);
+      // Error already toasted in hook
     }
   };
 
@@ -430,27 +284,42 @@ export default function GuestChat({}: Route.ComponentProps) {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <div className="flex items-center gap-2 border rounded-md px-3 py-1.5">
-            <Switch
-              id="auto-translate"
-              checked={autoTranslateEnabled}
-              onCheckedChange={setAutoTranslate}
-            />
-            <Label htmlFor="auto-translate" className="text-sm cursor-pointer">
-              Tự động dịch
-            </Label>
-          </div>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
+        {/* Load more button */}
+        {hasMore && (
+          <div className="flex justify-center py-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLoadMore}
+              disabled={isFetching}
+            >
+              {isFetching ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Đang tải...
+                </>
+              ) : (
+                <>
+                  <ChevronUp className="h-4 w-4 mr-2" />
+                  Xem thêm tin nhắn cũ
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
+        {/* Connection status */}
         {isConnecting && (
           <div className="flex justify-center">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         )}
 
+        {/* Messages list */}
         {messages.map((msg) => (
           <MessageBubble
             key={msg.id}

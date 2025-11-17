@@ -11,7 +11,11 @@ const TranslateTextResponseSchema = z.object({
   detectedSourceLanguage: z.string(),
 });
 
+const DetectLanguageResponseSchema = z.object({
+  language: z.string(),
+});
 export const TranslationSchema = {
   TranslateTextRequestSchema,
   TranslateTextResponseSchema,
+  DetectLanguageResponseSchema,
 };

@@ -27,28 +27,28 @@ export function useChatSession(sessionId: string, enabled: boolean = true) {
   });
 }
 
-// Query: Get chat messages
+// Query: Get chat messages with manual pagination
 export function useChatMessages(
   sessionId: string,
   enabled: boolean = true,
   params?: ChatMessagesParams
 ) {
   return useQuery({
-    queryKey: ["chat-messages", sessionId],
+    queryKey: ["chat-messages", sessionId, params],
     queryFn: async () =>
       await ChatService.getChatSessionMessages(sessionId, params),
     enabled: enabled && !!sessionId,
-    staleTime: 0, // Real-time via SignalR, this is just initial load
-    refetchInterval: false, // Don't poll, rely on SignalR
+    staleTime: 0,
+    refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 }
 
-// Query: Get staff inbox
+// Query: Get staff inbox with manual pagination
 export function useStaffInbox(params?: ChatMessagesParams) {
   return useQuery({
-    queryKey: ["staff-chat-inbox"],
+    queryKey: ["staff-chat-inbox", params],
     queryFn: async () => await ChatService.getStaffChatInbox(params),
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 30 * 1000, // Poll every 30s for new sessions
