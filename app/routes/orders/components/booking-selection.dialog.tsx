@@ -255,7 +255,6 @@ export default function BookingSelectionDialog({
                           handleConfirmBookingOnly(booking.bookingCode)
                         }
                         className="w-full"
-                        variant="secondary"
                       >
                         Tạo đơn cho booking (tất cả {bookingDetail.rooms.length}{" "}
                         phòng)
@@ -323,6 +322,7 @@ export default function BookingSelectionDialog({
                     <Button
                       onClick={() => handleConfirmBooking(booking.bookingCode)}
                       className="w-full mt-2"
+                      variant="secondary"
                       disabled={!selectedRoomId}
                     >
                       Tạo đơn hàng cho phòng đã chọn

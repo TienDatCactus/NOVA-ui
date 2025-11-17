@@ -12,7 +12,6 @@ const ServicesBreakfastFormSchema = z.object({
     BookingSchema.StaffCreateBookingSchema.shape.isBreakfastAll.optional(),
   breakfastDates:
     BookingSchema.StaffCreateBookingSchema.shape.breakfastDates.optional(),
-  // Add checkin/checkout dates for validation context
   checkinDate: z.union([z.date(), z.string()]).optional(),
   checkoutDate: z.union([z.date(), z.string()]).optional(),
 });

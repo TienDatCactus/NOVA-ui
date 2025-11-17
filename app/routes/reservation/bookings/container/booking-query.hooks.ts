@@ -108,7 +108,7 @@ function useOrderableBookings() {
     queryKey: ["orderable-bookings"],
     queryFn: async () => await BookingService.getOrderableBookings(),
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchOnReconnect: false,
     refetchOnMount: false,
   });

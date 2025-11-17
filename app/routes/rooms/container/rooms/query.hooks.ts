@@ -52,7 +52,7 @@ function useRoomBookingHistory({
 
 function useAvailableRoomsInternal(
   params: GetAvailableRoomsInternalParams,
-  enabled = true
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ["available-rooms-internal", params],

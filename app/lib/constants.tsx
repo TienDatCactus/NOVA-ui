@@ -53,7 +53,7 @@ const SIDEBAR_NAV_MAIN: Array<{
     items: [
       {
         title: "Báo cáo",
-        url: "/dashboard/bookings",
+        url: "/dashboard/bookings/reports",
       },
       {
         title: "Kiểm tra phòng trống",
@@ -61,7 +61,7 @@ const SIDEBAR_NAV_MAIN: Array<{
       },
       {
         title: "Danh sách đặt phòng",
-        url: "/dashboard/bookings",
+        url: "/dashboard/bookings/list",
       },
       {
         title: "Đặt phòng mới",
@@ -211,10 +211,11 @@ const COMMAND_BAR_ROUTES: Array<{
   icon: LucideIcon;
   href: string;
 }> = [
-  // Auth
-
-  // Bookings
-  { name: "Báo cáo đặt phòng", icon: BarChart3, href: "/dashboard/bookings" },
+  {
+    name: "Báo cáo đặt phòng",
+    icon: BarChart3,
+    href: "/dashboard/bookings/reports",
+  },
   { name: "Sơ đồ phòng", icon: Grid3x3, href: "/dashboard/bookings/grid" },
   { name: "Danh sách đặt phòng", icon: List, href: "/dashboard/bookings/list" },
   {

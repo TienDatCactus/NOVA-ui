@@ -1,7 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, CircleX, Loader, Users } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import {
+  Armchair,
+  CalendarIcon,
+  CircleX,
+  Icon,
+  Loader,
+  Search,
+  Users,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -27,6 +35,14 @@ import { useCalculateNights } from "~/lib/utils";
 import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { AvailableRoomTypeCard } from "../fragments/available-room.card";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "~/components/ui/empty";
 
 const RoomSelectionSchema = z.object({
   dateRange: z
@@ -56,7 +72,7 @@ function onError(errors: any) {
 
 export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
   const { data: bookingData, setData } = useCreateBookingStore();
-
+  const [shouldFetch, setShouldFetch] = useState(false);
   const form = useForm<RoomSelectionFormData>({
     resolver: zodResolver(RoomSelectionSchema),
     defaultValues: {
@@ -79,14 +95,20 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
     checkinDate: dateRange?.from,
     checkoutDate: dateRange?.to,
   });
-
-  const { data: availableRooms, isPending } = useAvailableRoomsInternal({
-    CheckInDate: dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "",
-    CheckOutDate: dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "",
-    Guests:
-      Number(bookingData.adultsAmount || 1) +
-      Number(bookingData.childrenAmount || 0),
-  });
+  const {
+    data: availableRooms,
+    isPending,
+    refetch,
+  } = useAvailableRoomsInternal(
+    {
+      CheckInDate: dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "",
+      CheckOutDate: dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "",
+      Guests:
+        Number(bookingData.adultsAmount || 1) +
+        Number(bookingData.childrenAmount || 0),
+    },
+    shouldFetch
+  );
 
   // Calculate guest capacity validation
   const capacityValidation = useMemo(() => {
@@ -342,13 +364,12 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
                           </Badge>
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto " align="start">
                         <Calendar
                           mode="range"
                           selected={field.value}
                           onSelect={(range) => {
                             field.onChange(range);
-                            // Auto-clear validation errors when date changes
                             if (range?.from && range?.to) {
                               form.clearErrors("dateRange");
                             }
@@ -359,8 +380,20 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
                             return date < today;
                           }}
                           numberOfMonths={2}
-                          className="rounded-md border bg-card shadow-sm p-4"
                         />
+                        <div className="flex items-center justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setShouldFetch(true);
+                              refetch();
+                            }}
+                          >
+                            <Search className=" h-4 w-4" />
+                            Tìm phòng trống
+                          </Button>
+                        </div>
                       </PopoverContent>
                     </Popover>
                   </FormControl>
@@ -398,29 +431,16 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
 
         {/* Available Rooms */}
         <div className="space-y-2">
-          {isPending ? (
-            <Card className="p-12">
-              <div className="flex flex-col items-center justify-center gap-4">
-                <Loader className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">
-                  Đang tìm phòng trống...
-                </p>
-              </div>
-            </Card>
-          ) : !availableRooms || availableRooms.length === 0 ? (
-            <Card className="p-12">
-              <div className="flex flex-col items-center justify-center gap-4">
-                <CircleX className="h-12 w-12 text-muted-foreground" />
-                <div className="text-center">
-                  <h3 className="font-semibold text-lg mb-2">
-                    Không có phòng trống
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Vui lòng thử chọn ngày khác
-                  </p>
-                </div>
-              </div>
-            </Card>
+          {!availableRooms || availableRooms.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Armchair />
+                </EmptyMedia>
+                <EmptyTitle>Không có phòng trống</EmptyTitle>
+                <EmptyDescription>Vui lòng thử chọn ngày khác</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <div className="space-y-4 grid-cols-1 md:grid-cols-2 gap-4 grid">
               {availableRooms.map((roomType) => (

@@ -229,10 +229,9 @@ export default function OrderActions({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Gửi đơn xuống bếp/bar?</AlertDialogTitle>
+                <AlertDialogTitle>Hoàn tất đơn hàng</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Đơn hàng sẽ được chuyển sang trạng thái Hoàn tất và gửi xuống
-                  bếp.
+                  Đơn hàng sẽ được chuyển sang trạng thái Hoàn tất
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -28,7 +28,7 @@ export default [
         route("menu-categories", "routes/menu/menu-categories.tsx"),
       ]),
       ...prefix("bookings", [
-        index("routes/reservation/bookings/list.tsx"),
+        route("list", "routes/reservation/bookings/list.tsx"),
         route("reports", "routes/reservation/reports/reports.tsx"),
         route("grid", "routes/reservation/bookings/grid.tsx"),
         route(

@@ -8,7 +8,7 @@ import {
   Globe,
 } from "lucide-react";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Alert, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -68,6 +68,7 @@ const steps = [
 ];
 
 export default function BookingFlow() {
+  const [loading, setLoading] = useState(false);
   const [currentStep, { goToNextStep, goToPrevStep }] = useStep(7);
   const { data: bookingData, setData } = useCreateBookingStore();
   const bookingTypeForm = useForm({
@@ -87,17 +88,15 @@ export default function BookingFlow() {
   const servicesBreakfastFormRef = useRef<HTMLFormElement>(null);
   const reviewPaymentFormRef = useRef<HTMLFormElement>(null);
   const handleNext = () => {
-    // For step 1, validate booking type selection
     if (currentStep === 1) {
       bookingTypeForm.handleSubmit(() => {
         updateBookingData(
           "bookingType",
           bookingTypeForm.getValues().bookingType
         );
-        goToNextStep();
       }, onError)();
       if (!bookingData.bookingType) {
-        return; // Don't proceed if no booking type selected
+        return;
       }
     }
     if (currentStep === 2 && customerInfoFormRef.current) {
@@ -105,20 +104,24 @@ export default function BookingFlow() {
       return;
     }
 
-    // For step 4 (room selection), skip to step 6 for RoomBlock
     if (currentStep === 3 && roomSelectionFormRef.current) {
       roomSelectionFormRef.current.requestSubmit();
       return;
     }
-    // For step 5 (services), trigger form submission for normal bookings
-    // RoomBlock will skip this step entirely
     if (currentStep === 4 && servicesBreakfastFormRef.current) {
       servicesBreakfastFormRef.current.requestSubmit();
       return;
     }
-    // For step 6, trigger form submission to create booking
     if (currentStep === 5 && reviewPaymentFormRef.current) {
-      reviewPaymentFormRef.current.requestSubmit();
+      setLoading(true);
+      try {
+        reviewPaymentFormRef.current.requestSubmit();
+      } catch (error) {
+        console.error("Error submitting review payment form:", error);
+        return;
+      } finally {
+        setLoading(false);
+      }
       return;
     }
     goToNextStep();
@@ -127,10 +130,9 @@ export default function BookingFlow() {
   const handlePrevious = () => {
     const isRoomBlock = bookingData.bookingType === "RoomBlock";
 
-    // Skip services step when going back from review for RoomBlock
     if (currentStep === 5 && isRoomBlock) {
-      goToPrevStep(); // Go to step 4
-      goToPrevStep(); // Go to step 3 (room selection)
+      goToPrevStep();
+      goToPrevStep();
       return;
     }
 
@@ -315,7 +317,7 @@ export default function BookingFlow() {
       case 6:
         return (
           <div className="space-y-6">
-            <CardHeader className="px-0 pt-0">
+            <CardHeader className="px-0 py-0 text-center">
               <CardTitle>Đặt phòng thành công!</CardTitle>
               <CardDescription>
                 Đơn đặt phòng đã được tạo thành công
@@ -328,7 +330,7 @@ export default function BookingFlow() {
                   <Check className="h-8 w-8 text-green-600" />
                 </div>
               </div>
-              <p className="text-gray-700">
+              <p className="text-gray-700 max-w-md text-center mx-auto">
                 Đơn đặt phòng của bạn đã được tạo thành công. Bạn có thể xem chi
                 tiết hoặc tạo đơn đặt phòng mới.
               </p>
@@ -403,7 +405,7 @@ export default function BookingFlow() {
             </Button>
           )}
           {currentStep < 6 ? (
-            <Button onClick={handleNext}>
+            <Button disabled={loading} onClick={handleNext}>
               <span>
                 {currentStep === 5 ? "Xác nhận đặt phòng" : "Tiếp theo"}
               </span>
@@ -412,7 +414,9 @@ export default function BookingFlow() {
           ) : (
             <div className="flex gap-2">
               <Button variant={"outline"} asChild>
-                <Link to={DASHBOARD.bookings.list}>Tạo đặt phòng mới</Link>
+                <Link to={DASHBOARD.bookings.list}>
+                  Xem danh sách đặt phòng
+                </Link>
               </Button>
 
               <Button

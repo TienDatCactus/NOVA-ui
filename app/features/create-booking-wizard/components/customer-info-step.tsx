@@ -66,6 +66,24 @@ const CustomerInfoSchema = z
       }
     }
 
+    // Agency validation - reuses otaBookingCode field for agency booking code
+    if (data.source === "Agency") {
+      if (!data.otaBookingCode) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Mã đặt phòng đại lý là bắt buộc",
+          path: ["otaBookingCode"],
+        });
+      }
+      if (!data.guestPhone && !data.guestEmail) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Vui lòng nhập ít nhất số điện thoại hoặc email của đại lý",
+          path: ["guestPhone"],
+        });
+      }
+    }
+
     if (data.source === "RoomBlock") {
       if (!data.guestFullName || data.guestFullName.trim().length < 2) {
         ctx.addIssue({
@@ -136,7 +154,6 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
     try {
       let sourceValue = values.source;
 
-      // Set source based on bookingType
       if (bookingType === "RoomBlock") {
         sourceValue = "RoomBlock";
       } else if (bookingType === "OTA") {
@@ -152,7 +169,10 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
         source: sourceValue as any,
         otaInformationId:
           bookingType === "OTA" ? values.otaInformationId : undefined,
-        otaBookingCode: bookingType === "OTA" ? values.otaBookingCode : "",
+        otaBookingCode:
+          bookingType === "OTA" || sourceValue === "Agency"
+            ? values.otaBookingCode
+            : "",
         adultsAmount: values.adultsAmount,
         childrenAmount: values.childrenAmount,
       });
@@ -294,6 +314,31 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
             />
           </div>
         )}
+
+        {bookingType === "Direct" && form.watch("source") === "Agency" && (
+          <FormField
+            control={form.control}
+            name="otaBookingCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Mã đặt phòng đại lý{" "}
+                  <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Nhập mã đặt phòng từ đại lý"
+                    className="bg-secondary"
+                  />
+                </FormControl>
+                <FormDescription>Mã booking do đại lý cung cấp</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
@@ -303,7 +348,10 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
                 <FormLabel>
                   {bookingType === "RoomBlock"
                     ? "Lý do khóa phòng"
-                    : "Họ và tên"}{" "}
+                    : bookingType === "Direct" &&
+                        form.watch("source") === "Agency"
+                      ? "Tên đại lý"
+                      : "Họ và tên"}{" "}
                   <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
@@ -312,7 +360,10 @@ export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
                     placeholder={
                       bookingType === "RoomBlock"
                         ? "VD: Bảo trì hệ thống điện"
-                        : "Nguyễn Văn A"
+                        : bookingType === "Direct" &&
+                            form.watch("source") === "Agency"
+                          ? "VD: Công ty Du lịch ABC"
+                          : "Nguyễn Văn A"
                     }
                     className="bg-secondary"
                   />
