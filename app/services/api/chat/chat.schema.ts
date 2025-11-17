@@ -36,6 +36,7 @@ const ChatSessionMessageItemSchema = z.object({
   staffUserId: z.string().nullable(),
   staffName: z.string().nullable(),
   createdAt: z.string(),
+  detectedLanguage: z.string().optional(),
 });
 
 const ChatSessionMessagesSchema = z.array(ChatSessionMessageItemSchema);

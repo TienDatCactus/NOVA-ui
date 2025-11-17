@@ -11,6 +11,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
 } from "~/components/ui/dropdown-menu";
 import {
   Send,
@@ -26,8 +32,11 @@ import {
   useChatSession,
   useAssignStaff,
   useCloseSession,
+  useStaffList,
 } from "../container/query.hooks";
 import { useTranslateMessage } from "../container/translation.hooks";
+import { TranslationService } from "~/services/api/translation";
+import { MessageBubble } from "../fragments/message-bubble";
 import { signalRChatService, type ChatMessage } from "~/lib/signalr";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -35,125 +44,6 @@ import { toast } from "sonner";
 import { useAuthStore } from "~/store/auth.store";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
 import { SUPPORTED_LANGUAGES } from "~/lib/constants";
-
-interface MessageBubbleProps {
-  message: ChatMessage;
-  onTranslate?: (message: ChatMessage) => void;
-}
-
-const MessageBubble = ({ message, onTranslate }: MessageBubbleProps) => {
-  const isStaff = message.sender === "Staff";
-  const isSystem = message.sender === "System";
-
-  if (isSystem) {
-    return (
-      <div className="flex justify-center my-4">
-        <div className="bg-muted px-4 py-2 rounded-full">
-          <p className="text-xs text-muted-foreground">{message.message}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex items-start gap-3",
-        isStaff ? "justify-end" : "justify-start"
-      )}
-    >
-      {!isStaff && (
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>K</AvatarFallback>
-        </Avatar>
-      )}
-      <div
-        className={cn(
-          "max-w-[70%] rounded-lg p-3",
-          isStaff
-            ? "bg-primary text-primary-foreground rounded-br-none"
-            : "bg-muted rounded-bl-none"
-        )}
-      >
-        {isStaff && message.staffName && (
-          <p className="text-xs font-semibold mb-1 opacity-90">
-            {message.staffName}
-          </p>
-        )}
-        <p className="text-sm whitespace-pre-wrap break-words">
-          {message.message}
-        </p>
-
-        {/* Translation section */}
-        {message.translatedText && message.showTranslation && (
-          <div
-            className={cn(
-              "mt-2 pt-2 border-t",
-              isStaff
-                ? "border-primary-foreground/20"
-                : "border-muted-foreground/20"
-            )}
-          >
-            <p
-              className={cn(
-                "text-xs mb-1",
-                isStaff ? "opacity-70" : "text-muted-foreground"
-              )}
-            >
-              Đã dịch từ {message.detectedLanguage || "ngôn ngữ khác"}
-            </p>
-            <p className="text-sm whitespace-pre-wrap break-words opacity-90">
-              {message.translatedText}
-            </p>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between mt-1 gap-2">
-          <p
-            className={cn(
-              "text-xs",
-              isStaff ? "opacity-70" : "text-muted-foreground"
-            )}
-          >
-            {format(parseISO(message.createdAt), "HH:mm", { locale: vi })}
-          </p>
-
-          {/* Translation toggle button */}
-          {!isSystem && onTranslate && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className={cn(
-                "h-6 px-2 py-0",
-                isStaff
-                  ? "hover:bg-primary-foreground/20 text-primary-foreground"
-                  : "hover:bg-muted-foreground/10"
-              )}
-              onClick={() => onTranslate(message)}
-              disabled={message.isTranslating}
-            >
-              {message.isTranslating ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <>
-                  <Languages className="h-3 w-3 mr-1" />
-                  <span className="text-xs">
-                    {message.showTranslation ? "Bản gốc" : "Dịch"}
-                  </span>
-                </>
-              )}
-            </Button>
-          )}
-        </div>
-      </div>
-      {isStaff && (
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>{message.staffName?.[0] || "S"}</AvatarFallback>
-        </Avatar>
-      )}
-    </div>
-  );
-};
 
 interface ChatMainProps {
   sessionId: string | null;
@@ -170,13 +60,20 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const {
     userLanguage,
     autoTranslateEnabled,
+    sessionLanguageOverrides,
     setUserLanguage,
     setAutoTranslate,
+    setSessionLanguage,
   } = useChatTranslationStore();
   const { translateMessage, autoTranslateMessage } = useTranslateMessage();
 
+  // Get effective language for this session (session override or global)
+  const effectiveLanguage = sessionId
+    ? sessionLanguageOverrides[sessionId] || userLanguage
+    : userLanguage;
+
   const currentLanguage =
-    SUPPORTED_LANGUAGES.find((lang) => lang.code === userLanguage) ||
+    SUPPORTED_LANGUAGES.find((lang) => lang.code === effectiveLanguage) ||
     SUPPORTED_LANGUAGES[0];
 
   const { data: session, isLoading: isLoadingSession } = useChatSession(
@@ -185,6 +82,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   );
   const { data: messageHistory, isLoading: isLoadingMessages } =
     useChatMessages(sessionId || "", !!sessionId);
+  const { data: staffList } = useStaffList();
 
   const assignStaffMutation = useAssignStaff();
   const closeSessionMutation = useCloseSession();
@@ -199,13 +97,48 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         await signalRChatService.connect(import.meta.env.VITE_CHAT_HUB_URL);
         await signalRChatService.joinSession(sessionId);
         signalRChatService.onReceiveMessage(async (message: ChatMessage) => {
-          // Auto-translate guest messages if enabled
-          if (autoTranslateEnabled && message.sender === "Guest") {
-            const translatedMessage = await autoTranslateMessage(message);
-            setMessages((prev) => {
-              if (prev.some((m) => m.id === translatedMessage.id)) return prev;
-              return [...prev, translatedMessage];
-            });
+          // Auto-detect language and translate guest messages if enabled
+          if (message.sender === "Guest") {
+            try {
+              // Always detect language for guest messages
+              const detection = await TranslationService.detectLanguage(
+                message.message
+              );
+              const detectedLang = detection?.language;
+
+              const messageWithDetection = {
+                ...message,
+                detectedLanguage: detectedLang,
+              };
+
+              // Auto-translate if enabled
+              if (
+                autoTranslateEnabled &&
+                detectedLang &&
+                detectedLang !== effectiveLanguage
+              ) {
+                const translatedMessage =
+                  await autoTranslateMessage(messageWithDetection);
+                setMessages((prev) => {
+                  if (prev.some((m) => m.id === translatedMessage.id))
+                    return prev;
+                  return [...prev, translatedMessage];
+                });
+              } else {
+                setMessages((prev) => {
+                  if (prev.some((m) => m.id === messageWithDetection.id))
+                    return prev;
+                  return [...prev, messageWithDetection];
+                });
+              }
+            } catch (error) {
+              console.error("Language detection failed:", error);
+              // Fallback to original message
+              setMessages((prev) => {
+                if (prev.some((m) => m.id === message.id)) return prev;
+                return [...prev, message];
+              });
+            }
           } else {
             setMessages((prev) => {
               if (prev.some((m) => m.id === message.id)) return prev;
@@ -240,9 +173,14 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     }
   }, [messageHistory]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom (only for new messages, not translation toggles)
+  const prevMessageCountRef = useRef(messages.length);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Only scroll if message count increased (new message arrived)
+    if (messages.length > prevMessageCountRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    prevMessageCountRef.current = messages.length;
   }, [messages]);
 
   // Update message state (for translation)
@@ -257,18 +195,84 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     translateMessage(message, updateMessage);
   };
 
+  // Detect language and translate input message before sending
+  const [isTranslatingInput, setIsTranslatingInput] = useState(false);
+  const [translatedInput, setTranslatedInput] = useState("");
+  const [inputSourceLang, setInputSourceLang] = useState<string | null>(null);
+
+  const handleDetectAndTranslateInput = async () => {
+    if (!inputMessage.trim()) return;
+
+    setIsTranslatingInput(true);
+    try {
+      // Detect language of input
+      const detection = await TranslationService.detectLanguage(inputMessage);
+      const detectedLang = detection?.language;
+
+      if (!detectedLang) {
+        toast.error("Không thể nhận diện ngôn ngữ");
+        setIsTranslatingInput(false);
+        return;
+      }
+
+      setInputSourceLang(detectedLang);
+
+      // Get the guest's language (from latest guest message or session override)
+      const guestMessages = messages.filter((m) => m.sender === "Guest");
+      const latestGuestMessage = guestMessages[guestMessages.length - 1];
+      const targetLang =
+        latestGuestMessage?.detectedLanguage || effectiveLanguage;
+
+      // If same language, no need to translate
+      if (detectedLang === targetLang) {
+        toast.info("Tin nhắn đã ở ngôn ngữ của khách");
+        setIsTranslatingInput(false);
+        return;
+      }
+
+      // Translate to guest's language
+      const result = await TranslationService.translateText({
+        text: inputMessage,
+        sourceLanguage: detectedLang,
+        targetLanguage: targetLang,
+      });
+
+      setTranslatedInput(result.translatedText);
+
+      const sourceLangLabel =
+        SUPPORTED_LANGUAGES.find((l) => l.code === detectedLang)?.label ||
+        detectedLang.toUpperCase();
+      const targetLangLabel =
+        SUPPORTED_LANGUAGES.find((l) => l.code === targetLang)?.label ||
+        targetLang.toUpperCase();
+
+      toast.success(`Đã dịch từ ${sourceLangLabel} sang ${targetLangLabel}`);
+    } catch (error) {
+      console.error("Translation failed:", error);
+      toast.error("Không thể dịch tin nhắn");
+    } finally {
+      setIsTranslatingInput(false);
+    }
+  };
+
   // Send message
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || !sessionId || !user) return;
 
     try {
+      // Send translated version if available, otherwise send original
+      const messageToSend = translatedInput || inputMessage.trim();
+
       await signalRChatService.sendMessage({
         sessionId,
-        message: inputMessage.trim(),
+        message: messageToSend,
         sender: "Staff",
         staffUserId: user.id,
       });
+
       setInputMessage("");
+      setTranslatedInput("");
+      setInputSourceLang(null);
     } catch (error) {
       toast.error("Không thể gửi tin nhắn");
       console.error(error);
@@ -339,13 +343,11 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     );
   }
 
-  const isAssignedToMe = session.assignedStaffUserId === user?.id;
   const canSendMessage = session.state === "Open";
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b p-4 bg-card">
+      <div className="flex items-center justify-between border-b p-4 bg-white shadow-sm">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
             <AvatarFallback>{session.customerName.charAt(0)}</AvatarFallback>
@@ -366,63 +368,133 @@ export function ChatMain({ sessionId }: ChatMainProps) {
             </Badge>
           )}
 
-          {/* Language selector */}
+          {/* Unified Settings Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" variant="outline">
-                <Globe className="h-4 w-4 mr-2" />
-                {currentLanguage.flag} {currentLanguage.label}
+                <Languages className="h-4 w-4 mr-2" />
+                Cài đặt Chat
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <DropdownMenuItem
-                  key={lang.code}
-                  onClick={() => setUserLanguage(lang.code)}
-                  className={cn(userLanguage === lang.code && "bg-muted")}
-                >
-                  <span className="mr-2">{lang.flag}</span>
-                  {lang.label}
-                </DropdownMenuItem>
-              ))}
+            <DropdownMenuContent align="end" className="w-64">
+              {/* Language Selection */}
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  Ngôn ngữ dịch đích
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <DropdownMenuItem
+                        key={lang.code}
+                        onClick={() => setUserLanguage(lang.code)}
+                        className={cn(userLanguage === lang.code && "bg-muted")}
+                      >
+                        <span className="mr-2">{lang.flag}</span>
+                        {lang.label}
+                        {userLanguage === lang.code && (
+                          <span className="ml-auto text-xs text-primary">
+                            ✓
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuSeparator />
+
+              {/* Auto-translate Toggle */}
+              <div className="px-2 py-2">
+                <div className="flex items-center justify-between">
+                  <Label
+                    htmlFor="auto-translate-menu"
+                    className="text-sm cursor-pointer"
+                  >
+                    Tự động dịch tin nhắn
+                  </Label>
+                  <Switch
+                    id="auto-translate-menu"
+                    checked={autoTranslateEnabled}
+                    onCheckedChange={setAutoTranslate}
+                  />
+                </div>
+              </div>
+
+              <DropdownMenuSeparator />
+
+              {/* Staff Assignment */}
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Gán nhân viên</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {staffList && staffList.data.length > 0 ? (
+                      staffList.data.map((staff) => (
+                        <DropdownMenuItem
+                          key={staff.id}
+                          onClick={() => {
+                            if (!sessionId) return;
+                            assignStaffMutation.mutate(
+                              {
+                                sessionId,
+                                staffUserId: staff.id,
+                              },
+                              {
+                                onSuccess: () => {
+                                  toast.success(`Đã gán cho ${staff.fullName}`);
+                                },
+                                onError: () => {
+                                  toast.error("Không thể gán nhân viên");
+                                },
+                              }
+                            );
+                          }}
+                          className={cn(
+                            session.assignedStaffUserId === staff.id &&
+                              "bg-muted"
+                          )}
+                          disabled={assignStaffMutation.isPending}
+                        >
+                          <div className="flex flex-col flex-1">
+                            <span className="font-medium">
+                              {staff.fullName}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {staff.staffRoleName}
+                            </span>
+                          </div>
+                          {session.assignedStaffUserId === staff.id && (
+                            <span className="ml-auto text-xs text-primary">
+                              ✓
+                            </span>
+                          )}
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <DropdownMenuItem disabled>
+                        Không có nhân viên
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              {canSendMessage && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleCloseSession}
+                    disabled={closeSessionMutation.isPending}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Đóng phiên chat
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Auto-translate toggle */}
-          <div className="flex items-center gap-2 border rounded-md px-3 py-1.5">
-            <Switch
-              id="auto-translate"
-              checked={autoTranslateEnabled}
-              onCheckedChange={setAutoTranslate}
-            />
-            <Label htmlFor="auto-translate" className="text-sm cursor-pointer">
-              Tự động dịch
-            </Label>
-          </div>
-
-          {!session.assignedStaffUserId && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleAssignSelf}
-              disabled={assignStaffMutation.isPending}
-            >
-              <UserCheck className="h-4 w-4 mr-2" />
-              Nhận xử lý
-            </Button>
-          )}
-
-          {canSendMessage && (
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={handleCloseSession}
-              disabled={closeSessionMutation.isPending}
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              Đóng chat
-            </Button>
-          )}
         </div>
       </div>
 
@@ -451,27 +523,81 @@ export function ChatMain({ sessionId }: ChatMainProps) {
             Phiên chat đã đóng
           </div>
         ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
-            className="flex items-center gap-2"
-          >
-            <Input
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Nhập tin nhắn..."
-              disabled={isConnecting}
-              className="flex-1"
-            />
-            <Button
-              type="submit"
-              disabled={!inputMessage.trim() || isConnecting}
+          <div className="space-y-2">
+            {/* Translation Preview */}
+            {translatedInput && (
+              <div className="bg-muted/50 rounded-md p-3 border border-border">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Bản gốc ({inputSourceLang?.toUpperCase()}):
+                    </p>
+                    <p className="text-sm mb-2">{inputMessage}</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Bản dịch sẽ gửi:
+                    </p>
+                    <p className="text-sm font-medium">{translatedInput}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setTranslatedInput("");
+                      setInputSourceLang(null);
+                    }}
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Input Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex items-center gap-2"
             >
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+              <Input
+                value={inputMessage}
+                onChange={(e) => {
+                  setInputMessage(e.target.value);
+                  // Clear translation if user edits message
+                  if (translatedInput) {
+                    setTranslatedInput("");
+                    setInputSourceLang(null);
+                  }
+                }}
+                placeholder="Nhập tin nhắn..."
+                disabled={isConnecting}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleDetectAndTranslateInput}
+                disabled={
+                  !inputMessage.trim() || isTranslatingInput || isConnecting
+                }
+                title="Dịch tin nhắn sang ngôn ngữ của khách"
+              >
+                {isTranslatingInput ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Globe className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                type="submit"
+                disabled={!inputMessage.trim() || isConnecting}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
         )}
       </div>
     </div>

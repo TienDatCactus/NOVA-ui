@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import { Loader2, Languages } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
+import { Loader2, Languages, Globe } from "lucide-react";
 import { cn } from "~/lib/utils";
 import type { ChatMessage } from "~/lib/signalr";
 import { format, parseISO } from "date-fns";
@@ -69,6 +70,22 @@ export function MessageBubble({
           {message.message}
         </p>
 
+        {/* Detected language badge */}
+        {message.detectedLanguage && !message.showTranslation && (
+          <Badge
+            variant="outline"
+            className={cn(
+              "mt-2 text-xs",
+              isOwnMessage
+                ? "border-primary-foreground/30 text-primary-foreground"
+                : "border-muted-foreground/30"
+            )}
+          >
+            <Globe className="h-3 w-3 mr-1" />
+            {message.detectedLanguage.toUpperCase()}
+          </Badge>
+        )}
+
         {/* Translation section */}
         {message.translatedText && message.showTranslation && (
           <div
@@ -93,7 +110,7 @@ export function MessageBubble({
           </div>
         )}
 
-        {/* Footer: timestamp + translation button */}
+        {/* Footer: timestamp + action buttons */}
         <div className="flex items-center justify-between mt-1 gap-2">
           <p
             className={cn(
@@ -104,32 +121,34 @@ export function MessageBubble({
             {format(parseISO(message.createdAt), "HH:mm", { locale: vi })}
           </p>
 
-          {/* Translation toggle button */}
-          {!isSystem && onTranslate && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className={cn(
-                "h-6 px-2 py-0",
-                isOwnMessage
-                  ? "hover:bg-primary-foreground/20 text-primary-foreground"
-                  : "hover:bg-muted-foreground/10"
-              )}
-              onClick={() => onTranslate(message)}
-              disabled={message.isTranslating}
-            >
-              {message.isTranslating ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <>
-                  <Languages className="h-3 w-3 mr-1" />
-                  <span className="text-xs">
-                    {message.showTranslation ? "Bản gốc" : "Dịch"}
-                  </span>
-                </>
-              )}
-            </Button>
-          )}
+          <div className="flex items-center gap-1">
+            {/* Translation toggle button */}
+            {!isSystem && onTranslate && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className={cn(
+                  "h-6 px-2 py-0",
+                  isOwnMessage
+                    ? "hover:bg-primary-foreground/20 text-primary-foreground"
+                    : "hover:bg-muted-foreground/10"
+                )}
+                onClick={() => onTranslate(message)}
+                disabled={message.isTranslating}
+              >
+                {message.isTranslating ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <>
+                    <Languages className="h-3 w-3 mr-1" />
+                    <span className="text-xs">
+                      {message.showTranslation ? "Bản gốc" : "Dịch"}
+                    </span>
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 

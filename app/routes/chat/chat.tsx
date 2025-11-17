@@ -18,7 +18,7 @@ export default function Component({
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <ChatSidebar
         activeSessionId={activeSessionId}
         onSessionSelect={setActiveSessionId}

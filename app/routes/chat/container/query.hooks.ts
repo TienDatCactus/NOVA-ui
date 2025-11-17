@@ -91,6 +91,19 @@ export function useAssignStaff() {
   });
 }
 
+// Query: Get staff list for assignment
+export function useStaffList() {
+  return useQuery({
+    queryKey: ["staff-list"],
+    queryFn: async () => {
+      const { StaffService } = await import("~/services/api/staff");
+      return await StaffService.getStaffList();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+}
+
 // Mutation: Close session
 export function useCloseSession() {
   const queryClient = useQueryClient();

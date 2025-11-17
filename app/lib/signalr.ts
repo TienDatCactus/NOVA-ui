@@ -15,6 +15,7 @@ export interface ChatMessage {
   detectedLanguage?: string;
   showTranslation?: boolean;
   isTranslating?: boolean;
+  isDetecting?: boolean;
 }
 
 export interface SendMessageCommand {
