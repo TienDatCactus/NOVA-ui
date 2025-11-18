@@ -7,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
+import { navigationMenuTriggerStyle } from "~/components/ui/navigation-menu";
 import {
   SidebarGroup,
   SidebarGroupLabel,

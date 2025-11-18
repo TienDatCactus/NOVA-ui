@@ -60,6 +60,7 @@ const queryClient = new QueryClient();
 export default function App() {
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />

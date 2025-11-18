@@ -25,8 +25,13 @@ import {
   XCircle,
   Languages,
   Globe,
+  Hash,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { MenuService } from "~/services/api/menu";
+import { ServicesService } from "~/services/api/services";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   useChatMessages,
   useChatSession,
@@ -44,6 +49,13 @@ import { toast } from "sonner";
 import { useAuthStore } from "~/store/auth.store";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
 import { SUPPORTED_LANGUAGES } from "~/lib/constants";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
+import { useServices } from "~/routes/services/container/services/query.hooks";
 
 interface ChatMainProps {
   sessionId: string | null;
@@ -63,18 +75,12 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     sessionLanguageOverrides,
     setUserLanguage,
     setAutoTranslate,
-    setSessionLanguage,
   } = useChatTranslationStore();
   const { translateMessage, autoTranslateMessage } = useTranslateMessage();
 
-  // Get effective language for this session (session override or global)
   const effectiveLanguage = sessionId
     ? sessionLanguageOverrides[sessionId] || userLanguage
     : userLanguage;
-
-  const currentLanguage =
-    SUPPORTED_LANGUAGES.find((lang) => lang.code === effectiveLanguage) ||
-    SUPPORTED_LANGUAGES[0];
 
   const { data: session, isLoading: isLoadingSession } = useChatSession(
     sessionId || "",
@@ -173,39 +179,61 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     }
   }, [messageHistory]);
 
-  // Auto-scroll to bottom (only for new messages, not translation toggles)
   const prevMessageCountRef = useRef(messages.length);
   useEffect(() => {
-    // Only scroll if message count increased (new message arrived)
     if (messages.length > prevMessageCountRef.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
     prevMessageCountRef.current = messages.length;
   }, [messages]);
 
-  // Update message state (for translation)
   const updateMessage = (messageId: string, updates: Partial<ChatMessage>) => {
     setMessages((prev) =>
       prev.map((msg) => (msg.id === messageId ? { ...msg, ...updates } : msg))
     );
   };
 
-  // Handle translation toggle
   const handleTranslate = (message: ChatMessage) => {
     translateMessage(message, updateMessage);
   };
 
-  // Detect language and translate input message before sending
   const [isTranslatingInput, setIsTranslatingInput] = useState(false);
   const [translatedInput, setTranslatedInput] = useState("");
   const [inputSourceLang, setInputSourceLang] = useState<string | null>(null);
+  const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [serviceItems, setServiceItems] = useState<any[]>([]);
+  const [isLoadingItems, setIsLoadingItems] = useState(false);
+
+  // Load menu and services for tagging
+  const loadItemsForTagging = async () => {
+    if (menuItems.length > 0 || serviceItems.length > 0) return; // Already loaded
+
+    setIsLoadingItems(true);
+    try {
+      const { data: menuResponse } = useMenuList({});
+      const { data: serviceResponse } = useServices({});
+      setMenuItems(menuResponse || []);
+      setServiceItems(serviceResponse || []);
+    } catch (error) {
+      console.error("Failed to load items:", error);
+      toast.error("Không thể tải danh sách món ăn và dịch vụ");
+    } finally {
+      setIsLoadingItems(false);
+    }
+  };
+
+  const handleTagItem = (item: any, type: "menu" | "service") => {
+    const tag = type === "menu" ? `#món:${item.name}` : `#dv:${item.name}`;
+    setInputMessage((prev) => `${prev} ${tag}`.trim());
+    setIsItemPopoverOpen(false);
+  };
 
   const handleDetectAndTranslateInput = async () => {
     if (!inputMessage.trim()) return;
 
     setIsTranslatingInput(true);
     try {
-      // Detect language of input
       const detection = await TranslationService.detectLanguage(inputMessage);
       const detectedLang = detection?.language;
 
@@ -217,20 +245,17 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
       setInputSourceLang(detectedLang);
 
-      // Get the guest's language (from latest guest message or session override)
       const guestMessages = messages.filter((m) => m.sender === "Guest");
       const latestGuestMessage = guestMessages[guestMessages.length - 1];
       const targetLang =
         latestGuestMessage?.detectedLanguage || effectiveLanguage;
 
-      // If same language, no need to translate
       if (detectedLang === targetLang) {
         toast.info("Tin nhắn đã ở ngôn ngữ của khách");
         setIsTranslatingInput(false);
         return;
       }
 
-      // Translate to guest's language
       const result = await TranslationService.translateText({
         text: inputMessage,
         sourceLanguage: detectedLang,
@@ -277,25 +302,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
       toast.error("Không thể gửi tin nhắn");
       console.error(error);
     }
-  };
-
-  // Assign self to session
-  const handleAssignSelf = () => {
-    if (!sessionId || !user) return;
-    assignStaffMutation.mutate(
-      {
-        sessionId,
-        staffUserId: user.id,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Đã nhận xử lý chat này");
-        },
-        onError: () => {
-          toast.error("Không thể gán nhân viên");
-        },
-      }
-    );
   };
 
   // Close session
@@ -346,7 +352,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const canSendMessage = session.state === "Open";
 
   return (
-    <div className="flex-1 flex flex-col bg-background">
+    <div className="flex-1 overflow-y-auto min-h-0 flex flex-col bg-background">
       <div className="flex items-center justify-between border-b p-4 bg-white shadow-sm">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
@@ -517,7 +523,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t p-4 bg-card">
+      <div className="border-t p-4 bg-white">
         {!canSendMessage ? (
           <div className="text-center text-sm text-muted-foreground py-2">
             Phiên chat đã đóng
@@ -560,6 +566,111 @@ export function ChatMain({ sessionId }: ChatMainProps) {
               }}
               className="flex items-center gap-2"
             >
+              <Popover
+                open={isItemPopoverOpen}
+                onOpenChange={setIsItemPopoverOpen}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full"
+                    onClick={() => {
+                      setIsItemPopoverOpen(true);
+                      loadItemsForTagging();
+                    }}
+                    disabled={isConnecting}
+                    title="Tag món ăn hoặc dịch vụ"
+                  >
+                    <Hash className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-80">
+                  <Tabs defaultValue="menu" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="menu">Món ăn</TabsTrigger>
+                      <TabsTrigger value="services">Dịch vụ</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="menu" className="mt-2">
+                      {isLoadingItems ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                        </div>
+                      ) : menuItems.length > 0 ? (
+                        <ScrollArea className="h-64">
+                          <div className="space-y-1">
+                            {menuItems.map((item) => (
+                              <Button
+                                key={item.id}
+                                variant="ghost"
+                                className="w-full justify-start text-left h-auto py-2"
+                                onClick={() => handleTagItem(item, "menu")}
+                              >
+                                <div className="flex flex-col items-start">
+                                  <span className="font-medium">
+                                    {item.name}
+                                  </span>
+                                  {item.description && (
+                                    <span className="text-xs text-muted-foreground line-clamp-1">
+                                      {item.description}
+                                    </span>
+                                  )}
+                                  <span className="text-xs text-primary">
+                                    {item.price?.toLocaleString("vi-VN")} VNĐ
+                                  </span>
+                                </div>
+                              </Button>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      ) : (
+                        <div className="text-center py-8 text-sm text-muted-foreground">
+                          Không có món ăn
+                        </div>
+                      )}
+                    </TabsContent>
+                    <TabsContent value="services" className="mt-2">
+                      {isLoadingItems ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                        </div>
+                      ) : serviceItems.length > 0 ? (
+                        <ScrollArea className="h-64">
+                          <div className="space-y-1">
+                            {serviceItems.map((item) => (
+                              <Button
+                                key={item.id}
+                                variant="ghost"
+                                className="w-full justify-start text-left h-auto py-2"
+                                onClick={() => handleTagItem(item, "service")}
+                              >
+                                <div className="flex flex-col items-start">
+                                  <span className="font-medium">
+                                    {item.name}
+                                  </span>
+                                  {item.description && (
+                                    <span className="text-xs text-muted-foreground line-clamp-1">
+                                      {item.description}
+                                    </span>
+                                  )}
+                                  <span className="text-xs text-primary">
+                                    {item.price?.toLocaleString("vi-VN")} VNĐ
+                                  </span>
+                                </div>
+                              </Button>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      ) : (
+                        <div className="text-center py-8 text-sm text-muted-foreground">
+                          Không có dịch vụ
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                </PopoverContent>
+              </Popover>
               <Input
                 value={inputMessage}
                 onChange={(e) => {
@@ -572,12 +683,13 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 }}
                 placeholder="Nhập tin nhắn..."
                 disabled={isConnecting}
-                className="flex-1"
+                className="flex-1 rounded-full"
               />
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
+                className="rounded-full"
                 onClick={handleDetectAndTranslateInput}
                 disabled={
                   !inputMessage.trim() || isTranslatingInput || isConnecting
@@ -592,6 +704,8 @@ export function ChatMain({ sessionId }: ChatMainProps) {
               </Button>
               <Button
                 type="submit"
+                size="icon"
+                className="rounded-full"
                 disabled={!inputMessage.trim() || isConnecting}
               >
                 <Send className="h-4 w-4" />

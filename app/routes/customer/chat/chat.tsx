@@ -1,25 +1,28 @@
-import { useEffect, useState, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
+import { ChevronUp, Hash, Loader2, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
+import { toast } from "sonner";
 import {
   AlertDialog,
+  AlertDialogAction,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogAction,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { Send, Loader2, Globe, ChevronUp } from "lucide-react";
-import { cn } from "~/lib/utils";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import type { ChatMessage } from "~/lib/signalr";
+import STORAGE, { deleteStorage, setStorage } from "~/lib/storage";
+
 import {
   useChatEntry,
   useChatMessages,
@@ -28,12 +31,9 @@ import {
 import { useTranslateMessage } from "~/routes/chat/container/translation.hooks";
 import { useChatConnection } from "~/routes/chat/container/use-chat-connection.hooks";
 import { MessageBubble } from "~/routes/chat/fragments/message-bubble";
-import type { ChatMessage } from "~/lib/signalr";
-import { toast } from "sonner";
-import { useChatTranslationStore } from "~/store/chat-translation.store";
-import { SUPPORTED_LANGUAGES } from "~/lib/constants";
 import type { Route } from "./+types/chat";
-import Image from "~/components/ui/image";
+import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
+import { useServices } from "~/routes/services/container/services/query.hooks";
 
 export default function GuestChat({}: Route.ComponentProps) {
   const [searchParams] = useSearchParams();
@@ -45,14 +45,21 @@ export default function GuestChat({}: Route.ComponentProps) {
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [serviceItems, setServiceItems] = useState<any[]>([]);
+  const [isLoadingItems, setIsLoadingItems] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { userLanguage, setUserLanguage } = useChatTranslationStore();
   const { translateMessage } = useTranslateMessage();
 
-  const currentLanguage =
-    SUPPORTED_LANGUAGES.find((lang) => lang.code === userLanguage) ||
-    SUPPORTED_LANGUAGES[0];
+  // Save roomToken to storage for future use
+  useEffect(() => {
+    if (roomToken) {
+      setStorage(STORAGE.GUEST_ROOM_TOKEN, roomToken);
+    }
+  }, [roomToken]);
 
   const {
     data: entry,
@@ -93,7 +100,6 @@ export default function GuestChat({}: Route.ComponentProps) {
   useEffect(() => {
     if (messagesData) {
       setAllMessages((prev) => {
-        // Prepend new page messages (older messages go to top)
         const existingIds = new Set(prev.map((m) => m.id));
         const newMessages = messagesData.filter((m) => !existingIds.has(m.id));
         return [...newMessages, ...prev];
@@ -143,22 +149,33 @@ export default function GuestChat({}: Route.ComponentProps) {
     setCurrentPage((prev) => prev + 1);
   };
 
-  // Check if there might be more messages
   const hasMore = messagesData && messagesData.length === 50;
-
-  // Debug logging
-  useEffect(() => {
-    console.log("[Guest Chat Debug]", {
-      sessionId,
-      session,
-      isLoadingSession,
-      sessionError,
-      entry,
-    });
-  }, [sessionId, session, isLoadingSession, sessionError, entry]);
 
   const handleTranslate = (message: ChatMessage) => {
     translateMessage(message, updateMessage);
+  };
+
+  const loadItemsForTagging = async () => {
+    if (menuItems.length > 0 || serviceItems.length > 0) return; // Already loaded
+
+    setIsLoadingItems(true);
+    try {
+      const { data: menuResponse } = useMenuList({});
+      const { data: serviceResponse } = useServices({});
+      setMenuItems(menuResponse || []);
+      setServiceItems(serviceResponse || []);
+    } catch (error) {
+      console.error("Failed to load items:", error);
+      toast.error("Không thể tải danh sách món ăn và dịch vụ");
+    } finally {
+      setIsLoadingItems(false);
+    }
+  };
+
+  const handleTagItem = (item: any, type: "menu" | "service") => {
+    const tag = type === "menu" ? `#món:${item.name}` : `#dv:${item.name}`;
+    setInputMessage((prev) => `${prev} ${tag}`.trim());
+    setIsItemPopoverOpen(false);
   };
 
   const handleSendMessage = async () => {
@@ -174,6 +191,7 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   const handleErrorDialogClose = () => {
     setShowErrorDialog(false);
+    deleteStorage(STORAGE.GUEST_ROOM_TOKEN);
     navigate("/");
   };
 
@@ -248,46 +266,7 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <div className="flex items-center justify-between border-b p-4 bg-card">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback>
-              <Image src="https://api.dicebear.com/9.x/glass/svg" />
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="font-semibold">NOVA Hotel Chat</h2>
-            <p className="text-sm text-muted-foreground">
-              {session.roomName} • {session.customerName}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline">
-                <Globe className="h-4 w-4 mr-2" />
-                {currentLanguage.flag} {currentLanguage.label}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <DropdownMenuItem
-                  key={lang.code}
-                  onClick={() => setUserLanguage(lang.code)}
-                  className={cn(userLanguage === lang.code && "bg-muted")}
-                >
-                  <span className="mr-2">{lang.flag}</span>
-                  {lang.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
+      <div className="flex-1 overflow-y-auto space-y-4 bg-background ">
         {/* Load more button */}
         {hasMore && (
           <div className="flex justify-center py-2">
@@ -344,6 +323,106 @@ export default function GuestChat({}: Route.ComponentProps) {
             }}
             className="flex items-center gap-2"
           >
+            <Popover
+              open={isItemPopoverOpen}
+              onOpenChange={setIsItemPopoverOpen}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    setIsItemPopoverOpen(true);
+                    loadItemsForTagging();
+                  }}
+                  disabled={isConnecting}
+                  title="Tag món ăn hoặc dịch vụ"
+                >
+                  <Hash className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-80">
+                <Tabs defaultValue="menu" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="menu">Món ăn</TabsTrigger>
+                    <TabsTrigger value="services">Dịch vụ</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="menu" className="mt-2">
+                    {isLoadingItems ? (
+                      <div className="flex justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      </div>
+                    ) : menuItems.length > 0 ? (
+                      <ScrollArea className="h-64">
+                        <div className="space-y-1">
+                          {menuItems.map((item) => (
+                            <Button
+                              key={item.itemId}
+                              variant="ghost"
+                              className="w-full justify-start text-left h-auto py-2"
+                              onClick={() => handleTagItem(item, "menu")}
+                            >
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">{item.name}</span>
+                                {item.description && (
+                                  <span className="text-xs text-muted-foreground line-clamp-1">
+                                    {item.description}
+                                  </span>
+                                )}
+                                <span className="text-xs text-primary">
+                                  {item.price?.toLocaleString("vi-VN")} VNĐ
+                                </span>
+                              </div>
+                            </Button>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    ) : (
+                      <div className="text-center py-8 text-sm text-muted-foreground">
+                        Không có món ăn
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="services" className="mt-2">
+                    {isLoadingItems ? (
+                      <div className="flex justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      </div>
+                    ) : serviceItems.length > 0 ? (
+                      <ScrollArea className="h-64">
+                        <div className="space-y-1">
+                          {serviceItems.map((item) => (
+                            <Button
+                              key={item.serviceItemId}
+                              variant="ghost"
+                              className="w-full justify-start text-left h-auto py-2"
+                              onClick={() => handleTagItem(item, "service")}
+                            >
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">{item.name}</span>
+                                {item.description && (
+                                  <span className="text-xs text-muted-foreground line-clamp-1">
+                                    {item.description}
+                                  </span>
+                                )}
+                                <span className="text-xs text-primary">
+                                  {item.basePrice?.toLocaleString("vi-VN")} VNĐ
+                                </span>
+                              </div>
+                            </Button>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    ) : (
+                      <div className="text-center py-8 text-sm text-muted-foreground">
+                        Không có dịch vụ
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </PopoverContent>
+            </Popover>
             <Input
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}

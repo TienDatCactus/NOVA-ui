@@ -8,10 +8,6 @@ interface UseChatConnectionOptions {
   userId?: string; // Staff user ID
 }
 
-/**
- * Shared hook for managing SignalR chat connection, messages, and sending
- * Used by both staff chat and guest chat components
- */
 export function useChatConnection({
   sessionId,
   isGuest = false,
@@ -56,7 +52,7 @@ export function useChatConnection({
       }
       signalRChatService.offAll("ReceiveMessage");
     };
-  }, [sessionId]);
+  }, [sessionId, isGuest]);
 
   // Update a message in the list (for translation toggle)
   const updateMessage = useCallback(

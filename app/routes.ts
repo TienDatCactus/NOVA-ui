@@ -57,7 +57,10 @@ export default [
       ]),
     ]),
   ]),
-  route("chat", "routes/customer/chat/chat.tsx"),
+  layout("layouts/customer.layout.tsx", [
+    index("routes/customer/chat/inbox.tsx"),
+    route("chat", "routes/customer/chat/chat.tsx"),
+  ]),
 
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;
