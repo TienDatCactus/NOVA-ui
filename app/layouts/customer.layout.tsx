@@ -28,14 +28,18 @@ const CustomerLayout: React.FC = () => {
     SUPPORTED_LANGUAGES[0];
 
   return (
-    <div className="flex flex-col relative w-full">
+    <div
+      className="h-dvh flex flex-col relative w-full"
+      suppressHydrationWarning
+    >
       <header
         className={cn(
-          "h-12 p-4 border-b shadow-sm flex items-center justify-between",
+          "h-12 p-4 border-b shadow-sm flex items-center justify-between shrink-0 bg-background z-10",
           {
             hidden: isMobile,
           }
         )}
+        suppressHydrationWarning
       >
         <h1 className="font-bold text-lg uppercase">NOVA</h1>
         <div>
@@ -78,7 +82,10 @@ const CustomerLayout: React.FC = () => {
           </DropdownMenu>
         </div>
       </header>
-      <main className="max-h-[calc(100vh-48px)] overflow-hidden bg-white ">
+      <main
+        className="flex-1 flex flex-col overflow-hidden bg-white relative w-full"
+        suppressHydrationWarning
+      >
         <Outlet />
       </main>
     </div>

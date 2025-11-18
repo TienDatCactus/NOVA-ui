@@ -46,10 +46,9 @@ export default function GuestChat({}: Route.ComponentProps) {
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
-  const [menuItems, setMenuItems] = useState<any[]>([]);
-  const [serviceItems, setServiceItems] = useState<any[]>([]);
-  const [isLoadingItems, setIsLoadingItems] = useState(false);
-
+  const { data: menuItems, isPending: isMenuLoading } = useMenuList({});
+  const { data: serviceItems, isPending: isServiceLoading } = useServices({});
+  let isLoadingItems = isMenuLoading || isServiceLoading;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { translateMessage } = useTranslateMessage();
@@ -78,7 +77,7 @@ export default function GuestChat({}: Route.ComponentProps) {
   const {
     data: messagesData,
     isLoading: isLoadingMessages,
-    error: messagesError,
+
     isFetching,
   } = useChatMessages(sessionId || "", !!sessionId, {
     page: currentPage,
@@ -153,23 +152,6 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   const handleTranslate = (message: ChatMessage) => {
     translateMessage(message, updateMessage);
-  };
-
-  const loadItemsForTagging = async () => {
-    if (menuItems.length > 0 || serviceItems.length > 0) return; // Already loaded
-
-    setIsLoadingItems(true);
-    try {
-      const { data: menuResponse } = useMenuList({});
-      const { data: serviceResponse } = useServices({});
-      setMenuItems(menuResponse || []);
-      setServiceItems(serviceResponse || []);
-    } catch (error) {
-      console.error("Failed to load items:", error);
-      toast.error("Không thể tải danh sách món ăn và dịch vụ");
-    } finally {
-      setIsLoadingItems(false);
-    }
   };
 
   const handleTagItem = (item: any, type: "menu" | "service") => {
@@ -265,8 +247,8 @@ export default function GuestChat({}: Route.ComponentProps) {
   const canSendMessage = session.state === "Open";
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <div className="flex-1 overflow-y-auto space-y-4 bg-background ">
+    <div className="h-full flex flex-col relative bg-background overflow-hidden">
+      <div className="flex-1 overflow-y-auto min-h-0 space-y-4 bg-background p-4">
         {/* Load more button */}
         {hasMore && (
           <div className="flex justify-center py-2">
@@ -310,7 +292,7 @@ export default function GuestChat({}: Route.ComponentProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t p-4 bg-card">
+      <div className="border-t bg-card p-4 ">
         {!canSendMessage ? (
           <div className="text-center text-sm text-muted-foreground py-2">
             Phiên chat đã đóng
@@ -331,10 +313,10 @@ export default function GuestChat({}: Route.ComponentProps) {
                 <Button
                   type="button"
                   variant="outline"
-                  size="icon"
+                  size={"icon"}
+                  className="rounded-full"
                   onClick={() => {
                     setIsItemPopoverOpen(true);
-                    loadItemsForTagging();
                   }}
                   disabled={isConnecting}
                   title="Tag món ăn hoặc dịch vụ"
@@ -353,7 +335,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                       <div className="flex justify-center py-8">
                         <Loader2 className="h-6 w-6 animate-spin" />
                       </div>
-                    ) : menuItems.length > 0 ? (
+                    ) : menuItems && menuItems.length > 0 ? (
                       <ScrollArea className="h-64">
                         <div className="space-y-1">
                           {menuItems.map((item) => (
@@ -389,7 +371,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                       <div className="flex justify-center py-8">
                         <Loader2 className="h-6 w-6 animate-spin" />
                       </div>
-                    ) : serviceItems.length > 0 ? (
+                    ) : serviceItems && serviceItems.length > 0 ? (
                       <ScrollArea className="h-64">
                         <div className="space-y-1">
                           {serviceItems.map((item) => (
@@ -428,10 +410,12 @@ export default function GuestChat({}: Route.ComponentProps) {
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Nhập tin nhắn..."
               disabled={isConnecting}
-              className="flex-1"
+              className="flex-1 rounded-full"
             />
             <Button
               type="submit"
+              size={"icon"}
+              className="rounded-full"
               disabled={!inputMessage.trim() || isConnecting}
             >
               <Send className="h-4 w-4" />

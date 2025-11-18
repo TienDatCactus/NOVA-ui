@@ -4,6 +4,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { useStaffInbox } from "../container/query.hooks";
 import ChatSessionCard from "../fragments/chat-session.cards";
 import { Separator } from "~/components/ui/separator";
+import { Input } from "~/components/ui/input";
 
 interface ChatSidebarProps {
   activeSessionId: string | null;
@@ -61,17 +62,14 @@ export function ChatSidebar({
   }
 
   return (
-    <div className="flex w-80 flex-col border border-r p-4">
-      <div className=" grid gap-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Hộp thư đến</h1>
-          <Badge variant="default">{sessions.length}</Badge>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Danh sách tin nhắn từ khách
-        </p>
+    <div className="flex w-80 flex-col space-y-4 border border-r p-4">
+      <div className=" grid gap-4">
+        <h1 className="text-2xl font-bold">Hộp thư đến</h1>
+        <Input
+          placeholder="Tìm kiếm tin nhắn..."
+          className="w-full rounded-full bg-background "
+        />
       </div>
-      <Separator className="my-2" />
       <div className="flex-1 space-y-2 overflow-y-auto">
         {sessions.map((session) => (
           <ChatSessionCard

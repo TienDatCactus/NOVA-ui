@@ -2,12 +2,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import {
   isRouteErrorResponse,
+  Link,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigate,
   useNavigation,
+  useRouteError,
 } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
@@ -21,9 +24,9 @@ import {
 import type { Route } from "./+types/root";
 import "./index.css";
 
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/sonner";
 import { SpinnerLoader } from "./features/loading";
+import { MapProvider } from "./routes/customer/map/context/map-context";
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -47,7 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <MapProvider>{children}</MapProvider>
         <Toaster position="top-right" />
         <ScrollRestoration />
         <Scripts />
@@ -63,10 +66,10 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       {isNavigating && (
         <SpinnerLoader fullScreen size="lg" text="Đang tải..." />
       )}
+
       <Outlet />
     </QueryClientProvider>
   );
@@ -76,52 +79,83 @@ type RouteErrorBoundaryProps = {
   error: any;
 };
 
-export function ErrorBoundary({ error }: RouteErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const navigate = useNavigate();
+  let title = "Error - Unknown";
+  let message = "An unexpected error has occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404 Not Found" : "Error";
-    details =
+    title = error.status === 404 ? "Error - 404" : `Error - ${error.status}`;
+    message =
       error.status === 404
-        ? "The page you're looking for doesn't exist."
-        : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    details = error.message;
+        ? "The page you are looking for does not exist."
+        : error.statusText || message;
+  } else if (error instanceof Error) {
+    message = error.message;
     stack = error.stack;
   }
 
   return (
-    <main className="flex min-h-screen overflow-auto w-full items-center justify-center bg-muted p-4">
-      <Card className="w-full max-w-3xl shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2.5 text-2xl text-destructive">
-            <AlertTriangle className="h-7 w-7" />
-            <span>{message}</span>
-          </CardTitle>
-          <CardDescription className="pt-2 text-base">
-            {details}
-          </CardDescription>
-        </CardHeader>
+    <main className="min-h-screen w-full bg-[#0000AA] text-white font-mono flex flex-col items-center justify-center p-4 selection:bg-gray-300 selection:text-[#0000AA]">
+      {/* Title Box: Nền xám, chữ xanh */}
+      <div className="bg-[#A8A8A8] text-[#0000AA] px-6 py-1 mb-12 font-bold text-xl shadow-sm">
+        {title}
+      </div>
 
-        {stack && (
-          <CardContent className="space-y-4">
-            <h3 className="font-semibold text-muted-foreground">
-              Stack Trace (Development Only)
-            </h3>
-            <pre className="w-full overflow-x-auto rounded-md bg-secondary p-4 text-sm text-secondary-foreground">
-              <code className="line-clamp-6">{stack}</code>
+      {/* Content Container */}
+      <div className="max-w-2xl w-full space-y-8 text-lg">
+        <p className="mb-6">{message}, to continue:</p>
+
+        <ul className="list-none space-y-2 pl-0">
+          <li className="flex items-start gap-2">
+            <span>*</span>
+            <Link
+              to="/"
+              className="hover:underline hover:bg-[#0000AA] focus:bg-gray-300 focus:text-[#0000AA] outline-none"
+            >
+              Return to our homepage.
+            </Link>
+          </li>
+          <li className="flex items-start gap-2">
+            <span>*</span>
+            <a
+              href="mailto:ecopalm@example.com"
+              className="hover:underline hover:bg-[#0000AA] focus:bg-gray-300 focus:text-[#0000AA] outline-none"
+            >
+              Send us an e-mail about this error and try later.
+            </a>
+          </li>
+        </ul>
+
+        {/* Development Stack Trace (Chỉ hiện khi có stack và ở môi trường Dev) */}
+        {stack && import.meta.env.DEV && (
+          <div className="mt-8 pt-8 border-t border-white/30 text-sm opacity-80">
+            <p className="mb-2 font-bold uppercase">
+              Technical Information (Dev Only):
+            </p>
+            <pre className="whitespace-pre-wrap break-words font-mono text-xs">
+              {stack}
             </pre>
-          </CardContent>
+          </div>
         )}
+      </div>
 
-        <CardFooter>
-          <Button asChild className="w-full">
-            <a href="/">Go Back Home</a>
-          </Button>
-        </CardFooter>
-      </Card>
+      {/* Footer Links */}
+      <div className="mt-24 flex items-center gap-4 text-center text-lg">
+        <Button
+          variant="link"
+          onClick={() => navigate(-1)}
+          className="hover:underline text-white"
+        >
+          revert
+        </Button>
+        <span>|</span>
+        <Button variant="link" className="hover:underline text-white">
+          eco palm
+        </Button>
+      </div>
     </main>
   );
 }

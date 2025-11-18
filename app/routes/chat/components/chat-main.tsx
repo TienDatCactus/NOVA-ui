@@ -1,61 +1,58 @@
-import { useEffect, useState, useRef } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
+import {
+  Globe,
+  Hash,
+  Languages,
+  Loader2,
+  Send,
+  UserCheck,
+  XCircle,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Switch } from "~/components/ui/switch";
-import { Label } from "~/components/ui/label";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
   DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import {
-  Send,
-  Loader2,
-  UserCheck,
-  XCircle,
-  Languages,
-  Globe,
-  Hash,
-} from "lucide-react";
-import { cn } from "~/lib/utils";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { MenuService } from "~/services/api/menu";
-import { ServicesService } from "~/services/api/services";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import {
-  useChatMessages,
-  useChatSession,
-  useAssignStaff,
-  useCloseSession,
-  useStaffList,
-} from "../container/query.hooks";
-import { useTranslateMessage } from "../container/translation.hooks";
-import { TranslationService } from "~/services/api/translation";
-import { MessageBubble } from "../fragments/message-bubble";
-import { signalRChatService, type ChatMessage } from "~/lib/signalr";
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
-import { toast } from "sonner";
-import { useAuthStore } from "~/store/auth.store";
-import { useChatTranslationStore } from "~/store/chat-translation.store";
-import { SUPPORTED_LANGUAGES } from "~/lib/constants";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Switch } from "~/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { SUPPORTED_LANGUAGES } from "~/lib/constants";
+import { signalRChatService, type ChatMessage } from "~/lib/signalr";
+import { cn } from "~/lib/utils";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
+import { TranslationService } from "~/services/api/translation";
+import { useAuthStore } from "~/store/auth.store";
+import { useChatTranslationStore } from "~/store/chat-translation.store";
+import {
+  useAssignStaff,
+  useChatMessages,
+  useChatSession,
+  useCloseSession,
+  useStaffList,
+} from "../container/query.hooks";
+import {
+  shouldTranslate,
+  useTranslateMessage,
+} from "../container/translation.hooks";
+import { MessageBubble } from "../fragments/message-bubble";
 
 interface ChatMainProps {
   sessionId: string | null;
@@ -117,11 +114,10 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 detectedLanguage: detectedLang,
               };
 
-              // Auto-translate if enabled
+              // Auto-translate if enabled and translation is needed
               if (
                 autoTranslateEnabled &&
-                detectedLang &&
-                detectedLang !== effectiveLanguage
+                shouldTranslate(detectedLang, effectiveLanguage)
               ) {
                 const translatedMessage =
                   await autoTranslateMessage(messageWithDetection);
@@ -201,27 +197,9 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const [translatedInput, setTranslatedInput] = useState("");
   const [inputSourceLang, setInputSourceLang] = useState<string | null>(null);
   const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
-  const [menuItems, setMenuItems] = useState<any[]>([]);
-  const [serviceItems, setServiceItems] = useState<any[]>([]);
+  const { data: menuItems } = useMenuList({});
+  const { data: serviceItems } = useServices({});
   const [isLoadingItems, setIsLoadingItems] = useState(false);
-
-  // Load menu and services for tagging
-  const loadItemsForTagging = async () => {
-    if (menuItems.length > 0 || serviceItems.length > 0) return; // Already loaded
-
-    setIsLoadingItems(true);
-    try {
-      const { data: menuResponse } = useMenuList({});
-      const { data: serviceResponse } = useServices({});
-      setMenuItems(menuResponse || []);
-      setServiceItems(serviceResponse || []);
-    } catch (error) {
-      console.error("Failed to load items:", error);
-      toast.error("Không thể tải danh sách món ăn và dịch vụ");
-    } finally {
-      setIsLoadingItems(false);
-    }
-  };
 
   const handleTagItem = (item: any, type: "menu" | "service") => {
     const tag = type === "menu" ? `#món:${item.name}` : `#dv:${item.name}`;
@@ -250,8 +228,9 @@ export function ChatMain({ sessionId }: ChatMainProps) {
       const targetLang =
         latestGuestMessage?.detectedLanguage || effectiveLanguage;
 
-      if (detectedLang === targetLang) {
-        toast.info("Tin nhắn đã ở ngôn ngữ của khách");
+      // Check if translation is needed using shouldTranslate
+      if (!shouldTranslate(detectedLang, targetLang)) {
+        toast.info("Tin nhắn đã ở ngôn ngữ của khách hoặc không thể dịch");
         setIsTranslatingInput(false);
         return;
       }
@@ -578,7 +557,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                     className="rounded-full"
                     onClick={() => {
                       setIsItemPopoverOpen(true);
-                      loadItemsForTagging();
                     }}
                     disabled={isConnecting}
                     title="Tag món ăn hoặc dịch vụ"
@@ -597,12 +575,12 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                         <div className="flex justify-center py-8">
                           <Loader2 className="h-6 w-6 animate-spin" />
                         </div>
-                      ) : menuItems.length > 0 ? (
+                      ) : menuItems && menuItems.length > 0 ? (
                         <ScrollArea className="h-64">
                           <div className="space-y-1">
                             {menuItems.map((item) => (
                               <Button
-                                key={item.id}
+                                key={item.itemId}
                                 variant="ghost"
                                 className="w-full justify-start text-left h-auto py-2"
                                 onClick={() => handleTagItem(item, "menu")}
@@ -635,12 +613,12 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                         <div className="flex justify-center py-8">
                           <Loader2 className="h-6 w-6 animate-spin" />
                         </div>
-                      ) : serviceItems.length > 0 ? (
+                      ) : serviceItems && serviceItems.length > 0 ? (
                         <ScrollArea className="h-64">
                           <div className="space-y-1">
                             {serviceItems.map((item) => (
                               <Button
-                                key={item.id}
+                                key={item.serviceItemId}
                                 variant="ghost"
                                 className="w-full justify-start text-left h-auto py-2"
                                 onClick={() => handleTagItem(item, "service")}
@@ -655,7 +633,8 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                                     </span>
                                   )}
                                   <span className="text-xs text-primary">
-                                    {item.price?.toLocaleString("vi-VN")} VNĐ
+                                    {item.basePrice?.toLocaleString("vi-VN")}{" "}
+                                    VNĐ
                                   </span>
                                 </div>
                               </Button>

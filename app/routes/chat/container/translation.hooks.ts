@@ -4,6 +4,34 @@ import { useChatTranslationStore } from "~/store/chat-translation.store";
 import { toast } from "sonner";
 import type { ChatMessage } from "~/lib/signalr";
 
+// Languages that should not be translated
+const NON_TRANSLATABLE_LANGUAGES = [
+  "emoji",
+  "unknown",
+  "mixed",
+  "und", // undefined language code
+  "zxx", // no linguistic content
+];
+
+/**
+ * Check if a language code should be translated
+ */
+export function shouldTranslate(
+  detectedLang: string | undefined,
+  userLang: string
+): boolean {
+  if (!detectedLang) return false;
+
+  // Don't translate if same as user language
+  if (detectedLang.toLowerCase() === userLang.toLowerCase()) return false;
+
+  // Don't translate special/non-translatable languages
+  if (NON_TRANSLATABLE_LANGUAGES.includes(detectedLang.toLowerCase()))
+    return false;
+
+  return true;
+}
+
 /**
  * Hook for managing message translation in chat
  * Uses persisted translation cache from Zustand store
@@ -63,6 +91,13 @@ export function useTranslateMessage() {
           // Update message with detected language
           updateMessage(message.id, { detectedLanguage: detectedLang });
 
+          // Check if translation is needed
+          if (!shouldTranslate(detectedLang, userLanguage)) {
+            toast.info("Tin nhắn đã ở ngôn ngữ hiện tại hoặc không thể dịch");
+            updateMessage(message.id, { isTranslating: false });
+            return;
+          }
+
           // Continue with translation using detected language
           const result = await TranslationService.translateText({
             text: message.message,
@@ -90,6 +125,12 @@ export function useTranslateMessage() {
           updateMessage(message.id, { isTranslating: false });
           return;
         }
+      }
+
+      // Check if translation is needed for already detected language
+      if (!shouldTranslate(message.detectedLanguage, userLanguage)) {
+        toast.info("Tin nhắn đã ở ngôn ngữ hiện tại hoặc không thể dịch");
+        return;
       }
 
       // Start translation with already detected language
@@ -146,8 +187,8 @@ export function useTranslateMessage() {
           detectedLanguage: detectedLang,
         };
 
-        // If detected language is same as user language, no need to translate
-        if (detectedLang === userLanguage) {
+        // Check if translation is needed
+        if (!shouldTranslate(detectedLang, userLanguage)) {
           return messageWithDetection;
         }
 

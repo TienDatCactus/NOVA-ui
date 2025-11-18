@@ -60,6 +60,7 @@ export default [
   layout("layouts/customer.layout.tsx", [
     index("routes/customer/chat/inbox.tsx"),
     route("chat", "routes/customer/chat/chat.tsx"),
+    route("map", "routes/customer/map/map.tsx"),
   ]),
 
   route("*", "routes/not-found.tsx"),

@@ -30,15 +30,12 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
           qrbox: { width: 250, height: 250 },
         },
         (decodedText) => {
-          // Success callback
           html5QrCode.stop().then(() => {
             setIsScanning(false);
             onScan(decodedText);
           });
         },
-        (errorMessage) => {
-          // Error callback (called continuously, so we don't log it)
-        }
+        (errorMessage) => {}
       );
     } catch (err) {
       const errorMsg =
@@ -50,7 +47,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   };
 
   const stopScanning = () => {
-    if (scannerRef.current) {
+    if (scannerRef.current && isScanning) {
       scannerRef.current
         .stop()
         .then(() => {
@@ -59,6 +56,9 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         })
         .catch((err) => {
           console.error("Error stopping scanner:", err);
+          // Force cleanup even if stop fails
+          scannerRef.current = null;
+          setIsScanning(false);
         });
     }
   };
@@ -66,9 +66,14 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      stopScanning();
+      // Only stop if scanner is actually running
+      if (scannerRef.current && isScanning) {
+        scannerRef.current.stop().catch(() => {
+          // Ignore errors during cleanup
+        });
+      }
     };
-  }, []);
+  }, [isScanning]);
 
   return (
     <div className="space-y-4">

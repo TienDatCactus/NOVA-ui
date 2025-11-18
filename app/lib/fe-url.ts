@@ -45,6 +45,7 @@ const DASHBOARD = {
 };
 const CUSTOMER = {
   inbox: "/",
+  chat: (roomToken: string) => `/chat?roomToken=${roomToken}`,
   map: "/map",
 };
 

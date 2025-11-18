@@ -10,6 +10,7 @@ import type {
   StaffChatInboxResponseDto,
 } from "./dto";
 import type { ChatMessagesParams } from "./chat.types";
+import axios from "axios";
 
 const {
   ChatEntryResponseSchema,
@@ -19,6 +20,7 @@ const {
   ChatSendHttpMessageResponseSchema,
   StaffChatInboxResponseSchema,
 } = ChatSchema;
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 /**
  * Check if customer can chat and get session info
@@ -26,8 +28,8 @@ const {
  */
 async function getChatEntry(roomToken: string): Promise<ChatEntryResponseDto> {
   try {
-    const resp = await http.get(Chat.entry(roomToken));
-    return ChatEntryResponseSchema.parse(resp.data);
+    const resp = await axios.get(Chat.entry(roomToken));
+    return ChatEntryResponseSchema.parse(resp.data.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -41,8 +43,8 @@ async function getChatSession(
   sessionId: string
 ): Promise<ChatSessionDetailDto> {
   try {
-    const resp = await http.get(Chat.session(sessionId));
-    return ChatSessionDetailSchema.parse(resp.data);
+    const resp = await axios.get(Chat.session(sessionId));
+    return ChatSessionDetailSchema.parse(resp.data.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -57,8 +59,8 @@ async function getChatSessionMessages(
   params?: ChatMessagesParams
 ): Promise<ChatSessionMessagesDto> {
   try {
-    const resp = await http.get(Chat.messages(sessionId), { params });
-    return ChatSessionMessagesSchema.parse(resp.data);
+    const resp = await axios.get(Chat.messages(sessionId), { params });
+    return ChatSessionMessagesSchema.parse(resp.data.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -73,8 +75,8 @@ async function sendChatMessageHttp(
 ): Promise<ChatSendHttpMessageResponseDto> {
   try {
     const validatedData = ChatSendHttpMessageRequestSchema.parse(data);
-    const resp = await http.post(Chat.sendMessage, validatedData);
-    return ChatSendHttpMessageResponseSchema.parse(resp.data);
+    const resp = await axios.post(Chat.sendMessage, validatedData);
+    return ChatSendHttpMessageResponseSchema.parse(resp.data.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -104,7 +106,7 @@ async function assignChatSession(
   staffUserId: string
 ): Promise<void> {
   try {
-    await http.post(Chat.assign(sessionId), { staffUserId });
+    await axios.post(Chat.assign(sessionId), { staffUserId });
   } catch (error) {
     return Promise.reject(error);
   }
@@ -116,7 +118,7 @@ async function assignChatSession(
  */
 async function closeChatSession(sessionId: string): Promise<void> {
   try {
-    await http.post(Chat.close(sessionId));
+    await axios.post(Chat.close(sessionId));
   } catch (error) {
     return Promise.reject(error);
   }

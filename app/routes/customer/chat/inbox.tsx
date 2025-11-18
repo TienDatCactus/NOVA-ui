@@ -1,4 +1,12 @@
-import { MessageSquare, QrCode, Loader2, Scan, Terminal } from "lucide-react";
+import {
+  MessageSquare,
+  QrCode,
+  Loader2,
+  Scan,
+  Terminal,
+  MessageCircleReply,
+  MessageCircleX,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -13,13 +21,19 @@ import {
 } from "~/components/ui/dialog";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import STORAGE, { getStorage, setStorage } from "~/lib/storage";
+import STORAGE, {
+  clearStorage,
+  deleteStorage,
+  getStorage,
+  setStorage,
+} from "~/lib/storage";
 import { useChatEntry } from "~/routes/chat/container/query.hooks";
 import { toast } from "sonner";
 import type { Route } from "./+types/inbox";
@@ -34,17 +48,17 @@ import {
 import { QRScanner } from "~/components/qr-scanner";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { CUSTOMER } from "~/lib/fe-url";
 export default function ChatInbox({}: Route.ComponentProps) {
   const navigate = useNavigate();
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
   const [savedToken, setSavedToken] = useState<string | null>(null);
-  // Load saved room token from storage
   useEffect(() => {
     const token = getStorage(STORAGE.GUEST_ROOM_TOKEN);
     if (token) {
       setSavedToken(token);
     }
-  }, []);
+  }, [savedToken]);
 
   // Validate saved token
   const { data: entry, isLoading } = useChatEntry(
@@ -52,12 +66,19 @@ export default function ChatInbox({}: Route.ComponentProps) {
     !!savedToken
   );
 
+  const handleCloseChat = () => {
+    deleteStorage(STORAGE.GUEST_ROOM_TOKEN);
+    setSavedToken(null);
+    toast.success("Đã đóng phiên chat");
+  };
+  const handleOpenChat = () => {
+    navigate(CUSTOMER.chat(savedToken!));
+  };
   const handleQRScan = () => {
     setIsQRScannerOpen(true);
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: "environment" } })
       .then((stream) => {
-        console.log("Camera access granted");
         stream.getTracks().forEach((track) => track.stop());
       })
       .catch((err) => {
@@ -69,12 +90,33 @@ export default function ChatInbox({}: Route.ComponentProps) {
       });
   };
 
-  const handleQRScanned = (token: string) => {
-    setStorage(STORAGE.GUEST_ROOM_TOKEN, token);
-    setSavedToken(token);
-    setIsQRScannerOpen(false);
-    toast.success("Đã quét mã QR thành công!");
-    navigate(`/chat?roomToken=${token}`);
+  const handleQRScanned = (scannedText: string) => {
+    try {
+      // Try to parse as URL first
+      let token: string | null = null;
+
+      try {
+        const url = new URL(scannedText);
+        token = url.searchParams.get("roomToken");
+      } catch {
+        // If not a URL, treat as direct token
+        token = scannedText;
+      }
+
+      if (!token) {
+        toast.error("Mã QR không hợp lệ");
+        return;
+      }
+
+      setStorage(STORAGE.GUEST_ROOM_TOKEN, token);
+      setSavedToken(token);
+      setIsQRScannerOpen(false);
+      toast.success("Đã quét mã QR thành công!");
+      // navigate(CUSTOMER.chat(token));
+    } catch (error) {
+      console.error("QR scan error:", error);
+      toast.error("Không thể xử lý mã QR");
+    }
   };
 
   if (isLoading) {
@@ -95,7 +137,6 @@ export default function ChatInbox({}: Route.ComponentProps) {
       <div className="bg-white border-b p-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-primary" />
             Chat với Lễ tân
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -175,36 +216,42 @@ export default function ChatInbox({}: Route.ComponentProps) {
               </EmptyContent>
             </Empty>
           )}
-
           {/* Active Session Display */}
           {savedToken && entry && (
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      Phiên chat của bạn
-                    </CardTitle>
-                    <CardDescription className="mt-1">
-                      Phòng: {entry.roomName || "N/A"}
-                    </CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Phiên chat của bạn
+                </CardTitle>
+                <CardAction>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      variant={"info-outline"}
+                      onClick={handleOpenChat}
+                      disabled={!entry.canChat}
+                    >
+                      <MessageCircleX className="h-5 w-5 mr-2" />
+                      Mở chat
+                    </Button>
+                    <Button
+                      variant={"destructive-outline"}
+                      onClick={handleCloseChat}
+                    >
+                      <MessageCircleReply className="h-5 w-5 mr-2" />
+                      Đóng chat
+                    </Button>
                   </div>
-                  <Badge variant={entry.canChat ? "default" : "secondary"}>
-                    {entry.canChat ? "Đang mở" : "Đã đóng"}
-                  </Badge>
-                </div>
+                </CardAction>
+                <CardDescription className="mt-1">
+                  Phòng: {entry.roomName || "N/A"}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button
-                  onClick={() => navigate(`/chat?roomToken=${savedToken}`)}
-                  className="w-full"
-                  size="lg"
-                  disabled={!entry.canChat}
-                >
-                  <MessageSquare className="h-5 w-5 mr-2" />
-                  Mở chat
-                </Button>
+                <Badge variant={entry.canChat ? "default" : "secondary"}>
+                  {entry.canChat ? "Đang mở" : "Đã đóng"}
+                </Badge>
+
                 {!entry.canChat && (
                   <p className="text-xs text-center text-muted-foreground">
                     {entry.message || "Phiên chat không khả dụng"}
@@ -213,7 +260,6 @@ export default function ChatInbox({}: Route.ComponentProps) {
               </CardContent>
             </Card>
           )}
-
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Hướng dẫn sử dụng</CardTitle>
