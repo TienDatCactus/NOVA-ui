@@ -66,31 +66,29 @@ export default function ApplyUnusedLeaveDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label>Chọn chế độ xử lý</Label>
             <Select value={mode} onValueChange={(value: any) => setMode(value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Chọn chế độ" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="PayOut">
-                  <div className="flex flex-col items-start">
-                    <span className="font-medium">Trả tiền phép dư</span>
-                    <span className="text-xs text-muted-foreground">
-                      Quy đổi ngày phép thành tiền
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="CarryOver">
-                  <div className="flex flex-col items-start">
-                    <span className="font-medium">Cộng dồn sang tháng sau</span>
-                    <span className="text-xs text-muted-foreground">
-                      Giữ lại cho kỳ tiếp theo
-                    </span>
-                  </div>
-                </SelectItem>
+                <SelectItem value="PayOut">Trả tiền phép dư</SelectItem>
+                <SelectItem value="CarryOver">Cộng dồn sang tháng sau</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Description hiện khi select */}
+            {mode === "PayOut" && (
+              <p className="text-xs text-muted-foreground animate-in fade-in slide-in-from-top-1 duration-200">
+                Quy đổi ngày phép thành tiền
+              </p>
+            )}
+            {mode === "CarryOver" && (
+              <p className="text-xs text-muted-foreground animate-in fade-in slide-in-from-top-1 duration-200">
+                Giữ lại cho kỳ tiếp theo
+              </p>
+            )}
           </div>
 
           <div className="rounded-lg bg-muted p-4 space-y-2">
@@ -101,12 +99,6 @@ export default function ApplyUnusedLeaveDialog({
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Mã NV:</span>
               <span className="font-mono">{payroll.staffCode}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Ngày phép còn lại:</span>
-              <span className="font-medium">
-                {payroll.paidLeaveDaysRemaining} ngày
-              </span>
             </div>
           </div>
         </div>

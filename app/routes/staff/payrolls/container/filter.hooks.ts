@@ -3,6 +3,7 @@ import { useState } from "react";
 export interface PayrollFilterState {
   year?: number;
   month?: number;
+  search?: string;
 }
 
 export function usePayrollFilter() {
@@ -10,6 +11,7 @@ export function usePayrollFilter() {
   const [filterState, setFilterState] = useState<PayrollFilterState>({
     year: currentDate.getFullYear(),
     month: currentDate.getMonth() + 1,
+    search: "",
   });
 
   const updateFilter = (updates: Partial<PayrollFilterState>) => {
@@ -20,6 +22,7 @@ export function usePayrollFilter() {
     setFilterState({
       year: currentDate.getFullYear(),
       month: currentDate.getMonth() + 1,
+      search: "",
     });
   };
 

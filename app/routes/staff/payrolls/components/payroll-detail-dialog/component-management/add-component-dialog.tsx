@@ -37,6 +37,11 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "~/lib/utils";
+import {
+  formatNumber,
+  parseFormattedNumber,
+  handleNumberInputChange,
+} from "~/lib/format-number";
 
 const { AddComponentFormSchema } = StaffPayrollSchema;
 
@@ -75,7 +80,7 @@ export default function AddComponentDialog({
       return StaffPayrollService.addComponent(payrollId, {
         type: data.type,
         title: data.title,
-        amount: Number(data.amount),
+        amount: parseFormattedNumber(data.amount),
         note: data.note,
         effectiveDate: data.effectiveDate,
       });
@@ -111,19 +116,43 @@ export default function AddComponentDialog({
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Loại</FormLabel>
+                    <FormLabel>Loại khoản <span className="text-destructive">*</span></FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="h-10">
-                          <SelectValue />
+                          <SelectValue>
+                            {field.value && (() => {
+                              const isDeductionType = ["Penalty", "Advance", "AdjustmentDecrease"].includes(field.value);
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-base font-bold ${
+                                    isDeductionType ? "text-red-600" : "text-green-600"
+                                  }`}>
+                                    {isDeductionType ? "-" : "+"}
+                                  </span>
+                                  <span>{ComponentTypeConfig[field.value]?.label}</span>
+                                </div>
+                              );
+                            })()}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.entries(ComponentTypeConfig).map(([key, config]) => (
-                          <SelectItem key={key} value={key}>
-                            {config.label}
-                          </SelectItem>
-                        ))}
+                        {Object.entries(ComponentTypeConfig).map(([key, config]) => {
+                          const isDeductionType = ["Penalty", "Advance", "AdjustmentDecrease"].includes(key);
+                          return (
+                            <SelectItem key={key} value={key}>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-base font-bold ${
+                                  isDeductionType ? "text-red-600" : "text-green-600"
+                                }`}>
+                                  {isDeductionType ? "-" : "+"}
+                                </span>
+                                <span>{config.label}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -136,7 +165,7 @@ export default function AddComponentDialog({
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tiêu đề</FormLabel>
+                    <FormLabel>Tên khoản <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input
                         placeholder={ComponentTypeConfig[selectedType]?.label || "Nhập tiêu đề"}
@@ -157,14 +186,15 @@ export default function AddComponentDialog({
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Số tiền</FormLabel>
+                    <FormLabel>Số tiền <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
-                          type="number"
+                          type="text"
                           placeholder="0"
                           className="pr-12 h-10"
-                          {...field}
+                          value={field.value}
+                          onChange={(e) => handleNumberInputChange(e, field.onChange)}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                           VNĐ
@@ -181,7 +211,7 @@ export default function AddComponentDialog({
                 name="effectiveDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Ngày hiệu lực</FormLabel>
+                    <FormLabel>Áp dụng từ ngày <span className="text-destructive">*</span></FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -211,7 +241,6 @@ export default function AddComponentDialog({
                           }}
                           captionLayout="dropdown"
                           className="rounded-md border"
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
@@ -227,7 +256,7 @@ export default function AddComponentDialog({
               name="note"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ghi chú (không bắt buộc)</FormLabel>
+                  <FormLabel>Ghi chú</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Nhập ghi chú..."

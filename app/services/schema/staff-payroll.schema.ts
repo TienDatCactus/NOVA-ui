@@ -31,9 +31,8 @@ const PayrollItemSchema = z.object({
   staffId: z.string(),
   staffCode: z.string(),
   staffName: z.string(),
-  year: z.number(),
-  month: z.number(),
   daysInMonth: z.number(),
+  assignedDays: z.number(),
   workDays: z.number(),
   paidLeaveQuota: z.number(),
   paidLeaveDaysUsed: z.number(),
@@ -80,7 +79,7 @@ const GeneratePayrollRequestSchema = z.object({
 const GenerateSinglePayrollRequestSchema = z.object({
   year: z.number(),
   month: z.number(),
-  baseSalaryFullMonth: z.number(),
+  baseSalaryFullMonth: z.number().optional(),
 });
 
 // Apply unused leave request schema

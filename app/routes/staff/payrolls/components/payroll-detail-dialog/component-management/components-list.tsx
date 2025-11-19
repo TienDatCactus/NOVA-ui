@@ -81,9 +81,9 @@ export default function ComponentsList({
   };
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="flex flex-col h-full p-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="font-semibold text-base">Danh sách phụ cấp / khấu trừ</h3>
           <p className="text-sm text-muted-foreground mt-1">
@@ -98,7 +98,8 @@ export default function ComponentsList({
 
       {components && components.length > 0 ? (
         <>
-          <div className="space-y-2.5">
+          {/* Scrollable list */}
+          <div className="flex-1 overflow-y-auto space-y-2.5 pr-2">
             {components.map((component) => {
               const config = ComponentTypeConfig[component.type as ComponentTypeKey];
               // Các loại component là khấu trừ
@@ -179,26 +180,27 @@ export default function ComponentsList({
             })}
           </div>
 
-          <Separator className="my-4" />
-
-          {/* Total */}
-          <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-sm text-foreground">
-                Tổng phụ cấp/khấu trừ
-              </span>
-              <div className="text-right">
-                <div
-                  className={`font-mono text-xl font-bold tabular-nums ${
-                    componentsTotal >= 0
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {componentsTotal >= 0 ? "+" : ""}
-                  {componentsTotal.toLocaleString("vi-VN")}
+          {/* Fixed total at bottom */}
+          <div className="flex-shrink-0 pt-4 space-y-4">
+            <Separator />
+            <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-sm text-foreground">
+                  Tổng phụ cấp/khấu trừ
+                </span>
+                <div className="text-right">
+                  <div
+                    className={`font-mono text-xl font-bold tabular-nums ${
+                      componentsTotal >= 0
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {componentsTotal >= 0 ? "+" : ""}
+                    {componentsTotal.toLocaleString("vi-VN")}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">VNĐ</div>
                 </div>
-                <div className="text-xs text-muted-foreground mt-0.5">VNĐ</div>
               </div>
             </div>
           </div>
@@ -228,7 +230,7 @@ export default function ComponentsList({
           </p>
           <Button size="sm" onClick={() => setAddDialogOpen(true)} variant="outline">
             <Plus className="h-4 w-4 mr-1.5" />
-            Thêm component đầu tiên
+            Thêm phụ cấp/khấu trừ đầu tiên
           </Button>
         </div>
       )}

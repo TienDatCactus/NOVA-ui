@@ -59,8 +59,20 @@ export const columns: ColumnDef<PayrollItem>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "assignedDays",
+    header: () => <div className="text-center">Ngày công định mức</div>,
+    cell: ({ row }) => {
+      const assignedDays = row.getValue("assignedDays") as number;
+      return (
+        <div className="flex flex-col items-center">
+          <span className="font-mono font-medium">{assignedDays}</span>
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "workDays",
-    header: () => <div className="text-center">Ngày công</div>,
+    header: () => <div className="text-center">Ngày công thực tế</div>,
     cell: ({ row }) => {
       const workDays = row.getValue("workDays") as number;
       return (
@@ -96,7 +108,7 @@ export const columns: ColumnDef<PayrollItem>[] = [
   },
   {
     accessorKey: "baseSalaryFullMonth",
-    header: () => <div className="text-right">Lương tháng đầy đủ</div>,
+    header: () => <div className="text-right">Lương cơ bản (tháng đủ)</div>,
     cell: ({ row }) => {
       const amount = row.getValue("baseSalaryFullMonth") as number;
       return (
@@ -110,7 +122,7 @@ export const columns: ColumnDef<PayrollItem>[] = [
   },
   {
     accessorKey: "baseSalaryCalculated",
-    header: () => <div className="text-right">Lương cơ bản</div>,
+    header: () => <div className="text-right">Lương cơ bản tính theo công</div>,
     cell: ({ row }) => {
       const amount = row.getValue("baseSalaryCalculated") as number;
       return (
@@ -144,7 +156,7 @@ export const columns: ColumnDef<PayrollItem>[] = [
   },
   {
     accessorKey: "totalAmount",
-    header: () => <div className="text-right">Tổng lương</div>,
+    header: () => <div className="text-right">Tổng thu nhập kỳ này</div>,
     cell: ({ row }) => {
       const amount = row.getValue("totalAmount") as number;
       return (
@@ -159,7 +171,7 @@ export const columns: ColumnDef<PayrollItem>[] = [
   },
   {
     accessorKey: "paidAmount",
-    header: () => <div className="text-right">Đã trả</div>,
+    header: () => <div className="text-right">Đã thanh toán</div>,
     cell: ({ row }) => {
       const paid = row.getValue("paidAmount") as number;
       return (
@@ -171,7 +183,7 @@ export const columns: ColumnDef<PayrollItem>[] = [
   },
   {
     accessorKey: "remainingAmount",
-    header: () => <div className="text-right">Còn lại</div>,
+    header: () => <div className="text-right">Còn phải trả</div>,
     cell: ({ row }) => {
       const remaining = row.getValue("remainingAmount") as number;
       return (
@@ -185,16 +197,15 @@ export const columns: ColumnDef<PayrollItem>[] = [
   },
   {
     accessorKey: "hasUnusedLeavePending",
-    header: () => <div className="text-center">Xử lý phép dư</div>,
+    header: () => <div className="text-center">Còn ngày dư chưa xử lý</div>,
     cell: ({ row }) => {
       const hasUnusedLeavePending = row.getValue("hasUnusedLeavePending") as boolean;
-      const payroll = row.original;
       
       if (!hasUnusedLeavePending) {
         return (
           <div className="flex justify-center">
             <Badge variant="outline" className="text-xs">
-              Đã được xử lý
+              Đã xử lý
             </Badge>
           </div>
         );
@@ -203,7 +214,7 @@ export const columns: ColumnDef<PayrollItem>[] = [
       return (
         <div className="flex justify-center">
           <Badge variant="secondary" className="text-xs">
-            Chờ xử lý
+            Chưa xử lý
           </Badge>
         </div>
       );

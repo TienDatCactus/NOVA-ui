@@ -6,11 +6,14 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { StaffPayrollService } from "~/services/api/staff-payroll";
-import { Loader2 } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
+import { useState } from "react";
 import ComponentsList from "./payroll-detail-dialog/component-management/components-list";
 
 interface PayrollDetailDialogProps {
@@ -26,6 +29,8 @@ export default function PayrollDetailDialog({
   onOpenChange,
   onSuccess,
 }: PayrollDetailDialogProps) {
+  const [isExporting, setIsExporting] = useState(false);
+
   const { data, isPending, refetch } = useQuery({
     queryKey: ["payroll-detail", payrollId],
     queryFn: () => StaffPayrollService.getPayrollDetail(payrollId),
@@ -39,12 +44,52 @@ export default function PayrollDetailDialog({
     onSuccess?.(); // Refetch list
   };
 
+  const handleExportPayslip = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await StaffPayrollService.exportPayslip(payrollId);
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `PhieuLuong_${payroll?.staffCode}_${payroll?.month}_${payroll?.year}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Xuất phiếu lương thành công");
+    } catch (error) {
+      toast.error("Không thể xuất phiếu lương");
+      console.error("Export payslip error:", error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl h-[85vh] p-0 flex flex-col">
         {/* Header */}
-        <DialogHeader className="px-6 pt-6 pb-3 shrink-0">
-          <DialogTitle>Chi tiết bảng lương</DialogTitle>
+        <DialogHeader className="px-9 pt-6 pb-3 shrink-0 border-b">
+          <div className="flex items-center justify-between">
+            <DialogTitle>Chi tiết bảng lương</DialogTitle>
+            {payroll && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleExportPayslip}
+                disabled={isExporting}
+              >
+                {isExporting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-4 w-4" />
+                )}
+                Xuất phiếu lương
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         {isPending ? (
@@ -207,14 +252,12 @@ export default function PayrollDetailDialog({
               </TabsContent>
 
               <TabsContent value="components" className="h-full m-0 data-[state=inactive]:hidden">
-                <ScrollArea className="h-full">
-                  <ComponentsList
-                    payrollId={payrollId}
-                    components={payroll.components || []}
-                    componentsTotal={payroll.componentsTotal || 0}
-                    onRefresh={handleRefresh}
-                  />
-                </ScrollArea>
+                <ComponentsList
+                  payrollId={payrollId}
+                  components={payroll.components || []}
+                  componentsTotal={payroll.componentsTotal || 0}
+                  onRefresh={handleRefresh}
+                />
               </TabsContent>
             </div>
           </Tabs>

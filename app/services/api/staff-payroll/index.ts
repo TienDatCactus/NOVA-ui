@@ -196,6 +196,79 @@ async function deleteComponent(
   }
 }
 
+/**
+ * Export monthly payroll (toàn bộ nhân viên)
+ */
+async function exportMonthly(params: {
+  year: number;
+  month: number;
+}): Promise<Blob> {
+  try {
+    const resp = await http.get(StaffPayroll.exportMonthly, {
+      params,
+      responseType: "blob",
+    });
+    let blobData = resp;
+    if (blobData instanceof Blob) {
+      return blobData;
+    }
+    const blobContent =
+      typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
+    return new Blob([blobContent as BlobPart]);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Export payslip for single payroll (1 nhân viên)
+ */
+async function exportPayslip(id: string): Promise<Blob> {
+  try {
+    const resp = await http.get(StaffPayroll.exportPayslip(id), {
+      responseType: "blob",
+    });
+    let blobData = resp;
+    if (blobData instanceof Blob) {
+      return blobData;
+    }
+    const blobContent =
+      typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
+    return new Blob([blobContent as BlobPart]);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Refresh days for all payrolls (toàn bộ nhân viên)
+ */
+async function refreshDays(params: {
+  year: number;
+  month: number;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const resp = await http.post(StaffPayroll.refreshDays, null, { params });
+    return resp.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Refresh days for single payroll (1 nhân viên)
+ */
+async function refreshSinglePayroll(
+  id: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const resp = await http.post(StaffPayroll.refreshSinglePayroll(id));
+    return resp.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 export const StaffPayrollService = {
   getPayrollGrid,
   generatePayroll,
@@ -209,4 +282,8 @@ export const StaffPayrollService = {
   addComponent,
   updateComponent,
   deleteComponent,
+  exportMonthly,
+  exportPayslip,
+  refreshDays,
+  refreshSinglePayroll,
 };

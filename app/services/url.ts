@@ -250,6 +250,10 @@ const StaffPayroll = {
     `StaffPayrolls/components/${componentId}`,
   deleteComponent: (componentId: string) =>
     `StaffPayrolls/components/${componentId}`,
+  exportMonthly: "StaffPayrolls/export/monthly",
+  exportPayslip: (id: string) => `StaffPayrolls/${id}/export-payslip`,
+  refreshDays: "StaffPayrolls/refresh-days",
+  refreshSinglePayroll: (id: string) => `StaffPayrolls/${id}/refresh-days`,
 };
 
 export {

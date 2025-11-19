@@ -37,6 +37,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import {
+  formatNumber,
+  parseFormattedNumber,
+  handleNumberInputChange,
+} from "~/lib/format-number";
 
 interface GeneratePayrollDialogProps {
   open: boolean;
@@ -85,14 +90,18 @@ export default function GeneratePayrollDialog({
         if (!selectedStaffId) {
           throw new Error("Vui lòng chọn nhân viên");
         }
-        if (!baseSalaryFullMonth || Number(baseSalaryFullMonth) <= 0) {
-          throw new Error("Vui lòng nhập lương cơ bản");
-        }
-        return StaffPayrollService.generateSinglePayroll(selectedStaffId, {
+        const payload: any = {
           year,
           month,
-          baseSalaryFullMonth: Number(baseSalaryFullMonth),
-        });
+        };
+        // Chỉ gửi baseSalaryFullMonth nếu có giá trị
+        if (baseSalaryFullMonth) {
+          const parsedValue = parseFormattedNumber(baseSalaryFullMonth);
+          if (parsedValue > 0) {
+            payload.baseSalaryFullMonth = parsedValue;
+          }
+        }
+        return StaffPayrollService.generateSinglePayroll(selectedStaffId, payload);
       }
     },
     onSuccess: () => {
@@ -257,14 +266,14 @@ export default function GeneratePayrollDialog({
 
               {/* Lương cơ bản */}
               <div className="space-y-2">
-                <Label htmlFor="baseSalary">Lương cơ bản (tháng đủ)</Label>
+                <Label htmlFor="baseSalary">Lương cơ bản (tháng đủ) <span className="text-xs text-muted-foreground">(không bắt buộc)</span></Label>
                 <div className="relative">
                   <Input
                     id="baseSalary"
-                    type="number"
+                    type="text"
                     placeholder="0"
                     value={baseSalaryFullMonth}
-                    onChange={(e) => setBaseSalaryFullMonth(e.target.value)}
+                    onChange={(e) => handleNumberInputChange(e, setBaseSalaryFullMonth)}
                     className="pr-12"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -287,10 +296,10 @@ export default function GeneratePayrollDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={
+            disabled={(
               generateMutation.isPending ||
-              (scope === "single" && (!selectedStaffId || !baseSalaryFullMonth))
-            }
+              (scope === "single" && !selectedStaffId)
+            )}
           >
             {generateMutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -144,12 +144,12 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: "/dashboard/staff/work-shifts",
       },
       {
-        title: "Lịch làm việc",
-        url: "/dashboard/staff/schedules",
-      },
-      {
         title: "Ngày nghỉ",
         url: "/dashboard/staff/holidays",
+      },
+      {
+        title: "Lịch làm việc",
+        url: "/dashboard/staff/schedules",
       },
       {
         title: "Bảng lương",
@@ -161,11 +161,6 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Tài khoản",
     url: "/dashboard/users",
     icon: Users,
-  },
-  {
-    title: "Nhân sự",
-    url: "/dashboard/staff",
-    icon: UserCog,
   },
   {
     title: "Hóa đơn",

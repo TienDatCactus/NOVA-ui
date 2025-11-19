@@ -7,7 +7,7 @@ import {
   type ColumnDef,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -32,6 +32,43 @@ interface DataTableProps<TData, TValue> {
   onRowClick?: (row: TData) => void;
 }
 
+const STORAGE_KEY = "payroll-column-visibility";
+
+const getDefaultColumnVisibility = (): VisibilityState => {
+  // Try to load from localStorage
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (error) {
+        console.error("Failed to parse saved column visibility:", error);
+      }
+    }
+  }
+
+  // Default visible columns
+  return {
+    select: true,
+    index: true,
+    staffCode: true,
+    staffName: true,
+    workDays: true,
+    totalAmount: true,
+    remainingAmount: true,
+    locked: true,
+    actions: true,
+    // Hidden by default
+    paidLeaveDaysUsed: false,
+    unpaidLeaveDays: false,
+    assignedDays: false,
+    baseSalaryFullMonth: false,
+    baseSalaryCalculated: false,
+    componentsTotal: false,
+    paidAmount: false,
+  };
+};
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -39,25 +76,16 @@ export function DataTable<TData, TValue>({
   onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    // Default visible columns
-    select: true,
-    index: true,
-    staffCode: true,
-    staffName: true,
-    workDays: true,
-    totalAmount: true,
-    locked: true,
-    actions: true,
-    // Hidden by default
-    paidLeaveDaysUsed: false,
-    unpaidLeaveDays: false,
-    baseSalaryFullMonth: false,
-    baseSalaryCalculated: false,
-    componentsTotal: false,
-    paidAmount: false,
-    remainingAmount: false,
-  });
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    getDefaultColumnVisibility()
+  );
+
+  // Save column visibility to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(columnVisibility));
+    }
+  }, [columnVisibility]);
 
   const table = useReactTable({
     data,
@@ -88,7 +116,7 @@ export function DataTable<TData, TValue>({
               Hiển thị cột
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
+          <DropdownMenuContent align="end" className="w-[200px]" onCloseAutoFocus={(e) => e.preventDefault()}>
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
@@ -97,16 +125,17 @@ export function DataTable<TData, TValue>({
                   index: "STT",
                   staffCode: "Mã nhân viên",
                   staffName: "Tên nhân viên",
-                  workDays: "Ngày công",
+                  assignedDays: "Ngày công định mức",
+                  workDays: "Ngày công thực tế",
                   paidLeaveDaysUsed: "Phép có lương",
                   unpaidLeaveDays: "Phép không lương",
-                  baseSalaryFullMonth: "Lương tháng đầy đủ",
-                  baseSalaryCalculated: "Lương cơ bản",
+                  baseSalaryFullMonth: "Lương cơ bản (tháng đủ)",
+                  baseSalaryCalculated: "Lương cơ bản tính theo công",
                   componentsTotal: "Phụ cấp/Khấu trừ",
-                  totalAmount: "Tổng lương",
-                  hasUnusedLeavePending: "Xử lý phép dư",
-                  paidAmount: "Đã trả",
-                  remainingAmount: "Còn lại",
+                  totalAmount: "Tổng thu nhập kỳ này",
+                  hasUnusedLeavePending: "Còn ngày dư chưa xử lý",
+                  paidAmount: "Đã thanh toán",
+                  remainingAmount: "Còn phải trả",
                   locked: "Trạng thái",
                 };
                 return (
@@ -117,6 +146,7 @@ export function DataTable<TData, TValue>({
                     onCheckedChange={(value) =>
                       column.toggleVisibility(!!value)
                     }
+                    onSelect={(e) => e.preventDefault()}
                   >
                     {columnLabels[column.id] || column.id}
                   </DropdownMenuCheckboxItem>

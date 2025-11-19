@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -23,6 +23,9 @@ export default function StatusSelectCell({
   onSuccess,
 }: StatusSelectCellProps) {
   const [currentStatus, setCurrentStatus] = useState(locked);
+  useEffect(() => {
+    setCurrentStatus(locked);
+  }, [locked, payrollId]);
 
   const lockMutation = useMutation({
     mutationFn: () => StaffPayrollService.lockPayroll(payrollId),

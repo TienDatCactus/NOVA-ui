@@ -15,6 +15,11 @@ import { StaffPayrollService } from "~/services/api/staff-payroll";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import type { PayrollItem } from "~/services/api/staff-payroll/dto";
+import {
+  formatNumber,
+  parseFormattedNumber,
+  handleNumberInputChange,
+} from "~/lib/format-number";
 
 interface UpdatePayrollDialogProps {
   payroll: PayrollItem | null;
@@ -35,8 +40,12 @@ export default function UpdatePayrollDialog({
   // Load initial values when payroll changes
   useEffect(() => {
     if (payroll) {
-      setBaseSalaryFullMonth(payroll.baseSalaryFullMonth?.toString() || "");
-      setPaidAmount(payroll.paidAmount?.toString() || "");
+      setBaseSalaryFullMonth(
+        payroll.baseSalaryFullMonth ? formatNumber(payroll.baseSalaryFullMonth) : ""
+      );
+      setPaidAmount(
+        payroll.paidAmount ? formatNumber(payroll.paidAmount) : ""
+      );
     }
   }, [payroll]);
 
@@ -50,10 +59,10 @@ export default function UpdatePayrollDialog({
       } = {};
 
       if (baseSalaryFullMonth) {
-        updateData.baseSalaryFullMonth = parseFloat(baseSalaryFullMonth);
+        updateData.baseSalaryFullMonth = parseFormattedNumber(baseSalaryFullMonth);
       }
       if (paidAmount) {
-        updateData.paidAmount = parseFloat(paidAmount);
+        updateData.paidAmount = parseFormattedNumber(paidAmount);
       }
 
       return StaffPayrollService.updatePayroll(payroll.payrollId, updateData);
@@ -98,12 +107,6 @@ export default function UpdatePayrollDialog({
               <span className="text-muted-foreground">Tên nhân viên:</span>
               <span className="font-medium">{payroll?.staffName}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Kỳ lương:</span>
-              <span className="font-medium">
-                Tháng {payroll?.month}/{payroll?.year}
-              </span>
-            </div>
           </div>
 
           {/* Base Salary Full Month */}
@@ -112,10 +115,10 @@ export default function UpdatePayrollDialog({
             <div className="relative">
               <Input
                 id="baseSalary"
-                type="number"
+                type="text"
                 placeholder="Nhập lương cơ bản"
                 value={baseSalaryFullMonth}
-                onChange={(e) => setBaseSalaryFullMonth(e.target.value)}
+                onChange={(e) => handleNumberInputChange(e, setBaseSalaryFullMonth)}
                 className="pr-16"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -124,7 +127,7 @@ export default function UpdatePayrollDialog({
             </div>
             {payroll && (
               <p className="text-xs text-muted-foreground">
-                Hiện tại: {payroll.baseSalaryFullMonth.toLocaleString("vi-VN")} VNĐ
+                Hiện tại: {formatNumber(payroll.baseSalaryFullMonth)} VNĐ
               </p>
             )}
           </div>
@@ -135,10 +138,10 @@ export default function UpdatePayrollDialog({
             <div className="relative">
               <Input
                 id="paidAmount"
-                type="number"
+                type="text"
                 placeholder="Nhập số tiền đã trả"
                 value={paidAmount}
-                onChange={(e) => setPaidAmount(e.target.value)}
+                onChange={(e) => handleNumberInputChange(e, setPaidAmount)}
                 className="pr-16"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -147,7 +150,7 @@ export default function UpdatePayrollDialog({
             </div>
             {payroll && (
               <p className="text-xs text-muted-foreground">
-                Hiện tại: {payroll.paidAmount.toLocaleString("vi-VN")} VNĐ
+                Hiện tại: {formatNumber(payroll.paidAmount)} VNĐ
               </p>
             )}
           </div>
@@ -158,13 +161,13 @@ export default function UpdatePayrollDialog({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tổng lương:</span>
                 <span className="font-mono font-semibold">
-                  {payroll.totalAmount.toLocaleString("vi-VN")} VNĐ
+                  {formatNumber(payroll.totalAmount)} VNĐ
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Còn lại:</span>
                 <span className="font-mono font-semibold text-orange-600">
-                  {payroll.remainingAmount.toLocaleString("vi-VN")} VNĐ
+                  {formatNumber(payroll.remainingAmount)} VNĐ
                 </span>
               </div>
             </div>
