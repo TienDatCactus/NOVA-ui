@@ -112,7 +112,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
       setSavedToken(token);
       setIsQRScannerOpen(false);
       toast.success("Đã quét mã QR thành công!");
-      // navigate(CUSTOMER.chat(token));
+      window.open(CUSTOMER.chat(token), "_blank");
     } catch (error) {
       console.error("QR scan error:", error);
       toast.error("Không thể xử lý mã QR");

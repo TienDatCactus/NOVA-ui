@@ -72,8 +72,52 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className }) => {
       setQuery("");
       try {
         const data = await search.searchByResortCategory(categoryKey as any);
-        const features = data?.features || data?.suggestions || [];
+        const features = (data?.features || data?.suggestions || []) as any[];
+
+        // Show list results
         setResults(normalizeResults(features));
+
+        // Also drop markers for category results
+        if (!mapRef.current) return;
+        clearMarkers();
+
+        const bounds = new mapboxgl.LngLatBounds();
+        let count = 0;
+
+        for (const f of features) {
+          const coords =
+            f?.geometry?.coordinates || f?.center || f?.coordinates;
+          const id = f?.mapbox_id || f?.id || f?.properties?.mapbox_id;
+          const name =
+            f?.name || f?.properties?.name || f?.properties?.place_formatted;
+          const address =
+            f?.full_address ||
+            f?.properties?.full_address ||
+            f?.properties?.place_formatted;
+
+          if (!coords || coords.length < 2 || !Array.isArray(coords)) continue;
+          const [lng, lat] = coords as [number, number];
+
+          const popup = new mapboxgl.Popup({ offset: 12, closeButton: true });
+
+          const marker = new mapboxgl.Marker({
+            anchor: "bottom",
+            offset: [0, -2],
+          })
+            .setLngLat([lng, lat])
+            .setPopup(popup)
+            .addTo(mapRef.current!);
+
+          markersRef.current.push(marker);
+          bounds.extend([lng, lat]);
+
+          count += 1;
+          if (count >= 50) break; // cap markers
+        }
+
+        if (!bounds.isEmpty()) {
+          mapRef.current.fitBounds(bounds, { padding: 60, duration: 800 });
+        }
       } catch (error) {
         console.error("Category search failed:", error);
         setResults([]);
@@ -81,7 +125,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className }) => {
         setLoading(false);
       }
     },
-    [search, normalizeResults]
+    [search, normalizeResults, mapRef, clearMarkers]
   );
 
   async function handleSelectResult(item: any) {

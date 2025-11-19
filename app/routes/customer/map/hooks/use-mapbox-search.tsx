@@ -289,36 +289,6 @@ export function useMapboxSearch(options?: {
     sessionTokenRef.current = crypto.randomUUID();
   }, []);
 
-  // Search history management
-  const addToHistory = useCallback(
-    (item: { name: string; full_address?: string; mapbox_id: string }) => {
-      const historyItem: SearchHistoryItem = {
-        id: crypto.randomUUID(),
-        name: item.name,
-        full_address: item.full_address,
-        mapbox_id: item.mapbox_id,
-        timestamp: Date.now(),
-      };
-
-      setSearchHistory((prev) => [
-        historyItem,
-        ...prev.filter((h) => h.mapbox_id !== item.mapbox_id).slice(0, 9),
-      ]);
-    },
-    [setSearchHistory]
-  );
-
-  const removeFromHistory = useCallback(
-    (id: string) => {
-      setSearchHistory((prev) => prev.filter((item) => item.id !== id));
-    },
-    [setSearchHistory]
-  );
-
-  const clearHistory = useCallback(() => {
-    setSearchHistory([]);
-  }, [setSearchHistory]);
-
   return useMemo(
     () => ({
       suggest,
@@ -329,9 +299,6 @@ export function useMapboxSearch(options?: {
       reverseLookup,
       resetSession,
       searchHistory,
-      addToHistory,
-      removeFromHistory,
-      clearHistory,
       sessionToken: sessionTokenRef.current,
       loading,
       error,
@@ -345,10 +312,6 @@ export function useMapboxSearch(options?: {
       reverseLookup,
       resetSession,
       searchHistory,
-      addToHistory,
-      removeFromHistory,
-      clearHistory,
-      loading,
       error,
     ]
   );
