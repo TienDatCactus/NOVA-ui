@@ -21,10 +21,6 @@ export type StockItemDetailsDto = z.infer<
   typeof StockItemsSchemas.StockItemDetailsSchema
 >;
 
-export type LowStockListResponseDto = z.infer<
-  typeof StockItemsSchemas.LowStockListResponseSchema
->;
-
 export type StockTransactionsItemDto = z.infer<
   typeof StockItemsSchemas.StockTransactionsItemSchema
 >;

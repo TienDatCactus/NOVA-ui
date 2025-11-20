@@ -6,3 +6,31 @@ export type PurchaseRequestListParams = {
     typeof PurchaseRequestsSchemas.PurchaseRequestStatusEnum
   > | null;
 };
+
+export const PURCHASE_REQUESTS_STATUS = [
+  {
+    label: "Nháp",
+    value: "Draft",
+  },
+  {
+    label: "Chờ duyệt",
+    value: "PendingApproval",
+  },
+  {
+    label: "Đã duyệt",
+    value: "Approved",
+  },
+  {
+    label: "Từ chối",
+    value: "Rejected",
+  },
+  {
+    label: "Đã nhận hàng",
+    value: "Fulfilled",
+  },
+
+  {
+    label: "Đã hủy",
+    value: "Cancelled",
+  },
+];

@@ -32,19 +32,6 @@ export function useStockItemDetail(id?: string, code?: string) {
 }
 
 /**
- * Hook lấy danh sách items tồn kho thấp
- */
-export function useLowStockItems(options?: { enabled?: boolean }) {
-  return useQuery({
-    queryKey: ["stock-items", "low-stock"],
-    queryFn: async () => await StockItemsService.getLowStockItemList(),
-    staleTime: 3 * 60 * 1000, // 3 minutes - refresh thường xuyên hơn
-    refetchInterval: 5 * 60 * 1000, // Auto-refresh mỗi 5 phút
-    enabled: options?.enabled,
-  });
-}
-
-/**
  * Hook lấy lịch sử giao dịch của item
  */
 export function useStockItemTransactions(
@@ -71,17 +58,10 @@ export function useCreateStockItem() {
       await StockItemsService.createStockItem(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock-items"] });
-      toast.success("Tạo hàng hóa thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi tạo hàng hóa");
     },
   });
 }
 
-/**
- * Hook cập nhật item
- */
 export function useUpdateStockItem() {
   const queryClient = useQueryClient();
 

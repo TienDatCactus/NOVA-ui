@@ -19,6 +19,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { formatMoney } from "~/lib/utils";
+import ItemsActionCell from "../../fragments/items-action.cell";
 
 export const columns: ColumnDef<StockItemsListItemDto>[] = [
   {
@@ -135,39 +136,7 @@ export const columns: ColumnDef<StockItemsListItemDto>[] = [
     id: "actions",
     header: () => null,
     cell: ({ row }) => {
-      return (
-        <div className="flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  window.location.href = `/dashboard/stocks/items/edit/${row.original.id}`;
-                }}
-              >
-                <Pencil className="mr-2 h-4 w-4" />
-                Chỉnh sửa
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => {
-                  // TODO: Implement delete
-                  console.log("Delete", row.original.id);
-                }}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Xóa
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
+      return <ItemsActionCell item={row.original} />;
     },
     enableSorting: false,
     enableHiding: false,

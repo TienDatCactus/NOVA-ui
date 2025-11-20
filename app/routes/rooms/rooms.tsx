@@ -3,7 +3,6 @@ import CreateRoomDialog from "./components/create-room.dialog";
 import RoomsDataTable from "./components/rooms-list";
 import { useRoomTypes } from "./container/room-types/query.hooks";
 import useRoomsContainer from "./container/rooms/container.hooks";
-import BulkActionsToolbar from "./fragments/rooms/bulk-action.dialog";
 import RoomsViewLayout from "./layouts/rooms-view.layout";
 
 export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
@@ -37,13 +36,6 @@ export default function Component({
       totalRooms={filteredRooms.length}
       onAddRoom={() => setCreateDialogOpen(true)}
     >
-      <BulkActionsToolbar
-        selectedRooms={selectedRooms}
-        onBulkDelete={handleBulkDelete}
-        onBulkStatusChange={handleBulkStatusChange}
-        onClearSelection={handleClearSelection}
-      />
-
       <RoomsDataTable
         rooms={filteredRooms}
         isLoading={isPending}

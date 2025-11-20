@@ -272,6 +272,13 @@ const Stock = {
     delete: (id: string) => `StockAdjustments/${id}`,
     apply: (id: string) => `StockAdjustments/${id}/apply`,
   },
+  ItemCategories: {
+    list: "ItemCategories",
+    create: "ItemCategories",
+    detail: (id: string) => `ItemCategories/${id}`,
+    update: (id: string) => `ItemCategories/${id}`,
+    delete: (id: string) => `ItemCategories/${id}`,
+  },
 };
 
 export {

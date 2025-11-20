@@ -71,7 +71,7 @@ export default function Component({
   return (
     <div className="relative ">
       <SearchBox className="z-20" />
-      <div className="w-screen h-screen" ref={mapContainerRef} />;
+      <div className="w-screen h-screen" ref={mapContainerRef} />
     </div>
   );
 }

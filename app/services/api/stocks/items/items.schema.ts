@@ -63,8 +63,6 @@ const StockUpdateItemSchema = z.object({
 
 const StockItemDetailsSchema = StockItemsListItemSchema;
 
-const LowStockListResponseSchema = StockItemsListSchema;
-
 const StockTransactionsItemSchema = z.object({
   id: z.uuid(),
   itemId: z.uuid(),
@@ -94,7 +92,6 @@ export const StockItemsSchemas = {
   StockCreateItemSchema,
   StockUpdateItemSchema,
   StockItemDetailsSchema,
-  LowStockListResponseSchema,
   StockTransactionsItemSchema,
   StockTransactionsResponseSchema,
   StockAdjustRequestSchema,

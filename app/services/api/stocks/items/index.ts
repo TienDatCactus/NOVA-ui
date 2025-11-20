@@ -6,7 +6,6 @@ import type {
   StockCreateItemDto,
   StockUpdateItemDto,
   StockItemDetailsDto,
-  LowStockListResponseDto,
   StockTransactionsResponseDto,
   StockAdjustRequestDto,
 } from "./dto";
@@ -17,7 +16,6 @@ const {
   StockCreateItemSchema,
   StockUpdateItemSchema,
   StockItemDetailsSchema,
-  LowStockListResponseSchema,
   StockTransactionsResponseSchema,
   StockAdjustRequestSchema,
 } = StockItemsSchemas;
@@ -90,28 +88,6 @@ async function deleteStockItem(id: string): Promise<void> {
   }
 }
 
-async function getStockItemListByCategory(
-  categoryId: string
-): Promise<StockItemsListDto> {
-  try {
-    const resp = await http.get(Stock.Items.listByCategory(categoryId));
-    return StockItemsListSchema.parse(resp.data);
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
-}
-
-async function getLowStockItemList(): Promise<LowStockListResponseDto> {
-  try {
-    const resp = await http.get(Stock.Items.lowStock);
-    return LowStockListResponseSchema.parse(resp.data);
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
-}
-
 async function getStockItemsTransactions(
   id: string,
   params?: ItemListParams
@@ -144,8 +120,6 @@ export const StockItemsService = {
   getStockItemDetail,
   updateStockItem,
   deleteStockItem,
-  getStockItemListByCategory,
-  getLowStockItemList,
   getStockItemsTransactions,
   adjustStock,
 };

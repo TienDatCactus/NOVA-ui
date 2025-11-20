@@ -5,14 +5,12 @@ import {
   type VisibilityState,
   flexRender,
   getCoreRowModel,
-  getExpandedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { Plus, Search } from "lucide-react";
 import React, { useState } from "react";
-import { DataTableViewOptions } from "~/components/table/colum-toggle";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -24,16 +22,15 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
-import CreateItemDialog from "../create-item.dialog";
-import { ItemDetailRow } from "../../fragments/item-detail.row";
+import type { PurchaseRequestListItemDto } from "~/services/api/stocks/purchase-requests/dto";
+import CreatePurchaseRequestDialog from "../create-purchase-request.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData extends StockItemsListItemDto, TValue>({
+export function DataTable<TData extends PurchaseRequestListItemDto, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -45,9 +42,6 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [expandedRows, setExpandedRows] = React.useState<
-    Record<string, boolean>
-  >({});
 
   const table = useReactTable({
     data,
@@ -59,15 +53,11 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
     },
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     getRowId: (row) => row.id,
-    meta: {
-      expandedRows,
-    },
   });
 
   return (
@@ -75,16 +65,18 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
       <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
-          placeholder="Tìm theo tên, mã, mô tả..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          placeholder="Tìm theo số phiếu..."
+          value={
+            (table.getColumn("requestNumber")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("requestNumber")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
         <Button size={"sm"} onClick={() => setOpenCreateDialog(true)}>
           <Plus />
-          Tạo hàng hóa
+          Tạo yêu cầu mua hàng
         </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
@@ -111,25 +103,19 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 return (
-                  <React.Fragment key={row.id}>
-                    <TableRow data-state={row.getIsSelected() && "selected"}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    {row.getIsExpanded() && (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} className="p-0">
-                          <ItemDetailRow item={row.original} />
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </React.Fragment>
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 );
               })
             ) : (
@@ -146,7 +132,7 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
-      <CreateItemDialog
+      <CreatePurchaseRequestDialog
         open={openCreateDialog}
         onOpenChange={setOpenCreateDialog}
       />

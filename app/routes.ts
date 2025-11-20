@@ -50,10 +50,9 @@ export default [
       route("chat", "routes/chat/chat.tsx"),
       route("users", "routes/users/users.tsx"),
       ...prefix("stocks", [
-        ...prefix("items", [
-          index("routes/stocks/items/items.tsx"),
-          route("create", "routes/stocks/items/create.tsx"),
-          route("edit/:id", "routes/stocks/items/edit.$id.tsx"),
+        ...prefix("items", [index("routes/stocks/items/items.tsx")]),
+        ...prefix("purchase-requests", [
+          index("routes/stocks/purchase-requests/purchase-requests.tsx"),
         ]),
       ]),
       ...prefix("staff", [
