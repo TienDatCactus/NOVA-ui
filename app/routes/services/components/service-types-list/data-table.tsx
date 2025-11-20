@@ -1,14 +1,17 @@
 import {
   type ColumnDef,
+  type ColumnFiltersState,
   type ExpandedState,
   type RowSelectionState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -20,7 +23,8 @@ import {
 import { cn } from "~/lib/utils";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import ServiceTypeDetailRow from "../../fragments/service-types/detail.row";
-import { Button } from "~/components/ui/button";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Input } from "~/components/ui/input";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
@@ -36,14 +40,18 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
     columns,
     state: {
       rowSelection,
+      columnFilters,
     },
     onRowSelectionChange: setRowSelection,
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getRowCanExpand: (row) => true,
@@ -52,7 +60,18 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
   });
 
   return (
-    <div>
+    <div className="grid gap-2">
+      <div className="flex items-center py-4">
+        <Input
+          startAddon={<Search />}
+          placeholder="Tìm theo tên loại dịch vụ..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -114,24 +133,7 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }

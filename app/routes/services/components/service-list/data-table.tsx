@@ -1,13 +1,16 @@
 import {
   type ColumnDef,
+  type ColumnFiltersState,
   type RowSelectionState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -18,7 +21,8 @@ import {
 } from "~/components/ui/table";
 import type { ServiceItem } from "~/services/api/services/dto";
 import ServiceDetailRow from "../../fragments/services/detail.row";
-import { Button } from "~/components/ui/button";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Input } from "~/components/ui/input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,14 +36,18 @@ export function DataTable<TData extends ServiceItem, TValue>({
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
     columns,
     state: {
       rowSelection,
+      columnFilters,
     },
     onRowSelectionChange: setRowSelection,
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getRowCanExpand: (row) => true,
@@ -48,7 +56,18 @@ export function DataTable<TData extends ServiceItem, TValue>({
   });
 
   return (
-    <div>
+    <div className="grid gap-2">
+      <div className="flex items-center py-4">
+        <Input
+          startAddon={<Search />}
+          placeholder="Tìm theo tên dịch vụ..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -109,24 +128,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }

@@ -1,7 +1,9 @@
-import { Filter, Package, Search } from "lucide-react";
+import { Package, Plus } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Empty,
@@ -9,7 +11,6 @@ import {
   EmptyHeader,
   EmptyMedia,
 } from "~/components/ui/empty";
-import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -18,12 +19,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
-import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import type { StockItemsListDto } from "~/services/api/stocks/items/dto";
 import type { ItemsFilterState } from "../container/items.filter.hooks";
 import StockItemsDataTable from "./items-list";
 
 interface ItemsListViewProps {
-  items: StockItemsListItemDto[];
+  items: StockItemsListDto;
   isLoading: boolean;
   filters: ItemsFilterState;
   updateFilter: <K extends keyof ItemsFilterState>(
@@ -45,60 +46,55 @@ export default function ItemsListView({
   return (
     <Card className="flex-1">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <CardTitle>Danh sách hàng hóa</CardTitle>
-            <Badge variant="default">{items.length} sản phẩm</Badge>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <CardTitle>Danh sách hàng hóa</CardTitle>
+              <Badge variant="default">{items.length} sản phẩm</Badge>
+            </div>
+            <div className="flex flex-wrap items-center gap-6">
+              <Button>
+                <Plus />
+                Tạo hàng hóa
+              </Button>
+              <Select
+                value={filters.activeFilter}
+                onValueChange={(value: any) =>
+                  updateFilter("activeFilter", value)
+                }
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả</SelectItem>
+                  <SelectItem value="active">Đang hoạt động</SelectItem>
+                  <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="low-stock-filter"
+                  checked={filters.lowStockOnly}
+                  onCheckedChange={(checked) =>
+                    updateFilter("lowStockOnly", checked)
+                  }
+                />
+                <Label htmlFor="low-stock-filter" className="cursor-pointer">
+                  Chỉ hiển thị tồn kho thấp
+                </Label>
+              </div>
+
+              {(filters.activeFilter !== "all" || filters.lowStockOnly) && (
+                <Button variant="ghost" size="sm" onClick={resetFilters}>
+                  Xóa bộ lọc
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Filters */}
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Tìm theo tên, mã, mô tả..."
-              value={filters.searchQuery}
-              onChange={(e) => updateFilter("searchQuery", e.target.value)}
-              className="pl-9"
-            />
-          </div>
-
-          {/* Active filter */}
-          <Select
-            value={filters.activeFilter}
-            onValueChange={(value: any) => updateFilter("activeFilter", value)}
-          >
-            <SelectTrigger className="w-[150px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="active">Đang hoạt động</SelectItem>
-              <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Low stock filter */}
-          <Button
-            variant={filters.lowStockOnly ? "default" : "outline"}
-            size="sm"
-            onClick={() => updateFilter("lowStockOnly", !filters.lowStockOnly)}
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Tồn kho thấp
-          </Button>
-
-          {/* Reset filters */}
-          {(filters.searchQuery ||
-            filters.categoryId ||
-            filters.activeFilter !== "active" ||
-            filters.lowStockOnly) && (
-            <Button variant="ghost" size="sm" onClick={resetFilters}>
-              Xóa bộ lọc
-            </Button>
-          )}
+          {/* Filters */}
         </div>
       </CardHeader>
 

@@ -2,15 +2,11 @@ import { useState, useMemo } from "react";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 
 export type ItemsFilterState = {
-  searchQuery: string;
-  categoryId: string | null;
   activeFilter: "all" | "active" | "inactive";
   lowStockOnly: boolean;
 };
 
 const initialFilters: ItemsFilterState = {
-  searchQuery: "",
-  categoryId: null,
   activeFilter: "active",
   lowStockOnly: false,
 };
@@ -32,56 +28,21 @@ export default function useItemsFilters() {
     setFilters(initialFilters);
   };
 
-  /**
-   * Lọc items dựa trên filters (client-side filtering)
-   */
   const filterItems = (items: StockItemsListItemDto[]) => {
     return items.filter((item) => {
-      // Filter by search query
-      if (filters.searchQuery) {
-        const query = filters.searchQuery.toLowerCase();
-        const matchName = item.name.toLowerCase().includes(query);
-        const matchCode = item.code.toLowerCase().includes(query);
-        const matchDescription = item.description.toLowerCase().includes(query);
-        if (!matchName && !matchCode && !matchDescription) return false;
-      }
-
-      // Filter by category
-      if (filters.categoryId && item.categoryId !== filters.categoryId) {
-        return false;
-      }
-
       // Filter by active status
       if (filters.activeFilter === "active" && !item.isActive) return false;
       if (filters.activeFilter === "inactive" && item.isActive) return false;
 
       // Filter by low stock
-      if (filters.lowStockOnly && item.currentStock >= item.minStock) {
+      if (
+        filters.lowStockOnly &&
+        (item.currentStock ?? 0) >= (item.minStock ?? 0)
+      ) {
         return false;
       }
 
       return true;
-    });
-  };
-
-  /**
-   * Sắp xếp items
-   */
-  const sortItems = (
-    items: StockItemsListItemDto[],
-    sortBy: "name" | "stock" | "code" = "name"
-  ) => {
-    return [...items].sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          return a.name.localeCompare(b.name);
-        case "code":
-          return a.code.localeCompare(b.code);
-        case "stock":
-          return a.currentStock - b.currentStock;
-        default:
-          return 0;
-      }
     });
   };
 
@@ -90,7 +51,6 @@ export default function useItemsFilters() {
     updateFilter,
     resetFilters,
     filterItems,
-    sortItems,
   };
 }
 
@@ -102,12 +62,12 @@ export function useItemsStats(items: StockItemsListItemDto[]) {
     const totalItems = items.length;
     const activeItems = items.filter((item) => item.isActive).length;
     const lowStockItems = items.filter(
-      (item) => item.currentStock < item.minStock
+      (item) => (item.currentStock ?? 0) < (item.minStock ?? 0)
     ).length;
 
     // Tổng giá trị kho (currentStock × averageCost)
     const totalInventoryValue = items.reduce(
-      (sum, item) => sum + item.currentStock * item.averageCost,
+      (sum, item) => sum + (item.currentStock ?? 0) * (item.averageCost ?? 0),
       0
     );
 

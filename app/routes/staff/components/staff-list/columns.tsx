@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,46 +26,47 @@ export const createStaffColumns = ({
 }: StaffColumnsProps = {}): ColumnDef<StaffListItem>[] => [
   {
     accessorKey: "index",
-    header: "STT",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STT" />
+    ),
     cell: ({ row }) => (
       <div className="w-12 text-center font-medium">{row.index + 1}</div>
     ),
   },
   {
     accessorKey: "code",
-    header: "Mã nhân sự",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mã nhân sự" />
+    ),
     cell: ({ row }) => (
       <div className="font-mono text-sm font-medium">{row.original.code}</div>
     ),
   },
   {
     accessorKey: "fullName",
-    header: "Họ và tên",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Họ và tên" />
+    ),
     cell: ({ row }) => (
       <div className="min-w-[150px] font-medium">{row.original.fullName}</div>
     ),
   },
   {
-    accessorKey: "position",
-    header: "Chức vụ",
+    accessorKey: "phoneNumber",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Số điện thoại" />
+    ),
     cell: ({ row }) => (
-      <Badge variant="secondary" className="font-normal">
-        {row.original.position}
-      </Badge>
+      <div className="font-mono text-sm">{row.original.phoneNumber || "-"}</div>
     ),
   },
   {
-    accessorKey: "department",
-    header: "Phòng ban",
-    cell: ({ row }) => <div className="text-sm">{row.original.department}</div>,
-  },
-  {
-    accessorKey: "active",
-    header: "Trạng thái",
+    accessorKey: "citizenId",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="CCCD" />
+    ),
     cell: ({ row }) => (
-      <Badge variant={row.original.active ? "default" : "secondary"}>
-        {row.original.active ? "Đang làm việc" : "Đã nghỉ việc"}
-      </Badge>
+      <div className="font-mono text-sm">{row.original.citizenId || "-"}</div>
     ),
   },
   {
@@ -109,5 +111,7 @@ export const createStaffColumns = ({
         </DropdownMenu>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

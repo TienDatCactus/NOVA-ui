@@ -54,7 +54,7 @@ function ServiceTypesDataTable({
   }
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto ">
       <DataTable columns={columns} data={types} />
     </div>
   );

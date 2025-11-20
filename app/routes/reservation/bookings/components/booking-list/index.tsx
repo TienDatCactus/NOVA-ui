@@ -66,7 +66,7 @@ function BookingList({ bookings, isLoading, refetch }: BookingListProps) {
     );
   }
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto ">
       <DataTable columns={columns} data={bookings!} />
     </div>
   );

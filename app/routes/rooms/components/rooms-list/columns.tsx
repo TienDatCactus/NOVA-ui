@@ -1,6 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Checkbox } from "~/components/ui/checkbox";
 
 import { useState } from "react";
@@ -41,14 +42,18 @@ export const columns: ColumnDef<RoomListItem>[] = [
   },
   {
     accessorKey: "index",
-    header: "STT",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STT" />
+    ),
     cell: ({ row }) => {
       return <span className="font-medium">{row.index + 1}</span>;
     },
   },
   {
     accessorKey: "roomName",
-    header: "Tên phòng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tên phòng" />
+    ),
     cell: ({ row }) => {
       const [open, setOpen] = useState(false);
       return (
@@ -71,7 +76,9 @@ export const columns: ColumnDef<RoomListItem>[] = [
   },
   {
     accessorKey: "roomTypeName",
-    header: "Loại phòng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Loại phòng" />
+    ),
     cell: ({ row }) => {
       return (
         <div className="space-y-1 w-40">
@@ -85,14 +92,20 @@ export const columns: ColumnDef<RoomListItem>[] = [
   },
   {
     accessorKey: "status",
-    header: "Trạng thái",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
     cell: ({ row }) => {
       return <RoomStatusCell room={row.original} />;
     },
   },
   {
     accessorKey: "dailyPrice",
-    header: () => <p className="text-end">Giá/đêm</p>,
+    header: ({ column }) => (
+      <div className="text-end">
+        <DataTableColumnHeader column={column} title="Giá/đêm" />
+      </div>
+    ),
     cell: ({ row }) => {
       return (
         <pre className="font-semibold text-end">

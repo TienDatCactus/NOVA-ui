@@ -2,30 +2,29 @@ import { useMemo } from "react";
 import ItemsListView from "./components/items-list-view";
 import ItemsStatsCards from "./components/items-stats-cards";
 import useItemsFilters, { useItemsStats } from "./container/items.filter.hooks";
-import { useStockItemList } from "./container/items.query.hooks";
+import {
+  useLowStockItems,
+  useStockItemList,
+} from "./container/items.query.hooks";
 
 export default function ItemsRoute() {
-  const { filters, updateFilter, resetFilters, filterItems, sortItems } =
-    useItemsFilters();
+  const { filters, updateFilter, resetFilters } = useItemsFilters();
 
   const { data: items, isPending } = useStockItemList({
     includeInactive: filters.activeFilter !== "active",
   });
+  const { data: lowStockItems } = useLowStockItems({
+    enabled: filters.lowStockOnly,
+  });
 
-  const filteredItems = useMemo(() => {
-    if (!items) return [];
-    const filtered = filterItems(items);
-    return sortItems(filtered, "name");
-  }, [items, filters]);
-
-  const stats = useItemsStats(filteredItems);
+  const stats = useItemsStats(items ?? []);
 
   return (
     <div className="flex h-full flex-col gap-6 p-6">
       <ItemsStatsCards stats={stats} isLoading={isPending} />
 
       <ItemsListView
-        items={filteredItems}
+        items={filters.lowStockOnly ? (lowStockItems ?? []) : (items ?? [])}
         isLoading={isPending}
         filters={filters}
         updateFilter={updateFilter}

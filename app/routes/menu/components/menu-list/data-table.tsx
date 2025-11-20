@@ -5,9 +5,12 @@ import {
   getPaginationRowModel,
   useReactTable,
   type ColumnDef,
+  type ColumnFiltersState,
   type RowSelectionState,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 import React, { useState } from "react";
+import { Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,7 +22,8 @@ import {
 import { cn } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import MenuDetailRow from "../../fragments/menu/detail.row";
-import { Button } from "~/components/ui/button";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Input } from "~/components/ui/input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -31,14 +35,18 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
     columns,
     state: {
       rowSelection,
+      columnFilters,
     },
     onRowSelectionChange: setRowSelection,
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
@@ -47,7 +55,18 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
   });
 
   return (
-    <div>
+    <div className="grid gap-2">
+      <div className="flex items-center py-4">
+        <Input
+          startAddon={<Search />}
+          placeholder="Tìm theo tên món..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -105,24 +124,7 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }

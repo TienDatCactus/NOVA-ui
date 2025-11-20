@@ -1,92 +1,173 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import type z from "zod";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
-
-import { useState } from "react";
-import { Dialog, DialogTrigger } from "~/components/ui/dialog";
-import { formatMoney } from "~/lib/utils";
-import { RoomSchema } from "~/services/api/rooms/room.schema";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import {
+  ChevronDown,
+  ChevronRight,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react";
+import { formatMoney } from "~/lib/utils";
 
 export const columns: ColumnDef<StockItemsListItemDto>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <div>
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
+    accessorKey: "code",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mã hàng hóa" />
     ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "index",
-    header: "STT",
     cell: ({ row }) => {
-      return <span className="font-medium">{row.index + 1}</span>;
-    },
-  },
-  {
-    accessorKey: "roomName",
-    header: "Tên phòng",
-    cell: ({ row }) => {
-      const [open, setOpen] = useState(false);
       return (
         <div className="flex items-center gap-2">
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button variant="link" className="p-0"></Button>
-            </DialogTrigger>
-          </Dialog>
+          <span className="font-mono text-sm font-medium">
+            {row.original.code}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => row.toggleExpanded()}
+          >
+            {row.getIsExpanded() ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       );
     },
   },
   {
-    accessorKey: "roomTypeName",
-    header: "Loại phòng",
+    accessorKey: "name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tên hàng hóa" />
+    ),
     cell: ({ row }) => {
       return (
-        <div className="space-y-1 w-40">
-          <p className="text-xs text-muted-foreground"></p>
+        <div className="flex flex-col gap-1">
+          <span className="font-medium">{row.original.name}</span>
+          {row.original.description && (
+            <span className="text-xs text-muted-foreground line-clamp-1">
+              {row.original.description}
+            </span>
+          )}
         </div>
       );
     },
   },
   {
-    accessorKey: "status",
-    header: "Trạng thái",
+    accessorKey: "categoryName",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Danh mục" />
+    ),
     cell: ({ row }) => {
-      return <div></div>;
+      return <span className="text-sm">{row.original.categoryName}</span>;
     },
   },
   {
-    accessorKey: "dailyPrice",
-    header: () => <p className="text-end">Giá/đêm</p>,
+    accessorKey: "currentStock",
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title="Tồn kho"
+        className="justify-end"
+      />
+    ),
     cell: ({ row }) => {
-      return <pre className="font-semibold text-end"></pre>;
+      const currentStock = row.original.currentStock ?? 0;
+      const minStock = row.original.minStock ?? 0;
+      const isLowStock = currentStock < minStock && minStock > 0;
+      return (
+        <div className="text-center font-mono ">
+          <span
+            className={`font-semibold ${isLowStock ? "text-destructive" : ""}`}
+          >
+            {currentStock}
+          </span>
+          <span className="text-xs text-muted-foreground ml-1">
+            {row.original.unitName}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "averageCost",
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title="Giá trung bình"
+        className="justify-end"
+      />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="text-center font-mono text-sm">
+          {formatMoney(row.original.averageCost ?? 0).vndFormatted}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "isActive",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Badge variant={row.original.isActive ? "default" : "secondary"}>
+          {row.original.isActive ? "Hoạt động" : "Ngừng"}
+        </Badge>
+      );
     },
   },
   {
     id: "actions",
     header: () => null,
     cell: ({ row }) => {
-      return <div className="flex justify-end"></div>;
+      return (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  window.location.href = `/dashboard/stocks/items/edit/${row.original.id}`;
+                }}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                Chỉnh sửa
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => {
+                  // TODO: Implement delete
+                  console.log("Delete", row.original.id);
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Xóa
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
     },
     enableSorting: false,
     enableHiding: false,

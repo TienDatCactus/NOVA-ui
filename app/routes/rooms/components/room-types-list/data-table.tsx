@@ -2,15 +2,17 @@ import {
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type ColumnFiltersState,
   type RowSelectionState,
   type SortingState,
 } from "@tanstack/react-table";
 import React, { useState } from "react";
-import { Button } from "~/components/ui/button";
+import { Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -20,6 +22,8 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Input } from "~/components/ui/input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,6 +39,7 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [expanded, setExpanded] = useState<any>();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
@@ -49,14 +54,28 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
       sorting,
       expanded,
       rowSelection,
+      columnFilters,
     },
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
-    <div>
+    <div className="grid gap-2">
+      <div className="flex items-center py-4">
+        <Input
+          startAddon={<Search />}
+          placeholder="Tìm theo tên hạng phòng..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
       <div className="overflow-hidden rounded-md border">
         <Table className="">
           <TableHeader className="h-16">
@@ -106,24 +125,7 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }

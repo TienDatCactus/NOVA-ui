@@ -1,13 +1,21 @@
 import {
   type ColumnDef,
+  type ColumnFiltersState,
   type RowSelectionState,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { Search } from "lucide-react";
 import React, { useState } from "react";
+import { DataTableViewOptions } from "~/components/table/colum-toggle";
+import { DataTablePagination } from "~/components/table/table-pagination";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -17,6 +25,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import { ItemDetailRow } from "../item-detail-row";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -28,21 +37,50 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [expandedRows, setExpandedRows] = React.useState<
+    Record<string, boolean>
+  >({});
 
   const table = useReactTable({
     data,
     columns,
     state: {
       rowSelection,
+      columnFilters,
+      columnVisibility,
     },
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
     getRowId: (row) => row.id,
+    meta: {
+      expandedRows,
+    },
   });
 
   return (
-    <div>
+    <div className="grid gap-2">
+      <div className="flex items-center py-4">
+        <Input
+          startAddon={<Search />}
+          placeholder="Tìm theo tên, mã, mô tả..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <DataTableViewOptions table={table} />
+      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -78,6 +116,13 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
                         </TableCell>
                       ))}
                     </TableRow>
+                    {row.getIsExpanded() && (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="p-0">
+                          <ItemDetailRow item={row.original} />
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </React.Fragment>
                 );
               })
@@ -94,24 +139,7 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }

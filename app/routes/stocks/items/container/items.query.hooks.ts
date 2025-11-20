@@ -34,12 +34,13 @@ export function useStockItemDetail(id?: string, code?: string) {
 /**
  * Hook lấy danh sách items tồn kho thấp
  */
-export function useLowStockItems() {
+export function useLowStockItems(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["stock-items", "low-stock"],
     queryFn: async () => await StockItemsService.getLowStockItemList(),
     staleTime: 3 * 60 * 1000, // 3 minutes - refresh thường xuyên hơn
     refetchInterval: 5 * 60 * 1000, // Auto-refresh mỗi 5 phút
+    enabled: options?.enabled,
   });
 }
 
