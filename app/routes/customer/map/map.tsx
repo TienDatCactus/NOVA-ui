@@ -8,14 +8,6 @@ import SearchBox from "./components/search";
 import { useMap } from "./context/map-context";
 import Categories from "./components/categories";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

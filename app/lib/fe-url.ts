@@ -40,6 +40,11 @@ const DASHBOARD = {
   invoices: "/dashboard/invoices",
   chat: "/dashboard/chat",
   units: "/dashboard/units",
+  stocks: {
+    items: "/dashboard/stocks/items",
+    purchaseRequests: "/dashboard/stocks/purchase-requests",
+    adjustments: "/dashboard/stocks/adjustments",
+  },
   settings: "/settings",
   help: "/help",
 };

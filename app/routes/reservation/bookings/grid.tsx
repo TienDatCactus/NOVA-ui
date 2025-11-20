@@ -7,11 +7,7 @@ import { useAvailableRoomsFilter } from "./container/available-booking-filter.ho
 import { useAvailableRooms } from "./container/booking-query.hooks";
 import type { Route } from "./+types/grid";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 

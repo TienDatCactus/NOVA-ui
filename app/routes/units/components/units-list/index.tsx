@@ -76,11 +76,9 @@ function UnitsDataTable({
   }
 
   return (
-    <DataTable
-      columns={columns}
-      data={units}
-      onSuccess={onSuccess}
-    />
+    <div className="container mx-auto py-10">
+      <DataTable columns={columns} data={units} onSuccess={onSuccess} />
+    </div>
   );
 }
 

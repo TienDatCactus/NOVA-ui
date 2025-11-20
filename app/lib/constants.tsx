@@ -11,6 +11,7 @@ import {
   ListOrdered,
   LogIn,
   MessageSquareDot,
+  Package,
   PackageSearch,
   Plus,
   ReceiptText,
@@ -170,6 +171,25 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Hóa đơn",
     url: FE_URL.dashboard.invoices,
     icon: ReceiptText,
+  },
+  {
+    title: "Quản lý kho",
+    url: FE_URL.dashboard.stocks.items,
+    icon: Package,
+    items: [
+      {
+        title: "Hàng hóa",
+        url: FE_URL.dashboard.stocks.items,
+      },
+      {
+        title: "Yêu cầu mua hàng",
+        url: FE_URL.dashboard.stocks.purchaseRequests,
+      },
+      {
+        title: "Điều chỉnh kho",
+        url: FE_URL.dashboard.stocks.adjustments,
+      },
+    ],
   },
 ];
 

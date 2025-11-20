@@ -45,6 +45,10 @@ function MenuDataTable({ menu, isLoading }: MenuDataTableProps) {
     );
   }
 
-  return <DataTable columns={columns} data={menu} />;
+  return (
+    <div className="container mx-auto py-10">
+      <DataTable columns={columns} data={menu} />
+    </div>
+  );
 }
 export default MenuDataTable;

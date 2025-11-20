@@ -23,7 +23,7 @@ export default function HolidaysList({
   }
 
   return (
-    <div className="w-full">
+    <div className="container mx-auto py-10">
       <DataTable columns={columns} data={holidays} onSuccess={onSuccess} />
     </div>
   );

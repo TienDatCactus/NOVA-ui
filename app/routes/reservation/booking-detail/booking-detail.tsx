@@ -53,7 +53,7 @@ import { useBookingUpdatePermissions } from "./container/use-booking-update-perm
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   const bookingCode = params.bookingCode;
   if (!bookingCode) {
     throw new Response("Booking code is required", { status: 400 });

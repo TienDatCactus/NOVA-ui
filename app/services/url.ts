@@ -240,6 +240,40 @@ const Translation = {
   translate: "Translation/translate",
   detect: (text: string) => `Translation/detect-language?text=${text}`,
 };
+
+const Stock = {
+  Items: {
+    list: "Items",
+    create: "Items",
+    detail: (id: string) => `Items/${id}`,
+    update: (id: string) => `Items/${id}`,
+    delete: (id: string) => `Items/${id}`,
+    listByCategory: (categoryId: string) => `Items/by-category/${categoryId}`,
+    listByCode: (code: string) => `Items/by-code/${code}`,
+    lowStock: "Items/low-stock",
+    transactions: (id: string) => `Items/${id}/transactions`,
+    adjustStock: (id: string) => `Items/${id}/adjust-stock`,
+  },
+  PurchaseRequests: {
+    list: "PurchaseRequests",
+    create: "PurchaseRequests",
+    detail: (id: string) => `PurchaseRequests/${id}`,
+    update: (id: string) => `PurchaseRequests/${id}`,
+    delete: (id: string) => `PurchaseRequests/${id}`,
+    approve: (id: string) => `PurchaseRequests/${id}/approve`,
+    reject: (id: string) => `PurchaseRequests/${id}/reject`,
+    receiveStock: (id: string) => `PurchaseRequests/${id}/receive-stock`,
+  },
+  StockAdjustments: {
+    list: "StockAdjustments",
+    create: "StockAdjustments",
+    detail: (id: string) => `StockAdjustments/${id}`,
+    update: (id: string) => `StockAdjustments/${id}`,
+    delete: (id: string) => `StockAdjustments/${id}`,
+    apply: (id: string) => `StockAdjustments/${id}/apply`,
+  },
+};
+
 export {
   Auth,
   User,
@@ -264,4 +298,5 @@ export {
   Chat,
   Discount,
   Translation,
+  Stock,
 };

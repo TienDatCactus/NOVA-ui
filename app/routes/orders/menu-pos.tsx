@@ -36,11 +36,7 @@ import {
 } from "./container/pos-orders/mutation.hooks";
 import ScheduledTimeDialog from "./components/scheduled-time.dialog";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 

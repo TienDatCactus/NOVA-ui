@@ -6,11 +6,7 @@ import useRoomsContainer from "./container/rooms/container.hooks";
 import BulkActionsToolbar from "./fragments/rooms/bulk-action.dialog";
 import RoomsViewLayout from "./layouts/rooms-view.layout";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 

@@ -48,6 +48,10 @@ function MenuCategoryDataTable({
     );
   }
 
-  return <DataTable columns={columns} data={menuCategories} />;
+  return (
+    <div className="container mx-auto py-10">
+      <DataTable columns={columns} data={menuCategories} />
+    </div>
+  );
 }
 export default MenuCategoryDataTable;

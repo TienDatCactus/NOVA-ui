@@ -46,7 +46,11 @@ function ServicesDataTable({ services, isLoading }: ServicesDataTableProps) {
     );
   }
 
-  return <DataTable columns={columns} data={services} />;
+  return (
+    <div className="container mx-auto py-10">
+      <DataTable columns={columns} data={services} />
+    </div>
+  );
 }
 
 export default ServicesDataTable;
