@@ -52,7 +52,7 @@ import {
   useTranslateMessage,
 } from "../container/translation.hooks";
 import { MessageBubble } from "../fragments/message-bubble";
-import { useStaffList } from "~/routes/staff/staff/container/staff/query.hooks";
+import { useStaffList } from "~/routes/staff/staff/container/query.hooks";
 
 interface ChatMainProps {
   sessionId: string | null;

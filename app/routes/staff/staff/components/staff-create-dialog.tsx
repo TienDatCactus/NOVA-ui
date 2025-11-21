@@ -1,10 +1,5 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { parseISO } from "date-fns";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Button } from "~/components/ui/button";
-import { DatePicker } from "~/components/ui/date-picker";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -16,12 +11,15 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { Textarea } from "~/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -29,83 +27,63 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Textarea } from "~/components/ui/textarea";
-import type {
-  StaffDetailDto,
-  UpdateStaffDto,
-} from "~/services/api/staff/staff/dto";
+import type { CreateStaffDto } from "~/services/api/staff/staff/dto";
+import { StaffService } from "~/services/api/staff/staff";
+import { StaffRoleService } from "~/services/api/staff/staff-role";
+import type { StaffRoleItem } from "~/services/api/staff/staff-role/dto";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import type { z } from "zod";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { vi } from "date-fns/locale";
+import { ChevronDownIcon, Plus } from "lucide-react";
+import { Calendar } from "~/components/ui/calendar";
+import { cn } from "~/lib/utils";
 import { StaffSchema } from "~/services/api/staff/staff/staff.schema";
-import { useStaffRoleList } from "../../container/staff-roles/query.hooks";
-import { useUpdateStaff } from "../../container/staff/query.hooks";
+import { useStaffRoleList } from "../../staff-role/container/query.hooks";
+import { useCreateStaff } from "../container/query.hooks";
 
-interface StaffUpdateDialogProps {
+interface StaffDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  staff: StaffDetailDto;
 }
 
-export default function StaffUpdateDialog({
+export default function CreateStaffDialog({
   open,
   onOpenChange,
-  staff,
-}: StaffUpdateDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+}: StaffDialogProps) {
   const { data: roles } = useStaffRoleList();
-  const { mutateAsync: updateStaff } = useUpdateStaff();
-  const form = useForm<UpdateStaffDto>({
-    resolver: zodResolver(StaffSchema.UpdateStaffSchema),
+  const { mutateAsync: createStaff, isPending } = useCreateStaff();
+  const form = useForm<CreateStaffDto>({
+    resolver: zodResolver(StaffSchema.CreateStaffSchema),
     defaultValues: {
-      fullName: staff.fullName,
-      phoneNumber: staff.phoneNumber ?? "",
-      email: staff.email ?? "",
-      gender: staff.gender ?? "",
-      dateOfBirth: staff.dateOfBirth ? parseISO(staff.dateOfBirth) : undefined,
-      citizenId: staff.citizenId ?? "",
-      startDate: staff.startDate ? parseISO(staff.startDate) : undefined,
-      note: staff.note ?? "",
-      staffRoleId: staff.staffRoleId ?? "",
+      code: "",
+      fullName: "",
+      phoneNumber: "",
+      email: "",
+      gender: "",
+      dateOfBirth: undefined,
+      citizenId: "",
+      startDate: undefined,
+      note: "",
+      staffRoleId: "",
     },
   });
 
-  useEffect(() => {
-    if (open && staff) {
-      form.reset({
-        fullName: staff.fullName,
-        phoneNumber: staff.phoneNumber ?? "",
-        email: staff.email ?? "",
-        gender: staff.gender ?? "",
-        dateOfBirth: staff.dateOfBirth
-          ? parseISO(staff.dateOfBirth)
-          : undefined,
-        citizenId: staff.citizenId ?? "",
-        startDate: staff.startDate ? parseISO(staff.startDate) : undefined,
-        note: staff.note ?? "",
-        staffRoleId: staff.staffRoleId ?? "",
-      });
-    }
-  }, [open, staff, form]);
-
-  const onSubmit = async (data: UpdateStaffDto) => {
-    setIsSubmitting(true);
+  const onSubmit = async (data: CreateStaffDto) => {
     try {
-      await updateStaff(
-        {
-          id: staff.id,
-          data: form.getValues(),
-        },
-        {
-          onSuccess: () => {
-            onOpenChange(false);
-            form.reset();
-          },
-        }
-      );
+      await createStaff(data);
+      toast.success("Tạo nhân sự thành công");
+      onOpenChange(false);
+      form.reset();
     } catch (error) {
-      console.error("Staff update error:", error);
-      toast.error("Không thể cập nhật nhân sự");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Staff dialog error:", error);
+      toast.error("Không thể tạo nhân sự mới");
     }
   };
 
@@ -113,20 +91,38 @@ export default function StaffUpdateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Chỉnh sửa thông tin nhân sự</DialogTitle>
+          <DialogTitle>Thêm nhân sự mới</DialogTitle>
           <DialogDescription>
-            Cập nhật thông tin nhân sự: {staff.fullName} ({staff.code})
+            Điền đầy đủ thông tin để tạo nhân sự mới
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
+              {/* Code */}
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Mã nhân sự <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="NV001" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Full Name */}
               <FormField
                 control={form.control}
                 name="fullName"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem>
                     <FormLabel>
                       Họ và tên <span className="text-destructive">*</span>
                     </FormLabel>
@@ -174,6 +170,25 @@ export default function StaffUpdateDialog({
                 )}
               />
 
+              {/* Citizen ID */}
+              <FormField
+                control={form.control}
+                name="citizenId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Số CCCD</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="001234567890"
+                        className="font-mono"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Gender */}
               <FormField
                 control={form.control}
@@ -208,32 +223,37 @@ export default function StaffUpdateDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ngày sinh</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Chọn ngày sinh"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Citizen ID */}
-              <FormField
-                control={form.control}
-                name="citizenId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Số CCCD</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="001234567890"
-                        className="font-mono"
-                      />
-                    </FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-between font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy", { locale: vi })
+                            ) : (
+                              <span>Chọn ngày sinh</span>
+                            )}
+                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          captionLayout="dropdown"
+                          fromYear={1950}
+                          toYear={2010}
+                          locale={vi}
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -246,13 +266,37 @@ export default function StaffUpdateDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ngày bắt đầu làm việc</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Chọn ngày bắt đầu"
-                      />
-                    </FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-between font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy", { locale: vi })
+                            ) : (
+                              <span>Chọn ngày bắt đầu</span>
+                            )}
+                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          captionLayout="dropdown"
+                          fromYear={2000}
+                          toYear={new Date().getFullYear() + 1}
+                          locale={vi}
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -275,7 +319,7 @@ export default function StaffUpdateDialog({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Chọn vai trò" />
+                            <SelectValue placeholder={"Chọn vai trò"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -317,12 +361,12 @@ export default function StaffUpdateDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
+                disabled={isPending}
               >
                 Hủy
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Đang xử lý..." : "Cập nhật"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Đang xử lý..." : "Tạo mới"}
               </Button>
             </DialogFooter>
           </form>

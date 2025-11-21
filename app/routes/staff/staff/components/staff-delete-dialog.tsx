@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
-import { useDeleteStaff } from "../../container/staff/query.hooks";
+import { useDeleteStaff } from "../container/query.hooks";
 
 interface StaffDeleteDialogProps {
   open: boolean;

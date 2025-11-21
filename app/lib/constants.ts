@@ -144,6 +144,10 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.staff.list,
       },
       {
+        title: "Vai trò",
+        url: FE_URL.dashboard.staff.roles,
+      },
+      {
         title: "Ca làm việc",
         url: FE_URL.dashboard.staff.workShifts,
       },

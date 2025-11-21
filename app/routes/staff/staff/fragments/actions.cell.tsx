@@ -9,9 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
-import StaffDeleteDialog from "../../components/staff/staff-delete-dialog";
+import StaffDeleteDialog from "../components/staff-delete-dialog";
 import { useState } from "react";
-import StaffUpdateDialog from "../../components/staff/staff-update-dialog";
+import StaffUpdateDialog from "../components/staff-update-dialog";
 
 interface StaffActionsCellProps {
   staff: StaffListItemDto;

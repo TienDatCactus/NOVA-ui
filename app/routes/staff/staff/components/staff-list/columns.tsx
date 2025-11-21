@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
-import StaffActionsCell from "../../../fragments/staff/actions.cell";
+import StaffActionsCell from "../../fragments/actions.cell";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import StaffDetailDialog from "../staff-detail-dialog";
@@ -76,3 +76,4 @@ export const columns: ColumnDef<StaffListItemDto>[] = [
     enableHiding: false,
   },
 ];
+

@@ -12,6 +12,7 @@ import { StaffService } from "~/services/api/staff/staff";
 import type { StaffDetailDto } from "~/services/api/staff/staff/dto";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
+import { useStaffDetail } from "../container/query.hooks";
 
 interface StaffDetailDialogProps {
   open: boolean;
@@ -24,27 +25,7 @@ export default function StaffDetailDialog({
   onOpenChange,
   staffId,
 }: StaffDetailDialogProps) {
-  const [staff, setStaff] = useState<StaffDetailDto | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (open && staffId) {
-      setIsLoading(true);
-      StaffService.getStaffById(staffId)
-        .then((response) => {
-          setStaff(response);
-        })
-        .catch((error) => {
-          console.error("Error fetching staff detail:", error);
-          toast.error("Không thể tải thông tin nhân sự");
-          onOpenChange(false);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [open, staffId, onOpenChange]);
-
+  const { data: staff, isLoading } = useStaffDetail(staffId);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">

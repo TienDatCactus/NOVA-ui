@@ -1,8 +1,8 @@
 import StaffViewLayout from "./layouts/staff-view.layout";
 
-import { useStaffFilters } from "./container/staff/filter.hooks";
-import { useStaffList } from "./container/staff/query.hooks";
-import StaffDataTable from "./components/staff/staff-list";
+import { useStaffFilters } from "./container/filter.hooks";
+import { useStaffList } from "./container/query.hooks";
+import StaffDataTable from "./components/staff-list";
 
 export default function StaffPage() {
   const { filters, updateFilter, resetFilter } = useStaffFilters();

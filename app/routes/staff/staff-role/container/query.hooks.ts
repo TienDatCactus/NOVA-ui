@@ -18,6 +18,18 @@ export function useStaffRoleList() {
 }
 
 /**
+ * Hook để lấy chi tiết vai trò nhân sự
+ */
+export function useStaffRoleDetail(id: string) {
+  return useQuery({
+    queryKey: ["staff-role", id],
+    queryFn: async () => await StaffRoleService.getStaffRoleById(id),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
  * Hook để tạo vai trò nhân sự mới
  */
 export function useCreateStaffRole() {

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { StaffFilters } from "../container/staff/filter.hooks";
+import type { StaffFilters } from "../container/filter.hooks";
 
 interface StaffViewLayoutProps {
   children: ReactNode;

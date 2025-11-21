@@ -37,16 +37,16 @@ const StaffDetailSchema = z.object({
 
 // Create Staff Schema (for API requests)
 const CreateStaffSchema = z.object({
-  code: z.string(),
-  fullName: z.string(),
-  phoneNumber: z.string(),
+  code: z.string().min(1, "Mã nhân sự là bắt buộc"),
+  fullName: z.string().min(1, "Họ tên là bắt buộc"),
+  phoneNumber: z.string().min(1, "Số điện thoại là bắt buộc"),
   email: z.string().optional(),
   gender: z.string().optional(),
-  dateOfBirth: z.string().optional(), // yyyy-MM-dd format
+  dateOfBirth: z.date().optional(),
   citizenId: z.string().optional(),
-  startDate: z.string().optional(), // yyyy-MM-dd format
+  startDate: z.date().optional(),
   note: z.string().optional(),
-  staffRoleId: z.string(),
+  staffRoleId: z.string().min(1, "Vai trò là bắt buộc"),
 });
 
 // Update Staff Schema (for API requests)

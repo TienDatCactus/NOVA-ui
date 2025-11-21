@@ -1,5 +1,7 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,88 +19,54 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
-import { UpdateStaffRoleRequestSchema } from "~/services/api/staff/staff-role/staff-role.schema";
-import type {
-  UpdateStaffRoleRequest,
-  StaffRoleItem,
-} from "~/services/api/staff/staff-role/dto";
-import { StaffRoleService } from "~/services/api/staff/staff-role";
-import { toast } from "sonner";
-import { useState, useEffect } from "react";
-import type { z } from "zod";
+import { useCreateStaffRole } from "../container/query.hooks";
+import type { CreateStaffRoleDto } from "~/services/api/staff/staff-role/dto";
+import { StaffRoleSchema } from "~/services/api/staff/staff-role/staff-role.schema";
 
-interface StaffRoleUpdateDialogProps {
+interface CreateRoleDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  role: StaffRoleItem;
-  onSuccess?: () => void;
+  onClose: () => void;
 }
 
-type UpdateStaffRoleFormData = z.infer<typeof UpdateStaffRoleRequestSchema>;
-
-export default function StaffRoleUpdateDialog({
+export default function CreateRoleDialog({
   open,
-  onOpenChange,
-  role,
-  onSuccess,
-}: StaffRoleUpdateDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  onClose,
+}: CreateRoleDialogProps) {
+  const { mutate: createRole, isPending } = useCreateStaffRole();
 
-  const form = useForm<UpdateStaffRoleFormData>({
-    resolver: zodResolver(UpdateStaffRoleRequestSchema),
+  const form = useForm<CreateStaffRoleDto>({
+    resolver: zodResolver(StaffRoleSchema.CreateStaffRoleSchema),
     defaultValues: {
-      name: role.name,
-      code: role.code,
-      description: role.description || "",
+      code: "",
+      name: "",
+      description: "",
     },
   });
 
-  // Update form when role changes
-  useEffect(() => {
-    if (open && role) {
-      form.reset({
-        name: role.name,
-        code: role.code,
-        description: role.description || "",
-      });
-    }
-  }, [open, role, form]);
-
-  const onSubmit = async (data: UpdateStaffRoleFormData) => {
-    setIsSubmitting(true);
-
-    try {
-      const requestData: UpdateStaffRoleRequest = {
-        name: data.name,
+  const onSubmit = (data: CreateStaffRoleDto) => {
+    createRole(
+      {
         code: data.code,
+        name: data.name,
         description: data.description || undefined,
-      };
-
-      await StaffRoleService.updateStaffRole(role.id, requestData);
-
-      toast.success(`Đã cập nhật vai trò ${data.name}`);
-      onOpenChange(false);
-
-      if (onSuccess) {
-        onSuccess();
+      },
+      {
+        onSuccess: () => {
+          form.reset();
+          onClose();
+        },
       }
-    } catch (error) {
-      console.error("Update staff role error:", error);
-      toast.error("Không thể cập nhật vai trò. Vui lòng thử lại.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    );
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Cập nhật vai trò</DialogTitle>
+          <DialogTitle>Tạo vai trò mới</DialogTitle>
           <DialogDescription>
-            Chỉnh sửa thông tin vai trò nhân sự
+            Tạo vai trò nhân sự mới trong hệ thống
           </DialogDescription>
         </DialogHeader>
 
@@ -116,6 +84,7 @@ export default function StaffRoleUpdateDialog({
                     <Input
                       placeholder="VD: MANAGER, RECEPTIONIST..."
                       {...field}
+                      className="font-mono"
                     />
                   </FormControl>
                   <FormMessage />
@@ -147,10 +116,9 @@ export default function StaffRoleUpdateDialog({
                   <FormLabel>Mô tả</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Mô tả vai trò..."
-                      className="resize-none"
-                      rows={3}
+                      placeholder="Mô tả vai trò và trách nhiệm..."
                       {...field}
+                      rows={3}
                     />
                   </FormControl>
                   <FormMessage />
@@ -162,13 +130,13 @@ export default function StaffRoleUpdateDialog({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
+                onClick={onClose}
+                disabled={isPending}
               >
                 Hủy
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Đang cập nhật..." : "Cập nhật"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Đang tạo..." : "Tạo vai trò"}
               </Button>
             </DialogFooter>
           </form>
