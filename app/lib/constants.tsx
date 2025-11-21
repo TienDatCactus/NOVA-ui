@@ -60,13 +60,8 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.bookings.reports,
       },
       {
-<<<<<<< HEAD
-        title: "Sơ đồ phòng",
-        url: "/dashboard/bookings/grid",
-=======
         title: "Kiểm tra phòng trống",
         url: FE_URL.dashboard.bookings.grid,
->>>>>>> 29b4d650251822d9c787e79305e47c52c4e087b5
       },
       {
         title: "Danh sách đặt phòng",
