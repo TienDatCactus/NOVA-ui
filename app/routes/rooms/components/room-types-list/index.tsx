@@ -60,11 +60,13 @@ function RoomTypesDataTable({
   }
 
   return (
-    <DataTable
-      columns={columns}
-      data={roomTypes}
-      onSelectionChange={onSelectionChange}
-    />
+    <div className="container mx-auto ">
+      <DataTable
+        columns={columns}
+        data={roomTypes}
+        onSelectionChange={onSelectionChange}
+      />
+    </div>
   );
 }
 

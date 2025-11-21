@@ -1,19 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, parseISO } from "date-fns";
-import { DoorOpen, FileWarning, Wallet } from "lucide-react";
+import { CreditCard, DoorOpen, FileWarning, Receipt } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { Badge } from "~/components/ui/badge";
+
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
 import {
   Empty,
@@ -31,43 +31,29 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
-import { toYMD } from "~/lib/utils";
+import { formatMoney, toYMD } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import type {
-  ConfirmBookingPaymentRequestDto,
-  StaffUpdateBookingRequestDto,
-} from "~/services/api/booking/dto";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
 import type { Route } from "./+types/booking-detail";
 import AddCompletedChargesDialog from "./components/add-completed-charges-dialog";
 import BookingRoomsBar from "./components/booking-rooms-bar";
+import CheckoutSheet from "./components/checkout-sheet";
 import CustomerInfoBar from "./components/customer-info-bar";
 import PendingChargesSection from "./components/pending-charges-section";
 import StayDetailBar from "./components/stay-detail-bar";
-import {
-  useAddCompletedCharges,
-  useConfirmBookingPayment,
-} from "./container/use-booking-checkout.hooks";
+import { useAddCompletedCharges } from "./container/use-booking-checkout.hooks";
+import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
-import CheckoutSheet from "./components/checkout-sheet";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   const bookingCode = params.bookingCode;
   if (!bookingCode) {
     throw new Response("Booking code is required", { status: 400 });
@@ -96,20 +82,12 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
   const permissions = useBookingUpdatePermissions(bookingDetail);
 
+  // Calculate financial status from invoices
+  const financialSummary = useBookingFinancialStatus(bookingDetail?.invoices);
+
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
     bookingDetail?.id || ""
   );
-
-  const { mutate: confirmPayment, isPending: isConfirmingPayment } =
-    useConfirmBookingPayment(bookingDetail?.id || "");
-
-  const paymentForm = useForm<ConfirmBookingPaymentRequestDto>({
-    resolver: zodResolver(BookingSchema.ConfirmBookingPaymentRequestSchema),
-    defaultValues: {
-      paymentMethod: "Cash",
-      paidAmount: 0,
-    },
-  });
 
   const form = useForm<StaffUpdateBookingRequestDto>({
     resolver: zodResolver(StaffUpdateBookingRequestSchema),
@@ -182,7 +160,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       otaInformationId: data.otaInformationId,
       breakfastDates: data.breakfastDates || [],
       totalAmount: data.totalAmount,
-      rooms: data.rooms, // Include room operations
+      rooms: data.rooms,
     };
 
     updateBooking(payload, {});
@@ -258,6 +236,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             bookingDetail={bookingDetail}
             form={form}
             OTAList={OTAList || []}
+            permissions={permissions}
           />
           <div className="flex items-start gap-2">
             <div>
@@ -316,6 +295,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                       <FormControl>
                         <Textarea
                           {...field}
+                          disabled={!permissions.canDoSoftUpdate}
                           placeholder="Nhập ghi chú về đặt phòng..."
                           rows={6}
                         />
@@ -348,157 +328,39 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         </div>
         <Separator />
         <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
-          <Dialog>
-            <DialogTrigger asChild>
+          {/* Checkout button for InHouse/CheckedIn */}
+          {(bookingDetail?.status === "InHouse" ||
+            bookingDetail?.status === "CheckedIn") && (
+            <Button variant={"success"} onClick={() => setCheckoutOpen(true)}>
+              <DoorOpen className="w-4 h-4 mr-2" />
+              Checkout và Thanh toán
+            </Button>
+          )}
+
+          {/* Post-checkout payment button */}
+          {bookingDetail?.status === "CheckedOut" &&
+            financialSummary.totalBalance > 0 && (
               <Button
-                variant={"outline"}
-                disabled={
-                  !bookingDetail?.id ||
-                  bookingDetail?.status === "CheckedOut" ||
-                  bookingDetail?.status === "Cancelled"
-                }
+                variant="default"
+                onClick={() => setCheckoutOpen(true)}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white"
               >
-                <Wallet className="w-4 h-4 mr-2" />
-                Xác nhận thanh toán
+                <CreditCard className="w-4 h-4 mr-2" />
+                Thu tiền sau checkout
+                <Badge variant="destructive" className="ml-2">
+                  {formatMoney(financialSummary.totalBalance).vndFormatted}
+                </Badge>
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Xác nhận thanh toán</DialogTitle>
-                <DialogDescription>
-                  Xác nhận thanh toán cho đặt phòng #
-                  {bookingDetail?.bookingCode}
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...paymentForm}>
-                <form
-                  onSubmit={paymentForm.handleSubmit((data) =>
-                    confirmPayment(data)
-                  )}
-                  className="space-y-4"
-                >
-                  <div className="space-y-4">
-                    <FormField
-                      control={paymentForm.control}
-                      name="paymentMethod"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phương thức thanh toán</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Chọn phương thức" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {PAYMENT_METHODS.filter((pm) => !pm.disabled).map(
-                                (pm) => (
-                                  <SelectItem key={pm.value} value={pm.value}>
-                                    <div className="flex items-center gap-2">
-                                      <pm.icon className="w-4 h-4" />
-                                      {pm.label}
-                                    </div>
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+            )}
 
-                    {/* Paid Amount */}
-                    <FormField
-                      control={paymentForm.control}
-                      name="paidAmount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Số tiền thanh toán</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Nhập số tiền"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value) || 0)
-                              }
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Số tiền tối thiểu: 0.01 VNĐ
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Card className="p-4 bg-white gap-0 rounded-lg space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Tổng tiền:
-                        </span>
-                        <span className="font-mono font-semibold">
-                          {bookingDetail?.totalAmount?.toLocaleString("vi-VN")}{" "}
-                          VNĐ
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Đã thanh toán:
-                        </span>
-                        <span className="font-mono">
-                          {bookingDetail?.paidAmount?.toLocaleString("vi-VN")}{" "}
-                          VNĐ
-                        </span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between text-sm font-semibold">
-                        <span>Còn lại:</span>
-                        <span className="font-mono text-destructive">
-                          {(
-                            (bookingDetail?.totalAmount || 0) -
-                            (bookingDetail?.paidAmount || 0)
-                          ).toLocaleString("vi-VN")}{" "}
-                          VNĐ
-                        </span>
-                      </div>
-                    </Card>
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        paymentForm.reset();
-                      }}
-                      disabled={isConfirmingPayment}
-                    >
-                      Hủy
-                    </Button>
-                    <Button type="submit" disabled={isConfirmingPayment}>
-                      {isConfirmingPayment ? "Xử lý..." : "Xác nhận thanh toán"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-          <Button
-            variant={"success"}
-            onClick={() => setCheckoutOpen(true)}
-            disabled={
-              !bookingDetail?.id ||
-              bookingDetail?.status === "CheckedOut" ||
-              bookingDetail?.status === "Cancelled"
-            }
-          >
-            <DoorOpen className="w-4 h-4 mr-2" />
-            Checkout
-          </Button>
+          {/* View invoices for settled checkouts */}
+          {bookingDetail?.status === "CheckedOut" &&
+            financialSummary.totalBalance === 0 && (
+              <Button variant="outline" onClick={() => setCheckoutOpen(true)}>
+                <Receipt className="w-4 h-4 mr-2" />
+                Xem hóa đơn
+              </Button>
+            )}
 
           <Button
             type="button"
@@ -522,6 +384,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           onOpenChange={setCheckoutOpen}
           bookingId={bookingDetail?.id || ""}
           bookingCode={bookingDetail?.bookingCode || ""}
+          bookingDetail={bookingDetail}
         />
 
         {/* Confirm Payment Dialog */}

@@ -6,14 +6,14 @@ import { OrderService } from "~/services/api/orders";
  */
 export function useServiceOrderList(date?: string) {
   return useQuery({
-    queryKey: ["service-order-list", date],
+    queryKey: ["service-order-list", date && date],
     queryFn: async () => {
       return await OrderService.getServiceOrderList(date);
     },
     staleTime: 30 * 1000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 

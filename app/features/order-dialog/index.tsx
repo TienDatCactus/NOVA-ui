@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
-import { Search } from "lucide-react";
+import { RotateCcw, Search } from "lucide-react";
 import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
 import useMenuFilters from "~/routes/menu/container/menu/filter.hooks";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
@@ -29,12 +29,12 @@ import { useServiceOrderStore } from "~/store/service-order.store";
 import MenuList from "./components/menu-list";
 import OrderDetail from "./components/order-detail";
 import ServiceList from "./components/service-list";
+import { useDebounceCallback } from "usehooks-ts";
 
 interface AddServiceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm?: () => void;
-  bookingId?: string;
   customerName?: string;
   checkinDate?: Date | string;
   checkoutDate?: Date | string;
@@ -44,8 +44,9 @@ export default function AddServiceDialog({
   open,
   onOpenChange,
   onConfirm,
-  bookingId,
   customerName,
+  checkinDate,
+  checkoutDate,
 }: AddServiceDialogProps) {
   const [activeTab, setActiveTab] = useState<"service" | "menu">("service");
   const [searchText, setSearchText] = useState("");
@@ -80,7 +81,6 @@ export default function AddServiceDialog({
     categoryCode: menuFilters.categoryCode,
   });
 
-  // Selection helpers using store
   const isSelected = (itemId: string) => {
     return orderServices.some((s) => s.itemId === itemId);
   };
@@ -148,7 +148,7 @@ export default function AddServiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] min-h-0 overflow-hidden p-0 bg-background">
+      <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto p-0 bg-accent gap-2">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle>Chọn dịch vụ & món ăn</DialogTitle>
           <DialogDescription>
@@ -205,29 +205,37 @@ export default function AddServiceDialog({
                 </SelectContent>
               </Select>
             )}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className=" flex items-center gap-2">
               <Input
+                startAddon={
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                }
                 placeholder="Tìm kiếm..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="pl-9"
               />
+              <Button
+                variant="outline"
+                onClick={() => {
+                  resetMenuFilters();
+                  resetServiceFilters();
+                  setSearchText("");
+                }}
+              >
+                <RotateCcw />
+                Đặt lại{" "}
+              </Button>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Filters Row */}
-
         {/* Main Content Grid */}
-        <div className="px-6 pb-4 flex-1 ">
-          <div className="grid md:grid-cols-12 grid-cols-1 gap-4 h-full">
-            <div className="md:col-span-7 col-span-12 overflow-y-auto">
+        <div className="px-4 flex-1 ">
+          <div className="grid md:grid-cols-10 grid-cols-1 gap-4 h-full">
+            <div className="md:col-span-6 col-span-12 bg-card border rounded-2xl flex flex-col gap-4 h-full">
               {activeTab === "service" ? (
                 <ServiceList
                   services={filteredServiceItems}
-                  searchText=""
-                  onSearchChange={() => {}}
                   isSelected={isSelected}
                   getQuantity={getQuantity}
                   onToggleSelect={(id) => toggleSelectItem(id, "ServiceItem")}
@@ -236,8 +244,6 @@ export default function AddServiceDialog({
               ) : (
                 <MenuList
                   menuItems={filteredMenuItems}
-                  searchText=""
-                  onSearchChange={() => {}}
                   isSelected={isSelected}
                   getQuantity={getQuantity}
                   onToggleSelect={(id) => toggleSelectItem(id, "MenuItem")}
@@ -246,17 +252,20 @@ export default function AddServiceDialog({
               )}
             </div>
 
-            <div className="md:col-span-5 col-span-12 overflow-y-auto">
+            <div className="md:col-span-4 col-span-12 overflow-y-auto">
               <OrderDetail
-                onClearAll={handleClearAll}
-                bookingId={bookingId}
                 customerName={customerName}
+                checkinDate={checkinDate}
+                checkoutDate={checkoutDate}
               />
             </div>
           </div>
         </div>
 
-        <DialogFooter className="border-t p-6 flex items-center justify-between">
+        <DialogFooter
+          className="border-t p-4 pt-0
+         flex items-center justify-between"
+        >
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Hủy
           </Button>

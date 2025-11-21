@@ -790,6 +790,7 @@ export default function PaymentOrderSheet({
                   </Button>
                   <Button
                     type="button"
+                    variant={"success-ghost"}
                     onClick={paymentForm.handleSubmit(handleSubmit)}
                     disabled={isPaying || !isPaymentValid}
                   >

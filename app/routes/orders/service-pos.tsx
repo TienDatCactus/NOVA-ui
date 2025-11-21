@@ -38,11 +38,7 @@ import Image from "~/components/ui/image";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Card } from "~/components/ui/card";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 

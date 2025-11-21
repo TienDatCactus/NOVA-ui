@@ -28,9 +28,9 @@ export default [
         route("menu-categories", "routes/menu/menu-categories.tsx"),
       ]),
       ...prefix("bookings", [
-        index("routes/reservation/reports/reports.tsx"),
-        route("grid", "routes/reservation/bookings/grid.tsx"),
         route("list", "routes/reservation/bookings/list.tsx"),
+        route("reports", "routes/reservation/reports/reports.tsx"),
+        route("grid", "routes/reservation/bookings/grid.tsx"),
         route(
           "detail/:bookingCode",
           "routes/reservation/booking-detail/booking-detail.tsx"
@@ -47,7 +47,14 @@ export default [
       ]),
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
+      route("chat", "routes/chat/chat.tsx"),
       route("users", "routes/users/users.tsx"),
+      ...prefix("stocks", [
+        ...prefix("items", [index("routes/stocks/items/items.tsx")]),
+        ...prefix("purchase-requests", [
+          index("routes/stocks/purchase-requests/purchase-requests.tsx"),
+        ]),
+      ]),
       ...prefix("staff", [
         index("routes/staff/staff/staff.tsx"),
         route("work-shifts", "routes/staff/work-shifts/work-shifts.tsx"),
@@ -55,6 +62,11 @@ export default [
         route("schedules", "routes/staff/schedules/schedules.tsx"),
       ]),
     ]),
+  ]),
+  layout("layouts/customer.layout.tsx", [
+    index("routes/customer/chat/inbox.tsx"),
+    route("chat", "routes/customer/chat/chat.tsx"),
+    route("map", "routes/customer/map/map.tsx"),
   ]),
 
   route("*", "routes/not-found.tsx"),

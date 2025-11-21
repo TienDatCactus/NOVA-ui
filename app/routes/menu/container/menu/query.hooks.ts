@@ -2,11 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { MenuService } from "~/services/api/menu";
 import type { MenuListParams } from "~/services/api/menu/menu.types";
 
-export function useMenuList(params?: MenuListParams) {
+export function useMenuList(
+  params?: MenuListParams,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["menu-list", params],
     queryFn: async () => await MenuService.getMenuList(params ?? {}),
     staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled: options?.enabled,
   });
 }
 

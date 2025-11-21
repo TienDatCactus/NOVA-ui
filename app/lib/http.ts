@@ -62,11 +62,14 @@ http.interceptors.response.use(
     const message = error.response?.data?.message;
     const curPath = window.location.pathname;
 
-    if (
-      status === 401 &&
-      !originalRequest._retry &&
-      !curPath.includes("/auth")
-    ) {
+    // Skip auth redirect for customer/public routes
+    const isPublicRoute =
+      curPath.startsWith("/chat") ||
+      curPath.startsWith("/map") ||
+      curPath === "/" ||
+      curPath.includes("/auth");
+
+    if (status === 401 && !originalRequest._retry && !isPublicRoute) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -97,16 +100,10 @@ http.interceptors.response.use(
 
       try {
         const refreshData = await AuthService.refresh(refreshToken);
-        console.log("Refresh response:", refreshData);
-
-        // Check if response contains new tokens
         let newAccessToken: string | null = null;
-
         if (refreshData && typeof refreshData === "object") {
-          // Backend returns tokens in response body
           newAccessToken = (refreshData as any).accessToken;
           const newRefreshToken = (refreshData as any).refreshToken;
-
           if (newAccessToken) {
             setStorage(STORAGE.TOKEN, newAccessToken);
           }

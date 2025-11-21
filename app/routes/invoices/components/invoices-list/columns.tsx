@@ -1,5 +1,6 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
@@ -14,7 +15,9 @@ import { InvoiceDetailDialog } from "../invoice-detail/invoice-detail.dialog";
 export const columns: ColumnDef<InvoiceListItemDto>[] = [
   {
     accessorKey: "invoiceNo",
-    header: "Mã hóa đơn",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mã hóa đơn" />
+    ),
     cell: ({ row }) => {
       const [open, setOpen] = useState(false);
       return (
@@ -40,7 +43,7 @@ export const columns: ColumnDef<InvoiceListItemDto>[] = [
           <InvoiceDetailDialog
             open={open}
             onClose={() => setOpen(false)}
-            invoiceId={row.original.invoiceId}
+            invoiceId={row.original.invoiceId || ""}
           />
         </div>
       );
@@ -48,7 +51,9 @@ export const columns: ColumnDef<InvoiceListItemDto>[] = [
   },
   {
     accessorKey: "issuedAt",
-    header: "Ngày phát hành",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Ngày phát hành" />
+    ),
     cell: ({ row }) => {
       try {
         const date = parseISO(row.original.issuedAt || "");
@@ -71,7 +76,9 @@ export const columns: ColumnDef<InvoiceListItemDto>[] = [
   },
   {
     accessorKey: "bookingCode",
-    header: "Mã booking",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mã booking" />
+    ),
     cell: ({ row }) => {
       return (
         <Link
@@ -85,7 +92,9 @@ export const columns: ColumnDef<InvoiceListItemDto>[] = [
   },
   {
     accessorKey: "invoiceType",
-    header: "Loại",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Loại" />
+    ),
     cell: ({ row }) => {
       return (
         <span className="text-sm text-muted-foreground">
@@ -97,7 +106,9 @@ export const columns: ColumnDef<InvoiceListItemDto>[] = [
 
   {
     accessorKey: "status",
-    header: "Trạng thái",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
     cell: ({ row }) => {
       const status = INVOICE_STATUSES.find(
         (s) => s.value === row.original.status
@@ -111,7 +122,9 @@ export const columns: ColumnDef<InvoiceListItemDto>[] = [
   },
   {
     accessorKey: "total",
-    header: "Tổng tiền",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tổng tiền" />
+    ),
     cell: ({ row }) => {
       const { vndFormatted } = formatMoney(row.original.total ?? 0);
       return <span className="font-semibold">{vndFormatted}</span>;

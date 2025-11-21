@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
 import type { HolidayListItem } from "~/services/api/holiday/dto";
 import { Checkbox } from "~/components/ui/checkbox";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -33,14 +34,18 @@ export const columns: ColumnDef<HolidayListItem>[] = [
   },
   {
     accessorKey: "index",
-    header: "STT",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STT" />
+    ),
     cell: ({ row }) => {
       return <span className="font-medium">{row.index + 1}</span>;
     },
   },
   {
     accessorKey: "name",
-    header: "Tên ngày nghỉ",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tên ngày nghỉ" />
+    ),
     cell: ({ row }) => (
       <div className="flex flex-col">
         <span className="font-medium">{row.getValue("name")}</span>
@@ -49,7 +54,9 @@ export const columns: ColumnDef<HolidayListItem>[] = [
   },
   {
     accessorKey: "startDate",
-    header: "Ngày bắt đầu",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Ngày bắt đầu" />
+    ),
     cell: ({ row }) => {
       const date = row.getValue("startDate") as string;
       const formatted = format(parseISO(date), "dd/MM/yyyy", { locale: vi });
@@ -62,7 +69,9 @@ export const columns: ColumnDef<HolidayListItem>[] = [
   },
   {
     accessorKey: "endDate",
-    header: "Ngày kết thúc",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Ngày kết thúc" />
+    ),
     cell: ({ row }) => {
       const date = row.getValue("endDate") as string;
       const formatted = format(parseISO(date), "dd/MM/yyyy", { locale: vi });
@@ -75,7 +84,9 @@ export const columns: ColumnDef<HolidayListItem>[] = [
   },
   {
     accessorKey: "bonusAmount",
-    header: "Tiền thưởng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tiền thưởng" />
+    ),
     cell: ({ row }) => {
       const amount = row.getValue("bonusAmount") as number;
       return (
@@ -89,7 +100,13 @@ export const columns: ColumnDef<HolidayListItem>[] = [
   },
   {
     accessorKey: "isPublicHoliday",
-    header: () => <div className="text-center">Loại</div>,
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title="Loại"
+        className="text-center"
+      />
+    ),
     cell: ({ row }) => {
       const isPublic = row.getValue("isPublicHoliday") as boolean;
       return (
@@ -121,5 +138,7 @@ export const columns: ColumnDef<HolidayListItem>[] = [
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

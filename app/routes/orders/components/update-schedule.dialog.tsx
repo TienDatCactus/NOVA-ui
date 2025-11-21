@@ -10,7 +10,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Clock, CalendarIcon } from "lucide-react";
-import { format, addMinutes, parseISO, set } from "date-fns";
+import { format, addMinutes, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -62,12 +62,15 @@ export default function UpdateScheduleDialog({
 
     // Parse time and combine with selected date
     const [hours, minutes] = timeString.split(":").map(Number);
-    const finalDateTime = set(selectedDate, {
-      hours,
-      minutes,
-      seconds: 0,
-      milliseconds: 0,
-    });
+
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const day = selectedDate.getDate();
+
+    // Use Date.UTC to create UTC timestamp to avoid timezone conversion
+    const finalDateTime = new Date(
+      Date.UTC(year, month, day, hours, minutes, 0, 0)
+    );
 
     onConfirm(finalDateTime);
     setError("");
@@ -94,12 +97,18 @@ export default function UpdateScheduleDialog({
     if (date) {
       // Preserve the current time when changing date
       const [hours, minutes] = timeString.split(":").map(Number);
-      const newDateTime = set(date, {
-        hours: hours || 0,
-        minutes: minutes || 0,
-        seconds: 0,
-        milliseconds: 0,
-      });
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+      const newDateTime = new Date(
+        year,
+        month,
+        day,
+        hours || 0,
+        minutes || 0,
+        0,
+        0
+      );
       setSelectedDate(newDateTime);
       setCalendarOpen(false);
     }

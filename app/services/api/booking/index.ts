@@ -13,6 +13,7 @@ import type {
   BookingPendingChargesResponseDto,
   ConfirmBookingPaymentRequestDto,
   ConfirmBookingPaymentResponseDto,
+  OrderableBookingResponseDto,
   StaffAddCompletedChargesRequestDto,
   StaffBookingPricePreviewRequestDto,
   StaffBookingPricePreviewResponseDto,
@@ -54,6 +55,7 @@ const {
   StaffCheckoutPaymentRequestSchema,
   ConfirmBookingPaymentRequestSchema,
   ConfirmBookingPaymentResponseSchema,
+  OrderableBookingResponseSchema,
   UpdateBookingStatusRequestSchema,
   UpdateBookingStatusResponseSchema,
 } = BookingSchema;
@@ -135,8 +137,8 @@ async function updateBookingStatus(
   data: UpdateBookingStatusRequestDto
 ): Promise<UpdateBookingStatusResponseDto> {
   try {
-    const resp = await http.put(
-      Booking.updateStatus(data.bookingId),
+    const resp = await http.post(
+      Booking.updateStatus,
       UpdateBookingStatusRequestSchema.parse(data)
     );
     return UpdateBookingStatusResponseSchema.parse(resp.data);
@@ -283,10 +285,16 @@ async function staffAddCompletedCharges(
   bookingId: string,
   data: StaffAddCompletedChargesRequestDto
 ): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
   try {
     const resp = await http.post(
       Booking.addToCompletedRoomOrder(bookingId),
-      StaffAddCompletedChargesRequestSchema.parse(data)
+      StaffAddCompletedChargesRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
     );
     return resp.data;
   } catch (error) {
@@ -396,6 +404,20 @@ async function staffConfirmBookingPayment(
     return Promise.reject(error);
   }
 }
+
+/**
+ * Get orderable bookings (active + confirmed bookings available for POS/Service orders)
+ */
+async function getOrderableBookings(): Promise<OrderableBookingResponseDto> {
+  try {
+    const resp = await http.get(Booking.orderableBookings);
+    return OrderableBookingResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
@@ -417,4 +439,5 @@ export const BookingService = {
 
   updateBookingStatus,
   staffConfirmBookingPayment,
+  getOrderableBookings,
 };

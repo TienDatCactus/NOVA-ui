@@ -16,11 +16,7 @@ import { usePOSOrderList } from "./container/pos-orders/query.hooks";
 import { DatePicker } from "~/components/ui/date-picker";
 import { format } from "date-fns";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 

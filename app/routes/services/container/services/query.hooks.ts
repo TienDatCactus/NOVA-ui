@@ -2,13 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { ServicesService } from "~/services/api/services";
 import type { ServiceListParams } from "~/services/api/services/service.types";
 
-export function useServices(params?: ServiceListParams) {
+export function useServices(
+  params?: ServiceListParams,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["services", params],
     queryFn: async () => await ServicesService.getServiceList(params || {}),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
+    enabled: options?.enabled,
   });
 }
 

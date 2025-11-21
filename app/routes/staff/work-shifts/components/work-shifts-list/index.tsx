@@ -75,5 +75,9 @@ export default function WorkShiftsDataTable({
     );
   }
 
-  return <DataTable columns={columns} data={workShifts} onSuccess={onSuccess} />;
+  return (
+    <div className="container mx-auto ">
+      <DataTable columns={columns} data={workShifts} onSuccess={onSuccess} />
+    </div>
+  );
 }

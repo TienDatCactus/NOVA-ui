@@ -19,8 +19,14 @@ export function useCreatePOSOrder() {
     mutationFn: async (data: CreatePOSOrderRequestDto) => {
       return await OrderService.createPOSOrder(data);
     },
-    onSuccess: () => {
+    onSuccess: (_, data) => {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", data.bookingId],
+      });
     },
   });
 }
@@ -105,6 +111,9 @@ export function useDeleteItemFromPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
     },
   });
 }
@@ -127,6 +136,9 @@ export function useCompletePOSOrder() {
         queryKey: ["pos-order-detail", orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
     },
   });
 }

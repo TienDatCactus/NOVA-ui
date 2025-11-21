@@ -40,11 +40,11 @@ const Booking = {
   detailById: (id: string) => `Bookings/${id}/details`,
   detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
   Export: `Bookings/export`,
-  updateStatus: (id: string) => `Bookings/${id}/update-status`,
-
+  updateStatus: "Bookings/update-status",
   addToCompletedRoomOrder: (bookingId: string) =>
     `/StaffBookings/${bookingId}/add-completed-charges`,
   confirmPayment: (id: string) => `StaffBookings/${id}/confirm-payment`,
+  orderableBookings: "StaffBookings/orderable",
 };
 
 const OTAInformation = {
@@ -168,10 +168,12 @@ const Invoices = {
   export: (date?: string) =>
     date ? `Invoices/export?date=${date}` : `Invoices/export`, //? export invoices
   update: (id: string) => `Invoices/${id}`, //? update invoice details
+  syncInvoice: (invoiceId: string) =>
+    `Invoices/${invoiceId}/sync-pending-orders`, //? sync invoice with pending orders
 };
 // Chat endpoints
 const Chat = {
-  entry: "chat/entry",
+  entry: (roomToken: string) => `chat/entry?roomToken=${roomToken}`,
   messages: (sessionId: string) => `chat/sessions/${sessionId}/messages`,
   session: (sessionId: string) => `chat/sessions/${sessionId}`,
   sendMessage: "chat/messages",
@@ -233,6 +235,52 @@ const Discount = {
   apply: "discount/apply",
   override: "discount/override",
 };
+
+const Translation = {
+  translate: "Translation/translate",
+  detect: (text: string) => `Translation/detect-language?text=${text}`,
+};
+
+const Stock = {
+  Items: {
+    list: "Items",
+    create: "Items",
+    detail: (id: string) => `Items/${id}`,
+    update: (id: string) => `Items/${id}`,
+    delete: (id: string) => `Items/${id}`,
+    listByCategory: (categoryId: string) => `Items/by-category/${categoryId}`,
+    listByCode: (code: string) => `Items/by-code/${code}`,
+    lowStock: "Items/low-stock",
+    transactions: (id: string) => `Items/${id}/transactions`,
+    adjustStock: (id: string) => `Items/${id}/adjust-stock`,
+  },
+  PurchaseRequests: {
+    list: "PurchaseRequests",
+    create: "PurchaseRequests",
+    detail: (id: string) => `PurchaseRequests/${id}`,
+    update: (id: string) => `PurchaseRequests/${id}`,
+    delete: (id: string) => `PurchaseRequests/${id}`,
+    approve: (id: string) => `PurchaseRequests/${id}/approve`,
+    reject: (id: string) => `PurchaseRequests/${id}/reject`,
+    receiveStock: (id: string) => `PurchaseRequests/${id}/receive-stock`,
+  },
+  StockAdjustments: {
+    list: "StockAdjustments",
+    create: "StockAdjustments",
+    detail: (id: string) => `StockAdjustments/${id}`,
+    update: (id: string) => `StockAdjustments/${id}`,
+    delete: (id: string) => `StockAdjustments/${id}`,
+    apply: (id: string) => `StockAdjustments/${id}/apply`,
+  },
+  ItemCategories: {
+    list: "ItemCategories",
+    create: "ItemCategories",
+    detail: (id: string) => `ItemCategories/${id}`,
+    update: (id: string) => `ItemCategories/${id}`,
+    delete: (id: string) => `ItemCategories/${id}`,
+  },
+};
+
 export {
   Auth,
   User,
@@ -256,4 +304,6 @@ export {
   StaffAttendance,
   Chat,
   Discount,
+  Translation,
+  Stock,
 };

@@ -1,5 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import type { UserItem } from "~/services/api/user/dto";
 import {
   getRoleBadgeColors,
@@ -10,14 +11,18 @@ import ActionsMenuCell from "../../fragments/actions.cell";
 export const columns: ColumnDef<UserItem>[] = [
   {
     accessorKey: "fullName",
-    header: "Họ và tên",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Họ và tên" />
+    ),
     cell: ({ row }) => (
       <span className="font-medium">{row.getValue("fullName")}</span>
     ),
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Email" />
+    ),
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <span className="text-sm">{row.getValue("email")}</span>
@@ -26,7 +31,9 @@ export const columns: ColumnDef<UserItem>[] = [
   },
   {
     accessorKey: "phoneNumber",
-    header: "Số điện thoại",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Số điện thoại" />
+    ),
     cell: ({ row }) => (
       <span className="text-muted-foreground">
         {row.getValue("phoneNumber")}
@@ -35,7 +42,9 @@ export const columns: ColumnDef<UserItem>[] = [
   },
   {
     accessorKey: "roles",
-    header: "Vai trò",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Vai trò" />
+    ),
     cell: ({ row }) => {
       const roles = row.getValue("roles") as string[];
       return (
@@ -58,7 +67,9 @@ export const columns: ColumnDef<UserItem>[] = [
   },
   {
     id: "status",
-    header: "Trạng thái",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
     cell: ({ row }) => {
       const user = row.original;
 
@@ -98,5 +109,7 @@ export const columns: ColumnDef<UserItem>[] = [
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

@@ -50,12 +50,17 @@ function useRoomBookingHistory({
   });
 }
 
-function useAvailableRoomsInternal(params: GetAvailableRoomsInternalParams) {
+function useAvailableRoomsInternal(
+  params: GetAvailableRoomsInternalParams,
+  enabled: boolean = true
+) {
   return useQuery({
     queryKey: ["available-rooms-internal", params],
     queryFn: async () => await RoomsService.getAvailableRoomsInternal(params),
-    staleTime: 5 * 60 * 1000,
-    enabled: () => !!params.CheckInDate && !!params.CheckOutDate,
+    staleTime: 5 * 60,
+    enabled: enabled && !!params.CheckInDate && !!params.CheckOutDate,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 }
 

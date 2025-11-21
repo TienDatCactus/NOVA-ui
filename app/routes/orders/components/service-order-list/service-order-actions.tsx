@@ -8,18 +8,19 @@ import {
 } from "lucide-react";
 import type { ServiceOrderDetailDto } from "~/services/api/orders/dto";
 import { useState } from "react";
-import UpdateScheduleDialog from "./update-schedule.dialog";
 import PaymentOrderSheet from "../payment-order.sheet";
 import {
   useCompleteServiceOrder,
   useCancelServiceOrder,
   usePayServiceOrderNow,
+  useUpdateServiceOrderSchedule,
 } from "../../container/service-order/mutation.hooks";
 import { useServiceOrderDetail } from "../../container/service-order/query.hooks";
 import { toast } from "sonner";
 import type { PaymentSchema } from "~/services/schema/payment.schema";
 import type z from "zod";
 import { OrderSchema } from "~/services/api/orders/order.schema";
+import UpdateScheduleDialog from "../update-schedule.dialog";
 
 const { OrderPayNowRequestSchema } = OrderSchema;
 
@@ -40,6 +41,7 @@ export default function ServiceOrderActions({
   const completeOrder = useCompleteServiceOrder();
   const cancelOrder = useCancelServiceOrder();
   const payNow = usePayServiceOrderNow();
+  const updateSchedule = useUpdateServiceOrderSchedule();
 
   const canComplete = order?.status === "Scheduled";
   const canCancel = order?.status === "Scheduled";
@@ -58,6 +60,24 @@ export default function ServiceOrderActions({
         },
         onError: () => {
           toast.error("Thanh toán thất bại. Vui lòng thử lại.");
+        },
+      }
+    );
+  };
+
+  const handleUpdateSchedule = (scheduledAt: Date) => {
+    updateSchedule.mutate(
+      {
+        orderId,
+        scheduledAt,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Đã cập nhật thời gian phục vụ!");
+          setShowScheduleDialog(false);
+        },
+        onError: () => {
+          toast.error("Cập nhật thất bại. Vui lòng thử lại.");
         },
       }
     );
@@ -130,10 +150,10 @@ export default function ServiceOrderActions({
 
       {order && showScheduleDialog && (
         <UpdateScheduleDialog
-          orderId={order.id}
-          currentScheduledTime={order.scheduledAt}
           open={showScheduleDialog}
           onOpenChange={setShowScheduleDialog}
+          onConfirm={handleUpdateSchedule}
+          currentScheduledTime={order.scheduledAt}
         />
       )}
 

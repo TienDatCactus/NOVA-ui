@@ -19,8 +19,8 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import {
-  INVOICE_ITEM_TYPES,
   INVOICE_STATUSES,
+  INVOICE_TYPES,
   type InvoiceListParams,
 } from "~/services/api/invoices/invoice.types";
 // Removed booking selection dependencies per updated requirements
@@ -232,7 +232,7 @@ function InvoicesFilterSidebar({
                     Tất cả
                   </Label>
                 </div>
-                {INVOICE_ITEM_TYPES.map((type) => (
+                {INVOICE_TYPES.map((type) => (
                   <div key={type.value} className="flex items-center gap-2">
                     <RadioGroupItem
                       id={`invoice-type-${type.value}`}

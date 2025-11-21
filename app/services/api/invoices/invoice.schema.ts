@@ -5,18 +5,21 @@ const InvoiceStatusEnum = z
   .enum([
     "Unpaid",
     "DepositOnly",
+    "PartiallyPaid",
     "Paid",
     "Overpaid",
-    "PartiallyPaid",
     "Refunded",
     "Chargeback",
     "Voided",
   ])
   .or(z.string());
-const InvoiceTypeEnum = z
-  .enum(["Room", "POS", "Service", "Mixed"])
-  .or(z.string());
 
+const InvoiceTypeEnum = z.enum([
+  "Deposit", // Hóa đơn cọc/deposit
+  "RoomCharges", // Hóa đơn tiền phòng (trả trước hoặc giữa chừng)
+  "ServiceCharges", // Hóa đơn dịch vụ (F&B, Spa, Laundry, etc.)
+  "Checkout", // Hóa đơn checkout (tổng hợp)
+]);
 //? ---------------------------------
 
 const AddCustomItemsRequestSchema = z.object({
@@ -86,6 +89,7 @@ const InvoiceDetailSchema = z.object({
   id: z.string().optional().nullable(),
   invoiceNo: z.string().optional().nullable(),
   bookingRoomId: z.string().optional().nullable(),
+  invoiceType: InvoiceTypeEnum,
   subTotal: z.number().optional().nullable(),
   vatAmount: z.number().optional().nullable(),
   serviceChargeAmount: z.number().optional().nullable(),
@@ -208,6 +212,17 @@ const UpdateInvoiceRequestSchema = z.object({
   note: z.string("Ghi chú không hợp lệ").optional(),
 });
 
+const SyncInvoiceWithOrdersResponseSchema = z.object({
+  invoiceId: z.string().optional(),
+  invoiceNo: z.string().optional(),
+  posOrdersAdded: z.number().optional(),
+  serviceOrdersAdded: z.number().optional(),
+  previousTotal: z.number().optional(),
+  newTotal: z.number().optional(),
+  addedAmount: z.number().optional(),
+  message: z.string().optional(),
+});
+
 export const InvoiceSchema = {
   InvoiceStatusEnum,
   InvoiceTypeEnum,
@@ -232,4 +247,5 @@ export const InvoiceSchema = {
   InvoiceCalculateFeesResponseSchema,
   InvoiceCalculateFeesRequestSchema,
   UpdateInvoiceRequestSchema,
+  SyncInvoiceWithOrdersResponseSchema,
 };

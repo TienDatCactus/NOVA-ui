@@ -33,15 +33,18 @@ export function AddRoomModal({
 }: AddRoomModalProps) {
   const [addingRoomId, setAddingRoomId] = useState<string | null>(null);
   const { data: availableRooms, isPending: isLoading } =
-    useAvailableRoomsInternal({
-      CheckInDate: bookingDetail?.checkinDate
-        ? format(bookingDetail.checkinDate, "yyyy-MM-dd")
-        : "",
-      CheckOutDate: bookingDetail?.checkoutDate
-        ? format(bookingDetail.checkoutDate, "yyyy-MM-dd")
-        : "",
-      Guests: (bookingDetail?.adults || 1) + (bookingDetail?.children || 0),
-    });
+    useAvailableRoomsInternal(
+      {
+        CheckInDate: bookingDetail?.checkinDate
+          ? format(bookingDetail.checkinDate, "yyyy-MM-dd")
+          : "",
+        CheckOutDate: bookingDetail?.checkoutDate
+          ? format(bookingDetail.checkoutDate, "yyyy-MM-dd")
+          : "",
+        Guests: (bookingDetail?.adults || 1) + (bookingDetail?.children || 0),
+      },
+      open
+    );
   const handleAddRoom = (roomId: string, roomTypeId: string) => {
     setAddingRoomId(roomId);
     onAddRoom(roomId, roomTypeId);
