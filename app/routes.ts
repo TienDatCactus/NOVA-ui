@@ -51,8 +51,14 @@ export default [
       route("users", "routes/users/users.tsx"),
       ...prefix("stocks", [
         ...prefix("items", [index("routes/stocks/items/items.tsx")]),
+        ...prefix("item-categories", [
+          index("routes/stocks/item-categories/item-categories.tsx"),
+        ]),
         ...prefix("purchase-requests", [
           index("routes/stocks/purchase-requests/purchase-requests.tsx"),
+        ]),
+        ...prefix("stock-adjustments", [
+          index("routes/stocks/stock-adjustments/stock-adjustments.tsx"),
         ]),
       ]),
       ...prefix("staff", [
@@ -60,6 +66,7 @@ export default [
         route("work-shifts", "routes/staff/work-shifts/work-shifts.tsx"),
         route("holidays", "routes/staff/holidays/holidays.tsx"),
         route("schedules", "routes/staff/schedules/schedules.tsx"),
+        route("payrolls", "routes/staff/payrolls/payrolls.tsx"),
       ]),
     ]),
   ]),

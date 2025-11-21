@@ -76,21 +76,21 @@ export function useSchedulesContainer() {
   // Success handlers
   const handleCreateSuccess = () => {
     setCreateDialogOpen(false);
-    refetch();
+    queryClient.invalidateQueries({ queryKey: ["staff-shifts"] });
     queryClient.invalidateQueries({ queryKey: ["staff-attendances"] });
   };
 
   const handleDeleteSuccess = () => {
     setSelectedShift(null);
     setDeleteDialogOpen(false);
-    refetch();
+    queryClient.invalidateQueries({ queryKey: ["staff-shifts"] });
     queryClient.invalidateQueries({ queryKey: ["staff-attendances"] });
   };
 
   const handleUpdateSuccess = () => {
     setSelectedShift(null);
     setUpdateDialogOpen(false);
-    refetch();
+    queryClient.invalidateQueries({ queryKey: ["staff-shifts"] });
     queryClient.invalidateQueries({ queryKey: ["staff-attendances"] });
   };
 

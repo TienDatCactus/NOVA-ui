@@ -152,10 +152,16 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.staff.workShifts,
       },
       {
+        title: "Ngày nghỉ",
+        url: "/dashboard/staff/holidays",
+      },
+      {
         title: "Lịch làm việc",
         url: FE_URL.dashboard.staff.schedules,
       },
       {
+        title: "Bảng lương",
+        url: "/dashboard/staff/payrolls",
         title: "Ngày nghỉ",
         url: FE_URL.dashboard.staff.holidays,
       },
@@ -179,6 +185,10 @@ const SIDEBAR_NAV_MAIN: Array<{
       {
         title: "Hàng hóa",
         url: FE_URL.dashboard.stocks.items,
+      },
+      {
+        title: "Danh mục hàng",
+        url: FE_URL.dashboard.stocks.itemCategories,
       },
       {
         title: "Yêu cầu mua hàng",
