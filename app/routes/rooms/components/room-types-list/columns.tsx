@@ -18,29 +18,6 @@ import { RoomTypeActionsCell } from "../../fragments/room-types/action.cell";
 
 export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Chọn tất cả"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Chọn hàng"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-
-  {
     accessorKey: "index",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="STT" />

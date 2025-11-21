@@ -246,7 +246,7 @@ export default function Component({
       <header className="flex items-center justify-between p-4 border-b  border-accent-foreground/20">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
-            <Link to={DASHBOARD.orders["menu-orders"]}>
+            <Link to={DASHBOARD.orders.menuOrders}>
               <Button variant="ghost" size="sm" onClick={handleReset}>
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
@@ -344,7 +344,7 @@ export default function Component({
 
         {/* Cart Sidebar */}
         <aside className=" p-2 overflow-y-auto ">
-          <div className="w-md bg-card rounded-xl h-full border p-2 flex flex-col ">
+          <div className="w-md bg-card rounded-xl h-full border p-4 flex flex-col ">
             <div className="flex items-center justify-between ">
               <h2 className="text-lg font-semibold">Tóm tắt đơn hàng</h2>
               {orderId && (

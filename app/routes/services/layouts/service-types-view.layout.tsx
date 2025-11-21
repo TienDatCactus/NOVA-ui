@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import ServiceTypesCommandBar from "../fragments/service-types/command-bar";
 import type { ServiceTypeFilters } from "../container/service-types/filter.hooks";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 
 interface ServiceTypesViewLayoutProps {
   children: ReactNode;
@@ -22,29 +23,32 @@ export default function ServiceTypesViewLayout({
 }: ServiceTypesViewLayoutProps) {
   return (
     <div className="flex gap-6 p-4">
-      <ServiceTypesCommandBar
-        filters={filters}
-        resetFilters={resetFilters}
-        updateFilter={updateFilter}
-      />
-
       <div className="flex-1  space-y-4">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="grid gap-2">
             <h1 className="text-3xl font-bold tracking-tight">
               Quản lý các loại dịch vụ
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Quản lý các loại dịch vụ và sản phẩm của khách sạn
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-muted-foreground">
-              Tổng số:{" "}
+            <p className="text-muted-foreground ">
+              Tổng{" "}
               <span className="font-semibold text-foreground">
                 {totalTypes}
               </span>{" "}
-              dịch vụ
+              loại dịch vụ
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
+              <Label htmlFor="active-filter" className="cursor-pointer ">
+                Tất cả loại dịch vụ
+              </Label>
+              <Switch
+                id="active-filter"
+                checked={filters.activeFilter === "active"}
+                onCheckedChange={(checked) =>
+                  updateFilter("activeFilter", checked ? "active" : "all")
+                }
+              />
             </div>
           </div>
         </div>

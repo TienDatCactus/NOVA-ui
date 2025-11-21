@@ -17,16 +17,9 @@ import type { RoomListItemDto } from "~/services/api/rooms/dto";
 interface RoomsDataTableProps {
   rooms: RoomListResponseDto;
   isLoading?: boolean;
-  onAddRoom: () => void;
-  onSelectionChange?: (selectedRows: RoomListItemDto[]) => void;
 }
 
-function RoomsDataTable({
-  rooms,
-  isLoading,
-  onAddRoom,
-  onSelectionChange,
-}: RoomsDataTableProps) {
+function RoomsDataTable({ rooms, isLoading }: RoomsDataTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -52,20 +45,13 @@ function RoomsDataTable({
             phòng đầu tiên.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onAddRoom}>Thêm phòng đầu tiên</Button>
-        </EmptyContent>
       </Empty>
     );
   }
 
   return (
     <div className="container mx-auto ">
-      <DataTable
-        columns={columns}
-        data={rooms}
-        onSelectionChange={onSelectionChange}
-      />
+      <DataTable columns={columns} data={rooms} />
     </div>
   );
 }

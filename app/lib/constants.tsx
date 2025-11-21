@@ -158,25 +158,8 @@ const SIDEBAR_NAV_MAIN: Array<{
       {
         title: "Bảng lương",
         url: "/dashboard/staff/payrolls",
-        title: "Ngày nghỉ",
-        url: FE_URL.dashboard.staff.holidays,
       },
     ],
-  },
-  {
-    title: "Tài khoản",
-    url: FE_URL.dashboard.users,
-    icon: Users,
-  },
-  {
-    title: "Nhân sự",
-    url: FE_URL.dashboard.staff.list,
-    icon: UserCog,
-  },
-  {
-    title: "Hóa đơn",
-    url: FE_URL.dashboard.invoices,
-    icon: ReceiptText,
   },
   {
     title: "Quản lý kho",
@@ -200,6 +183,17 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.stocks.adjustments,
       },
     ],
+  },
+  {
+    title: "Tài khoản",
+    url: FE_URL.dashboard.users,
+    icon: Users,
+  },
+
+  {
+    title: "Hóa đơn",
+    url: FE_URL.dashboard.invoices,
+    icon: ReceiptText,
   },
 ];
 

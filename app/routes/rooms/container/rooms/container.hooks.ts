@@ -6,16 +6,6 @@ import useRoomFilters from "./filter.hooks";
 import { useDeleteRoom } from "./mutation.hooks";
 
 function useRoomsContainer() {
-  const { filters, updateFilter, resetFilters, filterRooms } = useRoomFilters();
-  const {
-    data: rooms,
-    isPending,
-    refetch,
-  } = useRooms({
-    date: filters.date,
-    status: filters.status,
-    typeId: filters.typeId,
-  });
   const [selectedRooms, setSelectedRooms] = useState<RoomListItemDto[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { mutate: deleteRoom, isPending: isDeleting } = useDeleteRoom();

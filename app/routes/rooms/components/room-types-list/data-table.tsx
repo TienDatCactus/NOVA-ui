@@ -12,7 +12,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import React, { useState } from "react";
-import { Search } from "lucide-react";
+import { Download, Plus, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -24,36 +24,30 @@ import {
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { CreateRoomTypeDialog } from "../create-room-types.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 export function DataTable<TData extends RoomTypesListItemDto, TValue>({
   columns,
   data,
-  onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [expanded, setExpanded] = useState<any>();
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const table = useReactTable({
     data,
     columns,
-    onExpandedChange: setExpanded,
-    onRowSelectionChange: setRowSelection,
-    getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getRowCanExpand: () => true,
     getRowId: (row) => row.id,
     state: {
       sorting,
-      expanded,
-      rowSelection,
       columnFilters,
     },
     onSortingChange: setSorting,
@@ -65,7 +59,7 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên hạng phòng..."
@@ -75,10 +69,20 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
           }
           className="max-w-sm"
         />
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="success" size={"sm"}>
+            <Download className="h-4 w-4" />
+            Xuất CSV
+          </Button>
+          <Button onClick={() => setCreateDialogOpen(true)} size={"sm"}>
+            <Plus className="h-4 w-4" />
+            Thêm hạng phòng
+          </Button>
+        </div>
       </div>
       <div className="overflow-hidden rounded-md border">
-        <Table className="">
-          <TableHeader className="h-16">
+        <Table>
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -126,6 +130,10 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateRoomTypeDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+      />
     </div>
   );
 }

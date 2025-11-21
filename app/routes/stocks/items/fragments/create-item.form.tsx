@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type { CreateItemFormData } from "../create";
+import type { CreateItemFormData } from "../components/create-item.dialog";
 import { FormSchema } from "~/services/schema/forms.schema";
 
 interface CreateItemFormProps {

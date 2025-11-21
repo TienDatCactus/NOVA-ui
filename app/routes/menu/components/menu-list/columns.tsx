@@ -29,7 +29,7 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
       const hasImages = item.imageUrls && item.imageUrls.length > 0;
 
       return (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center ">
           {hasImages ? (
             <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted">
               <Image

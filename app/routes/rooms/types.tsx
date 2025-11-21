@@ -19,10 +19,7 @@ export default function RoomTypesPage() {
   const { data: roomTypes, isPending } = useRoomTypes({
     includeInactive,
   });
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [selectedRoomTypes, setSelectedRoomTypes] = useState<
-    RoomTypesListItemDto[]
-  >([]);
+
   const filteredRoomTypes = roomTypes ? filterRoomTypes(roomTypes) : [];
 
   return (
@@ -31,19 +28,8 @@ export default function RoomTypesPage() {
       onFilterChange={updateFilter}
       onResetFilters={resetFilters}
       totalRoomTypes={filteredRoomTypes?.length || 0}
-      onAddRoomType={() => setCreateDialogOpen(true)}
     >
-      <RoomTypesDataTable
-        roomTypes={filteredRoomTypes}
-        isLoading={isPending}
-        onAddRoomType={() => setCreateDialogOpen(true)}
-        onSelectionChange={setSelectedRoomTypes}
-      />
-
-      <CreateRoomTypeDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-      />
+      <RoomTypesDataTable roomTypes={filteredRoomTypes} isLoading={isPending} />
     </RoomTypesViewLayout>
   );
 }

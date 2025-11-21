@@ -22,11 +22,11 @@ export function RoomTypeActionsCell({ roomType }: RoomTypeActionsCellProps) {
   return (
     <>
       <Button
-        variant={"outline"}
+        variant={"link"}
         size="icon"
         onClick={() => setUpdateSheetOpen(true)}
       >
-        <Pencil />
+        Chỉnh sửa
       </Button>
       <UpdateRoomTypeSheet
         open={updateSheetOpen}
