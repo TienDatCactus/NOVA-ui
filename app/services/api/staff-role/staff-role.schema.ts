@@ -9,13 +9,7 @@ export const StaffRoleItemSchema = z.object({
 });
 
 // Staff Role List Response Schema
-export const StaffRoleListResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: z.array(StaffRoleItemSchema),
-  meta: z.any().optional(),
-});
+export const StaffRoleListResponseSchema = z.array(StaffRoleItemSchema);
 
 // Create Staff Role Request Schema
 export const CreateStaffRoleRequestSchema = z.object({
@@ -32,22 +26,7 @@ export const UpdateStaffRoleRequestSchema = z.object({
 });
 
 // Staff Role Detail Response Schema
-export const StaffRoleDetailResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: StaffRoleItemSchema,
-  meta: z.any().optional(),
-});
-
-// Delete Staff Role Response Schema
-export const DeleteStaffRoleResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: z.string().optional().nullable(),
-  meta: z.any().optional(),
-});
+export const StaffRoleDetailResponseSchema = StaffRoleItemSchema;
 
 export const StaffRoleSchema = {
   StaffRoleItemSchema,
@@ -55,5 +34,4 @@ export const StaffRoleSchema = {
   CreateStaffRoleRequestSchema,
   UpdateStaffRoleRequestSchema,
   StaffRoleDetailResponseSchema,
-  DeleteStaffRoleResponseSchema,
 };

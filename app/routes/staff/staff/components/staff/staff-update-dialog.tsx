@@ -11,7 +11,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,6 +19,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -27,57 +27,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { CreateStaffFormSchema } from "~/services/api/staff/staff.schema";
-import type { CreateStaffRequest } from "~/services/api/staff/dto";
+import { UpdateStaffFormSchema } from "~/services/api/staff/staff.schema";
+import type {
+  UpdateStaffRequest,
+  StaffDetailItem,
+} from "~/services/api/staff/dto";
 import { StaffService } from "~/services/api/staff";
 import { StaffRoleService } from "~/services/api/staff-role";
 import type { StaffRoleItem } from "~/services/api/staff-role/dto";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
 import type { z } from "zod";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { vi } from "date-fns/locale";
-import { ChevronDownIcon, Plus } from "lucide-react";
-import { Calendar } from "~/components/ui/calendar";
-import { cn } from "~/lib/utils";
-import StaffRoleCreateDialog from "./staff-role-create-dialog";
+import { parseISO, format } from "date-fns";
+import { Plus } from "lucide-react";
+import StaffRoleCreateDialog from "../staff-role/staff-role-create-dialog";
 
-interface StaffDialogProps {
+type UpdateStaffFormData = z.infer<typeof UpdateStaffFormSchema>;
+
+interface StaffUpdateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  staff: StaffDetailItem;
   onSuccess?: () => void;
 }
 
-type CreateStaffFormData = z.infer<typeof CreateStaffFormSchema>;
-
-export default function StaffDialog({
+export default function StaffUpdateDialog({
   open,
   onOpenChange,
+  staff,
   onSuccess,
-}: StaffDialogProps) {
+}: StaffUpdateDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [roles, setRoles] = useState<StaffRoleItem[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
 
-  const form = useForm<CreateStaffFormData>({
-    resolver: zodResolver(CreateStaffFormSchema),
+  const form = useForm<UpdateStaffFormData>({
+    resolver: zodResolver(UpdateStaffFormSchema),
     defaultValues: {
-      code: "",
-      fullName: "",
-      phoneNumber: "",
-      email: "",
-      gender: "",
-      dateOfBirth: undefined,
-      citizenId: "",
-      startDate: undefined,
-      note: "",
-      staffRoleId: "",
+      fullName: staff.fullName,
+      phoneNumber: staff.phoneNumber ?? "",
+      email: staff.email ?? "",
+      gender: staff.gender ?? "",
+      dateOfBirth: staff.dateOfBirth ? parseISO(staff.dateOfBirth) : undefined,
+      citizenId: staff.citizenId ?? "",
+      startDate: staff.startDate ? parseISO(staff.startDate) : undefined,
+      note: staff.note ?? "",
+      staffRoleId: staff.staffRoleId ?? "",
     },
   });
 
@@ -111,12 +107,30 @@ export default function StaffDialog({
     toast.success(`Đã chọn vai trò: ${roleName}`);
   };
 
-  const onSubmit = async (data: CreateStaffFormData) => {
+  // Update form values when staff changes
+  useEffect(() => {
+    if (open && staff) {
+      form.reset({
+        fullName: staff.fullName,
+        phoneNumber: staff.phoneNumber ?? "",
+        email: staff.email ?? "",
+        gender: staff.gender ?? "",
+        dateOfBirth: staff.dateOfBirth
+          ? parseISO(staff.dateOfBirth)
+          : undefined,
+        citizenId: staff.citizenId ?? "",
+        startDate: staff.startDate ? parseISO(staff.startDate) : undefined,
+        note: staff.note ?? "",
+        staffRoleId: staff.staffRoleId ?? "",
+      });
+    }
+  }, [open, staff, form]);
+
+  const onSubmit = async (data: UpdateStaffFormData) => {
     setIsSubmitting(true);
     try {
       // Convert Date objects to ISO strings for API
-      const payload: CreateStaffRequest = {
-        code: data.code,
+      const payload: UpdateStaffRequest = {
         fullName: data.fullName,
         phoneNumber: data.phoneNumber,
         email: data.email,
@@ -132,14 +146,14 @@ export default function StaffDialog({
         staffRoleId: data.staffRoleId,
       };
 
-      await StaffService.createStaff(payload);
-      toast.success("Tạo nhân sự thành công");
+      await StaffService.updateStaff(staff.id, payload);
+      toast.success("Cập nhật nhân sự thành công");
       onOpenChange(false);
       form.reset();
       onSuccess?.();
     } catch (error) {
-      console.error("Staff dialog error:", error);
-      toast.error("Không thể tạo nhân sự mới");
+      console.error("Staff update error:", error);
+      toast.error("Không thể cập nhật nhân sự");
     } finally {
       setIsSubmitting(false);
     }
@@ -149,38 +163,21 @@ export default function StaffDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Thêm nhân sự mới</DialogTitle>
+          <DialogTitle>Chỉnh sửa nhân sú</DialogTitle>
           <DialogDescription>
-            Điền đầy đủ thông tin để tạo nhân sự mới
+            Cập nhật thông tin nhân sự: {staff.fullName} ({staff.code})
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              {/* Code */}
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Mã nhân sự <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="NV001" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Full Name */}
               <FormField
                 control={form.control}
                 name="fullName"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-2">
                     <FormLabel>
                       Họ và tên <span className="text-destructive">*</span>
                     </FormLabel>
@@ -228,25 +225,6 @@ export default function StaffDialog({
                 )}
               />
 
-              {/* Citizen ID */}
-              <FormField
-                control={form.control}
-                name="citizenId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Số CCCD</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="001234567890"
-                        className="font-mono"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Gender */}
               <FormField
                 control={form.control}
@@ -281,37 +259,32 @@ export default function StaffDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ngày sinh</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: vi })
-                            ) : (
-                              <span>Chọn ngày sinh</span>
-                            )}
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          captionLayout="dropdown"
-                          fromYear={1950}
-                          toYear={2010}
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Chọn ngày sinh"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Citizen ID */}
+              <FormField
+                control={form.control}
+                name="citizenId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Số CCCD</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="001234567890"
+                        className="font-mono"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -324,37 +297,13 @@ export default function StaffDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ngày bắt đầu làm việc</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: vi })
-                            ) : (
-                              <span>Chọn ngày bắt đầu</span>
-                            )}
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          captionLayout="dropdown"
-                          fromYear={2000}
-                          toYear={new Date().getFullYear() + 1}
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Chọn ngày bắt đầu"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -440,7 +389,7 @@ export default function StaffDialog({
                 Hủy
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Đang xử lý..." : "Tạo mới"}
+                {isSubmitting ? "Đang xử lý..." : "Cập nhật"}
               </Button>
             </DialogFooter>
           </form>

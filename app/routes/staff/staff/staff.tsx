@@ -1,11 +1,11 @@
 import { useState } from "react";
 import StaffViewLayout from "./layouts/staff-view.layout";
 import StaffList from "./components/staff-list";
-import StaffCreateDialog from "./components/staff-create-dialog";
-import StaffUpdateDialog from "./components/staff-update-dialog";
-import StaffDetailDialog from "./components/staff-detail-dialog";
-import StaffDeleteDialog from "./components/staff-delete-dialog";
-import { useStaffContainer } from "./container/container.hooks";
+import StaffCreateDialog from "./components/staff/staff-create-dialog";
+import StaffUpdateDialog from "./components/staff/staff-update-dialog";
+import StaffDetailDialog from "./components/staff/staff-detail-dialog";
+import StaffDeleteDialog from "./components/staff/staff-delete-dialog";
+import { useStaffContainer } from "./container/staff/container.hooks";
 import type { StaffListItem, StaffDetailItem } from "~/services/api/staff/dto";
 import { toast } from "sonner";
 import { StaffService } from "~/services/api/staff";

@@ -24,12 +24,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import type { StaffFilters } from "../container/filter.hooks";
+import type { StaffFilters } from "../container/staff/filter.hooks";
 import { useStaffRoleList } from "../container/staff-roles/query.hooks";
 import { useState } from "react";
-import StaffRoleCreateDialog from "../components/staff-role-create-dialog";
-import StaffRoleUpdateDialog from "../components/staff-role-update-dialog";
-import StaffRoleDeleteDialog from "../components/staff-role-delete-dialog";
+import StaffRoleCreateDialog from "../components/staff-role/staff-role-create-dialog";
+import StaffRoleUpdateDialog from "../components/staff-role/staff-role-update-dialog";
+import StaffRoleDeleteDialog from "../components/staff-role/staff-role-delete-dialog";
 import type { StaffRoleItem } from "~/services/api/staff-role/dto";
 
 interface StaffFilterSidebarProps {

@@ -9,20 +9,18 @@ import type {
   DeleteStaffRoleResponse,
 } from "./dto";
 
-const {
-  StaffRoleListResponseSchema,
-  StaffRoleDetailResponseSchema,
-  DeleteStaffRoleResponseSchema,
-} = StaffRoleSchema;
+const { StaffRoleListResponseSchema, StaffRoleDetailResponseSchema } =
+  StaffRoleSchema;
 
 /**
  * GET /api/StaffRoles - Lấy danh sách vai trò nhân sự
  */
 async function getStaffRoleList(): Promise<StaffRoleListResponse> {
   try {
-    const response = await http.get(StaffRole.list);
-    return StaffRoleListResponseSchema.parse(response);
+    const resp = await http.get(StaffRole.list);
+    return StaffRoleListResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -34,8 +32,8 @@ async function createStaffRole(
   data: CreateStaffRoleRequest
 ): Promise<StaffRoleDetailResponse> {
   try {
-    const response = await http.post(StaffRole.create, data);
-    return StaffRoleDetailResponseSchema.parse(response);
+    const resp = await http.post(StaffRole.create, data);
+    return StaffRoleDetailResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -46,8 +44,8 @@ async function createStaffRole(
  */
 async function getStaffRoleById(id: string): Promise<StaffRoleDetailResponse> {
   try {
-    const response = await http.get(StaffRole.detail(id));
-    return StaffRoleDetailResponseSchema.parse(response);
+    const resp = await http.get(StaffRole.detail(id));
+    return StaffRoleDetailResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -61,8 +59,8 @@ async function updateStaffRole(
   data: UpdateStaffRoleRequest
 ): Promise<StaffRoleDetailResponse> {
   try {
-    const response = await http.put(StaffRole.update(id), data);
-    return StaffRoleDetailResponseSchema.parse(response);
+    const resp = await http.put(StaffRole.update(id), data);
+    return StaffRoleDetailResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -73,8 +71,8 @@ async function updateStaffRole(
  */
 async function deleteStaffRole(id: string): Promise<DeleteStaffRoleResponse> {
   try {
-    const response = await http.delete(StaffRole.delete(id));
-    return DeleteStaffRoleResponseSchema.parse(response);
+    const resp = await http.delete(StaffRole.delete(id));
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useStaffFilters } from "./filter.hooks";
-import { useStaffList } from "./query.hooks";
+import { useStaffList } from "../query.hooks";
 
 export function useStaffContainer() {
   const {

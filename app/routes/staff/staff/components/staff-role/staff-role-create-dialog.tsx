@@ -65,10 +65,6 @@ export default function StaffRoleCreateDialog({
       toast.success(`Đã tạo vai trò ${data.name}`);
       form.reset();
       onOpenChange(false);
-
-      if (onSuccess && response.data) {
-        onSuccess(response.data.id, response.data.name);
-      }
     } catch (error) {
       console.error("Create staff role error:", error);
       toast.error("Không thể tạo vai trò. Vui lòng thử lại.");

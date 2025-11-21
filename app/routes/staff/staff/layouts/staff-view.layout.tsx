@@ -1,8 +1,24 @@
 import type { ReactNode } from "react";
-import StaffFilterSidebar from "../fragments/filter.sidebar";
-import type { StaffFilters } from "../container/filter.hooks";
 import { Button } from "~/components/ui/button";
-import { UserPlus, FileText } from "lucide-react";
+import type { StaffFilters } from "../container/staff/filter.hooks";
+import { useStaffRoleList } from "../container/staff-roles/query.hooks";
+import StaffFilterSidebar from "../fragments/filter.sidebar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+
+import { ChevronsUpDown, Check } from "lucide-react";
+import { cn } from "~/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 
 interface StaffViewLayoutProps {
   children: ReactNode;
@@ -22,8 +38,8 @@ export default function StaffViewLayout({
   onFilterChange,
   onResetFilters,
   totalStaffs,
-  onCreateStaff,
 }: StaffViewLayoutProps) {
+  const { data: staffRoles, refetch } = useStaffRoleList();
   return (
     <div className="flex gap-6 h-[calc(100vh-4rem)]">
       <div className="w-72 flex-shrink-0">
@@ -46,12 +62,46 @@ export default function StaffViewLayout({
             </p>
           </div>
           <div className="flex items-center gap-2 pr-5">
-            {onCreateStaff && (
-              <Button onClick={onCreateStaff} className="gap-2">
-                <UserPlus className="h-4 w-4" />
-                Thêm nhân sự
-              </Button>
-            )}
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[200px] justify-between">
+                  {value
+                    ? frameworks.find((role) => role.value === value)?.label
+                    : "Select role..."}
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search role..." className="h-9" />
+                  <CommandList>
+                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandGroup>
+                      {staffRoles?.map((role) => (
+                        <CommandItem
+                          key={role.id}
+                          value={role.id}
+                          onSelect={(currentValue) => {
+                            setValue(
+                              currentValue === value ? "" : currentValue
+                            );
+                            setOpen(false);
+                          }}
+                        >
+                          {role.label}
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              value === role.value ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         <div className="flex-1 overflow-auto">{children}</div>
