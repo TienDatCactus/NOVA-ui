@@ -25,7 +25,7 @@ const UserDetailResponseSchema = UserItemSchema;
 
 // POST /api/Users - Create request body
 const CreateUserSchema = z.object({
-  userName: z.string().min(1, "Tên đăng nhập không được để trống"),
+  userName: z.string().min(1, "Tên đăng nhập không được để trống").trim(),
   email: z
     .string()
     .min(1, "Email không được để trống")
@@ -34,7 +34,8 @@ const CreateUserSchema = z.object({
     .string()
     .min(1, "Họ tên không được để trống")
     .max(32, "Họ tên không được quá 32 ký tự")
-    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ tên không được chứa ký tự đặc biệt hoặc số"),
+    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ tên không được chứa ký tự đặc biệt hoặc số")
+    .trim(),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
   phoneNumber: z
     .string()
@@ -62,7 +63,8 @@ const UpdateUserSchema = z.object({
     .string()
     .min(1, "Họ tên không được để trống")
     .max(32, "Họ tên không được quá 32 ký tự")
-    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ tên không được chứa ký tự đặc biệt hoặc số"),
+    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ tên không được chứa ký tự đặc biệt hoặc số")
+    .trim(),
   email: z
     .string()
     .min(1, "Email không được để trống")

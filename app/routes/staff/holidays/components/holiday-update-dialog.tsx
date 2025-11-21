@@ -37,13 +37,18 @@ import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "~/lib/utils";
 import type { HolidayListItem } from "~/services/api/holiday/dto";
+import {
+  formatNumber,
+  parseFormattedNumber,
+  handleNumberInputChange,
+} from "~/lib/format-number";
 
 const UpdateHolidayFormSchema = z.object({
   name: z.string().min(1, "Tên ngày nghỉ là bắt buộc"),
   startDate: z.date({ message: "Ngày bắt đầu là bắt buộc" }),
   endDate: z.date({ message: "Ngày kết thúc là bắt buộc" }),
   isPublicHoliday: z.boolean(),
-  bonusAmount: z.number().min(0, "Số tiền thưởng phải >= 0"),
+  bonusAmount: z.string().min(1, "Số tiền thưởng là bắt buộc"),
 });
 
 type UpdateHolidayForm = z.infer<typeof UpdateHolidayFormSchema>;
@@ -70,7 +75,7 @@ export default function UpdateHolidayDialog({
       startDate: undefined,
       endDate: undefined,
       isPublicHoliday: false,
-      bonusAmount: 0,
+      bonusAmount: "",
     },
   });
 
@@ -82,7 +87,7 @@ export default function UpdateHolidayDialog({
         startDate: parseISO(holiday.startDate),
         endDate: parseISO(holiday.endDate),
         isPublicHoliday: holiday.isPublicHoliday,
-        bonusAmount: holiday.bonusAmount,
+        bonusAmount: formatNumber(holiday.bonusAmount),
       });
     }
   }, [holiday, form]);
@@ -98,7 +103,7 @@ export default function UpdateHolidayDialog({
         endDate: format(data.endDate, "yyyy-MM-dd"),
         isPublicHoliday: data.isPublicHoliday,
         bonusMultiplier: undefined,
-        bonusAmount: data.bonusAmount,
+        bonusAmount: parseFormattedNumber(data.bonusAmount),
       };
       await HolidayService.updateHoliday(holiday.id, payload);
       toast.success("Cập nhật ngày nghỉ thành công");
@@ -248,12 +253,10 @@ export default function UpdateHolidayDialog({
                     </FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
+                        type="text"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value) || 0)
-                        }
+                        value={field.value}
+                        onChange={(e) => handleNumberInputChange(e, field.onChange)}
                       />
                     </FormControl>
                     <FormMessage />

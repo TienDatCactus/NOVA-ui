@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import type { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,10 @@ import { TimePicker24h } from "~/components/ui/time-picker-24h";
 import { Loader2, Clock } from "lucide-react";
 import { useState } from "react";
 import { WorkShiftService } from "~/services/api/work-shift";
+import { WorkShiftSchema } from "~/services/api/work-shift/work-shift.schema";
 import { toast } from "sonner";
+
+const { CreateWorkShiftFormSchema } = WorkShiftSchema;
 
 // Helper function to ensure 24h format (HH:mm:ss)
 function formatTimeTo24h(time: string): string {
@@ -36,13 +39,6 @@ function formatTimeTo24h(time: string): string {
   if (/^\d{2}:\d{2}$/.test(time)) return `${time}:00`;
   return time;
 }
-
-const CreateWorkShiftFormSchema = z.object({
-  code: z.string().min(1, "Mã ca làm việc là bắt buộc"),
-  name: z.string().min(1, "Tên ca làm việc là bắt buộc"),
-  startTime: z.string().min(1, "Giờ bắt đầu là bắt buộc"),
-  endTime: z.string().min(1, "Giờ kết thúc là bắt buộc"),
-});
 
 type CreateWorkShiftForm = z.infer<typeof CreateWorkShiftFormSchema>;
 
@@ -62,7 +58,6 @@ export default function CreateWorkShiftDialog({
   const form = useForm<CreateWorkShiftForm>({
     resolver: zodResolver(CreateWorkShiftFormSchema),
     defaultValues: {
-      code: "",
       name: "",
       startTime: "",
       endTime: "",
@@ -114,26 +109,6 @@ export default function CreateWorkShiftDialog({
             className="space-y-6 mt-4"
           >
             <div className="space-y-4">
-              {/* Code */}
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-semibold">
-                      Mã ca làm việc <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="VD: SANG, CHIEU, TOI..." {...field} />
-                    </FormControl>
-                    <FormDescription className="text-xs">
-                      Mã định danh ca làm việc
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Name */}
               <FormField
                 control={form.control}

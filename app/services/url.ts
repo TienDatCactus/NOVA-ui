@@ -236,6 +236,29 @@ const Discount = {
   override: "discount/override",
 };
 
+const StaffPayroll = {
+  grid: "StaffPayrolls/grid",
+  generate: "StaffPayrolls/generate",
+  detail: (id: string) => `StaffPayrolls/${id}`,
+  update: (id: string) => `StaffPayrolls/${id}`,
+  generateSingle: (staffId: string) =>
+    `StaffPayrolls/staff/${staffId}/generate`,
+  applyUnusedLeave: (id: string) => `StaffPayrolls/${id}/apply-unused-leave`,
+  lock: (id: string) => `StaffPayrolls/${id}/lock`,
+  unlock: (id: string) => `StaffPayrolls/${id}/unlock`,
+  getComponents: (id: string) => `StaffPayrolls/${id}/components`,
+  addComponent: (id: string) => `StaffPayrolls/${id}/components`,
+  updateComponent: (componentId: string) =>
+    `StaffPayrolls/components/${componentId}`,
+  deleteComponent: (componentId: string) =>
+    `StaffPayrolls/components/${componentId}`,
+  exportMonthly: "StaffPayrolls/export/monthly",
+  exportPayslip: (id: string) => `StaffPayrolls/${id}/export-payslip`,
+  refreshDays: "StaffPayrolls/refresh-days",
+  refreshSinglePayroll: (id: string) => `StaffPayrolls/${id}/refresh-days`,
+};
+
+
 const Translation = {
   translate: "Translation/translate",
   detect: (text: string) => `Translation/detect-language?text=${text}`,
@@ -304,6 +327,7 @@ export {
   StaffAttendance,
   Chat,
   Discount,
+  StaffPayroll,
   Translation,
   Stock,
 };

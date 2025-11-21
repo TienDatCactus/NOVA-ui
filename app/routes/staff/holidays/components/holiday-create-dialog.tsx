@@ -35,13 +35,18 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "~/lib/utils";
+import {
+  formatNumber,
+  parseFormattedNumber,
+  handleNumberInputChange,
+} from "~/lib/format-number";
 
 const CreateHolidayFormSchema = z.object({
   name: z.string().min(1, "Tên ngày nghỉ là bắt buộc"),
   startDate: z.date({ message: "Ngày bắt đầu là bắt buộc" }),
   endDate: z.date({ message: "Ngày kết thúc là bắt buộc" }),
   isPublicHoliday: z.boolean(),
-  bonusAmount: z.number().min(0, "Số tiền thưởng phải >= 0"),
+  bonusAmount: z.string().min(1, "Số tiền thưởng là bắt buộc"),
 });
 
 type CreateHolidayForm = z.infer<typeof CreateHolidayFormSchema>;
@@ -66,7 +71,7 @@ export default function CreateHolidayDialog({
       startDate: undefined,
       endDate: undefined,
       isPublicHoliday: false,
-      bonusAmount: 0,
+      bonusAmount: "",
     },
   });
 
@@ -79,7 +84,7 @@ export default function CreateHolidayDialog({
         startDate: format(data.startDate, "yyyy-MM-dd"),
         endDate: format(data.endDate, "yyyy-MM-dd"),
         isPublicHoliday: data.isPublicHoliday,
-        bonusAmount: data.bonusAmount,
+        bonusAmount: parseFormattedNumber(data.bonusAmount),
       };
       await HolidayService.createHoliday(payload);
       toast.success("Tạo ngày nghỉ thành công");
@@ -242,16 +247,14 @@ export default function CreateHolidayDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-semibold">
-                      Tiền thưởng 
+                      Tiền thưởng <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
+                        type="text"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value) || 0)
-                        }
+                        value={field.value}
+                        onChange={(e) => handleNumberInputChange(e, field.onChange)}
                       />
                     </FormControl>
                     <FormDescription className="text-xs">

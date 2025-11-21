@@ -224,7 +224,7 @@ export default function UpdateScheduleDialog({
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium">{shift.name}</span>
                                   <span className="text-xs text-muted-foreground">
-                                    {shift.startTime} - {shift.endTime}
+                                    {shift.startTime?.slice(0, 5)} - {shift.endTime?.slice(0, 5)}
                                   </span>
                                 </div>
                               </SelectItem>
