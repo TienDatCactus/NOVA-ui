@@ -42,8 +42,9 @@ const DASHBOARD = {
   units: "/dashboard/units",
   stocks: {
     items: "/dashboard/stocks/items",
+    itemCategories: "/dashboard/stocks/item-categories",
     purchaseRequests: "/dashboard/stocks/purchase-requests",
-    adjustments: "/dashboard/stocks/adjustments",
+    adjustments: "/dashboard/stocks/stock-adjustments",
   },
   settings: "/settings",
   help: "/help",

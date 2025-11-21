@@ -182,6 +182,10 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.stocks.items,
       },
       {
+        title: "Danh mục hàng",
+        url: FE_URL.dashboard.stocks.itemCategories,
+      },
+      {
         title: "Yêu cầu mua hàng",
         url: FE_URL.dashboard.stocks.purchaseRequests,
       },

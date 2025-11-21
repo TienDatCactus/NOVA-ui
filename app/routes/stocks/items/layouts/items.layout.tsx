@@ -1,12 +1,7 @@
-import { Plus } from "lucide-react";
-import React, { useState } from "react";
-import { Button } from "~/components/ui/button";
-import { ButtonGroup } from "~/components/ui/button-group";
-import { Select } from "~/components/ui/select";
-import { Switch } from "~/components/ui/switch";
+import React from "react";
 import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import type { ItemsFilter } from "../container/filter.hooks";
-import CreateItemDialog from "../components/create-item.dialog";
 interface ItemsLayoutProps {
   children: React.ReactNode;
   filters: ItemsFilter;
