@@ -1,6 +1,7 @@
-import { HandPlatter, Loader2, Plus } from "lucide-react";
+import { format } from "date-fns";
+import { HandPlatter, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Button } from "~/components/ui/button";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Empty,
   EmptyDescription,
@@ -9,17 +10,11 @@ import {
   EmptyTitle,
 } from "~/components/ui/empty";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import type { ServiceOrderDetailDto } from "~/services/api/orders/dto";
+import type { Route } from "./+types/service-orders";
 import ServiceOrderCard from "./components/service-order-list/service-order-card";
 import StatusFilter from "./components/service-order-list/status-filter";
-import type { ServiceOrderDetailDto } from "~/services/api/orders/dto";
-import { Link, useSearchParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
-import { OrderService } from "~/services/api/orders";
-import type { Route } from "./+types/service-orders";
 import { useServiceOrderList } from "./container/service-order/query.hooks";
-import { DatePicker } from "~/components/ui/date-picker";
-import { format } from "date-fns";
-import STORAGE, { getStorage } from "~/lib/storage";
 
 type ServiceOrderStatus = ServiceOrderDetailDto["status"] | "All";
 

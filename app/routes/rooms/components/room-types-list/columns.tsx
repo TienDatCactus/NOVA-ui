@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import {
   Dialog,
   DialogContent,
@@ -41,13 +42,17 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
 
   {
     accessorKey: "index",
-    header: "STT",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STT" />
+    ),
     cell: ({ row }) => <div className="w-12">{row.index + 1}</div>,
   },
 
   {
     accessorKey: "code",
-    header: "Mã hạng phòng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mã hạng phòng" />
+    ),
     cell: ({ row }) => {
       const [open, setOpen] = useState(false);
 
@@ -80,12 +85,16 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   },
   {
     accessorKey: "name",
-    header: "Tên hạng phòng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tên hạng phòng" />
+    ),
     cell: ({ row }) => <div>{row.original.name}</div>,
   },
   {
     accessorKey: "baseRate",
-    header: "Giá cơ bản",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Giá cơ bản" />
+    ),
     cell: ({ row }) => {
       const baseRate = row.original.baseRate as number;
       const { vndFormatted } = formatMoney(baseRate);
@@ -94,7 +103,9 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   },
   {
     accessorKey: "active",
-    header: "Trạng thái",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
     cell: ({ row }) => {
       const active = row.original.active;
       return (
@@ -108,7 +119,9 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   },
   {
     accessorKey: "roomsCount",
-    header: "Số lượng phòng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Số lượng phòng" />
+    ),
     cell: ({ row }) => {
       return <Badge variant="outline">{row.original.roomsCount} phòng</Badge>;
     },
@@ -117,5 +130,7 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
     id: "actions",
     header: "Thao tác",
     cell: ({ row }) => <RoomTypeActionsCell roomType={row.original} />,
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

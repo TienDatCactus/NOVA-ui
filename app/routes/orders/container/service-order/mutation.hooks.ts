@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { OrderService } from "~/services/api/orders";
 import type {
   CreateServiceOrderRequestDto,
+  ServiceOrderDetailDto,
   ServiceOrderPayNowRequestDto,
   SetScheduledServiceOrderRequestDto,
   UpdateServiceOrderRequestDto,
@@ -17,9 +18,11 @@ export function useCreateServiceOrder() {
   return useMutation({
     mutationFn: (data: CreateServiceOrderRequestDto) =>
       OrderService.createServiceOrder(data),
-    onSuccess: () => {
+    onSuccess: (_, data) => {
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
-      toast.success("Tạo service order thành công");
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", data.bookingId],
+      });
     },
   });
 }
@@ -38,8 +41,11 @@ export function useUpdateServiceOrder() {
       orderId: string;
       data: UpdateServiceOrderRequestDto;
     }) => OrderService.updateServiceOrder(orderId, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", variables.orderId],
+      });
     },
   });
 }
@@ -52,7 +58,16 @@ export function useCompleteServiceOrder() {
 
   return useMutation({
     mutationFn: (orderId: string) => OrderService.completeServiceOrder(orderId),
-    onSuccess: () => {
+    onSuccess: (_, orderId) => {
+      // Optimistically update detail status for immediate UI feedback
+      queryClient.setQueryData(
+        ["service-order-detail", orderId],
+        (prev: ServiceOrderDetailDto | undefined) =>
+          prev ? { ...prev, status: "Completed" } : prev
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", orderId],
+      });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
@@ -66,7 +81,16 @@ export function useCancelServiceOrder() {
 
   return useMutation({
     mutationFn: (orderId: string) => OrderService.cancelServiceOrder(orderId),
-    onSuccess: () => {
+    onSuccess: (_, orderId) => {
+      // Optimistically update detail status for immediate UI feedback
+      queryClient.setQueryData(
+        ["service-order-detail", orderId],
+        (prev: ServiceOrderDetailDto | undefined) =>
+          prev ? { ...prev, status: "Cancelled" } : prev
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", orderId],
+      });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
@@ -86,7 +110,10 @@ export function usePayServiceOrderNow() {
       orderId: string;
       data: ServiceOrderPayNowRequestDto;
     }) => OrderService.payServiceOrderNow(orderId, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", variables.orderId],
+      });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });
@@ -99,14 +126,29 @@ export function useUpdateServiceOrderSchedule() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       orderId,
-      data,
+      scheduledAt,
     }: {
       orderId: string;
-      data: SetScheduledServiceOrderRequestDto;
-    }) => OrderService.setScheduledServiceOrder(orderId, data),
-    onSuccess: () => {
+      scheduledAt: Date;
+    }) => {
+      return await OrderService.setScheduledServiceOrder(orderId, {
+        scheduledAt: scheduledAt.toISOString(),
+      });
+    },
+    onSuccess: (_, variables) => {
+      // Optimistically update scheduledAt in detail cache
+      queryClient.setQueryData(
+        ["service-order-detail", variables.orderId],
+        (prev: ServiceOrderDetailDto | undefined) =>
+          prev
+            ? { ...prev, scheduledAt: variables.scheduledAt.toISOString() }
+            : prev
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail", variables.orderId],
+      });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
     },
   });

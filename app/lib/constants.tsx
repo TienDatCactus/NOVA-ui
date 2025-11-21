@@ -11,6 +11,7 @@ import {
   ListOrdered,
   LogIn,
   MessageSquareDot,
+  Package,
   PackageSearch,
   Plus,
   ReceiptText,
@@ -22,16 +23,19 @@ import {
   UserCog,
   UtensilsCrossed,
 } from "lucide-react";
+import FE_URL from "~/lib/fe-url";
 
-const SERVICE_CATEGORIES = ["Dịch vụ", "Thức ăn", "Đồ uống"];
-
-const ROOM_COUNT = 13;
-const DAYS_COUNT = 7;
-const SUBS_PER_DAY = 2;
-const headerRows = 1;
-const rowHeight = 64;
-const firstColWidth = 220;
-const totalSubCols = DAYS_COUNT * SUBS_PER_DAY;
+// Translation supported languages
+const SUPPORTED_LANGUAGES = [
+  { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "ja", label: "日本語", flag: "🇯🇵" },
+  { code: "ko", label: "한국어", flag: "🇰🇷" },
+  { code: "zh", label: "中文", flag: "🇨🇳" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "es", label: "Español", flag: "🇪🇸" },
+];
 
 const CHECK_IN_TIME = "13:00 PM";
 const CHECK_OUT_TIME = "11:00 AM";
@@ -48,100 +52,100 @@ const SIDEBAR_NAV_MAIN: Array<{
 }> = [
   {
     title: "Đặt phòng",
-    url: "/dashboard/bookings",
+    url: FE_URL.dashboard.bookings.list,
     icon: HousePlus,
     items: [
       {
         title: "Báo cáo",
-        url: "/dashboard/bookings",
+        url: FE_URL.dashboard.bookings.reports,
       },
       {
         title: "Kiểm tra phòng trống",
-        url: "/dashboard/bookings/grid",
+        url: FE_URL.dashboard.bookings.grid,
       },
       {
         title: "Danh sách đặt phòng",
-        url: "/dashboard/bookings/list",
+        url: FE_URL.dashboard.bookings.list,
       },
       {
         title: "Đặt phòng mới",
-        url: "/dashboard/bookings/new-booking",
+        url: FE_URL.dashboard.bookings.newBooking,
       },
     ],
   },
   {
     title: "Buồng phòng",
-    url: "/dashboard/rooms",
+    url: FE_URL.dashboard.rooms.list,
     icon: Bath,
     items: [
       {
         title: "Danh sách phòng",
-        url: "/dashboard/rooms",
+        url: FE_URL.dashboard.rooms.list,
       },
       {
         title: "Loại phòng",
-        url: "/dashboard/rooms/types",
+        url: FE_URL.dashboard.rooms.types,
       },
     ],
   },
   {
     title: "Dịch vụ",
-    url: "/dashboard/services",
+    url: FE_URL.dashboard.services.list,
     icon: Utensils,
     items: [
       {
         title: "Danh sách dịch vụ",
-        url: "/dashboard/services",
+        url: FE_URL.dashboard.services.list,
       },
       {
         title: "Loại dịch vụ",
-        url: "/dashboard/services/types",
+        url: FE_URL.dashboard.services.types,
       },
       {
         title: "Thực đơn",
-        url: "/dashboard/services/menu",
+        url: FE_URL.dashboard.services.menu,
       },
       {
         title: "Danh mục món ăn",
-        url: "/dashboard/services/menu-categories",
+        url: FE_URL.dashboard.services.menuCategories,
       },
     ],
   },
   {
     title: "Đơn hàng",
-    url: "/dashboard/orders",
+    url: FE_URL.dashboard.orders.menuOrders,
     icon: ListOrdered,
     items: [
       {
         title: "Đơn món ăn",
-        url: "/dashboard/orders/menu-orders",
+        url: FE_URL.dashboard.orders.menuOrders,
       },
       {
         title: "Đơn dịch vụ",
-        url: "/dashboard/orders/service-orders",
+        url: FE_URL.dashboard.orders.serviceOrders,
       },
       {
         title: "POS Món ăn",
-        url: "/dashboard/menu-pos",
+        url: FE_URL.dashboard.orders.menuPos,
       },
       {
         title: "POS Dịch vụ",
-        url: "/dashboard/service-pos",
+        url: FE_URL.dashboard.orders.servicePos,
       },
     ],
   },
   {
     title: "Nhân viên",
-    url: "/dashboard/staff",
+    url: FE_URL.dashboard.staff.list,
     icon: UserCog,
     items: [
       {
         title: "Nhân sự",
-        url: "/dashboard/staff",
+        url: FE_URL.dashboard.staff.list,
       },
       {
         title: "Ca làm việc",
-        url: "/dashboard/staff/work-shifts",
+        url: FE_URL.dashboard.staff.workShifts,
       },
       {
         title: "Ngày nghỉ",
@@ -149,23 +153,53 @@ const SIDEBAR_NAV_MAIN: Array<{
       },
       {
         title: "Lịch làm việc",
-        url: "/dashboard/staff/schedules",
+        url: FE_URL.dashboard.staff.schedules,
       },
       {
         title: "Bảng lương",
         url: "/dashboard/staff/payrolls",
+        title: "Ngày nghỉ",
+        url: FE_URL.dashboard.staff.holidays,
       },
     ],
   },
   {
     title: "Tài khoản",
-    url: "/dashboard/users",
+    url: FE_URL.dashboard.users,
     icon: Users,
   },
   {
+    title: "Nhân sự",
+    url: FE_URL.dashboard.staff.list,
+    icon: UserCog,
+  },
+  {
     title: "Hóa đơn",
-    url: "/dashboard/invoices",
+    url: FE_URL.dashboard.invoices,
     icon: ReceiptText,
+  },
+  {
+    title: "Quản lý kho",
+    url: FE_URL.dashboard.stocks.items,
+    icon: Package,
+    items: [
+      {
+        title: "Hàng hóa",
+        url: FE_URL.dashboard.stocks.items,
+      },
+      {
+        title: "Danh mục hàng",
+        url: FE_URL.dashboard.stocks.itemCategories,
+      },
+      {
+        title: "Yêu cầu mua hàng",
+        url: FE_URL.dashboard.stocks.purchaseRequests,
+      },
+      {
+        title: "Điều chỉnh kho",
+        url: FE_URL.dashboard.stocks.adjustments,
+      },
+    ],
   },
 ];
 
@@ -176,22 +210,22 @@ const SIDEBAR_PROJECTS: Array<{
 }> = [
   {
     name: "Chat",
-    url: "/dashboard/chat",
+    url: FE_URL.dashboard.chat,
     icon: MessageSquareDot,
   },
   {
     name: "Đơn vị tính",
-    url: "/dashboard/units",
+    url: FE_URL.dashboard.units,
     icon: PackageSearch,
   },
   {
     name: "Cài đặt",
-    url: "/settings",
+    url: FE_URL.dashboard.settings,
     icon: Settings,
   },
   {
     name: "Trợ giúp",
-    url: "/help",
+    url: FE_URL.dashboard.help,
     icon: HelpCircle,
   },
 ];
@@ -210,73 +244,94 @@ const COMMAND_BAR_ROUTES: Array<{
   icon: LucideIcon;
   href: string;
 }> = [
-  // Auth
-
-  // Bookings
-  { name: "Báo cáo đặt phòng", icon: BarChart3, href: "/dashboard/bookings" },
-  { name: "Sơ đồ phòng", icon: Grid3x3, href: "/dashboard/bookings/grid" },
-  { name: "Danh sách đặt phòng", icon: List, href: "/dashboard/bookings/list" },
+  {
+    name: "Báo cáo đặt phòng",
+    icon: BarChart3,
+    href: FE_URL.dashboard.bookings.reports,
+  },
+  { name: "Sơ đồ phòng", icon: Grid3x3, href: FE_URL.dashboard.bookings.grid },
+  {
+    name: "Danh sách đặt phòng",
+    icon: List,
+    href: FE_URL.dashboard.bookings.list,
+  },
   {
     name: "Hóa đơn đặt phòng",
     icon: FileText,
-    href: "/dashboard/bookings/invoices",
+    href: FE_URL.dashboard.bookings.invoices,
   },
   {
     name: "Đặt phòng mới",
     icon: Plus,
-    href: "/dashboard/bookings/new-booking",
+    href: FE_URL.dashboard.bookings.newBooking,
   },
 
   // Rooms
-  { name: "Danh sách phòng", icon: Bath, href: "/dashboard/rooms" },
-  { name: "Loại phòng", icon: Tag, href: "/dashboard/rooms/types" },
+  { name: "Danh sách phòng", icon: Bath, href: FE_URL.dashboard.rooms.list },
+  { name: "Loại phòng", icon: Tag, href: FE_URL.dashboard.rooms.types },
 
   // Services
-  { name: "Danh sách dịch vụ", icon: Utensils, href: "/dashboard/services" },
-  { name: "Loại dịch vụ", icon: Tag, href: "/dashboard/services/types" },
-  { name: "Thực đơn", icon: UtensilsCrossed, href: "/dashboard/services/menu" },
+  {
+    name: "Danh sách dịch vụ",
+    icon: Utensils,
+    href: FE_URL.dashboard.services.list,
+  },
+  { name: "Loại dịch vụ", icon: Tag, href: FE_URL.dashboard.services.types },
+  {
+    name: "Thực đơn",
+    icon: UtensilsCrossed,
+    href: FE_URL.dashboard.services.menu,
+  },
   {
     name: "Danh mục món ăn",
     icon: List,
-    href: "/dashboard/services/menu-categories",
+    href: FE_URL.dashboard.services.menuCategories,
   },
 
   // Orders
   {
     name: "Đơn món ăn",
     icon: ListOrdered,
-    href: "/dashboard/orders/menu-orders",
+    href: FE_URL.dashboard.orders.menuOrders,
   },
   {
     name: "Đơn dịch vụ",
     icon: ListOrdered,
-    href: "/dashboard/orders/service-orders",
+    href: FE_URL.dashboard.orders.serviceOrders,
   },
-  { name: "POS Món ăn", icon: ShoppingCart, href: "/dashboard/menu-pos" },
-  { name: "POS Dịch vụ", icon: ShoppingCart, href: "/dashboard/service-pos" },
+  {
+    name: "POS Món ăn",
+    icon: ShoppingCart,
+    href: FE_URL.dashboard.orders.menuPos,
+  },
+  {
+    name: "POS Dịch vụ",
+    icon: ShoppingCart,
+    href: FE_URL.dashboard.orders.servicePos,
+  },
 
   // Others
-  { name: "Tài khoản", icon: Users, href: "/dashboard/users" },
-  { name: "Hóa đơn", icon: ReceiptText, href: "/dashboard/invoices" },
-  { name: "Chat", icon: MessageSquareDot, href: "/dashboard/chat" },
-  { name: "Đơn vị tính", icon: PackageSearch, href: "/dashboard/units" },
-  { name: "Cài đặt", icon: Settings, href: "/settings" },
-  { name: "Trợ giúp", icon: HelpCircle, href: "/help" },
+  { name: "Tài khoản", icon: Users, href: FE_URL.dashboard.users },
+  { name: "Hóa đơn", icon: ReceiptText, href: FE_URL.dashboard.invoices },
+  { name: "Chat", icon: MessageSquareDot, href: FE_URL.dashboard.chat },
+  { name: "Đơn vị tính", icon: PackageSearch, href: FE_URL.dashboard.units },
+  { name: "Cài đặt", icon: Settings, href: FE_URL.dashboard.settings },
+  { name: "Trợ giúp", icon: HelpCircle, href: FE_URL.dashboard.help },
 ];
 
+const CUSTOMER_NAVS = [
+  { name: "Inbox", icon: Settings, href: FE_URL.customer.inbox },
+  { name: "Services & F&B", icon: Settings, href: FE_URL.customer.inbox },
+  { name: "Guidelines", icon: Settings, href: FE_URL.customer.inbox },
+  { name: "Map", icon: Settings, href: FE_URL.customer.map },
+];
 export {
   CHECK_IN_TIME,
   CHECK_OUT_TIME,
   COMMAND_BAR_ROUTES,
-  DAYS_COUNT,
-  firstColWidth,
-  headerRows,
-  ROOM_COUNT,
-  rowHeight,
-  SERVICE_CATEGORIES,
   SIDEBAR_NAV_MAIN,
   SIDEBAR_PROJECTS,
   SIDEBAR_TEAMS,
-  SUBS_PER_DAY,
-  totalSubCols,
+  SUPPORTED_LANGUAGES,
+  CUSTOMER_NAVS,
 };

@@ -3,11 +3,7 @@ import InvoicesDataTable from "./components/invoices-list";
 import useInvoicesContainer from "./container/invoices/container.hooks";
 import InvoicesViewLayout from "./layouts/invoices-view.layout";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 

@@ -34,9 +34,9 @@ import {
 import PaymentOrderSheet from "../payment-order.sheet";
 import AddMenuItemDialog from "./add-menu-item.dialog";
 import PrintPreviewDialog from "./print-preview.dialog";
-import UpdateScheduleDialog from "./update-schedule.dialog";
 import { toast } from "sonner";
 import { InvoiceDetailDialog } from "~/routes/invoices/components/invoice-detail/invoice-detail.dialog";
+import UpdateScheduleDialog from "../update-schedule.dialog";
 
 const { OrderPayNowRequestSchema } = OrderSchema;
 
@@ -229,10 +229,9 @@ export default function OrderActions({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Gửi đơn xuống bếp/bar?</AlertDialogTitle>
+                <AlertDialogTitle>Hoàn tất đơn hàng</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Đơn hàng sẽ được chuyển sang trạng thái Hoàn tất và gửi xuống
-                  bếp.
+                  Đơn hàng sẽ được chuyển sang trạng thái Hoàn tất
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

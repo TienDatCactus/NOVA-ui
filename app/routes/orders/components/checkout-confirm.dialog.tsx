@@ -45,17 +45,10 @@ export default function CheckoutConfirmDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Receipt className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle>Xác nhận đơn hàng</DialogTitle>
-              <DialogDescription>
-                Chọn loại khách hàng và tạo hóa đơn
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle>Xác nhận đơn hàng</DialogTitle>
+          <DialogDescription>
+            Chọn loại khách hàng và tạo hóa đơn
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

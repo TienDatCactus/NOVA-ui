@@ -30,20 +30,17 @@ export default function CancelBookingAlertDialog({
     bookingCode,
     enabled: open,
   });
-  const id = bookingDetail?.id;
 
-  const { mutate: cancelBooking, isPending } = useCancelBooking(id);
+  const { mutate: cancelBooking, isPending } = useCancelBooking(
+    bookingDetail?.id || ""
+  );
 
   const handleConfirm = () => {
-    if (!id) {
+    if (!bookingDetail?.id) {
       return;
     }
 
-    cancelBooking(id, {
-      onSuccess: () => {
-        onOpenChange(false);
-      },
-    });
+    cancelBooking();
   };
 
   return (
@@ -109,7 +106,7 @@ export default function CancelBookingAlertDialog({
               e.preventDefault();
               handleConfirm();
             }}
-            disabled={isPending || !id}
+            disabled={isPending || !bookingDetail?.id}
             className={buttonVariants({
               variant: "destructive",
             })}

@@ -32,6 +32,7 @@ const {
   InvoicePreviewRequestSchema,
   InvoiceCalculateFeesRequestSchema,
   UpdateInvoiceRequestSchema,
+  SyncInvoiceWithOrdersResponseSchema,
 } = InvoiceSchema;
 
 /**
@@ -192,7 +193,7 @@ async function refundInvoice(
  * @param data - Payment data
  * @returns Promise with payment response
  */
-async function addInvoicePayment(
+async function proceedInvoicePayment(
   invoiceId: string,
   data: InvoicePaymentRequestDto
 ): Promise<InvoicePaymentResponseDto> {
@@ -269,6 +270,24 @@ async function updateInvoice(
     return Promise.reject(error);
   }
 }
+async function syncInvoiceWithOrders(invoiceId: string) {
+  try {
+    const idempotencyKey = crypto.randomUUID();
+    const resp = await http.post(
+      Invoices.syncInvoice(invoiceId),
+      {},
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+    return SyncInvoiceWithOrdersResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 
 export const InvoicesService = {
   getInvoiceList,
@@ -277,10 +296,11 @@ export const InvoicesService = {
   getInvoicePayments,
   addCustomItemsToInvoice,
   refundInvoice,
-  addInvoicePayment,
+  proceedInvoicePayment,
   voidInvoice,
   exportInvoices,
   calculateInvoiceFees,
   previewBookingInvoice,
   updateInvoice,
+  syncInvoiceWithOrders,
 };

@@ -63,6 +63,9 @@ export default function ServiceOrderCard({ order }: ServiceOrderCardProps) {
                 <Badge variant="outline" className="font-mono text-xs">
                   #{order.id?.slice(0, 8) || "N/A"}
                 </Badge>
+                <Badge variant="outline">
+                  Mã đặt phòng: {order.bookingId || "N/A"}
+                </Badge>
                 <Badge
                   className={cn("text-xs")}
                   variant={statusInfo.variant as any}

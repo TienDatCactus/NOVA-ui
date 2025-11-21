@@ -53,7 +53,11 @@ function ServiceTypesDataTable({
     );
   }
 
-  return <DataTable columns={columns} data={types} />;
+  return (
+    <div className="container mx-auto ">
+      <DataTable columns={columns} data={types} />
+    </div>
+  );
 }
 
 export default ServiceTypesDataTable;

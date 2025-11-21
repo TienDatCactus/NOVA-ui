@@ -52,17 +52,25 @@ export default function Schedules() {
 
   // Attendance dialog states
   const [markAbsentDialogOpen, setMarkAbsentDialogOpen] = useState(false);
-  const [markAttendanceDialogOpen, setMarkAttendanceDialogOpen] = useState(false);
-  const [selectedAttendance, setSelectedAttendance] = useState<StaffAttendanceListItem | null>(null);
+  const [markAttendanceDialogOpen, setMarkAttendanceDialogOpen] =
+    useState(false);
+  const [selectedAttendance, setSelectedAttendance] =
+    useState<StaffAttendanceListItem | null>(null);
 
   // Fetch attendance data for the week
   const { data: attendanceData, refetch: refetchAttendance } = useQuery({
-    queryKey: ["staff-attendances", format(currentWeekStart, "yyyy-MM-dd"), format(weekEnd, "yyyy-MM-dd")],
+    queryKey: [
+      "staff-attendances",
+      format(currentWeekStart, "yyyy-MM-dd"),
+      format(weekEnd, "yyyy-MM-dd"),
+    ],
     queryFn: async () => {
       const resp = await StaffAttendanceService.getStaffAttendanceList({
         from: format(currentWeekStart, "yyyy-MM-dd"),
         to: format(weekEnd, "yyyy-MM-dd"),
-        ...(filterState.selectedStaffId && { staffId: filterState.selectedStaffId }),
+        ...(filterState.selectedStaffId && {
+          staffId: filterState.selectedStaffId,
+        }),
       });
       return resp;
     },
@@ -78,7 +86,9 @@ export default function Schedules() {
     setMarkAbsentDialogOpen(true);
   };
 
-  const handleOpenMarkAttendanceDialog = (attendance: StaffAttendanceListItem) => {
+  const handleOpenMarkAttendanceDialog = (
+    attendance: StaffAttendanceListItem
+  ) => {
     setSelectedAttendance(attendance);
     setMarkAttendanceDialogOpen(true);
   };

@@ -71,7 +71,9 @@ export default function ScheduleCalendarView({
   });
 
   // Helper to get attendance for a shift
-  const getAttendance = (shift: StaffShiftListItem): StaffAttendanceListItem | null => {
+  const getAttendance = (
+    shift: StaffShiftListItem
+  ): StaffAttendanceListItem | null => {
     const key = `${shift.staffId}-${shift.shiftId}-${shift.workDate}`;
     return attendanceMap.get(key) || null;
   };
@@ -79,13 +81,25 @@ export default function ScheduleCalendarView({
   // Helper to get badge variant based on status
   const getStatusBadge = (status?: string) => {
     if (!status || status.toLowerCase() === "assigned") {
-      return { variant: "secondary" as const, label: "Chưa chấm", showLabel: true };
+      return {
+        variant: "secondary" as const,
+        label: "Chưa chấm",
+        showLabel: true,
+      };
     }
     if (status.toLowerCase() === "present") {
-      return { variant: "default" as const, label: "Đã chấm công", showLabel: false }; // Không hiển thị text
+      return {
+        variant: "default" as const,
+        label: "Đã chấm công",
+        showLabel: false,
+      }; // Không hiển thị text
     }
     if (status.toLowerCase() === "absent") {
-      return { variant: "destructive" as const, label: "Vắng mặt", showLabel: true };
+      return {
+        variant: "destructive" as const,
+        label: "Vắng mặt",
+        showLabel: true,
+      };
     }
     return { variant: "secondary" as const, label: status, showLabel: true };
   };
@@ -152,7 +166,8 @@ export default function ScheduleCalendarView({
                 <div className="space-y-1">
                   <div className="font-semibold text-sm">{shift.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {shift.startTime.substring(0, 5)} - {shift.endTime.substring(0, 5)}
+                    {shift.startTime.substring(0, 5)} -{" "}
+                    {shift.endTime.substring(0, 5)}
                   </div>
                 </div>
               </td>
@@ -164,8 +179,7 @@ export default function ScheduleCalendarView({
                 const isHovered = hoveredCell === cellKey;
 
                 // Get staff for this shift and date (match by shift name)
-                const staffList =
-                  groupedShifts[dateStr]?.[shift.name] || [];
+                const staffList = groupedShifts[dateStr]?.[shift.name] || [];
 
                 return (
                   <td
@@ -175,54 +189,81 @@ export default function ScheduleCalendarView({
                     <div className="space-y-1 overflow-visible">
                       {/* Staff List - wrap in container with overflow visible */}
                       <div className="space-y-2 overflow-visible">
-                      {staffList.map((staff) => {
-                        const badgeKey = `${staff.id}`;
-                        const isHoveredBadge = hoveredBadge === badgeKey;
-                        const attendance = getAttendance(staff);
-                        const statusBadge = getStatusBadge(attendance?.status);
-                        const isAbsent = attendance?.status.toLowerCase() === "absent";
-                        const isPresent = attendance?.status.toLowerCase() === "present";
-                        const isAssigned = !attendance || attendance?.status.toLowerCase() === "assigned";
-                        const hasReason = isAbsent && attendance?.absentReason;
+                        {staffList.map((staff) => {
+                          const badgeKey = `${staff.id}`;
+                          const isHoveredBadge = hoveredBadge === badgeKey;
+                          const attendance = getAttendance(staff);
+                          const statusBadge = getStatusBadge(
+                            attendance?.status
+                          );
+                          const isAbsent =
+                            attendance?.status.toLowerCase() === "absent";
+                          const isPresent =
+                            attendance?.status.toLowerCase() === "present";
+                          const isAssigned =
+                            !attendance ||
+                            attendance?.status.toLowerCase() === "assigned";
+                          const hasReason =
+                            isAbsent && attendance?.absentReason;
 
-                        const cardContent = (
-                          <div
-                            key={staff.id}
-                            className="relative group p-2 bg-background rounded-md border hover:border-primary/50 transition-colors cursor-pointer overflow-visible"
-                            onMouseEnter={() => setHoveredBadge(badgeKey)}
-                            onMouseLeave={() => setHoveredBadge(null)}
-                            onClick={() => onEditStaff?.(staff)}
-                          >
-                            <div className="space-y-1">
-                              <div className="text-xs font-medium truncate">
-                                {staff.staffName || "N/A"}
+                          const cardContent = (
+                            <div
+                              key={staff.id}
+                              className="relative group p-2 bg-background rounded-md border hover:border-primary/50 transition-colors cursor-pointer overflow-visible"
+                              onMouseEnter={() => setHoveredBadge(badgeKey)}
+                              onMouseLeave={() => setHoveredBadge(null)}
+                              onClick={() => onEditStaff?.(staff)}
+                            >
+                              <div className="space-y-1">
+                                <div className="text-xs font-medium truncate">
+                                  {staff.staffName || "N/A"}
+                                </div>
+                                {/* Chỉ hiển thị badge nếu có label */}
+                                {statusBadge.showLabel && (
+                                  <Badge
+                                    variant={statusBadge.variant}
+                                    className="text-[10px] h-5"
+                                  >
+                                    {statusBadge.label}
+                                  </Badge>
+                                )}
                               </div>
-                              {/* Chỉ hiển thị badge nếu có label */}
-                              {statusBadge.showLabel && (
-                                <Badge variant={statusBadge.variant} className="text-[10px] h-5">
-                                  {statusBadge.label}
-                                </Badge>
-                              )}
-                            </div>
 
-                            {/* Action buttons - hiển thị khi hover */}
-                            {isHoveredBadge && (
-                              <div className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-50">
-                                {/* Buttons cho status "assigned" (chưa chấm) */}
-                                {isAssigned && attendance && (
-                                  <>
-                                    <Button
-                                      size="icon"
-                                      variant="default"
-                                      className="h-6 w-6 rounded-full shadow-md"
-                                      onClick={(e: any) => {
-                                        e.stopPropagation();
-                                        onMarkAttendance?.(attendance);
-                                      }}
-                                      title="Đánh dấu điểm danh"
-                                    >
-                                      <CheckCircle2 className="h-3 w-3" />
-                                    </Button>
+                              {/* Action buttons - hiển thị khi hover */}
+                              {isHoveredBadge && (
+                                <div className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-50">
+                                  {/* Buttons cho status "assigned" (chưa chấm) */}
+                                  {isAssigned && attendance && (
+                                    <>
+                                      <Button
+                                        size="icon"
+                                        variant="default"
+                                        className="h-6 w-6 rounded-full shadow-md"
+                                        onClick={(e: any) => {
+                                          e.stopPropagation();
+                                          onMarkAttendance?.(attendance);
+                                        }}
+                                        title="Đánh dấu điểm danh"
+                                      >
+                                        <CheckCircle2 className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        size="icon"
+                                        variant="destructive"
+                                        className="h-6 w-6 rounded-full shadow-md"
+                                        onClick={(e: any) => {
+                                          e.stopPropagation();
+                                          onMarkAbsent?.(attendance);
+                                        }}
+                                        title="Đánh dấu vắng mặt"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </>
+                                  )}
+
+                                  {/* Button chuyển đổi cho "present" -> "absent" */}
+                                  {isPresent && attendance && (
                                     <Button
                                       size="icon"
                                       variant="destructive"
@@ -231,78 +272,65 @@ export default function ScheduleCalendarView({
                                         e.stopPropagation();
                                         onMarkAbsent?.(attendance);
                                       }}
-                                      title="Đánh dấu vắng mặt"
+                                      title="Chuyển sang vắng mặt"
                                     >
                                       <X className="h-3 w-3" />
                                     </Button>
-                                  </>
-                                )}
+                                  )}
 
-                                {/* Button chuyển đổi cho "present" -> "absent" */}
-                                {isPresent && attendance && (
-                                  <Button
-                                    size="icon"
-                                    variant="destructive"
-                                    className="h-6 w-6 rounded-full shadow-md"
-                                    onClick={(e: any) => {
+                                  {/* Button chuyển đổi cho "absent" -> "present" */}
+                                  {isAbsent && attendance && (
+                                    <Button
+                                      size="icon"
+                                      variant="default"
+                                      className="h-6 w-6 rounded-full shadow-md"
+                                      onClick={(e: any) => {
+                                        e.stopPropagation();
+                                        onMarkAttendance?.(attendance);
+                                      }}
+                                      title="Chuyển sang đã chấm công"
+                                    >
+                                      <CheckCircle2 className="h-3 w-3" />
+                                    </Button>
+                                  )}
+
+                                  {/* Nút X để xóa lịch - luôn hiển thị */}
+                                  <button
+                                    onClick={(e) => {
                                       e.stopPropagation();
-                                      onMarkAbsent?.(attendance);
+                                      onDeleteStaff?.(staff);
                                     }}
-                                    title="Chuyển sang vắng mặt"
+                                    className="w-6 h-6 flex items-center justify-center rounded-full bg-muted hover:bg-destructive/20 transition-colors shadow-md"
+                                    title="Xóa lịch"
                                   >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                )}
+                                    <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
 
-                                {/* Button chuyển đổi cho "absent" -> "present" */}
-                                {isAbsent && attendance && (
-                                  <Button
-                                    size="icon"
-                                    variant="default"
-                                    className="h-6 w-6 rounded-full shadow-md"
-                                    onClick={(e: any) => {
-                                      e.stopPropagation();
-                                      onMarkAttendance?.(attendance);
-                                    }}
-                                    title="Chuyển sang đã chấm công"
-                                  >
-                                    <CheckCircle2 className="h-3 w-3" />
-                                  </Button>
-                                )}
-
-                                {/* Nút X để xóa lịch - luôn hiển thị */}
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDeleteStaff?.(staff);
-                                  }}
-                                  className="w-6 h-6 flex items-center justify-center rounded-full bg-muted hover:bg-destructive/20 transition-colors shadow-md"
-                                  title="Xóa lịch"
-                                >
-                                  <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        );
-
-                        // Wrap with Tooltip if absent and has reason
-                        return hasReason ? (
-                          <TooltipProvider key={staff.id}>
-                            <Tooltip delayDuration={200}>
-                              <TooltipTrigger asChild>
-                                {cardContent}
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-xs">
-                                <p className="text-xs font-semibold mb-1">Lý do vắng mặt:</p>
-                                <p className="text-xs">{attendance?.absentReason}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        ) : (
-                          cardContent
-                        );
-                      })}
+                          // Wrap with Tooltip if absent and has reason
+                          return hasReason ? (
+                            <TooltipProvider key={staff.id}>
+                              <Tooltip delayDuration={200}>
+                                <TooltipTrigger asChild>
+                                  {cardContent}
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs">
+                                  <p className="text-xs font-semibold mb-1">
+                                    Lý do vắng mặt:
+                                  </p>
+                                  <p className="text-xs">
+                                    {attendance?.absentReason}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          ) : (
+                            cardContent
+                          );
+                        })}
                       </div>
 
                       {/* Empty space at the end - shows "Add" button on hover */}

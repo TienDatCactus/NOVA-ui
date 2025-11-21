@@ -1,4 +1,12 @@
-import { Search, X, ChevronDown, Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Search,
+  X,
+  ChevronDown,
+  Plus,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -119,7 +127,6 @@ export default function StaffFilterSidebar({
               >
                 <Plus className="h-4 w-4 stroke-[2.5]" />
                 <span className="text-xs">Thêm</span>
-
               </Button>
             </div>
             <CollapsibleTrigger className="flex items-center justify-between w-full">
@@ -135,7 +142,10 @@ export default function StaffFilterSidebar({
                 </p>
               ) : (
                 staffRoles.map((role) => (
-                  <div key={role.id} className="flex items-center gap-2 group/item">
+                  <div
+                    key={role.id}
+                    className="flex items-center gap-2 group/item"
+                  >
                     <Checkbox
                       id={`role-${role.id}`}
                       checked={filters.staffRoleIds?.includes(role.id) || false}

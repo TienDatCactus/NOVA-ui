@@ -65,7 +65,11 @@ function BookingList({ bookings, isLoading, refetch }: BookingListProps) {
       </Empty>
     );
   }
-  return <DataTable columns={columns} data={bookings!} />;
+  return (
+    <div className="container mx-auto ">
+      <DataTable columns={columns} data={bookings!} />
+    </div>
+  );
 }
 
 export default BookingList;

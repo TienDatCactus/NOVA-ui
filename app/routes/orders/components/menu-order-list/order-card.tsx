@@ -47,7 +47,6 @@ export default function OrderCard({ order }: OrderCardProps) {
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-4">
-            {/* Left: Order Info */}
             <div className="flex-1 min-w-0 space-y-3">
               <div className="flex items-center gap-3 flex-wrap">
                 <Badge variant="outline" className="font-mono text-xs">
@@ -106,7 +105,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                 <p className="text-muted-foreground text-xs mb-1">Ghi chú:</p>
                 <InlineNoteEditor
                   orderId={order.id}
-                  initialNote={order.note}
+                  initialNote={order.note || ""}
                   disabled={order.status !== "Open"}
                 />
               </div>

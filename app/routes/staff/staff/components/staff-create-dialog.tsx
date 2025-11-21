@@ -275,90 +275,90 @@ export default function StaffDialog({
               />
 
               {/* Date of Birth */}
-<FormField
-  control={form.control}
-  name="dateOfBirth"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Ngày sinh</FormLabel>
-      <Popover>
-        <PopoverTrigger asChild>
-          <FormControl>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-between font-normal",
-                !field.value && "text-muted-foreground"
-              )}
-            >
-              {field.value ? (
-                format(field.value, "dd/MM/yyyy", { locale: vi })
-              ) : (
-                <span>Chọn ngày sinh</span>
-              )}
-              <ChevronDownIcon className="h-4 w-4 opacity-50" />
-            </Button>
-          </FormControl>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={field.value}
-            onSelect={field.onChange}
-            captionLayout="dropdown"
-            fromYear={1950}
-            toYear={2010}
-            locale={vi}
-          />
-        </PopoverContent>
-      </Popover>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+              <FormField
+                control={form.control}
+                name="dateOfBirth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ngày sinh</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-between font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy", { locale: vi })
+                            ) : (
+                              <span>Chọn ngày sinh</span>
+                            )}
+                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          captionLayout="dropdown"
+                          fromYear={1950}
+                          toYear={2010}
+                          locale={vi}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-{/* Start Date */}
-<FormField
-  control={form.control}
-  name="startDate"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Ngày bắt đầu làm việc</FormLabel>
-      <Popover>
-        <PopoverTrigger asChild>
-          <FormControl>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-between font-normal",
-                !field.value && "text-muted-foreground"
-              )}
-            >
-              {field.value ? (
-                format(field.value, "dd/MM/yyyy", { locale: vi })
-              ) : (
-                <span>Chọn ngày bắt đầu</span>
-              )}
-              <ChevronDownIcon className="h-4 w-4 opacity-50" />
-            </Button>
-          </FormControl>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={field.value}
-            onSelect={field.onChange}
-            captionLayout="dropdown"
-            fromYear={2000}
-            toYear={new Date().getFullYear() + 1}
-            locale={vi}
-          />
-        </PopoverContent>
-      </Popover>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+              {/* Start Date */}
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ngày bắt đầu làm việc</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-between font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy", { locale: vi })
+                            ) : (
+                              <span>Chọn ngày bắt đầu</span>
+                            )}
+                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          captionLayout="dropdown"
+                          fromYear={2000}
+                          toYear={new Date().getFullYear() + 1}
+                          locale={vi}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Staff Role ID - Fetch from API */}
               <FormField
@@ -367,7 +367,8 @@ export default function StaffDialog({
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>
-                      Vai trò nhân sự <span className="text-destructive">*</span>
+                      Vai trò nhân sự{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <div className="flex gap-2">
                       <Select

@@ -1,6 +1,7 @@
 const STORAGE = {
   TOKEN: "nova-access-token",
   REFRESH_TOKEN: "nova-refresh-token",
+  GUEST_ROOM_TOKEN: "nova-guest-room-token",
 };
 
 export const getStorage = (name: (typeof STORAGE)[keyof typeof STORAGE]) => {

@@ -1,13 +1,14 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import type { StaffListItem } from "~/services/api/staff/dto";
 
@@ -24,35 +25,45 @@ export const createStaffColumns = ({
 }: StaffColumnsProps = {}): ColumnDef<StaffListItem>[] => [
   {
     accessorKey: "index",
-    header: "STT",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STT" />
+    ),
     cell: ({ row }) => (
       <div className="w-12 text-center font-medium">{row.index + 1}</div>
     ),
   },
   {
     accessorKey: "code",
-    header: "Mã nhân sự",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mã nhân sự" />
+    ),
     cell: ({ row }) => (
       <div className="font-mono text-sm font-medium">{row.original.code}</div>
     ),
   },
   {
     accessorKey: "fullName",
-    header: "Họ và tên",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Họ và tên" />
+    ),
     cell: ({ row }) => (
       <div className="min-w-[150px] font-medium">{row.original.fullName}</div>
     ),
   },
   {
     accessorKey: "phoneNumber",
-    header: "Số điện thoại",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Số điện thoại" />
+    ),
     cell: ({ row }) => (
       <div className="font-mono text-sm">{row.original.phoneNumber || "-"}</div>
     ),
   },
   {
     accessorKey: "citizenId",
-    header: "CCCD",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="CCCD" />
+    ),
     cell: ({ row }) => (
       <div className="font-mono text-sm">{row.original.citizenId || "-"}</div>
     ),
@@ -99,5 +110,7 @@ export const createStaffColumns = ({
         </DropdownMenu>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

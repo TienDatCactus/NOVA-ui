@@ -1,10 +1,9 @@
+import { Trash2 } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import Image from "~/components/ui/image";
-import { formatMoney } from "~/lib/utils";
-import { PenLine, Trash2 } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { formatMoney } from "~/lib/utils";
 import type { MenuPosCartItem } from "~/store/menu-pos-order.store";
 import type { ServicePosCartItem } from "~/store/service-pos-order.store";
 
@@ -27,18 +26,6 @@ export default function CartItem({
     <Card className="shadow-sm p-0 snap-center">
       <CardContent className="p-3">
         <div className="flex gap-3">
-          {/* Image */}
-          <div className="flex-shrink-0">
-            <Image
-              src={imageUrl || "/placeholder-menu.png"}
-              alt={name}
-              width={100}
-              height={100}
-              className="h-full rounded-md object-cover"
-            />
-          </div>
-
-          {/* Content */}
           <div className="flex-1 min-w-0 space-y-2">
             {/* Header */}
             <div className="space-y-1">

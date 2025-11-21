@@ -36,11 +36,7 @@ import {
 } from "./container/pos-orders/mutation.hooks";
 import ScheduledTimeDialog from "./components/scheduled-time.dialog";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 
@@ -360,7 +356,7 @@ export default function Component({
             <Separator className="my-2" />
             <div className="flex-1 flex flex-col justify-between space-y-2">
               {items.length > 0 && (
-                <div className="space-y-4 p-2 overflow-y-auto h-72 snap-y">
+                <div className="space-y-4 p-2 overflow-y-auto flex-1 max-h-[50vh]">
                   {items.map((item) => (
                     <CartItem
                       key={item.id}

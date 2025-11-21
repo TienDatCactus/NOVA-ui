@@ -5,29 +5,21 @@ import MenuCard from "../fragments/menu.card";
 
 interface MenuListProps {
   menuItems: MenuListResponseDto;
-  searchText: string;
-  onSearchChange: (value: string) => void;
   isSelected: (itemId: string) => boolean;
   getQuantity: (itemId: string) => number;
   onToggleSelect: (itemId: string) => void;
   onQuantityChange: (itemId: string, quantity: number) => void;
 }
 
-/**
- * Menu list component
- * Displays filterable grid of menu items
- */
 export default function MenuList({
   menuItems,
-  searchText,
-  onSearchChange,
   isSelected,
   getQuantity,
   onToggleSelect,
   onQuantityChange,
 }: MenuListProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2 h-96 overflow-y-auto">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2 ">
       {menuItems.length === 0 ? (
         <div className="text-center text-muted-foreground col-span-2 py-8">
           Không có món ăn

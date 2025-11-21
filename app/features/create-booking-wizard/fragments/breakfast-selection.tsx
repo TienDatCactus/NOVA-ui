@@ -34,16 +34,16 @@ export function BreakfastSelection({
   nights,
 }: BreakfastSelectionProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="p-4 h-full shadow-sm">
+      <CardHeader className="p-0">
         <div className="flex items-center gap-2">
           <Coffee className="h-5 w-5 text-muted-foreground" />
-          <CardTitle className="text-base">Bữa sáng</CardTitle>
+          <CardTitle className="text-lg">Bữa sáng</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-0">
         {/* Toggle all breakfast */}
-        <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+        <div className="flex items-center justify-between p-4 rounded-lg border bg-white">
           <div className="space-y-1">
             <Label htmlFor="breakfast-all" className="text-base font-medium">
               Bữa sáng cho tất cả các ngày
@@ -95,6 +95,7 @@ export function BreakfastSelection({
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="multiple"
+                  defaultMonth={checkinDate ? new Date(checkinDate) : undefined}
                   selected={breakfastDates}
                   onSelect={(dates) => onSelectDates(dates || [])}
                   disabled={(date) =>

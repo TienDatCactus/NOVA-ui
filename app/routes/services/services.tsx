@@ -4,11 +4,7 @@ import useServiceFilters from "./container/services/filter.hooks";
 import { useServices } from "./container/services/query.hooks";
 import ServicesViewLayout from "./layouts/service-view.layout";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 

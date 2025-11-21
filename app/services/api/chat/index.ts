@@ -1,129 +1,135 @@
 import http from "~/lib/http";
 import { Chat } from "~/services/url";
-import { ChatSchema } from "~/services/schema/chat.schema";
+import { ChatSchema } from "~/services/api/chat/chat.schema";
 import type {
   ChatEntryResponseDto,
-  ChatSessionDto,
-  ChatMessagesResponseDto,
-  SendMessageRequestDto,
-  SendMessageResponseDto,
-  StaffInboxResponseDto,
-  AssignStaffRequestDto,
-  AssignStaffResponseDto,
-  CloseSessionResponseDto,
+  ChatSessionDetailDto,
+  ChatSessionMessagesDto,
+  ChatSendHttpMessageRequestDto,
+  ChatSendHttpMessageResponseDto,
+  StaffChatInboxResponseDto,
 } from "./dto";
+import type { ChatMessagesParams } from "./chat.types";
+import axios from "axios";
 
 const {
   ChatEntryResponseSchema,
-  ChatSessionSchema,
-  ChatMessagesResponseSchema,
-  SendMessageRequestSchema,
-  SendMessageResponseSchema,
-  StaffInboxResponseSchema,
-  AssignStaffRequestSchema,
-  AssignStaffResponseSchema,
-  CloseSessionResponseSchema,
+  ChatSessionDetailSchema,
+  ChatSessionMessagesSchema,
+  ChatSendHttpMessageRequestSchema,
+  ChatSendHttpMessageResponseSchema,
+  StaffChatInboxResponseSchema,
 } = ChatSchema;
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
-async function entry(roomToken: string): Promise<ChatEntryResponseDto> {
+/**
+ * Check if customer can chat and get session info
+ * @param bookingRoomId - The booking room ID to check chat availability
+ */
+async function getChatEntry(roomToken: string): Promise<ChatEntryResponseDto> {
   try {
-    const resp = await http.get(Chat.entry, { params: { roomToken } });
-    return ChatEntryResponseSchema.parse(resp.data);
+    const resp = await axios.get(Chat.entry(roomToken));
+    return ChatEntryResponseSchema.parse(resp.data.data);
   } catch (error) {
-    console.error(error);
     return Promise.reject(error);
   }
 }
 
-async function getSession(sessionId: string): Promise<ChatSessionDto> {
-  try {
-    const resp = await http.get(Chat.session(sessionId));
-    return ChatSessionSchema.parse(resp.data);
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
-}
-
-async function getMessages(
-  sessionId: string,
-  page = 1,
-  pageSize = 50
-): Promise<ChatMessagesResponseDto> {
-  try {
-    const resp = await http.get(Chat.messages(sessionId), {
-      params: { page, pageSize },
-    });
-    return ChatMessagesResponseSchema.parse(resp.data);
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
-}
-
-async function sendMessage(
-  data: SendMessageRequestDto
-): Promise<SendMessageResponseDto> {
-  try {
-    const validatedData = SendMessageRequestSchema.parse(data);
-    const resp = await http.post(Chat.sendMessage, validatedData);
-    return SendMessageResponseSchema.parse(resp.data);
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
-}
-
-async function getStaffInbox({
-  page = 1,
-  pageSize = 20,
-}: {
-  page?: number;
-  pageSize?: number;
-}): Promise<StaffInboxResponseDto> {
-  try {
-    const resp = await http.get(Chat.staffInbox, {
-      params: { page, pageSize },
-    });
-    return StaffInboxResponseSchema.parse(resp.data);
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
-}
-
-async function assignStaff(
-  sessionId: string,
-  data: AssignStaffRequestDto
-): Promise<AssignStaffResponseDto> {
-  try {
-    const validatedData = AssignStaffRequestSchema.parse(data);
-    const resp = await http.post(Chat.assign(sessionId), validatedData);
-    return AssignStaffResponseSchema.parse(resp.data);
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
-}
-
-async function closeSession(
+/**
+ * Get chat session details
+ * @param sessionId - The chat session ID
+ */
+async function getChatSession(
   sessionId: string
-): Promise<CloseSessionResponseDto> {
+): Promise<ChatSessionDetailDto> {
   try {
-    const resp = await http.post(Chat.close(sessionId));
-    return CloseSessionResponseSchema.parse(resp.data);
+    const resp = await axios.get(Chat.session(sessionId));
+    return ChatSessionDetailSchema.parse(resp.data.data);
   } catch (error) {
-    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Get all messages in a chat session
+ * @param sessionId - The chat session ID
+ */
+async function getChatSessionMessages(
+  sessionId: string,
+  params?: ChatMessagesParams
+): Promise<ChatSessionMessagesDto> {
+  try {
+    const resp = await axios.get(Chat.messages(sessionId), { params });
+    return ChatSessionMessagesSchema.parse(resp.data.data);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Send a message in a chat session (HTTP fallback)
+ * @param data - Message data including sessionId, message, sender, staffUserId
+ */
+async function sendChatMessageHttp(
+  data: ChatSendHttpMessageRequestDto
+): Promise<ChatSendHttpMessageResponseDto> {
+  try {
+    const validatedData = ChatSendHttpMessageRequestSchema.parse(data);
+    const resp = await axios.post(Chat.sendMessage, validatedData);
+    return ChatSendHttpMessageResponseSchema.parse(resp.data.data);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Get staff chat inbox with all active sessions
+ */
+async function getStaffChatInbox(
+  params?: ChatMessagesParams
+): Promise<StaffChatInboxResponseDto> {
+  try {
+    const resp = await http.get(Chat.staffInbox, { params });
+    return StaffChatInboxResponseSchema.parse(resp.data);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Assign a chat session to a staff member
+ * @param sessionId - The chat session ID
+ * @param staffUserId - The staff user ID to assign to
+ */
+async function assignChatSession(
+  sessionId: string,
+  staffUserId: string
+): Promise<void> {
+  try {
+    await axios.post(Chat.assign(sessionId), { staffUserId });
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Close a chat session
+ * @param sessionId - The chat session ID to close
+ */
+async function closeChatSession(sessionId: string): Promise<void> {
+  try {
+    await axios.post(Chat.close(sessionId));
+  } catch (error) {
     return Promise.reject(error);
   }
 }
 
 export const ChatService = {
-  entry,
-  getSession,
-  getMessages,
-  sendMessage,
-  getStaffInbox,
-  assignStaff,
-  closeSession,
+  getChatEntry,
+  getChatSession,
+  getChatSessionMessages,
+  sendChatMessageHttp,
+  getStaffChatInbox,
+  assignChatSession,
+  closeChatSession,
 };

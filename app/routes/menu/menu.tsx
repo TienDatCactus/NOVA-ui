@@ -6,11 +6,7 @@ import useMenuFilters from "./container/menu/filter.hooks";
 import { useMenuList } from "./container/menu/query.hooks";
 import MenuViewLayout from "./layouts/menu-view.layout";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 

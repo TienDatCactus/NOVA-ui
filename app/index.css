@@ -8,7 +8,18 @@
     "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
-
+*::selection {
+  background: oklch(0.48 0.2 260.47);
+  color: #ffffff;
+}
+*::-moz-selection {
+  background: oklch(0.48 0.2 260.47);
+  color: #ffffff;
+}
+*::-webkit-selection {
+  background: oklch(0.48 0.2 260.47);
+  color: #ffffff;
+}
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   --background: oklch(0.98 0 0);

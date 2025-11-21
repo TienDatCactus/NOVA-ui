@@ -59,7 +59,11 @@ function InvoicesDataTable({
     );
   }
 
-  return <DataTable columns={columns} data={invoices} />;
+  return (
+    <div className="container mx-auto ">
+      <DataTable columns={columns} data={invoices} />
+    </div>
+  );
 }
 
 export default InvoicesDataTable;

@@ -112,12 +112,14 @@ function UsersDataTable({
   }
 
   return (
-    <DataTable
-      columns={columns}
-      data={users}
-      onViewDetail={onViewDetail}
-      onSuccess={onSuccess}
-    />
+    <div className="container mx-auto ">
+      <DataTable
+        columns={columns}
+        data={users}
+        onViewDetail={onViewDetail}
+        onSuccess={onSuccess}
+      />
+    </div>
   );
 }
 
