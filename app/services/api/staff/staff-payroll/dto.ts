@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { StaffPayrollSchema } from "~/services/api/staff-payroll/staff-payroll.schema";
+import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
 
 const {
   PayrollItemSchema,

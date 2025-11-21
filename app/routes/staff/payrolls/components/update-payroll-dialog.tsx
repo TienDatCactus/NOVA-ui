@@ -11,10 +11,10 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
+import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import type { PayrollItem } from "~/services/api/staff-payroll/dto";
+import type { PayrollItem } from "~/services/api/staff/staff-payroll/dto";
 import {
   formatNumber,
   parseFormattedNumber,
@@ -41,11 +41,11 @@ export default function UpdatePayrollDialog({
   useEffect(() => {
     if (payroll) {
       setBaseSalaryFullMonth(
-        payroll.baseSalaryFullMonth ? formatNumber(payroll.baseSalaryFullMonth) : ""
+        payroll.baseSalaryFullMonth
+          ? formatNumber(payroll.baseSalaryFullMonth)
+          : ""
       );
-      setPaidAmount(
-        payroll.paidAmount ? formatNumber(payroll.paidAmount) : ""
-      );
+      setPaidAmount(payroll.paidAmount ? formatNumber(payroll.paidAmount) : "");
     }
   }, [payroll]);
 
@@ -59,7 +59,8 @@ export default function UpdatePayrollDialog({
       } = {};
 
       if (baseSalaryFullMonth) {
-        updateData.baseSalaryFullMonth = parseFormattedNumber(baseSalaryFullMonth);
+        updateData.baseSalaryFullMonth =
+          parseFormattedNumber(baseSalaryFullMonth);
       }
       if (paidAmount) {
         updateData.paidAmount = parseFormattedNumber(paidAmount);
@@ -101,7 +102,9 @@ export default function UpdatePayrollDialog({
           <div className="rounded-lg bg-muted p-3 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Mã nhân viên:</span>
-              <span className="font-mono font-medium">{payroll?.staffCode}</span>
+              <span className="font-mono font-medium">
+                {payroll?.staffCode}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Tên nhân viên:</span>
@@ -118,7 +121,9 @@ export default function UpdatePayrollDialog({
                 type="text"
                 placeholder="Nhập lương cơ bản"
                 value={baseSalaryFullMonth}
-                onChange={(e) => handleNumberInputChange(e, setBaseSalaryFullMonth)}
+                onChange={(e) =>
+                  handleNumberInputChange(e, setBaseSalaryFullMonth)
+                }
                 className="pr-16"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">

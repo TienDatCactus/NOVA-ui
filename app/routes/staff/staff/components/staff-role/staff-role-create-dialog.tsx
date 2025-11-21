@@ -19,9 +19,9 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
-import { CreateStaffRoleRequestSchema } from "~/services/api/staff-role/staff-role.schema";
-import type { CreateStaffRoleRequest } from "~/services/api/staff-role/dto";
-import { StaffRoleService } from "~/services/api/staff-role";
+import { CreateStaffRoleRequestSchema } from "~/services/api/staff/staff-role/staff-role.schema";
+import type { CreateStaffRoleRequest } from "~/services/api/staff/staff-role/dto";
+import { StaffRoleService } from "~/services/api/staff/staff-role";
 import { toast } from "sonner";
 import { useState } from "react";
 import type { z } from "zod";

@@ -1,4 +1,4 @@
-import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
+import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { Skeleton } from "~/components/ui/skeleton";

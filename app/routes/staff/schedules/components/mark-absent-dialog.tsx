@@ -19,12 +19,12 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Textarea } from "~/components/ui/textarea";
-import { StaffAttendanceService } from "~/services/api/staff-attendance";
+import { StaffAttendanceService } from "~/services/api/staff/staff-attendance";
 import type {
   MarkAbsentRequest,
   StaffAttendanceListItem,
-} from "~/services/api/staff-attendance/dto";
-import { StaffAttendanceSchema } from "~/services/api/staff-attendance/staff-attendance.schema";
+} from "~/services/api/staff/staff-attendance/dto";
+import { StaffAttendanceSchema } from "~/services/api/staff/staff-attendance/staff-attendance.schema";
 
 const { MarkAbsentRequestSchema } = StaffAttendanceSchema;
 

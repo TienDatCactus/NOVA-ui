@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
-import type { PayrollGridParams } from "~/services/api/staff-payroll/dto";
+import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
+import type { PayrollGridParams } from "~/services/api/staff/staff-payroll/dto";
 
 export function usePayrollsQuery(params?: PayrollGridParams) {
   return useQuery({

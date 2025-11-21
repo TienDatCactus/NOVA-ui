@@ -11,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { StaffAttendanceService } from "~/services/api/staff-attendance";
-import type { StaffAttendanceListItem } from "~/services/api/staff-attendance/dto";
+import { StaffAttendanceService } from "~/services/api/staff/staff-attendance";
+import type { StaffAttendanceListItem } from "~/services/api/staff/staff-attendance/dto";
 
 interface MarkAttendanceDialogProps {
   open: boolean;

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,39 +8,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import type { StaffListItem } from "~/services/api/staff/dto";
-import { StaffService } from "~/services/api/staff";
-import { toast } from "sonner";
+import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
+import { useDeleteStaff } from "../../container/staff/query.hooks";
 
 interface StaffDeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  staff: StaffListItem | null;
-  onSuccess: () => void;
+  staff: StaffListItemDto | null;
 }
 
 export default function StaffDeleteDialog({
   open,
   onOpenChange,
   staff,
-  onSuccess,
 }: StaffDeleteDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-
+  const { mutateAsync: deleteStaff, isPending: isDeleting } = useDeleteStaff();
   const handleConfirm = async () => {
     if (!staff) return;
-
-    setIsDeleting(true);
     try {
-      await StaffService.deleteStaff(staff.id);
-      toast.success(`Đã xóa nhân sự ${staff.fullName}`);
-      onOpenChange(false);
-      onSuccess();
+      await deleteStaff(staff.id, {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+      });
     } catch (error) {
       console.error("Delete staff error:", error);
-      // Error toast handled by http interceptor
-    } finally {
-      setIsDeleting(false);
     }
   };
 

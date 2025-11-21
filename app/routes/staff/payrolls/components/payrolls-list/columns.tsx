@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
-import type { PayrollItem } from "~/services/api/staff-payroll/dto";
+import type { PayrollItem } from "~/services/api/staff/staff-payroll/dto";
 import { Checkbox } from "~/components/ui/checkbox";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import StatusSelectCell from "../../fragments/status-select.cell";
@@ -43,7 +43,9 @@ export const columns: ColumnDef<PayrollItem>[] = [
     header: "Mã nhân viên",
     cell: ({ row }) => (
       <div className="flex flex-col">
-        <span className="font-mono font-medium">{row.getValue("staffCode")}</span>
+        <span className="font-mono font-medium">
+          {row.getValue("staffCode")}
+        </span>
       </div>
     ),
     enableHiding: false,
@@ -176,7 +178,9 @@ export const columns: ColumnDef<PayrollItem>[] = [
       const paid = row.getValue("paidAmount") as number;
       return (
         <div className="text-right">
-          <span className="font-mono text-sm">{paid.toLocaleString("vi-VN")}</span>
+          <span className="font-mono text-sm">
+            {paid.toLocaleString("vi-VN")}
+          </span>
         </div>
       );
     },
@@ -188,7 +192,9 @@ export const columns: ColumnDef<PayrollItem>[] = [
       const remaining = row.getValue("remainingAmount") as number;
       return (
         <div className="text-right">
-          <span className={`font-mono text-sm ${remaining > 0 ? 'text-orange-600' : remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
+          <span
+            className={`font-mono text-sm ${remaining > 0 ? "text-orange-600" : remaining < 0 ? "text-red-600" : "text-green-600"}`}
+          >
             {remaining.toLocaleString("vi-VN")}
           </span>
         </div>
@@ -199,8 +205,10 @@ export const columns: ColumnDef<PayrollItem>[] = [
     accessorKey: "hasUnusedLeavePending",
     header: () => <div className="text-center">Còn ngày dư chưa xử lý</div>,
     cell: ({ row }) => {
-      const hasUnusedLeavePending = row.getValue("hasUnusedLeavePending") as boolean;
-      
+      const hasUnusedLeavePending = row.getValue(
+        "hasUnusedLeavePending"
+      ) as boolean;
+
       if (!hasUnusedLeavePending) {
         return (
           <div className="flex justify-center">

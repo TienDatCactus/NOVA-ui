@@ -24,8 +24,8 @@ import { Card } from "~/components/ui/card";
 import { TimePicker24h } from "~/components/ui/time-picker-24h";
 import { Loader2, Clock } from "lucide-react";
 import { useState } from "react";
-import { WorkShiftService } from "~/services/api/work-shift";
-import { WorkShiftSchema } from "~/services/api/work-shift/work-shift.schema";
+import { WorkShiftService } from "~/services/api/staff/work-shift";
+import { WorkShiftSchema } from "~/services/api/staff/work-shift/work-shift.schema";
 import { toast } from "sonner";
 
 const { CreateWorkShiftFormSchema } = WorkShiftSchema;
@@ -95,7 +95,9 @@ export default function CreateWorkShiftDialog({
               <Clock className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <DialogTitle className="text-xl">Thêm ca làm việc mới</DialogTitle>
+              <DialogTitle className="text-xl">
+                Thêm ca làm việc mới
+              </DialogTitle>
               <DialogDescription className="mt-1">
                 Tạo ca làm việc mới cho nhân viên khách sạn
               </DialogDescription>
@@ -116,10 +118,14 @@ export default function CreateWorkShiftDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-semibold">
-                      Tên ca làm việc <span className="text-destructive">*</span>
+                      Tên ca làm việc{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="VD: Ca sáng, Ca chiều, Ca tối..." {...field} />
+                      <Input
+                        placeholder="VD: Ca sáng, Ca chiều, Ca tối..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription className="text-xs">
                       Tên mô tả ca làm việc

@@ -92,63 +92,10 @@ export const UpdateItemFormSchema = z
     path: ["minStock"],
   });
 
-/**
- * Schema cho form tạo nhân sự
- */
-export const CreateStaffFormSchema = z.object({
-  code: z.string().min(1, "Mã nhân sự là bắt buộc"),
-  fullName: z.string().min(1, "Họ tên là bắt buộc"),
-  phoneNumber: z.string().min(1, "Số điện thoại là bắt buộc"),
-  email: z.string().optional(),
-  gender: z.string().optional(),
-  dateOfBirth: z.date().optional(),
-  citizenId: z.string().optional(),
-  startDate: z.date().optional(),
-  note: z.string().optional(),
-  staffRoleId: z.string().min(1, "Vai trò là bắt buộc"),
-});
-
-/**
- * Schema cho form cập nhật nhân sự
- */
-export const UpdateStaffFormSchema = z.object({
-  fullName: z.string().min(1, "Họ tên là bắt buộc"),
-  phoneNumber: z.string().min(1, "Số điện thoại là bắt buộc"),
-  email: z.string().optional(),
-  gender: z.string().optional(),
-  dateOfBirth: z.date().optional(),
-  citizenId: z.string().optional(),
-  startDate: z.date().optional(),
-  note: z.string().optional(),
-  staffRoleId: z.string().min(1, "Vai trò là bắt buộc"),
-});
-
-/**
- * Schema cho form tạo vai trò nhân sự
- */
-export const CreateStaffRoleFormSchema = z.object({
-  name: z.string().min(1, "Tên vai trò là bắt buộc"),
-  code: z.string().min(1, "Mã vai trò là bắt buộc"),
-  description: z.string().optional(),
-});
-
-/**
- * Schema cho form cập nhật vai trò nhân sự
- */
-export const UpdateStaffRoleFormSchema = z.object({
-  name: z.string().min(1, "Tên vai trò là bắt buộc"),
-  code: z.string().min(1, "Mã vai trò là bắt buộc"),
-  description: z.string().optional(),
-});
-
 export const FormSchema = {
   RoomSelectionFormSchema,
   ServicesBreakfastFormSchema,
   ReviewPaymentFormSchema,
   CreateItemFormSchema,
   UpdateItemFormSchema,
-  CreateStaffFormSchema,
-  UpdateStaffFormSchema,
-  CreateStaffRoleFormSchema,
-  UpdateStaffRoleFormSchema,
 };

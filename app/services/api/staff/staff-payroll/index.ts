@@ -1,6 +1,6 @@
 import http from "~/lib/http";
 import { StaffPayroll } from "~/services/url";
-import { StaffPayrollSchema } from "~/services/api/staff-payroll/staff-payroll.schema";
+import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
 import type {
   PayrollGridListResponse,
   PayrollGridParams,

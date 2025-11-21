@@ -17,10 +17,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useMutation } from "@tanstack/react-query";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
+import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import type { PayrollItem } from "~/services/api/staff-payroll/dto";
+import type { PayrollItem } from "~/services/api/staff/staff-payroll/dto";
 
 interface ApplyUnusedLeaveDialogProps {
   payroll: PayrollItem;
@@ -61,7 +61,8 @@ export default function ApplyUnusedLeaveDialog({
           <DialogTitle>Áp dụng chế độ xử lý phép dư</DialogTitle>
           <DialogDescription>
             Nhân viên <strong>{payroll.staffName}</strong> còn{" "}
-            <strong>{payroll.paidLeaveDaysRemaining} ngày phép</strong> chưa sử dụng
+            <strong>{payroll.paidLeaveDaysRemaining} ngày phép</strong> chưa sử
+            dụng
           </DialogDescription>
         </DialogHeader>
 
@@ -74,7 +75,9 @@ export default function ApplyUnusedLeaveDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="PayOut">Trả tiền phép dư</SelectItem>
-                <SelectItem value="CarryOver">Cộng dồn sang tháng sau</SelectItem>
+                <SelectItem value="CarryOver">
+                  Cộng dồn sang tháng sau
+                </SelectItem>
               </SelectContent>
             </Select>
 

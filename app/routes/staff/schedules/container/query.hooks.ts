@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { StaffShiftService } from "~/services/api/staff-shift";
-import { WorkShiftService } from "~/services/api/work-shift";
-import type { StaffShiftListParams } from "~/services/api/staff-shift/staff-shift.type";
+import { StaffShiftService } from "~/services/api/staff/staff-shift";
+import { WorkShiftService } from "~/services/api/staff/work-shift";
+import type { StaffShiftListParams } from "~/services/api/staff/staff-shift/staff-shift.type";
 
 // GET /api/StaffShifts - Query hook for staff shift list
 export function useStaffShiftList(params?: StaffShiftListParams) {

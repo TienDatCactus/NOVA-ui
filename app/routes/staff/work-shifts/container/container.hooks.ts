@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useWorkShiftList } from "./query.hooks";
 import { useWorkShiftFilter } from "./filter.hooks";
-import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
+import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
 
 export default function useWorkShiftsContainer() {
   const { data, isPending, isError, error, refetch } = useWorkShiftList();

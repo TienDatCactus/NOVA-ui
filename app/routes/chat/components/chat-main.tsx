@@ -46,13 +46,13 @@ import {
   useChatMessages,
   useChatSession,
   useCloseSession,
-  useStaffList,
 } from "../container/query.hooks";
 import {
   shouldTranslate,
   useTranslateMessage,
 } from "../container/translation.hooks";
 import { MessageBubble } from "../fragments/message-bubble";
+import { useStaffList } from "~/routes/staff/staff/container/staff/query.hooks";
 
 interface ChatMainProps {
   sessionId: string | null;
@@ -414,8 +414,8 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 <DropdownMenuSubTrigger>Gán nhân viên</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    {staffList && staffList.data.length > 0 ? (
-                      staffList.data.map((staff) => (
+                    {staffList && staffList.length > 0 ? (
+                      staffList.map((staff) => (
                         <DropdownMenuItem
                           key={staff.id}
                           onClick={() => {

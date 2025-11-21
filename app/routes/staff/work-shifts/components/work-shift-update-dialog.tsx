@@ -25,10 +25,10 @@ import { Card } from "~/components/ui/card";
 import { TimePicker24h } from "~/components/ui/time-picker-24h";
 import { Loader2, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
-import { WorkShiftService } from "~/services/api/work-shift";
-import { WorkShiftSchema } from "~/services/api/work-shift/work-shift.schema";
+import { WorkShiftService } from "~/services/api/staff/work-shift";
+import { WorkShiftSchema } from "~/services/api/staff/work-shift/work-shift.schema";
 import { toast } from "sonner";
-import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
+import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
 
 const { UpdateWorkShiftFormSchema } = WorkShiftSchema;
 
@@ -113,7 +113,9 @@ export default function UpdateWorkShiftDialog({
               <Clock className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <DialogTitle className="text-xl">Cập nhật ca làm việc</DialogTitle>
+              <DialogTitle className="text-xl">
+                Cập nhật ca làm việc
+              </DialogTitle>
               <DialogDescription className="mt-1">
                 Chỉnh sửa thông tin ca làm việc
               </DialogDescription>
@@ -134,10 +136,14 @@ export default function UpdateWorkShiftDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-semibold">
-                      Tên ca làm việc <span className="text-destructive">*</span>
+                      Tên ca làm việc{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="VD: Ca sáng, Ca chiều, Ca tối..." {...field} />
+                      <Input
+                        placeholder="VD: Ca sáng, Ca chiều, Ca tối..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription className="text-xs">
                       Tên mô tả ca làm việc

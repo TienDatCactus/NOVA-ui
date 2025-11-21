@@ -10,9 +10,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import type { StaffShiftListItem } from "~/services/api/staff-shift/dto";
-import type { StaffAttendanceListItem } from "~/services/api/staff-attendance/dto";
-import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
+import type { StaffShiftListItem } from "~/services/api/staff/staff-shift/dto";
+import type { StaffAttendanceListItem } from "~/services/api/staff/staff-attendance/dto";
+import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
 import { cn } from "~/lib/utils";
 
 interface ScheduleStaffViewProps {

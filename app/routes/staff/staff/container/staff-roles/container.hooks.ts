@@ -10,11 +10,11 @@ export function useStaffRoleContainer() {
 
   // Client-side filtering
   const filteredStaffRoles = useMemo(() => {
-    if (!data?.data) return [];
+    if (!data) return [];
 
     const searchLower = filters.search.toLowerCase().trim();
 
-    return data.data.filter((role) => {
+    return data.filter((role) => {
       if (searchLower) {
         const matchesName = role.name.toLowerCase().includes(searchLower);
         const matchesCode = role.code.toLowerCase().includes(searchLower);

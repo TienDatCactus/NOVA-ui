@@ -33,13 +33,11 @@ type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
   columns,
   data,
-  onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -139,7 +137,7 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />{" "}
+      <DataTablePagination table={table} />
       <CreateServiceTypeDialog onClose={() => setOpen(false)} open={open} />
     </div>
   );

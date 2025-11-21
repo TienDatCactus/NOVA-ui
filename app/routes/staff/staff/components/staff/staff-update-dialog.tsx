@@ -1,5 +1,10 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { parseISO } from "date-fns";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +22,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
-import { DatePicker } from "~/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -27,43 +29,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { UpdateStaffFormSchema } from "~/services/api/staff/staff.schema";
+import { Textarea } from "~/components/ui/textarea";
 import type {
-  UpdateStaffRequest,
-  StaffDetailItem,
-} from "~/services/api/staff/dto";
-import { StaffService } from "~/services/api/staff";
-import { StaffRoleService } from "~/services/api/staff-role";
-import type { StaffRoleItem } from "~/services/api/staff-role/dto";
-import { toast } from "sonner";
-import { useState, useEffect } from "react";
-import type { z } from "zod";
-import { parseISO, format } from "date-fns";
-import { Plus } from "lucide-react";
-import StaffRoleCreateDialog from "../staff-role/staff-role-create-dialog";
-
-type UpdateStaffFormData = z.infer<typeof UpdateStaffFormSchema>;
+  StaffDetailDto,
+  UpdateStaffDto,
+} from "~/services/api/staff/staff/dto";
+import { StaffSchema } from "~/services/api/staff/staff/staff.schema";
+import { useStaffRoleList } from "../../container/staff-roles/query.hooks";
+import { useUpdateStaff } from "../../container/staff/query.hooks";
 
 interface StaffUpdateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  staff: StaffDetailItem;
-  onSuccess?: () => void;
+  staff: StaffDetailDto;
 }
 
 export default function StaffUpdateDialog({
   open,
   onOpenChange,
   staff,
-  onSuccess,
 }: StaffUpdateDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [roles, setRoles] = useState<StaffRoleItem[]>([]);
-  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
-  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
 
-  const form = useForm<UpdateStaffFormData>({
-    resolver: zodResolver(UpdateStaffFormSchema),
+  const { data: roles } = useStaffRoleList();
+  const { mutateAsync: updateStaff } = useUpdateStaff();
+  const form = useForm<UpdateStaffDto>({
+    resolver: zodResolver(StaffSchema.UpdateStaffSchema),
     defaultValues: {
       fullName: staff.fullName,
       phoneNumber: staff.phoneNumber ?? "",
@@ -77,37 +68,6 @@ export default function StaffUpdateDialog({
     },
   });
 
-  // Fetch staff roles when dialog opens
-  useEffect(() => {
-    if (open) {
-      fetchRoles();
-    }
-  }, [open]);
-
-  const fetchRoles = () => {
-    setIsLoadingRoles(true);
-    StaffRoleService.getStaffRoleList()
-      .then((response) => {
-        setRoles(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching staff roles:", error);
-        toast.error("Không thể tải danh sách vai trò");
-      })
-      .finally(() => {
-        setIsLoadingRoles(false);
-      });
-  };
-
-  const handleRoleCreated = (roleId: string, roleName: string) => {
-    // Refresh roles list
-    fetchRoles();
-    // Auto-select the newly created role
-    form.setValue("staffRoleId", roleId);
-    toast.success(`Đã chọn vai trò: ${roleName}`);
-  };
-
-  // Update form values when staff changes
   useEffect(() => {
     if (open && staff) {
       form.reset({
@@ -126,31 +86,21 @@ export default function StaffUpdateDialog({
     }
   }, [open, staff, form]);
 
-  const onSubmit = async (data: UpdateStaffFormData) => {
+  const onSubmit = async (data: UpdateStaffDto) => {
     setIsSubmitting(true);
     try {
-      // Convert Date objects to ISO strings for API
-      const payload: UpdateStaffRequest = {
-        fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
-        email: data.email,
-        gender: data.gender,
-        dateOfBirth: data.dateOfBirth
-          ? format(data.dateOfBirth, "yyyy-MM-dd")
-          : undefined,
-        citizenId: data.citizenId,
-        startDate: data.startDate
-          ? format(data.startDate, "yyyy-MM-dd")
-          : undefined,
-        note: data.note,
-        staffRoleId: data.staffRoleId,
-      };
-
-      await StaffService.updateStaff(staff.id, payload);
-      toast.success("Cập nhật nhân sự thành công");
-      onOpenChange(false);
-      form.reset();
-      onSuccess?.();
+      await updateStaff(
+        {
+          id: staff.id,
+          data: form.getValues(),
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            form.reset();
+          },
+        }
+      );
     } catch (error) {
       console.error("Staff update error:", error);
       toast.error("Không thể cập nhật nhân sự");
@@ -163,7 +113,7 @@ export default function StaffUpdateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Chỉnh sửa nhân sú</DialogTitle>
+          <DialogTitle>Chỉnh sửa thông tin nhân sự</DialogTitle>
           <DialogDescription>
             Cập nhật thông tin nhân sự: {staff.fullName} ({staff.code})
           </DialogDescription>
@@ -172,7 +122,6 @@ export default function StaffUpdateDialog({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              {/* Full Name */}
               <FormField
                 control={form.control}
                 name="fullName"
@@ -323,36 +272,20 @@ export default function StaffUpdateDialog({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        disabled={isLoadingRoles}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                isLoadingRoles
-                                  ? "Đang tải vai trò..."
-                                  : "Chọn vai trò"
-                              }
-                            />
+                            <SelectValue placeholder="Chọn vai trò" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {roles.map((role) => (
+                          {roles?.map((role) => (
                             <SelectItem key={role.id} value={role.id}>
                               {role.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setIsRoleDialogOpen(true)}
-                        title="Thêm vai trò mới"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -395,13 +328,6 @@ export default function StaffUpdateDialog({
           </form>
         </Form>
       </DialogContent>
-
-      {/* Staff Role Create Dialog */}
-      <StaffRoleCreateDialog
-        open={isRoleDialogOpen}
-        onOpenChange={setIsRoleDialogOpen}
-        onSuccess={handleRoleCreated}
-      />
     </Dialog>
   );
 }

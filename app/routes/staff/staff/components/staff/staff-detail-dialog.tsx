@@ -8,8 +8,8 @@ import {
 } from "~/components/ui/dialog";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { StaffService } from "~/services/api/staff";
-import type { StaffDetailItem } from "~/services/api/staff/dto";
+import { StaffService } from "~/services/api/staff/staff";
+import type { StaffDetailDto } from "~/services/api/staff/staff/dto";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 
@@ -24,7 +24,7 @@ export default function StaffDetailDialog({
   onOpenChange,
   staffId,
 }: StaffDetailDialogProps) {
-  const [staff, setStaff] = useState<StaffDetailItem | null>(null);
+  const [staff, setStaff] = useState<StaffDetailDto | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function StaffDetailDialog({
       setIsLoading(true);
       StaffService.getStaffById(staffId)
         .then((response) => {
-          setStaff(response.data);
+          setStaff(response);
         })
         .catch((error) => {
           console.error("Error fetching staff detail:", error);
@@ -120,9 +120,7 @@ export default function StaffDetailDialog({
             </div>
           </div>
         ) : (
-          <p className="text-center text-muted-foreground">
-            Không có dữ liệu
-          </p>
+          <p className="text-center text-muted-foreground">Không có dữ liệu</p>
         )}
       </DialogContent>
     </Dialog>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { WorkShiftService } from "~/services/api/work-shift";
+import { WorkShiftService } from "~/services/api/staff/work-shift";
 
 export function useWorkShiftList() {
   return useQuery({

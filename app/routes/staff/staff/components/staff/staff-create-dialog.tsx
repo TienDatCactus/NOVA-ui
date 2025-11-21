@@ -27,11 +27,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { CreateStaffFormSchema } from "~/services/api/staff/staff.schema";
-import type { CreateStaffRequest } from "~/services/api/staff/dto";
-import { StaffService } from "~/services/api/staff";
-import { StaffRoleService } from "~/services/api/staff-role";
-import type { StaffRoleItem } from "~/services/api/staff-role/dto";
+import { CreateStaffFormSchema } from "~/services/schema/forms.schema";
+import type { CreateStaffDto } from "~/services/api/staff/staff/dto";
+import { StaffService } from "~/services/api/staff/staff";
+import { StaffRoleService } from "~/services/api/staff/staff-role";
+import type { StaffRoleItem } from "~/services/api/staff/staff-role/dto";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
@@ -92,7 +92,7 @@ export default function StaffDialog({
     setIsLoadingRoles(true);
     StaffRoleService.getStaffRoleList()
       .then((response) => {
-        setRoles(response.data);
+        setRoles(response);
       })
       .catch((error) => {
         console.error("Error fetching staff roles:", error);
@@ -115,7 +115,7 @@ export default function StaffDialog({
     setIsSubmitting(true);
     try {
       // Convert Date objects to ISO strings for API
-      const payload: CreateStaffRequest = {
+      const payload: CreateStaffDto = {
         code: data.code,
         fullName: data.fullName,
         phoneNumber: data.phoneNumber,

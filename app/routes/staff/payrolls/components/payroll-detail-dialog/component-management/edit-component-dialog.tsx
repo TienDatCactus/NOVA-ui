@@ -28,11 +28,15 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
-import type { PayrollComponent } from "~/services/api/staff-payroll/dto";
-import { ComponentTypeConfig } from "~/services/api/staff-payroll/staff-payroll.type";
-import { StaffPayrollSchema } from "~/services/api/staff-payroll/staff-payroll.schema";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
+import type { PayrollComponent } from "~/services/api/staff/staff-payroll/dto";
+import { ComponentTypeConfig } from "~/services/api/staff/staff-payroll/staff-payroll.type";
+import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
 import { toast } from "sonner";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -137,42 +141,61 @@ export default function EditComponentDialog({
                     <FormLabel>Loại khoản</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger 
-                          className="h-10" 
-                        >
+                        <SelectTrigger className="h-10">
                           <SelectValue>
-                            {field.value && (() => {
-                              const isDeductionType = ["Penalty", "Advance", "AdjustmentDecrease"].includes(field.value);
-                              return (
-                                <div className="flex items-center gap-2">
-                                  <span className={`text-base font-bold ${
-                                    isDeductionType ? "text-red-600" : "text-green-600"
-                                  }`}>
-                                    {isDeductionType ? "-" : "+"}
-                                  </span>
-                                  <span>{ComponentTypeConfig[field.value]?.label}</span>
-                                </div>
-                              );
-                            })()}
+                            {field.value &&
+                              (() => {
+                                const isDeductionType = [
+                                  "Penalty",
+                                  "Advance",
+                                  "AdjustmentDecrease",
+                                ].includes(field.value);
+                                return (
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className={`text-base font-bold ${
+                                        isDeductionType
+                                          ? "text-red-600"
+                                          : "text-green-600"
+                                      }`}
+                                    >
+                                      {isDeductionType ? "-" : "+"}
+                                    </span>
+                                    <span>
+                                      {ComponentTypeConfig[field.value]?.label}
+                                    </span>
+                                  </div>
+                                );
+                              })()}
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.entries(ComponentTypeConfig).map(([key, config]) => {
-                          const isDeductionType = ["Penalty", "Advance", "AdjustmentDecrease"].includes(key);
-                          return (
-                            <SelectItem key={key} value={key}>
-                              <div className="flex items-center gap-2">
-                                <span className={`text-base font-bold ${
-                                  isDeductionType ? "text-red-600" : "text-green-600"
-                                }`}>
-                                  {isDeductionType ? "-" : "+"}
-                                </span>
-                                <span>{config.label}</span>
-                              </div>
-                            </SelectItem>
-                          );
-                        })}
+                        {Object.entries(ComponentTypeConfig).map(
+                          ([key, config]) => {
+                            const isDeductionType = [
+                              "Penalty",
+                              "Advance",
+                              "AdjustmentDecrease",
+                            ].includes(key);
+                            return (
+                              <SelectItem key={key} value={key}>
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`text-base font-bold ${
+                                      isDeductionType
+                                        ? "text-red-600"
+                                        : "text-green-600"
+                                    }`}
+                                  >
+                                    {isDeductionType ? "-" : "+"}
+                                  </span>
+                                  <span>{config.label}</span>
+                                </div>
+                              </SelectItem>
+                            );
+                          }
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -188,7 +211,10 @@ export default function EditComponentDialog({
                     <FormLabel>Tên khoản</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={ComponentTypeConfig[selectedType]?.label || "Nhập tiêu đề"}
+                        placeholder={
+                          ComponentTypeConfig[selectedType]?.label ||
+                          "Nhập tiêu đề"
+                        }
                         className="h-10"
                         {...field}
                       />
@@ -214,7 +240,9 @@ export default function EditComponentDialog({
                           placeholder="0"
                           className="pr-12 h-10"
                           value={field.value}
-                          onChange={(e) => handleNumberInputChange(e, field.onChange)}
+                          onChange={(e) =>
+                            handleNumberInputChange(e, field.onChange)
+                          }
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                           VNĐ
@@ -257,7 +285,9 @@ export default function EditComponentDialog({
                           selected={date}
                           onSelect={(newDate) => {
                             setDate(newDate);
-                            field.onChange(newDate ? format(newDate, "yyyy-MM-dd") : "");
+                            field.onChange(
+                              newDate ? format(newDate, "yyyy-MM-dd") : ""
+                            );
                           }}
                           captionLayout="dropdown"
                           className="rounded-md border"

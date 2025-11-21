@@ -1,6 +1,6 @@
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import type { PayrollItem } from "~/services/api/staff-payroll/dto";
+import type { PayrollItem } from "~/services/api/staff/staff-payroll/dto";
 
 interface PayrollsListProps {
   data: PayrollItem[];
@@ -8,6 +8,17 @@ interface PayrollsListProps {
   onRowClick?: (row: PayrollItem) => void;
 }
 
-export default function PayrollsList({ data, onSuccess, onRowClick }: PayrollsListProps) {
-  return <DataTable columns={columns} data={data} onSuccess={onSuccess} onRowClick={onRowClick} />;
+export default function PayrollsList({
+  data,
+  onSuccess,
+  onRowClick,
+}: PayrollsListProps) {
+  return (
+    <DataTable
+      columns={columns}
+      data={data}
+      onSuccess={onSuccess}
+      onRowClick={onRowClick}
+    />
+  );
 }

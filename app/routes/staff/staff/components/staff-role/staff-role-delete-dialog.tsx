@@ -8,8 +8,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import type { StaffRoleItem } from "~/services/api/staff-role/dto";
-import { StaffRoleService } from "~/services/api/staff-role";
+import type { StaffRoleItem } from "~/services/api/staff/staff-role/dto";
+import { StaffRoleService } from "~/services/api/staff/staff-role";
 import { toast } from "sonner";
 import { useState } from "react";
 

@@ -19,12 +19,12 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
-import { UpdateStaffRoleRequestSchema } from "~/services/api/staff-role/staff-role.schema";
+import { UpdateStaffRoleRequestSchema } from "~/services/api/staff/staff-role/staff-role.schema";
 import type {
   UpdateStaffRoleRequest,
   StaffRoleItem,
-} from "~/services/api/staff-role/dto";
-import { StaffRoleService } from "~/services/api/staff-role";
+} from "~/services/api/staff/staff-role/dto";
+import { StaffRoleService } from "~/services/api/staff/staff-role";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import type { z } from "zod";

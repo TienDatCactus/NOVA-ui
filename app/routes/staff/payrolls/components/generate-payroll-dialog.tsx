@@ -19,8 +19,8 @@ import {
 import { Checkbox } from "~/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
-import { StaffService } from "~/services/api/staff";
+import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
+import { StaffService } from "~/services/api/staff/staff";
 import { toast } from "sonner";
 import { Loader2, Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
@@ -71,10 +71,11 @@ export default function GeneratePayrollDialog({
   });
 
   const staffList = (staffListData as any)?.data || [];
-  
-  const filteredStaffs = staffList.filter((staff: any) =>
-    staff.fullName?.toLowerCase().includes(staffSearchQuery.toLowerCase()) ||
-    staff.code?.toLowerCase().includes(staffSearchQuery.toLowerCase())
+
+  const filteredStaffs = staffList.filter(
+    (staff: any) =>
+      staff.fullName?.toLowerCase().includes(staffSearchQuery.toLowerCase()) ||
+      staff.code?.toLowerCase().includes(staffSearchQuery.toLowerCase())
   );
 
   const selectedStaff = staffList.find((s: any) => s.id === selectedStaffId);
@@ -101,7 +102,10 @@ export default function GeneratePayrollDialog({
             payload.baseSalaryFullMonth = parsedValue;
           }
         }
-        return StaffPayrollService.generateSinglePayroll(selectedStaffId, payload);
+        return StaffPayrollService.generateSinglePayroll(
+          selectedStaffId,
+          payload
+        );
       }
     },
     onSuccess: () => {
@@ -136,16 +140,25 @@ export default function GeneratePayrollDialog({
           {/* Phạm vi áp dụng */}
           <div className="space-y-3">
             <Label>Phạm vi áp dụng</Label>
-            <RadioGroup value={scope} onValueChange={(value: any) => setScope(value)}>
+            <RadioGroup
+              value={scope}
+              onValueChange={(value: any) => setScope(value)}
+            >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="all" id="scope-all" />
-                <label htmlFor="scope-all" className="text-sm font-medium cursor-pointer">
+                <label
+                  htmlFor="scope-all"
+                  className="text-sm font-medium cursor-pointer"
+                >
                   Tất cả nhân viên
                 </label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="single" id="scope-single" />
-                <label htmlFor="scope-single" className="text-sm font-medium cursor-pointer">
+                <label
+                  htmlFor="scope-single"
+                  className="text-sm font-medium cursor-pointer"
+                >
                   Tùy chọn
                 </label>
               </div>
@@ -178,13 +191,14 @@ export default function GeneratePayrollDialog({
                   <SelectValue placeholder="Chọn năm" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i).map(
-                    (y) => (
-                      <SelectItem key={y} value={y.toString()}>
-                        Năm {y}
-                      </SelectItem>
-                    )
-                  )}
+                  {Array.from(
+                    { length: 5 },
+                    (_, i) => currentDate.getFullYear() - 2 + i
+                  ).map((y) => (
+                    <SelectItem key={y} value={y.toString()}>
+                      Năm {y}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -196,7 +210,10 @@ export default function GeneratePayrollDialog({
               {/* Staff Picker */}
               <div className="space-y-2">
                 <Label>Chọn nhân viên</Label>
-                <Popover open={staffSearchOpen} onOpenChange={setStaffSearchOpen}>
+                <Popover
+                  open={staffSearchOpen}
+                  onOpenChange={setStaffSearchOpen}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -206,11 +223,15 @@ export default function GeneratePayrollDialog({
                     >
                       {selectedStaff ? (
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs">{selectedStaff.code}</span>
+                          <span className="font-mono text-xs">
+                            {selectedStaff.code}
+                          </span>
                           <span>{selectedStaff.fullName}</span>
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">Chọn nhân viên...</span>
+                        <span className="text-muted-foreground">
+                          Chọn nhân viên...
+                        </span>
                       )}
                       <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -248,7 +269,9 @@ export default function GeneratePayrollDialog({
                                     </span>
                                   </div>
                                   <div className="flex flex-col">
-                                    <span className="font-medium">{staff.fullName}</span>
+                                    <span className="font-medium">
+                                      {staff.fullName}
+                                    </span>
                                     <span className="text-xs text-muted-foreground font-mono">
                                       {staff.code}
                                     </span>
@@ -266,14 +289,21 @@ export default function GeneratePayrollDialog({
 
               {/* Lương cơ bản */}
               <div className="space-y-2">
-                <Label htmlFor="baseSalary">Lương cơ bản (tháng đủ) <span className="text-xs text-muted-foreground">(không bắt buộc)</span></Label>
+                <Label htmlFor="baseSalary">
+                  Lương cơ bản (tháng đủ){" "}
+                  <span className="text-xs text-muted-foreground">
+                    (không bắt buộc)
+                  </span>
+                </Label>
                 <div className="relative">
                   <Input
                     id="baseSalary"
                     type="text"
                     placeholder="0"
                     value={baseSalaryFullMonth}
-                    onChange={(e) => handleNumberInputChange(e, setBaseSalaryFullMonth)}
+                    onChange={(e) =>
+                      handleNumberInputChange(e, setBaseSalaryFullMonth)
+                    }
                     className="pr-12"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -296,10 +326,10 @@ export default function GeneratePayrollDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={(
+            disabled={
               generateMutation.isPending ||
               (scope === "single" && !selectedStaffId)
-            )}
+            }
           >
             {generateMutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
