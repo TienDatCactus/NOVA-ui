@@ -31,7 +31,7 @@ import { Calendar } from "~/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { StaffPayrollService } from "~/services/api/staff-payroll";
 import { ComponentTypeConfig } from "~/services/api/staff-payroll/staff-payroll.type";
-import { StaffPayrollSchema } from "~/services/schema/staff-payroll.schema";
+import { StaffPayrollSchema } from "~/services/api/staff-payroll/staff-payroll.schema";
 import { toast } from "sonner";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";

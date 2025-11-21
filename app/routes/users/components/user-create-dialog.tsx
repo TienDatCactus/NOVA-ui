@@ -196,7 +196,7 @@ export function UserFormDialog({
                     name="userName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tên đăng nhập</FormLabel>
+                        <FormLabel>Tên đăng nhập <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="john_doe" {...field} />
                         </FormControl>
@@ -209,7 +209,7 @@ export function UserFormDialog({
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Mật khẩu</FormLabel>
+                        <FormLabel>Mật khẩu <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input
                             type="password"
@@ -236,7 +236,7 @@ export function UserFormDialog({
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Họ và tên</FormLabel>
+                    <FormLabel>Họ và tên <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input placeholder="Nguyễn Văn A" {...field} />
                     </FormControl>
@@ -250,7 +250,7 @@ export function UserFormDialog({
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -267,7 +267,7 @@ export function UserFormDialog({
                   name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số điện thoại</FormLabel>
+                      <FormLabel>Số điện thoại<span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="0123456789" {...field} />
                       </FormControl>
@@ -300,7 +300,7 @@ export function UserFormDialog({
                     name="roles"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Chọn vai trò</FormLabel>
+                        <FormLabel>Chọn vai trò <span className="text-destructive">*</span></FormLabel>
                         <Popover
                           open={openRoleSelect}
                           onOpenChange={setOpenRoleSelect}

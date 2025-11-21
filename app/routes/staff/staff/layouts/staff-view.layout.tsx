@@ -45,17 +45,13 @@ export default function StaffViewLayout({
               nhân sự
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pr-5">
             {onCreateStaff && (
               <Button onClick={onCreateStaff} className="gap-2">
                 <UserPlus className="h-4 w-4" />
                 Thêm nhân sự
               </Button>
             )}
-            <Button variant="outline" className="gap-2">
-              <FileText className="h-4 w-4" />
-              Xuất báo cáo
-            </Button>
           </div>
         </div>
         <div className="flex-1 overflow-auto">{children}</div>
