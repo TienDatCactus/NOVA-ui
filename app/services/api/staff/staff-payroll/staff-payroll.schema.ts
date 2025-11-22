@@ -47,7 +47,7 @@ const PayrollItemSchema = z.object({
   paidAmount: z.number(),
   remainingAmount: z.number(),
   locked: z.boolean(),
-  hasUnusedLeavePending: z.boolean(),
+  hasUnusedLeavePending: z.boolean().optional(),
   components: z.array(PayrollComponentSchema).optional().default([]),
 });
 

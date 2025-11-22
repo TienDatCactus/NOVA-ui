@@ -5,32 +5,11 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import StatusSelectCell from "../../fragments/status-select.cell";
+import { Button } from "~/components/ui/button";
+import PayrollDetailDialog from "../payroll-detail-dialog";
+import { useState } from "react";
 
 export const columns: ColumnDef<PayrollItemDto>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Chọn tất cả"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Chọn dòng"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "index",
     header: "STT",
@@ -45,13 +24,25 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Mã nhân viên" />
     ),
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span className="font-mono font-medium">
-          {row.getValue("staffCode")}
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const [openDetailDialog, setOpenDetailDialog] = useState(false);
+      return (
+        <>
+          <Button
+            variant="link"
+            className="p-0"
+            onClick={() => setOpenDetailDialog(true)}
+          >
+            {row.getValue("staffCode")}
+          </Button>
+          <PayrollDetailDialog
+            payrollId={row.original.payrollId}
+            onOpenChange={setOpenDetailDialog}
+            open={openDetailDialog}
+          />
+        </>
+      );
+    },
     enableHiding: false,
   },
   {

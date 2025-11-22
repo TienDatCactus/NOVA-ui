@@ -1,45 +1,37 @@
-import { useQuery } from "@tanstack/react-query";
+import { Download, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
-import { Loader2, Download } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Button } from "~/components/ui/button";
-import { toast } from "sonner";
-import { useState } from "react";
-import ComponentsList from "./payroll-detail-dialog/components-list";
+import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { usePayrollDetail } from "../container/query.hooks";
+import ComponentsList from "./payroll-detail-dialog/components-list";
 
 interface PayrollDetailDialogProps {
   payrollId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
 }
 
 export default function PayrollDetailDialog({
   payrollId,
   open,
   onOpenChange,
-  onSuccess,
 }: PayrollDetailDialogProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const { data, isPending, refetch } = usePayrollDetail(payrollId);
 
   const payroll = (data as any)?.data || data;
-
-  const handleRefresh = () => {
-    refetch(); // Refetch detail
-    onSuccess?.(); // Refetch list
-  };
 
   const handleExportPayslip = async () => {
     setIsExporting(true);
@@ -325,7 +317,7 @@ export default function PayrollDetailDialog({
                   payrollId={payrollId}
                   components={payroll.components || []}
                   componentsTotal={payroll.componentsTotal || 0}
-                  onRefresh={handleRefresh}
+                  onRefresh={refetch}
                 />
               </TabsContent>
             </div>

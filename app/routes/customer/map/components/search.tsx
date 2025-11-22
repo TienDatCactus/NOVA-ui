@@ -74,10 +74,8 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className }) => {
         const data = await search.searchByResortCategory(categoryKey as any);
         const features = (data?.features || data?.suggestions || []) as any[];
 
-        // Show list results
         setResults(normalizeResults(features));
 
-        // Also drop markers for category results
         if (!mapRef.current) return;
         clearMarkers();
 

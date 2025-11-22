@@ -125,15 +125,39 @@ export function useRejectPurchaseRequest() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) =>
-      await PurchaseRequestsService.rejectPurchaseRequest(id),
-    onSuccess: (_, id) => {
+    mutationFn: async ({ id, reason }: { id: string; reason?: string }) =>
+      await PurchaseRequestsService.rejectPurchaseRequest(id, reason),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["purchase-requests"] });
-      queryClient.invalidateQueries({ queryKey: ["purchase-request", id] });
+      queryClient.invalidateQueries({
+        queryKey: ["purchase-request", variables.id],
+      });
       toast.success("Từ chối yêu cầu mua hàng thành công");
     },
     onError: (error: any) => {
       toast.error(error?.message || "Lỗi khi từ chối yêu cầu mua hàng");
+    },
+  });
+}
+
+/**
+ * Hook hủy purchase request
+ */
+export function useCancelPurchaseRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason?: string }) =>
+      await PurchaseRequestsService.cancelPurchaseRequest(id, reason),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["purchase-requests"] });
+      queryClient.invalidateQueries({
+        queryKey: ["purchase-request", variables.id],
+      });
+      toast.success("Hủy yêu cầu mua hàng thành công");
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Lỗi khi hủy yêu cầu mua hàng");
     },
   });
 }

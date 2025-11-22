@@ -1,5 +1,6 @@
 import {
   CheckCircle,
+  Eye,
   MoreHorizontal,
   PackageCheck,
   Pencil,
@@ -18,6 +19,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import type { PurchaseRequestListItemDto } from "~/services/api/stocks/purchase-requests/dto";
 import EditPurchaseRequestDialog from "../components/edit-purchase-request.dialog";
+import PurchaseRequestDetailDialog from "../components/purchase-request-detail.dialog";
 import ApproveRejectDialog from "./approve-reject.dialog";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
 import ReceiveStockDialog from "./receive-stock.dialog";
@@ -29,10 +31,12 @@ interface PurchaseRequestActionCellProps {
 const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
   purchaseRequest,
 }) => {
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
   const [openRejectDialog, setOpenRejectDialog] = useState(false);
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [openReceiveDialog, setOpenReceiveDialog] = useState(false);
 
   const canEdit = purchaseRequest.status === "Draft";
@@ -42,16 +46,15 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
     purchaseRequest.status === "Cancelled";
   const canApprove = purchaseRequest.status === "Draft";
   const canReject = canApprove;
+  const canCancel =
+    purchaseRequest.status === "Draft" || purchaseRequest.status === "Approved";
   const canReceive =
     purchaseRequest.status === "Approved" && !purchaseRequest.isReceived;
 
   const hasAnyAction =
-    canEdit || canDelete || canApprove || canReject || canReceive;
+    canEdit || canDelete || canApprove || canReject || canCancel || canReceive;
 
-  if (!hasAnyAction) {
-    return null;
-  }
-
+  // Always show action button to allow viewing details
   return (
     <div className="flex justify-end">
       <DropdownMenu>
@@ -63,6 +66,8 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
           <DropdownMenuSeparator />
+
+          {hasAnyAction && <DropdownMenuSeparator />}
 
           {canEdit && (
             <DropdownMenuItem onClick={() => setOpenEditDialog(true)}>
@@ -92,6 +97,16 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
             <DropdownMenuItem onClick={() => setOpenReceiveDialog(true)}>
               <PackageCheck className="mr-2 h-4 w-4" />
               Nhận hàng vào kho
+            </DropdownMenuItem>
+          )}
+
+          {canCancel && (
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={() => setOpenCancelDialog(true)}
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              Hủy yêu cầu
             </DropdownMenuItem>
           )}
 
@@ -136,6 +151,13 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
         onClose={() => setOpenRejectDialog(false)}
         purchaseRequest={purchaseRequest}
         action="reject"
+      />
+
+      <ApproveRejectDialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+        purchaseRequest={purchaseRequest}
+        action="cancel"
       />
 
       {canReceive && (

@@ -1,6 +1,4 @@
-import type { MapboxRetrieveResponse } from "../types/mapbox-search";
-
-export function normalizePoiDetail(res: MapboxRetrieveResponse) {
+export function normalizePoiDetail(res: any) {
   const f = res.features?.[0];
   if (!f) return null;
 

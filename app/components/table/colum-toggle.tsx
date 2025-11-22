@@ -28,7 +28,7 @@ export function DataTableViewOptions<TData>({
           Hiển thị cột
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[150px]">
+      <DropdownMenuContent align="end">
         <DropdownMenuLabel>Hiển thị cột</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {table

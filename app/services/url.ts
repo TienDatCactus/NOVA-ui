@@ -284,6 +284,7 @@ const Stock = {
     delete: (id: string) => `PurchaseRequests/${id}`,
     approve: (id: string) => `PurchaseRequests/${id}/approve`,
     reject: (id: string) => `PurchaseRequests/${id}/reject`,
+    cancel: (id: string) => `PurchaseRequests/${id}/cancel`,
     receiveStock: (id: string) => `PurchaseRequests/${id}/receive-stock`,
   },
   StockAdjustments: {

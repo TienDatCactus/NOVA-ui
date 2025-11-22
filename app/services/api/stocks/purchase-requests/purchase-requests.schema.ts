@@ -15,10 +15,10 @@ const PurchaseRequestItemSchema = z.object({
   itemCode: z.string().nullable(),
   freeTextItemName: z.string(),
   freeTextItemDescription: z.string().optional().nullable(),
-  freeTextUnitName: z.string(),
+  freeTextUnitName: z.string().optional().nullable(),
   quantity: z.number(),
   unitCost: z.number(),
-  note: z.string(),
+  note: z.string().optional().nullable(),
 });
 
 const PurchaseRequestListItemSchema = z.object({
@@ -26,7 +26,7 @@ const PurchaseRequestListItemSchema = z.object({
   requestNumber: z.string(),
   requestedAt: z.string(),
   status: PurchaseRequestStatusEnum,
-  notes: z.string(),
+  notes: z.string().optional().nullable(),
   approvedBy: z.string().nullable(),
   approvedByName: z.string().nullable(),
   approvedAt: z.string().nullable(),
@@ -47,11 +47,11 @@ const CreatePurchaseItemRequestSchema = z.object({
     .number("Số lượng không hợp lệ")
     .positive("Số lượng phải lớn hơn 0"),
   unitCost: z.number("Đơn giá không hợp lệ").nonnegative("Giá không được âm"),
-  note: z.string("Ghi chú không hợp lệ").optional(),
+  note: z.string("Ghi chú không hợp lệ").optional().nullable(),
 });
 
 const CreatePurchaseRequestSchema = z.object({
-  notes: z.string().optional(),
+  notes: z.string().optional().nullable(),
   items: z.array(CreatePurchaseItemRequestSchema),
 });
 
@@ -62,14 +62,14 @@ const UpdatePurchaseItemRequestSchema = CreatePurchaseItemRequestSchema.extend({
 });
 
 const UpdatePurchaseRequestSchema = z.object({
-  notes: z.string().optional(),
+  notes: z.string().optional().nullable(),
   items: z.array(UpdatePurchaseItemRequestSchema),
 });
 
 const ReceiveStockRequestSchema = z.object({
   actualCosts: z.record(z.uuid(), z.number()),
   expenseId: z.string().nullable().optional(),
-  note: z.string().optional(),
+  note: z.string().optional().nullable(),
 });
 
 export const PurchaseRequestsSchemas = {

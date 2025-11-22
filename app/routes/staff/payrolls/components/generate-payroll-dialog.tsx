@@ -50,6 +50,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { useStaffList } from "../../staff/container/query.hooks";
 
 const generatePayrollSchema = z
   .object({
@@ -85,7 +86,6 @@ export default function GeneratePayrollDialog({
 }: GeneratePayrollDialogProps) {
   const currentDate = new Date();
   const [staffSearchOpen, setStaffSearchOpen] = useState(false);
-  const [staffSearchQuery, setStaffSearchQuery] = useState("");
 
   const form = useForm<GeneratePayrollFormData>({
     resolver: zodResolver(generatePayrollSchema),
@@ -102,21 +102,9 @@ export default function GeneratePayrollDialog({
   const selectedStaffId = form.watch("selectedStaffId");
 
   // Fetch staff list
-  const { data: staffListData, isPending: isLoadingStaffs } = useQuery({
-    queryKey: ["staffs-list"],
-    queryFn: () => StaffService.getStaffList(),
-    enabled: open && scope === "single",
-  });
+  const { data: staffList, isPending: isLoadingStaffs } = useStaffList({});
 
-  const staffList = (staffListData as any)?.data || [];
-
-  const filteredStaffs = staffList.filter(
-    (staff: any) =>
-      staff.fullName?.toLowerCase().includes(staffSearchQuery.toLowerCase()) ||
-      staff.code?.toLowerCase().includes(staffSearchQuery.toLowerCase())
-  );
-
-  const selectedStaff = staffList.find((s: any) => s.id === selectedStaffId);
+  const selectedStaff = staffList?.find((s: any) => s.id === selectedStaffId);
 
   const { mutate: generateAll, isPending: isGeneratingAll } =
     useGeneratePayroll();
@@ -323,29 +311,24 @@ export default function GeneratePayrollDialog({
                         </PopoverTrigger>
                         <PopoverContent className="w-[400px] p-0">
                           <Command>
-                            <CommandInput
-                              placeholder="Tìm theo mã hoặc tên nhân viên..."
-                              value={staffSearchQuery}
-                              onValueChange={setStaffSearchQuery}
-                            />
+                            <CommandInput placeholder="Tìm theo mã hoặc tên nhân viên..." />
                             <CommandList>
                               {isLoadingStaffs ? (
                                 <div className="flex items-center justify-center py-6">
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 </div>
-                              ) : filteredStaffs.length === 0 ? (
+                              ) : staffList?.length === 0 ? (
                                 <CommandEmpty>
                                   Không tìm thấy nhân viên
                                 </CommandEmpty>
                               ) : (
                                 <CommandGroup>
-                                  {filteredStaffs.map((staff: any) => (
+                                  {staffList?.map((staff: any) => (
                                     <CommandItem
                                       key={staff.id}
                                       value={`${staff.code}-${staff.fullName}`}
                                       onSelect={() => {
                                         field.onChange(staff.id);
-                                        setStaffSearchQuery("");
                                         setStaffSearchOpen(false);
                                       }}
                                     >
