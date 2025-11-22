@@ -1,48 +1,30 @@
+import { Loader2 } from "lucide-react";
 import { Card } from "~/components/ui/card";
-import { usePayrollsContainer } from "./container/container.hooks";
-import HeaderLayout from "./layouts/header.layout";
-import PayrollsList from "./components/payrolls-list";
 import GeneratePayrollDialog from "./components/generate-payroll-dialog";
 import PayrollDetailDialog from "./components/payroll-detail-dialog";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
+import PayrollsList from "./components/payrolls-list";
+import { usePayrollFilter } from "./container/filter.hooks";
+import { usePayrolls } from "./container/query.hooks";
+import PayrollsLayout from "./layouts/payrolls.layout";
 
 export default function PayrollsPage() {
+  const { filterState, updateFilter, resetFilter } = usePayrollFilter();
+
   const {
-    payrolls,
+    data: payrolls,
     isPending,
-    filterState,
-    updateFilter,
-    generateDialogOpen,
-    setGenerateDialogOpen,
     refetch,
-  } = usePayrollsContainer();
-
-  const [selectedPayrollId, setSelectedPayrollId] = useState<string | null>(
-    null
-  );
-
-  const handleRowClick = (payroll: PayrollItemDto) => {
-    setSelectedPayrollId(payroll.payrollId);
-  };
-
-  // Filter payrolls based on search query
-  const filteredPayrolls = payrolls.filter((payroll: PayrollItemDto) => {
-    if (!filterState.search) return true;
-    const searchLower = filterState.search.toLowerCase();
-    return (
-      payroll.staffCode.toLowerCase().includes(searchLower) ||
-      payroll.staffName.toLowerCase().includes(searchLower)
-    );
+  } = usePayrolls({
+    year: filterState.year,
+    month: filterState.month,
   });
 
   return (
     <div className="p-6 space-y-6">
-      <HeaderLayout
-        onGenerateClick={() => setGenerateDialogOpen(true)}
+      <PayrollsLayout
         filterState={filterState}
         updateFilter={updateFilter}
+        resetFilter={resetFilter}
         onRefresh={refetch}
       />
 
@@ -52,28 +34,9 @@ export default function PayrollsPage() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <PayrollsList
-            data={filteredPayrolls}
-            onSuccess={refetch}
-            onRowClick={handleRowClick}
-          />
+          <PayrollsList data={payrolls ?? []} />
         )}
       </Card>
-
-      <GeneratePayrollDialog
-        open={generateDialogOpen}
-        onOpenChange={setGenerateDialogOpen}
-        onSuccess={refetch}
-      />
-
-      {selectedPayrollId && (
-        <PayrollDetailDialog
-          payrollId={selectedPayrollId}
-          open={!!selectedPayrollId}
-          onOpenChange={(open) => !open && setSelectedPayrollId(null)}
-          onSuccess={refetch}
-        />
-      )}
     </div>
   );
 }

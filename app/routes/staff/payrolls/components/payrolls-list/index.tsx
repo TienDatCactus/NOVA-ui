@@ -4,21 +4,12 @@ import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 
 interface PayrollsListProps {
   data: PayrollItemDto[];
-  onSuccess?: () => void;
-  onRowClick?: (row: PayrollItemDto) => void;
 }
 
-export default function PayrollsList({
-  data,
-  onSuccess,
-  onRowClick,
-}: PayrollsListProps) {
+export default function PayrollsList({ data }: PayrollsListProps) {
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      onSuccess={onSuccess}
-      onRowClick={onRowClick}
-    />
+    <div className="mx-auto container">
+      <DataTable columns={columns} data={data} />
+    </div>
   );
 }

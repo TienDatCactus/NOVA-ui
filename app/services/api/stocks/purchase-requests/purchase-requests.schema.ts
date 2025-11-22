@@ -2,7 +2,6 @@ import { z } from "zod";
 
 const PurchaseRequestStatusEnum = z.enum([
   "Draft",
-  "PendingApproval",
   "Approved",
   "Rejected",
   "Fulfilled",

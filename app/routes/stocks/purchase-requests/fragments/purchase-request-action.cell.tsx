@@ -40,12 +40,8 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
     purchaseRequest.status === "Draft" ||
     purchaseRequest.status === "Rejected" ||
     purchaseRequest.status === "Cancelled";
-  const canApprove =
-    purchaseRequest.status === "Draft" ||
-    purchaseRequest.status === "PendingApproval";
-  const canReject =
-    purchaseRequest.status === "Draft" ||
-    purchaseRequest.status === "PendingApproval";
+  const canApprove = purchaseRequest.status === "Draft";
+  const canReject = canApprove;
   const canReceive =
     purchaseRequest.status === "Approved" && !purchaseRequest.isReceived;
 

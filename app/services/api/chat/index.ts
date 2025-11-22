@@ -31,6 +31,7 @@ async function getChatEntry(roomToken: string): Promise<ChatEntryResponseDto> {
     const resp = await axios.get(Chat.entry(roomToken));
     return ChatEntryResponseSchema.parse(resp.data.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -46,6 +47,7 @@ async function getChatSession(
     const resp = await axios.get(Chat.session(sessionId));
     return ChatSessionDetailSchema.parse(resp.data.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -62,6 +64,7 @@ async function getChatSessionMessages(
     const resp = await axios.get(Chat.messages(sessionId), { params });
     return ChatSessionMessagesSchema.parse(resp.data.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -78,6 +81,7 @@ async function sendChatMessageHttp(
     const resp = await axios.post(Chat.sendMessage, validatedData);
     return ChatSendHttpMessageResponseSchema.parse(resp.data.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -92,6 +96,7 @@ async function getStaffChatInbox(
     const resp = await http.get(Chat.staffInbox, { params });
     return StaffChatInboxResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -108,6 +113,7 @@ async function assignChatSession(
   try {
     await axios.post(Chat.assign(sessionId), { staffUserId });
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -120,6 +126,7 @@ async function closeChatSession(sessionId: string): Promise<void> {
   try {
     await axios.post(Chat.close(sessionId));
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }

@@ -34,6 +34,7 @@ async function getPayrollGrid(
     const resp = await http.get(StaffPayroll.grid, { params });
     return PayrollListSchema.parse(resp.data);
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -49,6 +50,7 @@ async function generatePayroll(
     const resp = await http.post(StaffPayroll.generate, validated);
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -68,6 +70,7 @@ async function generateSinglePayroll(
     );
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -80,6 +83,7 @@ async function getPayrollDetail(id: string): Promise<PayrollDetailDto> {
     const resp = await http.get(StaffPayroll.detail(id));
     return PayrollDetailSchema.parse(resp.data);
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -96,6 +100,7 @@ async function updatePayroll(
     const resp = await http.put(StaffPayroll.update(id), validated);
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -112,6 +117,7 @@ async function applyUnusedLeave(
     const resp = await http.post(StaffPayroll.applyUnusedLeave(id), validated);
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -126,6 +132,7 @@ async function lockPayroll(
     const resp = await http.post(StaffPayroll.lock(id));
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -140,6 +147,7 @@ async function unlockPayroll(
     const resp = await http.post(StaffPayroll.unlock(id));
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -152,6 +160,7 @@ async function getComponents(id: string): Promise<PayrollComponentListDto> {
     const resp = await http.get(StaffPayroll.getComponents(id));
     return PayrollComponentListSchema.parse(resp.data);
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -168,6 +177,7 @@ async function addComponent(
     const resp = await http.post(StaffPayroll.addComponent(id), validated);
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -187,6 +197,7 @@ async function updateComponent(
     );
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -201,6 +212,7 @@ async function deleteComponent(
     const resp = await http.delete(StaffPayroll.deleteComponent(componentId));
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -225,6 +237,7 @@ async function exportMonthly(params: {
       typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
     return new Blob([blobContent as BlobPart]);
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -245,6 +258,7 @@ async function exportPayslip(id: string): Promise<Blob> {
       typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
     return new Blob([blobContent as BlobPart]);
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -260,6 +274,7 @@ async function refreshDays(params: {
     const resp = await http.post(StaffPayroll.refreshDays, null, { params });
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }
@@ -274,6 +289,7 @@ async function refreshSinglePayroll(
     const resp = await http.post(StaffPayroll.refreshSinglePayroll(id));
     return resp.data;
   } catch (error) {
+    console.log(error);
     return Promise.reject(error);
   }
 }

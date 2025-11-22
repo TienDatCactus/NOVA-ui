@@ -8,11 +8,10 @@ import {
   type ComponentTypeKey,
 } from "~/services/api/staff/staff-payroll/staff-payroll.type";
 import { Plus, Pencil, Trash2, MoreVertical } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { toast } from "sonner";
 import AddComponentDialog from "./add-component-dialog";
 import EditComponentDialog from "./edit-component-dialog";
+import { useDeletePayrollComponent } from "../../container/query.hooks";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,19 +50,8 @@ export default function ComponentsList({
   const [componentToDelete, setComponentToDelete] =
     useState<PayrollComponentDto | null>(null);
 
-  const deleteMutation = useMutation({
-    mutationFn: (componentId: string) =>
-      StaffPayrollService.deleteComponent(componentId),
-    onSuccess: () => {
-      toast.success("Xóa component thành công");
-      setDeleteDialogOpen(false);
-      setComponentToDelete(null);
-      onRefresh?.();
-    },
-    onError: () => {
-      toast.error("Không thể xóa component");
-    },
-  });
+  const { mutate: deleteComponent, isPending: isDeleting } =
+    useDeletePayrollComponent();
 
   const handleEdit = (component: PayrollComponentDto) => {
     setSelectedComponent(component);
@@ -77,7 +65,20 @@ export default function ComponentsList({
 
   const confirmDelete = () => {
     if (componentToDelete) {
-      deleteMutation.mutate(componentToDelete.componentId);
+      deleteComponent(
+        { componentId: componentToDelete.componentId },
+        {
+          onSuccess: () => {
+            toast.success("Xóa component thành công");
+            setDeleteDialogOpen(false);
+            setComponentToDelete(null);
+            onRefresh?.();
+          },
+          onError: () => {
+            toast.error("Không thể xóa component");
+          },
+        }
+      );
     }
   };
 
