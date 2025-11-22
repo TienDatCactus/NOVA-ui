@@ -1,11 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
-import type { PayrollItem } from "~/services/api/staff/staff-payroll/dto";
+import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import { Checkbox } from "~/components/ui/checkbox";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import StatusSelectCell from "../../fragments/status-select.cell";
 
-export const columns: ColumnDef<PayrollItem>[] = [
+export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     id: "select",
     header: ({ table }) => (

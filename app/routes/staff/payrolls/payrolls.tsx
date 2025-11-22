@@ -6,7 +6,7 @@ import GeneratePayrollDialog from "./components/generate-payroll-dialog";
 import PayrollDetailDialog from "./components/payroll-detail-dialog";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import type { PayrollItem } from "~/services/api/staff/staff-payroll/dto";
+import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 
 export default function PayrollsPage() {
   const {
@@ -23,12 +23,12 @@ export default function PayrollsPage() {
     null
   );
 
-  const handleRowClick = (payroll: PayrollItem) => {
+  const handleRowClick = (payroll: PayrollItemDto) => {
     setSelectedPayrollId(payroll.payrollId);
   };
 
   // Filter payrolls based on search query
-  const filteredPayrolls = payrolls.filter((payroll: PayrollItem) => {
+  const filteredPayrolls = payrolls.filter((payroll: PayrollItemDto) => {
     if (!filterState.search) return true;
     const searchLower = filterState.search.toLowerCase();
     return (

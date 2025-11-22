@@ -10,7 +10,7 @@ import {
   getPaginationRowModel,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -21,18 +21,19 @@ import {
 } from "~/components/ui/table";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import CreateWorkShiftDialog from "../work-shift-create-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSuccess?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  onSuccess,
 }: DataTableProps<TData, TValue>) {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -48,15 +49,13 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
     },
-    meta: {
-      onSuccess,
-    },
+
     getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex justify-between items-center py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên ca..."
@@ -66,6 +65,10 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Button size={"sm"} onClick={() => setOpenCreateDialog(true)}>
+          <Plus className="h-4 w-4" />
+          Thêm ca làm việc
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -118,6 +121,10 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateWorkShiftDialog
+        onOpenChange={setOpenCreateDialog}
+        open={openCreateDialog}
+      />
     </div>
   );
 }

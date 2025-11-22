@@ -1,43 +1,46 @@
-import type { z } from "zod";
+import { z } from "zod";
 import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
 
 const {
   PayrollItemSchema,
-  PayrollDetailResponseSchema,
-  PayrollGridListResponseSchema,
-  GeneratePayrollRequestSchema,
-  GenerateSinglePayrollRequestSchema,
-  ApplyUnusedLeaveRequestSchema,
-  UpdatePayrollRequestSchema,
+  PayrollDetailSchema,
+  PayrollListSchema,
   PayrollComponentSchema,
-  ComponentRequestSchema,
-  ComponentListResponseSchema,
+  PayrollComponentListSchema,
+  GeneratePayrollSchema,
+  GenerateSinglePayrollSchema,
+  ApplyUnusedLeaveSchema,
+  UpdatePayrollSchema,
+  PayrollComponentInputSchema,
   PayrollComponentTypeEnum,
 } = StaffPayrollSchema;
 
-// Types
-export type PayrollItem = z.infer<typeof PayrollItemSchema>;
-export type PayrollComponent = z.infer<typeof PayrollComponentSchema>;
-export type PayrollDetailResponse = z.infer<typeof PayrollDetailResponseSchema>;
-export type PayrollGridListResponse = z.infer<
-  typeof PayrollGridListResponseSchema
+// DTOs (consistent naming with Dto suffix)
+export type PayrollItemDto = z.infer<typeof PayrollItemSchema>;
+export type PayrollComponentDto = z.infer<typeof PayrollComponentSchema>;
+export type PayrollDetailDto = z.infer<typeof PayrollDetailSchema>;
+export type PayrollListDto = z.infer<typeof PayrollListSchema>;
+export type PayrollComponentListDto = z.infer<
+  typeof PayrollComponentListSchema
 >;
-export type GeneratePayrollRequest = z.infer<
-  typeof GeneratePayrollRequestSchema
+
+// Input DTOs
+export type GeneratePayrollDto = z.infer<typeof GeneratePayrollSchema>;
+export type GenerateSinglePayrollDto = z.infer<
+  typeof GenerateSinglePayrollSchema
 >;
-export type GenerateSinglePayrollRequest = z.infer<
-  typeof GenerateSinglePayrollRequestSchema
+export type ApplyUnusedLeaveDto = z.infer<typeof ApplyUnusedLeaveSchema>;
+export type UpdatePayrollDto = z.infer<typeof UpdatePayrollSchema>;
+export type PayrollComponentInputDto = z.infer<
+  typeof PayrollComponentInputSchema
 >;
-export type ApplyUnusedLeaveRequest = z.infer<
-  typeof ApplyUnusedLeaveRequestSchema
->;
-export type UpdatePayrollRequest = z.infer<typeof UpdatePayrollRequestSchema>;
-export type ComponentRequest = z.infer<typeof ComponentRequestSchema>;
-export type ComponentListResponse = z.infer<typeof ComponentListResponseSchema>;
+
+// Enums
 export type PayrollComponentType = z.infer<typeof PayrollComponentTypeEnum>;
 
-// Query params for grid list
-export interface PayrollGridParams {
-  year?: number;
-  month?: number;
-}
+export const PayrollGridParamsSchema = z.object({
+  year: z.number().optional(),
+  month: z.number().optional(),
+});
+
+export type PayrollGridParams = z.infer<typeof PayrollGridParamsSchema>;

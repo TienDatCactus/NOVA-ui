@@ -28,39 +28,25 @@ import { useState, useEffect } from "react";
 import { WorkShiftService } from "~/services/api/staff/work-shift";
 import { WorkShiftSchema } from "~/services/api/staff/work-shift/work-shift.schema";
 import { toast } from "sonner";
-import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
-
-const { UpdateWorkShiftFormSchema } = WorkShiftSchema;
-
-// Helper function to ensure 24h format (HH:mm:ss)
-function formatTimeTo24h(time: string): string {
-  if (!time) return "";
-  // If already in HH:mm:ss format, return as is
-  if (/^\d{2}:\d{2}:\d{2}$/.test(time)) return time;
-  // If in HH:mm format, add :00
-  if (/^\d{2}:\d{2}$/.test(time)) return `${time}:00`;
-  return time;
-}
-
-type UpdateWorkShiftForm = z.infer<typeof UpdateWorkShiftFormSchema>;
+import type {
+  UpdateWorkShiftRequest,
+  WorkShiftListItem,
+} from "~/services/api/staff/work-shift/dto";
+import { useUpdateWorkShift } from "../container/mutation.hooks";
 
 interface UpdateWorkShiftDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workShift: WorkShiftListItem | null;
-  onSuccess?: () => void;
 }
 
 export default function UpdateWorkShiftDialog({
   open,
   onOpenChange,
   workShift,
-  onSuccess,
 }: UpdateWorkShiftDialogProps) {
-  const [isPending, setIsPending] = useState(false);
-
-  const form = useForm<UpdateWorkShiftForm>({
-    resolver: zodResolver(UpdateWorkShiftFormSchema),
+  const form = useForm<UpdateWorkShiftRequest>({
+    resolver: zodResolver(WorkShiftSchema.UpdateWorkShiftRequestSchema),
     defaultValues: {
       name: "",
       startTime: "",
@@ -69,6 +55,7 @@ export default function UpdateWorkShiftDialog({
     },
   });
 
+  const { mutateAsync: updateWorkShift, isPending } = useUpdateWorkShift();
   // Update form when workShift changes
   useEffect(() => {
     if (workShift) {
@@ -81,26 +68,23 @@ export default function UpdateWorkShiftDialog({
     }
   }, [workShift, form]);
 
-  const handleSubmit = async (data: UpdateWorkShiftForm) => {
+  const handleSubmit = async (data: UpdateWorkShiftRequest) => {
     if (!workShift) return;
 
-    setIsPending(true);
     try {
-      // Ensure time is in HH:mm:ss format
-      const payload = {
-        ...data,
-        startTime: formatTimeTo24h(data.startTime),
-        endTime: formatTimeTo24h(data.endTime),
-      };
-      await WorkShiftService.updateWorkShift(workShift.id, payload);
-      toast.success("Cập nhật ca làm việc thành công");
-      onOpenChange(false);
-      onSuccess?.();
+      await updateWorkShift(
+        {
+          id: workShift.id,
+          payload: data,
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+          },
+        }
+      );
     } catch (error) {
       console.error("Update work shift error:", error);
-      // Error toast handled by http interceptor
-    } finally {
-      setIsPending(false);
     }
   };
 

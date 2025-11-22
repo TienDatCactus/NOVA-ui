@@ -2,33 +2,38 @@ import http from "~/lib/http";
 import { StaffPayroll } from "~/services/url";
 import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
 import type {
-  PayrollGridListResponse,
+  PayrollListDto,
   PayrollGridParams,
-  GeneratePayrollRequest,
-  PayrollDetailResponse,
-  GenerateSinglePayrollRequest,
-  ApplyUnusedLeaveRequest,
-  UpdatePayrollRequest,
-  ComponentRequest,
-  ComponentListResponse,
+  GeneratePayrollDto,
+  PayrollDetailDto,
+  GenerateSinglePayrollDto,
+  ApplyUnusedLeaveDto,
+  UpdatePayrollDto,
+  PayrollComponentInputDto,
+  PayrollComponentListDto,
 } from "./dto";
 
-const { PayrollGridListResponseSchema, PayrollDetailResponseSchema } =
-  StaffPayrollSchema;
+const {
+  PayrollListSchema,
+  PayrollDetailSchema,
+  PayrollComponentListSchema,
+  GeneratePayrollSchema,
+  GenerateSinglePayrollSchema,
+  ApplyUnusedLeaveSchema,
+  UpdatePayrollSchema,
+  PayrollComponentInputSchema,
+} = StaffPayrollSchema;
 
 /**
  * Get payroll grid list
  */
 async function getPayrollGrid(
   params?: PayrollGridParams
-): Promise<PayrollGridListResponse> {
+): Promise<PayrollListDto> {
   try {
     const resp = await http.get(StaffPayroll.grid, { params });
-    console.log("getPayrollGrid response:", resp.data);
-    // resp.data is already the full response object with success, statusCode, message, data
-    return resp.data;
+    return PayrollListSchema.parse(resp.data);
   } catch (error) {
-    console.error("getPayrollGrid error:", error);
     return Promise.reject(error);
   }
 }
@@ -37,14 +42,13 @@ async function getPayrollGrid(
  * Generate payroll for all staff (bulk)
  */
 async function generatePayroll(
-  data: GeneratePayrollRequest
+  data: GeneratePayrollDto
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const resp = await http.post(StaffPayroll.generate, data);
-    console.log("generatePayroll response:", resp.data);
+    const validated = GeneratePayrollSchema.parse(data);
+    const resp = await http.post(StaffPayroll.generate, validated);
     return resp.data;
   } catch (error) {
-    console.error("generatePayroll error:", error);
     return Promise.reject(error);
   }
 }
@@ -54,10 +58,14 @@ async function generatePayroll(
  */
 async function generateSinglePayroll(
   staffId: string,
-  data: GenerateSinglePayrollRequest
+  data: GenerateSinglePayrollDto
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const resp = await http.post(StaffPayroll.generateSingle(staffId), data);
+    const validated = GenerateSinglePayrollSchema.parse(data);
+    const resp = await http.post(
+      StaffPayroll.generateSingle(staffId),
+      validated
+    );
     return resp.data;
   } catch (error) {
     return Promise.reject(error);
@@ -67,14 +75,11 @@ async function generateSinglePayroll(
 /**
  * Get payroll detail by ID
  */
-async function getPayrollDetail(id: string): Promise<PayrollDetailResponse> {
+async function getPayrollDetail(id: string): Promise<PayrollDetailDto> {
   try {
     const resp = await http.get(StaffPayroll.detail(id));
-    console.log("getPayrollDetail response:", resp.data);
-    // resp.data is already the full response object
-    return resp.data;
+    return PayrollDetailSchema.parse(resp.data);
   } catch (error) {
-    console.error("getPayrollDetail error:", error);
     return Promise.reject(error);
   }
 }
@@ -84,10 +89,11 @@ async function getPayrollDetail(id: string): Promise<PayrollDetailResponse> {
  */
 async function updatePayroll(
   id: string,
-  data: UpdatePayrollRequest
+  data: UpdatePayrollDto
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const resp = await http.put(StaffPayroll.update(id), data);
+    const validated = UpdatePayrollSchema.parse(data);
+    const resp = await http.put(StaffPayroll.update(id), validated);
     return resp.data;
   } catch (error) {
     return Promise.reject(error);
@@ -99,10 +105,11 @@ async function updatePayroll(
  */
 async function applyUnusedLeave(
   id: string,
-  data: ApplyUnusedLeaveRequest
+  data: ApplyUnusedLeaveDto
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const resp = await http.post(StaffPayroll.applyUnusedLeave(id), data);
+    const validated = ApplyUnusedLeaveSchema.parse(data);
+    const resp = await http.post(StaffPayroll.applyUnusedLeave(id), validated);
     return resp.data;
   } catch (error) {
     return Promise.reject(error);
@@ -140,10 +147,10 @@ async function unlockPayroll(
 /**
  * Get components list for a payroll
  */
-async function getComponents(id: string): Promise<ComponentListResponse> {
+async function getComponents(id: string): Promise<PayrollComponentListDto> {
   try {
     const resp = await http.get(StaffPayroll.getComponents(id));
-    return resp.data;
+    return PayrollComponentListSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -154,10 +161,11 @@ async function getComponents(id: string): Promise<ComponentListResponse> {
  */
 async function addComponent(
   id: string,
-  data: ComponentRequest
+  data: PayrollComponentInputDto
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const resp = await http.post(StaffPayroll.addComponent(id), data);
+    const validated = PayrollComponentInputSchema.parse(data);
+    const resp = await http.post(StaffPayroll.addComponent(id), validated);
     return resp.data;
   } catch (error) {
     return Promise.reject(error);
@@ -169,12 +177,13 @@ async function addComponent(
  */
 async function updateComponent(
   componentId: string,
-  data: ComponentRequest
+  data: PayrollComponentInputDto
 ): Promise<{ success: boolean; message: string }> {
   try {
+    const validated = PayrollComponentInputSchema.parse(data);
     const resp = await http.put(
       StaffPayroll.updateComponent(componentId),
-      data
+      validated
     );
     return resp.data;
   } catch (error) {

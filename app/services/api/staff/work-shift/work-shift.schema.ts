@@ -49,20 +49,6 @@ const WorkShiftMutationResponseSchema = z
   })
   .optional();
 
-// Form Validation Schemas (for UI components)
-const CreateWorkShiftFormSchema = z.object({
-  name: z.string().min(1, "Tên ca làm việc là bắt buộc"),
-  startTime: z.string().min(1, "Giờ bắt đầu là bắt buộc"),
-  endTime: z.string().min(1, "Giờ kết thúc là bắt buộc"),
-});
-
-const UpdateWorkShiftFormSchema = z.object({
-  name: z.string().min(1, "Tên ca làm việc là bắt buộc"),
-  startTime: z.string().min(1, "Giờ bắt đầu là bắt buộc"),
-  endTime: z.string().min(1, "Giờ kết thúc là bắt buộc"),
-  active: z.boolean(),
-});
-
 export const WorkShiftSchema = {
   WorkShiftListItemSchema,
   WorkShiftListResponseSchema,
@@ -70,6 +56,4 @@ export const WorkShiftSchema = {
   CreateWorkShiftRequestSchema,
   UpdateWorkShiftRequestSchema,
   WorkShiftMutationResponseSchema,
-  CreateWorkShiftFormSchema,
-  UpdateWorkShiftFormSchema,
 };

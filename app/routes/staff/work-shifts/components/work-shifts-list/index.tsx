@@ -1,4 +1,7 @@
-import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
+import type {
+  WorkShiftListItem,
+  WorkShiftListResponseDto,
+} from "~/services/api/staff/work-shift/dto";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -12,22 +15,19 @@ import {
 } from "~/components/ui/empty";
 import { Clock } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import CreateWorkShiftDialog from "../work-shift-create-dialog";
 
 interface WorkShiftsDataTableProps {
-  workShifts: WorkShiftListItem[];
+  workShifts: WorkShiftListResponseDto;
   isLoading?: boolean;
-  hasFilters?: boolean;
-  onAddWorkShift: () => void;
-  onSuccess?: () => void;
 }
 
 export default function WorkShiftsDataTable({
   workShifts,
   isLoading,
-  hasFilters,
-  onAddWorkShift,
-  onSuccess,
 }: WorkShiftsDataTableProps) {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -41,22 +41,6 @@ export default function WorkShiftsDataTable({
   }
 
   if (!workShifts || workShifts.length === 0) {
-    if (hasFilters) {
-      return (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Clock />
-            </EmptyMedia>
-            <EmptyTitle>Không tìm thấy kết quả</EmptyTitle>
-            <EmptyDescription>
-              Thử điều chỉnh bộ lọc hoặc thay đổi từ khóa tìm kiếm
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      );
-    }
-
     return (
       <Empty>
         <EmptyHeader>
@@ -69,7 +53,9 @@ export default function WorkShiftsDataTable({
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={onAddWorkShift}>Thêm ca làm việc đầu tiên</Button>
+          <Button onClick={() => setOpenCreateDialog(true)}>
+            Thêm ca làm việc
+          </Button>
         </EmptyContent>
       </Empty>
     );
@@ -77,7 +63,11 @@ export default function WorkShiftsDataTable({
 
   return (
     <div className="container mx-auto ">
-      <DataTable columns={columns} data={workShifts} onSuccess={onSuccess} />
+      <DataTable columns={columns} data={workShifts} />
+      <CreateWorkShiftDialog
+        open={openCreateDialog}
+        onOpenChange={setOpenCreateDialog}
+      />
     </div>
   );
 }

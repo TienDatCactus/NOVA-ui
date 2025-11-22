@@ -7,14 +7,14 @@ import {
 import { Button } from "~/components/ui/button";
 import { MoreHorizontal, FileText, Edit, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import type { PayrollItem } from "~/services/api/staff/staff-payroll/dto";
+import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
 import UpdatePayrollDialog from "../components/update-payroll-dialog";
 import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { toast } from "sonner";
 
 interface ActionsMenuCellProps {
-  payroll: PayrollItem;
+  payroll: PayrollItemDto;
   onSuccess?: () => void;
 }
 

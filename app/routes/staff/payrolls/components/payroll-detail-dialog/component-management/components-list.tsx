@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import type { PayrollComponent } from "~/services/api/staff/staff-payroll/dto";
+import type { PayrollComponentDto } from "~/services/api/staff/staff-payroll/dto";
 import {
   ComponentTypeConfig,
   type ComponentTypeKey,
@@ -32,7 +32,7 @@ import {
 
 interface ComponentsListProps {
   payrollId: string;
-  components: PayrollComponent[];
+  components: PayrollComponentDto[];
   componentsTotal: number;
   onRefresh?: () => void;
 }
@@ -46,10 +46,10 @@ export default function ComponentsList({
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] =
-    useState<PayrollComponent | null>(null);
+    useState<PayrollComponentDto | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [componentToDelete, setComponentToDelete] =
-    useState<PayrollComponent | null>(null);
+    useState<PayrollComponentDto | null>(null);
 
   const deleteMutation = useMutation({
     mutationFn: (componentId: string) =>
@@ -65,12 +65,12 @@ export default function ComponentsList({
     },
   });
 
-  const handleEdit = (component: PayrollComponent) => {
+  const handleEdit = (component: PayrollComponentDto) => {
     setSelectedComponent(component);
     setEditDialogOpen(true);
   };
 
-  const handleDelete = (component: PayrollComponent) => {
+  const handleDelete = (component: PayrollComponentDto) => {
     setComponentToDelete(component);
     setDeleteDialogOpen(true);
   };

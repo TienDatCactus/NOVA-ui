@@ -25,7 +25,7 @@ function RoomTypesViewLayout({
     <div className="flex gap-6 p-4 ">
       <main className="flex-1 space-y-4">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="grid gap-2">
             <h1 className="text-3xl font-bold">Quản lý hạng phòng</h1>
             <p className="text-muted-foreground mt-1">
               Tổng{" "}

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -33,30 +32,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
-import type { PayrollComponent } from "~/services/api/staff/staff-payroll/dto";
+import type { PayrollComponentDto } from "~/services/api/staff/staff-payroll/dto";
 import { ComponentTypeConfig } from "~/services/api/staff/staff-payroll/staff-payroll.type";
-import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
-import { toast } from "sonner";
+import { FormSchema } from "~/services/schema/forms.schema";
+import { useUpdatePayrollComponent } from "../../../container/query.hooks";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "~/lib/utils";
-import {
-  formatNumber,
-  parseFormattedNumber,
-  handleNumberInputChange,
-} from "~/lib/format-number";
 
-const { AddComponentFormSchema } = StaffPayrollSchema;
+const { AddPayrollComponentFormSchema } = FormSchema;
 
-type FormValues = z.infer<typeof AddComponentFormSchema>;
+type FormValues = z.infer<typeof AddPayrollComponentFormSchema>;
 
 interface EditComponentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   payrollId: string;
-  component: PayrollComponent | null;
+  component: PayrollComponentDto | null;
   onSuccess?: () => void;
 }
 
@@ -70,11 +63,11 @@ export default function EditComponentDialog({
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(AddComponentFormSchema),
+    resolver: zodResolver(AddPayrollComponentFormSchema),
     defaultValues: {
       type: "Bonus",
       title: "",
-      amount: "",
+      amount: 0,
       note: "",
       effectiveDate: "",
     },
@@ -88,36 +81,26 @@ export default function EditComponentDialog({
       form.reset({
         type: component.type as any,
         title: component.title,
-        amount: formatNumber(component.amount),
+        amount: component.amount,
         note: component.note || "",
         effectiveDate: "",
       });
     }
   }, [component, form]);
 
-  const mutation = useMutation({
-    mutationFn: (data: FormValues) => {
-      if (!component) return Promise.reject("No component selected");
-      return StaffPayrollService.updateComponent(component.componentId, {
-        type: data.type,
-        title: data.title,
-        amount: parseFormattedNumber(data.amount),
-        note: data.note,
-        effectiveDate: data.effectiveDate,
-      });
-    },
-    onSuccess: () => {
-      toast.success("Cập nhật component thành công");
-      onOpenChange(false);
-      onSuccess?.();
-    },
-    onError: () => {
-      toast.error("Không thể cập nhật component");
-    },
-  });
+  const mutation = useUpdatePayrollComponent();
 
   const onSubmit = (data: FormValues) => {
-    mutation.mutate(data);
+    if (!component) return;
+    mutation.mutate(
+      { componentId: component.componentId, payrollId, data },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          onSuccess?.();
+        },
+      }
+    );
   };
 
   if (!component) return null;
@@ -240,9 +223,7 @@ export default function EditComponentDialog({
                           placeholder="0"
                           className="pr-12 h-10"
                           value={field.value}
-                          onChange={(e) =>
-                            handleNumberInputChange(e, field.onChange)
-                          }
+                          onChange={(e) => field.onChange(e)}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                           VNĐ

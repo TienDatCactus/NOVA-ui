@@ -35,66 +35,42 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "~/lib/utils";
-import {
-  formatNumber,
-  parseFormattedNumber,
-  handleNumberInputChange,
-} from "~/lib/format-number";
 
-const CreateHolidayFormSchema = z.object({
-  name: z.string().min(1, "Tên ngày nghỉ là bắt buộc"),
-  startDate: z.date({ message: "Ngày bắt đầu là bắt buộc" }),
-  endDate: z.date({ message: "Ngày kết thúc là bắt buộc" }),
-  isPublicHoliday: z.boolean(),
-  bonusAmount: z.string().min(1, "Số tiền thưởng là bắt buộc"),
-});
-
-type CreateHolidayForm = z.infer<typeof CreateHolidayFormSchema>;
+import { useCreateHoliday } from "../container/mutation.hooks";
+import { HolidaySchema } from "~/services/api/holiday/holiday.schema";
+import type { CreateHolidayRequest } from "~/services/api/holiday/dto";
 
 interface CreateHolidayDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
 }
 
 export default function CreateHolidayDialog({
   open,
   onOpenChange,
-  onSuccess,
 }: CreateHolidayDialogProps) {
-  const [isPending, setIsPending] = useState(false);
-
-  const form = useForm<CreateHolidayForm>({
-    resolver: zodResolver(CreateHolidayFormSchema),
+  const form = useForm<CreateHolidayRequest>({
+    resolver: zodResolver(HolidaySchema.CreateHolidayRequestSchema),
     defaultValues: {
       name: "",
       startDate: undefined,
       endDate: undefined,
       isPublicHoliday: false,
-      bonusAmount: "",
+      bonusAmount: 0,
     },
   });
 
-  const handleSubmit = async (data: CreateHolidayForm) => {
-    setIsPending(true);
+  const { mutateAsync: createHoliday, isPending } = useCreateHoliday();
+  const handleSubmit = async (data: CreateHolidayRequest) => {
     try {
-      // Format dates to yyyy-MM-dd
-      const payload = {
-        name: data.name,
-        startDate: format(data.startDate, "yyyy-MM-dd"),
-        endDate: format(data.endDate, "yyyy-MM-dd"),
-        isPublicHoliday: data.isPublicHoliday,
-        bonusAmount: parseFormattedNumber(data.bonusAmount),
-      };
-      await HolidayService.createHoliday(payload);
-      toast.success("Tạo ngày nghỉ thành công");
-      form.reset();
-      onOpenChange(false);
-      onSuccess?.();
+      await createHoliday(data, {
+        onSuccess: () => {
+          form.reset();
+          onOpenChange(false);
+        },
+      });
     } catch (error) {
       console.error("Create holiday error:", error);
-    } finally {
-      setIsPending(false);
     }
   };
 
@@ -175,11 +151,9 @@ export default function CreateHolidayDialog({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={new Date(field.value)}
                           onSelect={field.onChange}
                           captionLayout="dropdown"
-                          fromYear={new Date().getFullYear()}
-                          toYear={new Date().getFullYear() + 100}
                           locale={vi}
                         />
                       </PopoverContent>
@@ -223,11 +197,9 @@ export default function CreateHolidayDialog({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={new Date(field.value)}
                           onSelect={field.onChange}
                           captionLayout="dropdown"
-                          fromYear={new Date().getFullYear()}
-                          toYear={new Date().getFullYear() + 100}
                           locale={vi}
                         />
                       </PopoverContent>
@@ -254,7 +226,7 @@ export default function CreateHolidayDialog({
                         type="text"
                         placeholder="0"
                         value={field.value}
-                        onChange={(e) => handleNumberInputChange(e, field.onChange)}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormDescription className="text-xs">

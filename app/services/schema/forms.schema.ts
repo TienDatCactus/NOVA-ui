@@ -2,6 +2,7 @@ import z from "zod";
 import { BookingSchema } from "../api/booking/booking.schema";
 import { PaymentSchema } from "./payment.schema";
 import { OrderSchema } from "../api/orders/order.schema";
+import { StaffPayrollSchema } from "../api/staff/staff-payroll/staff-payroll.schema";
 
 const RoomSelectionFormSchema = z.object({
   roomIds: z.array(z.string()).min(1, "Phải chọn ít nhất 1 phòng"),
@@ -104,10 +105,51 @@ export const UpdateItemFormSchema = z
  * Schema cho form tạo vai trò nhân sự
  */
 
+/**
+ * Schema cho form áp dụng nghỉ phép chưa sử dụng
+ */
+export const ApplyUnusedLeaveFormSchema = z.object({
+  mode: StaffPayrollSchema.UnusedLeaveModeEnum,
+});
+
+/**
+ * Schema cho form cập nhật bảng lương
+ */
+export const UpdatePayrollFormSchema = z.object({
+  baseSalaryFullMonth: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseFloat(val) : undefined))
+    .refine((val) => val === undefined || !isNaN(val), {
+      message: "Lương cơ bản phải là số hợp lệ",
+    }),
+  paidAmount: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseFloat(val) : undefined))
+    .refine((val) => val === undefined || !isNaN(val), {
+      message: "Số tiền đã trả phải là số hợp lệ",
+    }),
+});
+
+/**
+ * Schema cho form thêm/sửa component bảng lương
+ */
+export const AddPayrollComponentFormSchema = z.object({
+  type: StaffPayrollSchema.PayrollComponentTypeEnum,
+  title: z.string().min(1, "Vui lòng nhập tiêu đề"),
+  amount: z.number().min(1, "Vui lòng nhập số tiền"),
+  note: z.string().optional(),
+  effectiveDate: z.string().optional(),
+});
+
 export const FormSchema = {
   RoomSelectionFormSchema,
   ServicesBreakfastFormSchema,
   ReviewPaymentFormSchema,
   CreateItemFormSchema,
   UpdateItemFormSchema,
+  ApplyUnusedLeaveFormSchema,
+  UpdatePayrollFormSchema,
+  AddPayrollComponentFormSchema,
 };

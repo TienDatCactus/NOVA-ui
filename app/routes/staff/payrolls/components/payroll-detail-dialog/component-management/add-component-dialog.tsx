@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -33,23 +32,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { ComponentTypeConfig } from "~/services/api/staff/staff-payroll/staff-payroll.type";
-import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
-import { toast } from "sonner";
+import { FormSchema } from "~/services/schema/forms.schema";
+import { useAddPayrollComponent } from "../../../container/query.hooks";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "~/lib/utils";
-import {
-  formatNumber,
-  parseFormattedNumber,
-  handleNumberInputChange,
-} from "~/lib/format-number";
 
-const { AddComponentFormSchema } = StaffPayrollSchema;
+const { AddPayrollComponentFormSchema } = FormSchema;
 
-type FormValues = z.infer<typeof AddComponentFormSchema>;
+type FormValues = z.infer<typeof AddPayrollComponentFormSchema>;
 
 interface AddComponentDialogProps {
   open: boolean;
@@ -67,11 +60,11 @@ export default function AddComponentDialog({
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(AddComponentFormSchema),
+    resolver: zodResolver(AddPayrollComponentFormSchema),
     defaultValues: {
       type: "Bonus",
       title: "",
-      amount: "",
+      amount: 0,
       note: "",
       effectiveDate: format(new Date(), "yyyy-MM-dd"),
     },
@@ -79,29 +72,19 @@ export default function AddComponentDialog({
 
   const selectedType = form.watch("type");
 
-  const mutation = useMutation({
-    mutationFn: (data: FormValues) => {
-      return StaffPayrollService.addComponent(payrollId, {
-        type: data.type,
-        title: data.title,
-        amount: parseFormattedNumber(data.amount),
-        note: data.note,
-        effectiveDate: data.effectiveDate,
-      });
-    },
-    onSuccess: () => {
-      toast.success("Thêm component thành công");
-      form.reset();
-      onOpenChange(false);
-      onSuccess?.();
-    },
-    onError: () => {
-      toast.error("Không thể thêm component");
-    },
-  });
+  const mutation = useAddPayrollComponent();
 
   const onSubmit = (data: FormValues) => {
-    mutation.mutate(data);
+    mutation.mutate(
+      { payrollId, data },
+      {
+        onSuccess: () => {
+          form.reset();
+          onOpenChange(false);
+          onSuccess?.();
+        },
+      }
+    );
   };
 
   return (
@@ -231,9 +214,7 @@ export default function AddComponentDialog({
                           placeholder="0"
                           className="pr-12 h-10"
                           value={field.value}
-                          onChange={(e) =>
-                            handleNumberInputChange(e, field.onChange)
-                          }
+                          onChange={(e) => field.onChange(e)}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                           VNĐ

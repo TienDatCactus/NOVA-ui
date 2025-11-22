@@ -1,16 +1,19 @@
 import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getFilteredRowModel,
-  type SortingState,
   type ColumnDef,
   type ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  type SortingState,
+  useReactTable,
 } from "@tanstack/react-table";
+import { Plus, Search } from "lucide-react";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -19,8 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
+import CreateHolidayDialog from "../holiday-create-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -33,6 +35,7 @@ export function DataTable<TData, TValue>({
   data,
   onSuccess,
 }: DataTableProps<TData, TValue>) {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -56,7 +59,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 justify-between">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên ngày nghỉ..."
@@ -66,6 +69,10 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Button onClick={() => setOpenCreateDialog(true)} size={"sm"}>
+          <Plus className="h-4 w-4" />
+          Thêm phòng
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -118,6 +125,10 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateHolidayDialog
+        open={openCreateDialog}
+        onOpenChange={setOpenCreateDialog}
+      />
     </div>
   );
 }

@@ -17,7 +17,7 @@ export const PayrollComponentTypeEnum = z.enum([
 
 // Component schema (phụ cấp/khấu trừ)
 const PayrollComponentSchema = z.object({
-  componentId: z.string(),
+  componentId: z.string().uuid(),
   type: z.string(),
   title: z.string(),
   note: z.string().nullable().optional(),
@@ -27,8 +27,8 @@ const PayrollComponentSchema = z.object({
 // Single payroll item schema
 const PayrollItemSchema = z.object({
   index: z.number().optional(),
-  payrollId: z.string(),
-  staffId: z.string(),
+  payrollId: z.string().uuid(),
+  staffId: z.string().uuid(),
   staffCode: z.string(),
   staffName: z.string(),
   daysInMonth: z.number(),
@@ -51,50 +51,37 @@ const PayrollItemSchema = z.object({
   components: z.array(PayrollComponentSchema).optional().default([]),
 });
 
-// Payroll detail response schema
-const PayrollDetailResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: PayrollItemSchema,
-  meta: z.string().nullable().optional(),
-});
-
-// Payroll grid list response schema
-const PayrollGridListResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: z.array(PayrollItemSchema),
-  meta: z.string().nullable().optional(),
-});
+// Clean domain schemas (no wrappers)
+const PayrollDetailSchema = PayrollItemSchema;
+const PayrollListSchema = z.array(PayrollItemSchema);
+const PayrollComponentListSchema = z.array(PayrollComponentSchema);
 
 // Generate payroll request schema (for all staff)
-const GeneratePayrollRequestSchema = z.object({
+const GeneratePayrollSchema = z.object({
   year: z.number(),
   month: z.number(),
 });
 
 // Generate single payroll request schema (for one staff)
-const GenerateSinglePayrollRequestSchema = z.object({
+const GenerateSinglePayrollSchema = z.object({
   year: z.number(),
   month: z.number(),
   baseSalaryFullMonth: z.number().optional(),
 });
 
 // Apply unused leave request schema
-const ApplyUnusedLeaveRequestSchema = z.object({
+const ApplyUnusedLeaveSchema = z.object({
   mode: UnusedLeaveModeEnum,
 });
 
 // Update payroll request schema
-const UpdatePayrollRequestSchema = z.object({
+const UpdatePayrollSchema = z.object({
   baseSalaryFullMonth: z.number().optional(),
   paidAmount: z.number().optional(),
 });
 
 // Create/Update Component Request Schema
-const ComponentRequestSchema = z.object({
+const PayrollComponentInputSchema = z.object({
   type: PayrollComponentTypeEnum,
   title: z.string().min(1, "Tiêu đề không được để trống"),
   note: z.string().optional(),
@@ -102,36 +89,34 @@ const ComponentRequestSchema = z.object({
   effectiveDate: z.string().optional(),
 });
 
-// Component List Response Schema
-const ComponentListResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: z.array(PayrollComponentSchema),
-  meta: z.string().nullable().optional(),
-});
-
 // Add/Edit Component Form Schema (for UI validation)
 const AddComponentFormSchema = z.object({
   type: PayrollComponentTypeEnum,
   title: z.string().min(1, "Vui lòng nhập tiêu đề"),
-  amount: z.string().min(1, "Vui lòng nhập số tiền"),
+  amount: z.number().min(1, "Vui lòng nhập số tiền"),
   note: z.string().optional(),
   effectiveDate: z.string().optional(),
 });
 
 export const StaffPayrollSchema = {
+  // Core schemas
   PayrollItemSchema,
-  PayrollDetailResponseSchema,
-  PayrollGridListResponseSchema,
-  GeneratePayrollRequestSchema,
-  GenerateSinglePayrollRequestSchema,
-  ApplyUnusedLeaveRequestSchema,
-  UpdatePayrollRequestSchema,
+  PayrollDetailSchema,
+  PayrollListSchema,
   PayrollComponentSchema,
+  PayrollComponentListSchema,
+
+  // Input schemas
+  GeneratePayrollSchema,
+  GenerateSinglePayrollSchema,
+  ApplyUnusedLeaveSchema,
+  UpdatePayrollSchema,
+  PayrollComponentInputSchema,
+
+  // Enums
   UnusedLeaveModeEnum,
   PayrollComponentTypeEnum,
-  ComponentRequestSchema,
-  ComponentListResponseSchema,
+
+  // Form schemas
   AddComponentFormSchema,
 };
