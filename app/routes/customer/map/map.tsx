@@ -1,12 +1,10 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef, useState } from "react";
-import { sapaData, sapaPoiData } from "~/assets/json-layers";
-import { detectPoiCategory, iconMap } from "~/lib/utils";
+import { sapaData } from "~/assets/json-layers";
 import type { Route } from "./+types/map";
 import SearchBox from "./components/search";
 import { useMap } from "./context/map-context";
-import Categories from "./components/categories";
 
 export default function Component({
   loaderData,
@@ -21,16 +19,19 @@ export default function Component({
 
   useEffect(() => {
     mapboxgl.accessToken = import.meta.env.VITE_MAP_BOX_TOKEN;
-    if (mapRef.current) return;
-    if (!mapContainerRef.current) return;
+
+    // Don't initialize if already initialized or container not ready
+    if (mapRef.current || !mapContainerRef.current) return;
+
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/streets-v12",
+      style: "mapbox://styles/mapbox/standard",
       center: [lng, lat],
       zoom: zoom,
     });
 
     mapRef.current = map;
+
     map.on("load", () => {
       map.addSource("sapa", {
         type: "geojson",
@@ -63,14 +64,18 @@ export default function Component({
         setZoom(parseFloat(mapRef.current.getZoom().toFixed(2)));
       }
     });
+
     return () => {
-      mapRef.current?.remove();
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
     };
   }, []);
 
   return (
     <div className="relative ">
-      <SearchBox className="z-20" />
+      <SearchBox />
       <div className="w-screen h-screen" ref={mapContainerRef} />
     </div>
   );

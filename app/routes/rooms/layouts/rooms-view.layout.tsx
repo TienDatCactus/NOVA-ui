@@ -1,10 +1,16 @@
 import type { ReactNode } from "react";
 
-import RoomsFilterSidebar from "../fragments/rooms/filter.sidebar";
-import type { RoomFilters } from "../container/rooms/filter.hooks";
+import { ArrowRightLeft } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useRoomTypes } from "../container/room-types/query.hooks";
-import { Button } from "~/components/ui/button";
-import { Plus } from "lucide-react";
+import type { RoomFilters } from "../container/rooms/filter.hooks";
 
 interface RoomsViewLayoutProps {
   children: ReactNode;
@@ -15,7 +21,6 @@ interface RoomsViewLayoutProps {
   ) => void;
   onResetFilters: () => void;
   totalRooms: number;
-  onAddRoom: () => void;
 }
 
 function RoomsViewLayout({
@@ -24,22 +29,15 @@ function RoomsViewLayout({
   onFilterChange,
   onResetFilters,
   totalRooms,
-  onAddRoom,
 }: RoomsViewLayoutProps) {
   const { data: roomTypes } = useRoomTypes();
   return (
-    <div className="grid gap-6 p-4">
-      <RoomsFilterSidebar
-        filters={filters}
-        onFilterChange={onFilterChange}
-        onResetFilters={onResetFilters}
-        roomTypes={roomTypes || []}
-      />
+    <div className="flex gap-6 p-4">
       <main className="flex-1 space-y-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
+        <div className="flex items-center justify-between">
+          <div className="grid gap-2">
             <h1 className="text-3xl font-bold">Quản lý phòng</h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground ">
               Tổng{" "}
               <span className="font-semibold text-foreground">
                 {totalRooms}
@@ -48,10 +46,53 @@ function RoomsViewLayout({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={onAddRoom} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Thêm phòng
-            </Button>
+            <Select
+              value={filters.status}
+              onValueChange={(value) =>
+                onFilterChange(
+                  "status",
+                  value === "all" ? undefined : (value as RoomFilters["status"])
+                )
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Trạng thái" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                {Object.entries(RoomStatusEnum).map(([key, value]) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <SelectItem id={`status-${key}`} value={key}>
+                      {value}
+                    </SelectItem>
+                  </div>
+                ))}
+              </SelectContent>
+            </Select>
+            <ArrowRightLeft className="w-4 h-4" />
+            <Select
+              value={filters.typeId ?? "all"}
+              onValueChange={(value) =>
+                onFilterChange(
+                  "typeId",
+                  value === "all" ? undefined : (value as RoomFilters["typeId"])
+                )
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Hạng phòng" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                {roomTypes?.map((item) => (
+                  <div key={item.id} className="flex items-center gap-2">
+                    <SelectItem id={`status-${item.id}`} value={item.id}>
+                      {item.name}
+                    </SelectItem>
+                  </div>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         {children}

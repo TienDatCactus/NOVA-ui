@@ -17,30 +17,6 @@ type RoomListItem = z.infer<typeof RoomListItemSchema>;
 
 export const columns: ColumnDef<RoomListItem>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <div>
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "index",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="STT" />
@@ -102,13 +78,11 @@ export const columns: ColumnDef<RoomListItem>[] = [
   {
     accessorKey: "dailyPrice",
     header: ({ column }) => (
-      <div className="text-end">
-        <DataTableColumnHeader column={column} title="Giá/đêm" />
-      </div>
+      <DataTableColumnHeader column={column} title="Giá/đêm" />
     ),
     cell: ({ row }) => {
       return (
-        <pre className="font-semibold text-end">
+        <pre className="font-semibold">
           {formatMoney(row.original.dailyPrice).vndFormatted}
         </pre>
       );

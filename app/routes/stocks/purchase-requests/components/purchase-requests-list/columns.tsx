@@ -5,8 +5,11 @@ import type { PurchaseRequestListItemDto } from "~/services/api/stocks/purchase-
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import PurchaseRequestActionCell from "../../fragments/purchase-request-action.cell";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import PurchaseRequestDetailDialog from "../purchase-request-detail.dialog";
 
-const getStatusBadge = (status: string) => {
+export const getStatusBadge = (status: string) => {
   const variants: Record<
     string,
     {
@@ -25,7 +28,6 @@ const getStatusBadge = (status: string) => {
   const config = variants[status] || variants.Draft;
   return <Badge variant={config.variant}>{config.label}</Badge>;
 };
-
 export const columns: ColumnDef<PurchaseRequestListItemDto>[] = [
   {
     accessorKey: "requestNumber",
@@ -33,10 +35,23 @@ export const columns: ColumnDef<PurchaseRequestListItemDto>[] = [
       <DataTableColumnHeader column={column} title="Số phiếu" />
     ),
     cell: ({ row }) => {
+      const [openDetailDialog, setOpenDetailDialog] = useState(false);
+
       return (
-        <span className="font-mono text-sm font-medium">
-          {row.original.requestNumber}
-        </span>
+        <>
+          <Button
+            variant="link"
+            size="sm"
+            onClick={() => setOpenDetailDialog(true)}
+          >
+            {row.original.requestNumber}
+          </Button>
+          <PurchaseRequestDetailDialog
+            open={openDetailDialog}
+            onOpenChange={setOpenDetailDialog}
+            purchaseRequestId={row.original.id}
+          />
+        </>
       );
     },
   },

@@ -1,7 +1,4 @@
-import type { RoomListResponseDto } from "~/services/api/rooms/dto";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
-import { Skeleton } from "~/components/ui/skeleton";
+import { BedDouble } from "lucide-react";
 import {
   Empty,
   EmptyContent,
@@ -10,23 +7,21 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { BedDouble } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import type { RoomListItemDto } from "~/services/api/rooms/dto";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { RoomListResponseDto } from "~/services/api/rooms/dto";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
+import { Button } from "react-aria-components";
+import { useState } from "react";
+import CreateRoomDialog from "../create-room.dialog";
 
 interface RoomsDataTableProps {
   rooms: RoomListResponseDto;
   isLoading?: boolean;
-  onAddRoom: () => void;
-  onSelectionChange?: (selectedRows: RoomListItemDto[]) => void;
 }
 
-function RoomsDataTable({
-  rooms,
-  isLoading,
-  onAddRoom,
-  onSelectionChange,
-}: RoomsDataTableProps) {
+function RoomsDataTable({ rooms, isLoading }: RoomsDataTableProps) {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -53,7 +48,9 @@ function RoomsDataTable({
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={onAddRoom}>Thêm phòng đầu tiên</Button>
+          <Button onClick={() => setOpenCreateDialog(true)}>
+            Thêm phòng mới
+          </Button>
         </EmptyContent>
       </Empty>
     );
@@ -61,10 +58,10 @@ function RoomsDataTable({
 
   return (
     <div className="container mx-auto ">
-      <DataTable
-        columns={columns}
-        data={rooms}
-        onSelectionChange={onSelectionChange}
+      <DataTable columns={columns} data={rooms} />{" "}
+      <CreateRoomDialog
+        open={openCreateDialog}
+        onClose={() => setOpenCreateDialog(false)}
       />
     </div>
   );

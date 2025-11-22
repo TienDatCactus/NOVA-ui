@@ -11,9 +11,9 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
-import type { StaffAttendanceListItem } from "~/services/api/staff-attendance/dto";
-import type { StaffShiftListItem } from "~/services/api/staff-shift/dto";
-import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
+import type { StaffAttendanceListItem } from "~/services/api/staff/staff-attendance/dto";
+import type { StaffShiftListItem } from "~/services/api/staff/staff-shift/dto";
+import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
 
 interface ScheduleCalendarViewProps {
   shifts: StaffShiftListItem[];

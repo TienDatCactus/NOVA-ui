@@ -5,10 +5,10 @@ import { format, addMonths, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import { CalendarIcon, ChevronDown, Plus, X } from "lucide-react";
 import { toast } from "sonner";
-import { StaffShiftSchema } from "~/services/api/staff-shift/staff-shift.schema";
-import { StaffShiftService } from "~/services/api/staff-shift";
-import { WEEKDAYS } from "~/services/api/staff-shift/staff-shift.type";
-import type { CreateShiftScheduleRequest } from "~/services/api/staff-shift/dto";
+import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
+import { StaffShiftService } from "~/services/api/staff/staff-shift";
+import { WEEKDAYS } from "~/services/api/staff/staff-shift/staff-shift.type";
+import type { CreateShiftScheduleRequest } from "~/services/api/staff/staff-shift/dto";
 import {
   Dialog,
   DialogContent,
@@ -42,8 +42,8 @@ import { Calendar } from "~/components/ui/calendar";
 import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { StaffService } from "~/services/api/staff";
-import { WorkShiftService } from "~/services/api/work-shift";
+import { StaffService } from "~/services/api/staff/staff";
+import { WorkShiftService } from "~/services/api/staff/work-shift";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Badge } from "~/components/ui/badge";
 
@@ -62,7 +62,9 @@ export default function CreateScheduleDialog({
 }: CreateScheduleDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchStaff, setSearchStaff] = useState("");
-  const [selectedAdditionalStaff, setSelectedAdditionalStaff] = useState<string[]>([]);
+  const [selectedAdditionalStaff, setSelectedAdditionalStaff] = useState<
+    string[]
+  >([]);
 
   const { data: staffListResponse } = useQuery({
     queryKey: ["staff-list"],
@@ -72,7 +74,7 @@ export default function CreateScheduleDialog({
     queryKey: ["work-shifts-active"],
     queryFn: async () => await WorkShiftService.getActiveWorkShiftList(),
   });
-  const staffList = staffListResponse?.data || [];
+  const staffList = staffListResponse || [];
 
   const form = useForm<CreateShiftScheduleRequest>({
     resolver: zodResolver(CreateShiftScheduleRequestSchema),
@@ -120,7 +122,9 @@ export default function CreateScheduleDialog({
     }
   };
   const handleRemoveStaff = (staffId: string) => {
-    setSelectedAdditionalStaff(selectedAdditionalStaff.filter((id) => id !== staffId));
+    setSelectedAdditionalStaff(
+      selectedAdditionalStaff.filter((id) => id !== staffId)
+    );
   };
 
   const filteredStaff = staffList?.filter((s) =>
@@ -128,7 +132,9 @@ export default function CreateScheduleDialog({
   );
 
   const primaryStaffId = form.watch("primaryStaffId");
-  const selectedStaff = staffList?.filter((s) => selectedAdditionalStaff.includes(s.id));
+  const selectedStaff = staffList?.filter((s) =>
+    selectedAdditionalStaff.includes(s.id)
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -141,12 +147,17 @@ export default function CreateScheduleDialog({
 
         <Form {...form}>
           {/* Thân cuộn độc lập với scrollbar luôn hiện */}
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 min-h-0 flex flex-col">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex-1 min-h-0 flex flex-col"
+          >
             <div className="flex-1 px-6 overflow-y-scroll">
               <div className="space-y-6 pb-6">
                 {/* THÔNG TIN NHÂN VIÊN */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">THÔNG TIN NHÂN VIÊN</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground">
+                    THÔNG TIN NHÂN VIÊN
+                  </h3>
                   <div className="grid grid-cols-2 gap-6">
                     {/* Nhân viên chính */}
                     <FormField
@@ -158,9 +169,14 @@ export default function CreateScheduleDialog({
                           <FormControl>
                             <Popover>
                               <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-between h-11">
+                                <Button
+                                  variant="outline"
+                                  className="w-full justify-between h-11"
+                                >
                                   {field.value
-                                    ? staffList?.find((s) => s.id === field.value)?.fullName
+                                    ? staffList?.find(
+                                        (s) => s.id === field.value
+                                      )?.fullName
                                     : "Chọn nhân viên"}
                                   <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                                 </Button>
@@ -181,8 +197,12 @@ export default function CreateScheduleDialog({
                                         onClick={() => field.onChange(staff.id)}
                                       >
                                         <div className="text-left">
-                                          <div className="font-medium">{staff.fullName}</div>
-                                          <div className="text-xs text-muted-foreground">{staff.code}</div>
+                                          <div className="font-medium">
+                                            {staff.fullName}
+                                          </div>
+                                          <div className="text-xs text-muted-foreground">
+                                            {staff.code}
+                                          </div>
                                         </div>
                                       </Button>
                                     ))}
@@ -201,7 +221,10 @@ export default function CreateScheduleDialog({
                       <FormLabel>Chọn nhân viên (Tùy chọn)</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-start h-11">
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start h-11"
+                          >
                             <Plus className="h-4 w-4 mr-2" />
                             Thêm nhân viên
                           </Button>
@@ -224,7 +247,8 @@ export default function CreateScheduleDialog({
                           <div className="max-h-64 overflow-y-auto">
                             <div className="p-2 space-y-1">
                               {filteredStaff?.map((staff) => {
-                                const isSelected = selectedAdditionalStaff.includes(staff.id);
+                                const isSelected =
+                                  selectedAdditionalStaff.includes(staff.id);
                                 const isPrimary = staff.id === primaryStaffId;
                                 if (isPrimary) return null;
                                 return (
@@ -235,13 +259,18 @@ export default function CreateScheduleDialog({
                                       isSelected && "bg-accent"
                                     )}
                                     onClick={() => {
-                                      if (isSelected) handleRemoveStaff(staff.id);
+                                      if (isSelected)
+                                        handleRemoveStaff(staff.id);
                                       else handleAddStaff(staff.id);
                                     }}
                                   >
                                     <div className="flex-1">
-                                      <div className="font-medium text-sm">{staff.fullName}</div>
-                                      <div className="text-xs text-muted-foreground">{staff.code}</div>
+                                      <div className="font-medium text-sm">
+                                        {staff.fullName}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        {staff.code}
+                                      </div>
                                     </div>
                                     <Checkbox checked={isSelected} />
                                   </div>
@@ -255,7 +284,11 @@ export default function CreateScheduleDialog({
                       {selectedStaff && selectedStaff.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2 p-3 bg-muted/30 rounded-md">
                           {selectedStaff.map((staff) => (
-                            <Badge key={staff.id} variant="secondary" className="gap-1 py-1">
+                            <Badge
+                              key={staff.id}
+                              variant="secondary"
+                              className="gap-1 py-1"
+                            >
                               {staff.fullName}
                               <button
                                 type="button"
@@ -276,7 +309,9 @@ export default function CreateScheduleDialog({
 
                 {/* CA LÀM VIỆC & LỊCH TRÌNH */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">CA LÀM VIỆC & LỊCH TRÌNH</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground">
+                    CA LÀM VIỆC & LỊCH TRÌNH
+                  </h3>
                   <div className="grid grid-cols-2 gap-6">
                     {/* Ca làm */}
                     <FormField
@@ -288,8 +323,13 @@ export default function CreateScheduleDialog({
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
-                                <Button variant="outline" className="w-full justify-between h-11">
-                                  {field.value?.length ? `${field.value.length} ca được chọn` : "Chọn ca làm việc"}
+                                <Button
+                                  variant="outline"
+                                  className="w-full justify-between h-11"
+                                >
+                                  {field.value?.length
+                                    ? `${field.value.length} ca được chọn`
+                                    : "Chọn ca làm việc"}
                                   <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                                 </Button>
                               </FormControl>
@@ -303,26 +343,38 @@ export default function CreateScheduleDialog({
                               <Command>
                                 <CommandInput placeholder="Tìm ca làm..." />
                                 <CommandList className="max-h-64 overflow-y-auto">
-                                  <CommandEmpty>Không tìm thấy ca làm.</CommandEmpty>
+                                  <CommandEmpty>
+                                    Không tìm thấy ca làm.
+                                  </CommandEmpty>
                                   <CommandGroup>
                                     {workShifts?.map((shift) => {
-                                      const isSelected = field.value?.includes(shift.id);
+                                      const isSelected = field.value?.includes(
+                                        shift.id
+                                      );
                                       return (
                                         <CommandItem
                                           key={shift.id}
                                           onSelect={() => {
                                             const newValue = isSelected
-                                              ? field.value.filter((id) => id !== shift.id)
+                                              ? field.value.filter(
+                                                  (id) => id !== shift.id
+                                                )
                                               : [...field.value, shift.id];
                                             field.onChange(newValue);
                                           }}
                                         >
                                           <div className="flex items-center w-full">
-                                            <Checkbox checked={isSelected} className="mr-2" />
+                                            <Checkbox
+                                              checked={isSelected}
+                                              className="mr-2"
+                                            />
                                             <div className="flex-1">
-                                              <div className="font-medium">{shift.name}</div>
+                                              <div className="font-medium">
+                                                {shift.name}
+                                              </div>
                                               <div className="text-xs text-muted-foreground">
-                                                {shift.startTime?.slice(0, 5)} - {shift.endTime?.slice(0, 5)}
+                                                {shift.startTime?.slice(0, 5)} -{" "}
+                                                {shift.endTime?.slice(0, 5)}
                                               </div>
                                             </div>
                                           </div>
@@ -338,14 +390,26 @@ export default function CreateScheduleDialog({
                           {field.value?.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
                               {field.value.map((shiftId) => {
-                                const shift = workShifts?.find((s) => s.id === shiftId);
+                                const shift = workShifts?.find(
+                                  (s) => s.id === shiftId
+                                );
                                 if (!shift) return null;
                                 return (
-                                  <Badge key={shiftId} variant="secondary" className="gap-1">
+                                  <Badge
+                                    key={shiftId}
+                                    variant="secondary"
+                                    className="gap-1"
+                                  >
                                     {shift.name}
                                     <button
                                       type="button"
-                                      onClick={() => field.onChange(field.value.filter((id) => id !== shiftId))}
+                                      onClick={() =>
+                                        field.onChange(
+                                          field.value.filter(
+                                            (id) => id !== shiftId
+                                          )
+                                        )
+                                      }
                                       className="ml-1 hover:bg-destructive/20 rounded-full"
                                     >
                                       <X className="h-3 w-3" />
@@ -374,18 +438,40 @@ export default function CreateScheduleDialog({
                                   <FormControl>
                                     <Button
                                       variant="outline"
-                                      className={cn("w-full justify-start text-left font-normal h-11", !field.value && "text-muted-foreground")}
+                                      className={cn(
+                                        "w-full justify-start text-left font-normal h-11",
+                                        !field.value && "text-muted-foreground"
+                                      )}
                                     >
                                       <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {field.value ? format(parseISO(field.value), "dd/MM/yyyy", { locale: vi }) : "Chọn ngày"}
+                                      {field.value
+                                        ? format(
+                                            parseISO(field.value),
+                                            "dd/MM/yyyy",
+                                            { locale: vi }
+                                          )
+                                        : "Chọn ngày"}
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start" onWheel={stopWheel} onTouchMove={stopTouch}>
+                                <PopoverContent
+                                  className="w-auto p-0"
+                                  align="start"
+                                  onWheel={stopWheel}
+                                  onTouchMove={stopTouch}
+                                >
                                   <Calendar
                                     mode="single"
-                                    selected={field.value ? parseISO(field.value) : undefined}
-                                    onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                                    selected={
+                                      field.value
+                                        ? parseISO(field.value)
+                                        : undefined
+                                    }
+                                    onSelect={(date) =>
+                                      field.onChange(
+                                        date ? format(date, "yyyy-MM-dd") : ""
+                                      )
+                                    }
                                     locale={vi}
                                     captionLayout="dropdown"
                                     fromYear={2000}
@@ -409,18 +495,40 @@ export default function CreateScheduleDialog({
                                   <FormControl>
                                     <Button
                                       variant="outline"
-                                      className={cn("w-full justify-start text-left font-normal h-11", !field.value && "text-muted-foreground")}
+                                      className={cn(
+                                        "w-full justify-start text-left font-normal h-11",
+                                        !field.value && "text-muted-foreground"
+                                      )}
                                     >
                                       <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {field.value ? format(parseISO(field.value), "dd/MM/yyyy", { locale: vi }) : "Chưa xác định"}
+                                      {field.value
+                                        ? format(
+                                            parseISO(field.value),
+                                            "dd/MM/yyyy",
+                                            { locale: vi }
+                                          )
+                                        : "Chưa xác định"}
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start" onWheel={stopWheel} onTouchMove={stopTouch}>
+                                <PopoverContent
+                                  className="w-auto p-0"
+                                  align="start"
+                                  onWheel={stopWheel}
+                                  onTouchMove={stopTouch}
+                                >
                                   <Calendar
                                     mode="single"
-                                    selected={field.value ? parseISO(field.value) : undefined}
-                                    onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : null)}
+                                    selected={
+                                      field.value
+                                        ? parseISO(field.value)
+                                        : undefined
+                                    }
+                                    onSelect={(date) =>
+                                      field.onChange(
+                                        date ? format(date, "yyyy-MM-dd") : null
+                                      )
+                                    }
                                     locale={vi}
                                     captionLayout="dropdown"
                                     fromYear={2000}
@@ -428,7 +536,9 @@ export default function CreateScheduleDialog({
                                   />
                                 </PopoverContent>
                               </Popover>
-                              <FormDescription className="text-xs">Nếu để trống, mặc định là 3 tháng</FormDescription>
+                              <FormDescription className="text-xs">
+                                Nếu để trống, mặc định là 3 tháng
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -444,13 +554,19 @@ export default function CreateScheduleDialog({
                     render={({ field }) => (
                       <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/30">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-sm font-medium">Lặp lại hàng tuần</FormLabel>
+                          <FormLabel className="text-sm font-medium">
+                            Lặp lại hàng tuần
+                          </FormLabel>
                           <FormDescription className="text-xs">
-                            Lịch làm việc sẽ được tự động lặp lại vào các ngày trong tuần
+                            Lịch làm việc sẽ được tự động lặp lại vào các ngày
+                            trong tuần
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -474,19 +590,30 @@ export default function CreateScheduleDialog({
                                 control={form.control}
                                 name="weekDays"
                                 render={({ field }) => {
-                                  const selected = field.value?.includes(day.value);
+                                  const selected = field.value?.includes(
+                                    day.value
+                                  );
                                   return (
                                     <FormItem key={day.value}>
                                       <FormControl>
                                         <Button
                                           type="button"
-                                          variant={selected ? "default" : "outline"}
+                                          variant={
+                                            selected ? "default" : "outline"
+                                          }
                                           className="min-w-[90px]"
                                           onClick={() => {
                                             if (selected) {
-                                              field.onChange(field.value.filter((v: number) => v !== day.value));
+                                              field.onChange(
+                                                field.value.filter(
+                                                  (v: number) => v !== day.value
+                                                )
+                                              );
                                             } else {
-                                              field.onChange([...field.value, day.value]);
+                                              field.onChange([
+                                                ...field.value,
+                                                day.value,
+                                              ]);
                                             }
                                           }}
                                         >
@@ -500,7 +627,8 @@ export default function CreateScheduleDialog({
                             ))}
                           </div>
                           <FormDescription className="text-xs">
-                            Lặp lại thứ {form.watch("weekDays")?.length || 0} hàng tuần
+                            Lặp lại thứ {form.watch("weekDays")?.length || 0}{" "}
+                            hàng tuần
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -517,9 +645,14 @@ export default function CreateScheduleDialog({
                     render={({ field }) => (
                       <FormItem className="flex items-center space-x-3 space-y-0 p-3 bg-muted/30 rounded-md">
                         <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">Không xếp lịch vào ngày lễ</FormLabel>
+                        <FormLabel className="font-normal cursor-pointer">
+                          Không xếp lịch vào ngày lễ
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
@@ -530,7 +663,12 @@ export default function CreateScheduleDialog({
             {/* Footer sticky: luôn hiện ở đáy dialog */}
             <div className="px-6 py-4 border-t bg-background shrink-0">
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                >
                   Bỏ qua
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>

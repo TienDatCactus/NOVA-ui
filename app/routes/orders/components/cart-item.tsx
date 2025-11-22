@@ -47,23 +47,21 @@ export default function CartItem({
                 {formatMoney(subtotal).vndFormatted}
               </data>
             </div>
+
             <div className="flex items-center justify-between gap-2">
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <Counter
-                  value={quantity}
-                  onChange={(value) => onQuantityChange(value)}
-                />
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-destructive hover:text-destructive"
-                    onClick={onRemove}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+              <Counter
+                value={quantity}
+                onChange={(value) => onQuantityChange(value)}
+                className="w-40"
+              />
+              <div className="flex gap-1">
+                <Button
+                  variant="destructive-ghost"
+                  size="icon"
+                  onClick={onRemove}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
           </div>

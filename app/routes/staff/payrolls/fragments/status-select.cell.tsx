@@ -6,10 +6,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useMutation } from "@tanstack/react-query";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useLockPayroll, useUnlockPayroll } from "../container/query.hooks";
 
 interface StatusSelectCellProps {
   payrollId: string;
@@ -27,39 +26,28 @@ export default function StatusSelectCell({
     setCurrentStatus(locked);
   }, [locked, payrollId]);
 
-  const lockMutation = useMutation({
-    mutationFn: () => StaffPayrollService.lockPayroll(payrollId),
-    onSuccess: () => {
-      toast.success("Đã khóa bảng lương");
-      setCurrentStatus(true);
-      onSuccess?.();
-    },
-    onError: () => {
-      toast.error("Không thể khóa bảng lương");
-    },
-  });
-
-  const unlockMutation = useMutation({
-    mutationFn: () => StaffPayrollService.unlockPayroll(payrollId),
-    onSuccess: () => {
-      toast.success("Đã mở khóa bảng lương");
-      setCurrentStatus(false);
-      onSuccess?.();
-    },
-    onError: () => {
-      toast.error("Không thể mở khóa bảng lương");
-    },
-  });
+  const { mutate: lockPayroll, isPending: isLocking } = useLockPayroll();
+  const { mutate: unlockPayroll, isPending: isUnlocking } = useUnlockPayroll();
 
   const handleStatusChange = (value: string) => {
     if (value === "locked") {
-      lockMutation.mutate();
+      lockPayroll(payrollId, {
+        onSuccess: () => {
+          setCurrentStatus(true);
+          onSuccess?.();
+        },
+      });
     } else {
-      unlockMutation.mutate();
+      unlockPayroll(payrollId, {
+        onSuccess: () => {
+          setCurrentStatus(false);
+          onSuccess?.();
+        },
+      });
     }
   };
 
-  const isLoading = lockMutation.isPending || unlockMutation.isPending;
+  const isLoading = isLocking || isUnlocking;
 
   return (
     <div className="flex items-center justify-center">

@@ -7,8 +7,11 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
 } from "@tanstack/react-table";
+import { Plus, Search } from "lucide-react";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -17,23 +20,19 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Skeleton } from "~/components/ui/skeleton";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
+import CreateStaffDialog from "../staff-create-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  isPending?: boolean;
 }
 
-export function StaffDataTable<TData, TValue>({
+export function DataTable<TData, TValue>({
   columns,
   data,
-  isPending,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -46,19 +45,9 @@ export function StaffDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  if (isPending) {
-    return (
-      <div className="space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo họ tên..."
@@ -70,8 +59,12 @@ export function StaffDataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
+          <Plus />
+          Thêm nhân sự
+        </Button>
       </div>
-      <div className="rounded-md border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -120,6 +113,10 @@ export function StaffDataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateStaffDialog
+        open={openCreateDialog}
+        onOpenChange={setOpenCreateDialog}
+      />
     </div>
   );
 }

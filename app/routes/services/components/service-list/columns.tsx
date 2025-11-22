@@ -10,30 +10,6 @@ import { ChevronDown } from "lucide-react";
 
 export const columns: ColumnDef<ServiceItem>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Chọn tất cả"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Chọn dòng"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "index",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="STT" />
@@ -101,19 +77,11 @@ export const columns: ColumnDef<ServiceItem>[] = [
   {
     accessorKey: "basePrice",
     header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Giá cơ bản"
-        className="text-end"
-      />
+      <DataTableColumnHeader column={column} title="Giá cơ bản" />
     ),
     cell: ({ row }) => {
       const price = row.original.basePrice;
-      return (
-        <p className="text-end font-semibold">
-          {formatMoney(price).vndFormatted}
-        </p>
-      );
+      return <p className="font-semibold">{formatMoney(price).vndFormatted}</p>;
     },
   },
   {
@@ -138,7 +106,7 @@ export const columns: ColumnDef<ServiceItem>[] = [
     cell: ({ row }) => {
       const isActive = row.original.active;
       return (
-        <div className="flex justify-end">
+        <div className="flex ">
           <Badge variant={isActive ? "success" : "warning"}>
             {isActive ? "Hoạt động" : "Ngưng hoạt động"}
           </Badge>

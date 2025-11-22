@@ -1,14 +1,19 @@
+import { useState } from "react";
+import { History } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import { formatMoney } from "~/lib/utils";
+import { TransactionHistoryDialog } from "../components/transaction-history.dialog";
 
 interface ItemDetailRowProps {
   item: StockItemsListItemDto;
 }
 
 export function ItemDetailRow({ item }: ItemDetailRowProps) {
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
   const currentStock = item.currentStock ?? 0;
   const minStock = item.minStock ?? 0;
   const maxStock = item.maxStock ?? 0;
@@ -152,7 +157,28 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
             </div>
           </>
         )}
+
+        {/* Transaction History Button */}
+        <Separator className="my-4" />
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTransactionDialogOpen(true)}
+          >
+            <History className="mr-2 h-4 w-4" />
+            Xem lịch sử giao dịch
+          </Button>
+        </div>
       </CardContent>
+
+      {/* Transaction History Dialog */}
+      <TransactionHistoryDialog
+        open={transactionDialogOpen}
+        onOpenChange={setTransactionDialogOpen}
+        itemId={item.id}
+        itemName={item.name}
+      />
     </Card>
   );
 }

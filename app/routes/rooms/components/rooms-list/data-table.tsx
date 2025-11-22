@@ -9,7 +9,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React, { useState } from "react";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
 import {
@@ -21,28 +21,26 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
+import { Button } from "~/components/ui/button";
+import CreateRoomDialog from "../create-room.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 export function DataTable<TData extends RoomListItemDto, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const table = useReactTable({
     data,
     columns,
     state: {
-      rowSelection,
       columnFilters,
     },
-    onRowSelectionChange: setRowSelection,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -52,7 +50,7 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên phòng..."
@@ -64,6 +62,10 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
           }
           className="max-w-sm"
         />
+        <Button size={"sm"}>
+          <Plus className="h-4 w-4" />
+          Thêm phòng
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table className="">
@@ -117,6 +119,10 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateRoomDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+      />
     </div>
   );
 }

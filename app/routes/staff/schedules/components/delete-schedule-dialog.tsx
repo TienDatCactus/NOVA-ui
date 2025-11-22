@@ -13,9 +13,9 @@ import {
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Label } from "~/components/ui/label";
 import { toast } from "sonner";
-import type { StaffShiftListItem } from "~/services/api/staff-shift/dto";
-import { DeleteScope } from "~/services/api/staff-shift/staff-shift.type";
-import { StaffShiftService } from "~/services/api/staff-shift";
+import type { StaffShiftListItem } from "~/services/api/staff/staff-shift/dto";
+import { DeleteScope } from "~/services/api/staff/staff-shift/staff-shift.type";
+import { StaffShiftService } from "~/services/api/staff/staff-shift";
 
 interface DeleteScheduleDialogProps {
   open: boolean;
@@ -30,7 +30,9 @@ export default function DeleteScheduleDialog({
   shift,
   onSuccess,
 }: DeleteScheduleDialogProps) {
-  const [deleteScope, setDeleteScope] = useState<DeleteScope>(DeleteScope.Single);
+  const [deleteScope, setDeleteScope] = useState<DeleteScope>(
+    DeleteScope.Single
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!shift) return null;
@@ -75,7 +77,8 @@ export default function DeleteScheduleDialog({
       value: DeleteScope.FromThisDateForward,
       id: "forward",
       label: `Từ ngày ${formattedDate} đến ngày ${endDate}`,
-      description: "Xóa lịch làm việc từ ngày này trở đi với cùng nhân viên và ca làm",
+      description:
+        "Xóa lịch làm việc từ ngày này trở đi với cùng nhân viên và ca làm",
     },
     {
       value: DeleteScope.AllInSeries,
@@ -95,9 +98,14 @@ export default function DeleteScheduleDialog({
               {/* Info text */}
               <p className="text-sm">
                 Bạn có chắc chắn muốn xóa lịch làm việc của{" "}
-                <span className="font-semibold text-foreground">{shift.staffName}</span>{" "}
+                <span className="font-semibold text-foreground">
+                  {shift.staffName}
+                </span>{" "}
                 trong ca{" "}
-                <span className="font-semibold text-foreground">{shift.shiftName}</span>?
+                <span className="font-semibold text-foreground">
+                  {shift.shiftName}
+                </span>
+                ?
               </p>
 
               {/* Delete Scope Radio Group - Description bên ngoài */}
@@ -133,7 +141,8 @@ export default function DeleteScheduleDialog({
                   Lưu ý:
                 </span>
                 <p className="text-xs text-destructive">
-                  Hành động này không thể hoàn tác. Vui lòng kiểm tra kỹ trước khi xóa.
+                  Hành động này không thể hoàn tác. Vui lòng kiểm tra kỹ trước
+                  khi xóa.
                 </p>
               </div>
             </div>

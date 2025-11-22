@@ -17,16 +17,9 @@ import { columns } from "./columns";
 interface RoomTypesTableProps {
   roomTypes: RoomTypesListItemDto[];
   isLoading: boolean;
-  onAddRoomType: () => void;
-  onSelectionChange?: (selectedRows: RoomTypesListItemDto[]) => void;
 }
 
-function RoomTypesDataTable({
-  roomTypes,
-  isLoading,
-  onAddRoomType,
-  onSelectionChange,
-}: RoomTypesTableProps) {
+function RoomTypesDataTable({ roomTypes, isLoading }: RoomTypesTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -52,20 +45,13 @@ function RoomTypesDataTable({
             thêm loại phòng đầu tiên.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onAddRoomType}>Thêm loại phòng đầu tiên</Button>
-        </EmptyContent>
       </Empty>
     );
   }
 
   return (
     <div className="container mx-auto ">
-      <DataTable
-        columns={columns}
-        data={roomTypes}
-        onSelectionChange={onSelectionChange}
-      />
+      <DataTable columns={columns} data={roomTypes} />
     </div>
   );
 }

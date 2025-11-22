@@ -10,9 +10,9 @@ const StockAdjustmentItemSchema = z.object({
 });
 
 const StockAdjustmentListItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   reference: z.string(),
-  adjustmentDate: z.string().datetime(),
+  adjustmentDate: z.string(),
   reason: z.string(),
   isApplied: z.boolean(),
   items: z.array(StockAdjustmentItemSchema),

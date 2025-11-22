@@ -1,4 +1,4 @@
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, PackageCheck } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -12,12 +12,15 @@ import {
 import EditItemDialog from "../components/edit-item.dialog";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
+import { QuickAdjustDialog } from "./quick-adjust.dialog";
+
 interface ItemsActionCellProps {
   item: StockItemsListItemDto;
 }
 const ItemsActionCell: React.FC<ItemsActionCellProps> = ({ item }) => {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openQuickAdjustDialog, setOpenQuickAdjustDialog] = useState(false);
   return (
     <div className="flex justify-end">
       <DropdownMenu>
@@ -33,6 +36,11 @@ const ItemsActionCell: React.FC<ItemsActionCellProps> = ({ item }) => {
             <Pencil className="mr-2 h-4 w-4" />
             Chỉnh sửa
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setOpenQuickAdjustDialog(true)}>
+            <PackageCheck className="mr-2 h-4 w-4" />
+            Điều chỉnh kho
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-destructive"
             onClick={() => setOpenDeleteDialog(true)}
@@ -46,6 +54,11 @@ const ItemsActionCell: React.FC<ItemsActionCellProps> = ({ item }) => {
         open={openEditDialog}
         onOpenChange={setOpenEditDialog}
         itemId={item.id}
+      />
+      <QuickAdjustDialog
+        open={openQuickAdjustDialog}
+        onOpenChange={setOpenQuickAdjustDialog}
+        item={item}
       />
       <DeleteConfirmDialog
         item={item}

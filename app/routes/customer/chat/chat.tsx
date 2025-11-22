@@ -44,7 +44,6 @@ export default function GuestChat({}: Route.ComponentProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
   const { data: menuItems, isPending: isMenuLoading } = useMenuList({});
   const { data: serviceItems, isPending: isServiceLoading } = useServices({});
@@ -66,6 +65,13 @@ export default function GuestChat({}: Route.ComponentProps) {
     error: entryError,
   } = useChatEntry(roomToken || "", !!roomToken);
   const sessionId = entry?.canChat ? entry.sessionId : null;
+
+  // Show error dialog if cannot chat
+  useEffect(() => {
+    if (entry && !entry.canChat) {
+      setShowErrorDialog(true);
+    }
+  }, [entry]);
 
   const {
     data: session,
@@ -91,7 +97,7 @@ export default function GuestChat({}: Route.ComponentProps) {
     sendMessage: sendMessageViaSignalR,
     loadMessages,
   } = useChatConnection({
-    sessionId,
+    sessionId: sessionId || "",
     isGuest: true,
   });
 
@@ -113,32 +119,6 @@ export default function GuestChat({}: Route.ComponentProps) {
     }
   }, [allMessages, loadMessages]);
 
-  // Entry validation
-  useEffect(() => {
-    if (!roomToken) {
-      setErrorMessage("Không tìm thấy mã phòng. Vui lòng quét lại mã QR.");
-      setShowErrorDialog(true);
-      return;
-    }
-
-    if (entryError) {
-      setErrorMessage(
-        "Không thể kết nối. Vui lòng kiểm tra kết nối và thử lại."
-      );
-      setShowErrorDialog(true);
-      return;
-    }
-
-    if (entry && !entry.canChat) {
-      setErrorMessage(
-        entry.message ||
-          "Phòng này hiện không có khách lưu trú hoặc chưa đến thời gian check-in."
-      );
-      setShowErrorDialog(true);
-    }
-  }, [roomToken, entry, entryError]);
-
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -180,18 +160,81 @@ export default function GuestChat({}: Route.ComponentProps) {
   if (isLoadingEntry) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center space-y-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">
+            Đang kiểm tra quyền truy cập...
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (showErrorDialog) {
+  // Handle entry error (network error, etc.)
+  if (entryError) {
+    return (
+      <div className="flex h-screen items-center justify-center p-4">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-destructive">
+              Lỗi kết nối
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {entryError instanceof Error
+                ? entryError.message
+                : "Không thể kết nối đến server. Vui lòng thử lại sau."}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            className="mt-4"
+          >
+            Thử lại
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error dialog when canChat is false
+  if (showErrorDialog && entry) {
     return (
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Không thể truy cập Chat</AlertDialogTitle>
-            <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+            <AlertDialogDescription className="space-y-3">
+              <p className="text-base">{entry.message}</p>
+              {entry.roomName && (
+                <div className="bg-muted p-3 rounded-md space-y-1 text-sm">
+                  <p>
+                    <span className="font-medium">Phòng:</span> {entry.roomName}
+                  </p>
+                  {entry.customerName && (
+                    <p>
+                      <span className="font-medium">Khách hàng:</span>{" "}
+                      {entry.customerName}
+                    </p>
+                  )}
+                  {entry.checkinDate && (
+                    <p>
+                      <span className="font-medium">Check-in:</span>{" "}
+                      {new Date(entry.checkinDate).toLocaleDateString("vi-VN")}
+                    </p>
+                  )}
+                  {entry.checkoutDate && (
+                    <p>
+                      <span className="font-medium">Check-out:</span>{" "}
+                      {new Date(entry.checkoutDate).toLocaleDateString("vi-VN")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={handleErrorDialogClose}>

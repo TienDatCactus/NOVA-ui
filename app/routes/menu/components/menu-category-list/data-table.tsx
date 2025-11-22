@@ -1,15 +1,18 @@
 import {
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
   type ColumnDef,
   type ColumnFiltersState,
   type RowSelectionState,
-  getFilteredRowModel,
 } from "@tanstack/react-table";
+import { Plus, Search } from "lucide-react";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -19,8 +22,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
+import CreateMenuCategoryDialog from "../create-menu-category.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -33,7 +35,7 @@ export function DataTable<TData extends MenuCategoryItemDto, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -51,7 +53,7 @@ export function DataTable<TData extends MenuCategoryItemDto, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex justify-between items-center py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên danh mục..."
@@ -61,6 +63,10 @@ export function DataTable<TData extends MenuCategoryItemDto, TValue>({
           }
           className="max-w-sm"
         />
+        <Button onClick={() => setCreateDialogOpen(true)} size="sm">
+          <Plus className="h-4 w-4 " />
+          Thêm danh mục
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -111,7 +117,11 @@ export function DataTable<TData extends MenuCategoryItemDto, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} />{" "}
+      <CreateMenuCategoryDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+      />
     </div>
   );
 }

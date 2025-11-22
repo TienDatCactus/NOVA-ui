@@ -1,37 +1,25 @@
-import CreateMenuCategoryDialog from "./components/create-menu-category.dialog";
-import EditMenuCategorySheet from "./components/edit-menu-category.sheet";
-import MenuCategoryViewLayout from "./layouts/menu-category-view.layout";
-import { useMenuCategoryFilters } from "./container/menu-categories/filter.hooks";
 import { useMemo } from "react";
 import MenuCategoryDataTable from "./components/menu-category-list";
+import { useMenuCategoryFilters } from "./container/menu-categories/filter.hooks";
 import { useMenuCategories } from "./container/menu-categories/query.hooks";
+import MenuCategoryViewLayout from "./layouts/menu-category-view.layout";
 
-/**
- * Main menu categories management page
- * Orchestrates all components and logic for category CRUD
- */
 export default function MenuCategoriesPage() {
-  const { filters, updateFilter, resetFilters, filterCategories } =
-    useMenuCategoryFilters();
+  const { filters, updateFilter, resetFilters } = useMenuCategoryFilters();
 
   const { data: categories, isPending } = useMenuCategories({
     includeInactive: filters.activeFilter !== "active",
   });
 
-  const filteredCategories = useMemo(() => {
-    if (!categories) return [];
-    return filterCategories(categories);
-  }, [categories, filterCategories]);
-
   return (
     <MenuCategoryViewLayout
-      totalMenuCategories={filteredCategories.length}
+      totalMenuCategories={categories?.length ?? 0}
       filters={filters}
       updateFilter={updateFilter}
       resetFilters={resetFilters}
     >
       <MenuCategoryDataTable
-        menuCategories={filteredCategories}
+        menuCategories={categories || []}
         isLoading={isPending}
       />
     </MenuCategoryViewLayout>

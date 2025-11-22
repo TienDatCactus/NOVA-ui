@@ -7,14 +7,14 @@ import {
 import { Button } from "~/components/ui/button";
 import { MoreHorizontal, FileText, Edit, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import type { PayrollItem } from "~/services/api/staff-payroll/dto";
+import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
 import UpdatePayrollDialog from "../components/update-payroll-dialog";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
 import { toast } from "sonner";
+import { useRefreshSinglePayroll } from "../container/query.hooks";
 
 interface ActionsMenuCellProps {
-  payroll: PayrollItem;
+  payroll: PayrollItemDto;
   onSuccess?: () => void;
 }
 
@@ -24,20 +24,21 @@ export default function ActionsMenuCell({
 }: ActionsMenuCellProps) {
   const [updateOpen, setUpdateOpen] = useState(false);
   const [applyLeaveOpen, setApplyLeaveOpen] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleRefreshSingle = async () => {
-    setIsRefreshing(true);
-    try {
-      await StaffPayrollService.refreshSinglePayroll(payroll.payrollId);
-      toast.success("Làm mới dữ liệu thành công");
-      onSuccess?.();
-    } catch (error) {
-      toast.error("Không thể làm mới dữ liệu");
-      console.error("Refresh single error:", error);
-    } finally {
-      setIsRefreshing(false);
-    }
+  const { mutate: refreshSingle, isPending: isRefreshing } =
+    useRefreshSinglePayroll();
+
+  const handleRefreshSingle = () => {
+    refreshSingle(payroll.payrollId, {
+      onSuccess: () => {
+        toast.success("Làm mới dữ liệu thành công");
+        onSuccess?.();
+      },
+      onError: (error) => {
+        toast.error("Không thể làm mới dữ liệu");
+        console.error("Refresh single error:", error);
+      },
+    });
   };
 
   return (
@@ -54,7 +55,7 @@ export default function ActionsMenuCell({
             <Edit className="mr-2 h-4 w-4" />
             <span>Cập nhật</span>
           </DropdownMenuItem>
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={() => setApplyLeaveOpen(true)}
             disabled={payroll.locked}
             className={payroll.locked ? "opacity-50 cursor-not-allowed" : ""}
@@ -62,11 +63,13 @@ export default function ActionsMenuCell({
             <FileText className="mr-2 h-4 w-4" />
             <span>Áp dụng chế độ xử lý phép dư</span>
           </DropdownMenuItem>
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={handleRefreshSingle}
             disabled={isRefreshing}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             <span>Làm mới</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

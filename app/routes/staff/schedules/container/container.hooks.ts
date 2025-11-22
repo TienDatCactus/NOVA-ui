@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { endOfWeek, format, startOfWeek } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import type { StaffShiftListItem } from "~/services/api/staff-shift/dto";
+import type { StaffShiftListItem } from "~/services/api/staff/staff-shift/dto";
 import { useScheduleExport } from "./export.hooks";
 import { useScheduleFilter } from "./filter.hooks";
 import { useActiveWorkShiftList, useStaffShiftList } from "./query.hooks";

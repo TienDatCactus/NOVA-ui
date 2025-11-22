@@ -46,19 +46,6 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
-        <Input
-          startAddon={<Search />}
-          placeholder="Tìm theo mã đặt phòng..."
-          value={
-            (table.getColumn("bookingCode")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("bookingCode")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader className="h-14">

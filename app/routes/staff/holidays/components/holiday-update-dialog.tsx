@@ -1,6 +1,12 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { CalendarDays, ChevronDownIcon, Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
+import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -19,100 +25,71 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { Switch } from "~/components/ui/switch";
-import { Card } from "~/components/ui/card";
-import { DatePicker } from "~/components/ui/date-picker";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { Calendar } from "~/components/ui/calendar";
-import { Loader2, CalendarDays, ChevronDownIcon } from "lucide-react";
-import { useState, useEffect } from "react";
-import { HolidayService } from "~/services/api/holiday";
-import { toast } from "sonner";
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
-import type { HolidayListItem } from "~/services/api/holiday/dto";
-import {
-  formatNumber,
-  parseFormattedNumber,
-  handleNumberInputChange,
-} from "~/lib/format-number";
-
-const UpdateHolidayFormSchema = z.object({
-  name: z.string().min(1, "Tên ngày nghỉ là bắt buộc"),
-  startDate: z.date({ message: "Ngày bắt đầu là bắt buộc" }),
-  endDate: z.date({ message: "Ngày kết thúc là bắt buộc" }),
-  isPublicHoliday: z.boolean(),
-  bonusAmount: z.string().min(1, "Số tiền thưởng là bắt buộc"),
-});
-
-type UpdateHolidayForm = z.infer<typeof UpdateHolidayFormSchema>;
+import type {
+  HolidayListItem,
+  UpdateHolidayRequest,
+} from "~/services/api/holiday/dto";
+import { HolidaySchema } from "~/services/api/holiday/holiday.schema";
+import { useUpdateHoliday } from "../container/mutation.hooks";
 
 interface UpdateHolidayDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   holiday: HolidayListItem | null;
-  onSuccess?: () => void;
 }
 
 export default function UpdateHolidayDialog({
   open,
   onOpenChange,
   holiday,
-  onSuccess,
 }: UpdateHolidayDialogProps) {
-  const [isPending, setIsPending] = useState(false);
-
-  const form = useForm<UpdateHolidayForm>({
-    resolver: zodResolver(UpdateHolidayFormSchema),
+  const form = useForm<UpdateHolidayRequest>({
+    resolver: zodResolver(HolidaySchema.UpdateHolidayRequestSchema),
     defaultValues: {
       name: "",
       startDate: undefined,
       endDate: undefined,
       isPublicHoliday: false,
-      bonusAmount: "",
+      bonusAmount: 0,
     },
   });
-
-  // Update form when holiday changes
+  const { mutateAsync: updateHoliday, isPending } = useUpdateHoliday();
   useEffect(() => {
     if (holiday) {
       form.reset({
+        bonusAmount: holiday.bonusAmount ?? 0,
         name: holiday.name,
-        startDate: parseISO(holiday.startDate),
-        endDate: parseISO(holiday.endDate),
+        startDate: holiday.startDate,
+        endDate: holiday.endDate,
         isPublicHoliday: holiday.isPublicHoliday,
-        bonusAmount: formatNumber(holiday.bonusAmount),
       });
     }
   }, [holiday, form]);
 
-  const handleSubmit = async (data: UpdateHolidayForm) => {
+  const handleSubmit = async (data: UpdateHolidayRequest) => {
     if (!holiday) return;
 
-    setIsPending(true);
     try {
-      const payload = {
-        name: data.name,
-        startDate: format(data.startDate, "yyyy-MM-dd"),
-        endDate: format(data.endDate, "yyyy-MM-dd"),
-        isPublicHoliday: data.isPublicHoliday,
-        bonusMultiplier: undefined,
-        bonusAmount: parseFormattedNumber(data.bonusAmount),
-      };
-      await HolidayService.updateHoliday(holiday.id, payload);
-      toast.success("Cập nhật ngày nghỉ thành công");
-      onOpenChange(false);
-      onSuccess?.();
+      await updateHoliday(
+        {
+          holidayId: holiday.id,
+          payload: data,
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+          },
+        }
+      );
     } catch (error) {
       console.error("Update holiday error:", error);
-    } finally {
-      setIsPending(false);
     }
   };
 
@@ -185,11 +162,9 @@ export default function UpdateHolidayDialog({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={new Date(field.value)}
                           onSelect={field.onChange}
                           captionLayout="dropdown"
-                          fromYear={2000}
-                          toYear={new Date().getFullYear() + 10}
                           locale={vi}
                         />
                       </PopoverContent>
@@ -229,11 +204,9 @@ export default function UpdateHolidayDialog({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={new Date(field.value)}
                           onSelect={field.onChange}
                           captionLayout="dropdown"
-                          fromYear={2000}
-                          toYear={new Date().getFullYear() + 10}
                           locale={vi}
                         />
                       </PopoverContent>
@@ -256,7 +229,7 @@ export default function UpdateHolidayDialog({
                         type="text"
                         placeholder="0"
                         value={field.value}
-                        onChange={(e) => handleNumberInputChange(e, field.onChange)}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />

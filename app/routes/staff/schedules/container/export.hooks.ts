@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { StaffShiftService } from "~/services/api/staff-shift";
+import { StaffShiftService } from "~/services/api/staff/staff-shift";
 
 interface UseScheduleExportProps {
   currentWeekStart: Date;

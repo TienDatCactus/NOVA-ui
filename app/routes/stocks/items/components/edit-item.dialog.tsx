@@ -59,7 +59,9 @@ export default function EditItemDialog({
   onOpenChange,
   itemId,
 }: EditItemDialogProps) {
-  const { data: item } = useStockItemDetail(itemId);
+  const { data: item } = useStockItemDetail(itemId, undefined, {
+    enabled: open,
+  });
   const { data: categories = [] } = useItemCategories({
     includeInactive: true,
   });

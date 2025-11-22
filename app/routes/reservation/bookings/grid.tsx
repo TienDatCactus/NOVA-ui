@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import BookingGrid from "./components/booking-grid";
-import BookingGridFilters from "./fragments/booking-grid-filters";
+import BookingGridFilters from "./fragments/booking-grid.filters";
 import { useAvailableRoomsFilter } from "./container/available-booking-filter.hooks";
 import { useAvailableRooms } from "./container/booking-query.hooks";
 import type { Route } from "./+types/grid";

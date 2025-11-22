@@ -1,43 +1,31 @@
 import type { ReactNode } from "react";
-import StaffFilterSidebar from "../fragments/filter.sidebar";
 import type { StaffFilters } from "../container/filter.hooks";
-import { Button } from "~/components/ui/button";
-import { UserPlus, FileText } from "lucide-react";
 
 interface StaffViewLayoutProps {
   children: ReactNode;
+  totalStaffs: number;
   filters: StaffFilters;
   onFilterChange: <K extends keyof StaffFilters>(
     key: K,
     value: StaffFilters[K]
   ) => void;
   onResetFilters: () => void;
-  totalStaffs: number;
-  onCreateStaff?: () => void;
 }
 
 export default function StaffViewLayout({
   children,
+  totalStaffs,
   filters,
   onFilterChange,
   onResetFilters,
-  totalStaffs,
-  onCreateStaff,
 }: StaffViewLayoutProps) {
   return (
-    <div className="flex gap-6 h-[calc(100vh-4rem)]">
-      <div className="w-72 flex-shrink-0">
-        <StaffFilterSidebar
-          filters={filters}
-          onFilterChange={onFilterChange}
-          onResetFilters={onResetFilters}
-        />
-      </div>
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between mb-6 flex-shrink-0">
-          <div>
+    <div className="flex gap-6 p-4">
+      <div className="flex-1 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="grid gap-2">
             <h1 className="text-3xl font-bold">Quản lý nhân sự</h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground">
               Tổng{" "}
               <span className="font-semibold text-foreground">
                 {totalStaffs}
@@ -45,17 +33,10 @@ export default function StaffViewLayout({
               nhân sự
             </p>
           </div>
-          <div className="flex items-center gap-2 pr-5">
-            {onCreateStaff && (
-              <Button onClick={onCreateStaff} className="gap-2">
-                <UserPlus className="h-4 w-4" />
-                Thêm nhân sự
-              </Button>
-            )}
-          </div>
+          <div className="flex items-center gap-2 "></div>
         </div>
-        <div className="flex-1 overflow-auto">{children}</div>
-      </main>
+        <main className="flex-1 ">{children}</main>
+      </div>
     </div>
   );
 }

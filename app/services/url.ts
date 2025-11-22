@@ -258,7 +258,6 @@ const StaffPayroll = {
   refreshSinglePayroll: (id: string) => `StaffPayrolls/${id}/refresh-days`,
 };
 
-
 const Translation = {
   translate: "Translation/translate",
   detect: (text: string) => `Translation/detect-language?text=${text}`,
@@ -285,6 +284,7 @@ const Stock = {
     delete: (id: string) => `PurchaseRequests/${id}`,
     approve: (id: string) => `PurchaseRequests/${id}/approve`,
     reject: (id: string) => `PurchaseRequests/${id}/reject`,
+    cancel: (id: string) => `PurchaseRequests/${id}/cancel`,
     receiveStock: (id: string) => `PurchaseRequests/${id}/receive-stock`,
   },
   StockAdjustments: {

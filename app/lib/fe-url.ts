@@ -35,6 +35,7 @@ const DASHBOARD = {
     workShifts: "/dashboard/staff/work-shifts",
     schedules: "/dashboard/staff/schedules",
     holidays: "/dashboard/staff/holidays",
+    roles: "/dashboard/staff/roles",
   },
   users: "/dashboard/users",
   invoices: "/dashboard/invoices",

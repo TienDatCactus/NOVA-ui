@@ -14,7 +14,7 @@ import {
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_BOX_TOKEN;
 
-const DEFAULT_BBOX = "103.0280,21.7000,104.2280,22.8500";
+const DEFAULT_BBOX = "103.8362,22.3215,103.8807,22.3420";
 const DEFAULT_TYPES =
   "place,city,locality,neighborhood,street,address,poi,category";
 

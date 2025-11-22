@@ -3,15 +3,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { CalendarIcon, Clock, User, Calendar as CalendarDaysIcon, Repeat } from "lucide-react";
+import {
+  CalendarIcon,
+  Clock,
+  User,
+  Calendar as CalendarDaysIcon,
+  Repeat,
+} from "lucide-react";
 import { toast } from "sonner";
-import { StaffShiftSchema } from "~/services/api/staff-shift/staff-shift.schema";
-import { StaffShiftService } from "~/services/api/staff-shift";
-import { WEEKDAYS } from "~/services/api/staff-shift/staff-shift.type";
+import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
+import { StaffShiftService } from "~/services/api/staff/staff-shift";
+import { WEEKDAYS } from "~/services/api/staff/staff-shift/staff-shift.type";
 import type {
   UpdateShiftScheduleRequest,
   StaffShiftListItem,
-} from "~/services/api/staff-shift/dto";
+} from "~/services/api/staff/staff-shift/dto";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
@@ -44,7 +50,7 @@ import {
 import { Calendar } from "~/components/ui/calendar";
 import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
-import { WorkShiftService } from "~/services/api/work-shift";
+import { WorkShiftService } from "~/services/api/staff/work-shift";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
@@ -96,8 +102,8 @@ export default function UpdateScheduleDialog({
 
   // Load form data from API detail
   useEffect(() => {
-    if (shiftDetail?.data && open) {
-      const detail = shiftDetail.data;
+    if (shiftDetail && open) {
+      const detail = shiftDetail;
       form.reset({
         workShiftIds: detail.workShiftId ? [detail.workShiftId] : [],
         repeatWeekly: !!detail.weekDays && detail.weekDays.length > 0,
@@ -146,14 +152,13 @@ export default function UpdateScheduleDialog({
   const dayOfWeek = format(workDate, "EEEE", { locale: vi });
 
   // Get shift name and time from detail or fallback to list item
-  const shiftName = shiftDetail?.data?.shiftName || shift.shiftName || "N/A";
-  const staffName = shiftDetail?.data?.staffName || shift.staffName || "N/A";
+  const shiftName = shiftDetail?.shiftName || shift.shiftName || "N/A";
+  const staffName = shiftDetail?.staffName || shift.staffName || "N/A";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl h-[90vh] p-0 flex flex-col gap-0">
-        {/* Header với gradient background */}
-        <DialogHeader className="px-6 pt-6 pb-5 bg-gradient-to-br from-background to-muted/20 border-b">
+        <DialogHeader className="px-6 pt-6 pb-5 ">
           <DialogTitle className="text-xl">Cập nhật lịch làm việc</DialogTitle>
           {isLoadingDetail ? (
             <div className="space-y-2 pt-3">
@@ -188,7 +193,9 @@ export default function UpdateScheduleDialog({
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <FormLabel className="text-sm font-medium">Nhân viên</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Nhân viên
+                      </FormLabel>
                     </div>
                     {isLoadingDetail ? (
                       <div className="h-11 bg-muted/30 rounded-lg border animate-pulse" />
@@ -222,9 +229,12 @@ export default function UpdateScheduleDialog({
                             {workShifts?.map((shift) => (
                               <SelectItem key={shift.id} value={shift.id}>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-medium">{shift.name}</span>
+                                  <span className="font-medium">
+                                    {shift.name}
+                                  </span>
                                   <span className="text-xs text-muted-foreground">
-                                    {shift.startTime?.slice(0, 5)} - {shift.endTime?.slice(0, 5)}
+                                    {shift.startTime?.slice(0, 5)} -{" "}
+                                    {shift.endTime?.slice(0, 5)}
                                   </span>
                                 </div>
                               </SelectItem>
@@ -267,7 +277,8 @@ export default function UpdateScheduleDialog({
                           </SelectContent>
                         </Select>
                         <FormDescription className="text-xs">
-                          {field.value === "ThisOnly" && "Chỉ cập nhật lịch này"}
+                          {field.value === "ThisOnly" &&
+                            "Chỉ cập nhật lịch này"}
                           {field.value === "Forward" &&
                             "Cập nhật từ ngày này trở đi"}
                           {field.value === "All" &&
@@ -296,9 +307,13 @@ export default function UpdateScheduleDialog({
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
                                 {field.value
-                                  ? format(parseISO(field.value), "dd/MM/yyyy", {
-                                      locale: vi,
-                                    })
+                                  ? format(
+                                      parseISO(field.value),
+                                      "dd/MM/yyyy",
+                                      {
+                                        locale: vi,
+                                      }
+                                    )
                                   : "Chưa xác định"}
                               </Button>
                             </FormControl>
@@ -390,7 +405,9 @@ export default function UpdateScheduleDialog({
                                 onClick={() => {
                                   const currentValue = field.value || [];
                                   const newValue = selected
-                                    ? currentValue.filter((v) => v !== day.value)
+                                    ? currentValue.filter(
+                                        (v) => v !== day.value
+                                      )
                                     : [...currentValue, day.value];
                                   field.onChange(newValue);
                                 }}

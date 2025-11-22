@@ -2,7 +2,6 @@ import { z } from "zod";
 
 const PurchaseRequestStatusEnum = z.enum([
   "Draft",
-  "PendingApproval",
   "Approved",
   "Rejected",
   "Fulfilled",
@@ -13,24 +12,24 @@ const PurchaseRequestStatusEnum = z.enum([
 const PurchaseRequestItemSchema = z.object({
   id: z.uuid(),
   itemId: z.uuid().nullable(),
-  itemCode: z.string(),
+  itemCode: z.string().nullable(),
   freeTextItemName: z.string(),
-  freeTextItemDescription: z.string(),
-  freeTextUnitName: z.string(),
+  freeTextItemDescription: z.string().optional().nullable(),
+  freeTextUnitName: z.string().optional().nullable(),
   quantity: z.number(),
   unitCost: z.number(),
-  note: z.string(),
+  note: z.string().optional().nullable(),
 });
 
 const PurchaseRequestListItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   requestNumber: z.string(),
-  requestedAt: z.string().datetime(),
+  requestedAt: z.string(),
   status: PurchaseRequestStatusEnum,
-  notes: z.string(),
-  approvedBy: z.string().uuid().nullable(),
+  notes: z.string().optional().nullable(),
+  approvedBy: z.string().nullable(),
   approvedByName: z.string().nullable(),
-  approvedAt: z.string().datetime().nullable(),
+  approvedAt: z.string().nullable(),
   isReceived: z.boolean(),
   items: z.array(PurchaseRequestItemSchema),
 });
@@ -38,35 +37,39 @@ const PurchaseRequestListItemSchema = z.object({
 const PurchaseRequestListSchema = z.array(PurchaseRequestListItemSchema);
 
 const CreatePurchaseItemRequestSchema = z.object({
-  itemId: z.uuid().nullable().optional(),
-  freeTextItemName: z.string(),
-  freeTextItemDescription: z.string().optional(),
-  freeTextUnitName: z.string().optional(),
-  quantity: z.number().positive(),
-  unitCost: z.number().nonnegative(),
-  note: z.string().optional(),
+  itemId: z.uuid("Mã định danh hàng hóa không hợp lệ").nullable().optional(),
+  freeTextItemName: z
+    .string("Vui lòng nhập tên hàng hóa")
+    .min(1, "Tên hàng hóa không được để trống"),
+  freeTextItemDescription: z.string("Mô tả không hợp lệ").optional(),
+  freeTextUnitName: z.string("Đơn vị không hợp lệ").optional(),
+  quantity: z
+    .number("Số lượng không hợp lệ")
+    .positive("Số lượng phải lớn hơn 0"),
+  unitCost: z.number("Đơn giá không hợp lệ").nonnegative("Giá không được âm"),
+  note: z.string("Ghi chú không hợp lệ").optional().nullable(),
 });
 
 const CreatePurchaseRequestSchema = z.object({
-  notes: z.string().optional(),
+  notes: z.string().optional().nullable(),
   items: z.array(CreatePurchaseItemRequestSchema),
 });
 
 const PurchaseRequestDetailsSchema = PurchaseRequestListItemSchema;
 
 const UpdatePurchaseItemRequestSchema = CreatePurchaseItemRequestSchema.extend({
-  id: z.string().uuid().optional(),
+  id: z.uuid().optional(),
 });
 
 const UpdatePurchaseRequestSchema = z.object({
-  notes: z.string().optional(),
+  notes: z.string().optional().nullable(),
   items: z.array(UpdatePurchaseItemRequestSchema),
 });
 
 const ReceiveStockRequestSchema = z.object({
   actualCosts: z.record(z.uuid(), z.number()),
   expenseId: z.string().nullable().optional(),
-  note: z.string().optional(),
+  note: z.string().optional().nullable(),
 });
 
 export const PurchaseRequestsSchemas = {

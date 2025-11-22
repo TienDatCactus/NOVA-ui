@@ -35,66 +35,50 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "~/lib/utils";
-import {
-  formatNumber,
-  parseFormattedNumber,
-  handleNumberInputChange,
-} from "~/lib/format-number";
 
-const CreateHolidayFormSchema = z.object({
-  name: z.string().min(1, "Tên ngày nghỉ là bắt buộc"),
-  startDate: z.date({ message: "Ngày bắt đầu là bắt buộc" }),
-  endDate: z.date({ message: "Ngày kết thúc là bắt buộc" }),
-  isPublicHoliday: z.boolean(),
-  bonusAmount: z.string().min(1, "Số tiền thưởng là bắt buộc"),
-});
-
-type CreateHolidayForm = z.infer<typeof CreateHolidayFormSchema>;
+import { useCreateHoliday } from "../container/mutation.hooks";
+import { HolidaySchema } from "~/services/api/holiday/holiday.schema";
+import type { CreateHolidayRequest } from "~/services/api/holiday/dto";
+import { DatePicker } from "~/components/ui/date-picker";
 
 interface CreateHolidayDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
 }
 
 export default function CreateHolidayDialog({
   open,
   onOpenChange,
-  onSuccess,
 }: CreateHolidayDialogProps) {
-  const [isPending, setIsPending] = useState(false);
-
-  const form = useForm<CreateHolidayForm>({
-    resolver: zodResolver(CreateHolidayFormSchema),
+  const form = useForm<CreateHolidayRequest>({
+    resolver: zodResolver(HolidaySchema.CreateHolidayRequestSchema),
     defaultValues: {
       name: "",
       startDate: undefined,
       endDate: undefined,
       isPublicHoliday: false,
-      bonusAmount: "",
+      bonusAmount: 0,
     },
   });
 
-  const handleSubmit = async (data: CreateHolidayForm) => {
-    setIsPending(true);
+  const { mutateAsync: createHoliday, isPending } = useCreateHoliday();
+  const handleSubmit = async (data: CreateHolidayRequest) => {
     try {
-      // Format dates to yyyy-MM-dd
-      const payload = {
-        name: data.name,
-        startDate: format(data.startDate, "yyyy-MM-dd"),
-        endDate: format(data.endDate, "yyyy-MM-dd"),
-        isPublicHoliday: data.isPublicHoliday,
-        bonusAmount: parseFormattedNumber(data.bonusAmount),
-      };
-      await HolidayService.createHoliday(payload);
-      toast.success("Tạo ngày nghỉ thành công");
-      form.reset();
-      onOpenChange(false);
-      onSuccess?.();
+      await createHoliday(
+        {
+          ...data,
+          startDate: format(data.startDate, "yyyy-MM-dd"),
+          endDate: format(data.endDate, "yyyy-MM-dd"),
+        },
+        {
+          onSuccess: () => {
+            form.reset();
+            onOpenChange(false);
+          },
+        }
+      );
     } catch (error) {
       console.error("Create holiday error:", error);
-    } finally {
-      setIsPending(false);
     }
   };
 
@@ -102,23 +86,16 @@ export default function CreateHolidayDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5">
-              <CalendarDays className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle className="text-xl">Thêm ngày nghỉ mới</DialogTitle>
-              <DialogDescription className="mt-1">
-                Tạo ngày nghỉ lễ cho nhân viên khách sạn
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle className="text-xl">Thêm ngày nghỉ mới</DialogTitle>
+          <DialogDescription>
+            Tạo ngày nghỉ lễ cho nhân viên khách sạn
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6 mt-4"
+            className="space-y-6 "
           >
             <div className="space-y-4">
               {/* Name */}
@@ -153,37 +130,16 @@ export default function CreateHolidayDialog({
                     <FormLabel className="text-sm font-semibold">
                       Ngày bắt đầu <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: vi })
-                            ) : (
-                              <span>Chọn ngày bắt đầu</span>
-                            )}
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          captionLayout="dropdown"
-                          fromYear={new Date().getFullYear()}
-                          toYear={new Date().getFullYear() + 100}
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePicker
+                      mode="single"
+                      selected={new Date(field.value)}
+                      value={field.value}
+                      onChange={(value) =>
+                        field.onChange(
+                          format(value ?? new Date(), "yyyy-MM-dd")
+                        )
+                      }
+                    />
                     <FormDescription className="text-xs">
                       Ngày bắt đầu của kỳ nghỉ lễ
                     </FormDescription>
@@ -201,37 +157,16 @@ export default function CreateHolidayDialog({
                     <FormLabel className="text-sm font-semibold">
                       Ngày kết thúc <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: vi })
-                            ) : (
-                              <span>Chọn ngày kết thúc</span>
-                            )}
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          captionLayout="dropdown"
-                          fromYear={new Date().getFullYear()}
-                          toYear={new Date().getFullYear() + 100}
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePicker
+                      mode="single"
+                      value={field.value}
+                      selected={new Date(field.value)}
+                      onChange={(value) =>
+                        field.onChange(
+                          format(value ?? new Date(), "yyyy-MM-dd")
+                        )
+                      }
+                    />
                     <FormDescription className="text-xs">
                       Ngày kết thúc của kỳ nghỉ lễ
                     </FormDescription>
@@ -254,7 +189,7 @@ export default function CreateHolidayDialog({
                         type="text"
                         placeholder="0"
                         value={field.value}
-                        onChange={(e) => handleNumberInputChange(e, field.onChange)}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormDescription className="text-xs">

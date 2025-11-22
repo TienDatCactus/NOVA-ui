@@ -94,10 +94,13 @@ async function approvePurchaseRequest(
 }
 
 async function rejectPurchaseRequest(
-  id: string
+  id: string,
+  reason?: string
 ): Promise<PurchaseRequestDetailsDto> {
   try {
-    const resp = await http.post(Stock.PurchaseRequests.reject(id));
+    const resp = await http.post(Stock.PurchaseRequests.reject(id), {
+      reason,
+    });
     return PurchaseRequestDetailsSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -105,6 +108,20 @@ async function rejectPurchaseRequest(
   }
 }
 
+async function cancelPurchaseRequest(
+  id: string,
+  reason?: string
+): Promise<PurchaseRequestDetailsDto> {
+  try {
+    const resp = await http.post(Stock.PurchaseRequests.cancel(id), {
+      reason,
+    });
+    return PurchaseRequestDetailsSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 async function receiveStock(
   purchaseRequestId: string,
   data: ReceiveStockRequestDto
@@ -129,5 +146,6 @@ export const PurchaseRequestsService = {
   deletePurchaseRequest,
   approvePurchaseRequest,
   rejectPurchaseRequest,
+  cancelPurchaseRequest,
   receiveStock,
 };

@@ -20,7 +20,7 @@ const HolidayDetailResponseSchema = z.object({
 });
 
 const CreateHolidayRequestSchema = z.object({
-  name: z.string().min(1, "Tên ngày nghỉ là bắt buộc"),
+  name: z.string("").min(1, "Tên ngày nghỉ là bắt buộc"),
   startDate: z.string().min(1, "Ngày bắt đầu là bắt buộc"),
   endDate: z.string().min(1, "Ngày kết thúc là bắt buộc"),
   isPublicHoliday: z.boolean(),

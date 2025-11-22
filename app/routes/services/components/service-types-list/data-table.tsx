@@ -11,7 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React, { useState } from "react";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -25,23 +25,23 @@ import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import ServiceTypeDetailRow from "../../fragments/service-types/detail.row";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
+import CreateServiceTypeDialog from "../create-service-type.dialog";
+import { Button } from "~/components/ui/button";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
   columns,
   data,
-  onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [open, setOpen] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -61,7 +61,7 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên loại dịch vụ..."
@@ -71,6 +71,10 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
           }
           className="max-w-sm"
         />
+        <Button size="sm" onClick={() => setOpen(true)}>
+          <Plus />
+          Tạo loại dịch vụ mới
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -134,6 +138,7 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateServiceTypeDialog onClose={() => setOpen(false)} open={open} />
     </div>
   );
 }

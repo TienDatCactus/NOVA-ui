@@ -3,11 +3,11 @@ import z from "zod";
 const ChatEntryResponseSchema = z.object({
   canChat: z.boolean(),
   message: z.string().nullable(),
-  sessionId: z.string(),
+  sessionId: z.string().optional().nullable(),
   roomName: z.string(),
-  customerName: z.string(),
-  checkinDate: z.string().optional(),
-  checkoutDate: z.string(),
+  customerName: z.string().optional().nullable(),
+  checkinDate: z.string().optional().nullable(),
+  checkoutDate: z.string().optional().nullable(),
 });
 
 const ChatSessionDetailSchema = z.object({

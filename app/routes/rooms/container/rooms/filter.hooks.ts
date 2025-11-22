@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 
 export interface RoomFilters {
-  searchText: string;
   status?:
     | "Available"
     | "Occupied"
@@ -19,7 +18,6 @@ export interface RoomFilters {
 }
 
 const DEFAULT_FILTERS: RoomFilters = {
-  searchText: "",
   date: undefined,
   status: undefined,
   typeId: undefined,
@@ -42,15 +40,6 @@ function useRoomFilters() {
 
   const filterRooms = (rooms: RoomListItemDto[]) => {
     return rooms.filter((room) => {
-      if (filters.searchText) {
-        const searchLower = filters.searchText.toLowerCase();
-        const matchesSearch =
-          room.roomName.toLowerCase().includes(searchLower) ||
-          room.roomTypeCode.toLowerCase().includes(searchLower) ||
-          room.roomTypeName.toLowerCase().includes(searchLower);
-        if (!matchesSearch) return false;
-      }
-
       if (filters.status && room.status !== filters.status) {
         return false;
       }
