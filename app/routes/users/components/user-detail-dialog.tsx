@@ -47,7 +47,7 @@ export function UserDetailDialog({
             <div className="p-2 rounded-lg bg-primary/10">
               <User className="h-5 w-5 text-primary" />
             </div>
-            Chi tiết Khách hàng
+            Chi tiết tài khoản
           </DialogTitle>
         </DialogHeader>
 

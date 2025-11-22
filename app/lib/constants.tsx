@@ -162,8 +162,6 @@ const SIDEBAR_NAV_MAIN: Array<{
       {
         title: "Bảng lương",
         url: "/dashboard/staff/payrolls",
-        title: "Ngày nghỉ",
-        url: FE_URL.dashboard.staff.holidays,
       },
     ],
   },

@@ -176,8 +176,8 @@ export function UserFormDialog({
               )}
             </div>
             {isEditMode
-              ? "Cập nhật thông tin khách hàng"
-              : "Thêm khách hàng mới"}
+              ? "Cập nhật thông tin tài khoản"
+              : "Thêm tài khoản mới"}
           </DialogTitle>
         </DialogHeader>
 

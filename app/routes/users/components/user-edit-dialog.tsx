@@ -94,7 +94,7 @@ export function UserEditDialog({
             <div className="p-2 rounded-lg bg-primary/10">
               <Pencil className="h-5 w-5 text-primary" />
             </div>
-            Cập nhật thông tin khách hàng
+            Cập nhật thông tin tài khoản
           </DialogTitle>
         </DialogHeader>
 
