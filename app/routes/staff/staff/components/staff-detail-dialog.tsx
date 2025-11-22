@@ -8,10 +8,11 @@ import {
 } from "~/components/ui/dialog";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { StaffService } from "~/services/api/staff";
-import type { StaffDetailItem } from "~/services/api/staff/dto";
+import { StaffService } from "~/services/api/staff/staff";
+import type { StaffDetailDto } from "~/services/api/staff/staff/dto";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
+import { useStaffDetail } from "../container/query.hooks";
 
 interface StaffDetailDialogProps {
   open: boolean;
@@ -24,27 +25,7 @@ export default function StaffDetailDialog({
   onOpenChange,
   staffId,
 }: StaffDetailDialogProps) {
-  const [staff, setStaff] = useState<StaffDetailItem | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (open && staffId) {
-      setIsLoading(true);
-      StaffService.getStaffById(staffId)
-        .then((response) => {
-          setStaff(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching staff detail:", error);
-          toast.error("Không thể tải thông tin nhân sự");
-          onOpenChange(false);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [open, staffId, onOpenChange]);
-
+  const { data: staff, isLoading } = useStaffDetail(staffId);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -120,9 +101,7 @@ export default function StaffDetailDialog({
             </div>
           </div>
         ) : (
-          <p className="text-center text-muted-foreground">
-            Không có dữ liệu
-          </p>
+          <p className="text-center text-muted-foreground">Không có dữ liệu</p>
         )}
       </DialogContent>
     </Dialog>

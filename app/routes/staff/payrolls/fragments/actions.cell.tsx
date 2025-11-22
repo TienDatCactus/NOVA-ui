@@ -7,14 +7,14 @@ import {
 import { Button } from "~/components/ui/button";
 import { MoreHorizontal, FileText, Edit, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import type { PayrollItem } from "~/services/api/staff-payroll/dto";
+import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
 import UpdatePayrollDialog from "../components/update-payroll-dialog";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
+import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { toast } from "sonner";
 
 interface ActionsMenuCellProps {
-  payroll: PayrollItem;
+  payroll: PayrollItemDto;
   onSuccess?: () => void;
 }
 
@@ -54,7 +54,7 @@ export default function ActionsMenuCell({
             <Edit className="mr-2 h-4 w-4" />
             <span>Cập nhật</span>
           </DropdownMenuItem>
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={() => setApplyLeaveOpen(true)}
             disabled={payroll.locked}
             className={payroll.locked ? "opacity-50 cursor-not-allowed" : ""}
@@ -62,11 +62,13 @@ export default function ActionsMenuCell({
             <FileText className="mr-2 h-4 w-4" />
             <span>Áp dụng chế độ xử lý phép dư</span>
           </DropdownMenuItem>
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={handleRefreshSingle}
             disabled={isRefreshing}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             <span>Làm mới</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

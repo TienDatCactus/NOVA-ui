@@ -25,7 +25,7 @@ import {
 } from "~/components/ui/select";
 
 import type { StockItemDetailsDto } from "~/services/api/stocks/items/dto";
-import type { UpdateItemFormData } from "../edit.$id";
+import type { UpdateItemFormData } from "../components/edit-item.dialog";
 import { FormSchema } from "~/services/schema/forms.schema";
 
 interface EditItemFormProps {

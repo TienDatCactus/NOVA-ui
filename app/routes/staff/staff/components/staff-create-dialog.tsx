@@ -27,11 +27,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { CreateStaffFormSchema } from "~/services/api/staff/staff.schema";
-import type { CreateStaffRequest } from "~/services/api/staff/dto";
-import { StaffService } from "~/services/api/staff";
-import { StaffRoleService } from "~/services/api/staff-role";
-import type { StaffRoleItem } from "~/services/api/staff-role/dto";
+import type { CreateStaffDto } from "~/services/api/staff/staff/dto";
+import { StaffService } from "~/services/api/staff/staff";
+import { StaffRoleService } from "~/services/api/staff/staff-role";
+import type { StaffRoleItem } from "~/services/api/staff/staff-role/dto";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
@@ -45,28 +44,23 @@ import { vi } from "date-fns/locale";
 import { ChevronDownIcon, Plus } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
 import { cn } from "~/lib/utils";
-import StaffRoleCreateDialog from "./staff-role-create-dialog";
+import { StaffSchema } from "~/services/api/staff/staff/staff.schema";
+import { useStaffRoleList } from "../../staff-role/container/query.hooks";
+import { useCreateStaff } from "../container/query.hooks";
 
 interface StaffDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
 }
 
-type CreateStaffFormData = z.infer<typeof CreateStaffFormSchema>;
-
-export default function StaffDialog({
+export default function CreateStaffDialog({
   open,
   onOpenChange,
-  onSuccess,
 }: StaffDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [roles, setRoles] = useState<StaffRoleItem[]>([]);
-  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
-  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
-
-  const form = useForm<CreateStaffFormData>({
-    resolver: zodResolver(CreateStaffFormSchema),
+  const { data: roles } = useStaffRoleList();
+  const { mutateAsync: createStaff, isPending } = useCreateStaff();
+  const form = useForm<CreateStaffDto>({
+    resolver: zodResolver(StaffSchema.CreateStaffSchema),
     defaultValues: {
       code: "",
       fullName: "",
@@ -81,67 +75,15 @@ export default function StaffDialog({
     },
   });
 
-  // Fetch staff roles when dialog opens
-  useEffect(() => {
-    if (open) {
-      fetchRoles();
-    }
-  }, [open]);
-
-  const fetchRoles = () => {
-    setIsLoadingRoles(true);
-    StaffRoleService.getStaffRoleList()
-      .then((response) => {
-        setRoles(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching staff roles:", error);
-        toast.error("Không thể tải danh sách vai trò");
-      })
-      .finally(() => {
-        setIsLoadingRoles(false);
-      });
-  };
-
-  const handleRoleCreated = (roleId: string, roleName: string) => {
-    // Refresh roles list
-    fetchRoles();
-    // Auto-select the newly created role
-    form.setValue("staffRoleId", roleId);
-    toast.success(`Đã chọn vai trò: ${roleName}`);
-  };
-
-  const onSubmit = async (data: CreateStaffFormData) => {
-    setIsSubmitting(true);
+  const onSubmit = async (data: CreateStaffDto) => {
     try {
-      // Convert Date objects to ISO strings for API
-      const payload: CreateStaffRequest = {
-        code: data.code,
-        fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
-        email: data.email,
-        gender: data.gender,
-        dateOfBirth: data.dateOfBirth
-          ? format(data.dateOfBirth, "yyyy-MM-dd")
-          : undefined,
-        citizenId: data.citizenId,
-        startDate: data.startDate
-          ? format(data.startDate, "yyyy-MM-dd")
-          : undefined,
-        note: data.note,
-        staffRoleId: data.staffRoleId,
-      };
-
-      await StaffService.createStaff(payload);
+      await createStaff(data);
       toast.success("Tạo nhân sự thành công");
       onOpenChange(false);
       form.reset();
-      onSuccess?.();
     } catch (error) {
       console.error("Staff dialog error:", error);
       toast.error("Không thể tạo nhân sự mới");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -374,36 +316,20 @@ export default function StaffDialog({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        disabled={isLoadingRoles}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                isLoadingRoles
-                                  ? "Đang tải vai trò..."
-                                  : "Chọn vai trò"
-                              }
-                            />
+                            <SelectValue placeholder={"Chọn vai trò"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {roles.map((role) => (
+                          {roles?.map((role) => (
                             <SelectItem key={role.id} value={role.id}>
                               {role.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setIsRoleDialogOpen(true)}
-                        title="Thêm vai trò mới"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -435,24 +361,17 @@ export default function StaffDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
+                disabled={isPending}
               >
                 Hủy
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Đang xử lý..." : "Tạo mới"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Đang xử lý..." : "Tạo mới"}
               </Button>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
-
-      {/* Staff Role Create Dialog */}
-      <StaffRoleCreateDialog
-        open={isRoleDialogOpen}
-        onOpenChange={setIsRoleDialogOpen}
-        onSuccess={handleRoleCreated}
-      />
     </Dialog>
   );
 }

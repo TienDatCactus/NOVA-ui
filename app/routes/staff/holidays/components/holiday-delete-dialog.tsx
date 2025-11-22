@@ -13,6 +13,7 @@ import { useState } from "react";
 import { HolidayService } from "~/services/api/holiday";
 import { toast } from "sonner";
 import type { HolidayListItem } from "~/services/api/holiday/dto";
+import { useDeleteHoliday } from "../container/mutation.hooks";
 
 interface DeleteHolidayDialogProps {
   open: boolean;
@@ -25,23 +26,19 @@ export default function DeleteHolidayDialog({
   open,
   onOpenChange,
   holiday,
-  onSuccess,
 }: DeleteHolidayDialogProps) {
-  const [isPending, setIsPending] = useState(false);
-
+  const { mutateAsync: deleteHoliday, isPending } = useDeleteHoliday();
   const handleDelete = async () => {
     if (!holiday) return;
 
-    setIsPending(true);
     try {
-      await HolidayService.deleteHoliday(holiday.id);
-      toast.success("Xóa ngày nghỉ thành công");
-      onOpenChange(false);
-      onSuccess?.();
+      await deleteHoliday(holiday.id, {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+      });
     } catch (error) {
       console.error("Delete holiday error:", error);
-    } finally {
-      setIsPending(false);
     }
   };
 

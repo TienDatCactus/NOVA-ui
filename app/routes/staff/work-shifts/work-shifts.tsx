@@ -1,51 +1,25 @@
-import CreateWorkShiftDialog from "./components/work-shift-create-dialog";
-import WorkShiftsViewLayout from "./layouts/work-shifts-view.layout";
-import useWorkShiftsContainer from "./container/container.hooks";
 import WorkShiftsDataTable from "./components/work-shifts-list";
+import { useWorkShiftFilter } from "./container/filter.hooks";
 import { useWorkShiftList } from "./container/query.hooks";
+import WorkShiftsViewLayout from "./layouts/work-shifts-view.layout";
 
 export function clientLoader() {
   return { title: "Ca làm việc - NOVA" };
 }
 
 export default function WorkShifts() {
-  const { refetch } = useWorkShiftList();
-  const {
-    workShifts,
-    isPending,
-    filters,
-    updateFilter,
-    resetFilters,
-    stats,
-    createDialogOpen,
-    setCreateDialogOpen,
-  } = useWorkShiftsContainer();
-
-  const hasFilters = !!(filters.searchQuery || filters.isActive !== "all");
-
+  const { filters, updateFilter, resetFilters } = useWorkShiftFilter();
+  const { data: workshifts, isPending } = useWorkShiftList();
   return (
     <WorkShiftsViewLayout
       filters={filters}
-      onFilterChange={updateFilter}
-      onResetFilters={resetFilters}
-      totalWorkShifts={stats.total}
-      activeWorkShifts={stats.active}
-      inactiveWorkShifts={stats.inactive}
-      onAddWorkShift={() => setCreateDialogOpen(true)}
+      updateFilter={updateFilter}
+      resetFilters={resetFilters}
+      totalWorkShifts={workshifts?.length || 0}
     >
       <WorkShiftsDataTable
-        workShifts={workShifts}
+        workShifts={workshifts ?? []}
         isLoading={isPending}
-        hasFilters={hasFilters}
-        onAddWorkShift={() => setCreateDialogOpen(true)}
-        onSuccess={refetch}
-      />
-
-      {/* Dialogs */}
-      <CreateWorkShiftDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onSuccess={refetch}
       />
     </WorkShiftsViewLayout>
   );

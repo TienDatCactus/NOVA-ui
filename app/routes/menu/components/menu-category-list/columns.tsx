@@ -6,35 +6,7 @@ import { DataTableColumnHeader } from "~/components/table/table-header";
 import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
 import MenuCategoryActionsCell from "../../fragments/menu-categories/actions.cell";
 
-/**
- * Factory function to create columns with action callbacks
- * @param onEdit - Callback khi click edit
- */
 export const columns: ColumnDef<MenuCategoryItemDto>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Chọn tất cả"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Chọn dòng"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "index",
     header: ({ column }) => (
@@ -84,11 +56,9 @@ export const columns: ColumnDef<MenuCategoryItemDto>[] = [
     cell: ({ row }) => {
       const count = row.original.menuItemCount;
       return (
-        <div className="flex justify-center">
-          <Badge variant="outline" className="font-normal">
-            {count} món
-          </Badge>
-        </div>
+        <Badge variant="outline" className="font-normal">
+          {count} món
+        </Badge>
       );
     },
   },
@@ -104,11 +74,9 @@ export const columns: ColumnDef<MenuCategoryItemDto>[] = [
     cell: ({ row }) => {
       const isActive = row.original.active;
       return (
-        <div className="flex justify-center">
-          <Badge variant={isActive ? "success" : "warning"} className="text-xs">
-            {isActive ? "Hoạt động" : "Ngưng"}
-          </Badge>
-        </div>
+        <Badge variant={isActive ? "success" : "warning"} className="text-xs">
+          {isActive ? "Hoạt động" : "Ngưng"}
+        </Badge>
       );
     },
   },

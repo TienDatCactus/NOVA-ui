@@ -9,39 +9,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
-import { WorkShiftService } from "~/services/api/work-shift";
+import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
+import { WorkShiftService } from "~/services/api/staff/work-shift";
 import { toast } from "sonner";
+import { useDeleteWorkShift } from "../container/mutation.hooks";
 
 interface DeleteWorkShiftDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workShift: WorkShiftListItem | null;
-  onSuccess: () => void;
 }
 
 export default function DeleteWorkShiftDialog({
   open,
   onOpenChange,
   workShift,
-  onSuccess,
 }: DeleteWorkShiftDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-
+  const { mutateAsync: deleteWorkShift, isPending } = useDeleteWorkShift();
   const handleConfirm = async () => {
     if (!workShift) return;
 
-    setIsDeleting(true);
     try {
-      await WorkShiftService.deleteWorkShift(workShift.id);
-      toast.success(`Đã xóa ca làm việc ${workShift.name}`);
-      onOpenChange(false);
-      onSuccess();
+      await deleteWorkShift(workShift.id, {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+      });
     } catch (error) {
       console.error("Delete work shift error:", error);
-      // Error toast handled by http interceptor
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -57,13 +52,13 @@ export default function DeleteWorkShiftDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Hủy</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Hủy</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={isDeleting}
+            disabled={isPending}
             className="bg-destructive hover:bg-destructive/90"
           >
-            {isDeleting ? "Đang xóa..." : "Xóa"}
+            {isPending ? "Đang xóa..." : "Xóa"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -258,7 +258,6 @@ const StaffPayroll = {
   refreshSinglePayroll: (id: string) => `StaffPayrolls/${id}/refresh-days`,
 };
 
-
 const Translation = {
   translate: "Translation/translate",
   detect: (text: string) => `Translation/detect-language?text=${text}`,

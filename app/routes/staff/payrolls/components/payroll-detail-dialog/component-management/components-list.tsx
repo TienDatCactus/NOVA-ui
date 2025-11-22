@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import type { PayrollComponent } from "~/services/api/staff-payroll/dto";
-import { ComponentTypeConfig, type ComponentTypeKey } from "~/services/api/staff-payroll/staff-payroll.type";
+import type { PayrollComponentDto } from "~/services/api/staff/staff-payroll/dto";
+import {
+  ComponentTypeConfig,
+  type ComponentTypeKey,
+} from "~/services/api/staff/staff-payroll/staff-payroll.type";
 import { Plus, Pencil, Trash2, MoreVertical } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { StaffPayrollService } from "~/services/api/staff-payroll";
+import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { toast } from "sonner";
 import AddComponentDialog from "./add-component-dialog";
 import EditComponentDialog from "./edit-component-dialog";
@@ -29,7 +32,7 @@ import {
 
 interface ComponentsListProps {
   payrollId: string;
-  components: PayrollComponent[];
+  components: PayrollComponentDto[];
   componentsTotal: number;
   onRefresh?: () => void;
 }
@@ -42,9 +45,11 @@ export default function ComponentsList({
 }: ComponentsListProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedComponent, setSelectedComponent] = useState<PayrollComponent | null>(null);
+  const [selectedComponent, setSelectedComponent] =
+    useState<PayrollComponentDto | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [componentToDelete, setComponentToDelete] = useState<PayrollComponent | null>(null);
+  const [componentToDelete, setComponentToDelete] =
+    useState<PayrollComponentDto | null>(null);
 
   const deleteMutation = useMutation({
     mutationFn: (componentId: string) =>
@@ -60,12 +65,12 @@ export default function ComponentsList({
     },
   });
 
-  const handleEdit = (component: PayrollComponent) => {
+  const handleEdit = (component: PayrollComponentDto) => {
     setSelectedComponent(component);
     setEditDialogOpen(true);
   };
 
-  const handleDelete = (component: PayrollComponent) => {
+  const handleDelete = (component: PayrollComponentDto) => {
     setComponentToDelete(component);
     setDeleteDialogOpen(true);
   };
@@ -85,7 +90,9 @@ export default function ComponentsList({
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-semibold text-base">Danh sách phụ cấp / khấu trừ</h3>
+          <h3 className="font-semibold text-base">
+            Danh sách phụ cấp / khấu trừ
+          </h3>
           <p className="text-sm text-muted-foreground mt-1">
             Quản lý các khoản thưởng, phạt, phụ cấp
           </p>
@@ -101,12 +108,19 @@ export default function ComponentsList({
           {/* Scrollable list */}
           <div className="flex-1 overflow-y-auto space-y-2.5 pr-2">
             {components.map((component) => {
-              const config = ComponentTypeConfig[component.type as ComponentTypeKey];
+              const config =
+                ComponentTypeConfig[component.type as ComponentTypeKey];
               // Các loại component là khấu trừ
-              const isDeductionType = ["Penalty", "Advance", "AdjustmentDecrease"].includes(component.type);
+              const isDeductionType = [
+                "Penalty",
+                "Advance",
+                "AdjustmentDecrease",
+              ].includes(component.type);
               // Số tiền hiển thị: nếu là loại khấu trừ thì luôn âm, ngược lại dùng giá trị gốc
-              const displayAmount = isDeductionType ? -Math.abs(component.amount) : component.amount;
-              
+              const displayAmount = isDeductionType
+                ? -Math.abs(component.amount)
+                : component.amount;
+
               return (
                 <div
                   key={component.componentId}
@@ -119,10 +133,7 @@ export default function ComponentsList({
                         <h4 className="font-medium text-sm text-foreground truncate">
                           {component.title}
                         </h4>
-                        <Badge 
-                          variant="secondary" 
-                          className="text-xs shrink-0"
-                        >
+                        <Badge variant="secondary" className="text-xs shrink-0">
                           {config?.label || component.type}
                         </Badge>
                       </div>
@@ -146,7 +157,9 @@ export default function ComponentsList({
                           {displayAmount >= 0 ? "+" : ""}
                           {displayAmount.toLocaleString("vi-VN")}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">VNĐ</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          VNĐ
+                        </div>
                       </div>
 
                       <DropdownMenu>
@@ -160,7 +173,9 @@ export default function ComponentsList({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(component)}>
+                          <DropdownMenuItem
+                            onClick={() => handleEdit(component)}
+                          >
                             <Pencil className="h-4 w-4 mr-2" />
                             Chỉnh sửa
                           </DropdownMenuItem>
@@ -199,7 +214,9 @@ export default function ComponentsList({
                     {componentsTotal >= 0 ? "+" : ""}
                     {componentsTotal.toLocaleString("vi-VN")}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-0.5">VNĐ</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    VNĐ
+                  </div>
                 </div>
               </div>
             </div>
@@ -228,7 +245,11 @@ export default function ComponentsList({
           <p className="text-xs text-muted-foreground mt-1 mb-4">
             Nhấn "Thêm mới" để thêm các khoản thưởng, phạt, phụ cấp
           </p>
-          <Button size="sm" onClick={() => setAddDialogOpen(true)} variant="outline">
+          <Button
+            size="sm"
+            onClick={() => setAddDialogOpen(true)}
+            variant="outline"
+          >
             <Plus className="h-4 w-4 mr-1.5" />
             Thêm phụ cấp/khấu trừ đầu tiên
           </Button>
@@ -255,8 +276,8 @@ export default function ComponentsList({
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa component "{componentToDelete?.title}" không?
-              Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa component "{componentToDelete?.title}"
+              không? Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

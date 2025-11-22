@@ -2,15 +2,18 @@ import {
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
   type ColumnDef,
   type ColumnFiltersState,
   type RowSelectionState,
-  getFilteredRowModel,
 } from "@tanstack/react-table";
+import { Plus, Search } from "lucide-react";
 import React, { useState } from "react";
-import { Search } from "lucide-react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -22,8 +25,7 @@ import {
 import { cn } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import MenuDetailRow from "../../fragments/menu/detail.row";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
+import CreateMenuDialog from "../create-menu.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -34,6 +36,7 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -56,7 +59,7 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên món..."
@@ -66,6 +69,10 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
           }
           className="max-w-sm"
         />
+        <Button onClick={() => setCreateDialogOpen(true)} size="sm">
+          <Plus className="h-4 w-4 " />
+          Thêm món
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -125,6 +132,11 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+
+      <CreateMenuDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+      />
     </div>
   );
 }

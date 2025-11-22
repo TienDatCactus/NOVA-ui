@@ -27,10 +27,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
-import type { RoomTypesListResponseDto } from "~/services/api/room-types/dto";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useCreateRoom } from "../container/rooms/mutation.hooks";
+import { useRoomTypes } from "../container/room-types/query.hooks";
 
 const { CreateRoomResponseSchema } = RoomSchema;
 const CreateRoomFormSchema = CreateRoomResponseSchema.pick({
@@ -44,10 +44,10 @@ type CreateRoomFormData = z.infer<typeof CreateRoomFormSchema>;
 interface CreateRoomDialogProps {
   open: boolean;
   onClose: () => void;
-  roomTypes?: RoomTypesListResponseDto;
 }
 
-function CreateRoomDialog({ open, onClose, roomTypes }: CreateRoomDialogProps) {
+function CreateRoomDialog({ open, onClose }: CreateRoomDialogProps) {
+  const { data: roomTypes } = useRoomTypes();
   const form = useForm<CreateRoomFormData>({
     resolver: zodResolver(CreateRoomFormSchema),
     defaultValues: {

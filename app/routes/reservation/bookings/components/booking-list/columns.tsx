@@ -4,7 +4,7 @@ import { DataTableColumnHeader } from "~/components/table/table-header";
 import { vi } from "date-fns/locale";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
-import { ActionCell } from "../../fragments/action-cell.list";
+import { ActionCell } from "../../fragments/actions.cell.";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import {
   BOOKING_SOURCES,

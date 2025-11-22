@@ -232,8 +232,8 @@ export default function OrderConfirmationDialog({
         <Link
           to={
             curPath.includes("menu-pos")
-              ? DASHBOARD.orders["menu-orders"]
-              : DASHBOARD.orders["service-orders"]
+              ? DASHBOARD.orders["menuOrders"]
+              : DASHBOARD.orders["serviceOrders"]
           }
         >
           <Button variant="outline">

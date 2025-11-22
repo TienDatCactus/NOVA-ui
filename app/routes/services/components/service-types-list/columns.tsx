@@ -13,30 +13,6 @@ import Image from "~/components/ui/image";
 
 export const columns: ColumnDef<ServiceTypeItem>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Chọn tất cả"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Chọn dòng"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "index",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="STT" />
@@ -116,7 +92,7 @@ export const columns: ColumnDef<ServiceTypeItem>[] = [
     cell: ({ row }) => {
       const isActive = row.original.active;
       return (
-        <div className="flex justify-end">
+        <div className="flex">
           <Badge variant={isActive ? "success" : "warning"}>
             {isActive ? "Hoạt động" : "Ngưng hoạt động"}
           </Badge>
@@ -127,11 +103,7 @@ export const columns: ColumnDef<ServiceTypeItem>[] = [
   {
     accessorKey: "serviceCount",
     header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Số lượng dịch vụ"
-        className="text-center"
-      />
+      <DataTableColumnHeader column={column} title="Số lượng dịch vụ" />
     ),
     cell: ({ row }) => {
       const count = row.original.serviceItemCount || 0;

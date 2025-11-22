@@ -10,7 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -23,6 +23,8 @@ import type { ServiceItem } from "~/services/api/services/dto";
 import ServiceDetailRow from "../../fragments/services/detail.row";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import CreateServiceTypeDialog from "../create-service-type.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -37,7 +39,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [open, setOpen] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -57,7 +59,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên dịch vụ..."
@@ -67,6 +69,10 @@ export function DataTable<TData extends ServiceItem, TValue>({
           }
           className="max-w-sm"
         />
+        <Button onClick={() => setOpen(true)} size={"sm"}>
+          <Plus className="h-4 w-4 " />
+          Thêm loại dịch vụ
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -129,6 +135,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateServiceTypeDialog onClose={() => setOpen(false)} open={open} />
     </div>
   );
 }

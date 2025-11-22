@@ -1,28 +1,18 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import { DataTableColumnHeader } from "~/components/table/table-header";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import type { StaffListItem } from "~/services/api/staff/dto";
+import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
+import StaffActionsCell from "../../fragments/actions.cell";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import StaffDetailDialog from "../staff-detail-dialog";
 
 interface StaffColumnsProps {
-  onEdit?: (staff: StaffListItem) => void;
-  onDelete?: (staff: StaffListItem) => void;
-  onView?: (staff: StaffListItem) => void;
+  onEdit?: (staff: StaffListItemDto) => void;
+  onDelete?: (staff: StaffListItemDto) => void;
+  onView?: (staff: StaffListItemDto) => void;
 }
 
-export const createStaffColumns = ({
-  onEdit,
-  onDelete,
-  onView,
-}: StaffColumnsProps = {}): ColumnDef<StaffListItem>[] => [
+export const columns: ColumnDef<StaffListItemDto>[] = [
   {
     accessorKey: "index",
     header: ({ column }) => (
@@ -37,9 +27,25 @@ export const createStaffColumns = ({
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Mã nhân sự" />
     ),
-    cell: ({ row }) => (
-      <div className="font-mono text-sm font-medium">{row.original.code}</div>
-    ),
+    cell: ({ row }) => {
+      const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+      return (
+        <>
+          <Button
+            variant="link"
+            onClick={() => setDetailDialogOpen(true)}
+            className="p-0 m-0 h-auto"
+          >
+            {row.original.code}
+          </Button>
+          <StaffDetailDialog
+            open={detailDialogOpen}
+            onOpenChange={setDetailDialogOpen}
+            staffId={row.original.id}
+          />
+        </>
+      );
+    },
   },
   {
     accessorKey: "fullName",
@@ -59,58 +65,15 @@ export const createStaffColumns = ({
       <div className="font-mono text-sm">{row.original.phoneNumber || "-"}</div>
     ),
   },
-  {
-    accessorKey: "citizenId",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="CCCD" />
-    ),
-    cell: ({ row }) => (
-      <div className="font-mono text-sm">{row.original.citizenId || "-"}</div>
-    ),
-  },
+
   {
     id: "actions",
     header: "Thao tác",
     cell: ({ row }) => {
-      const staff = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Mở menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {onView && (
-              <DropdownMenuItem onClick={() => onView(staff)}>
-                <Eye className="mr-2 h-4 w-4" />
-                Xem chi tiết
-              </DropdownMenuItem>
-            )}
-            {onEdit && (
-              <DropdownMenuItem onClick={() => onEdit(staff)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Chỉnh sửa
-              </DropdownMenuItem>
-            )}
-            {onDelete && (
-              <DropdownMenuItem
-                onClick={() => onDelete(staff)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Xóa nhân sự
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <StaffActionsCell staff={row.original} />;
     },
     enableSorting: false,
     enableHiding: false,
   },
 ];
+

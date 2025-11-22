@@ -20,6 +20,7 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 type ScheduledTimeDialogProps = {
   open: boolean;
@@ -112,27 +113,18 @@ export default function ScheduledTimeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle>Thời gian phục vụ</DialogTitle>
-              <DialogDescription>
-                Chọn ngày và thời gian mong muốn phục vụ đơn hàng
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle>Thời gian phục vụ</DialogTitle>
+          <DialogDescription>
+            Chọn ngày và thời gian mong muốn phục vụ đơn hàng
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 ">
           {bookingInfo && (
-            <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-              <p className="font-medium text-foreground mb-1">
-                Thông tin booking
-              </p>
-              <p>{bookingInfo}</p>
-            </div>
+            <Alert variant="info" className="mb-2">
+              <AlertTitle> Thông tin booking</AlertTitle>
+              <AlertDescription>{bookingInfo}</AlertDescription>
+            </Alert>
           )}
 
           <div className="space-y-2">

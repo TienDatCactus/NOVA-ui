@@ -6,7 +6,7 @@ import GeneratePayrollDialog from "./components/generate-payroll-dialog";
 import PayrollDetailDialog from "./components/payroll-detail-dialog";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import type { PayrollItem } from "~/services/api/staff-payroll/dto";
+import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 
 export default function PayrollsPage() {
   const {
@@ -19,14 +19,16 @@ export default function PayrollsPage() {
     refetch,
   } = usePayrollsContainer();
 
-  const [selectedPayrollId, setSelectedPayrollId] = useState<string | null>(null);
+  const [selectedPayrollId, setSelectedPayrollId] = useState<string | null>(
+    null
+  );
 
-  const handleRowClick = (payroll: PayrollItem) => {
+  const handleRowClick = (payroll: PayrollItemDto) => {
     setSelectedPayrollId(payroll.payrollId);
   };
 
   // Filter payrolls based on search query
-  const filteredPayrolls = payrolls.filter((payroll: PayrollItem) => {
+  const filteredPayrolls = payrolls.filter((payroll: PayrollItemDto) => {
     if (!filterState.search) return true;
     const searchLower = filterState.search.toLowerCase();
     return (
@@ -50,8 +52,8 @@ export default function PayrollsPage() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <PayrollsList 
-            data={filteredPayrolls} 
+          <PayrollsList
+            data={filteredPayrolls}
             onSuccess={refetch}
             onRowClick={handleRowClick}
           />

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
-import { StaffAttendanceService } from "~/services/api/staff-attendance";
-import type { StaffAttendanceListItem } from "~/services/api/staff-attendance/dto";
+import { StaffAttendanceService } from "~/services/api/staff/staff-attendance";
+import type { StaffAttendanceListItem } from "~/services/api/staff/staff-attendance/dto";
 import CreateScheduleDialog from "./components/create-schedule-dialog";
 import DeleteScheduleDialog from "./components/delete-schedule-dialog";
 import MarkAbsentDialog from "./components/mark-absent-dialog";

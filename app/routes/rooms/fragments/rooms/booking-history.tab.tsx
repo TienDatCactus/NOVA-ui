@@ -146,7 +146,9 @@ function BookingHistory({ roomId }: BookingHistoryRowProps) {
               <TableCell className="font-medium">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{booking.bookingId}</span>
+                  <span className="text-sm truncate line-clamp-1 max-w-40">
+                    {booking.bookingId}
+                  </span>
                 </div>
               </TableCell>
 
