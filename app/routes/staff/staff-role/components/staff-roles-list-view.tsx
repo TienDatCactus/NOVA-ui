@@ -1,12 +1,17 @@
 import { UserCog } from "lucide-react";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
+  EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
 import StaffRolesList from "./staff-roles-list";
 import type { StaffRoleItem } from "~/services/api/staff/staff-role/dto";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import CreateRoleDialog from "./create-role.dialog";
 
 interface StaffRolesListViewProps {
   roles: StaffRoleItem[];
@@ -17,6 +22,7 @@ export default function StaffRolesListView({
   roles,
   isLoading,
 }: StaffRolesListViewProps) {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -30,15 +36,28 @@ export default function StaffRolesListView({
 
   if (!roles || roles.length === 0) {
     return (
-      <Empty>
-        <EmptyMedia variant="icon">
-          <UserCog />
-        </EmptyMedia>
-        <EmptyTitle>Chưa có vai trò nhân sự nào.</EmptyTitle>
-        <EmptyDescription>
-          Tạo vai trò đầu tiên để bắt đầu quản lý nhân sự
-        </EmptyDescription>
-      </Empty>
+      <>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <UserCog />
+            </EmptyMedia>
+            <EmptyTitle>Chưa có vai trò nhân sự nào.</EmptyTitle>
+            <EmptyDescription>
+              Tạo vai trò đầu tiên để bắt đầu quản lý nhân sự
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => setOpenCreateDialog(true)}>
+              Thêm vai trò
+            </Button>
+          </EmptyContent>
+        </Empty>
+        <CreateRoleDialog
+          open={openCreateDialog}
+          onClose={() => setOpenCreateDialog(false)}
+        />
+      </>
     );
   }
 

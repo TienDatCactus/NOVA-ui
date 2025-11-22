@@ -42,32 +42,34 @@ export default function WorkShiftsDataTable({
 
   if (!workShifts || workShifts.length === 0) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <Clock />
-          </EmptyMedia>
-          <EmptyTitle>Chưa có ca làm việc nào</EmptyTitle>
-          <EmptyDescription>
-            Bắt đầu bằng cách thêm ca làm việc đầu tiên cho hệ thống
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={() => setOpenCreateDialog(true)}>
-            Thêm ca làm việc
-          </Button>
-        </EmptyContent>
-      </Empty>
+      <>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Clock />
+            </EmptyMedia>
+            <EmptyTitle>Chưa có ca làm việc nào</EmptyTitle>
+            <EmptyDescription>
+              Bắt đầu bằng cách thêm ca làm việc đầu tiên cho hệ thống
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => setOpenCreateDialog(true)}>
+              Thêm ca làm việc
+            </Button>
+          </EmptyContent>
+        </Empty>
+        <CreateWorkShiftDialog
+          open={openCreateDialog}
+          onOpenChange={setOpenCreateDialog}
+        />
+      </>
     );
   }
 
   return (
     <div className="container mx-auto ">
       <DataTable columns={columns} data={workShifts} />
-      <CreateWorkShiftDialog
-        open={openCreateDialog}
-        onOpenChange={setOpenCreateDialog}
-      />
     </div>
   );
 }

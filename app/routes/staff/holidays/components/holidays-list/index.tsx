@@ -39,33 +39,35 @@ export default function HolidaysList({
   }
   if (!holidays || holidays.length === 0) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <BedDouble />
-          </EmptyMedia>
-          <EmptyTitle>Chưa có ngày nghỉ lễ</EmptyTitle>
-          <EmptyDescription>
-            Bạn chưa có ngày nghỉ lễ nào trong hệ thống. Hãy bắt đầu bằng cách
-            thêm ngày nghỉ lễ đầu tiên.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={() => setOpenCreateDialog(true)}>
-            Thêm ngày nghỉ lễ
-          </Button>
-        </EmptyContent>
-      </Empty>
+      <>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <BedDouble />
+            </EmptyMedia>
+            <EmptyTitle>Chưa có ngày nghỉ lễ</EmptyTitle>
+            <EmptyDescription>
+              Bạn chưa có ngày nghỉ lễ nào trong hệ thống. Hãy bắt đầu bằng cách
+              thêm ngày nghỉ lễ đầu tiên.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => setOpenCreateDialog(true)}>
+              Thêm ngày nghỉ lễ
+            </Button>
+          </EmptyContent>
+        </Empty>
+        <CreateHolidayDialog
+          open={openCreateDialog}
+          onOpenChange={setOpenCreateDialog}
+        />
+      </>
     );
   }
 
   return (
     <div className="container mx-auto ">
       <DataTable columns={columns} data={holidays} />
-      <CreateHolidayDialog
-        open={openCreateDialog}
-        onOpenChange={setOpenCreateDialog}
-      />
     </div>
   );
 }
