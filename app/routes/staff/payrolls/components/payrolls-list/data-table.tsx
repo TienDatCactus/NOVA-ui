@@ -22,9 +22,10 @@ import {
 } from "~/components/ui/table";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { DataTableViewOptions } from "~/components/table/colum-toggle";
 import { DataTablePagination } from "~/components/table/table-pagination";
+import GeneratePayrollDialog from "../generate-payroll-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -39,6 +40,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     paidLeaveDaysUsed: false,
     unpaidLeaveDays: false,
@@ -87,7 +89,18 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
-        <DataTableViewOptions table={table} />
+
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setGenerateDialogOpen(true)} size="sm">
+            <Plus />
+            Thêm bảng lương
+          </Button>
+          <DataTableViewOptions table={table} />
+          <GeneratePayrollDialog
+            open={generateDialogOpen}
+            onOpenChange={setGenerateDialogOpen}
+          />
+        </div>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

@@ -1,7 +1,7 @@
+import { Download, Loader2, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
-import { Plus, Download, Loader2, RefreshCw, Search } from "lucide-react";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -9,11 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type { PayrollFilterState } from "../container/filter.hooks";
 import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
-import { toast } from "sonner";
-import { useState } from "react";
-import GeneratePayrollDialog from "../components/generate-payroll-dialog";
+import type { PayrollFilterState } from "../container/filter.hooks";
 import { useRefreshPayrollDays } from "../container/query.hooks";
 
 interface HeaderLayoutProps {
@@ -32,7 +29,6 @@ export default function PayrollsLayout({
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const [isExporting, setIsExporting] = useState(false);
-  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
 
   const { mutate: refreshDays, isPending: isRefreshing } =
     useRefreshPayrollDays();
@@ -126,25 +122,10 @@ export default function PayrollsLayout({
             )}
             Xuất bảng lương
           </Button>
-
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Tạo bảng lương
-          </Button>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm theo mã hoặc tên nhân viên..."
-            value={filterState.search || ""}
-            onChange={(e) => updateFilter({ search: e.target.value })}
-            className="pl-9"
-          />
-        </div>
-
         <Select
           value={filterState.month?.toString() || "all"}
           onValueChange={(value) =>
@@ -184,11 +165,6 @@ export default function PayrollsLayout({
           </SelectContent>
         </Select>
       </div>
-      <GeneratePayrollDialog
-        open={generateDialogOpen}
-        onOpenChange={setGenerateDialogOpen}
-        onSuccess={onRefresh}
-      />
     </div>
   );
 }

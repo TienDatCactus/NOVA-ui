@@ -1,4 +1,4 @@
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { WorkShiftService } from "~/services/api/staff/work-shift";
 import type {
   CreateWorkShiftRequest,
@@ -6,7 +6,7 @@ import type {
 } from "~/services/api/staff/work-shift/dto";
 
 export function useCreateWorkShift() {
-  const qc = new QueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ["create-work-shift"],
     mutationFn: async (data: CreateWorkShiftRequest) => {
@@ -19,7 +19,7 @@ export function useCreateWorkShift() {
 }
 
 export function useDeleteWorkShift() {
-  const qc = new QueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ["delete-work-shift"],
     mutationFn: async (id: string) => {
@@ -32,7 +32,7 @@ export function useDeleteWorkShift() {
 }
 
 export function useUpdateWorkShift() {
-  const qc = new QueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ["update-work-shift"],
     mutationFn: async (data: {

@@ -77,13 +77,11 @@ type GeneratePayrollFormData = z.infer<typeof generatePayrollSchema>;
 interface GeneratePayrollDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
 }
 
 export default function GeneratePayrollDialog({
   open,
   onOpenChange,
-  onSuccess,
 }: GeneratePayrollDialogProps) {
   const currentDate = new Date();
   const [staffSearchOpen, setStaffSearchOpen] = useState(false);
@@ -134,13 +132,8 @@ export default function GeneratePayrollDialog({
         },
         {
           onSuccess: () => {
-            toast.success("Tạo bảng lương thành công cho tất cả nhân viên");
             form.reset();
-            onSuccess?.();
             onOpenChange(false);
-          },
-          onError: (error: any) => {
-            toast.error(error?.message || "Có lỗi xảy ra khi tạo bảng lương");
           },
         }
       );
@@ -166,13 +159,8 @@ export default function GeneratePayrollDialog({
         },
         {
           onSuccess: () => {
-            toast.success("Tạo bảng lương thành công cho nhân viên");
             form.reset();
-            onSuccess?.();
             onOpenChange(false);
-          },
-          onError: (error: any) => {
-            toast.error(error?.message || "Có lỗi xảy ra khi tạo bảng lương");
           },
         }
       );

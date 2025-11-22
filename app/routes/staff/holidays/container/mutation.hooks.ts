@@ -1,4 +1,4 @@
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { HolidayService } from "~/services/api/holiday";
 import type {
   CreateHolidayRequest,
@@ -6,7 +6,7 @@ import type {
 } from "~/services/api/holiday/dto";
 
 export function useCreateHoliday() {
-  const qc = new QueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ["create-holiday"],
     mutationFn: async (data: CreateHolidayRequest) => {
@@ -19,7 +19,7 @@ export function useCreateHoliday() {
 }
 
 export function useDeleteHoliday() {
-  const qc = new QueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ["delete-holiday"],
     mutationFn: async (holidayId: string) => {
@@ -32,7 +32,7 @@ export function useDeleteHoliday() {
 }
 
 export function useUpdateHoliday() {
-  const qc = new QueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ["update-holiday"],
     mutationFn: async (data: {

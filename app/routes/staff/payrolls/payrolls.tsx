@@ -28,15 +28,13 @@ export default function PayrollsPage() {
         onRefresh={refetch}
       />
 
-      <Card className="p-6">
-        {isPending ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <PayrollsList data={payrolls ?? []} />
-        )}
-      </Card>
+      {isPending ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <PayrollsList data={payrolls ?? []} />
+      )}
     </div>
   );
 }
