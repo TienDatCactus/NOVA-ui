@@ -60,12 +60,10 @@ export default function ApplyConfirmDialog({
               </Badge>
             </div>
 
-            <Alert variant="default" className="border-orange-500 bg-orange-50">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-              <AlertTitle className="text-orange-900">
-                ⚠️ CẢNH BÁO QUAN TRỌNG
-              </AlertTitle>
-              <AlertDescription className="text-orange-800 space-y-2">
+            <Alert variant="destructive">
+              <AlertTriangle />
+              <AlertTitle>CẢNH BÁO QUAN TRỌNG</AlertTitle>
+              <AlertDescription className=" space-y-2">
                 <p className="font-semibold">
                   Thao tác này sẽ thay đổi số lượng tồn kho và KHÔNG THỂ HOÀN
                   TÁC!

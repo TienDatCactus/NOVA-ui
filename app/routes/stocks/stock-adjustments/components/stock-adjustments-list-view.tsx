@@ -1,13 +1,18 @@
 import { FileWarning } from "lucide-react";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
+  EmptyTitle,
 } from "~/components/ui/empty";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { StockAdjustmentListDto } from "~/services/api/stocks/stock-adjustments/dto";
 import StockAdjustmentsDataTable from "./stock-adjustments-list";
+import { useState } from "react";
+import CreateStockAdjustmentDialog from "./create-stock-adjustment.dialog";
+import { Button } from "~/components/ui/button";
 
 interface StockAdjustmentsListViewProps {
   adjustments: StockAdjustmentListDto;
@@ -42,15 +47,29 @@ function LoadingSkeleton() {
 }
 
 function EmptyState() {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   return (
-    <Empty>
-      <EmptyMedia variant="icon">
-        <FileWarning />
-      </EmptyMedia>
-      <EmptyHeader>Không tìm thấy phiếu điều chỉnh</EmptyHeader>
-      <EmptyDescription>
-        Thử thay đổi bộ lọc hoặc tạo phiếu mới
-      </EmptyDescription>
-    </Empty>
+    <>
+      <Empty>
+        <EmptyMedia variant="icon">
+          <FileWarning />
+        </EmptyMedia>
+        <EmptyHeader>
+          <EmptyTitle>Không tìm thấy phiếu điều chỉnh</EmptyTitle>
+          <EmptyDescription>
+            Thử thay đổi bộ lọc hoặc tạo phiếu mới
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={() => setOpenCreateDialog(true)}>
+            Tạo phiếu mới
+          </Button>
+        </EmptyContent>
+      </Empty>
+      <CreateStockAdjustmentDialog
+        open={openCreateDialog}
+        onOpenChange={setOpenCreateDialog}
+      />
+    </>
   );
 }

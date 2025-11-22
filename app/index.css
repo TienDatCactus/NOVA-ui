@@ -275,11 +275,12 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #888; /* Màu của nút cuộn */
-  border-radius: 5px; /* Bo góc cho nút cuộn */
+  border-radius: 16px; /* Bo góc cho nút cuộn */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Màu khi hover */
+  background: var(--primary); /* Màu khi hover */
+  border-radius: 16px; /* Bo góc cho nút cuộn */
 }
 
 * {

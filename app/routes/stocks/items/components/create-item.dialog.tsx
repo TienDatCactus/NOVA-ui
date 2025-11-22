@@ -77,7 +77,7 @@ export default function CreateItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] p-2">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-4">
         <DialogHeader className="px-4 pt-4">
           <DialogTitle>Tạo hàng hóa mới</DialogTitle>
           <DialogDescription>
@@ -88,7 +88,7 @@ export default function CreateItemDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6 overflow-y-auto max-h-[70vh] px-4 pb-4"
+            className="space-y-6 px-4 pb-4"
           >
             <div className="space-y-4">
               <h3 className="font-semibold text-sm">Thông tin cơ bản</h3>
@@ -137,7 +137,7 @@ export default function CreateItemDialog({
                 />
 
                 {/* Category */}
-                <div className="grid gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <FormField
                     control={form.control}
                     name="categoryId"
