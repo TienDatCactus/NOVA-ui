@@ -28,13 +28,7 @@ const StaffShiftDetailItemSchema = z.object({
 const StaffShiftListResponseSchema = z.array(StaffShiftListItemSchema);
 
 // GET /api/StaffShifts/{id} - Detail response
-const StaffShiftDetailResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: StaffShiftDetailItemSchema,
-  meta: z.string().optional().nullable(),
-});
+const StaffShiftDetailResponseSchema = StaffShiftDetailItemSchema;
 
 // POST /api/StaffShifts/schedule - Create schedule request
 const CreateShiftScheduleRequestSchema = z.object({
@@ -59,17 +53,6 @@ const UpdateShiftScheduleRequestSchema = z.object({
   applyScope: z.enum(["ThisOnly", "Forward", "All"]), // Required, no default
 });
 
-// Generic Mutation Response Schema
-const StaffShiftMutationResponseSchema = z
-  .object({
-    success: z.boolean().optional(),
-    statusCode: z.number().optional(),
-    message: z.string().optional(),
-    data: z.any().optional().nullable(),
-    meta: z.any().optional().nullable(),
-  })
-  .optional();
-
 export const StaffShiftSchema = {
   StaffShiftListItemSchema,
   StaffShiftDetailItemSchema,
@@ -77,5 +60,4 @@ export const StaffShiftSchema = {
   StaffShiftDetailResponseSchema,
   CreateShiftScheduleRequestSchema,
   UpdateShiftScheduleRequestSchema,
-  StaffShiftMutationResponseSchema,
 };

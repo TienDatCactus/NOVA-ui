@@ -38,11 +38,19 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
   const canEdit = purchaseRequest.status === "Draft";
   const canDelete =
     purchaseRequest.status === "Draft" ||
+    purchaseRequest.status === "Rejected" ||
     purchaseRequest.status === "Cancelled";
-  const canApprove = purchaseRequest.status === "PendingApproval";
-  const canReject = purchaseRequest.status === "PendingApproval";
+  const canApprove = purchaseRequest.status === "Draft";
+  const canReject = canApprove;
   const canReceive =
     purchaseRequest.status === "Approved" && !purchaseRequest.isReceived;
+
+  const hasAnyAction =
+    canEdit || canDelete || canApprove || canReject || canReceive;
+
+  if (!hasAnyAction) {
+    return null;
+  }
 
   return (
     <div className="flex justify-end">

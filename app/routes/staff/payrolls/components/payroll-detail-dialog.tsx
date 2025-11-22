@@ -14,7 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
-import ComponentsList from "./payroll-detail-dialog/component-management/components-list";
+import ComponentsList from "./payroll-detail-dialog/components-list";
+import { usePayrollDetail } from "../container/query.hooks";
 
 interface PayrollDetailDialogProps {
   payrollId: string;
@@ -31,11 +32,7 @@ export default function PayrollDetailDialog({
 }: PayrollDetailDialogProps) {
   const [isExporting, setIsExporting] = useState(false);
 
-  const { data, isPending, refetch } = useQuery({
-    queryKey: ["payroll-detail", payrollId],
-    queryFn: () => StaffPayrollService.getPayrollDetail(payrollId),
-    enabled: open,
-  });
+  const { data, isPending, refetch } = usePayrollDetail(payrollId);
 
   const payroll = (data as any)?.data || data;
 

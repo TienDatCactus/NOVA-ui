@@ -22,11 +22,15 @@ export function useStockItemList(params: ItemListParams) {
 /**
  * Hook lấy chi tiết 1 item
  */
-export function useStockItemDetail(id?: string, code?: string) {
+export function useStockItemDetail(
+  id?: string,
+  code?: string,
+  options?: { enabled: boolean }
+) {
   return useQuery({
     queryKey: ["stock-item", id, code],
     queryFn: async () => await StockItemsService.getStockItemDetail(id, code),
-    enabled: !!(id || code),
+    enabled: !!options?.enabled && !!(id || code),
     staleTime: 5 * 60 * 1000,
   });
 }

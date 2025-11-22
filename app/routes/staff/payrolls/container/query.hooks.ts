@@ -13,7 +13,7 @@ import { toast } from "sonner";
 /**
  * Hook lấy danh sách bảng lương theo tháng/năm
  */
-export function usePayrollsQuery(params?: PayrollGridParams) {
+export function usePayrolls(params?: PayrollGridParams) {
   return useQuery({
     queryKey: ["payrolls", params?.year, params?.month],
     queryFn: async () => await StaffPayrollService.getPayrollGrid(params),
@@ -93,10 +93,6 @@ export function useGenerateSinglePayroll() {
       queryClient.invalidateQueries({
         queryKey: ["payrolls", variables.data.year, variables.data.month],
       });
-      toast.success("Tạo bảng lương cho nhân viên thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi tạo bảng lương cho nhân viên");
     },
   });
 }
@@ -115,10 +111,6 @@ export function useUpdatePayroll() {
       queryClient.invalidateQueries({
         queryKey: ["payroll-detail", variables.id],
       });
-      toast.success("Cập nhật bảng lương thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi cập nhật bảng lương");
     },
   });
 }
@@ -142,10 +134,6 @@ export function useApplyUnusedLeave() {
       queryClient.invalidateQueries({
         queryKey: ["payroll-detail", variables.id],
       });
-      toast.success("Áp dụng chế độ nghỉ phép thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi áp dụng chế độ nghỉ phép");
     },
   });
 }
@@ -161,10 +149,6 @@ export function useLockPayroll() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
       queryClient.invalidateQueries({ queryKey: ["payroll-detail", id] });
-      toast.success("Khóa bảng lương thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi khóa bảng lương");
     },
   });
 }
@@ -181,10 +165,6 @@ export function useUnlockPayroll() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
       queryClient.invalidateQueries({ queryKey: ["payroll-detail", id] });
-      toast.success("Mở khóa bảng lương thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi mở khóa bảng lương");
     },
   });
 }
@@ -211,10 +191,6 @@ export function useAddPayrollComponent() {
       queryClient.invalidateQueries({
         queryKey: ["payroll-components", variables.payrollId],
       });
-      toast.success("Thêm component thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi thêm component");
     },
   });
 }
@@ -228,27 +204,13 @@ export function useUpdatePayrollComponent() {
   return useMutation({
     mutationFn: async ({
       componentId,
-      payrollId,
       data,
     }: {
       componentId: string;
-      payrollId?: string;
       data: PayrollComponentInputDto;
     }) => await StaffPayrollService.updateComponent(componentId, data),
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
-      if (variables.payrollId) {
-        queryClient.invalidateQueries({
-          queryKey: ["payroll-detail", variables.payrollId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["payroll-components", variables.payrollId],
-        });
-      }
-      toast.success("Cập nhật component thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi cập nhật component");
     },
   });
 }
@@ -260,27 +222,10 @@ export function useDeletePayrollComponent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      componentId,
-      payrollId,
-    }: {
-      componentId: string;
-      payrollId?: string;
-    }) => await StaffPayrollService.deleteComponent(componentId),
-    onSuccess: (_, variables) => {
+    mutationFn: async ({ componentId }: { componentId: string }) =>
+      await StaffPayrollService.deleteComponent(componentId),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
-      if (variables.payrollId) {
-        queryClient.invalidateQueries({
-          queryKey: ["payroll-detail", variables.payrollId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["payroll-components", variables.payrollId],
-        });
-      }
-      toast.success("Xóa component thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi xóa component");
     },
   });
 }
@@ -298,10 +243,6 @@ export function useRefreshPayrollDays() {
       queryClient.invalidateQueries({
         queryKey: ["payrolls", variables.year, variables.month],
       });
-      toast.success("Làm mới số ngày công thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi làm mới số ngày công");
     },
   });
 }
@@ -318,10 +259,6 @@ export function useRefreshSinglePayroll() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
       queryClient.invalidateQueries({ queryKey: ["payroll-detail", id] });
-      toast.success("Làm mới bảng lương thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi làm mới bảng lương");
     },
   });
 }

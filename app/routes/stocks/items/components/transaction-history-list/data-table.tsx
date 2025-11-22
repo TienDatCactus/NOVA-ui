@@ -1,17 +1,16 @@
 import {
+  type ColumnDef,
+  type ColumnFiltersState,
+  type SortingState,
   flexRender,
   getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  type SortingState,
-  type ColumnDef,
-  type VisibilityState,
-  type ColumnFiltersState,
-  type RowSelectionState,
+  getSortedRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { DataTablePagination } from "~/components/table/table-pagination";
 import {
   Table,
   TableBody,
@@ -20,75 +19,44 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Search } from "lucide-react";
-import { DataTableViewOptions } from "~/components/table/colum-toggle";
-import { DataTablePagination } from "~/components/table/table-pagination";
+import type { StockTransactionsItemDto } from "~/services/api/stocks/items/dto";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSuccess?: () => void;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends StockTransactionsItemDto, TValue>({
   columns,
   data,
-  onSuccess,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "transactionDate", desc: true },
+  ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    paidLeaveDaysUsed: false,
-    unpaidLeaveDays: false,
-    baseSalaryFullMonth: false,
-    baseSalaryCalculated: false,
-    componentsTotal: false,
-    paidAmount: false,
-    remainingAmount: false,
-    hasUnusedLeavePending: false,
-  });
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
-      columnVisibility,
-      rowSelection,
     },
-    meta: {
-      onSuccess,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
     },
   });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <Input
-          startAddon={<Search />}
-          placeholder="Tìm theo mã NV, tên NV..."
-          value={
-            (table.getColumn("staffName")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("staffName")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DataTableViewOptions table={table} />
-      </div>
+    <div className="grid gap-2">
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -96,7 +64,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="h-12">
+                    <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -115,7 +83,6 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -133,7 +100,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Không có dữ liệu
+                  Không có giao dịch nào
                 </TableCell>
               </TableRow>
             )}

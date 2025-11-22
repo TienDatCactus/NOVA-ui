@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,9 +32,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import type { PayrollComponentDto } from "~/services/api/staff/staff-payroll/dto";
 import { ComponentTypeConfig } from "~/services/api/staff/staff-payroll/staff-payroll.type";
 import { FormSchema } from "~/services/schema/forms.schema";
-import { useAddPayrollComponent } from "../../../container/query.hooks";
+import { useUpdatePayrollComponent } from "../../container/query.hooks";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -44,19 +45,21 @@ const { AddPayrollComponentFormSchema } = FormSchema;
 
 type FormValues = z.infer<typeof AddPayrollComponentFormSchema>;
 
-interface AddComponentDialogProps {
+interface EditComponentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   payrollId: string;
+  component: PayrollComponentDto | null;
   onSuccess?: () => void;
 }
 
-export default function AddComponentDialog({
+export default function EditComponentDialog({
   open,
   onOpenChange,
   payrollId,
+  component,
   onSuccess,
-}: AddComponentDialogProps) {
+}: EditComponentDialogProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   const form = useForm<FormValues>({
@@ -66,20 +69,33 @@ export default function AddComponentDialog({
       title: "",
       amount: 0,
       note: "",
-      effectiveDate: format(new Date(), "yyyy-MM-dd"),
+      effectiveDate: "",
     },
   });
 
   const selectedType = form.watch("type");
 
-  const mutation = useAddPayrollComponent();
+  useEffect(() => {
+    if (component) {
+      setDate(undefined);
+      form.reset({
+        type: component.type as any,
+        title: component.title,
+        amount: component.amount,
+        note: component.note || "",
+        effectiveDate: "",
+      });
+    }
+  }, [component, form]);
+
+  const mutation = useUpdatePayrollComponent();
 
   const onSubmit = (data: FormValues) => {
+    if (!component) return;
     mutation.mutate(
-      { payrollId, data },
+      { componentId: component.componentId, payrollId, data },
       {
         onSuccess: () => {
-          form.reset();
           onOpenChange(false);
           onSuccess?.();
         },
@@ -87,11 +103,13 @@ export default function AddComponentDialog({
     );
   };
 
+  if (!component) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Thêm phụ cấp / khấu trừ</DialogTitle>
+          <DialogTitle>Chỉnh sửa phụ cấp / khấu trừ</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -103,13 +121,8 @@ export default function AddComponentDialog({
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Loại khoản <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <FormLabel>Loại khoản</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="h-10">
                           <SelectValue>
@@ -178,9 +191,7 @@ export default function AddComponentDialog({
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Tên khoản <span className="text-destructive">*</span>
-                    </FormLabel>
+                    <FormLabel>Tên khoản</FormLabel>
                     <FormControl>
                       <Input
                         placeholder={
@@ -204,9 +215,7 @@ export default function AddComponentDialog({
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Số tiền <span className="text-destructive">*</span>
-                    </FormLabel>
+                    <FormLabel>Số tiền</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -230,18 +239,15 @@ export default function AddComponentDialog({
                 control={form.control}
                 name="effectiveDate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>
-                      Áp dụng từ ngày{" "}
-                      <span className="text-destructive">*</span>
-                    </FormLabel>
+                  <FormItem>
+                    <FormLabel>Áp dụng từ ngày</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full h-10 pl-3 text-left font-normal",
+                              "w-full pl-3 text-left font-normal h-10",
                               !date && "text-muted-foreground"
                             )}
                           >
@@ -309,7 +315,7 @@ export default function AddComponentDialog({
                 {mutation.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Thêm
+                Lưu
               </Button>
             </div>
           </form>

@@ -102,8 +102,8 @@ export default function UpdateScheduleDialog({
 
   // Load form data from API detail
   useEffect(() => {
-    if (shiftDetail?.data && open) {
-      const detail = shiftDetail.data;
+    if (shiftDetail && open) {
+      const detail = shiftDetail;
       form.reset({
         workShiftIds: detail.workShiftId ? [detail.workShiftId] : [],
         repeatWeekly: !!detail.weekDays && detail.weekDays.length > 0,
@@ -152,14 +152,13 @@ export default function UpdateScheduleDialog({
   const dayOfWeek = format(workDate, "EEEE", { locale: vi });
 
   // Get shift name and time from detail or fallback to list item
-  const shiftName = shiftDetail?.data?.shiftName || shift.shiftName || "N/A";
-  const staffName = shiftDetail?.data?.staffName || shift.staffName || "N/A";
+  const shiftName = shiftDetail?.shiftName || shift.shiftName || "N/A";
+  const staffName = shiftDetail?.staffName || shift.staffName || "N/A";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl h-[90vh] p-0 flex flex-col gap-0">
-        {/* Header với gradient background */}
-        <DialogHeader className="px-6 pt-6 pb-5 bg-gradient-to-br from-background to-muted/20 border-b">
+        <DialogHeader className="px-6 pt-6 pb-5 ">
           <DialogTitle className="text-xl">Cập nhật lịch làm việc</DialogTitle>
           {isLoadingDetail ? (
             <div className="space-y-2 pt-3">

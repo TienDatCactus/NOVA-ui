@@ -1,4 +1,3 @@
-import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
@@ -23,9 +22,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
+import { useUpdatePayroll } from "../container/query.hooks";
 
 const updatePayrollSchema = z.object({
   baseSalaryFullMonth: z.string().optional(),
@@ -67,42 +65,41 @@ export default function UpdatePayrollDialog({
     }
   }, [payroll, form]);
 
-  const updateMutation = useMutation({
-    mutationFn: (data: UpdatePayrollFormData) => {
-      if (!payroll) throw new Error("Không có dữ liệu bảng lương");
-
-      const updateData: {
-        baseSalaryFullMonth?: number;
-        paidAmount?: number;
-      } = {};
-
-      if (data.baseSalaryFullMonth) {
-        const parsed = parseFloat(data.baseSalaryFullMonth);
-        if (!isNaN(parsed)) {
-          updateData.baseSalaryFullMonth = parsed;
-        }
-      }
-      if (data.paidAmount) {
-        const parsed = parseFloat(data.paidAmount);
-        if (!isNaN(parsed)) {
-          updateData.paidAmount = parsed;
-        }
-      }
-
-      return StaffPayrollService.updatePayroll(payroll.payrollId, updateData);
-    },
-    onSuccess: () => {
-      toast.success("Cập nhật bảng lương thành công");
-      onSuccess?.();
-      onOpenChange(false);
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Có lỗi xảy ra khi cập nhật bảng lương");
-    },
-  });
+  const { mutate: updatePayroll, isPending } = useUpdatePayroll();
 
   const handleSubmit = form.handleSubmit((data) => {
-    updateMutation.mutate(data);
+    if (!payroll) return;
+
+    const payload: any = {};
+    if (data.baseSalaryFullMonth) {
+      const parsed = parseFloat(data.baseSalaryFullMonth);
+      if (!isNaN(parsed)) {
+        payload.baseSalaryFullMonth = parsed;
+      }
+    }
+    if (data.paidAmount) {
+      const parsed = parseFloat(data.paidAmount);
+      if (!isNaN(parsed)) {
+        payload.paidAmount = parsed;
+      }
+    }
+
+    updatePayroll(
+      {
+        id: payroll.payrollId,
+        data: payload,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Cập nhật bảng lương thành công");
+          onSuccess?.();
+          onOpenChange(false);
+        },
+        onError: (error: any) => {
+          toast.error(error?.message || "Không thể cập nhật bảng lương");
+        },
+      }
+    );
   });
 
   const handleCancel = () => {
@@ -156,7 +153,7 @@ export default function UpdatePayrollDialog({
                       </span>
                     </div>
                   </FormControl>
-                  {payroll && (
+                  {payroll && payroll.baseSalaryFullMonth !== undefined && (
                     <p className="text-xs text-muted-foreground">
                       Hiện tại: {payroll.baseSalaryFullMonth.toLocaleString()}{" "}
                       VNĐ
@@ -203,13 +200,13 @@ export default function UpdatePayrollDialog({
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tổng lương:</span>
                   <span className="font-mono font-semibold">
-                    {payroll.totalAmount.toLocaleString()} VNĐ
+                    {payroll.totalAmount?.toLocaleString() || "0"} VNĐ
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Còn lại:</span>
                   <span className="font-mono font-semibold text-orange-600">
-                    {payroll.remainingAmount.toLocaleString()} VNĐ
+                    {payroll.remainingAmount?.toLocaleString() || "0"} VNĐ
                   </span>
                 </div>
               </div>
@@ -222,17 +219,12 @@ export default function UpdatePayrollDialog({
             type="button"
             variant="outline"
             onClick={handleCancel}
-            disabled={updateMutation.isPending}
+            disabled={isPending}
           >
             Hủy
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={updateMutation.isPending || !payroll}
-          >
-            {updateMutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
+          <Button onClick={handleSubmit} disabled={isPending || !payroll}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Cập nhật
           </Button>
         </DialogFooter>

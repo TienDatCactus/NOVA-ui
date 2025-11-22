@@ -13,25 +13,29 @@ import type { PayrollFilterState } from "../container/filter.hooks";
 import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { toast } from "sonner";
 import { useState } from "react";
+import GeneratePayrollDialog from "../components/generate-payroll-dialog";
+import { useRefreshPayrollDays } from "../container/query.hooks";
 
 interface HeaderLayoutProps {
-  onGenerateClick: () => void;
   filterState: PayrollFilterState;
   updateFilter: (updates: Partial<PayrollFilterState>) => void;
   onRefresh?: () => void;
+  resetFilter: () => void;
 }
 
-export default function HeaderLayout({
-  onGenerateClick,
+export default function PayrollsLayout({
   filterState,
   updateFilter,
   onRefresh,
+  resetFilter,
 }: HeaderLayoutProps) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const [isExporting, setIsExporting] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
 
+  const { mutate: refreshDays, isPending: isRefreshing } =
+    useRefreshPayrollDays();
   const handleExportMonthly = async () => {
     if (!filterState.year) {
       toast.error("Vui lòng chọn năm để xuất báo cáo");
@@ -63,27 +67,28 @@ export default function HeaderLayout({
     }
   };
 
-  const handleRefreshDays = async () => {
+  const handleRefreshDays = () => {
     if (!filterState.year) {
       toast.error("Vui lòng chọn năm để làm mới dữ liệu");
       return;
     }
 
-    setIsRefreshing(true);
-    try {
-      await StaffPayrollService.refreshDays({
+    refreshDays(
+      {
         year: filterState.year,
         month: filterState.month || currentDate.getMonth() + 1,
-      });
-
-      toast.success("Làm mới dữ liệu bảng lương thành công");
-      onRefresh?.();
-    } catch (error) {
-      toast.error("Không thể làm mới dữ liệu");
-      console.error("Refresh error:", error);
-    } finally {
-      setIsRefreshing(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          toast.success("Làm mới dữ liệu bảng lương thành công");
+          onRefresh?.();
+        },
+        onError: (error) => {
+          toast.error("Không thể làm mới dữ liệu");
+          console.error("Refresh error:", error);
+        },
+      }
+    );
   };
 
   return (
@@ -110,7 +115,7 @@ export default function HeaderLayout({
           </Button>
 
           <Button
-            variant="outline"
+            variant="success"
             onClick={handleExportMonthly}
             disabled={isExporting}
           >
@@ -122,7 +127,7 @@ export default function HeaderLayout({
             Xuất bảng lương
           </Button>
 
-          <Button onClick={onGenerateClick}>
+          <Button>
             <Plus className="mr-2 h-4 w-4" />
             Tạo bảng lương
           </Button>
@@ -179,6 +184,11 @@ export default function HeaderLayout({
           </SelectContent>
         </Select>
       </div>
+      <GeneratePayrollDialog
+        open={generateDialogOpen}
+        onOpenChange={setGenerateDialogOpen}
+        onSuccess={onRefresh}
+      />
     </div>
   );
 }

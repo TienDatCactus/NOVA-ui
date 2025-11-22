@@ -14,7 +14,6 @@ const {
   StaffShiftListResponseSchema,
   StaffShiftDetailResponseSchema,
   UpdateShiftScheduleRequestSchema,
-  StaffShiftMutationResponseSchema,
 } = StaffShiftSchema;
 
 // GET /api/StaffShifts - Get list of staff shifts with optional filters
@@ -36,8 +35,9 @@ async function createShiftSchedule(
 ): Promise<StaffShiftMutationResponseDto> {
   try {
     const resp = await http.post(StaffShift.schedule, data);
-    return StaffShiftMutationResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -50,6 +50,7 @@ async function getStaffShiftById(
     const resp = await http.get(StaffShift.detail(id));
     return StaffShiftDetailResponseSchema.parse(resp.data);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -63,8 +64,9 @@ async function deleteStaffShift(
     const resp = await http.delete(StaffShift.delete(id), {
       params: { scope },
     });
-    return StaffShiftMutationResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -75,9 +77,13 @@ async function updateShiftSchedule(
   data: UpdateShiftScheduleRequest
 ): Promise<StaffShiftMutationResponseDto> {
   try {
-    const resp = await http.put(StaffShift.update(id), data);
-    return StaffShiftMutationResponseSchema.parse(resp.data);
+    const resp = await http.put(
+      StaffShift.update(id),
+      UpdateShiftScheduleRequestSchema.parse(data)
+    );
+    return resp.data;
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -100,6 +106,7 @@ async function exportWeeklyMatrix(params?: {
       typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
     return new Blob([blobContent as BlobPart]);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }
@@ -122,6 +129,7 @@ async function exportWeeklyForm2(params: {
       typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
     return new Blob([blobContent as BlobPart]);
   } catch (error) {
+    console.error(error);
     return Promise.reject(error);
   }
 }

@@ -10,8 +10,8 @@ import { useState } from "react";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
 import UpdatePayrollDialog from "../components/update-payroll-dialog";
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { toast } from "sonner";
+import { useRefreshSinglePayroll } from "../container/query.hooks";
 
 interface ActionsMenuCellProps {
   payroll: PayrollItemDto;
@@ -24,20 +24,21 @@ export default function ActionsMenuCell({
 }: ActionsMenuCellProps) {
   const [updateOpen, setUpdateOpen] = useState(false);
   const [applyLeaveOpen, setApplyLeaveOpen] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleRefreshSingle = async () => {
-    setIsRefreshing(true);
-    try {
-      await StaffPayrollService.refreshSinglePayroll(payroll.payrollId);
-      toast.success("Làm mới dữ liệu thành công");
-      onSuccess?.();
-    } catch (error) {
-      toast.error("Không thể làm mới dữ liệu");
-      console.error("Refresh single error:", error);
-    } finally {
-      setIsRefreshing(false);
-    }
+  const { mutate: refreshSingle, isPending: isRefreshing } =
+    useRefreshSinglePayroll();
+
+  const handleRefreshSingle = () => {
+    refreshSingle(payroll.payrollId, {
+      onSuccess: () => {
+        toast.success("Làm mới dữ liệu thành công");
+        onSuccess?.();
+      },
+      onError: (error) => {
+        toast.error("Không thể làm mới dữ liệu");
+        console.error("Refresh single error:", error);
+      },
+    });
   };
 
   return (

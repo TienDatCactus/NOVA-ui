@@ -20,12 +20,15 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
+import { useQuery } from "@tanstack/react-query";
 import { StaffService } from "~/services/api/staff/staff";
 import { toast } from "sonner";
 import { Loader2, Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
+import {
+  useGeneratePayroll,
+  useGenerateSinglePayroll,
+} from "../container/query.hooks";
 import {
   Command,
   CommandEmpty,
@@ -117,51 +120,63 @@ export default function GeneratePayrollDialog({
 
   const selectedStaff = staffList.find((s: any) => s.id === selectedStaffId);
 
-  const generateMutation = useMutation({
-    mutationFn: (data: GeneratePayrollFormData) => {
-      if (data.scope === "all") {
-        return StaffPayrollService.generatePayroll({
-          year: data.year,
-          month: data.month,
-        });
-      } else {
-        if (!data.selectedStaffId) {
-          throw new Error("Vui lòng chọn nhân viên");
-        }
-        const payload: any = {
-          year: data.year,
-          month: data.month,
-        };
-        // Chỉ gửi baseSalaryFullMonth nếu có giá trị
-        if (data.baseSalaryFullMonth) {
-          const parsedValue = parseFloat(data.baseSalaryFullMonth);
-          if (!isNaN(parsedValue) && parsedValue > 0) {
-            payload.baseSalaryFullMonth = parsedValue;
-          }
-        }
-        return StaffPayrollService.generateSinglePayroll(
-          data.selectedStaffId,
-          payload
-        );
-      }
-    },
-    onSuccess: (_, variables) => {
-      toast.success(
-        variables.scope === "all"
-          ? "Tạo bảng lương thành công cho tất cả nhân viên"
-          : "Tạo bảng lương thành công cho nhân viên"
-      );
-      form.reset();
-      onSuccess?.();
-      onOpenChange(false);
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Có lỗi xảy ra khi tạo bảng lương");
-    },
-  });
+  const { mutate: generateAll, isPending: isGeneratingAll } =
+    useGeneratePayroll();
+  const { mutate: generateSingle, isPending: isGeneratingSingle } =
+    useGenerateSinglePayroll();
 
   const handleSubmit = form.handleSubmit((data) => {
-    generateMutation.mutate(data);
+    if (data.scope === "all") {
+      generateAll(
+        {
+          year: data.year,
+          month: data.month,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Tạo bảng lương thành công cho tất cả nhân viên");
+            form.reset();
+            onSuccess?.();
+            onOpenChange(false);
+          },
+          onError: (error: any) => {
+            toast.error(error?.message || "Có lỗi xảy ra khi tạo bảng lương");
+          },
+        }
+      );
+    } else {
+      if (!data.selectedStaffId) {
+        toast.error("Vui lòng chọn nhân viên");
+        return;
+      }
+      const payload: any = {
+        year: data.year,
+        month: data.month,
+      };
+      if (data.baseSalaryFullMonth) {
+        const parsedValue = parseFloat(data.baseSalaryFullMonth);
+        if (!isNaN(parsedValue) && parsedValue > 0) {
+          payload.baseSalaryFullMonth = parsedValue;
+        }
+      }
+      generateSingle(
+        {
+          staffId: data.selectedStaffId,
+          data: payload,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Tạo bảng lương thành công cho nhân viên");
+            form.reset();
+            onSuccess?.();
+            onOpenChange(false);
+          },
+          onError: (error: any) => {
+            toast.error(error?.message || "Có lỗi xảy ra khi tạo bảng lương");
+          },
+        }
+      );
+    }
   });
 
   return (
@@ -413,12 +428,15 @@ export default function GeneratePayrollDialog({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={generateMutation.isPending}
+            disabled={isGeneratingAll || isGeneratingSingle}
           >
             Hủy
           </Button>
-          <Button onClick={handleSubmit} disabled={generateMutation.isPending}>
-            {generateMutation.isPending && (
+          <Button
+            onClick={handleSubmit}
+            disabled={isGeneratingAll || isGeneratingSingle}
+          >
+            {(isGeneratingAll || isGeneratingSingle) && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Tạo bảng lương

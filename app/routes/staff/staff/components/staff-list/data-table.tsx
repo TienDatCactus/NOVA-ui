@@ -7,9 +7,10 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
 } from "@tanstack/react-table";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
   Table,
@@ -19,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import CreateStaffDialog from "../staff-create-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,7 +32,7 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -57,6 +59,10 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
+          <Plus />
+          Thêm nhân sự
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -107,6 +113,10 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateStaffDialog
+        open={openCreateDialog}
+        onOpenChange={setOpenCreateDialog}
+      />
     </div>
   );
 }

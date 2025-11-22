@@ -10,7 +10,11 @@ interface PurchaseRequestsDataTableProps {
 function PurchaseRequestsDataTable({
   purchaseRequests,
 }: PurchaseRequestsDataTableProps) {
-  return <DataTable columns={columns} data={purchaseRequests} />;
+  return (
+    <div className="container mx-auto ">
+      <DataTable columns={columns} data={purchaseRequests} />;
+    </div>
+  );
 }
 
 export default PurchaseRequestsDataTable;
