@@ -8,14 +8,19 @@ import {
 } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
+  ArrowRight,
   BookCopy,
   CalendarCheck,
   CalendarX,
   CheckCircle,
+  CheckCircle2,
+  Clock,
   DoorOpen,
+  Globe,
   LogIn,
   LogOut,
   MoreVertical,
+  User,
   UserX,
   XCircle,
 } from "lucide-react";
@@ -40,12 +45,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Separator } from "~/components/ui/separator";
 import { DASHBOARD } from "~/lib/fe-url";
-import { cn } from "~/lib/utils";
+import { cn, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import {
@@ -62,12 +68,13 @@ interface BookingCardProps {
 }
 
 export function BookingCard({ booking, refetch }: BookingCardProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [noShowDialogOpen, setNoShowDialogOpen] = useState(false);
 
-  const updateStatus = useUpdateBookingStatus(booking.bookingId || "");
-  const cancelBooking = useCancelBooking(booking.bookingId || "");
+  const { mutateAsync: updateStatus, isPending: isProcessing } =
+    useUpdateBookingStatus(booking.bookingId || "");
+  const { mutateAsync: cancelBooking, isPending: isCancelling } =
+    useCancelBooking(booking.bookingId || "");
   const navigate = useNavigate();
 
   const statusConfig = BOOKING_STATUSES.find((s) => s.value === booking.status);
@@ -95,265 +102,256 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const isCheckedOut = booking.status === "CheckedOut";
 
   const handleConfirmPayment = async () => {
-    setIsProcessing(true);
     try {
       navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
-    } catch {
-      toast.error("Xác nhận thất bại");
-    } finally {
-      setIsProcessing(false);
+    } catch (error) {
+      console.error("Xác nhận thất bại");
     }
   };
 
   const handleCheckIn = async () => {
-    setIsProcessing(true);
     try {
-      await updateStatus.mutateAsync("CheckedIn");
-      await updateStatus.mutateAsync("InHouse");
+      await updateStatus("CheckedIn");
+      await updateStatus("InHouse");
 
       toast.success("Check-in thành công");
       refetch?.();
     } catch {
       toast.error("Check-in thất bại");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
   const handleNoShow = async () => {
-    setIsProcessing(true);
     try {
-      await updateStatus.mutateAsync("NoShow");
+      await updateStatus("NoShow");
       toast.success("Đã đánh dấu No Show");
       refetch?.();
       setNoShowDialogOpen(false);
     } catch {
       toast.error("Thao tác thất bại");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
   const handleCancel = async () => {
-    setIsProcessing(true);
     try {
-      await cancelBooking.mutateAsync();
+      await cancelBooking();
       toast.success("Hủy đặt phòng thành công");
       refetch?.();
       setCancelDialogOpen(false);
     } catch {
       toast.error("Hủy đặt phòng thất bại");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
-  const handleCheckout = () => {
-    navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
-  };
-
+  const nights = useCalculateNights({
+    checkinDate: booking.checkinDate,
+    checkoutDate: booking.checkoutDate,
+  });
   const handleViewDetail = () => {
     navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
   };
 
-  const renderPrimaryAction = () => {
-    if (canConfirmPayment) {
-      return (
-        <Button
-          size="sm"
-          variant="default"
-          className="flex-1"
-          onClick={handleConfirmPayment}
-          disabled={isProcessing}
-        >
-          <CheckCircle className="h-4 w-4 mr-1" />
-          Xác nhận thanh toán
-        </Button>
-      );
+  const renderStatusBadge = () => {
+    let bgClass = "bg-gray-600";
+    let icon = <Clock className="mr-1 h-3 w-3" />;
+
+    switch (booking.status) {
+      case "Confirmed":
+        bgClass = "bg-blue-600"; // Solid Blue
+        icon = <CheckCircle2 className="mr-1 h-3 w-3" />;
+        break;
+      case "CheckedIn":
+      case "InHouse":
+        bgClass = "bg-green-600"; // Solid Green
+        icon = <LogIn className="mr-1 h-3 w-3" />;
+        break;
+      case "CheckedOut":
+        bgClass = "bg-gray-500";
+        icon = <LogOut className="mr-1 h-3 w-3" />;
+        break;
+      case "Cancelled":
+        bgClass = "bg-destructive";
+        icon = <XCircle className="mr-1 h-3 w-3" />;
+        break;
+      case "NoShow":
+        bgClass = "bg-orange-600";
+        icon = <UserX className="mr-1 h-3 w-3" />;
+        break;
     }
+
+    return (
+      <Badge
+        className={cn(
+          "border-0 text-white shadow-sm hover:opacity-90",
+          bgClass
+        )}
+      >
+        {icon}
+        {statusConfig?.label || booking.status}
+      </Badge>
+    );
+  };
+
+  const renderPrimaryAction = () => {
+    const btnClass = "w-full shadow-sm font-semibold transition-all";
 
     if (canCheckIn) {
       return (
         <Button
           size="sm"
-          className="flex-1"
-          variant="success"
+          className={cn(btnClass, "bg-green-600 hover:bg-green-700 text-white")}
           onClick={handleCheckIn}
           disabled={isProcessing}
         >
-          <LogIn className="h-4 w-4 mr-1" />
-          Check-in
+          <LogIn className="mr-2 h-4 w-4" /> Check-in ngay
         </Button>
       );
     }
-
     if (canCheckOut) {
       return (
         <Button
           size="sm"
-          variant="warning"
-          className="flex-1"
-          onClick={handleCheckout}
+          className={cn(btnClass, "bg-amber-500 hover:bg-amber-600 text-white")}
+          onClick={handleViewDetail}
         >
-          <LogOut className="h-4 w-4 mr-1" />
-          Checkout
+          <LogOut className="mr-2 h-4 w-4" /> Checkout
         </Button>
       );
     }
-
-    if (isCheckedOut) {
+    if (canConfirmPayment) {
       return (
         <Button
           size="sm"
-          variant="outline"
-          className="flex-1"
+          variant="default"
+          className={btnClass}
           onClick={handleViewDetail}
         >
-          <BookCopy className="h-4 w-4 mr-1" />
-          Xem chi tiết
+          <CheckCircle2 className="mr-2 h-4 w-4" /> Xác nhận cọc
         </Button>
       );
     }
-
     return (
       <Button
         size="sm"
         variant="outline"
-        className="flex-1"
+        className={cn(btnClass, "bg-white hover:bg-gray-50")}
         onClick={handleViewDetail}
       >
         Xem chi tiết
       </Button>
     );
   };
-
-  const renderSecondaryActions = () => {
-    const actions: ReactNode[] = [];
-
-    if (canCancel) {
-      actions.push(
-        <DropdownMenuItem
-          key="cancel"
-          className="text-destructive focus:text-destructive"
-          onClick={() => setCancelDialogOpen(true)}
-        >
-          <XCircle className="h-4 w-4 mr-2" />
-          Hủy đặt phòng
-        </DropdownMenuItem>
-      );
-    }
-
-    if (canMarkNoShow) {
-      actions.push(
-        <DropdownMenuItem
-          key="noshow"
-          className="text-orange-600 focus:text-orange-600"
-          onClick={() => setNoShowDialogOpen(true)}
-        >
-          <UserX className="h-4 w-4 mr-2" />
-          Đánh dấu No Show
-        </DropdownMenuItem>
-      );
-    }
-
-    return actions;
-  };
-
   return (
     <>
-      <Card
-        className={cn(
-          "rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-m p-4"
-        )}
-      >
-        <CardContent className="p-0 space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <Link
-                to={DASHBOARD.bookings.bookingDetail(booking.bookingCode!)}
-                className="font-mono text-sm font-semibold text-primary hover:underline truncate line-clamp-1 w-20"
-              >
-                {booking.bookingCode}
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                {booking.source === "OTA" && booking.otaName
-                  ? `${booking.otaName}`
-                  : booking.source === "DirectStaff"
-                    ? "Trực tiếp"
-                    : booking.source}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant={statusConfig?.variant}>
-                {statusConfig?.label}
-              </Badge>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleViewDetail}>
-                    <DoorOpen className="h-4 w-4 mr-2" />
-                    Xem chi tiết
-                  </DropdownMenuItem>
-                  {renderSecondaryActions().length > 0 && (
-                    <>
-                      <DropdownMenuSeparator />
-                      {renderSecondaryActions()}
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          {/* Guest Name */}
-          <div>
-            <p className=" font-semibold text-foreground">
-              {booking.customerName || "Khách chưa xác định"}
-            </p>
-          </div>
-
-          {/* Dates */}
-          <div className="flex items-center gap-2 text-sm">
-            <div
-              className={cn(
-                "inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1",
-                isArrivingToday && "ring-1 ring-primary/30"
+      <div className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-primary/20 hover:shadow-lg">
+        {/* HEADER SECTION: System Info */}
+        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-gray-500">
+              #{booking.bookingCode}
+            </span>
+            <div className="h-4 w-[1px] bg-gray-300"></div>
+            {/* Source Pill */}
+            <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
+              {booking.source === "OTA" ? (
+                <Globe className="h-3 w-3" />
+              ) : (
+                <User className="h-3 w-3" />
               )}
-            >
-              <CalendarCheck
-                className={cn(
-                  "h-3.5 w-3.5",
-                  isArrivingToday ? "text-primary" : "text-muted-foreground"
-                )}
-              />
-              <span className="font-medium">
-                {checkinDate
-                  ? format(checkinDate, "dd/MM/yyyy", { locale: vi })
-                  : "N/A"}
-              </span>
-            </div>
-
-            <span className="text-muted-foreground">-</span>
-            <div className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1">
-              <CalendarX className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="font-medium">
-                {checkoutDate
-                  ? format(checkoutDate, "dd/MM/yyyy", { locale: vi })
-                  : "N/A"}
+              <span className="truncate max-w-[80px]">
+                {booking.source === "OTA" ? booking.otaName : "Khách lẻ"}
               </span>
             </div>
           </div>
 
-          <Separator className="my-1" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Tác vụ</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleViewDetail}>
+                <DoorOpen className="mr-2 h-4 w-4" /> Xem chi tiết
+              </DropdownMenuItem>
+              {canCancel && (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setCancelDialogOpen(true)}
+                >
+                  <XCircle className="mr-2 h-4 w-4" /> Hủy đặt phòng
+                </DropdownMenuItem>
+              )}
+              {canMarkNoShow && (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setNoShowDialogOpen(true)}
+                >
+                  <UserX className="mr-2 h-4 w-4" /> Đánh dấu No Show
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-          {/* Quick Actions */}
-          <div className="flex gap-2 pt-1">{renderPrimaryAction()}</div>
-        </CardContent>
-      </Card>
+        {/* BODY SECTION: Main Content */}
+        <div className="flex-1 px-4 py-4">
+          <div className="mb-4 flex items-start justify-between">
+            <div>
+              <h3 className="line-clamp-1 text-lg font-bold text-gray-900 group-hover:text-primary">
+                {booking.customerName || "Khách vãng lai"}
+              </h3>
+              {renderStatusBadge()}
+            </div>
+          </div>
+
+          {/* Timeline Visual */}
+          <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-semibold uppercase text-gray-400">
+                  Check-in
+                </span>
+                <span
+                  className={cn(
+                    "font-bold",
+                    isArrivingToday ? "text-green-600" : "text-gray-700"
+                  )}
+                >
+                  {checkinDate ? format(checkinDate, "dd/MM") : "--/--"}
+                </span>
+              </div>
+
+              {/* Arrow / Duration */}
+              <div className="flex flex-col items-center px-4">
+                <span className="mb-1 text-[10px] font-medium text-gray-400">
+                  {nights} đêm
+                </span>
+                <div className="relative flex w-full items-center">
+                  <div className="h-[1px] w-12 bg-gray-300"></div>
+                  <ArrowRight className="absolute right-0 -mr-1 h-3 w-3 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-semibold uppercase text-gray-400">
+                  Check-out
+                </span>
+                <span className="font-bold text-gray-700">
+                  {checkoutDate ? format(checkoutDate, "dd/MM") : "--/--"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FOOTER SECTION: Actions */}
+        <div className="border-t border-gray-100 p-3">
+          {renderPrimaryAction()}
+        </div>
+      </div>
 
       {/* Cancel Confirmation Dialog */}
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>

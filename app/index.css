@@ -264,30 +264,27 @@ body {
     --sidebar-ring: oklch(0.439 0 0);
   }
 }
+/* width */
 ::-webkit-scrollbar {
-  width: 10px; /* Độ rộng thanh cuộn dọc */
-  height: 10px; /* Độ cao thanh cuộn ngang */
+  width: 6px;
+  display: none;
 }
 
+/* Track */
 ::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Màu nền của vùng track */
+  border-radius: 12px;
+  background: #f1f1f1;
 }
 
+/* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #888; /* Màu của nút cuộn */
-  border-radius: 16px; /* Bo góc cho nút cuộn */
+  background: #888;
 }
 
+/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary); /* Màu khi hover */
-  border-radius: 16px; /* Bo góc cho nút cuộn */
+  background: #555;
 }
-
-* {
-  scrollbar-width: thin; /* "auto" | "thin" | "none" */
-  scrollbar-color: #888 #f1f1f1; /* thumb color | track color */
-}
-
 body {
   -ms-overflow-style: scrollbar; /* Giữ hành vi scroll mặc định */
 }

@@ -71,7 +71,7 @@ export function DataTable<TData, TValue>({
         />
         <Button onClick={() => setOpenCreateDialog(true)} size={"sm"}>
           <Plus className="h-4 w-4" />
-          Thêm phòng
+          Thêm ngày nghỉ
         </Button>
       </div>
       <div className="overflow-hidden rounded-md border">

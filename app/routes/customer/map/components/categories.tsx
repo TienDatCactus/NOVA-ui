@@ -1,6 +1,16 @@
-import React, { useEffect, useState } from "react";
+import {
+  Bath,
+  Coffee,
+  Hotel,
+  Landmark,
+  ShoppingBag,
+  TreePine,
+  Utensils,
+  Wine,
+} from "lucide-react";
+import React from "react";
 import z from "zod";
-import { useMapboxSearch } from "../hooks/use-mapbox-search";
+import { Button } from "~/components/ui/button";
 
 export const CategoryItemSchema = z.object({
   canonical_id: z.string(),
@@ -17,17 +27,6 @@ interface MapCategoriesProps extends React.HTMLAttributes<HTMLDivElement> {
   category?: string;
   onCategoryClick?: (categoryKey: string) => void;
 }
-import {
-  Utensils,
-  Coffee,
-  Wine,
-  Hotel,
-  Bath,
-  ShoppingBag,
-  TreePine,
-  Landmark,
-} from "lucide-react";
-import { Button } from "~/components/ui/button";
 
 export const RESORT_CATEGORIES = {
   restaurant: {

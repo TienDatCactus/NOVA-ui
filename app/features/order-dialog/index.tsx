@@ -26,11 +26,32 @@ import { useServiceTypes } from "~/routes/services/container/service-types/query
 import useServiceFilters from "~/routes/services/container/services/filter.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
 import { useServiceOrderStore } from "~/store/service-order.store";
-import MenuList from "./components/menu-list";
 import OrderDetail from "./components/order-detail";
-import ServiceList from "./components/service-list";
-import { useDebounceCallback } from "usehooks-ts";
+import UniversalProductList from "./fragments/product-list";
 
+export type ProductType = "MenuItem" | "ServiceItem";
+
+export interface UnifiedProduct {
+  id: string; // Map từ serviceItemId hoặc itemId
+  type: ProductType; // Để phân biệt xử lý logic
+  name: string;
+  description?: string;
+  price: number; // Map từ basePrice hoặc price
+  image?: string; // Lấy ảnh đầu tiên trong mảng imageUrls
+  code?: string; // Mã sản phẩm (để hiển thị cho chuyên nghiệp)
+}
+const toUnified = (
+  item: any,
+  type: "MenuItem" | "ServiceItem"
+): UnifiedProduct => ({
+  id: type === "MenuItem" ? item.itemId : item.serviceItemId,
+  type,
+  name: item.name,
+  description: item.description,
+  price: type === "MenuItem" ? item.price : item.basePrice,
+  image: item.imageUrls?.[0],
+  code: type === "MenuItem" ? undefined : item.code, // Giả sử Service có code
+});
 interface AddServiceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -55,8 +76,6 @@ export default function AddServiceDialog({
   const orderServices = useServiceOrderStore((s) => s.services);
   const addItem = useServiceOrderStore((s) => s.addItem);
   const removeById = useServiceOrderStore((s) => s.removeById);
-  const setQuantity = useServiceOrderStore((s) => s.setQuantity);
-  const clear = useServiceOrderStore((s) => s.clear);
 
   // Service data & filters
   const { data: serviceTypes = [] } = useServiceTypes();
@@ -66,7 +85,7 @@ export default function AddServiceDialog({
     resetFilters: resetServiceFilters,
     filters: serviceFilters,
   } = useServiceFilters();
-  const { data: serviceItems = [] } = useServices({
+  const { data: serviceItems = [], isPending: isLoadingService } = useServices({
     typeCode: serviceFilters.typeCode,
   });
   // Menu data & filters
@@ -77,44 +96,13 @@ export default function AddServiceDialog({
     filterMenuItems,
     resetFilters: resetMenuFilters,
   } = useMenuFilters();
-  const { data: menuItems = [] } = useMenuList({
+  const { data: menuItems = [], isPending: isLoadingMenu } = useMenuList({
     categoryCode: menuFilters.categoryCode,
   });
-
-  const isSelected = (itemId: string) => {
-    return orderServices.some((s) => s.itemId === itemId);
-  };
 
   const getQuantity = (itemId: string): number => {
     const item = orderServices.find((s) => s.itemId === itemId);
     return item?.quantity || 0;
-  };
-
-  const handleQuantityChange = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeById(itemId);
-    } else {
-      setQuantity(itemId, quantity);
-    }
-  };
-
-  const toggleSelectItem = (
-    itemId: string,
-    itemType: "MenuItem" | "ServiceItem"
-  ) => {
-    const exists = orderServices.some((s) => s.itemId === itemId);
-    if (exists) {
-      removeById(itemId);
-    } else {
-      const today = new Date().toISOString().slice(0, 10);
-      addItem({
-        itemType,
-        itemId,
-        quantity: 1,
-        scheduledDate: today,
-        note: "",
-      });
-    }
   };
 
   const handleConfirm = () => {
@@ -122,10 +110,6 @@ export default function AddServiceDialog({
     setActiveTab("service");
     setSearchText("");
     onOpenChange(false);
-  };
-
-  const handleClearAll = () => {
-    clear();
   };
 
   const filteredServiceItems = useMemo(() => {
@@ -143,7 +127,27 @@ export default function AddServiceDialog({
       item.name.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [filterMenuItems, menuItems, searchText]);
-
+  const displayProducts = useMemo(() => {
+    if (activeTab === "menu") {
+      return filteredMenuItems.map((item) => toUnified(item, "MenuItem"));
+    }
+    return filteredServiceItems.map((item) => toUnified(item, "ServiceItem"));
+  }, [activeTab, filteredMenuItems, filteredServiceItems]);
+  // Handle Toggle thông minh
+  const handleToggle = (product: UnifiedProduct) => {
+    const exists = orderServices.some((s) => s.itemId === product.id);
+    if (exists) {
+      removeById(product.id);
+    } else {
+      addItem({
+        itemId: product.id,
+        itemType: product.type,
+        quantity: 1,
+        scheduledDate: new Date().toISOString().slice(0, 10),
+        note: "",
+      });
+    }
+  };
   const totalSelected = orderServices.length;
 
   return (
@@ -230,35 +234,25 @@ export default function AddServiceDialog({
         </DialogHeader>
 
         {/* Main Content Grid */}
-        <div className="px-4 flex-1 ">
-          <div className="grid md:grid-cols-10 grid-cols-1 gap-4 h-full">
-            <div className="md:col-span-6 col-span-12 bg-card border rounded-2xl flex flex-col gap-4 h-full">
-              {activeTab === "service" ? (
-                <ServiceList
-                  services={filteredServiceItems}
-                  isSelected={isSelected}
-                  getQuantity={getQuantity}
-                  onToggleSelect={(id) => toggleSelectItem(id, "ServiceItem")}
-                  onQuantityChange={handleQuantityChange}
-                />
-              ) : (
-                <MenuList
-                  menuItems={filteredMenuItems}
-                  isSelected={isSelected}
-                  getQuantity={getQuantity}
-                  onToggleSelect={(id) => toggleSelectItem(id, "MenuItem")}
-                  onQuantityChange={handleQuantityChange}
-                />
-              )}
-            </div>
+        <div className="px-4 flex-1 overflow-hidden flex flex-col md:flex-row">
+          {/* LEFT: Product List */}
+          <div className="flex-1 overflow-y-auto bg-muted/30 p-2 md:p-4 rounded-lg md:rounded-r-none">
+            <UniversalProductList
+              products={displayProducts}
+              isLoading={
+                activeTab === "menu" ? isLoadingMenu : isLoadingService
+              }
+              getQuantity={getQuantity}
+              onToggle={handleToggle}
+            />
+          </div>
 
-            <div className="md:col-span-4 col-span-12 overflow-y-auto">
-              <OrderDetail
-                customerName={customerName}
-                checkinDate={checkinDate}
-                checkoutDate={checkoutDate}
-              />
-            </div>
+          <div className="hidden md:flex w-[380px] flex-col border-l bg-background">
+            <OrderDetail
+              customerName={customerName}
+              checkinDate={checkinDate}
+              checkoutDate={checkoutDate}
+            />
           </div>
         </div>
 
