@@ -1,6 +1,13 @@
 import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
-import { Button } from "~/components/ui/button";
+import { formatMoney } from "~/lib/utils";
+import type { POSOrderDetailDto } from "~/services/api/orders/dto";
+import { Check, Trash2, ChefHat } from "lucide-react";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import {
+  useDeleteItemFromPOSOrder,
+  useMarkItemServed,
+} from "../../container/pos-orders/mutation.hooks";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,185 +19,114 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { formatMoney } from "~/lib/utils";
-import type { POSOrderDetailDto } from "~/services/api/orders/dto";
-import { Clock, StickyNote, Utensils, Trash2, Check } from "lucide-react";
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
-import {
-  useDeleteItemFromPOSOrder,
-  useMarkItemServed,
-} from "../../container/pos-orders/mutation.hooks";
+import { Button } from "~/components/ui/button";
 
 interface OrderDetailsProps {
   order: POSOrderDetailDto;
 }
 
 export default function OrderDetails({ order }: OrderDetailsProps) {
-  const hasScheduledTime = order.createdAt;
-  const hasNotes = false;
   const isOpen = order.status === "Open";
-
   const { mutate: deleteItem } = useDeleteItemFromPOSOrder();
   const { mutate: markServed, isPending: isMarkingServed } =
     useMarkItemServed();
 
-  const handleDeleteItem = (itemId: string) => {
-    deleteItem({
-      orderId: order.id,
-      itemId,
-    });
-  };
+  const handleDelete = (itemId: string) =>
+    deleteItem({ orderId: order.id, itemId });
+  const handleServed = (itemId: string) =>
+    markServed({ orderId: order.id, itemId, servedAt: new Date() });
 
-  const handleMarkServed = (itemId: string) => {
-    markServed({
-      orderId: order.id,
-      itemId,
-      servedAt: new Date(),
-    });
-  };
+  if (!order.items || order.items.length === 0) {
+    return (
+      <div className="py-8 text-center text-sm text-gray-400 italic">
+        Chưa có món nào
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
-      {/* Scheduled Time (if exists) */}
-      {hasScheduledTime && (
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5">
-            <Clock className="h-4 w-4 text-muted-foreground" />
+    <div className="space-y-1">
+      {order.items.map((item) => (
+        <div
+          key={item.id}
+          className="group relative grid grid-cols-[auto_1fr_auto] gap-3 items-start py-2 px-1 hover:bg-gray-50 rounded-md transition-colors"
+        >
+          {/* Cột 1: Số lượng */}
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-700 mt-0.5">
+            {item.quantity}
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium">Thời gian phục vụ</p>
-            <p className="text-sm text-muted-foreground">
-              {format(parseISO(order.createdAt!), "HH:mm - dd/MM/yyyy", {
-                locale: vi,
-              })}
+
+          {/* Cột 2: Tên món & Meta */}
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-gray-900 leading-tight">
+              {item.itemName}
             </p>
-          </div>
-        </div>
-      )}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs font-mono text-gray-400">
+                {formatMoney(item.unitPrice).vndFormatted}
+              </span>
 
-      {/* Notes (if exists) */}
-      {hasNotes && (
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5">
-            <StickyNote className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium">Ghi chú</p>
-            <p className="text-sm text-muted-foreground">Ghi chú đơn hàng...</p>
-          </div>
-        </div>
-      )}
+              {/* Trạng thái món (Served) */}
+              {item.servedAt && (
+                <span className="inline-flex items-center gap-1 rounded bg-green-50 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+                  <Check className="h-3 w-3" />{" "}
+                  {format(new Date(item.servedAt), "HH:mm")}
+                </span>
+              )}
+            </div>
 
-      <Separator />
-
-      {/* Order Items */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Utensils className="h-4 w-4 text-muted-foreground" />
-          <p className="text-sm font-medium">
-            Món ăn ({order.items?.length || 0})
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          {order.items && order.items.length > 0 ? (
-            order.items.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between gap-4 p-3 bg-background rounded-md border"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {item.itemName}
-                  </p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-muted-foreground">
-                      SL: {item.quantity}
-                    </span>
-                    <span className="text-xs text-muted-foreground">•</span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatMoney(item.unitPrice).vndFormatted}
-                    </span>
-                  </div>
-                  {item.servedAt && (
-                    <Badge variant="outline" className="mt-2 text-xs">
-                      Đã phục vụ{" "}
-                      {format(item.servedAt, "HH:mm", { locale: vi })}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-semibold">
-                      {formatMoney(item.subtotal).vndFormatted}
-                    </p>
-                  </div>
-                  {/* Mark as Served button for Open orders only (if not already served) */}
-                  {isOpen && !item.servedAt && (
+            {/* INLINE ACTIONS (Chỉ hiện khi Hover) */}
+            {isOpen && (
+              <div className="mt-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 mobile:opacity-100 ">
+                {!item.servedAt && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-auto px-2 text-xs text-primary border-primary hover:bg-primary/10"
+                    onClick={() => handleServed(item.id)}
+                    disabled={isMarkingServed}
+                  >
+                    <ChefHat className="mr-1 h-3 w-3" /> Báo xong
+                  </Button>
+                )}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleMarkServed(item.id)}
-                      disabled={isMarkingServed}
-                      className="h-8 text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700"
+                      variant="destructive-ghost"
+                      size="icon"
+                      className="h-6 w-6 "
                     >
-                      <Check className="h-4 w-4 mr-1" />
-                      Đã phục vụ
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
-                  )}
-                  {/* Delete button for Open orders only */}
-                  {isOpen && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Xóa món ăn?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Bạn có chắc muốn xóa "{item.itemName}" khỏi đơn
-                            hàng? Hành động này không thể hoàn tác.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Hủy</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteItem(item.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Xóa món
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
-                </div>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Xóa món này?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Không thể hoàn tác hành động này.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Hủy</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(item.id)}
+                        className="bg-destructive"
+                      >
+                        Xóa
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Không có món nào
-            </p>
-          )}
+            )}
+          </div>
+
+          {/* Cột 3: Thành tiền */}
+          <div className="text-right text-sm font-semibold text-gray-900">
+            {formatMoney(item.subtotal).vndFormatted}
+          </div>
         </div>
-      </div>
-
-      <Separator />
-
-      {/* Total */}
-      <div className="flex items-center justify-between pt-2">
-        <p className="text-sm font-semibold">Tổng cộng</p>
-        <p className="text-lg font-bold text-primary">
-          {formatMoney(order.totalAmount).vndFormatted}
-        </p>
-      </div>
+      ))}
     </div>
   );
 }

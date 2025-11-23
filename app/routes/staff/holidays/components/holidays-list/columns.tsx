@@ -101,27 +101,14 @@ export const columns: ColumnDef<HolidayListItem>[] = [
   {
     accessorKey: "isPublicHoliday",
     header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Loại"
-        className="text-center"
-      />
+      <DataTableColumnHeader column={column} title="Loại" />
     ),
     cell: ({ row }) => {
       const isPublic = row.getValue("isPublicHoliday") as boolean;
       return (
-        <div className="flex justify-center">
-          <Badge
-            variant={isPublic ? "default" : "secondary"}
-            className={
-              isPublic
-                ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
-            }
-          >
-            {isPublic ? "Hoạt động" : "Không hoạt động"}
-          </Badge>
-        </div>
+        <Badge variant={isPublic ? "default" : "secondary"}>
+          {isPublic ? "Hoạt động" : "Không hoạt động"}
+        </Badge>
       );
     },
   },

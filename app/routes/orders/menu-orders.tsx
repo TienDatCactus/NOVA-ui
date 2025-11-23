@@ -38,61 +38,86 @@ export default function Component({
   }, [orders, statusFilter]);
 
   return (
-    <div className="h-full flex flex-col bg-muted/30">
-      {/* Header */}
-      <div className="flex-shrink-0 p-6 bg-background border-b">
-        <div className="space-y-4">
-          <div>
-            <h1 className="text-2xl font-bold">Danh sách đơn hàng</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Quản lý các đơn hàng POS đang
-            </p>
+    <div className="flex h-full flex-col bg-muted/30">
+      {/* --- HEADER SECTION --- */}
+      <div className="flex-shrink-0 border-b bg-background px-6 py-5 shadow-sm">
+        {/* Container giới hạn max-width để không bị quá rộng trên màn hình Ultrawide */}
+        <div className="mx-auto w-full max-w-[1800px] space-y-4">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Danh sách đơn hàng
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Quản lý các đơn hàng POS đang xử lý tại quầy
+              </p>
+            </div>
           </div>
 
-          {/* Status Filter */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <StatusFilter
-              activeStatus={statusFilter}
-              onStatusChange={setStatusFilter}
-            />
-            <div className="ml-auto">
+          {/* Filters Toolbar */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex-1">
+              <StatusFilter
+                activeStatus={statusFilter}
+                onStatusChange={setStatusFilter}
+              />
+            </div>
+            <div className="w-full sm:w-[240px]">
               <DatePicker
                 value={selectedDate}
                 onChange={setSelectedDate}
-                placeholder="Chọn ngày"
-                className="w-[220px]"
+                placeholder="Chọn ngày lọc"
+                className="w-full"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Order List */}
+      {/* --- ORDER LIST SECTION --- */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="p-6 space-y-4">
+          <div className="mx-auto min-h-full w-full max-w-[1800px] p-4 md:p-6">
             {isPending ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              // Loading State: Căn giữa màn hình nhìn thấy (viewport)
+              <div className="flex h-[60vh] flex-col items-center justify-center gap-2">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Đang tải dữ liệu...
+                </p>
               </div>
             ) : filteredOrders?.length === 0 ? (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant={"icon"}>
-                    <Package />
-                  </EmptyMedia>
-                  <EmptyTitle>Không có đơn hàng</EmptyTitle>
-                  <EmptyDescription>
-                    {statusFilter === "All"
-                      ? "Chưa có đơn hàng nào được tạo"
-                      : `Không có đơn hàng ${statusFilter === "Open" ? "đang mở" : statusFilter === "Completed" ? "hoàn thành" : "đã hủy"}`}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
+              // Empty State: Căn giữa màn hình
+              <div className="flex h-[60vh] items-center justify-center">
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant={"icon"}>
+                      <Package className="h-12 w-12 text-muted-foreground/50" />
+                    </EmptyMedia>
+                    <EmptyTitle className="mt-4">Không có đơn hàng</EmptyTitle>
+                    <EmptyDescription>
+                      {statusFilter === "All"
+                        ? "Chưa có đơn hàng nào được tạo trong ngày này."
+                        : `Không tìm thấy đơn hàng nào có trạng thái "${
+                            statusFilter === "Open"
+                              ? "Đang mở"
+                              : statusFilter === "Completed"
+                                ? "Hoàn thành"
+                                : "Đã hủy"
+                          }".`}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              </div>
             ) : (
-              filteredOrders?.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))
+              <div className="columns-1 gap-4 space-y-4 md:columns-2 xl:columns-3 ">
+                {filteredOrders?.map((order) => (
+                  // break-inside-avoid: Ngăn không cho thẻ bị cắt đôi khi chuyển cột
+                  <div key={order.id} className="break-inside-avoid pb-4">
+                    <OrderCard order={order} />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </ScrollArea>

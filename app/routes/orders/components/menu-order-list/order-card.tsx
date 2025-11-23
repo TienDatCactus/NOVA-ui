@@ -1,20 +1,17 @@
 import { Badge } from "~/components/ui/badge";
-import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "~/components/ui/collapsible";
-import { formatMoney } from "~/lib/utils";
+import { Separator } from "~/components/ui/separator";
+import { cn, formatMoney } from "~/lib/utils";
 import type { POSOrderDetailDto } from "~/services/api/orders/dto";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, StickyNote, CalendarClock } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useState } from "react";
-import OrderActions from "./order-actions";
+
 import OrderDetails from "./order-details";
-import { cn } from "~/lib/utils";
-import { Button } from "~/components/ui/button";
+import {
+  OrderActionMenu,
+  OrderFooterActions,
+  OrderAddButton,
+} from "./order-actions";
 import InlineNoteEditor from "./inline-note-editor";
 
 interface OrderCardProps {
@@ -24,131 +21,113 @@ interface OrderCardProps {
 const statusConfig = {
   Open: {
     label: "Đang mở",
-    variant: "info",
+    className: "bg-blue-600 text-white hover:bg-blue-700",
   },
   Completed: {
     label: "Hoàn thành",
-    variant: "success",
+    className: "bg-green-600 text-white hover:bg-green-700",
   },
   Cancelled: {
     label: "Đã hủy",
-    variant: "warning",
+    className: "bg-gray-500 text-white hover:bg-gray-600",
   },
 };
 
 export default function OrderCard({ order }: OrderCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const itemCount = order?.items?.length || 0;
-  const statusInfo = statusConfig[order.status];
+  const currentStatus =
+    statusConfig[order.status as keyof typeof statusConfig] ||
+    statusConfig.Open;
 
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0 space-y-3">
-              <div className="flex items-center gap-3 flex-wrap">
-                <Badge variant="outline" className="font-mono text-xs">
-                  #{order.id.slice(0, 8)}
-                </Badge>
-                <Badge
-                  variant={statusInfo.variant as any}
-                  className={cn("text-xs")}
-                >
-                  {statusInfo.label}
-                </Badge>
-                {itemCount > 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    {itemCount} món
-                  </span>
-                )}
-              </div>
+    <div className="group flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-primary">
+      <div className="flex items-center justify-between border-b border-muted bg-muted px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Badge
+            variant="outline"
+            className="bg-white font-mono text-xs font-bold text-gray-800"
+          >
+            #{order.id.slice(0, 8)}
+          </Badge>
+          <Badge
+            className={cn(
+              "border-0 text-[10px] font-semibold uppercase tracking-wider",
+              currentStatus.className
+            )}
+          >
+            {currentStatus.label}
+          </Badge>
+        </div>
 
-              <div className="flex items-center gap-6 text-sm flex-wrap">
-                <div>
-                  <p className="text-muted-foreground text-xs">Ngày tạo</p>
-                  <p className="font-medium">
-                    {format(
-                      parseISO(order.createdAt || new Date().toISOString()),
-                      "HH:mm - dd/MM/yyyy",
-                      {
-                        locale: vi,
-                      }
-                    )}
-                  </p>
-                </div>
-                {order.scheduledAt && (
-                  <div>
-                    <p className="text-muted-foreground text-xs">
-                      Thời gian phục vụ
-                    </p>
-                    <p className="font-medium">
-                      {format(
-                        parseISO(order.scheduledAt),
-                        "HH:mm - dd/MM/yyyy",
-                        {
-                          locale: vi,
-                        }
-                      )}
-                    </p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-muted-foreground text-xs">Tổng tiền</p>
-                  <p className="font-semibold text-primary">
-                    {formatMoney(order.totalAmount).vndFormatted}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs mb-1">Ghi chú:</p>
-                <InlineNoteEditor
-                  orderId={order.id}
-                  initialNote={order.note || ""}
-                  disabled={order.status !== "Open"}
-                />
-              </div>
-            </div>
+        {/* Fragment: Action Menu (3 dots) */}
+        <OrderActionMenu
+          orderId={order.id}
+          status={order.status}
+          currentScheduledTime={order.scheduledAt}
+        />
+      </div>
 
-            {/* Right: Actions */}
-            <div className="flex-shrink-0">
-              <OrderActions
-                orderId={order.id}
-                status={order.status}
-                totalAmount={order.totalAmount}
-                currentScheduledTime={order.scheduledAt}
-                invoiceId={order.invoiceId}
-              />
-            </div>
+      {/* 2. SUB-HEADER: Meta Info */}
+      <div className="px-4 py-2 bg-white flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-500">
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5 text-gray-400" />
+          <span>
+            {format(
+              parseISO(order.createdAt || new Date().toISOString()),
+              "HH:mm dd/MM",
+              { locale: vi }
+            )}
+          </span>
+        </div>
+        {order.scheduledAt && (
+          <div className="flex items-center gap-1.5 text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded-full">
+            <CalendarClock className="h-3.5 w-3.5" />
+            <span>
+              Hẹn:{" "}
+              {format(parseISO(order.scheduledAt), "HH:mm", { locale: vi })}
+            </span>
           </div>
+        )}
+        <div className="flex items-center gap-1.5 w-full mt-1">
+          <StickyNote className="h-3.5 w-3.5 text-gray-400" />
+          <div className="flex-1">
+            <InlineNoteEditor
+              orderId={order.id}
+              initialNote={order.note || ""}
+              disabled={order.status !== "Open"}
+            />
+          </div>
+        </div>
+      </div>
 
-          {/* Expand/Collapse Trigger */}
-          <CollapsibleTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full mt-2 hover:bg-muted"
-            >
-              <span className="text-xs text-muted-foreground">
-                {isOpen ? "Ẩn chi tiết" : "Xem chi tiết"}
-              </span>
-              {isOpen ? (
-                <ChevronUp className="h-4 w-4 ml-2" />
-              ) : (
-                <ChevronDown className="h-4 w-4 ml-2" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-        </CardHeader>
+      <Separator className="opacity-50" />
 
-        {/* Expandable Details */}
-        <CollapsibleContent>
-          <CardContent className="pt-0">
-            <OrderDetails order={order} />
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
-    </Card>
+      {/* 3. BODY: Order Details */}
+      <div className="flex-1 px-4 py-2 bg-white flex flex-col">
+        <OrderDetails order={order} />
+
+        {/* Fragment: Add Button (inline with items) */}
+        <OrderAddButton orderId={order.id} status={order.status} />
+      </div>
+
+      {/* 4. FOOTER: Totals & Primary Actions */}
+      <div className="mt-auto bg-gray-50 px-4 py-4 border-t border-dashed border-gray-300">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm font-medium text-muted-foreground">
+            Tổng tiền
+          </span>
+          <span className="text-xl font-bold text-primary">
+            {formatMoney(order.totalAmount).vndFormatted}
+          </span>
+        </div>
+
+        {/* Fragment: Footer Actions (Pay/Complete) */}
+        <OrderFooterActions
+          orderId={order.id}
+          status={order.status}
+          totalAmount={order.totalAmount}
+          invoiceId={order.invoiceId}
+        />
+      </div>
+    </div>
   );
 }
