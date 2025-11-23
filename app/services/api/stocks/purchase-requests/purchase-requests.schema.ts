@@ -67,8 +67,7 @@ const UpdatePurchaseRequestSchema = z.object({
 });
 
 const ReceiveStockRequestSchema = z.object({
-  actualCosts: z.record(z.uuid(), z.number()),
-  expenseId: z.string().nullable().optional(),
+  actualCosts: z.record(z.string(), z.number()),
   note: z.string().optional().nullable(),
 });
 

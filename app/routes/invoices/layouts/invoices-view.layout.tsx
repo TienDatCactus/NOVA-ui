@@ -100,14 +100,7 @@ function InvoicesViewLayout({
 
   return (
     <div className="flex p-4 gap-6 ">
-      <div className="w-72 flex-shrink-0">
-        <InvoicesFilterSidebar
-          filters={filters}
-          onFilterChange={onFilterChange}
-          onResetFilters={onResetFilters}
-        />
-      </div>
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col space-y-4 overflow-hidden">
         <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <div>
             <h1 className="text-3xl font-bold">Quản lý hóa đơn</h1>
@@ -185,6 +178,11 @@ function InvoicesViewLayout({
             </Dialog>
           </div>
         </div>
+        <InvoicesFilterSidebar
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onResetFilters={onResetFilters}
+        />
         <div className="flex-1 overflow-auto">{children}</div>
 
         <Pagination>

@@ -73,6 +73,7 @@ export default function CreateItemDialog({
   const handleSubmit = (data: CreateItemFormData) => {
     onSubmit(data);
     form.reset();
+    onOpenChange(false);
   };
 
   return (
@@ -137,7 +138,7 @@ export default function CreateItemDialog({
                 />
 
                 {/* Category */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
                   <FormField
                     control={form.control}
                     name="categoryId"
@@ -152,7 +153,7 @@ export default function CreateItemDialog({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger>
                               <SelectValue placeholder="Chọn danh mục" />
                             </SelectTrigger>
                           </FormControl>
@@ -184,14 +185,14 @@ export default function CreateItemDialog({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger>
                               <SelectValue placeholder="Chọn đơn vị" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {units.map((unit) => (
                               <SelectItem key={unit.id} value={unit.id}>
-                                {unit.name} ({unit.code})
+                                {unit.name}
                               </SelectItem>
                             ))}
                           </SelectContent>

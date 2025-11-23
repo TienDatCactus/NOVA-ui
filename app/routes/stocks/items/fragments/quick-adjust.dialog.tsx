@@ -27,6 +27,7 @@ import { useAdjustStock } from "../container/query.hooks";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Separator } from "~/components/ui/separator";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 interface QuickAdjustDialogProps {
   open: boolean;
@@ -163,39 +164,7 @@ export function QuickAdjustDialog({
                   <FormItem>
                     <FormLabel>Số lượng điều chỉnh</FormLabel>
                     <FormControl>
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() =>
-                            field.onChange(
-                              Math.max((field.value || 0) - 1, -currentStock)
-                            )
-                          }
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            field.onChange(val === "" ? 0 : Number(val));
-                          }}
-                          value={field.value || ""}
-                          className="text-center font-mono text-lg"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => field.onChange((field.value || 0) + 1)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Counter {...field} minValue={-9999} />
                     </FormControl>
                     <FormDescription>
                       <div>

@@ -38,7 +38,7 @@ export default function PurchaseRequestDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh]  p-0 flex flex-col">
+      <DialogContent className="max-w-4xl h-[85vh] p-4 flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl">
             Chi tiết phiếu đề nghị mua hàng
@@ -208,7 +208,9 @@ export default function PurchaseRequestDetailDialog({
               {/* Tổng cộng */}
               <Card className="p-4 bg-primary/5 border-primary/20">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-lg">Tổng chi phí:</span>
+                  <span className="font-semibold text-lg">
+                    Tổng chi phí ước tính:
+                  </span>
                   <span className="font-bold text-2xl text-primary">
                     {totalCost.toLocaleString()} VNĐ
                   </span>

@@ -7,9 +7,10 @@ import {
   type ColumnFiltersState,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
   Table,
@@ -20,6 +21,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import type { UserItem } from "~/services/api/user/dto";
+import { CreateUserDialog } from "../user-create-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,7 +37,7 @@ export function DataTable<TData, TValue>({
   onSuccess,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -54,7 +56,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex justify-between items-center py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên..."
@@ -66,23 +68,29 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
+          <Plus />
+          Thêm tài khoản
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/50">
-              {table.getHeaderGroups().map((headerGroup) =>
-                headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="font-semibold">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))
-              )}
+            <TableRow>
+              {table
+                .getHeaderGroups()
+                .map((headerGroup) =>
+                  headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))
+                )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -129,6 +137,10 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      <CreateUserDialog
+        onClose={() => setOpenCreateDialog(false)}
+        open={openCreateDialog}
+      />
     </div>
   );
 }

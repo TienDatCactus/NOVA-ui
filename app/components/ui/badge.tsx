@@ -42,7 +42,7 @@ function Badge({
   return (
     <Comp
       data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn("shadow-sm", badgeVariants({ variant }), className)}
       {...props}
     />
   );

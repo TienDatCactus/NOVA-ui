@@ -23,6 +23,11 @@ import PurchaseRequestDetailDialog from "../components/purchase-request-detail.d
 import ApproveRejectDialog from "./approve-reject.dialog";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
 import ReceiveStockDialog from "./receive-stock.dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 interface PurchaseRequestActionCellProps {
   purchaseRequest: PurchaseRequestListItemDto;
@@ -31,7 +36,6 @@ interface PurchaseRequestActionCellProps {
 const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
   purchaseRequest,
 }) => {
-  const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
@@ -56,74 +60,84 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
 
   // Always show action button to allow viewing details
   return (
-    <div className="flex justify-end">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+    <div className="flex justify-end items-center gap-2">
+      {canApprove && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={"success"}
+              size={"icon"}
+              onClick={() => setOpenApproveDialog(true)}
+            >
+              <CheckCircle className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Phê duyệt yêu cầu</TooltipContent>
+        </Tooltip>
+      )}
 
-          {hasAnyAction && <DropdownMenuSeparator />}
-
-          {canEdit && (
-            <DropdownMenuItem onClick={() => setOpenEditDialog(true)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Chỉnh sửa
-            </DropdownMenuItem>
-          )}
-
-          {canApprove && (
-            <DropdownMenuItem onClick={() => setOpenApproveDialog(true)}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Phê duyệt
-            </DropdownMenuItem>
-          )}
-
-          {canReject && (
-            <DropdownMenuItem
-              className="text-destructive"
+      {canReject && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="destructive"
+              size={"icon"}
               onClick={() => setOpenRejectDialog(true)}
             >
-              <XCircle className="mr-2 h-4 w-4" />
-              Từ chối
-            </DropdownMenuItem>
-          )}
+              <XCircle className=" h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Từ chối yêu cầu</TooltipContent>
+        </Tooltip>
+      )}
+      {hasAnyAction && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+            <DropdownMenuSeparator />
 
-          {canReceive && (
-            <DropdownMenuItem onClick={() => setOpenReceiveDialog(true)}>
-              <PackageCheck className="mr-2 h-4 w-4" />
-              Nhận hàng vào kho
-            </DropdownMenuItem>
-          )}
+            {canEdit && (
+              <DropdownMenuItem onClick={() => setOpenEditDialog(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Chỉnh sửa
+              </DropdownMenuItem>
+            )}
 
-          {canCancel && (
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => setOpenCancelDialog(true)}
-            >
-              <XCircle className="mr-2 h-4 w-4" />
-              Hủy yêu cầu
-            </DropdownMenuItem>
-          )}
+            {canReceive && (
+              <DropdownMenuItem onClick={() => setOpenReceiveDialog(true)}>
+                <PackageCheck className="mr-2 h-4 w-4" />
+                Nhận hàng vào kho
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
 
-          {canDelete && (
-            <>
-              <DropdownMenuSeparator />
+            {canCancel && (
               <DropdownMenuItem
-                className="text-destructive"
+                variant="destructive"
+                onClick={() => setOpenCancelDialog(true)}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Hủy yêu cầu
+              </DropdownMenuItem>
+            )}
+
+            {canDelete && (
+              <DropdownMenuItem
+                variant="destructive"
                 onClick={() => setOpenDeleteDialog(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Xóa
               </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {canEdit && (
         <EditPurchaseRequestDialog

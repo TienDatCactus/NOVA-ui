@@ -91,9 +91,6 @@ export function UserEditDialog({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Pencil className="h-5 w-5 text-primary" />
-            </div>
             Cập nhật thông tin khách hàng
           </DialogTitle>
         </DialogHeader>

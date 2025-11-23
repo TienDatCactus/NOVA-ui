@@ -43,13 +43,11 @@ type CreateUnitForm = z.infer<typeof CreateUnitFormSchema>;
 interface CreateUnitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
 }
 
 export default function CreateUnitDialog({
   open,
   onOpenChange,
-  onSuccess,
 }: CreateUnitDialogProps) {
   const { mutate: createUnit, isPending } = useCreateUnit();
 
@@ -67,7 +65,6 @@ export default function CreateUnitDialog({
       onSuccess: () => {
         form.reset();
         onOpenChange(false);
-        onSuccess?.();
       },
     });
   };

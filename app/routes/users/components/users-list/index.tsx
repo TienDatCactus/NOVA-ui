@@ -5,6 +5,7 @@ import { DataTable } from "./data-table";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -18,22 +19,17 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import { CreateUserDialog } from "../user-create-dialog";
 
 interface UsersDataTableProps {
   users: UserItem[];
   isLoading?: boolean;
-  hasFilters?: boolean;
-  onViewDetail: (user: UserItem) => void;
-  onSuccess?: () => void;
 }
 
-function UsersDataTable({
-  users,
-  isLoading,
-  hasFilters,
-  onViewDetail,
-  onSuccess,
-}: UsersDataTableProps) {
+function UsersDataTable({ users, isLoading }: UsersDataTableProps) {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   if (isLoading) {
     return (
       <div className="overflow-x-auto">
@@ -82,43 +78,33 @@ function UsersDataTable({
   if (!users || users.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center">
-        {hasFilters ? (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Users />
-              </EmptyMedia>
-              <EmptyTitle>Không tìm thấy kết quả</EmptyTitle>
-              <EmptyDescription>
-                Thử điều chỉnh bộ lọc hoặc thay đổi từ khóa tìm kiếm
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Users />
-              </EmptyMedia>
-              <EmptyTitle>Chưa có tài khoản nào</EmptyTitle>
-              <EmptyDescription>
-                Bắt đầu bằng cách thêm tài khoản đầu tiên cho hệ thống
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Users />
+            </EmptyMedia>
+            <EmptyTitle>Chưa có tài khoản nào</EmptyTitle>
+            <EmptyDescription>
+              Bắt đầu bằng cách thêm tài khoản đầu tiên cho hệ thống
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => setOpenCreateDialog(true)}>
+              Thêm tài khoản
+            </Button>
+          </EmptyContent>
+        </Empty>
+        <CreateUserDialog
+          open={openCreateDialog}
+          onClose={() => setOpenCreateDialog(false)}
+        />
       </div>
     );
   }
 
   return (
     <div className="container mx-auto ">
-      <DataTable
-        columns={columns}
-        data={users}
-        onViewDetail={onViewDetail}
-        onSuccess={onSuccess}
-      />
+      <DataTable columns={columns} data={users} />
     </div>
   );
 }

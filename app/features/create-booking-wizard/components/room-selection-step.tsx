@@ -1,10 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import {
+  AlertCircle,
   Armchair,
   CalendarIcon,
   CircleX,
   Icon,
+  Info,
   Loader,
   Search,
   Users,
@@ -31,7 +33,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { useCalculateNights } from "~/lib/utils";
+import { cn, useCalculateNights } from "~/lib/utils";
 import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { AvailableRoomTypeCard } from "../fragments/available-room.card";
@@ -145,14 +147,17 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
     };
   }, [availableRooms, selectedRoomIds, bookingData]);
 
-  // Sync form with store
+  // Initialize form from store once on mount
   useEffect(() => {
     const currentFormData = form.getValues();
     const hasDateRange =
       currentFormData.dateRange?.from && currentFormData.dateRange?.to;
 
     // Only reset if form is empty (initial mount)
-    if (!hasDateRange) {
+    if (
+      !hasDateRange &&
+      (bookingData.checkinDate || bookingData.checkoutDate)
+    ) {
       form.reset({
         dateRange: {
           from: bookingData.checkinDate
@@ -167,7 +172,6 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
     }
   }, []);
 
-  // Validate selected rooms are still available
   useEffect(() => {
     if (!availableRooms || isPending) return;
 
@@ -186,17 +190,21 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
     );
 
     if (validRoomIds.length !== currentRoomIds.length) {
-      form.setValue("roomIds", validRoomIds, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-
       const removedCount = currentRoomIds.length - validRoomIds.length;
-      toast.warning(
-        `${removedCount} phòng đã chọn không còn khả dụng và đã bị xóa`
-      );
+
+      // Use setTimeout to break the render cycle
+      setTimeout(() => {
+        form.setValue("roomIds", validRoomIds, {
+          shouldValidate: false,
+          shouldDirty: true,
+        });
+        toast.warning(
+          `${removedCount} phòng đã chọn không còn khả dụng và đã bị xóa`
+        );
+      }, 0);
     }
-  }, [availableRooms, isPending, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableRooms]);
 
   const handleToggleRoom = (roomId: string) => {
     const current = form.getValues("roomIds") || [];
@@ -205,17 +213,10 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
     else set.add(roomId);
     const updatedRoomIds = Array.from(set);
 
-    // Update form state
+    // Only update form state - store will be updated on submit
     form.setValue("roomIds", updatedRoomIds, {
       shouldValidate: true,
       shouldDirty: true,
-    });
-
-    // Update store - preserve existing date range
-    setData({
-      roomIds: updatedRoomIds,
-      checkinDate: form.getValues("dateRange.from"),
-      checkoutDate: form.getValues("dateRange.to"),
     });
   };
 
@@ -313,58 +314,60 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
       <form
         ref={formRef}
         onSubmit={form.handleSubmit(onSubmit, onError)}
-        className="space-y-6"
+        className="flex flex-col gap-6"
       >
-        {/* Header Info */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              {nights} đêm lưu trú • {totalAvailableRooms} phòng trống
-            </p>
-            {selectedRoomIds.length > 0 && (
-              <Badge variant="default" className="text-xs">
-                <Users className="w-3 h-3 mr-1" />
-                {capacityValidation.totalGuests} khách • Sức chứa:{" "}
-                {capacityValidation.totalCapacity} người
-              </Badge>
-            )}
-          </div>
+        {/* --- 1. HEADER & CONTROLS --- */}
+        <div className="rounded-xl border bg-card p-5 shadow-sm space-y-4">
+          {/* Top Row: Title & Date Picker */}
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">
+                Chọn phòng nghỉ
+              </h2>
+              <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                <Badge variant="secondary" className="font-normal">
+                  {nights} đêm lưu trú
+                </Badge>
+                <span>•</span>
+                <span>Tổng {totalAvailableRooms} phòng trống</span>
+              </div>
+            </div>
 
-          <div className="flex items-end gap-2">
-            <FormField
-              control={form.control}
-              name="dateRange"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-xs text-muted-foreground">
-                    Ngày nhận - trả phòng
-                  </FormLabel>
-                  <FormControl>
+            {/* Date Picker Input */}
+            <div className="w-full md:w-auto">
+              <FormField
+                control={form.control}
+                name="dateRange"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
-                          size="sm"
                           variant="outline"
-                          className="relative"
+                          className={cn(
+                            "w-full md:w-[260px] justify-start text-left font-normal border-2 h-10",
+                            !field.value && "text-muted-foreground",
+                            // Nếu có lỗi thì viền đỏ
+                            form.formState.errors.dateRange &&
+                              "border-destructive/50 text-destructive bg-destructive/5"
+                          )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value?.from && field.value?.to ? (
-                            <>
-                              {format(field.value.from, "dd/MM/yyyy")} -{" "}
-                              {format(field.value.to, "dd/MM/yyyy")}
-                            </>
+                          {field.value?.from ? (
+                            field.value.to ? (
+                              <>
+                                {format(field.value.from, "dd/MM/yyyy")} -{" "}
+                                {format(field.value.to, "dd/MM/yyyy")}
+                              </>
+                            ) : (
+                              format(field.value.from, "dd/MM/yyyy")
+                            )
                           ) : (
-                            "Chọn ngày"
+                            <span>Chọn ngày nhận - trả phòng</span>
                           )}
-                          <Badge
-                            className="absolute -top-3 -right-3 rounded-full"
-                            variant="destructive"
-                          >
-                            !
-                          </Badge>
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto " align="start">
+                      <PopoverContent className="w-auto p-0" align="end">
                         <Calendar
                           mode="range"
                           selected={field.value}
@@ -374,76 +377,99 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
                               form.clearErrors("dateRange");
                             }
                           }}
-                          disabled={(date) => {
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
-                            return date < today;
-                          }}
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
                           numberOfMonths={2}
                         />
-                        <div className="flex items-center justify-end">
+                        <div className="p-3 border-t bg-gray-50 flex justify-end">
                           <Button
-                            variant="outline"
                             size="sm"
                             onClick={() => {
                               setShouldFetch(true);
                               refetch();
                             }}
+                            className="bg-primary hover:bg-primary/90"
                           >
-                            <Search className=" h-4 w-4" />
-                            Tìm phòng trống
+                            <Search className="mr-2 h-3.5 w-3.5" /> Tìm phòng
                           </Button>
                         </div>
                       </PopoverContent>
                     </Popover>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
+
+          {/* Bottom Row: Validation Summary (Nếu có phòng chọn) */}
+          {selectedRoomIds.length > 0 && (
+            <div
+              className={cn(
+                "flex items-center gap-2 rounded-md border p-3 text-sm transition-colors",
+                capacityValidation.isValid
+                  ? "border-green-200 bg-green-50 text-green-700"
+                  : "border-orange-200 bg-orange-50 text-orange-800"
+              )}
+            >
+              {capacityValidation.isValid ? (
+                <Info className="h-4 w-4" />
+              ) : (
+                <AlertCircle className="h-4 w-4" />
+              )}
+
+              <div className="flex-1 flex flex-wrap items-center gap-x-1">
+                <span>
+                  Đã chọn cho{" "}
+                  <strong>{capacityValidation.totalGuests} khách</strong>.
+                </span>
+                <span>
+                  Sức chứa hiện tại:{" "}
+                  <strong>{capacityValidation.totalCapacity}</strong>.
+                </span>
+
+                {!capacityValidation.isValid && (
+                  <span className="font-semibold underline">
+                    Thiếu chỗ cho {capacityValidation.deficit} người nữa.
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Capacity Validation Alert - Real-time */}
-        {!capacityValidation.isValid && selectedRoomIds.length > 0 && (
-          <Alert variant="destructive">
-            <CircleX className="h-4 w-4" />
-            <AlertTitle>Không đủ sức chứa</AlertTitle>
-            <AlertDescription>
-              Số lượng khách ({capacityValidation.totalGuests} người) vượt quá
-              sức chứa của {selectedRoomIds.length} phòng đã chọn (
-              {capacityValidation.totalCapacity} người). Vui lòng chọn thêm{" "}
-              phòng để chứa {capacityValidation.deficit} người.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Form Error - Submit-time */}
+        {/* --- 2. ERROR STATE (Submit Time) --- */}
         {form.formState.errors.roomIds && (
-          <Alert variant="destructive">
-            <CircleX className="h-4 w-4" />
-            <AlertTitle>Lỗi chọn phòng</AlertTitle>
+          <Alert
+            variant="destructive"
+            className="animate-in fade-in slide-in-from-top-2"
+          >
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Chưa chọn phòng</AlertTitle>
             <AlertDescription>
               {form.formState.errors.roomIds.message}
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Available Rooms */}
-        <div className="space-y-2">
+        {/* --- 3. ROOM LIST GRID --- */}
+        <div className="min-h-[300px]">
           {!availableRooms || availableRooms.length === 0 ? (
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <Armchair />
+                  <Armchair className="h-12 w-12 " />
                 </EmptyMedia>
-                <EmptyTitle>Không có phòng trống</EmptyTitle>
-                <EmptyDescription>Vui lòng thử chọn ngày khác</EmptyDescription>
+                <EmptyTitle>Không tìm thấy phòng trống</EmptyTitle>
+                <EmptyDescription>
+                  Vui lòng thử thay đổi ngày tìm kiếm hoặc kiểm tra lại bộ lọc.
+                </EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : (
-            <div className="space-y-4 grid-cols-1 md:grid-cols-2 gap-4 grid">
-              {availableRooms.map((roomType) => (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-6">
+              {availableRooms.map((roomType: any) => (
                 <AvailableRoomTypeCard
                   key={roomType.roomTypeId}
                   roomType={roomType}

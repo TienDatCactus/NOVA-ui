@@ -17,7 +17,9 @@ import type {
   UpdateUserResponseDto,
   ChangePasswordDto,
   ChangePasswordResponseDto,
+  RoleListResponseDto,
 } from "./dto";
+import type { UserListParams } from "./user.types";
 
 const {
   UserListResponseSchema,
@@ -33,9 +35,11 @@ const {
   ChangePasswordResponseSchema,
 } = UserSchema;
 
-async function getUserList(): Promise<UserListResponseDto> {
+async function getUserList(
+  params: UserListParams
+): Promise<UserListResponseDto> {
   try {
-    const resp = await http.get(User.list);
+    const resp = await http.get(User.list, { params });
     return UserListResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
@@ -76,13 +80,10 @@ async function updateUser(
   }
 }
 
-async function getRoleList(): Promise<string[]> {
+async function getRoleList(): Promise<RoleListResponseDto> {
   try {
     const resp = await http.get(User.roles);
-    if (resp && typeof resp === "object" && "data" in resp) {
-      return resp.data;
-    }
-    return [];
+    return RoleListResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

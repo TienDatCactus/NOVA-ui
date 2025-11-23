@@ -54,19 +54,6 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
-        <Input
-          startAddon={<Search />}
-          placeholder="Tìm theo mã hóa đơn..."
-          value={
-            (table.getColumn("invoiceNo")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("invoiceNo")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -106,98 +93,112 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
                       <TableRow>
                         <TableCell
                           colSpan={columns.length}
-                          className="p-4 bg-card space-y-4"
+                          className="p-0 border-b"
                         >
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="space-y-1">
-                              <span className="text-xs text-muted-foreground block">
-                                Khách hàng
-                              </span>
-                              <span className="font-medium text-foreground">
-                                {row.original.customerName}
-                              </span>
+                          <div className="flex flex-col md:flex-row gap-6 p-6 bg-muted/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+                            {/* SECTION 1: CONTEXT (Left Side) */}
+                            <div className="flex-1 space-y-4">
+                              <div>
+                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                                  Thông tin khách hàng
+                                </span>
+                                <div className="mt-1 flex items-center gap-2">
+                                  <span className="text-base font-semibold text-foreground">
+                                    {row.original.customerName}
+                                  </span>
+                                  <span className="text-sm text-muted-foreground">
+                                    • {row.original.itemCount} mục
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">
+                                  Phương thức:
+                                </span>
+                                <span className="font-medium text-foreground">
+                                  {PAYMENT_METHODS.find(
+                                    (m) =>
+                                      m.value === row.original.paymentMethod
+                                  )?.label || row.original.paymentMethod}
+                                </span>
+                              </div>
+
+                              {/* Action buttons live here for quick access */}
+                              <div className="pt-2">
+                                <InvoiceActions invoice={row.original} />
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <span className="text-xs text-muted-foreground block">
-                                Số lượng mục
-                              </span>
-                              <span className="font-medium text-foreground">
-                                {row.original.itemCount}
-                              </span>
+
+                            {/* SECTION 2: FINANCIAL BREAKDOWN (Right Side - Receipt Style) */}
+                            <div className="w-full md:w-[300px] bg-background/50 rounded-lg border border-border/50 p-4">
+                              <div className="space-y-2 text-sm">
+                                {/* Row Item */}
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">
+                                    Tạm tính
+                                  </span>
+                                  <span className="font-mono text-foreground">
+                                    {
+                                      formatMoney(row.original.subTotal ?? 0)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">
+                                    VAT
+                                  </span>
+                                  <span className="font-mono text-foreground">
+                                    {
+                                      formatMoney(row.original.vatAmount ?? 0)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">
+                                    Phí dịch vụ
+                                  </span>
+                                  <span className="font-mono text-foreground">
+                                    {
+                                      formatMoney(
+                                        row.original.serviceChargeAmount ?? 0
+                                      ).vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                <div className="my-2 h-px bg-border border-dashed" />
+
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">
+                                    Đã thanh toán
+                                  </span>
+                                  <span className="font-mono text-foreground">
+                                    {
+                                      formatMoney(row.original.paidAmount ?? 0)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                {/* Highlight the Balance */}
+                                <div className="flex justify-between items-center pt-2 mt-2 border-t border-dashed">
+                                  <span className="font-medium text-foreground">
+                                    Còn lại
+                                  </span>
+                                  <span className="font-mono font-bold text-lg text-primary">
+                                    {
+                                      formatMoney(row.original.balance ?? 0)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <span className="text-xs text-muted-foreground block">
-                                Tạm tính
-                              </span>
-                              <span className="font-medium text-foreground">
-                                {
-                                  formatMoney(row.original.subTotal ?? 0)
-                                    .vndFormatted
-                                }
-                              </span>
-                            </div>
-                            <div className="space-y-1">
-                              <span className="text-xs text-muted-foreground block">
-                                VAT
-                              </span>
-                              <span className="font-medium text-foreground">
-                                {
-                                  formatMoney(row.original.vatAmount ?? 0)
-                                    .vndFormatted
-                                }
-                              </span>
-                            </div>
-                            <div className="space-y-1">
-                              <span className="text-xs text-muted-foreground block">
-                                Phí dịch vụ
-                              </span>
-                              <span className="font-medium text-foreground">
-                                {
-                                  formatMoney(
-                                    row.original.serviceChargeAmount ?? 0
-                                  ).vndFormatted
-                                }
-                              </span>
-                            </div>
-                            <div className="space-y-1">
-                              <span className="text-xs text-muted-foreground block">
-                                Đã thanh toán
-                              </span>
-                              <span className="font-medium text-foreground">
-                                {
-                                  formatMoney(row.original.paidAmount ?? 0)
-                                    .vndFormatted
-                                }
-                              </span>
-                            </div>
-                            <div className="space-y-1">
-                              <span className="text-xs text-muted-foreground block">
-                                Còn lại
-                              </span>
-                              <span className="font-medium text-foreground">
-                                {
-                                  formatMoney(row.original.balance ?? 0)
-                                    .vndFormatted
-                                }
-                              </span>
-                            </div>
-                            <div className="space-y-1">
-                              <span className="text-xs text-muted-foreground block">
-                                Phương thức
-                              </span>
-                              <span className="font-medium text-foreground">
-                                {
-                                  PAYMENT_METHODS.find(
-                                    (method) =>
-                                      method.value ===
-                                      row.original.paymentMethod
-                                  )?.label
-                                }
-                              </span>
-                            </div>
-                          </div>
-                          <div className="mt-4 flex justify-end">
-                            <InvoiceActions invoice={row.original} />
                           </div>
                         </TableCell>
                       </TableRow>

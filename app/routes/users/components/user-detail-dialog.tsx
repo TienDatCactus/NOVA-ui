@@ -20,14 +20,43 @@ interface UserDetailDialogProps {
  * Helper function - Get role badge color
  */
 const getRoleBadgeVariant = (role: string) => {
-  const roleColors: Record<string, { bg: string; text: string; border: string }> = {
-    Receptionist: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
-    Staff: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
-    user: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-    HotelManager: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200" },
-    Accountant: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
+  const roleColors: Record<
+    string,
+    { bg: string; text: string; border: string }
+  > = {
+    Receptionist: {
+      bg: "bg-blue-50",
+      text: "text-blue-700",
+      border: "border-blue-200",
+    },
+    Staff: {
+      bg: "bg-purple-50",
+      text: "text-purple-700",
+      border: "border-purple-200",
+    },
+    user: {
+      bg: "bg-green-50",
+      text: "text-green-700",
+      border: "border-green-200",
+    },
+    HotelManager: {
+      bg: "bg-orange-50",
+      text: "text-orange-700",
+      border: "border-orange-200",
+    },
+    Accountant: {
+      bg: "bg-pink-50",
+      text: "text-pink-700",
+      border: "border-pink-200",
+    },
   };
-  return roleColors[role] || { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200" };
+  return (
+    roleColors[role] || {
+      bg: "bg-gray-50",
+      text: "text-gray-700",
+      border: "border-gray-200",
+    }
+  );
 };
 
 /**
@@ -80,7 +109,7 @@ export function UserDetailDialog({
                 <div className="w-32 text-sm text-muted-foreground">Email:</div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{user.email}</span>
-                  {user.emailConfirmed }
+                  {user.emailConfirmed}
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -127,7 +156,9 @@ export function UserDetailDialog({
             </h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-32 text-sm text-muted-foreground">Trạng thái:</div>
+                <div className="w-32 text-sm text-muted-foreground">
+                  Trạng thái:
+                </div>
                 {user.lockoutEnabled && user.lockoutEnd ? (
                   <Badge variant="destructive">Bị khóa</Badge>
                 ) : (

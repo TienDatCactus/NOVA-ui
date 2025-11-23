@@ -9,19 +9,22 @@ import {
   Receipt,
   User,
 } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn, formatMoney } from "~/lib/utils";
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import type { ServiceOrderListItemDto } from "~/services/api/orders/dto";
 import { useServiceOrderDetail } from "../../container/service-order/query.hooks";
-import { Badge } from "~/components/ui/badge";
 
 interface ServiceOrderDetailsProps {
   order: ServiceOrderListItemDto;
+  bookingDetail?: BookingDetailResponseDto;
 }
 
 export default function ServiceOrderDetails({
   order,
+  bookingDetail,
 }: ServiceOrderDetailsProps) {
   const {
     data: serviceOrderDetail,
@@ -96,11 +99,13 @@ export default function ServiceOrderDetails({
 
         {/* Context Info (Room & Staff) */}
         <div className="flex items-center justify-between gap-2 px-1">
-          {serviceOrderDetail.bookingRoomId ? (
+          {bookingDetail ? (
             <div className="flex items-center gap-1.5 text-xs font-medium text-gray-700">
               <MapPin className="h-3.5 w-3.5 text-gray-400" />
-              <span>Phòng: {serviceOrderDetail.bookingRoomId}</span>{" "}
-              {/* Nên map ID ra Name nếu có thể */}
+              <span>
+                Phòng:{" "}
+                {bookingDetail.rooms.map((room) => room.roomName).join(", ")}
+              </span>{" "}
             </div>
           ) : (
             <div className="flex items-center gap-1.5 text-xs text-gray-500">

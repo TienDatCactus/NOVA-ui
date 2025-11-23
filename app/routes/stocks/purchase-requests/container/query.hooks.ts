@@ -181,10 +181,11 @@ export function useReceiveStock() {
       queryClient.invalidateQueries({
         queryKey: ["purchase-request", variables.purchaseRequestId],
       });
-      queryClient.invalidateQueries({ queryKey: ["stock-items"] }); // Invalidate items as stock updated
+      queryClient.invalidateQueries({ queryKey: ["stock-items"] });
       toast.success("Nhận hàng vào kho thành công");
     },
     onError: (error: any) => {
+      console.log(error);
       toast.error(error?.message || "Lỗi khi nhận hàng vào kho");
     },
   });
