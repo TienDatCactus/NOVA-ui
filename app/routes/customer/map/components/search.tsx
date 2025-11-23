@@ -85,14 +85,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className }) => {
         for (const f of features) {
           const coords =
             f?.geometry?.coordinates || f?.center || f?.coordinates;
-          const id = f?.mapbox_id || f?.id || f?.properties?.mapbox_id;
-          const name =
-            f?.name || f?.properties?.name || f?.properties?.place_formatted;
-          const address =
-            f?.full_address ||
-            f?.properties?.full_address ||
-            f?.properties?.place_formatted;
-
           if (!coords || coords.length < 2 || !Array.isArray(coords)) continue;
           const [lng, lat] = coords as [number, number];
 
@@ -143,108 +135,144 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className }) => {
       .setPopup(
         new mapboxgl.Popup({ offset: 14 }).setHTML(`
           <div style="
-              font-size:0.875rem;
-              font-weight:600;
-              margin-bottom:0.25rem;
-              color:#111;
-              border-radius:2rem;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+              background-color: #ffffff;
+              padding: 10px;
+              max-width: 280px;
+              color: #374151;
           ">
-            ${detail.name}
+            <div style="margin-bottom: 4px;">
+              <h3 style="
+                  margin: 0 0 4px 0;
+                  font-size: 16px;
+                  font-weight: 700;
+                  color: #111827;
+                  line-height: 1.4;
+              ">
+                ${detail.name}
+              </h3>
+              <p style="
+                  margin: 0;
+                  font-size: 13px;
+                  color: #6b7280;
+                  line-height: 1.5;
+              ">
+                ${detail.address}
+              </p>
+            </div>
+        
+            ${
+              detail.rating || (detail.categories && detail.categories.length)
+                ? `
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                  ${
+                    detail.rating
+                      ? `
+                      <div style="display: flex; align-items: center; font-size: 13px; font-weight: 600; color: #1f2937;">
+                        <span style="color: #f59e0b; margin-right: 4px;">★</span>
+                        ${detail.rating}
+                        <span style="font-weight: 400; color: #9ca3af; margin-left: 2px; font-size: 12px;">(${detail.ratingCount})</span>
+                      </div>
+                      `
+                      : ""
+                  }
+                  
+                  ${
+                    detail.categories?.length
+                      ? `
+                      <span style="
+                          background-color: #eff6ff;
+                          color: #2563eb;
+                          font-size: 11px;
+                          font-weight: 500;
+                          padding: 2px 8px;
+                          border-radius: 9999px;
+                          text-transform: capitalize;
+                      ">
+                        ${detail.categories[0]} </span>
+                      `
+                      : ""
+                  }
+                </div>
+                `
+                : ""
+            }
+        
+            <div style="
+                border-top: 1px solid #f3f4f6; 
+                padding-top: 12px; 
+                display: flex; 
+                flex-direction: column; 
+                gap: 6px;
+            ">
+              ${
+                detail.hours
+                  ? `
+                  <div style="display: flex; align-items: start; font-size: 13px; color: #4b5563;">
+                    <span style="margin-right: 8px; min-width: 16px;">🕒</span>
+                    <span>${detail.hours}</span>
+                  </div>
+                  `
+                  : ""
+              }
+              ${
+                detail.website
+                  ? `
+                  <div style="display: flex; align-items: center; font-size: 13px;">
+                    <span style="margin-right: 8px; min-width: 16px;">🌐</span>
+                    <a href="${detail.website}" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 500;">
+                      Website
+                    </a>
+                  </div>
+                  `
+                  : ""
+              }
+            </div>
+        
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <button 
+                onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detail.name)}&query_place_id=${detail.id}', '_blank')"
+                style="
+                  background: #f3f4f6;
+                  color: #374151;
+                  border: 1px solid #e5e7eb;
+                  padding: 6px 0;
+                  border-radius: 6px;
+                  font-size: 13px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  width: 100%;
+                  transition: background 0.2s;
+                "
+                onmouseover="this.style.background='#e5e7eb'"
+                onmouseout="this.style.background='#f3f4f6'"
+              >
+                Chi tiết
+              </button>
+        
+              <button 
+                onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${
+                  detail.coords[1]
+                },${detail.coords[0]}', '_blank')"
+                style="
+                  background: #2563eb;
+                  color: white;
+                  border: none;
+                  padding: 6px 0;
+                  border-radius: 6px;
+                  font-size: 13px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  width: 100%;
+                  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+                "
+                onmouseover="this.style.background='#1d4ed8'"
+                onmouseout="this.style.background='#2563eb'"
+              >
+                Dẫn đường
+              </button>
+            </div>
           </div>
-        
-          <div style="
-              font-size:0.75rem;
-              color:#555;
-              margin-bottom:0.375rem;
-              max-width:15rem;
-              line-height:1.4;
-          ">
-            ${detail.address}
-          </div>
-        
-          ${
-            detail.rating
-              ? `
-                <div style="font-size:0.75rem;color:#222;margin-bottom:0.375rem;">
-                  ⭐ ${detail.rating} 
-                  <span style="color:#777;">(${detail.ratingCount})</span>
-                </div>
-              `
-              : ""
-          }
-        
-          ${
-            detail.categories?.length
-              ? `
-                <div style="
-                    font-size:0.6875rem;
-                    color:#0b62d6;
-                    margin-bottom:0.375rem;
-                    text-transform:capitalize;
-                ">
-                  ${detail.categories.join(", ")}
-                </div>
-              `
-              : ""
-          }
-        
-          ${
-            detail.website
-              ? `
-                <div style="margin-bottom:0.375rem;">
-                  <a href="${detail.website}" 
-                    target="_blank"
-                    style="color:#0b62d6;font-size:0.75rem;text-decoration:underline;">
-                    🌐 Website
-                  </a>
-                </div>
-              `
-              : ""
-          }
-        
-          ${
-            detail.hours
-              ? `
-                <div style="font-size:0.75rem;color:#555;margin-bottom:0.625rem;">
-                  🕒 ${detail.hours}
-                </div>
-              `
-              : ""
-          }
-      
-          <button 
-            style="
-              width:100%;
-              background:#2563eb;
-              color:white;
-              padding:0.375rem 0.625rem;
-              border-radius:0.375rem;
-              font-size:0.75rem;
-              margin-top:0.5rem;
-              cursor:pointer;
-            "
-            onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${
-              detail.coords[1]
-            },${detail.coords[0]}', '_blank')"
-          >
-            Điều hướng tới đây
-          </button>
-      
-          <button 
-            style="
-              width:100%;
-              background:#10b981;
-              color:white;
-              padding:0.375rem 0.625rem;
-              border-radius:0.375rem;
-              font-size:0.75rem;
-              margin-top:0.375rem;
-              cursor:pointer;
-            "
-            onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detail.name)}&query_place_id=${detail.id}', '_blank')"
-          >
-            Xem chi tiết
-          </button>
         `)
       )
 
