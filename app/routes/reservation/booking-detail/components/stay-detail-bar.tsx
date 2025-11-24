@@ -493,7 +493,6 @@ export default function StayDetailBar({
               <span className="text-sm font-medium">Ghi chú:</span>
               <Input
                 startAddon={<Pen />}
-                className="w-36"
                 placeholder="Ghi chú về đơn đặt phòng"
                 onFocus={() => setNoteModalOpen(true)}
               />

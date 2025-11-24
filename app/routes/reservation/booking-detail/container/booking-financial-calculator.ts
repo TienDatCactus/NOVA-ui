@@ -111,7 +111,10 @@ export function canCheckoutBooking(
   const warnings: string[] = [];
 
   // Rule 1: Booking must be InHouse or CheckedIn
-  if (!["InHouse", "CheckedIn"].includes(bookingStatus)) {
+  if (
+    !["InHouse", "CheckedIn"].includes(bookingStatus) &&
+    bookingStatus !== "CheckedOut"
+  ) {
     reasons.push("Booking chưa ở trạng thái InHouse/CheckedIn");
   }
 
