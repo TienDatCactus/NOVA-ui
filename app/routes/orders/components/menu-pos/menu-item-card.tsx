@@ -24,8 +24,20 @@ export default function MenuItemCard({
   addToOrder,
   menuItem,
 }: MenuItemCardProps) {
-  const { active, code, name, description, imageUrls, unitName, price } =
-    menuItem;
+  const {
+    active,
+    code,
+    name,
+    description,
+    imageUrls,
+    unitName,
+    price,
+    maxQuantityAvailable,
+  } = menuItem;
+
+  const isOutOfStock = maxQuantityAvailable === 0;
+  const isLowStock = maxQuantityAvailable > 0 && maxQuantityAvailable <= 5;
+
   return (
     <Card className="overflow-hidden shadow-sm p-0 hover:shadow-m transition-shadow">
       <div className="relative ">
@@ -39,6 +51,16 @@ export default function MenuItemCard({
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <Badge variant="destructive">Không khả dụng</Badge>
           </div>
+        )}
+        {isOutOfStock && active && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <Badge variant="destructive">Hết hàng</Badge>
+          </div>
+        )}
+        {isLowStock && !isOutOfStock && active && (
+          <Badge variant="warning" className="absolute top-2 right-2">
+            Còn {maxQuantityAvailable}
+          </Badge>
         )}
       </div>
 
@@ -74,11 +96,11 @@ export default function MenuItemCard({
         <Button
           className="w-full"
           onClick={addToOrder}
-          disabled={!active}
+          disabled={!active || isOutOfStock}
           size="sm"
         >
           <Plus className="h-4 w-4 mr-1" />
-          Thêm vào giỏ
+          {isOutOfStock ? "Hết hàng" : "Thêm vào giỏ"}
         </Button>
       </CardFooter>
     </Card>

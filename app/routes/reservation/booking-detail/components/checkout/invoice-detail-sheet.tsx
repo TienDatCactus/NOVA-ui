@@ -57,7 +57,7 @@ import {
   useCheckoutPayment,
   useInvoiceDetail,
   useUpdateInvoice,
-} from "../container/use-booking-checkout.hooks";
+} from "../../container/use-booking-checkout.hooks";
 import {
   useInvoicePayment,
   useSyncInvoiceWithOrders,
@@ -76,7 +76,7 @@ import {
 import {
   canInvoiceAcceptPayment,
   validatePaymentAmount,
-} from "../container/payment-validation";
+} from "../../container/payment-validation";
 
 const { StaffCheckoutPaymentRequestSchema } = BookingSchema;
 

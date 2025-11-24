@@ -50,8 +50,8 @@ import {
   useCreateCheckoutInvoice,
   useInvoicePreview,
   useInvoicesByBooking,
-} from "../container/use-booking-checkout.hooks";
-import { useCheckoutEligibility } from "../container/use-booking-financial-status.hooks";
+} from "../../container/use-booking-checkout.hooks";
+import { useCheckoutEligibility } from "../../container/use-booking-financial-status.hooks";
 import InvoiceDetailSheet from "./invoice-detail-sheet";
 
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";

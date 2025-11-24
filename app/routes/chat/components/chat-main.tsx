@@ -53,6 +53,7 @@ import {
 } from "../container/translation.hooks";
 import { MessageBubble } from "../fragments/message-bubble";
 import { useStaffList } from "~/routes/staff/staff/container/query.hooks";
+import { useUsers } from "~/routes/users/container/useUsers.hooks";
 
 interface ChatMainProps {
   sessionId: string | null;
@@ -85,7 +86,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   );
   const { data: messageHistory, isLoading: isLoadingMessages } =
     useChatMessages(sessionId || "", !!sessionId);
-  const { data: staffList } = useStaffList();
+  const { data: staffList } = useUsers();
 
   const assignStaffMutation = useAssignStaff();
   const closeSessionMutation = useCloseSession();
@@ -442,11 +443,9 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                           disabled={assignStaffMutation.isPending}
                         >
                           <div className="flex flex-col flex-1">
-                            <span className="font-medium">
-                              {staff.fullName}
-                            </span>
+                            <span className="font-medium">{staff.roles}</span>
                             <span className="text-xs text-muted-foreground">
-                              {staff.staffRoleName}
+                              {staff.email}
                             </span>
                           </div>
                           {session.assignedStaffUserId === staff.id && (

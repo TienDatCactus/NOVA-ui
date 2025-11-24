@@ -37,7 +37,10 @@ interface CustomerInfoBarProps {
   form: UseFormReturn<StaffUpdateBookingRequestDto>;
   OTAList?: Array<{ id: string; name: string }>;
   permissions: {
-    canDoSoftUpdate: boolean;
+    canDoSoftUpdate: boolean; // Legacy
+    canUpdateNonStructural: boolean;
+    canUpdateGuestCount: boolean;
+    canUpdateTotalAmount: boolean;
   };
 }
 
@@ -99,7 +102,7 @@ export default function CustomerInfoBar({
                   <Counter
                     className="w-30 "
                     {...field}
-                    isDisabled={!permissions.canDoSoftUpdate}
+                    isDisabled={!permissions.canUpdateGuestCount}
                   />
                 </div>
               </FormControl>
@@ -124,7 +127,7 @@ export default function CustomerInfoBar({
                     <Counter
                       className="w-30"
                       {...field}
-                      isDisabled={!permissions.canDoSoftUpdate}
+                      isDisabled={!permissions.canUpdateGuestCount}
                     />
                   </div>
                 </FormControl>
@@ -278,7 +281,7 @@ export default function CustomerInfoBar({
                     field.onChange(value.target.valueAsNumber)
                   }
                   startAddon={<Wallet />}
-                  disabled={!permissions.canDoSoftUpdate}
+                  disabled={!permissions.canUpdateTotalAmount}
                 />
               </FormControl>
               <FormDescription>

@@ -122,6 +122,27 @@ export default function Component({
 
   // Handlers
   const handleAddToCart = (item: MenuItem) => {
+    // Check if out of stock
+    if (item.maxQuantityAvailable === 0) {
+      toast.error(`${item.name} hiện đã hết hàng`);
+      return;
+    }
+
+    // Check if adding would exceed max available
+    const existingItem = items.find((i) => i.id === item.itemId);
+    if (existingItem) {
+      const newQuantity = existingItem.quantity + 1;
+      if (
+        item.maxQuantityAvailable !== undefined &&
+        newQuantity > item.maxQuantityAvailable
+      ) {
+        toast.error(
+          `Số lượng tối đa cho ${item.name} là ${item.maxQuantityAvailable}`
+        );
+        return;
+      }
+    }
+
     addItem({
       id: item.itemId,
       menuItemId: item.itemId,
@@ -129,6 +150,7 @@ export default function Component({
       name: item.name,
       unitPrice: item.price,
       imageUrl: item.imageUrls?.[0],
+      maxQuantityAvailable: item.maxQuantityAvailable,
     });
     toast.success(`Đã thêm ${item.name} vào đơn`);
   };

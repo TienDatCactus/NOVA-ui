@@ -23,7 +23,7 @@ import type {
 } from "~/services/api/booking/dto";
 import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
-import { AddRoomModal } from "./add-room-modal";
+import { AddRoomModal } from "./operations/add-room-modal";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
