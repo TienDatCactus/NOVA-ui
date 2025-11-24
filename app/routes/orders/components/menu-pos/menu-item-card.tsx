@@ -34,7 +34,7 @@ export default function MenuItemCard({
 
   const isOutOfStock = maxQuantityAvailable === 0;
   const isLowStock =
-    maxQuantityAvailable !== undefined &&
+    maxQuantityAvailable &&
     maxQuantityAvailable > 0 &&
     maxQuantityAvailable <= 5;
   const isDisabled = !active || isOutOfStock;

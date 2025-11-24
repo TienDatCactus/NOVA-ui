@@ -1,14 +1,26 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2, X } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  X,
+  Image as ImageIcon,
+  Layers,
+  Package,
+  Undo2,
+  Save,
+  ScanBarcode,
+  ImagePlus,
+  RotateCcw,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
+
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,7 +28,6 @@ import {
 } from "~/components/ui/form";
 import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -37,19 +48,27 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { Badge } from "~/components/ui/badge";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
+import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
+
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { MenuSchema } from "~/services/api/menu/menu.schema";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
 import { useMenuItemDetail } from "../container/menu/query.hooks";
+import { useStockItemList } from "~/routes/stocks/items/container/query.hooks";
+import GeneralTab from "../fragments/menu/edit/general-tab";
+import MediaTab from "../fragments/menu/edit/media-tab";
+import ComponentsTab from "../fragments/menu/edit/components-tab";
 
 const { UpdateMenuItemRequestSchema } = MenuSchema;
-
 type UpdateMenuFormData = z.infer<typeof UpdateMenuItemRequestSchema>;
 
 interface EditMenuSheetProps {
@@ -63,9 +82,11 @@ export default function EditMenuSheet({
   onClose,
   menuItem,
 }: EditMenuSheetProps) {
+  // --- State & Hooks ---
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const [removeMediaIds, setRemoveMediaIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("general");
 
   const form = useForm({
     resolver: zodResolver(UpdateMenuItemRequestSchema),
@@ -88,28 +109,30 @@ export default function EditMenuSheet({
     name: "Components",
   });
 
+  // --- Queries ---
   const { data: menuItemDetail, isPending: isLoadingDetail } =
     useMenuItemDetail(menuItem.itemId, { enabled: open });
-
   const { mutate: updateMenuItem, isPending: isUpdating } = useUpdateMenuItem(
     menuItem.itemId
   );
   const { data: menuCategories } = useMenuCategories();
   const { data: units } = useUnits();
+  const { data: stockItems } = useStockItemList({ includeInactive: false });
 
+  // --- Effects ---
   useEffect(() => {
-    if (menuItem) {
+    if (menuItem && menuItemDetail) {
       form.reset({
-        CategoryId: menuItemDetail?.categoryId,
-        Code: menuItemDetail?.code,
-        Name: menuItemDetail?.name,
-        Description: menuItemDetail?.description,
-        UnitId: menuItemDetail?.unitId || "",
-        Price: menuItemDetail?.price,
-        Active: menuItemDetail?.active,
+        CategoryId: menuItemDetail.categoryId,
+        Code: menuItemDetail.code,
+        Name: menuItemDetail.name,
+        Description: menuItemDetail.description,
+        UnitId: menuItemDetail.unitId || "",
+        Price: menuItemDetail.price,
+        Active: menuItemDetail.active,
         RemoveMediaIds: [],
         NewImages: [],
-        Components: menuItemDetail?.components.map((comp) => ({
+        Components: menuItemDetail.components.map((comp) => ({
           itemId: comp.itemId,
           itemCode: menuItem.code,
           itemName: comp.itemName,
@@ -117,36 +140,11 @@ export default function EditMenuSheet({
           notes: comp.notes || "",
         })),
       });
-
       setRemoveMediaIds([]);
       setNewFiles([]);
       setNewPreviews([]);
     }
-  }, [menuItem, menuItemDetail]);
-
-  const handleSubmit = (data: UpdateMenuFormData) => {
-    updateMenuItem(
-      {
-        ...data,
-        RemoveMediaIds: removeMediaIds,
-        NewImages: newFiles,
-      },
-      {
-        onSuccess: () => {
-          handleClose();
-        },
-      }
-    );
-  };
-
-  const handleClose = () => {
-    newPreviews.forEach((url) => URL.revokeObjectURL(url));
-    setNewPreviews([]);
-    setNewFiles([]);
-    setRemoveMediaIds([]);
-    form.reset();
-    onClose();
-  };
+  }, [menuItem, menuItemDetail, form]);
 
   useEffect(() => {
     form.setValue("NewImages", newFiles as any);
@@ -156,40 +154,42 @@ export default function EditMenuSheet({
   useEffect(() => {
     const urls = newFiles.map((f) => URL.createObjectURL(f));
     setNewPreviews(urls);
-    return () => {
-      urls.forEach((u) => URL.revokeObjectURL(u));
-    };
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, [newFiles]);
 
-  const onDropNewFiles = (accepted: File[]) => {
-    setNewFiles((prev) => [...prev, ...accepted]);
+  // --- Handlers ---
+  const handleSubmit = (data: UpdateMenuFormData) => {
+    updateMenuItem(
+      { ...data, RemoveMediaIds: removeMediaIds, NewImages: newFiles },
+      { onSuccess: handleClose }
+    );
   };
 
-  const removeNewFile = (index: number) => {
-    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+  const handleClose = () => {
+    newPreviews.forEach((url) => URL.revokeObjectURL(url));
+    setNewPreviews([]);
+    setNewFiles([]);
+    setRemoveMediaIds([]);
+    setActiveTab("general");
+    form.reset();
+    onClose();
   };
 
   const toggleRemoveExisting = (id: string) => {
     setRemoveMediaIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((mediaId) => mediaId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((mid) => mid !== id) : [...prev, id]
     );
   };
 
+  // --- Render Loading ---
   if (isLoadingDetail) {
     return (
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="sm:max-w-[700px] p-0 flex flex-col gap-0">
-          <SheetHeader className="p-6 pb-4 border-b">
-            <SheetTitle>Chỉnh sửa món ăn</SheetTitle>
-            <SheetDescription>Đang tải thông tin món ăn...</SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 p-6 space-y-4">
+        <SheetContent className="sm:max-w-[700px] p-0">
+          <div className="p-6 space-y-6">
+            <Skeleton className="h-8 w-1/2" />
             <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-64 w-full" />
           </div>
         </SheetContent>
       </Sheet>
@@ -198,421 +198,141 @@ export default function EditMenuSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="sm:max-w-[700px] p-0 flex flex-col gap-0 overflow-hidden">
-        <SheetHeader className="p-6 pb-4 border-b">
-          <SheetTitle>Chỉnh sửa món ăn</SheetTitle>
-          <SheetDescription>
-            Cập nhật thông tin món ăn. Nhấn lưu khi hoàn tất.
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="flex-1 overflow-y-auto p-6">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-6"
-            >
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">
-                  Thông tin cơ bản
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="CategoryId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Danh mục <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Chọn danh mục" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {menuCategories?.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="Code"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Mã món <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="VD: FOOD001" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="Name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Tên món <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="VD: Phở bò" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+      <SheetContent className="sm:max-w-[750px] w-full p-0 flex flex-col bg-background">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="flex flex-col h-full"
+          >
+            {/* === HEADER === */}
+            <SheetHeader className="px-6 py-4 border-b shrink-0">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <SheetTitle className="text-xl">Chỉnh sửa món</SheetTitle>
+                  <SheetDescription>
+                    Cập nhật thông tin chi tiết cho{" "}
+                    <span className="font-semibold text-foreground">
+                      {menuItem.name}
+                    </span>
+                  </SheetDescription>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="UnitId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Đơn vị <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Chọn đơn vị" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {units?.map((unit) => (
-                              <SelectItem key={unit.id} value={unit.id}>
-                                {unit.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <FormField
-                    control={form.control}
-                    name="Price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Giá (VNĐ) <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number.parseFloat(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="Active"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col justify-end">
-                        <FormLabel>
-                          <span className="text-sm text-muted-foreground">
-                            {field.value ? "Hoạt động" : "Tạm ngưng"}
-                          </span>
-                        </FormLabel>
-                        <FormControl>
-                          <div className="flex items-center gap-2">
-                            <div className="border-input has-data-[state=checked]:border-primary/50 relative flex w-full items-start gap-2 rounded-md border p-4 shadow-xs outline-none">
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                              <div className="flex grow items-center gap-3">
-                                <div className="grid grow gap-2">
-                                  <FormLabel htmlFor={field.name}>
-                                    Kích hoạt món ăn
-                                  </FormLabel>
-                                  <p
-                                    id={field.name}
-                                    className="text-muted-foreground text-xs"
-                                  >
-                                    Cho phép món ăn hiển thị trong thực đơn
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                {/* Active Toggle placed prominently in header */}
                 <FormField
                   control={form.control}
-                  name="Description"
+                  name="Active"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Mô tả <span className="text-destructive">*</span>
-                      </FormLabel>
+                    <FormItem className="flex items-center space-y-0 gap-2 bg-muted/50 px-3 py-1.5 rounded-full border">
                       <FormControl>
-                        <Textarea
-                          placeholder="Mô tả chi tiết..."
-                          rows={3}
-                          {...field}
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="scale-75"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormLabel className="text-xs font-medium cursor-pointer mb-0 pb-0">
+                        {field.value ? "Đang bán" : "Tạm ngưng"}
+                      </FormLabel>
                     </FormItem>
                   )}
                 />
               </div>
+            </SheetHeader>
 
-              {/* Images */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">
-                  Hình ảnh
-                </h3>
-
-                {/* Existing Images */}
-                <div className="space-y-2">
-                  <FormLabel>Hình ảnh hiện có</FormLabel>
-                  {!menuItemDetail || menuItemDetail?.images?.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      Không có hình ảnh
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {menuItemDetail.images?.map((img) => {
-                        const marked = removeMediaIds.includes(img.mediaId);
-                        return (
-                          <Label
-                            key={img.mediaId}
-                            className={cn(
-                              "relative group rounded-md border cursor-pointer transition-all",
-                              {
-                                "ring-2 ring-destructive/60 border-destructive/50":
-                                  marked,
-                                "border-border hover:border-primary/30":
-                                  !marked,
-                              }
-                            )}
-                            title={
-                              marked ? "Bỏ đánh dấu xóa" : "Đánh dấu để xóa"
-                            }
-                          >
-                            <div className="absolute top-2 left-2 z-10">
-                              <Checkbox
-                                className="
-                                data-[state=checked]:bg-destructive border-destructive data-[state=checked]:border-destructive"
-                                checked={marked}
-                                onCheckedChange={() =>
-                                  toggleRemoveExisting(img.mediaId)
-                                }
-                              />
-                            </div>
-                            <Image
-                              src={img.url}
-                              alt="existing"
-                              width={100}
-                              height={100}
-                              className="object-cover rounded-md"
-                            />
-
-                            {marked && (
-                              <span className="absolute inset-0 bg-destructive/20 flex items-center justify-center text-xs font-semibold" />
-                            )}
-                          </Label>
-                        );
-                      })}
-                    </div>
+            {/* === TABS & BODY === */}
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="flex-1 flex flex-col min-h-0"
+            >
+              <TabsList className=" h-12 w-full gap-6">
+                <TabsTrigger value="general">
+                  <Package className="w-4 h-4 mr-2" /> Thông tin chung
+                </TabsTrigger>
+                <TabsTrigger value="media">
+                  <ImageIcon className="w-4 h-4 mr-2" /> Hình ảnh
+                  {(newFiles.length > 0 ||
+                    (menuItemDetail?.images?.length || 0) > 0) && (
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 px-1 py-0 h-5 text-[10px]"
+                    >
+                      {(menuItemDetail?.images?.length || 0) +
+                        newFiles.length -
+                        removeMediaIds.length}
+                    </Badge>
                   )}
-                  {removeMediaIds.length > 0 && (
-                    <p className="text-xs text-destructive">
-                      Đã đánh dấu xóa {removeMediaIds.length} ảnh
-                    </p>
+                </TabsTrigger>
+                <TabsTrigger value="components">
+                  <Layers className="w-4 h-4 mr-2" /> Định lượng (Recipe)
+                  {fields.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 px-1 py-0 h-5 text-[10px]"
+                    >
+                      {fields.length}
+                    </Badge>
                   )}
+                </TabsTrigger>
+              </TabsList>
+
+              <ScrollArea className="flex-1">
+                <div className="p-6">
+                  <GeneralTab
+                    form={form}
+                    menuCategories={menuCategories}
+                    units={units}
+                  />
+
+                  <MediaTab
+                    menuItemDetail={menuItemDetail}
+                    newFiles={newFiles}
+                    newPreviews={newPreviews}
+                    removeMediaIds={removeMediaIds}
+                    setNewFiles={setNewFiles}
+                    toggleRemoveExisting={toggleRemoveExisting}
+                  />
+
+                  <ComponentsTab
+                    form={form}
+                    fields={fields}
+                    append={append}
+                    remove={remove}
+                    stockItems={stockItems}
+                  />
                 </div>
+              </ScrollArea>
+            </Tabs>
 
-                {/* New Images Upload */}
-                <div className="space-y-2">
-                  <FormLabel>Thêm hình ảnh</FormLabel>
-                  <Dropzone
-                    accept={{ "image/*": [] }}
-                    maxFiles={8}
-                    onDrop={(accepted) => onDropNewFiles(accepted)}
-                    src={newFiles}
-                    className="border-2 border-dashed"
-                  >
-                    <DropzoneEmptyState />
-                    <DropzoneContent />
-                  </Dropzone>
-
-                  {newPreviews.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {newPreviews.map((url, index) => (
-                        <div key={index} className="relative group">
-                          <Image
-                            src={url}
-                            alt={`new-${index}`}
-                            width={100}
-                            height={100}
-                            className="object-cover border"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => removeNewFile(index)}
-                            aria-label="Xóa ảnh mới"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Có thể tải lên tối đa 8 ảnh. Ảnh sẽ được lưu khi bạn nhấn
-                    Lưu thay đổi.
-                  </p>
-                </div>
-              </div>
-
-              {/* Components */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-2">
-                  <h3 className="text-lg font-semibold">Thành phần</h3>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      append({
-                        itemId: "",
-                        itemCode: "",
-                        itemName: "",
-                        quantity: 0,
-                        notes: "",
-                      })
-                    }
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Thêm
-                  </Button>
-                </div>
-
-                {fields.length === 0 ? (
-                  <Card className="p-6 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Chưa có thành phần nào
-                    </p>
-                  </Card>
+            {/* === FOOTER === */}
+            <SheetFooter className="p-6 pt-4 border-t shrink-0 bg-background">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                disabled={isUpdating}
+                type="button"
+              >
+                Hủy bỏ
+              </Button>
+              <Button
+                type="submit"
+                disabled={isUpdating}
+                className="min-w-[140px]"
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />{" "}
+                    Đang lưu...
+                  </>
                 ) : (
-                  <div className="space-y-3">
-                    {fields.map((field, index) => (
-                      <Card key={field.id} className="p-3">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-1 grid grid-cols-2 gap-3">
-                            <FormField
-                              control={form.control}
-                              name={`Components.${index}.itemName`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-xs">Tên</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="Tên nguyên liệu"
-                                      {...field}
-                                      className="h-9"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name={`Components.${index}.quantity`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-xs">
-                                    Số lượng
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="0"
-                                      {...field}
-                                      onChange={(e) =>
-                                        field.onChange(
-                                          Number.parseFloat(e.target.value)
-                                        )
-                                      }
-                                      className="h-9"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => remove(index)}
-                            className="mt-6 h-9 w-9 text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
+                  <>
+                    <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
+                  </>
                 )}
-              </div>
-            </form>
-          </Form>
-        </div>
-
-        <SheetFooter className="p-6 pt-4 border-t">
-          <Button variant="outline" onClick={handleClose} disabled={isUpdating}>
-            Hủy
-          </Button>
-          <Button
-            onClick={form.handleSubmit(handleSubmit)}
-            disabled={isUpdating}
-          >
-            {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
-          </Button>
-        </SheetFooter>
+              </Button>
+            </SheetFooter>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );

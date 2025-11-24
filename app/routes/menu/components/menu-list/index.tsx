@@ -11,11 +11,15 @@ import {
   EmptyContent,
 } from "~/components/ui/empty";
 import { DataTable } from "./data-table";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import CreateMenuDialog from "../create-menu.dialog";
 interface MenuDataTableProps {
   menu: MenuListResponseDto;
   isLoading?: boolean;
 }
 function MenuDataTable({ menu, isLoading }: MenuDataTableProps) {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -41,6 +45,15 @@ function MenuDataTable({ menu, isLoading }: MenuDataTableProps) {
             thực đơn đầu tiên.
           </EmptyDescription>
         </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={() => setOpenCreateDialog(true)}>
+            Tạo thực đơn đầu tiên
+          </Button>
+        </EmptyContent>
+        <CreateMenuDialog
+          open={openCreateDialog}
+          onClose={() => setOpenCreateDialog(false)}
+        />
       </Empty>
     );
   }
