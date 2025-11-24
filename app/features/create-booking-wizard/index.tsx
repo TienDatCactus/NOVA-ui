@@ -1,440 +1,295 @@
-import {
-  Ban,
-  Building2,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  CircleAlert,
-  Globe,
-} from "lucide-react";
-
-import { useRef, useState } from "react";
-import { Alert, AlertTitle } from "~/components/ui/alert";
-import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import { useStep } from "~/hooks/use-step";
-import { cn, onError } from "~/lib/utils";
-import { useCreateBookingStore } from "~/store/create-booking.store";
-import { CustomerInfoStep } from "./components/customer-info-step";
-import ReviewPaymentStep from "./components/review-payment-step";
-import { RoomSelectionStep } from "./components/room-selection-step";
-import { ServicesBreakfastStep } from "./components/services-breakfast-step";
-import { Link } from "react-router";
-import { DASHBOARD } from "~/lib/fe-url";
-import { useForm } from "react-hook-form";
-import { Form, FormField, FormMessage } from "~/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addDays, format } from "date-fns";
+import { Loader2, RotateCcw } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router"; // Chỉnh lại import tùy router bạn dùng
+import { toast } from "sonner";
+
+import { Button } from "~/components/ui/button";
+import { Form } from "~/components/ui/form";
+import { DASHBOARD } from "~/lib/fe-url";
+import { useCreateBookingStore } from "~/store/create-booking.store";
+import { useServiceOrderStore } from "~/store/service-order.store";
+
+// --- IMPORTS CÁC WIDGET MỚI ---
+
+// --- IMPORTS API & UTILS ---
+import useCreateBookingMutation from "./container/create-booking-mutation.hooks";
+
 import z from "zod";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
+import { CustomerInfoSection } from "./components/customer-info-step";
+import { BookingCartWidget } from "./components/review-payment-step";
+import { RoomSelectionSection } from "./components/room-selection-step";
+import { ServiceQuickAddWidget } from "./components/services-breakfast-step";
+import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
+import { onError } from "~/lib/utils";
 
-const steps = [
-  {
-    id: 1,
-    title: "Loại đặt phòng",
-    description: "Chọn nguồn đặt phòng",
-  },
-  {
-    id: 2,
-    title: "Thông tin khách & lưu trú",
-    description: "Thông tin liên hệ",
-  },
+const BookingMasterSchema = z
+  .object({
+    ...BookingSchema.StaffCreateBookingSchema.shape,
 
-  {
-    id: 3,
-    title: "Chọn phòng",
-    description: "Lựa chọn phòng",
-  },
-  {
-    id: 4,
-    title: "Bữa sáng & Dịch vụ",
-    description: "Dịch vụ bổ sung",
-  },
-  {
-    id: 5,
-    title: "Thanh toán",
-    description: "Xác nhận và thanh toán",
-  },
-  {
-    id: 6,
-    title: "Hoàn tất",
-    description: "Đặt phòng thành công",
-  },
-];
-
-export default function BookingFlow() {
-  const [loading, setLoading] = useState(false);
-  const [currentStep, { goToNextStep, goToPrevStep }] = useStep(7);
-  const { data: bookingData, setData } = useCreateBookingStore();
-  const bookingTypeForm = useForm({
-    resolver: zodResolver(
-      z.object({
-        bookingType: z
-          .enum(["Direct", "OTA", "RoomBlock"], "Vui lòng chọn loại đặt phòng")
-          .optional(),
+    bookingType: z.enum(["Direct", "OTA", "RoomBlock"]),
+    dateRange: z
+      .object({
+        from: z.date(),
+        to: z.date(),
       })
-    ),
-    mode: "onChange",
-    defaultValues: {
-      bookingType: bookingData.bookingType || undefined,
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      const checkin = new Date(data.checkinDate);
+      const checkout = new Date(data.checkoutDate);
+      return checkout > checkin;
     },
+    {
+      message: "Ngày trả phòng phải sau ngày nhận phòng",
+      path: ["checkoutDate"],
+    }
+  )
+  .refine(
+    (data) => {
+      // Validate service order scheduledDates (Logic gốc của bạn)
+      if (!data.serviceOrder?.services) return true;
+
+      const checkinDate = new Date(data.checkinDate);
+      const checkoutDate = new Date(data.checkoutDate);
+
+      // Reset hours để so sánh chính xác
+      checkinDate.setHours(0, 0, 0, 0);
+      checkoutDate.setHours(23, 59, 59, 999);
+
+      return data.serviceOrder.services.every((service) => {
+        if (!service.scheduledDate) return true;
+        const scheduledDate = new Date(service.scheduledDate);
+        return scheduledDate >= checkinDate && scheduledDate <= checkoutDate;
+      });
+    },
+    {
+      message: "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú",
+      path: ["serviceOrder"],
+    }
+  );
+//*------------------------------------------------------------
+export default function CreateBookingPage() {
+  const navigate = useNavigate();
+  const {
+    data: storeData,
+    setData,
+    reset: resetStore,
+  } = useCreateBookingStore();
+  const { services: serviceOrderServices, clear: clearServices } =
+    useServiceOrderStore();
+
+  const { mutateAsync: createBooking, isPending: isSubmitting } =
+    useCreateBookingMutation();
+
+  // Khởi tạo default dates
+  const defaultCheckin = storeData.checkinDate
+    ? new Date(storeData.checkinDate)
+    : new Date();
+  const defaultCheckout = storeData.checkoutDate
+    ? new Date(storeData.checkoutDate)
+    : addDays(new Date(), 1);
+
+  // 1. SETUP MASTER FORM
+  const form = useForm({
+    resolver: zodResolver(BookingMasterSchema),
+    defaultValues: {
+      // UI Fields
+      bookingType: storeData.bookingType || "Direct",
+      dateRange: {
+        from: defaultCheckin,
+        to: defaultCheckout,
+      },
+
+      // API Fields (Mapped from Store)
+      source: storeData.source,
+      checkinDate: defaultCheckin,
+      checkoutDate: defaultCheckout,
+
+      guestFullName: storeData.guestFullName || "",
+      guestPhone: storeData.guestPhone || "",
+      guestEmail: storeData.guestEmail || "",
+
+      adultsAmount: storeData.adultsAmount || 1,
+      childrenAmount: storeData.childrenAmount || 0,
+      roomIds: storeData.roomIds || [],
+
+      isBreakfastAll: storeData.isBreakfastAll || false,
+      breakfastDates: storeData.breakfastDates?.map((d) => new Date(d)) || [],
+      specialRequest: storeData.specialRequest || "",
+      overridePrice: storeData.overridePrice,
+      internalNote: storeData.internalNote,
+
+      roomPayment: storeData.roomPayment,
+      otaInformationId: storeData.otaInformationId,
+      otaBookingCode: storeData.otaBookingCode,
+    },
+    mode: "all",
   });
-  const customerInfoFormRef = useRef<HTMLFormElement>(null);
-  const roomSelectionFormRef = useRef<HTMLFormElement>(null);
-  const servicesBreakfastFormRef = useRef<HTMLFormElement>(null);
-  const reviewPaymentFormRef = useRef<HTMLFormElement>(null);
-  const handleNext = () => {
-    if (currentStep === 1) {
-      const bookingType = bookingTypeForm.getValues().bookingType;
 
-      if (!bookingType) {
-        bookingTypeForm.setError("bookingType", {
-          type: "manual",
-          message: "Vui lòng chọn loại đặt phòng để tiếp tục",
-        });
+  const dateRange = form.watch("dateRange");
+  useEffect(() => {
+    if (dateRange?.from) {
+      form.setValue("checkinDate", dateRange.from, { shouldValidate: true });
+    }
+    if (dateRange?.to) {
+      form.setValue("checkoutDate", dateRange.to, { shouldValidate: true });
+    }
+  }, [dateRange?.from, dateRange?.to, form]);
+
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      setData({
+        ...value,
+        checkinDate: value.dateRange?.from,
+        checkoutDate: value.dateRange?.to,
+      } as any);
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch, setData]);
+
+  const handleReset = () => {
+    if (confirm("Bạn có chắc muốn xóa form?")) {
+      resetStore();
+      clearServices();
+      form.reset();
+      toast.success("Đã làm mới");
+    }
+  };
+
+  const onSubmit = async (data: z.infer<typeof BookingMasterSchema>) => {
+    const isRoomBlock = data.bookingType === "RoomBlock";
+
+    if (!isRoomBlock && serviceOrderServices.length > 0) {
+      const checkin = new Date(data.checkinDate);
+      const checkout = new Date(data.checkoutDate);
+      const hasInvalidDate = serviceOrderServices.some((s) => {
+        if (!s.scheduledDate) return false;
+        const d = new Date(s.scheduledDate);
+        return d < checkin || d > checkout;
+      });
+
+      if (hasInvalidDate) {
+        toast.error("Có dịch vụ nằm ngoài ngày lưu trú.");
         return;
       }
-      updateBookingData("bookingType", bookingType);
-      goToNextStep();
-      return;
-    }
-    if (currentStep === 2 && customerInfoFormRef.current) {
-      customerInfoFormRef.current.requestSubmit();
-      return;
     }
 
-    if (currentStep === 3 && roomSelectionFormRef.current) {
-      roomSelectionFormRef.current.requestSubmit();
-      return;
-    }
-    if (currentStep === 4 && servicesBreakfastFormRef.current) {
-      servicesBreakfastFormRef.current.requestSubmit();
-      return;
-    }
-    if (currentStep === 5 && reviewPaymentFormRef.current) {
-      setLoading(true);
-      try {
-        reviewPaymentFormRef.current.requestSubmit();
-      } catch (error) {
-        console.error("Error submitting review payment form:", error);
-        return;
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-    goToNextStep();
-  };
+    try {
+      const { bookingType, dateRange, ...apiPayload } = data;
 
-  const handlePrevious = () => {
-    const isRoomBlock = bookingData.bookingType === "RoomBlock";
+      const finalPayload = {
+        ...apiPayload,
+        checkinDate: format(data.checkinDate, "yyyy-MM-dd"),
+        checkoutDate: format(data.checkoutDate, "yyyy-MM-dd"),
+        serviceOrder: isRoomBlock
+          ? undefined
+          : {
+              services: serviceOrderServices.map((s) => ({
+                itemType: s.itemType,
+                itemId: s.itemId,
+                quantity: s.quantity,
+                scheduledDate: s.scheduledDate, // Schema String date
+                note: s.note,
+              })),
+            },
 
-    if (currentStep === 5 && isRoomBlock) {
-      goToPrevStep();
-      goToPrevStep();
-      return;
-    }
+        overridePrice: isRoomBlock ? 0 : data.overridePrice || null,
+        roomPayment: isRoomBlock ? undefined : data.roomPayment,
+        internalNote: isRoomBlock
+          ? `ROOM BLOCK - ${data.guestFullName}`
+          : data.internalNote,
 
-    goToPrevStep();
-  };
+        source: isRoomBlock
+          ? BOOKING_SOURCES.find((bs) => bs.key === "RoomBlock")?.value
+          : data.bookingType === "OTA"
+            ? BOOKING_SOURCES.find((bs) => bs.key === "OTA")?.value
+            : data.source ||
+              BOOKING_SOURCES.find((bs) => bs.key === "DirectStaff")?.value,
+      };
 
-  const updateBookingData = (field: string, value: any) => {
-    setData({ [field]: value });
-  };
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <Form {...bookingTypeForm}>
-            <form className="space-y-6">
-              <CardHeader className="px-0 pt-0">
-                <CardTitle>Chọn loại đặt phòng</CardTitle>
-                <CardDescription>
-                  Vui lòng chọn nguồn đặt phòng của khách hàng
-                </CardDescription>
-              </CardHeader>
-
-              <FormField
-                control={bookingTypeForm.control}
-                name="bookingType"
-                render={({ field }) => (
-                  <>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                      {/* Direct */}
-                      <Card
-                        className={cn(
-                          "cursor-pointer transition-all h-fit p-0",
-                          field.value === "Direct"
-                            ? "bg-muted border-primary ring-2 ring-primary"
-                            : "border-gray-200 hover:shadow-md"
-                        )}
-                        onClick={() => field.onChange("Direct")}
-                      >
-                        <CardContent className="flex items-start space-x-4 p-6">
-                          <div className="flex-shrink-0">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                              <Building2 className="h-6 w-6 text-primary" />
-                            </div>
-                          </div>
-                          <div>
-                            <h3 className="mb-1 font-semibold text-foreground">
-                              Đặt phòng trực tiếp
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                              Khách hàng đặt trực tiếp tại khách sạn hoặc qua
-                              điện thoại
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* OTA */}
-                      <Card
-                        className={cn(
-                          "cursor-pointer transition-all h-fit p-0",
-                          field.value === "OTA"
-                            ? "bg-muted border-primary ring-2 ring-primary"
-                            : "border-gray-200 hover:shadow-md"
-                        )}
-                        onClick={() => field.onChange("OTA")}
-                      >
-                        <CardContent className="flex items-start space-x-4 p-6">
-                          <div className="flex-shrink-0">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                              <Globe className="h-6 w-6 text-primary" />
-                            </div>
-                          </div>
-                          <div>
-                            <h3 className="mb-1 font-semibold text-foreground">
-                              Đặt qua OTA
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                              Booking.com, Agoda, Expedia, Traveloka, v.v.
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Room Block */}
-                      <Card
-                        className={cn(
-                          "cursor-pointer transition-all h-fit p-0",
-                          field.value === "RoomBlock"
-                            ? "bg-muted border-destructive ring-2 ring-destructive"
-                            : "border-gray-200 hover:shadow-md"
-                        )}
-                        onClick={() => field.onChange("RoomBlock")}
-                      >
-                        <CardContent className="flex items-start space-x-4 p-6">
-                          <div className="flex-shrink-0">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-destructive/10">
-                              <Ban className="h-6 w-6 text-destructive" />
-                            </div>
-                          </div>
-                          <div>
-                            <h3 className="mb-1 font-semibold text-foreground">
-                              Room Block
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                              Khóa phòng để bảo trì, sửa chữa hoặc các mục đích
-                              nội bộ
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    {bookingTypeForm.formState.errors.bookingType && (
-                      <Alert variant={"destructive"}>
-                        <CircleAlert className="h-4 w-4" />
-                        <AlertTitle>
-                          {bookingTypeForm.formState.errors.bookingType
-                            ?.message ||
-                            "Vui lòng chọn loại đặt phòng để tiếp tục."}
-                        </AlertTitle>
-                      </Alert>
-                    )}
-                  </>
-                )}
-              />
-            </form>
-          </Form>
-        );
-
-      case 2:
-        return (
-          <div className="space-y-6">
-            <CardHeader className="px-0 pt-0">
-              <CardTitle>Thông tin khách hàng</CardTitle>
-              <CardDescription>
-                Nhập thông tin liên hệ của khách hàng
-              </CardDescription>
-            </CardHeader>
-            <CustomerInfoStep
-              onNext={goToNextStep}
-              formRef={customerInfoFormRef}
-            />
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <CardHeader className="px-0 pt-0">
-              <CardTitle>Chọn phòng</CardTitle>
-              <CardDescription>
-                Lựa chọn phòng phù hợp cho kỳ nghỉ
-              </CardDescription>
-            </CardHeader>
-            <RoomSelectionStep
-              onNext={goToNextStep}
-              formRef={roomSelectionFormRef}
-            />
-          </div>
-        );
-
-      case 4:
-        return (
-          <div className="space-y-6">
-            <CardHeader className="px-0 pt-0">
-              <CardTitle>Bữa sáng & Dịch vụ</CardTitle>
-              <CardDescription>
-                Thêm bữa sáng và các dịch vụ bổ sung
-              </CardDescription>
-            </CardHeader>
-            <ServicesBreakfastStep
-              onNext={goToNextStep}
-              formRef={servicesBreakfastFormRef}
-            />
-          </div>
-        );
-
-      case 5:
-        return (
-          <ReviewPaymentStep onNext={goToNextStep} ref={reviewPaymentFormRef} />
-        );
-
-      case 6:
-        return (
-          <div className="space-y-6">
-            <CardHeader className="px-0 py-0 text-center">
-              <CardTitle>Đặt phòng thành công!</CardTitle>
-              <CardDescription>
-                Đơn đặt phòng đã được tạo thành công
-              </CardDescription>
-            </CardHeader>
-
-            <div className="space-y-4 text-center py-8">
-              <div className="flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                  <Check className="h-8 w-8 text-green-600" />
-                </div>
-              </div>
-              <p className="text-gray-700 max-w-md text-center mx-auto">
-                Đơn đặt phòng của bạn đã được tạo thành công. Bạn có thể xem chi
-                tiết hoặc tạo đơn đặt phòng mới.
-              </p>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
+      await createBooking(finalPayload as any, {
+        onSuccess: () => {
+          toast.success("Tạo đặt phòng thành công!");
+          resetStore();
+          clearServices();
+          navigate(DASHBOARD.bookings.list);
+        },
+        onError: (err) => {
+          console.error(err);
+          toast.error("Thất bại. Vui lòng kiểm tra lại thông tin.");
+        },
+      });
+    } catch (e) {
+      console.error("Payload error", e);
+      toast.error("Lỗi xử lý dữ liệu.");
     }
   };
 
   return (
-    <div className="flex h-full items-center justify-center p-4">
-      <Card className="w-full max-w-6xl bg-white shadow-md ">
-        <CardHeader className="p-6">
-          <div className="flex items-center justify-between">
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className="relative flex flex-1 flex-col items-center"
-              >
-                <div
-                  className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors duration-300",
-                    currentStep > step.id
-                      ? "bg-primary text-primary-foreground"
-                      : currentStep === step.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-gray-200 text-gray-600"
-                  )}
-                >
-                  {currentStep > step.id ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    step.id
-                  )}
-                </div>
-                <div
-                  className={cn(
-                    "mt-2 text-center text-xs font-medium max-md:hidden",
-                    currentStep >= step.id ? "text-gray-800" : "text-gray-500"
-                  )}
-                >
-                  {step.title}
-                </div>
-                {step.id < steps.length && (
-                  <div
-                    className={cn(
-                      "absolute top-5 left-[calc(50%+20px)] h-0.5 w-[calc(100%-40px)] -translate-y-1/2 bg-gray-200 transition-colors duration-300",
-                      currentStep > step.id && "bg-primary"
-                    )}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </CardHeader>
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      <header className="h-14 shrink-0 bg-white border-b px-4 flex items-center justify-between z-30 shadow-sm">
+        <div className="flex items-center gap-3">
+          <h1 className="font-bold text-lg text-gray-900">Tạo Đặt Phòng</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={handleReset}>
+            <RotateCcw className="mr-2 h-3.5 w-3.5" /> Làm mới
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to={DASHBOARD.bookings.list}>Thoát</Link>
+          </Button>
+        </div>
+      </header>
 
-        <CardContent className="p-6 md:px-8 ">
-          {renderStepContent()}
-        </CardContent>
-        <CardFooter className="mt-8 flex gap-4 items-center justify-end border-t">
-          {currentStep > 1 && currentStep < 6 && (
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>Quay lại</span>
-            </Button>
-          )}
-          {currentStep < 6 ? (
-            <Button disabled={loading} onClick={handleNext}>
-              <span>
-                {currentStep === 5 ? "Xác nhận đặt phòng" : "Tiếp theo"}
-              </span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button variant={"outline"} asChild>
-                <Link to={DASHBOARD.bookings.list}>
-                  Xem danh sách đặt phòng
-                </Link>
-              </Button>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit, onError)}
+          className="flex-1 grid grid-cols-12 gap-0 overflow-hidden"
+        >
+          {/* LEFT: Guest Info */}
+          <aside className="col-span-12 md:col-span-3 bg-white border-r overflow-y-auto">
+            <div className="p-5">
+              <CustomerInfoSection form={form} />
+            </div>
+          </aside>
 
+          {/* CENTER: Room Selection */}
+          <main className="col-span-12 md:col-span-6 flex flex-col overflow-hidden bg-gray-50/50">
+            <div className="flex-1 overflow-hidden flex flex-col p-4 gap-4">
+              <RoomSelectionSection form={form} />
+            </div>
+            <div className="shrink-0 p-4 bg-white border-t z-20">
+              <ServiceQuickAddWidget form={form} />
+            </div>
+          </main>
+
+          {/* RIGHT: Cart & Payment */}
+          <aside className="col-span-12 md:col-span-3 bg-white border-l flex flex-col shadow-xl z-40 h-full">
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <BookingCartWidget form={form} />
+            </div>
+            <div className="p-4 border-t bg-gray-50">
               <Button
-                onClick={() => {
-                  useCreateBookingStore.getState().reset();
-                }}
+                type="submit"
+                size="lg"
+                className="w-full h-12 font-bold shadow-md"
+                disabled={isSubmitting}
               >
-                Tạo đặt phòng mới
+                {isSubmitting ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "Xác nhận & Tạo đơn"
+                )}
               </Button>
             </div>
-          )}
-        </CardFooter>
-      </Card>
+          </aside>
+        </form>
+      </Form>
     </div>
   );
 }

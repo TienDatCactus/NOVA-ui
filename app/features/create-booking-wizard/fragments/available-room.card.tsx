@@ -1,36 +1,39 @@
-import { BedDouble, ChevronDown, Users } from "lucide-react";
+import { Check, ChevronDown, Users, DoorOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import type z from "zod";
+
 import { Badge } from "~/components/ui/badge";
-import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import { Label } from "~/components/ui/label";
 import { cn, formatMoney } from "~/lib/utils";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
 
 const { AvailableRoomItemSchema } = RoomSchema;
 type AvailableRoomItem = z.infer<typeof AvailableRoomItemSchema>;
 
-interface AvailableRoomTypeCardProps {
+interface AvailableRoomRowProps {
   roomType: AvailableRoomItem;
   selectedRoomIds: string[];
   onToggleRoom: (roomId: string) => void;
   nights: number;
 }
 
-export function AvailableRoomTypeCard({
+export function AvailableRoomRow({
   roomType,
   selectedRoomIds,
   onToggleRoom,
   nights,
-}: AvailableRoomTypeCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+}: AvailableRoomRowProps) {
+  // Logic: Tự động mở nếu có phòng đang được chọn bên trong
+  const hasSelection = roomType.availableRooms.some((r) =>
+    selectedRoomIds.includes(r.roomId)
+  );
+  const [isExpanded, setIsExpanded] = useState(hasSelection);
 
+  // Logic: Auto-remove (Giữ nguyên logic nghiệp vụ của bạn)
   useEffect(() => {
     const unavailableRoomIds = roomType.availableRooms
       .filter((room) => room.status !== "Ready")
@@ -41,9 +44,7 @@ export function AvailableRoomTypeCard({
     );
 
     if (selectedUnavailableRooms.length > 0) {
-      selectedUnavailableRooms.forEach((roomId) => {
-        onToggleRoom(roomId);
-      });
+      selectedUnavailableRooms.forEach((roomId) => onToggleRoom(roomId));
     }
   }, [roomType.availableRooms, selectedRoomIds, onToggleRoom]);
 
@@ -54,138 +55,146 @@ export function AvailableRoomTypeCard({
   const hasAvailableRooms = roomType.availableCount > 0;
 
   return (
-    <Card className="shadow-sm mb-0">
-      <CardHeader className="space-y-4">
-        {/* Room Type Header */}
-        <div className="flex items-start justify-between gap-6">
-          {/* Left: Room Type Info */}
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center gap-3">
+    <div
+      className={cn(
+        "border-b last:border-0 transition-colors duration-200",
+        isExpanded ? "bg-muted/30" : "bg-transparent hover:bg-muted/10"
+      )}
+    >
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        {/* === TRIGGER ROW: Minimal & Clean === */}
+        <CollapsibleTrigger asChild>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 cursor-pointer group gap-3">
+            {/* Left: Info */}
+            <div className="flex items-start gap-3 min-w-0">
+              {/* Status Indicator Bar (Thay thế icon to) */}
+              <div
+                className={cn(
+                  "w-1 self-stretch rounded-full shrink-0 transition-colors",
+                  selectedCount > 0
+                    ? "bg-primary"
+                    : hasAvailableRooms
+                      ? "bg-muted-foreground/30"
+                      : "bg-destructive/30"
+                )}
+              />
+
               <div className="space-y-1">
-                <h3 className="text-lg font-semibold">
-                  {roomType.roomTypeName}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {roomType.roomTypeCode}
+                <div className="flex items-center gap-2">
+                  <h3
+                    className={cn(
+                      "text-sm font-semibold truncate",
+                      !hasAvailableRooms && "text-muted-foreground"
+                    )}
+                  >
+                    {roomType.roomTypeName}
+                  </h3>
+                  {selectedCount > 0 && (
+                    <Badge
+                      variant="default"
+                      className="h-5 px-1.5 text-[10px] animate-in zoom-in"
+                    >
+                      {selectedCount}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3 w-3" /> {roomType.maxOccupancy}
+                  </span>
+                  <span>•</span>
+                  <span
+                    className={cn(
+                      hasAvailableRooms
+                        ? "text-green-600 font-medium"
+                        : "text-destructive"
+                    )}
+                  >
+                    {hasAvailableRooms
+                      ? `Còn ${roomType.availableCount}`
+                      : "Hết phòng"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Price & Toggle */}
+            <div className="flex items-center justify-between sm:justify-end gap-4 ml-4 sm:ml-0">
+              <div className="text-right">
+                <p className="text-sm font-bold text-foreground">
+                  {formatMoney(totalPrice).vndFormatted}
                 </p>
+                {nights > 1 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {formatMoney(roomType.baseRatePerNight).vndFormatted}/đêm
+                  </p>
+                )}
               </div>
-            </div>
-
-            {/* Room Specs */}
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span>Tối đa {roomType.maxOccupancy} người</span>
-              </div>
-              <Badge
-                variant={hasAvailableRooms ? "success" : "secondary"}
-                className="text-xs"
-              >
-                {hasAvailableRooms
-                  ? `${roomType.availableCount} phòng trống`
-                  : "Hết phòng"}
-              </Badge>
-            </div>
-          </div>
-
-          {/* Right: Pricing */}
-          <div className="text-right space-y-1">
-            <p className="text-sm text-muted-foreground">
-              {formatMoney(roomType.baseRatePerNight).vndFormatted}
-            </p>
-            <p className="text-sm text-muted-foreground">/đêm</p>
-            <div className="mt-2 pt-2 border-t">
-              <p className="text-2xl font-bold text-primary">
-                {formatMoney(totalPrice).vndFormatted}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tổng {nights} đêm
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Selected Rooms Badge */}
-        {selectedCount > 0 && (
-          <div className="flex items-center gap-2 pt-3 border-t">
-            <Badge variant="default" className="text-xs font-medium">
-              ✓ Đã chọn {selectedCount} phòng
-            </Badge>
-          </div>
-        )}
-      </CardHeader>
-
-      {/* Collapsible Room List */}
-      {roomType.availableRooms.length > 0 && (
-        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <div className="border-t bg-muted/30">
-            <CollapsibleTrigger className="flex w-full items-center justify-between px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors">
-              <span>{isExpanded ? "Ẩn" : "Xem"} danh sách phòng</span>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  {roomType.availableRooms.length} phòng
-                </Badge>
+              <div className="h-8 w-8 rounded-md flex items-center justify-center text-muted-foreground bg-transparent group-hover:bg-muted/50 transition-colors">
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 transition-transform",
+                    "h-4 w-4 transition-transform duration-200",
                     isExpanded && "rotate-180"
                   )}
                 />
               </div>
-            </CollapsibleTrigger>
+            </div>
+          </div>
+        </CollapsibleTrigger>
 
-            <CollapsibleContent>
-              <CardContent className="space-y-2 py-4">
-                {roomType.availableRooms.map((room) => {
+        {/* === CONTENT: Compact Chip Grid === */}
+        <CollapsibleContent>
+          <div className="px-4 pb-4 pt-0 pl-8 sm:pl-8">
+            {/* Sử dụng Flex Wrap thay vì Grid để thích ứng mọi kích thước container */}
+            <div className="flex flex-wrap gap-2">
+              {roomType.availableRooms.length > 0 ? (
+                roomType.availableRooms.map((room) => {
                   const isSelected = selectedRoomIds.includes(room.roomId);
                   const isAvailable = room.status === "Ready";
 
                   return (
-                    <Label
+                    <button
                       key={room.roomId}
-                      htmlFor={room.roomId}
+                      type="button"
+                      disabled={!isAvailable}
+                      onClick={() => isAvailable && onToggleRoom(room.roomId)}
                       className={cn(
-                        "flex items-center justify-between gap-4 rounded-lg border bg-card p-4 transition-all cursor-pointer",
-                        "hover:border-primary/50 hover:shadow-sm",
-                        isSelected && "border-primary bg-primary/5 shadow-sm",
+                        "group relative flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-medium transition-all duration-200 select-none",
+                        // Selected State
+                        isSelected
+                          ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                          : "bg-background border-border text-foreground hover:border-primary/50 hover:bg-accent",
+                        // Disabled State
                         !isAvailable &&
-                          "opacity-60 cursor-not-allowed hover:border-border hover:shadow-none"
+                          "opacity-50 cursor-not-allowed bg-muted text-muted-foreground border-transparent"
                       )}
                     >
-                      <div className="flex items-center gap-3">
-                        <Checkbox
-                          id={room.roomId}
-                          checked={isSelected}
-                          onCheckedChange={() => onToggleRoom(room.roomId)}
-                          disabled={!isAvailable}
+                      {/* Check icon hiện ra khi select, tối giản không chiếm chỗ mặc định */}
+                      {isSelected ? (
+                        <Check className="h-3 w-3 shrink-0 animate-in zoom-in" />
+                      ) : (
+                        <DoorOpen
                           className={cn(
-                            "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            "h-3 w-3 shrink-0 text-muted-foreground/50 group-hover:text-foreground",
+                            !isAvailable && "hidden"
                           )}
                         />
-                        <div className="grid gap-2">
-                          <h1 className="text-xs font-semibold text-muted-foreground">
-                            Tên phòng
-                          </h1>
-                          <p className="text-sm font-medium leading-none">
-                            {room.roomName}
-                          </p>
-                        </div>
-                      </div>
+                      )}
 
-                      <Badge
-                        variant={isAvailable ? "success" : "secondary"}
-                        className="text-xs"
-                      >
-                        {isAvailable ? "Sẵn sàng" : "Không khả dụng"}
-                      </Badge>
-                    </Label>
+                      <span>{room.roomName}</span>
+                    </button>
                   );
-                })}
-              </CardContent>
-            </CollapsibleContent>
+                })
+              ) : (
+                <p className="text-xs text-muted-foreground italic pl-1">
+                  Danh sách phòng trống tạm thời không khả dụng.
+                </p>
+              )}
+            </div>
           </div>
-        </Collapsible>
-      )}
-    </Card>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
 }

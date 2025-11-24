@@ -1,261 +1,114 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-import type { ServicesBreakfastFormData } from "~/services/types/forms.types";
-import { useCreateBookingStore } from "~/store/create-booking.store";
-import { useServiceOrderStore } from "~/store/service-order.store";
-
+import { useState, useMemo } from "react";
+import { type UseFormReturn } from "react-hook-form";
 import { AlertCircle, Plus, UtensilsCrossed } from "lucide-react";
+
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Form } from "~/components/ui/form";
 import { Separator } from "~/components/ui/separator";
 import AddServiceDialog from "~/features/order-dialog";
-import { onError, useCalculateNights } from "~/lib/utils";
-import { FormSchema } from "~/services/schema/forms.schema";
-import { BreakfastSelection } from "../fragments/breakfast-selection";
-import { ServiceOrderTable } from "../fragments/service-order-table";
 
-interface ServicesBreakfastStepProps {
-  onNext: () => void;
-  formRef?: React.RefObject<HTMLFormElement | null>;
+import { useServiceOrderStore } from "~/store/service-order.store";
+
+interface ServiceQuickAddWidgetProps {
+  form: UseFormReturn<any>;
 }
 
-export function ServicesBreakfastStep({
-  onNext,
-  formRef,
-}: ServicesBreakfastStepProps) {
-  const { data: storeData, setData } = useCreateBookingStore();
-  const { ServicesBreakfastFormSchema } = FormSchema;
+export function ServiceQuickAddWidget({ form }: ServiceQuickAddWidgetProps) {
+  // 1. WATCH FORM DATA
+  const checkinDate = form.watch("dateRange.from");
+  const checkoutDate = form.watch("dateRange.to");
+  const guestFullName = form.watch("guestFullName");
+  const bookingType = form.watch("bookingType");
+
+  // 2. GLOBAL STORE
+  const services = useServiceOrderStore((s) => s.services);
+
+  // 3. STATE
   const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
 
-  // Get services from global store
-  const services = useServiceOrderStore((s) => s.services);
-  const removeById = useServiceOrderStore((s) => s.removeById);
+  // 4. VALIDATION LOGIC (Check date range)
+  const invalidServices = useMemo(() => {
+    if (!checkinDate || !checkoutDate) return [];
 
-  const form = useForm<ServicesBreakfastFormData>({
-    resolver: zodResolver(ServicesBreakfastFormSchema),
-    defaultValues: {
-      isBreakfastAll: storeData.isBreakfastAll ?? false,
-      breakfastDates: storeData.breakfastDates
-        ? storeData.breakfastDates.map((d) =>
-            d instanceof Date ? d : new Date(d)
-          )
-        : [],
-      checkinDate: storeData.checkinDate,
-      checkoutDate: storeData.checkoutDate,
-    },
-  });
-
-  const nights = useCalculateNights({
-    checkinDate: storeData.checkinDate,
-    checkoutDate: storeData.checkoutDate,
-  });
-
-  // Sync form with store
-  useEffect(() => {
-    form.reset({
-      isBreakfastAll: storeData.isBreakfastAll ?? false,
-      breakfastDates: storeData.breakfastDates
-        ? storeData.breakfastDates.map((d) =>
-            d instanceof Date ? d : new Date(d)
-          )
-        : [],
-      checkinDate: storeData.checkinDate,
-      checkoutDate: storeData.checkoutDate,
-    });
-  }, [storeData, form]);
-
-  const onSubmit = (data: ServicesBreakfastFormData) => {
-    // Validate service order dates are within booking range
-    if (
-      services.length > 0 &&
-      storeData.checkinDate &&
-      storeData.checkoutDate
-    ) {
-      const checkinDate = new Date(storeData.checkinDate);
-      const checkoutDate = new Date(storeData.checkoutDate);
-
-      const invalidServices = services.filter((service) => {
-        if (!service.scheduledDate) return false; // Optional field
-        const scheduledDate = new Date(service.scheduledDate);
-        return scheduledDate < checkinDate || scheduledDate > checkoutDate;
-      });
-
-      if (invalidServices.length > 0) {
-        toast.error(
-          "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú (từ ngày nhận phòng đến ngày trả phòng)"
-        );
-        return;
-      }
-    }
-
-    setData({
-      isBreakfastAll: data.isBreakfastAll,
-      breakfastDates: data.breakfastDates?.map((i) => new Date(i)) || [],
-    });
-
-    toast.success("Đã lưu thông tin bữa sáng và dịch vụ");
-    onNext();
-  };
-
-  const getInvalidServices = () => {
-    if (!storeData.checkinDate || !storeData.checkoutDate) return [];
-
-    const checkinDate = new Date(storeData.checkinDate);
-    const checkoutDate = new Date(storeData.checkoutDate);
+    const start = new Date(checkinDate);
+    const end = new Date(checkoutDate);
 
     return services.filter((service) => {
       if (!service.scheduledDate) return false;
       const scheduledDate = new Date(service.scheduledDate);
-      return scheduledDate < checkinDate || scheduledDate > checkoutDate;
+      // Reset hours để so sánh ngày chuẩn xác hơn
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return scheduledDate < start || scheduledDate > end;
     });
-  };
+  }, [services, checkinDate, checkoutDate]);
 
-  const invalidServices = getInvalidServices();
-
-  const handleConfirmServices = () => {
-    setServiceDialogOpen(false);
-  };
+  // Nếu là RoomBlock thì không hiện widget này
+  if (bookingType === "RoomBlock") return null;
 
   return (
-    <Form {...form}>
-      <form
-        ref={formRef}
-        onSubmit={form.handleSubmit(onSubmit, onError)}
-        className="space-y-6"
-      >
-        {/* Validation Warning - Top Level */}
-        {invalidServices.length > 0 && (
-          <Alert variant="destructive" className="shadow-sm">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>
-              Có {invalidServices.length} dịch vụ nằm ngoài khoảng thời gian lưu
-              trú
-            </AlertTitle>
-            <AlertDescription>
-              Ngày thực hiện dịch vụ phải nằm trong khoảng từ ngày nhận phòng
-              đến ngày trả phòng. Vui lòng chỉnh sửa hoặc xóa các dịch vụ này.
-            </AlertDescription>
-          </Alert>
-        )}
+    <div className="space-y-4">
+      {/* Validation Warning */}
+      {invalidServices.length > 0 && (
+        <Alert
+          variant="destructive"
+          className="py-2 shadow-sm animate-in fade-in"
+        >
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle className="text-sm font-semibold">
+            Lỗi ngày dịch vụ
+          </AlertTitle>
+          <AlertDescription className="text-xs">
+            Có {invalidServices.length} dịch vụ nằm ngoài khoảng thời gian lưu
+            trú. Vui lòng kiểm tra lại bên giỏ hàng.
+          </AlertDescription>
+        </Alert>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Breakfast Selection */}
-          <div className="space-y-4 h-full">
-            {storeData.checkinDate && storeData.checkoutDate && (
-              <BreakfastSelection
-                isBreakfastAll={form.watch("isBreakfastAll") || false}
-                breakfastDates={form.watch("breakfastDates") || []}
-                onToggleAll={(value) => form.setValue("isBreakfastAll", value)}
-                onSelectDates={(dates) =>
-                  form.setValue("breakfastDates", dates)
-                }
-                checkinDate={storeData.checkinDate}
-                checkoutDate={storeData.checkoutDate}
-                nights={nights}
-              />
-            )}
-          </div>
-
-          {/* Services Selection */}
-          <div className="space-y-4 h-full">
-            <Card className="shadow-sm h-full">
-              <CardHeader className="space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <CardTitle className="text-lg">
-                        Dịch vụ kèm theo
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Tùy chọn thêm
-                      </p>
-                    </div>
-                  </div>
-                  {services.length > 0 && (
-                    <Badge variant="default" className="text-xs font-medium">
-                      {services.length} dịch vụ
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {/* Add Service Button */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full shadow-sm hover:shadow-md transition-shadow"
-                  onClick={() => setServiceDialogOpen(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Thêm dịch vụ
-                </Button>
-
-                <AddServiceDialog
-                  open={serviceDialogOpen}
-                  onOpenChange={setServiceDialogOpen}
-                  onConfirm={handleConfirmServices}
-                  customerName={storeData.guestFullName}
-                  checkinDate={storeData.checkinDate}
-                  checkoutDate={storeData.checkoutDate}
-                />
-
-                {/* Services List */}
-                {services.length > 0 ? (
-                  <>
-                    <Separator />
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-semibold">
-                          Danh sách dịch vụ
-                        </h4>
-                        <Badge variant="outline" className="text-xs">
-                          {services.length} món
-                        </Badge>
-                      </div>
-
-                      <div className="max-h-[400px] overflow-y-auto">
-                        <ServiceOrderTable
-                          services={services}
-                          onRemove={removeById}
-                          invalidServiceIds={invalidServices.map(
-                            (s) => s.itemId
-                          )}
-                        />
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="rounded-lg border-2 border-dashed bg-muted/30 p-8 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mx-auto mb-3">
-                      <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-medium mb-1">
-                      Chưa có dịch vụ nào
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Nhấn "Thêm dịch vụ" để đặt dịch vụ kèm theo
-                    </p>
-                  </div>
+      {/* Quick Add Bar */}
+      <Card className="shadow-sm border-dashed hover:border-primary/50 transition-colors">
+        <CardContent className="p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <UtensilsCrossed className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-foreground">
+                Dịch vụ bổ sung
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>Ăn uống, Spa, Giặt ủi...</span>
+                {services.length > 0 && (
+                  <Badge variant="secondary" className="h-5 px-1.5">
+                    Đã chọn {services.length}
+                  </Badge>
                 )}
-
-                <Separator />
-
-                <p className="text-xs text-muted-foreground">
-                  * Dịch vụ sẽ được tính chung vào tổng hóa đơn
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
-        </div>
-      </form>
-    </Form>
+
+          <Button
+            onClick={() => setServiceDialogOpen(true)}
+            disabled={!checkinDate || !checkoutDate}
+            className="shrink-0"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Thêm dịch vụ
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Dialog Logic - Giữ nguyên nhưng ẩn khỏi UI chính */}
+      <AddServiceDialog
+        open={serviceDialogOpen}
+        onOpenChange={setServiceDialogOpen}
+        onConfirm={() => setServiceDialogOpen(false)}
+        customerName={guestFullName || "Khách lẻ"}
+        checkinDate={checkinDate}
+        checkoutDate={checkoutDate}
+      />
+    </div>
   );
 }
