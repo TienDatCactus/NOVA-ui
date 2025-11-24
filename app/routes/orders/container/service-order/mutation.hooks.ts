@@ -172,8 +172,3 @@ export function useUpdateServiceOrderSchedule() {
     },
   });
 }
-
-/**
- * Create service order with items (for Service POS)
- * Similar to menu POS but creates service orders instead
- */

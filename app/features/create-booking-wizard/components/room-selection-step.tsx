@@ -347,7 +347,6 @@ export function RoomSelectionStep({ onNext, formRef }: RoomSelectionStepProps) {
                           className={cn(
                             "w-full md:w-[260px] justify-start text-left font-normal border-2 h-10",
                             !field.value && "text-muted-foreground",
-                            // Nếu có lỗi thì viền đỏ
                             form.formState.errors.dateRange &&
                               "border-destructive/50 text-destructive bg-destructive/5"
                           )}

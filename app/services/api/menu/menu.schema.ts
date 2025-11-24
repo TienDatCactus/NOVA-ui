@@ -53,6 +53,7 @@ export const MenuListItemSchema = z.object({
   unitName: z.string().optional().nullable(),
   price: z.number().min(0),
   active: z.boolean(),
+  maxQuantityAvailable: z.number(),
   components: z.array(MenuItemComponentSchema),
 });
 

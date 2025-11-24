@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const StockAdjustmentItemSchema = z.object({
-  id: z.string().uuid(),
-  itemId: z.string().uuid(),
+  id: z.string(),
+  itemId: z.string(),
   itemCode: z.string(),
   itemName: z.string(),
   quantityDiff: z.number(),

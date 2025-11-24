@@ -111,7 +111,7 @@ async function assignChatSession(
   staffUserId: string
 ): Promise<void> {
   try {
-    await axios.post(Chat.assign(sessionId), { staffUserId });
+    await http.post(Chat.assign(sessionId), { staffUserId });
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

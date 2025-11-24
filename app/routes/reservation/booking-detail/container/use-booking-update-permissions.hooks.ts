@@ -1,14 +1,15 @@
 import { useMemo } from "react";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import {
-  canPerformHeavyUpdate,
-  canPerformSoftUpdate,
+  canUpdateNonStructural,
+  canUpdateDates,
+  canUpdateGuestCount,
+  canUpdateTotalAmount,
+  getDateUpdateBlockReason,
+  canAddRoom,
+  canModifyExistingStructure,
+  isBookingCompletelyLocked,
   hasAnyLockedRoomInvoice,
-  getHeavyUpdateBlockReason,
-  getDateChangeBlockReason,
-  canChangeDates,
-  canAddRooms,
-  canRemoveRooms,
 } from "./booking-validation";
 
 /**
@@ -21,7 +22,15 @@ export function useBookingUpdatePermissions(
   return useMemo(() => {
     if (!bookingDetail) {
       return {
-        // Permissions
+        // Granular permissions (new API)
+        canUpdateNonStructural: false,
+        canUpdateDates: false,
+        canUpdateGuestCount: false,
+        canUpdateTotalAmount: false,
+        canAddRoom: false,
+        canModifyRooms: false,
+
+        // Legacy compatibility
         canDoHeavyUpdate: false,
         canDoSoftUpdate: false,
         canEditDates: false,
@@ -29,32 +38,44 @@ export function useBookingUpdatePermissions(
         canRemoveRooms: false,
 
         // Metadata
+        isCompletelyLocked: false,
+        hasLockedInvoices: false,
         blockReason: "Đang tải thông tin booking...",
         dateChangeBlockReason: "Đang tải thông tin booking...",
-        hasLockedInvoices: false,
       };
     }
 
     const invoices = bookingDetail.invoices || [];
     const status = bookingDetail.status;
 
-    const canHeavyUpdate = canPerformHeavyUpdate(status, invoices);
     const hasLockedInvoices = hasAnyLockedRoomInvoice(invoices);
-    const blockReason = getHeavyUpdateBlockReason(status, invoices);
-    const dateChangeBlockReason = getDateChangeBlockReason(status, invoices);
+    const dateChangeBlockReason = getDateUpdateBlockReason(status, invoices);
+    const canModifyStructure = canModifyExistingStructure(status, invoices);
+    const canUpdateDatesFlag = canUpdateDates(status, invoices);
 
     return {
-      // Permissions
-      canDoHeavyUpdate: canHeavyUpdate,
-      canDoSoftUpdate: canPerformSoftUpdate(status),
-      canEditDates: canChangeDates(status, invoices),
-      canAddRooms: canAddRooms(status, invoices),
-      canRemoveRooms: canRemoveRooms(status, invoices),
+      // Granular permissions (new API)
+      canUpdateNonStructural: canUpdateNonStructural(status),
+      canUpdateDates: canUpdateDatesFlag,
+      canUpdateGuestCount: canUpdateGuestCount(status, invoices),
+      canUpdateTotalAmount: canUpdateTotalAmount(status),
+      canAddRoom: canAddRoom(status, invoices),
+      canModifyRooms: canModifyStructure,
+
+      // Legacy compatibility (keep for backward compatibility)
+      canDoHeavyUpdate: canModifyStructure,
+      canDoSoftUpdate: canUpdateNonStructural(status),
+      canEditDates: canUpdateDatesFlag,
+      canAddRooms: canAddRoom(status, invoices),
+      canRemoveRooms: canModifyStructure,
 
       // Metadata
-      blockReason,
-      dateChangeBlockReason,
+      isCompletelyLocked: isBookingCompletelyLocked(status),
       hasLockedInvoices,
+      dateChangeBlockReason,
+      blockReason: canModifyStructure
+        ? null
+        : "Không thể thay đổi cấu trúc booking khi đã có thanh toán hoặc booking đã kết thúc",
     };
   }, [bookingDetail]);
 }

@@ -1,14 +1,23 @@
+import { format, parseISO } from "date-fns";
+import {
+  Calendar,
+  CheckCircle2,
+  Lock,
+  Mail,
+  Phone,
+  Shield,
+  User,
+  XCircle,
+} from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import { Mail, Phone, User, Shield, Calendar, Lock } from "lucide-react";
 import type { UserItem } from "~/services/api/user/dto";
-import { format, parseISO } from "date-fns";
 
 interface UserDetailDialogProps {
   user: UserItem;
@@ -16,173 +25,131 @@ interface UserDetailDialogProps {
   onClose: () => void;
 }
 
-/**
- * Helper function - Get role badge color
- */
-const getRoleBadgeVariant = (role: string) => {
-  const roleColors: Record<
-    string,
-    { bg: string; text: string; border: string }
-  > = {
-    Receptionist: {
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-      border: "border-blue-200",
-    },
-    Staff: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-      border: "border-purple-200",
-    },
-    user: {
-      bg: "bg-green-50",
-      text: "text-green-700",
-      border: "border-green-200",
-    },
-    HotelManager: {
-      bg: "bg-orange-50",
-      text: "text-orange-700",
-      border: "border-orange-200",
-    },
-    Accountant: {
-      bg: "bg-pink-50",
-      text: "text-pink-700",
-      border: "border-pink-200",
-    },
-  };
-  return (
-    roleColors[role] || {
-      bg: "bg-gray-50",
-      text: "text-gray-700",
-      border: "border-gray-200",
-    }
-  );
-};
-
-/**
- * user Detail Dialog - NOVA-UI
- * Hiển thị chi tiết khách hàng với layout thoáng đãng
- */
 export function UserDetailDialog({
   user,
   open,
   onClose,
 }: UserDetailDialogProps) {
+  const isLocked =
+    user.lockoutEnabled &&
+    user.lockoutEnd &&
+    new Date(user.lockoutEnd) > new Date();
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <User className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden border-none shadow-xl">
+        {/* === 1. Identity Header (Grey Background) === */}
+        <DialogHeader className="px-6 py-5 bg-muted/20 border-b">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {/* Avatar Placeholder */}
+              <div className="h-14 w-14 rounded-full bg-background border shadow-sm flex items-center justify-center shrink-0">
+                <User className="h-6 w-6 text-muted-foreground/50" />
+              </div>
+
+              <div className="space-y-1">
+                <DialogTitle className="text-xl font-semibold leading-none">
+                  {user.fullName}
+                </DialogTitle>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="font-mono bg-muted px-1.5 rounded text-xs border">
+                    {user.userName}
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1.5">
+                    {isLocked ? (
+                      <span className="flex items-center gap-1.5 text-destructive font-medium text-xs">
+                        <Lock className="h-3 w-3" /> Tài khoản bị khóa
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-green-600 font-medium text-xs">
+                        <CheckCircle2 className="h-3 w-3" /> Đang hoạt động
+                      </span>
+                    )}
+                  </span>
+                </div>
+              </div>
             </div>
-            Chi tiết Khách hàng
-          </DialogTitle>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Thông tin cơ bản */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Thông tin cơ bản</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Tên đăng nhập</p>
-                <p className="font-medium">{user.userName}</p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Họ và tên</p>
-                <p className="font-medium">{user.fullName}</p>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Thông tin liên hệ */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              <Mail className="h-4 w-4 text-muted-foreground" />
+        {/* === 2. Content Body (Clean White) === */}
+        <div className="p-6 space-y-6">
+          {/* Contact Section */}
+          <section>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
               Thông tin liên hệ
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-32 text-sm text-muted-foreground">Email:</div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{user.email}</span>
-                  {user.emailConfirmed}
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-3.5 w-3.5" /> Email
+                </div>
+                <div className="font-medium text-sm flex items-center gap-2">
+                  {user.email}
+                  {user.emailConfirmed && (
+                    <span className="text-green-600" title="Đã xác thực email">
+                      <CheckCircle2 className="h-3 w-3" />
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-32 text-sm text-muted-foreground flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Số điện thoại:
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="h-3.5 w-3.5" /> Số điện thoại
                 </div>
-                <span className="font-medium">{user.phoneNumber}</span>
+                <div className="font-medium text-sm">
+                  {user.phoneNumber || "—"}
+                </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <Separator />
+          <Separator className="bg-border/60" />
 
-          {/* Vai trò và quyền */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              Vai trò
-            </h3>
-            <div className="flex gap-2 flex-wrap">
-              {user.roles.map((role) => {
-                const colors = getRoleBadgeVariant(role);
-                return (
+          {/* Roles & Permissions */}
+          <section>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+              <Shield className="h-3.5 w-3.5" /> Phân quyền hệ thống
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {user.roles.length > 0 ? (
+                user.roles.map((role) => (
+                  // Minimalist Badge: Outline only, no background color
                   <Badge
                     key={role}
                     variant="outline"
-                    className={`text-sm py-1 px-3 ${colors.bg} ${colors.text} ${colors.border} shadow-sm`}
+                    className="font-normal text-sm px-2.5 py-0.5 border-input text-foreground/80"
                   >
                     {role}
                   </Badge>
-                );
-              })}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Trạng thái tài khoản */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              <Lock className="h-4 w-4 text-muted-foreground" />
-              Trạng thái tài khoản
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-32 text-sm text-muted-foreground">
-                  Trạng thái:
-                </div>
-                {user.lockoutEnabled && user.lockoutEnd ? (
-                  <Badge variant="destructive">Bị khóa</Badge>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="bg-emerald-50 text-emerald-700 border-emerald-200"
-                  >
-                    Hoạt động
-                  </Badge>
-                )}
-              </div>
-              {user.lockoutEnd && (
-                <div className="flex items-center gap-3">
-                  <div className="w-32 text-sm text-muted-foreground flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Khóa đến:
-                  </div>
-                  <span className="font-medium">
-                    {format(parseISO(user.lockoutEnd), "dd/MM/yyyy HH:mm")}
-                  </span>
-                </div>
+                ))
+              ) : (
+                <span className="text-sm text-muted-foreground italic">
+                  Chưa được cấp quyền
+                </span>
               )}
             </div>
-          </div>
+          </section>
+
+          {/* Conditional: Lockout Info (Only shows if relevant) */}
+          {isLocked && user.lockoutEnd && (
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 flex items-start gap-3 mt-4">
+              <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <h5 className="text-sm font-medium text-destructive">
+                  Chi tiết khóa tài khoản
+                </h5>
+                <p className="text-xs text-muted-foreground">
+                  Tài khoản sẽ tự động mở khóa vào lúc:{" "}
+                  <span className="font-medium text-foreground">
+                    {format(parseISO(user.lockoutEnd), "dd/MM/yyyy HH:mm")}
+                  </span>
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

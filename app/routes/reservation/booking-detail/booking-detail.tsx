@@ -41,11 +41,13 @@ import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
 import type { Route } from "./+types/booking-detail";
-import AddCompletedChargesDialog from "./components/add-completed-charges-dialog";
+import AddCompletedChargesDialog from "./components/operations/add-completed-charges-dialog";
 import BookingRoomsBar from "./components/booking-rooms-bar";
-import CheckoutSheet from "./components/checkout-sheet";
+import CheckoutSheet from "./components/checkout/checkout-sheet";
 import CustomerInfoBar from "./components/customer-info-bar";
 import PendingChargesSection from "./components/pending-charges-section";
+import RefundButton from "./components/refunds/refund-button";
+import RefundHistory from "./components/refunds/refund-history";
 import StayDetailBar from "./components/stay-detail-bar";
 import { useAddCompletedCharges } from "./container/use-booking-checkout.hooks";
 import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
@@ -82,7 +84,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
   const permissions = useBookingUpdatePermissions(bookingDetail);
 
-  // Calculate financial status from invoices
   const financialSummary = useBookingFinancialStatus(bookingDetail?.invoices);
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
@@ -132,14 +133,22 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     }
   }, [bookingDetail, form]);
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
-    const hasHeavyUpdates =
+    const hasDatesChanged =
       data.checkinDate !== bookingDetail?.checkinDate ||
-      data.checkoutDate !== bookingDetail?.checkoutDate ||
-      (data.rooms && data.rooms.length > 0);
+      data.checkoutDate !== bookingDetail?.checkoutDate;
+    const hasRoomChanges = data.rooms && data.rooms.length > 0;
 
-    if (hasHeavyUpdates && !permissions.canDoHeavyUpdate) {
+    if (hasDatesChanged && !permissions.canUpdateDates) {
       toast.error(
-        permissions.blockReason || "Không thể cập nhật cấu trúc booking này"
+        permissions.dateChangeBlockReason ||
+          "Không thể thay đổi ngày check-in/check-out"
+      );
+      return;
+    }
+
+    if (hasRoomChanges && !permissions.canModifyRooms) {
+      toast.error(
+        "Không thể thay đổi phòng khi đã có thanh toán hoặc booking đã kết thúc"
       );
       return;
     }
@@ -211,7 +220,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       </div>
     );
   }
-
   if (error || !bookingDetail) {
     return (
       <Empty>
@@ -267,6 +275,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                   bookingDetail.status !== "Cancelled"
                 }
               />
+
+              <RefundHistory bookingId={bookingDetail.id} />
             </div>
           </div>
 
@@ -327,55 +337,69 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           </Dialog>
         </div>
         <Separator />
-        <div className="flex justify-end gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
-          {/* Checkout button for InHouse/CheckedIn */}
-          {(bookingDetail?.status === "InHouse" ||
-            bookingDetail?.status === "CheckedIn") && (
-            <Button variant={"success"} onClick={() => setCheckoutOpen(true)}>
-              <DoorOpen className="w-4 h-4 mr-2" />
-              Checkout và Thanh toán
+        <div className="flex justify-between gap-3 sticky bottom-0 bg-background pb-4 pt-4 ">
+          {/* Left side: Refund button */}
+          <div>
+            <RefundButton
+              bookingId={bookingDetail?.id || ""}
+              bookingNumber={bookingDetail?.bookingCode || ""}
+              bookingStatus={bookingDetail?.status || ""}
+              totalPaidAmount={bookingDetail.paidAmount}
+              variant="destructive"
+            />
+          </div>
+
+          {/* Right side: Action buttons */}
+          <div className="flex gap-3">
+            {/* Checkout button for InHouse/CheckedIn */}
+            {(bookingDetail?.status === "InHouse" ||
+              bookingDetail?.status === "CheckedIn") && (
+              <Button variant={"success"} onClick={() => setCheckoutOpen(true)}>
+                <DoorOpen className="w-4 h-4 mr-2" />
+                Checkout và Thanh toán
+              </Button>
+            )}
+
+            {/* Post-checkout payment button */}
+            {bookingDetail?.status === "CheckedOut" &&
+              financialSummary.totalBalance > 0 && (
+                <Button
+                  variant="default"
+                  onClick={() => setCheckoutOpen(true)}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Thu tiền sau checkout
+                  <Badge variant="destructive" className="ml-2">
+                    {formatMoney(financialSummary.totalBalance).vndFormatted}
+                  </Badge>
+                </Button>
+              )}
+
+            {/* View invoices for settled checkouts */}
+            {bookingDetail?.status === "CheckedOut" &&
+              financialSummary.totalBalance === 0 && (
+                <Button variant="outline" onClick={() => setCheckoutOpen(true)}>
+                  <Receipt className="w-4 h-4 mr-2" />
+                  Xem hóa đơn
+                </Button>
+              )}
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => form.reset()}
+              disabled={isUpdating}
+            >
+              Đặt lại
             </Button>
-          )}
-
-          {/* Post-checkout payment button */}
-          {bookingDetail?.status === "CheckedOut" &&
-            financialSummary.totalBalance > 0 && (
-              <Button
-                variant="default"
-                onClick={() => setCheckoutOpen(true)}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white"
-              >
-                <CreditCard className="w-4 h-4 mr-2" />
-                Thu tiền sau checkout
-                <Badge variant="destructive" className="ml-2">
-                  {formatMoney(financialSummary.totalBalance).vndFormatted}
-                </Badge>
-              </Button>
-            )}
-
-          {/* View invoices for settled checkouts */}
-          {bookingDetail?.status === "CheckedOut" &&
-            financialSummary.totalBalance === 0 && (
-              <Button variant="outline" onClick={() => setCheckoutOpen(true)}>
-                <Receipt className="w-4 h-4 mr-2" />
-                Xem hóa đơn
-              </Button>
-            )}
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => form.reset()}
-            disabled={isUpdating}
-          >
-            Đặt lại
-          </Button>
-          <Button
-            onClick={form.handleSubmit(handleSubmit)}
-            disabled={isUpdating}
-          >
-            {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
-          </Button>
+            <Button
+              onClick={form.handleSubmit(handleSubmit)}
+              disabled={isUpdating}
+            >
+              {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
+            </Button>
+          </div>
         </div>
 
         {/* Checkout Sheet */}

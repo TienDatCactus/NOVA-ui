@@ -74,7 +74,7 @@ export default function EditPurchaseRequestDialog({
 
   const form = useForm({
     resolver: zodResolver(PurchaseRequestsSchemas.UpdatePurchaseRequestSchema),
-    mode: "all",
+    mode: "onSubmit",
     values: purchaseRequest
       ? {
           notes: purchaseRequest.notes || undefined,

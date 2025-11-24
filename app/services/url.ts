@@ -305,6 +305,12 @@ const Stock = {
   },
 };
 
+const Refunds = {
+  createRefundForBooking: (bookingId: string) => `Refunds/booking/${bookingId}`,
+  getBookingRefundHistory: (bookingId: string) =>
+    `Refunds/booking/${bookingId}/history`,
+};
+
 export {
   Auth,
   User,
@@ -331,4 +337,5 @@ export {
   StaffPayroll,
   Translation,
   Stock,
+  Refunds,
 };

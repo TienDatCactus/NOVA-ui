@@ -31,22 +31,6 @@ export function AvailableRoomTypeCard({
 }: AvailableRoomTypeCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  useEffect(() => {
-    const unavailableRoomIds = roomType.availableRooms
-      .filter((room) => room.status !== "Ready")
-      .map((room) => room.roomId);
-
-    const selectedUnavailableRooms = selectedRoomIds.filter((id) =>
-      unavailableRoomIds.includes(id)
-    );
-
-    if (selectedUnavailableRooms.length > 0) {
-      selectedUnavailableRooms.forEach((roomId) => {
-        onToggleRoom(roomId);
-      });
-    }
-  }, [roomType.availableRooms, selectedRoomIds, onToggleRoom]);
-
   const totalPrice = roomType.baseRatePerNight * nights;
   const selectedCount = roomType.availableRooms.filter((room) =>
     selectedRoomIds.includes(room.roomId)
@@ -138,7 +122,6 @@ export function AvailableRoomTypeCard({
               <CardContent className="space-y-2 py-4">
                 {roomType.availableRooms.map((room) => {
                   const isSelected = selectedRoomIds.includes(room.roomId);
-                  const isAvailable = room.status === "Ready";
 
                   return (
                     <Label
@@ -147,9 +130,7 @@ export function AvailableRoomTypeCard({
                       className={cn(
                         "flex items-center justify-between gap-4 rounded-lg border bg-card p-4 transition-all cursor-pointer",
                         "hover:border-primary/50 hover:shadow-sm",
-                        isSelected && "border-primary bg-primary/5 shadow-sm",
-                        !isAvailable &&
-                          "opacity-60 cursor-not-allowed hover:border-border hover:shadow-none"
+                        isSelected && "border-primary bg-primary/5 shadow-sm"
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -157,7 +138,6 @@ export function AvailableRoomTypeCard({
                           id={room.roomId}
                           checked={isSelected}
                           onCheckedChange={() => onToggleRoom(room.roomId)}
-                          disabled={!isAvailable}
                           className={cn(
                             "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           )}
@@ -172,11 +152,8 @@ export function AvailableRoomTypeCard({
                         </div>
                       </div>
 
-                      <Badge
-                        variant={isAvailable ? "success" : "secondary"}
-                        className="text-xs"
-                      >
-                        {isAvailable ? "Sẵn sàng" : "Không khả dụng"}
+                      <Badge variant={"success"} className="text-xs">
+                        {"Sẵn sàng"}
                       </Badge>
                     </Label>
                   );
