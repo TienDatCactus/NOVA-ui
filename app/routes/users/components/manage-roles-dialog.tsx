@@ -234,8 +234,8 @@ export function ManageRolesDialog({
 
             {/* Changed Warning to Info to be less alarming */}
             {form.formState.isDirty && (
-              <div className="px-6 py-2 bg-blue-50 border-t border-b border-blue-100 flex items-start gap-2 shrink-0 animate-in slide-in-from-bottom-2">
-                <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+              <div className="px-6 py-2 bg-blue-50 border-t border-b border-blue-100 flex items-center gap-2 shrink-0 animate-in slide-in-from-bottom-2">
+                <AlertCircle className="h-4 w-4 text-blue-600 shrink-0" />
                 <p className="text-xs text-blue-700">
                   Bạn có thay đổi chưa lưu. Nhấn "Lưu thay đổi" để áp dụng.
                 </p>
