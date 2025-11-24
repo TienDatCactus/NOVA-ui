@@ -170,6 +170,7 @@ const Invoices = {
   update: (id: string) => `Invoices/${id}`, //? update invoice details
   syncInvoice: (invoiceId: string) =>
     `Invoices/${invoiceId}/sync-pending-orders`, //? sync invoice with pending orders
+  exportById: (id: string) => `Invoices/${id}/export`, //? export invoice by ID
 };
 // Chat endpoints
 const Chat = {

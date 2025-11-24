@@ -27,6 +27,9 @@ import {
 } from "~/components/ui/tooltip";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import { InvoicesService } from "~/services/api/invoices";
+import { toast } from "sonner";
+import { Download } from "lucide-react";
 
 type InvoiceDetailDialogProps = {
   open: boolean;
@@ -42,7 +45,30 @@ export function InvoiceDetailDialog({
   const { data: invoice } = useInvoiceDetail(invoiceId, {
     enabled: open,
   });
+
   if (!invoice) return null;
+  const handleExport = async () => {
+    try {
+      const blob = await InvoicesService.exportInvoiceById(invoiceId);
+      console.log("Blob received:", blob);
+
+      const url = window.URL.createObjectURL(blob as any);
+      const a = document.createElement("a");
+      a.href = url;
+      const filename = `invoice-${invoiceId}.xlsx`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Xuất báo cáo thành công");
+    } catch (e) {
+      console.error(e);
+      toast.error("Xuất báo cáo thất bại");
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-card shadow-sm rounded-2xl p-6 max-w-3xl w-full">
@@ -157,7 +183,11 @@ export function InvoiceDetailDialog({
             </TableBody>
           </Table>
         </div>
-        <DialogFooter className="flex flex-row gap-4 justify-end pt-4">
+        <DialogFooter className="flex items-center ">
+          <Button variant="success" size="sm" onClick={handleExport}>
+            <Download />
+            Xuất hóa đơn
+          </Button>
           <Button variant="outline" onClick={onClose}>
             Đóng
           </Button>

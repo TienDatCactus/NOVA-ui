@@ -289,6 +289,18 @@ async function syncInvoiceWithOrders(invoiceId: string) {
   }
 }
 
+async function exportInvoiceById(invoiceId: string) {
+  try {
+    const resp = await http.get(Invoices.exportById(invoiceId), {
+      responseType: "blob",
+    });
+    return resp;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const InvoicesService = {
   getInvoiceList,
   getInvoiceDetail,
@@ -303,4 +315,5 @@ export const InvoicesService = {
   previewBookingInvoice,
   updateInvoice,
   syncInvoiceWithOrders,
+  exportInvoiceById,
 };
