@@ -18,9 +18,9 @@ function UnitsHeader({
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-        <div>
+        <div className="grid gap-2">
           <h1 className="text-3xl font-bold">Quản lý đơn vị tính</h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground">
             Tổng{" "}
             <span className="font-semibold text-foreground">{totalUnits}</span>{" "}
             đơn vị

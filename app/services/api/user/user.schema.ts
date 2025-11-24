@@ -85,13 +85,7 @@ const UpdateUserResponseSchema = z.object({
 });
 
 // GET /api/Users/roles - Roles list response
-const RoleListResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: z.array(z.string()),
-  meta: z.string().nullable().optional(),
-});
+const RoleListResponseSchema = z.array(z.string());
 
 // POST /api/Users/{id}/lock - Lock user request
 const LockUserSchema = z.object({

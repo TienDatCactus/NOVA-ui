@@ -10,7 +10,7 @@ import {
   type ColumnFiltersState,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,6 +22,8 @@ import {
 import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import CreateUnitDialog from "../create-unit.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,7 +38,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -57,7 +59,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
           placeholder="Tìm theo tên hoặc mã đơn vị..."
@@ -67,6 +69,10 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Thêm đơn vị tính
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -119,6 +125,11 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      {/* Dialogs */}
+      <CreateUnitDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+      />
     </div>
   );
 }

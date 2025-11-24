@@ -32,7 +32,7 @@ export const columns: ColumnDef<PurchaseRequestListItemDto>[] = [
   {
     accessorKey: "requestNumber",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Số phiếu" />
+      <DataTableColumnHeader column={column} title="Mã phiếu" />
     ),
     cell: ({ row }) => {
       const [openDetailDialog, setOpenDetailDialog] = useState(false);
@@ -63,7 +63,7 @@ export const columns: ColumnDef<PurchaseRequestListItemDto>[] = [
     cell: ({ row }) => {
       return (
         <span className="text-sm">
-          {format(parseISO(row.original.requestedAt), "dd/MM/yyyy HH:mm", {
+          {format(parseISO(row.original.requestedAt), "HH:mm dd/MM/yyyy ", {
             locale: vi,
           })}
         </span>

@@ -4,9 +4,6 @@ import { useUnits } from "./unit-query.hooks";
 import useUnitFilters from "./filter.hooks";
 
 function useUnitsContainer() {
-  const { filters, updateFilter, resetFilters, filterUnits, includeInactive } =
-    useUnitFilters();
-  const { data: units, isPending } = useUnits({ includeInactive });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const filteredUnits = units ? filterUnits(units) : [];

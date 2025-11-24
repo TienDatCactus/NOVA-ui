@@ -73,18 +73,9 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
     cell: ({ row }) => {
       const active = row.getValue("active") as boolean;
       return (
-        <div className="flex justify-center">
-          <Badge
-            variant={active ? "default" : "secondary"}
-            className={
-              active
-                ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
-            }
-          >
-            {active ? "Hoạt động" : "Ngừng hoạt động"}
-          </Badge>
-        </div>
+        <Badge variant={active ? "success" : "secondary"}>
+          {active ? "Hoạt động" : "Ngừng hoạt động"}
+        </Badge>
       );
     },
   },

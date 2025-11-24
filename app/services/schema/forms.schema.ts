@@ -33,11 +33,7 @@ export const CreateItemFormSchema = z.object({
   code: z
     .string()
     .min(1, "Mã hàng hóa là bắt buộc")
-    .max(50, "Mã hàng hóa không được quá 50 ký tự")
-    .regex(
-      /^[A-Z0-9-]+$/,
-      "Mã hàng hóa chỉ chứa chữ in hoa, số và dấu gạch ngang"
-    ),
+    .max(50, "Mã hàng hóa không được quá 50 ký tự"),
   name: z
     .string()
     .min(1, "Tên hàng hóa là bắt buộc")

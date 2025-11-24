@@ -48,10 +48,7 @@ export default function ApplyConfirmDialog({
     <AlertDialog open={open} onOpenChange={onClose}>
       <AlertDialogContent className="max-w-2xl">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-orange-600" />
-            Xác nhận áp dụng phiếu điều chỉnh
-          </AlertDialogTitle>
+          <AlertDialogTitle>Xác nhận áp dụng phiếu điều chỉnh</AlertDialogTitle>
           <AlertDialogDescription className="space-y-4">
             <div className="flex items-center gap-2">
               <span>Mã phiếu:</span>
@@ -63,23 +60,8 @@ export default function ApplyConfirmDialog({
             <Alert variant="destructive">
               <AlertTriangle />
               <AlertTitle>CẢNH BÁO QUAN TRỌNG</AlertTitle>
-              <AlertDescription className=" space-y-2">
-                <p className="font-semibold">
-                  Thao tác này sẽ thay đổi số lượng tồn kho và KHÔNG THỂ HOÀN
-                  TÁC!
-                </p>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>
-                    Số lượng tồn kho của các hàng hóa sẽ được cập nhật ngay lập
-                    tức
-                  </li>
-                  <li>
-                    Giao dịch điều chỉnh sẽ được ghi vào lịch sử không thể xóa
-                  </li>
-                  <li>
-                    Sau khi áp dụng, phiếu này không thể chỉnh sửa hoặc xóa
-                  </li>
-                </ul>
+              <AlertDescription>
+                Thao tác này sẽ thay đổi số lượng tồn kho và KHÔNG THỂ HOÀN TÁC!
               </AlertDescription>
             </Alert>
 
@@ -127,10 +109,6 @@ export default function ApplyConfirmDialog({
                 </p>
               </div>
             </div>
-
-            <p className="font-semibold text-destructive">
-              Vui lòng kiểm tra kỹ trước khi xác nhận!
-            </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

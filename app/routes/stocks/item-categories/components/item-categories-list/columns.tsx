@@ -37,7 +37,7 @@ export const columns: ColumnDef<ItemCategoryListItemDto>[] = [
     ),
     cell: ({ row }) => {
       const count = row.getValue("itemCount") as number;
-      return <pre className="text-center">{count}</pre>;
+      return <pre>{count}</pre>;
     },
   },
   {

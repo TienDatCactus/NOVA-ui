@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { OrderService } from "~/services/api/orders";
 import type {
   CreatePOSOrderRequestDto,
@@ -20,13 +21,15 @@ export function useCreatePOSOrder() {
       return await OrderService.createPOSOrder(data);
     },
     onSuccess: (_, data) => {
+      // Invalidate all POS order lists (all dates)
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
-      queryClient.invalidateQueries({
-        queryKey: ["pos-order-detail"],
-      });
+      // Invalidate all order details
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      // Invalidate checkout pending charges
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", data.bookingId],
       });
+      toast.success("Đã tạo order thành công");
     },
   });
 }
@@ -55,6 +58,10 @@ export function useAddSingleItemToPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã thêm món vào order");
     },
   });
 }
@@ -83,6 +90,10 @@ export function useAddBatchItemsToPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã thêm các món vào order");
     },
   });
 }
@@ -114,6 +125,7 @@ export function useDeleteItemFromPOSOrder() {
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges"],
       });
+      toast.success("Đã xóa món khỏi order");
     },
   });
 }
@@ -139,6 +151,7 @@ export function useCompletePOSOrder() {
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges"],
       });
+      toast.success("Đã hoàn thành order");
     },
   });
 }
@@ -161,6 +174,10 @@ export function useCancelPOSOrder() {
         queryKey: ["pos-order-detail", orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã hủy order");
     },
   });
 }
@@ -190,6 +207,10 @@ export function usePayPOSOrderNow() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã thanh toán order");
     },
   });
 }
@@ -218,6 +239,7 @@ export function useSetScheduledPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      toast.success("Đã cập nhật thời gian phục vụ");
     },
   });
 }
@@ -252,6 +274,7 @@ export function useSetServedPOSOrderItem() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      toast.success("Đã đánh dấu món đã phục vụ");
     },
   });
 }
@@ -288,11 +311,13 @@ export function useUpdateScheduledTime() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      toast.success("Đã cập nhật thời gian phục vụ");
     },
   });
 }
 
 export function useMarkItemServed() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
       orderId,

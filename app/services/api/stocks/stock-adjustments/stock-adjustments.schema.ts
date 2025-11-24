@@ -21,8 +21,8 @@ const StockAdjustmentListItemSchema = z.object({
 const StockAdjustmentListSchema = z.array(StockAdjustmentListItemSchema);
 
 const CreateStockAdjustmentItemSchema = z.object({
-  itemId: z.string().uuid(),
-  quantityDiff: z.number(),
+  itemId: z.string(),
+  quantityDiff: z.number().min(1, "Số lượng điều chỉnh phải khác 0"),
   note: z.string().optional(),
 });
 
@@ -34,7 +34,7 @@ const CreateStockAdjustmentSchema = z.object({
 const StockAdjustmentDetailsSchema = StockAdjustmentListItemSchema;
 
 const UpdateStockAdjustmentItemSchema = CreateStockAdjustmentItemSchema.extend({
-  id: z.string().uuid().optional(),
+  id: z.string().optional(),
 });
 
 const UpdateStockAdjustmentSchema = z.object({

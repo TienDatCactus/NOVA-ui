@@ -4,6 +4,7 @@ import useUnitsContainer from "./container/container.hooks";
 import { Card } from "~/components/ui/card";
 import { useUnits } from "./container/unit-query.hooks";
 import UnitsDataTable from "./components/units-list";
+import useUnitFilters from "./container/filter.hooks";
 
 export function clientLoader() {
   return { title: "Đơn vị tính - NOVA" };
@@ -11,43 +12,19 @@ export function clientLoader() {
 
 export default function Units() {
   const { refetch } = useUnits();
-  const {
-    filteredUnits,
-    isPending,
-    filters,
-    updateFilter,
-    resetFilters,
-    stats,
-    createDialogOpen,
-    setCreateDialogOpen,
-  } = useUnitsContainer();
-
-  const hasFilters = !!(filters.searchQuery || filters.isActive !== "all");
+  const { filters, updateFilter, resetFilters } = useUnitFilters();
+  const { data: units, isPending } = useUnits({
+    includeInactive: filters.activeFilter === "all",
+  });
 
   return (
     <UnitsViewLayout
       filters={filters}
-      onFilterChange={updateFilter}
-      onResetFilters={resetFilters}
-      totalUnits={stats.total}
-      activeUnits={stats.active}
-      inactiveUnits={stats.inactive}
-      onAddUnit={() => setCreateDialogOpen(true)}
+      updateFilter={updateFilter}
+      resetFilter={resetFilters}
+      totalUnits={units?.length || 0}
     >
-      <UnitsDataTable
-        units={filteredUnits}
-        isLoading={isPending}
-        hasFilters={hasFilters}
-        onAddUnit={() => setCreateDialogOpen(true)}
-        onSuccess={refetch}
-      />
-
-      {/* Dialogs */}
-      <CreateUnitDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onSuccess={refetch}
-      />
+      <UnitsDataTable units={units ?? []} isLoading={isPending} />
     </UnitsViewLayout>
   );
 }

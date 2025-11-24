@@ -7,6 +7,9 @@ import {
   getRoleDisplayName,
 } from "~/services/types/users.types";
 import ActionsMenuCell from "../../fragments/actions.cell";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import { UserDetailDialog } from "../user-detail-dialog";
 
 export const columns: ColumnDef<UserItem>[] = [
   {
@@ -14,9 +17,25 @@ export const columns: ColumnDef<UserItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Họ và tên" />
     ),
-    cell: ({ row }) => (
-      <span className="font-medium">{row.getValue("fullName")}</span>
-    ),
+    cell: ({ row }) => {
+      const [openDetailDialog, setOpenDetailDialog] = useState(false);
+      return (
+        <>
+          <Button
+            onClick={() => setOpenDetailDialog(true)}
+            variant="link"
+            size="sm"
+          >
+            {row.getValue("fullName")}
+          </Button>
+          <UserDetailDialog
+            open={openDetailDialog}
+            user={row.original}
+            onClose={() => setOpenDetailDialog(false)}
+          />
+        </>
+      );
+    },
   },
   {
     accessorKey: "email",
@@ -29,17 +48,7 @@ export const columns: ColumnDef<UserItem>[] = [
       </div>
     ),
   },
-  {
-    accessorKey: "phoneNumber",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Số điện thoại" />
-    ),
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.getValue("phoneNumber")}
-      </span>
-    ),
-  },
+
   {
     accessorKey: "roles",
     header: ({ column }) => (
@@ -73,21 +82,13 @@ export const columns: ColumnDef<UserItem>[] = [
     cell: ({ row }) => {
       const user = row.original;
 
-      // Check if user is locked: lockoutEnd exists and is in the future
       const isLocked =
         user.lockoutEnd && new Date(user.lockoutEnd) > new Date();
 
       return isLocked ? (
-        <Badge variant="destructive" className="shadow-sm">
-          Bị khóa
-        </Badge>
+        <Badge variant="destructive">Bị khóa</Badge>
       ) : (
-        <Badge
-          variant="outline"
-          className="bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm"
-        >
-          Hoạt động
-        </Badge>
+        <Badge variant="success">Hoạt động</Badge>
       );
     },
   },

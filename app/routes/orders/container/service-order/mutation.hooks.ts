@@ -20,9 +20,11 @@ export function useCreateServiceOrder() {
       OrderService.createServiceOrder(data),
     onSuccess: (_, data) => {
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["service-order-detail"] });
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", data.bookingId],
       });
+      toast.success("Đã tạo service order thành công");
     },
   });
 }
@@ -46,6 +48,10 @@ export function useUpdateServiceOrder() {
       queryClient.invalidateQueries({
         queryKey: ["service-order-detail", variables.orderId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã cập nhật service order");
     },
   });
 }
@@ -69,6 +75,10 @@ export function useCompleteServiceOrder() {
         queryKey: ["service-order-detail", orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã hoàn thành service order");
     },
   });
 }
@@ -92,6 +102,10 @@ export function useCancelServiceOrder() {
         queryKey: ["service-order-detail", orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã hủy service order");
     },
   });
 }
@@ -115,6 +129,10 @@ export function usePayServiceOrderNow() {
         queryKey: ["service-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã thanh toán service order");
     },
   });
 }
@@ -150,6 +168,7 @@ export function useUpdateServiceOrderSchedule() {
         queryKey: ["service-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
+      toast.success("Đã cập nhật thời gian phục vụ");
     },
   });
 }

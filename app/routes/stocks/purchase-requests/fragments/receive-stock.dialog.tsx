@@ -1,6 +1,10 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,19 +23,17 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
-import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Skeleton } from "~/components/ui/skeleton";
+import { Textarea } from "~/components/ui/textarea";
+import { formatMoney, onError } from "~/lib/utils";
+import type { ReceiveStockRequestDto } from "~/services/api/stocks/purchase-requests/dto";
+import { PurchaseRequestsSchemas } from "~/services/api/stocks/purchase-requests/purchase-requests.schema";
 import {
   usePurchaseRequestDetail,
   useReceiveStock,
 } from "../container/query.hooks";
-import { PurchaseRequestsSchemas } from "~/services/api/stocks/purchase-requests/purchase-requests.schema";
-import type { ReceiveStockRequestDto } from "~/services/api/stocks/purchase-requests/dto";
-import { useState, useEffect } from "react";
 
 interface ReceiveStockDialogProps {
   open: boolean;
@@ -49,30 +51,31 @@ export default function ReceiveStockDialog({
 
   const { mutate: onSubmit, isPending: isSubmitting } = useReceiveStock();
 
-  // Track actual costs locally (keyed by item index or ID)
-  const [actualCosts, setActualCosts] = useState<Record<string, number>>({});
-
   const form = useForm<ReceiveStockRequestDto>({
     resolver: zodResolver(PurchaseRequestsSchemas.ReceiveStockRequestSchema),
     defaultValues: {
-      expenseId: null,
       note: "",
       actualCosts: {},
     },
   });
 
-  // Initialize actual costs from purchase request when loaded
   useEffect(() => {
-    if (purchaseRequest) {
+    if (purchaseRequest && open) {
       const initialCosts: Record<string, number> = {};
-      purchaseRequest.items.forEach((item, index) => {
-        const key = item.itemId || `temp-${index}`;
-        initialCosts[key] = item.unitCost;
+      purchaseRequest.items.forEach((item) => {
+        initialCosts[item.id] = item.unitCost;
       });
-      setActualCosts(initialCosts);
-      form.setValue("actualCosts", initialCosts);
+      form.reset({
+        note: "",
+        actualCosts: initialCosts,
+      });
+    } else if (!open) {
+      form.reset({
+        note: "",
+        actualCosts: {},
+      });
     }
-  }, [purchaseRequest, form]);
+  }, [purchaseRequest, open, form]);
 
   const handleSubmit = (data: ReceiveStockRequestDto) => {
     onSubmit(
@@ -85,11 +88,8 @@ export default function ReceiveStockDialog({
     );
   };
 
-  const updateActualCost = (key: string, cost: number) => {
-    const updated = { ...actualCosts, [key]: cost };
-    setActualCosts(updated);
-    form.setValue("actualCosts", updated);
-  };
+  // Watch actualCosts to calculate totals
+  const actualCosts = form.watch("actualCosts") || {};
 
   if (isLoadingPR) {
     return (
@@ -122,7 +122,7 @@ export default function ReceiveStockDialog({
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleSubmit, onError)}
             className="space-y-6 overflow-y-auto max-h-[70vh] px-4 pb-4"
           >
             {/* Warning Alert */}
@@ -137,29 +137,6 @@ export default function ReceiveStockDialog({
               </AlertDescription>
             </Alert>
 
-            {/* Expense ID */}
-            <FormField
-              control={form.control}
-              name="expenseId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mã chi phí (tùy chọn)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Nhập mã chi phí để liên kết với kế toán..."
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Liên kết với hệ thống kế toán để theo dõi chi phí
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Note */}
             <FormField
               control={form.control}
@@ -172,7 +149,7 @@ export default function ReceiveStockDialog({
                       placeholder="Ghi chú về quá trình nhập hàng, tình trạng hàng hóa..."
                       className="resize-none"
                       rows={3}
-                      {...field}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -190,16 +167,15 @@ export default function ReceiveStockDialog({
 
               <div className="space-y-4">
                 {purchaseRequest.items.map((item, index) => {
-                  const itemKey = item.itemId || `temp-${index}`;
                   const estimatedCost = item.unitCost;
                   const estimatedTotal = estimatedCost * item.quantity;
                   const currentActualCost =
-                    actualCosts[itemKey] || estimatedCost;
+                    actualCosts[item.id] || estimatedCost;
                   const actualTotal = currentActualCost * item.quantity;
 
                   return (
                     <div
-                      key={itemKey}
+                      key={item.id}
                       className="border rounded-lg p-4 space-y-3 bg-card"
                     >
                       <div className="flex items-start justify-between">
@@ -221,9 +197,9 @@ export default function ReceiveStockDialog({
                       <div className="grid gap-4 md:grid-cols-3">
                         {/* Quantity (Read-only) */}
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">
+                          <Label className="text-sm font-medium">
                             Số lượng
-                          </label>
+                          </Label>
                           <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-bold">
                               {item.quantity}
@@ -235,39 +211,50 @@ export default function ReceiveStockDialog({
                         </div>
 
                         {/* Actual Cost Input */}
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">
-                            Giá thực tế (đơn vị)
-                            <span className="text-destructive ml-1">*</span>
-                          </label>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            value={currentActualCost}
-                            onChange={(e) =>
-                              updateActualCost(
-                                itemKey,
-                                parseFloat(e.target.value) || 0
-                              )
-                            }
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Dự kiến: {estimatedCost.toLocaleString("vi-VN")} đ
-                          </p>
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name={`actualCosts.${item.id}`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Giá thực tế (đơn vị)
+                                <span className="text-destructive ml-1">*</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder={estimatedCost.toLocaleString(
+                                    "vi-VN"
+                                  )}
+                                  value={field.value || ""}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      parseFloat(e.target.value) || 0
+                                    )
+                                  }
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Dự kiến:{" "}
+                                {formatMoney(estimatedCost).vndFormatted}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
                         {/* Total (Calculated) */}
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">
+                          <Label className="text-sm font-medium">
                             Tổng giá trị
-                          </label>
+                          </Label>
                           <div className="space-y-1">
                             <p className="text-xl font-semibold text-primary">
-                              {actualTotal.toLocaleString("vi-VN")} đ
+                              {formatMoney(actualTotal).vndFormatted}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              So với dự kiến:{" "}
-                              {estimatedTotal.toLocaleString("vi-VN")} đ
+                              Dự kiến:{" "}
+                              {formatMoney(estimatedTotal).vndFormatted}
                             </p>
                           </div>
                         </div>
@@ -284,26 +271,27 @@ export default function ReceiveStockDialog({
                     Tổng giá trị dự kiến:
                   </span>
                   <span className="font-medium">
-                    {purchaseRequest.items
-                      .reduce(
-                        (sum, item) => sum + item.unitCost * item.quantity,
-                        0
-                      )
-                      .toLocaleString("vi-VN")}{" "}
-                    đ
+                    {
+                      formatMoney(
+                        purchaseRequest.items.reduce(
+                          (sum, item) => sum + item.unitCost * item.quantity,
+                          0
+                        )
+                      ).vndFormatted
+                    }
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-semibold">
                   <span>Tổng giá trị thực tế:</span>
                   <span className="text-primary">
-                    {purchaseRequest.items
-                      .reduce((sum, item, index) => {
-                        const itemKey = item.itemId || `temp-${index}`;
-                        const cost = actualCosts[itemKey] || item.unitCost;
-                        return sum + cost * item.quantity;
-                      }, 0)
-                      .toLocaleString("vi-VN")}{" "}
-                    đ
+                    {
+                      formatMoney(
+                        purchaseRequest.items.reduce((sum, item) => {
+                          const cost = actualCosts[item.id] || item.unitCost;
+                          return sum + cost * item.quantity;
+                        }, 0)
+                      ).vndFormatted
+                    }
                   </span>
                 </div>
               </div>

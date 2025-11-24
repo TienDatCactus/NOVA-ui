@@ -11,6 +11,7 @@ import {
   ServiceActionMenu,
   ServiceFooterActions,
 } from "./service-order-actions";
+import { useBookingDetail } from "~/routes/reservation/bookings/container/booking-query.hooks";
 
 interface ServiceOrderCardProps {
   order: ServiceOrderListItemDto;
@@ -40,20 +41,21 @@ export default function ServiceOrderCard({ order }: ServiceOrderCardProps) {
     statusConfig[order.status as keyof typeof statusConfig] ||
     statusConfig.Scheduled;
   const scheduledDate = order.scheduledAt ? parseISO(order.scheduledAt) : null;
-
+  const { data: bookingDetail } = useBookingDetail({
+    bookingId: order.bookingId || "",
+    enabled: !!order.bookingId,
+  });
   const displayBookingInfo = {
     icon: <User className="h-3.5 w-3.5" />,
     text: order.bookingId
-      ? `Booking ...${order.bookingId.slice(-6)}`
+      ? `Khách: ${bookingDetail?.customer.fullName || "N/A"}`
       : "Khách lẻ",
   };
 
   return (
     <div className="group flex flex-col h-full overflow-hidden rounded-xl border border-muted bg-white shadow-sm transition-all hover:shadow-md hover:border-primary">
-      {/* 1. HEADER: Context & Status */}
       <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-3">
         <div className="flex items-center gap-2">
-          {/* Service Badge: Nhỏ gọn */}
           <Badge
             variant="outline"
             className="bg-white font-mono text-[10px] font-bold text-gray-500"
@@ -109,10 +111,9 @@ export default function ServiceOrderCard({ order }: ServiceOrderCardProps) {
         </div>
 
         {/* Details Component (Dumb Component) */}
-        <ServiceOrderDetails order={order} />
+        <ServiceOrderDetails order={order} bookingDetail={bookingDetail} />
       </div>
 
-      {/* 3. FOOTER: Primary Actions */}
       <div className="mt-auto bg-gray-50 px-4 py-3 border-t border-dashed border-gray-300">
         <ServiceFooterActions orderId={order.id || ""} status={order.status} />
       </div>
