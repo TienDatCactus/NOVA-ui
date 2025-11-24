@@ -244,6 +244,11 @@ const SetScheduledServiceOrderRequestSchema = z.object({
   scheduledAt: z.string(),
 });
 
+const CreatePOSOrderWithItemsRequestSchema = CreatePOSOrderRequestSchema.extend(
+  {
+    items: AddBatchItemsToPOSOrderRequestSchema,
+  }
+);
 export const OrderSchema = {
   // 🔹 Generic service order creation/payment
   ServiceOrderSchema,
@@ -263,8 +268,9 @@ export const OrderSchema = {
   CreatePOSOrderRequestSchema,
   POSOrderPayNowResponseSchema,
   POSOrderListByBookingResponseSchema,
+  CreatePOSOrderWithItemsRequestSchema,
 
-  // 🔹 Service Orders
+  //  Service Orders
   ServiceOrderListSchema,
   ServiceOrderListByBookingDetailSchema,
   ServiceOrderStatusEnum,

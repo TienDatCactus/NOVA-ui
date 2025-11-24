@@ -37,6 +37,13 @@ import { formatMoney } from "~/lib/utils";
 import Image from "~/components/ui/image";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Card } from "~/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
 
 export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
@@ -239,8 +246,8 @@ export default function Component({
       <header className="flex items-center justify-between p-4 border-b border-accent-foreground/20">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
-            <Link to={DASHBOARD.orders["service-orders"]}>
-              <Button variant="ghost" size="sm" onClick={handleReset}>
+            <Link to={DASHBOARD.orders["serviceOrders"]}>
+              <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
               </Button>
@@ -328,12 +335,19 @@ export default function Component({
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center text-muted-foreground">
-                <p className="text-lg font-medium">Không tìm thấy dịch vụ</p>
-                <p className="text-sm">Thử điều chỉnh bộ lọc của bạn</p>
-              </div>
-            </div>
+            <Empty className="flex items-center justify-center h-full">
+              <EmptyHeader className="text-center text-muted-foreground">
+                <EmptyMedia variant={"icon"}>
+                  <SearchIcon className="h-12 w-12 mx-auto" />
+                </EmptyMedia>
+                <EmptyTitle className="text-lg font-medium">
+                  Không tìm thấy dịch vụ
+                </EmptyTitle>
+                <EmptyDescription className="text-sm">
+                  Thử điều chỉnh bộ lọc của bạn
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </main>
 
@@ -347,13 +361,15 @@ export default function Component({
 
             {/* Empty State */}
             {isEmpty && (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center text-muted-foreground space-y-2">
-                  <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
-                  <p className="text-sm font-medium">Chưa chọn dịch vụ</p>
-                  <p className="text-xs">Chọn dịch vụ để bắt đầu</p>
-                </div>
-              </div>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant={"icon"}>
+                    <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
+                  </EmptyMedia>
+                  <EmptyTitle>Chưa chọn dịch vụ</EmptyTitle>
+                  <EmptyDescription>Chọn dịch vụ để bắt đầu</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             )}
 
             {/* Selected Service */}

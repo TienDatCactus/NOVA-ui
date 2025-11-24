@@ -15,7 +15,6 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const navigate = useNavigate();
   const { filters, updateFilter, resetFilters, filterAvailableRooms } =
     useAvailableRoomsFilter();
 

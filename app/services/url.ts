@@ -150,6 +150,7 @@ const Orders = {
   payServiceOrderNow: (id: string) => `service-orders/${id}/pay-now`,
   setScheduledServiceOrder: (id: string) =>
     `service-orders/${id}/set-scheduled`,
+  createPosOrderWithItems: "PosOrders/with-items",
 };
 
 const Invoices = {

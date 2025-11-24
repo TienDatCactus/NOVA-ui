@@ -20,12 +20,12 @@ export default function CartItem({
   onQuantityChange,
   onRemove,
 }: CartItemProps) {
-  const { code, name, imageUrl, unitPrice, quantity, maxQuantityAvailable } =
+  const { code, name, unitPrice, quantity, maxQuantityAvailable } =
     cartItem as MenuPosCartItem;
   const subtotal = unitPrice * quantity;
 
   return (
-    <Card className="shadow-sm p-0 snap-center">
+    <Card className="shadow-none p-0 border-none snap-center">
       <CardContent className="p-3">
         <div className="flex gap-3">
           <div className="flex-1 min-w-0 space-y-2">

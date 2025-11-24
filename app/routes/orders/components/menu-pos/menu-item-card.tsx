@@ -1,19 +1,16 @@
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardFooter } from "~/components/ui/card";
+import { Info, Plus, ShoppingBag, Ban } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
-import Image from "~/components/ui/image";
-import { formatMoney } from "~/lib/utils";
-import { Plus, Info } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import type {
-  MenuItemDetailDto,
-  MenuListItemDto,
-} from "~/services/api/menu/dto";
+import Image from "~/components/ui/image";
+import { cn, formatMoney } from "~/lib/utils";
+import type { MenuListItemDto } from "~/services/api/menu/dto";
 
 type MenuItemCardProps = {
   menuItem: MenuListItemDto;
@@ -36,73 +33,145 @@ export default function MenuItemCard({
   } = menuItem;
 
   const isOutOfStock = maxQuantityAvailable === 0;
-  const isLowStock = maxQuantityAvailable > 0 && maxQuantityAvailable <= 5;
+  const isLowStock =
+    maxQuantityAvailable !== undefined &&
+    maxQuantityAvailable > 0 &&
+    maxQuantityAvailable <= 5;
+  const isDisabled = !active || isOutOfStock;
 
   return (
-    <Card className="overflow-hidden shadow-sm p-0 hover:shadow-m transition-shadow">
-      <div className="relative ">
-        <Image
-          src={imageUrls[0] || "/placeholder-menu.png"}
-          alt={name}
-          height={200}
-          className="w-full h-full object-cover"
-        />
-        {!active && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Badge variant="destructive">Không khả dụng</Badge>
+    <Card
+      className={cn(
+        "group relative h-full overflow-hidden border transition-all p-0 duration-200",
+        isDisabled
+          ? "opacity-60 bg-muted border-transparent" // Disabled State
+          : "bg-card border-border/50 hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 cursor-pointer" // Active State
+      )}
+      onClick={isDisabled ? undefined : addToOrder}
+    >
+      {/* === 1. IMAGE AREA (Interactive) === */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        {imageUrls && imageUrls[0] ? (
+          <Image
+            src={imageUrls[0]}
+            alt={name}
+            className={cn(
+              "h-full w-full object-cover transition-transform duration-500",
+              !isDisabled && "group-hover:scale-110",
+              isOutOfStock && "grayscale" // Visual cue for OOS
+            )}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-muted/50 text-muted-foreground">
+            <ShoppingBag className="h-8 w-8 opacity-20" />
           </div>
         )}
-        {isOutOfStock && active && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Badge variant="destructive">Hết hàng</Badge>
+
+        {/* Floating Badges */}
+        <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
+          {/* Stock Status */}
+          <div>
+            {!active && (
+              <Badge variant="destructive" className="shadow-sm">
+                Ngừng kinh doanh
+              </Badge>
+            )}
+            {isOutOfStock && active && (
+              <Badge variant="destructive" className="shadow-sm gap-1">
+                <Ban className="h-3 w-3" /> Hết hàng
+              </Badge>
+            )}
+            {isLowStock && !isOutOfStock && active && (
+              <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-none shadow-sm">
+                Còn {maxQuantityAvailable}
+              </Badge>
+            )}
           </div>
-        )}
-        {isLowStock && !isOutOfStock && active && (
-          <Badge variant="warning" className="absolute top-2 right-2">
-            Còn {maxQuantityAvailable}
-          </Badge>
+
+          {/* Quick Code Badge (Optional for POS) */}
+          {/* <Badge variant="secondary" className="bg-white/90 backdrop-blur text-[10px] font-mono text-foreground/70 shadow-sm">
+            {code}
+          </Badge> */}
+        </div>
+
+        {/* Hover Overlay (Add Action) */}
+        {!isDisabled && (
+          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+            <div className="bg-white text-primary rounded-full p-3 shadow-lg transform scale-75 group-hover:scale-100 transition-transform">
+              <Plus className="h-6 w-6 stroke-[3]" />
+            </div>
+          </div>
         )}
       </div>
 
-      <CardContent className="p-0 px-4 space-y-2">
-        <div className="space-y-1">
-          <h3 className="font-semibold text-base line-clamp-1">{name}</h3>
-          <p className="text-xs text-muted-foreground line-clamp-1">
-            {description}
-          </p>
+      {/* === 2. CONTENT AREA === */}
+      <CardContent className="p-3 space-y-2">
+        <div className="flex justify-between items-start gap-2">
+          <div className="space-y-1 flex-1">
+            <h3
+              className={cn(
+                "font-bold text-sm leading-tight line-clamp-2",
+                !isDisabled && "group-hover:text-primary transition-colors"
+              )}
+              title={name}
+            >
+              {name}
+            </h3>
+            {description && (
+              <p className="text-[10px] text-muted-foreground line-clamp-1">
+                {description}
+              </p>
+            )}
+          </div>
+
+          {/* Info Tooltip (Secondary Action) */}
+          {description && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 -mr-2 -mt-1 text-muted-foreground hover:text-foreground"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent triggering add to cart
+                      // Open details logic if needed
+                    }}
+                  >
+                    <Info className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-[200px] text-xs">
+                  {description}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
 
-        <div className="flex items-baseline justify-between">
-          <div>
-            <data
-              value={price}
-              className="text-lg font-bold text-primary font-mono"
+        <div className="pt-1 flex items-baseline justify-between border-t border-dashed mt-2">
+          <div className="flex items-baseline gap-1">
+            <span
+              className={cn(
+                "text-lg font-bold font-mono tracking-tight",
+                isDisabled ? "text-muted-foreground" : "text-primary"
+              )}
             >
               {formatMoney(price).vndFormatted}
-            </data>
+            </span>
             {unitName && (
-              <span className="text-xs text-muted-foreground ml-1">
+              <span className="text-[10px] text-muted-foreground">
                 /{unitName}
               </span>
             )}
           </div>
-          <Badge variant="outline" className="text-xs font-mono">
+
+          {/* Minimal Code Display */}
+          <span className="text-[10px] font-mono text-muted-foreground/50 uppercase">
             {code}
-          </Badge>
+          </span>
         </div>
       </CardContent>
-
-      <CardFooter className="p-4 pt-0">
-        <Button
-          className="w-full"
-          onClick={addToOrder}
-          disabled={!active || isOutOfStock}
-          size="sm"
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          {isOutOfStock ? "Hết hàng" : "Thêm vào giỏ"}
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
