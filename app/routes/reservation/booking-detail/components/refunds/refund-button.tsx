@@ -14,8 +14,6 @@ interface RefundButtonProps {
   bookingNumber: string;
   bookingStatus: string;
   totalPaidAmount: number;
-  variant?: "default" | "outline" | "destructive" | "ghost";
-  size?: "default" | "sm" | "lg" | "icon";
   showLabel?: boolean;
   className?: string;
 }
@@ -25,13 +23,10 @@ export default function RefundButton({
   bookingNumber,
   bookingStatus,
   totalPaidAmount,
-  variant = "outline",
-  size = "default",
   showLabel = true,
   className,
 }: RefundButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
-
   const canRefund = bookingStatus !== "CheckedOut" && totalPaidAmount > 0;
   if (!canRefund) {
     const reason =
@@ -45,8 +40,7 @@ export default function RefundButton({
           <TooltipTrigger asChild>
             <div>
               <Button
-                variant={variant}
-                size={size}
+                variant="destructive-ghost"
                 disabled
                 className={className}
               >
@@ -66,8 +60,7 @@ export default function RefundButton({
   return (
     <>
       <Button
-        variant={variant}
-        size={size}
+        variant={"destructive-ghost"}
         onClick={() => setDialogOpen(true)}
         className={className}
       >

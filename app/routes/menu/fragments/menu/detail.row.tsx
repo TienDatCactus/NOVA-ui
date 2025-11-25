@@ -55,11 +55,6 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
   const mainImage = hasImages ? detailData.images![0] : null;
   const subImages = hasImages ? detailData.images!.slice(1, 4) : [];
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success("Đã sao chép mã món");
-  };
-
   return (
     <div className="bg-slate-50/80 border-t shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="p-6 max-w-7xl mx-auto">
@@ -68,12 +63,12 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
           <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">
             {mainImage ? (
               <div className="space-y-3">
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl border bg-background shadow-sm">
+                <div className="relative  w-full overflow-hidden rounded-xl border bg-background shadow-sm">
                   <ImageZoom>
                     <Image
                       src={mainImage.url}
                       alt={detailData.name}
-                      className="h-full w-full object-cover transition-transform hover:scale-105 duration-500"
+                      className="h-full w-full aspect-square object-cover transition-transform hover:scale-105 duration-500"
                     />
                   </ImageZoom>
                 </div>

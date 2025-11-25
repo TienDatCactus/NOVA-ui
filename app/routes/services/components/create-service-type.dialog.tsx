@@ -183,7 +183,7 @@ export default function CreateServiceTypeDialog({
                             <div className="relative">
                               <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
-                                className="pl-9 text-lg font-medium h-11"
+                                className="pl-9 text-lg font-medium"
                                 placeholder="VD: Spa & Massage"
                                 {...field}
                               />

@@ -90,7 +90,7 @@ const SIDEBAR_NAV_MAIN: Array<{
     ],
   },
   {
-    title: "Dịch vụ",
+    title: " Dịch vụ & F&B",
     url: FE_URL.dashboard.services.list,
     icon: Utensils,
     items: [

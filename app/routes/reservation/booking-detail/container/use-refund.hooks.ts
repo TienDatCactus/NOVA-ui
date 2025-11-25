@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { RefundsService } from "~/services/api/refunds";
 import type { CreateRefundForBookingRequestDto } from "~/services/api/refunds/dto";
 
@@ -12,6 +13,7 @@ export function useCreateRefund(bookingId: string) {
     mutationFn: async (data: CreateRefundForBookingRequestDto) =>
       await RefundsService.createBookingRefund(bookingId, data),
     onSuccess: () => {
+      toast.success("Hoàn tiền thành công");
       queryClient.invalidateQueries({
         queryKey: ["booking-detail", bookingId],
       });
@@ -21,6 +23,9 @@ export function useCreateRefund(bookingId: string) {
       queryClient.invalidateQueries({
         queryKey: ["invoices", bookingId],
       });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Hoàn tiền thất bại");
     },
   });
 }

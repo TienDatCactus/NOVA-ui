@@ -62,7 +62,7 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        <Button size={"sm"}>
+        <Button size={"sm"} onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Thêm phòng
         </Button>

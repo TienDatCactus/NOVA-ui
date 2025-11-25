@@ -78,14 +78,15 @@ export default function EditMenuSheet({
   const { mutate: updateMenuItem, isPending: isUpdating } = useUpdateMenuItem(
     menuItem.itemId
   );
-  const { data: menuCategories } = useMenuCategories();
-  const { data: units } = useUnits();
+  const { data: menuCategories, isPending: isLoadingCategories } =
+    useMenuCategories();
+  const { data: units, isPending: isLoadingUnits } = useUnits();
   const { data: stockItems } = useStockItemList({ includeInactive: false });
 
   useEffect(() => {
-    if (menuItem && menuItemDetail) {
+    if (menuItem && menuItemDetail && menuCategories && units) {
       form.reset({
-        CategoryId: menuItemDetail.categoryId,
+        CategoryId: menuItemDetail.categoryId || "",
         Code: menuItemDetail.code,
         Name: menuItemDetail.name,
         Description: menuItemDetail.description || "",
@@ -96,8 +97,6 @@ export default function EditMenuSheet({
         NewImages: [],
         Components: menuItemDetail.components.map((comp) => ({
           itemId: comp.itemId,
-          itemCode: menuItem.code,
-          itemName: comp.itemName,
           quantity: comp.quantity,
           notes: comp.notes || "",
         })),
@@ -106,7 +105,7 @@ export default function EditMenuSheet({
       setNewFiles([]);
       setNewPreviews([]);
     }
-  }, [menuItem, menuItemDetail, form]);
+  }, [menuItem, menuItemDetail, menuCategories, units, form]);
 
   useEffect(() => {
     form.setValue("NewImages", newFiles as any);
@@ -143,7 +142,7 @@ export default function EditMenuSheet({
   };
 
   // --- Render Loading ---
-  if (isLoadingDetail) {
+  if (isLoadingDetail || isLoadingCategories || isLoadingUnits) {
     return (
       <Sheet open={open} onOpenChange={handleClose}>
         <SheetContent className="sm:max-w-2xl p-0">
@@ -226,8 +225,10 @@ export default function EditMenuSheet({
                     newFiles={newFiles}
                     newPreviews={newPreviews}
                     removeMediaIds={removeMediaIds}
-                    setNewFiles={setNewFiles}
                     toggleRemoveExisting={toggleRemoveExisting}
+                    onDrop={(acceptedFiles) => {
+                      setNewFiles((prev) => [...prev, ...acceptedFiles]);
+                    }}
                   />
 
                   <ComponentsTab

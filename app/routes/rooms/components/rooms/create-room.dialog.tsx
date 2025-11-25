@@ -29,8 +29,8 @@ import {
 
 import { RoomSchema } from "~/services/api/rooms/room.schema";
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
-import { useCreateRoom } from "../container/rooms/mutation.hooks";
-import { useRoomTypes } from "../container/room-types/query.hooks";
+import { useCreateRoom } from "../../container/rooms/mutation.hooks";
+import { useRoomTypes } from "../../container/room-types/query.hooks";
 
 const { CreateRoomResponseSchema } = RoomSchema;
 const CreateRoomFormSchema = CreateRoomResponseSchema.pick({

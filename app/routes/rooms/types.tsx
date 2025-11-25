@@ -1,11 +1,7 @@
-import { useState } from "react";
-
-import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { CreateRoomTypeDialog } from "./components/create-room-types.dialog";
-import RoomTypesViewLayout from "./layouts/room-types-view.layout";
-import RoomTypesDataTable from "./components/room-types-list";
+import RoomTypesDataTable from "./components/room-types/room-types-list";
 import useRoomTypeFilter from "./container/room-types/filter.hooks";
 import { useRoomTypes } from "./container/room-types/query.hooks";
+import RoomTypesViewLayout from "./layouts/room-types-view.layout";
 
 export default function RoomTypesPage() {
   const {

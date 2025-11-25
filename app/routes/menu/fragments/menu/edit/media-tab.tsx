@@ -13,8 +13,8 @@ interface MediaTabProps {
   newFiles: File[];
   newPreviews: string[];
   removeMediaIds: string[];
-  setNewFiles: React.Dispatch<React.SetStateAction<File[]>>;
   toggleRemoveExisting: (id: string) => void;
+  onDrop: (acceptedFiles: File[]) => void;
 }
 
 const MediaTab: React.FC<MediaTabProps> = ({
@@ -22,8 +22,8 @@ const MediaTab: React.FC<MediaTabProps> = ({
   newFiles,
   newPreviews,
   removeMediaIds,
-  setNewFiles,
   toggleRemoveExisting,
+  onDrop,
 }) => {
   return (
     <TabsContent
@@ -54,6 +54,7 @@ const MediaTab: React.FC<MediaTabProps> = ({
           <Dropzone
             accept={{ "image/*": [] }}
             maxFiles={8}
+            onDrop={onDrop}
             className="group aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer bg-muted/5"
           >
             <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
@@ -84,9 +85,7 @@ const MediaTab: React.FC<MediaTabProps> = ({
                 type="button"
                 size="icon"
                 variant="destructive-ghost"
-                onClick={() =>
-                  setNewFiles((prev) => prev.filter((_, i) => i !== index))
-                }
+                onClick={() => onDrop(newFiles.filter((_, i) => i !== index))}
                 className="absolute w-6 h-6 top-1.5 right-1.5 p-1.5 rounded-full bg-black/50 text-white hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
               >
                 <X className="w-3.5 h-3.5" />

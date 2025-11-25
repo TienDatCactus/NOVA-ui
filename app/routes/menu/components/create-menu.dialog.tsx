@@ -89,11 +89,7 @@ export default function CreateMenuDialog({
   };
 
   const handleSubmit = (data: CreateMenuFormData) => {
-    createMenuItem(
-      data,
-      { onSuccess: handleClose },
-     
-    );
+    createMenuItem(data, { onSuccess: handleClose });
   };
 
   const handleClose = () => {
@@ -163,11 +159,26 @@ export default function CreateMenuDialog({
                     units={units}
                   />
 
-                  {/* --- TAB 2: MEDIA --- */}
                   <MediaTab
                     imagePreview={imagePreview}
                     handleRemoveImage={handleRemoveImage}
                     formErrors={form.formState.errors.Images}
+                    onDrop={(acceptedFiles: File[]) => {
+                      const currentImgs = form.getValues("Images") || [];
+                      const totalImgs =
+                        currentImgs.length + acceptedFiles.length;
+                      if (totalImgs > 8) {
+                        return;
+                      }
+                      const newImgs = [...currentImgs, ...acceptedFiles];
+                      form.setValue("Images", newImgs);
+                      setImagePreview((prev) => [
+                        ...prev,
+                        ...acceptedFiles.map((file) =>
+                          URL.createObjectURL(file)
+                        ),
+                      ]);
+                    }}
                   />
 
                   {/* --- TAB 3: COMPONENTS --- */}

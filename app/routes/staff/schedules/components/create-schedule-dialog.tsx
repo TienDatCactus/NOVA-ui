@@ -171,7 +171,7 @@ export default function CreateScheduleDialog({
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
-                                  className="w-full justify-between h-11"
+                                  className="w-full justify-between"
                                 >
                                   {field.value
                                     ? staffList?.find(
@@ -223,7 +223,7 @@ export default function CreateScheduleDialog({
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
-                            className="w-full justify-start h-11"
+                            className="w-full justify-start"
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Thêm nhân viên
@@ -325,7 +325,7 @@ export default function CreateScheduleDialog({
                               <FormControl>
                                 <Button
                                   variant="outline"
-                                  className="w-full justify-between h-11"
+                                  className="w-full justify-between"
                                 >
                                   {field.value?.length
                                     ? `${field.value.length} ca được chọn`
@@ -439,7 +439,7 @@ export default function CreateScheduleDialog({
                                     <Button
                                       variant="outline"
                                       className={cn(
-                                        "w-full justify-start text-left font-normal h-11",
+                                        "w-full justify-start text-left font-normal",
                                         !field.value && "text-muted-foreground"
                                       )}
                                     >
@@ -496,7 +496,7 @@ export default function CreateScheduleDialog({
                                     <Button
                                       variant="outline"
                                       className={cn(
-                                        "w-full justify-start text-left font-normal h-11",
+                                        "w-full justify-start text-left font-normal",
                                         !field.value && "text-muted-foreground"
                                       )}
                                     >

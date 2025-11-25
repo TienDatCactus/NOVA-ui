@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { differenceInDays, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 import {
+  AlertTriangle,
   CreditCard,
   DoorOpen,
   FileWarning,
@@ -8,12 +9,10 @@ import {
   Receipt,
   RotateCcw,
   Save,
-  AlertTriangle,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { AnimatePresence, motion } from "framer-motion"; // Optional: Cho hiệu ứng mượt mà, nếu không có thì dùng CSS conditional
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -34,10 +33,8 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "~/components/ui/form";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -51,20 +48,20 @@ import { useBookingDetail } from "../bookings/container/booking-query.hooks";
 import type { Route } from "./+types/booking-detail";
 
 // Components
-import AddCompletedChargesDialog from "./components/operations/add-completed-charges-dialog";
 import BookingRoomsBar from "./components/booking-rooms-bar";
 import CheckoutSheet from "./components/checkout/checkout-sheet";
 import CustomerInfoBar from "./components/customer-info-bar";
+import AddCompletedChargesDialog from "./components/operations/add-completed-charges-dialog";
 import PendingChargesSection from "./components/pending-charges-section";
 import RefundButton from "./components/refunds/refund-button";
 import RefundHistory from "./components/refunds/refund-history";
 import StayDetailBar from "./components/stay-detail-bar";
 
 // Hooks
+import { Alert, AlertTitle } from "~/components/ui/alert";
 import { useAddCompletedCharges } from "./container/use-booking-checkout.hooks";
 import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
-import { Alert, AlertTitle } from "~/components/ui/alert";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
@@ -376,8 +373,6 @@ function BookingActionsBar({
             bookingNumber={bookingDetail?.bookingCode || ""}
             bookingStatus={bookingDetail?.status || ""}
             totalPaidAmount={bookingDetail.paidAmount}
-            variant="outline"
-            className="border-destructive/50 text-destructive hover:bg-destructive/10"
           />
         </div>
 

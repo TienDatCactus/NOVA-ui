@@ -12,9 +12,9 @@ import {
 } from "~/components/ui/dialog";
 import { formatMoney } from "~/lib/utils";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import RoomTypesDetailDialog from "../room-types-detail.dialog";
 import { useState } from "react";
-import { RoomTypeActionsCell } from "../../fragments/room-types/action.cell";
+import { RoomTypeActionsCell } from "~/routes/rooms/fragments/room-types/action.cell";
+import RoomTypesDetailDialog from "../room-types-detail.dialog";
 
 export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   {
@@ -43,19 +43,11 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
             {row.original.code}
           </Button>
 
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent
-              onInteractOutside={(e) => e.preventDefault()}
-              onEscapeKeyDown={(e) => e.preventDefault()}
-              className="max-w-5xl"
-            >
-              <RoomTypesDetailDialog
-                roomTypeId={row.original.id}
-                open={open}
-                onOpenChange={setOpen}
-              />
-            </DialogContent>
-          </Dialog>
+          <RoomTypesDetailDialog
+            roomTypeId={row.original.id}
+            open={open}
+            onOpenChange={setOpen}
+          />
         </>
       );
     },

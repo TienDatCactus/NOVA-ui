@@ -27,6 +27,7 @@ async function bookingRefundHistory(bookingId: string) {
     return BookingRefundHistorySchema.parse(resp.data);
   } catch (error) {
     console.error(error);
+    return Promise.reject(error);
   }
 }
 

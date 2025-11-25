@@ -334,7 +334,7 @@ export function useUpdateScheduledTime() {
 }
 
 export function useMarkItemServed() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({
       orderId,
@@ -348,6 +348,12 @@ export function useMarkItemServed() {
       return await OrderService.setServedOrderItem(orderId, itemId, {
         servedAt,
       });
+    },
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      qc.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }

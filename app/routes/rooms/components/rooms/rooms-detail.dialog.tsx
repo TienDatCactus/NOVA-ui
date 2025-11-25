@@ -8,8 +8,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import BookingHistory from "../fragments/rooms/booking-history.tab";
-import RoomDetailTab from "../fragments/rooms/detail.tab";
+import BookingHistory from "../../fragments/rooms/booking-history.tab";
+import RoomDetailTab from "../../fragments/rooms/detail.tab";
 interface RoomDetailRowProps {
   roomId: string;
   open?: boolean;

@@ -10,12 +10,14 @@ interface MediaTabProps {
   imagePreview: string[];
   handleRemoveImage: (index: number) => void;
   formErrors?: { message?: string };
+  onDrop: (acceptedFiles: File[]) => void;
 }
 
 const MediaTab: React.FC<MediaTabProps> = ({
   imagePreview,
   handleRemoveImage,
   formErrors,
+  onDrop,
 }) => {
   return (
     <TabsContent
@@ -39,6 +41,7 @@ const MediaTab: React.FC<MediaTabProps> = ({
           <Dropzone
             accept={{ "image/*": [] }}
             maxFiles={8}
+            onDrop={onDrop}
             className="group aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer bg-muted/5"
           >
             <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
