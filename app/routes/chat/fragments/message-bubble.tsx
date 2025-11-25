@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { Loader2, Languages, Globe } from "lucide-react";
+import { Loader2, Languages, Globe, Check, CheckCheck } from "lucide-react";
 import { cn } from "~/lib/utils";
 import type { ChatMessage } from "~/lib/signalr";
 import { format, parseISO } from "date-fns";
@@ -110,16 +110,41 @@ export function MessageBubble({
           </div>
         )}
 
-        {/* Footer: timestamp + action buttons */}
+        {/* Footer: timestamp + read status + action buttons */}
         <div className="flex items-center justify-between mt-1 gap-2">
-          <p
-            className={cn(
-              "text-xs",
-              isOwnMessage ? "opacity-70" : "text-muted-foreground"
+          <div className="flex items-center gap-1">
+            <p
+              className={cn(
+                "text-xs",
+                isOwnMessage ? "opacity-70" : "text-muted-foreground"
+              )}
+            >
+              {format(parseISO(message.createdAt), "HH:mm", { locale: vi })}
+            </p>
+
+            {/* Read status indicator (only for staff messages) */}
+            {isStaff && isOwnMessage && (
+              <div
+                className={cn(
+                  "flex items-center",
+                  isOwnMessage
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground"
+                )}
+                title={
+                  message.isRead && message.readAt
+                    ? `Đã đọc lúc ${format(parseISO(message.readAt), "HH:mm dd/MM/yyyy", { locale: vi })}`
+                    : "Đã gửi"
+                }
+              >
+                {message.isRead ? (
+                  <CheckCheck className="h-3 w-3" />
+                ) : (
+                  <Check className="h-3 w-3" />
+                )}
+              </div>
             )}
-          >
-            {format(parseISO(message.createdAt), "HH:mm", { locale: vi })}
-          </p>
+          </div>
 
           <div className="flex items-center gap-1">
             {/* Translation toggle button */}

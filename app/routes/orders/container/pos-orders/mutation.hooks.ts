@@ -6,6 +6,7 @@ import type {
   AddSingleItemToPOSOrderRequestDto,
   AddBatchItemsToPOSOrderRequestDto,
   OrderPayNowRequestDto,
+  CreatePOSOrderWithItemsRequestDto,
 } from "~/services/api/orders/dto";
 
 /**
@@ -30,6 +31,22 @@ export function useCreatePOSOrder() {
         queryKey: ["checkout", "pending-charges", data.bookingId],
       });
       toast.success("Đã tạo order thành công");
+    },
+  });
+}
+export function useCreatePOSOrderWithItems() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreatePOSOrderWithItemsRequestDto) => {
+      return await OrderService.createPosOrderWithItems(data);
+    },
+    onSuccess: (_, data) => {
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", data.bookingId],
+      });
     },
   });
 }

@@ -150,6 +150,7 @@ const Orders = {
   payServiceOrderNow: (id: string) => `service-orders/${id}/pay-now`,
   setScheduledServiceOrder: (id: string) =>
     `service-orders/${id}/set-scheduled`,
+  createPosOrderWithItems: "PosOrders/with-items",
 };
 
 const Invoices = {
@@ -181,6 +182,9 @@ const Chat = {
   staffInbox: "chat/staff/inbox",
   assign: (sessionId: string) => `chat/sessions/${sessionId}/assign`,
   close: (sessionId: string) => `chat/sessions/${sessionId}/close`,
+  markRead: (messageId: string) => `chat/messages/${messageId}/mark-read`,
+  markAllRead: (sessionId: string) =>
+    `chat/sessions/${sessionId}/mark-all-read`,
 };
 
 const Staff = {
@@ -311,6 +315,15 @@ const Refunds = {
     `Refunds/booking/${bookingId}/history`,
 };
 
+const Expenses = {
+  list: "Expenses",
+  create: "Expenses",
+  detail: (id: string) => `Expenses/${id}`,
+  update: (id: string) => `Expenses/${id}`,
+  delete: (id: string) => `Expenses/${id}`,
+  summary: "Expenses/summary",
+};
+
 export {
   Auth,
   User,
@@ -338,4 +351,5 @@ export {
   Translation,
   Stock,
   Refunds,
+  Expenses,
 };

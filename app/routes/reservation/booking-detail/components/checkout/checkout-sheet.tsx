@@ -3,23 +3,22 @@ import { vi } from "date-fns/locale";
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  CreditCard,
+  FileText,
   Info,
   Loader2,
   Receipt,
+  Wallet,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "~/components/ui/empty";
+import { Card, CardContent } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
@@ -61,7 +60,7 @@ interface CheckoutSheetProps {
   onOpenChange: (open: boolean) => void;
   bookingId: string;
   bookingCode: string;
-  bookingDetail?: BookingDetailResponseDto; // NEW: Pass booking detail for validation
+  bookingDetail?: BookingDetailResponseDto;
 }
 
 export default function CheckoutSheet({
@@ -97,7 +96,6 @@ export default function CheckoutSheet({
   const { mutate: finalizeCheckout, isPending: isCheckingOut } =
     useCheckout(bookingId);
 
-  // NEW: Use enhanced checkout eligibility validation
   const checkoutEligibility = useCheckoutEligibility(bookingDetail, {
     pendingOrders: pendingCharges?.pendingOrders,
   });
@@ -107,7 +105,6 @@ export default function CheckoutSheet({
     warnings,
   } = checkoutEligibility;
 
-  // Detect if this is post-checkout mode
   const isPostCheckout = bookingDetail?.status === "CheckedOut";
 
   const previewData = useMemo(() => {
@@ -119,25 +116,32 @@ export default function CheckoutSheet({
         applyServiceCharge,
       };
     }
-
     const posOrderIds =
       pendingCharges.pendingOrders.posOrders?.map((order) => order.id) || [];
     const serviceOrderIds =
       pendingCharges.pendingOrders.serviceOrders?.map((order) => order.id) ||
       [];
-
-    return {
-      posOrderIds,
-      serviceOrderIds,
-      applyVat,
-      applyServiceCharge,
-    };
+    return { posOrderIds, serviceOrderIds, applyVat, applyServiceCharge };
   }, [pendingCharges, applyVat, applyServiceCharge]);
 
-  // Use invoice preview hook
   const { data: invoicePreview } = useInvoicePreview(previewData, open);
 
   const activeInvoiceId = selectedInvoiceId || createdInvoiceId;
+
+  const totalDebt = useMemo(() => {
+    const pendingPreview = invoicePreview?.totalAmount || 0;
+    const otherInvoicesBalance =
+      existingInvoices?.reduce((acc, inv) => acc + (inv.balance || 0), 0) || 0;
+
+    return pendingPreview + otherInvoicesBalance;
+  }, [pendingCharges, invoicePreview, existingInvoices]);
+
+  const shouldShowCreateInvoice = useMemo(() => {
+    const hasPendingItems = (invoicePreview?.totalAmount || 0) > 0;
+    if (hasPendingItems) return true;
+    if (!existingInvoices || existingInvoices.length === 0) return true;
+    return false;
+  }, [invoicePreview, existingInvoices]);
 
   const handleCreateInvoice = () => {
     createInvoice(undefined, {
@@ -150,36 +154,22 @@ export default function CheckoutSheet({
     });
   };
 
-  // Handler to select existing invoice
   const handleSelectInvoice = (invoiceId: string) => {
     setSelectedInvoiceId(invoiceId);
     setShowInvoiceDetail(true);
   };
 
-  // Handler to finalize checkout
   const handleFinalCheckout = () => {
     finalizeCheckout(
-      {
-        actualCheckoutTime: new Date().toISOString(),
-        notes: undefined,
-      },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-        },
-      }
+      { actualCheckoutTime: new Date().toISOString() },
+      { onSuccess: () => onOpenChange(false) }
     );
   };
 
-  const shouldShowCreateInvoice = useMemo(() => {
-    if (!existingInvoices || existingInvoices.length === 0) {
-      return true;
-    }
-    const hasUnpaidInvoice = existingInvoices?.some(
-      (invoice) => invoice.invoiceType !== "Checkout" && invoice.balance! > 0
-    );
-    return hasUnpaidInvoice;
-  }, [, existingInvoices]);
+  const handleSheetClose = (isOpen: boolean) => {
+    if (!isOpen) reset();
+    onOpenChange(isOpen);
+  };
 
   const handleBackFromDetail = () => {
     setShowInvoiceDetail(false);
@@ -187,527 +177,506 @@ export default function CheckoutSheet({
     setCreatedInvoiceId(null);
   };
 
-  const handleSheetClose = (isOpen: boolean) => {
-    if (!isOpen) {
-      reset(); // Reset all checkout state
+  const renderDebtStatus = () => {
+    if (isLoadingCharges) return null;
+
+    if (totalDebt === 0) {
+      return (
+        <div className="flex flex-col items-end px-4 py-2 bg-green-50 border border-green-100 rounded-lg">
+          <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3" /> Trạng thái
+          </span>
+          <span className="text-lg font-bold text-green-700 font-mono">
+            Đã thanh toán đầy đủ
+          </span>
+        </div>
+      );
     }
-    onOpenChange(isOpen);
+
+    // Case 2: Debt > 0 (Guest needs to pay)
+    if (totalDebt > 0) {
+      return (
+        <div className="flex flex-col items-end px-4 py-2 bg-red-50 border border-red-100 rounded-lg">
+          <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
+            Khách cần trả
+          </span>
+          <span className="text-xl font-bold text-red-700 font-mono">
+            {formatMoney(totalDebt).vndFormatted}
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col items-end px-4 py-2 bg-orange-50 border border-orange-100 rounded-lg">
+        <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
+          Cần hoàn tiền
+        </span>
+        <span className="text-xl font-bold text-orange-700 font-mono">
+          {formatMoney(Math.abs(totalDebt)).vndFormatted}
+        </span>
+      </div>
+    );
   };
 
   return (
     <>
-      {/* Main Checkout Sheet */}
       <Sheet open={open} onOpenChange={handleSheetClose}>
         <SheetContent
           side="right"
-          className="w-full sm:max-w-[90vw] lg:max-w-6xl p-0"
+          className="w-full sm:max-w-[100vw] lg:max-w-6xl gap-0 p-0 flex flex-col bg-slate-50"
         >
-          <SheetHeader className="p-6 pb-4 border-b">
-            <SheetTitle className="text-xl">
-              {isPostCheckout
-                ? `Thu tiền sau checkout - #${bookingCode}`
-                : `Checkout đơn đặt phòng #${bookingCode}`}
-            </SheetTitle>
-            <SheetDescription>
-              {isPostCheckout
-                ? "Booking đã checkout. Vui lòng thanh toán các hóa đơn còn nợ."
-                : "Xem tổng quan chi phí và hoàn tất checkout"}
-            </SheetDescription>
+          {/* HEADER */}
+          <SheetHeader className="px-6 py-4 border-b bg-background shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <SheetTitle className="text-xl flex items-center gap-2">
+                  {isPostCheckout ? (
+                    <span>Xem hóa đơn</span>
+                  ) : (
+                    <>
+                      <FileText className="h-5 w-5 text-primary" />
+                      Checkout Booking #{bookingCode}
+                    </>
+                  )}
+                </SheetTitle>
+                <SheetDescription>
+                  Kiểm tra các khoản phí phát sinh, thanh toán hóa đơn và hoàn
+                  tất thủ tục trả phòng.
+                </SheetDescription>
+              </div>
+              {renderDebtStatus()}
+            </div>
           </SheetHeader>
 
-          {isLoadingCharges ? (
-            <div className="flex items-center justify-center flex-1">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : pendingCharges ? (
-            <>
-              <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
-                <div className="col-span-2">
-                  <div className="flex items-center justify-between">
-                    <h1 className="text-lg font-semibold">
-                      Preview Invoice - Hóa đơn tạm tính
-                    </h1>
-                    <Badge variant="outline">Chưa tạo</Badge>
-                  </div>
-                  <div className="p-6">
-                    {invoicePreview ? (
-                      <div className="space-y-4">
-                        {/* Fee Toggles */}
-                        <div className="flex items-center gap-6 p-4  rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              id="preview-vat"
-                              checked={applyVat}
-                              onCheckedChange={setApplyVat}
-                            />
-                            <Label
-                              htmlFor="preview-vat"
-                              className="cursor-pointer"
-                            >
-                              Áp dụng VAT
-                            </Label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              id="preview-service"
-                              checked={applyServiceCharge}
-                              onCheckedChange={setApplyServiceCharge}
-                            />
-                            <Label
-                              htmlFor="preview-service"
-                              className="cursor-pointer"
-                            >
-                              Áp dụng Service Charge
-                            </Label>
-                          </div>
-                        </div>
-
-                        {/* POS Items Table */}
-                        <div className="space-y-2">
-                          <h3 className="text-sm font-semibold uppercase text-muted-foreground">
-                            Đồ ăn & Đồ uống (POS)
-                          </h3>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Tên món</TableHead>
-                                <TableHead className="text-right">SL</TableHead>
-                                <TableHead className="text-right">
-                                  Đơn giá
-                                </TableHead>
-                                <TableHead className="text-right">
-                                  Thành tiền
-                                </TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {invoicePreview.posOrderItems &&
-                              invoicePreview.posOrderItems.length > 0 ? (
-                                invoicePreview.posOrderItems.map(
-                                  (item, index) => (
-                                    <TableRow key={index}>
-                                      <TableCell className="font-medium">
-                                        {item.itemName}
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {item.quantity}
-                                      </TableCell>
-                                      <TableCell className="text-right font-mono text-sm">
-                                        {
-                                          formatMoney(item.unitPrice || 0)
-                                            .vndFormatted
-                                        }
-                                      </TableCell>
-                                      <TableCell className="text-right font-mono text-sm">
-                                        {
-                                          formatMoney(item.amount || 0)
-                                            .vndFormatted
-                                        }
-                                      </TableCell>
-                                    </TableRow>
-                                  )
-                                )
-                              ) : (
-                                <TableRow>
-                                  <TableCell
-                                    colSpan={4}
-                                    className="text-center text-muted-foreground py-4"
-                                  >
-                                    Không có món ăn/đồ uống
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        {/* Service Items Table */}
-                        <div className="space-y-2">
-                          <h3 className="text-sm font-semibold uppercase text-muted-foreground">
-                            Dịch vụ
-                          </h3>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Tên dịch vụ</TableHead>
-                                <TableHead className="text-right">SL</TableHead>
-                                <TableHead className="text-right">
-                                  Đơn giá
-                                </TableHead>
-                                <TableHead className="text-right">
-                                  Thành tiền
-                                </TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {invoicePreview.serviceOrderItems &&
-                              invoicePreview.serviceOrderItems.length > 0 ? (
-                                invoicePreview.serviceOrderItems.map(
-                                  (item, index) => (
-                                    <TableRow key={index}>
-                                      <TableCell className="font-medium">
-                                        {item.itemName}
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {item.quantity}
-                                      </TableCell>
-                                      <TableCell className="text-right font-mono text-sm">
-                                        {
-                                          formatMoney(item.unitPrice || 0)
-                                            .vndFormatted
-                                        }
-                                      </TableCell>
-                                      <TableCell className="text-right font-mono text-sm">
-                                        {
-                                          formatMoney(item.amount || 0)
-                                            .vndFormatted
-                                        }
-                                      </TableCell>
-                                    </TableRow>
-                                  )
-                                )
-                              ) : (
-                                <TableRow>
-                                  <TableCell
-                                    colSpan={4}
-                                    className="text-center text-muted-foreground py-4"
-                                  >
-                                    Không có dịch vụ
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        <Separator />
-
-                        {/* Summary Section */}
-                        <div className="space-y-2 pt-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Subtotal:
+          <div className="flex-1 overflow-hidden">
+            {isLoadingCharges ? (
+              <div className="h-full flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                <p className="text-muted-foreground animate-pulse">
+                  Đang tổng hợp dữ liệu thanh toán...
+                </p>
+              </div>
+            ) : pendingCharges ? (
+              <div className="h-full flex flex-col lg:flex-row">
+                {/* LEFT COL: INVOICE PREVIEW (DRAFT BILL) */}
+                <ScrollArea className="flex-1 border-r bg-background">
+                  <div className="p-6 space-y-6">
+                    {/* Section: Room Info Quick View (ReadOnly) */}
+                    {pendingCharges.roomInvoice &&
+                      (pendingCharges.roomInvoice.balance || 0) > 0 && (
+                        <Alert className="border-orange-200 bg-orange-50">
+                          <Wallet className="h-4 w-4 text-orange-600" />
+                          <AlertTitle className="text-orange-800">
+                            Tiền phòng chưa thanh toán
+                          </AlertTitle>
+                          <AlertDescription className="flex justify-between items-center mt-2">
+                            <span className="text-orange-800/80">
+                              Hóa đơn phòng:
                             </span>
-                            <span className="font-mono">
-                              {
-                                formatMoney(invoicePreview.subTotal || 0)
-                                  .vndFormatted
-                              }
-                            </span>
-                          </div>
-                          {invoicePreview.vatAmount > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">
-                                VAT:
-                              </span>
-                              <span className="font-mono">
-                                {
-                                  formatMoney(invoicePreview.vatAmount)
-                                    .vndFormatted
-                                }
-                              </span>
-                            </div>
-                          )}
-                          {invoicePreview.serviceChargeAmount > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">
-                                Service Charge:
-                              </span>
-                              <span className="font-mono">
-                                {
-                                  formatMoney(
-                                    invoicePreview.serviceChargeAmount
-                                  ).vndFormatted
-                                }
-                              </span>
-                            </div>
-                          )}
-                          <Separator />
-                          <div className="flex justify-between font-semibold text-base">
-                            <span>Tổng cộng:</span>
-                            <span className="font-mono text-primary">
-                              {
-                                formatMoney(invoicePreview.totalAmount || 0)
-                                  .vndFormatted
-                              }
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <Empty>
-                        <EmptyHeader>
-                          <EmptyMedia variant="icon">
-                            <Receipt />
-                          </EmptyMedia>
-                          <EmptyTitle>Không có charges nào</EmptyTitle>
-                          <EmptyDescription>
-                            Booking này không có POS orders hoặc Service orders
-                            chưa thanh toán
-                          </EmptyDescription>
-                        </EmptyHeader>
-                      </Empty>
-                    )}
-                  </div>
-                </div>
-
-                <div className="col-span-1">
-                  <Card className="shadow-sm gap-2 p-4">
-                    <CardHeader className="p-0">
-                      <CardTitle className="text-lg">Thông tin phòng</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0 space-y-4">
-                      {pendingCharges.roomInvoice ? (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Tổng tiền phòng:
-                            </span>
-                            <span className="font-mono font-semibold">
-                              {
-                                formatMoney(
-                                  pendingCharges.roomInvoice.total || 0
-                                ).vndFormatted
-                              }
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Đã thanh toán:
-                            </span>
-                            <span className="font-mono">
-                              {
-                                formatMoney(
-                                  pendingCharges.roomInvoice.paid || 0
-                                ).vndFormatted
-                              }
-                            </span>
-                          </div>
-                          <Separator />
-                          <div className="flex justify-between text-base font-semibold">
-                            <span>Còn lại:</span>
-                            <span className="font-mono text-destructive text-lg">
+                            <span className="font-bold font-mono text-lg text-orange-700">
                               {
                                 formatMoney(
                                   pendingCharges.roomInvoice.balance || 0
                                 ).vndFormatted
                               }
                             </span>
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <h2 className="text-lg font-semibold flex items-center gap-2">
+                            Phí phát sinh & Dịch vụ
+                            <Badge
+                              variant="secondary"
+                              className="text-xs font-normal"
+                            >
+                              Chưa lên hóa đơn
+                            </Badge>
+                          </h2>
+                          <p className="text-sm text-muted-foreground">
+                            Các khoản này sẽ được gộp vào Invoice Checkout
+                          </p>
+                        </div>
+
+                        {/* Toggles */}
+                        <div className="flex items-center gap-4 bg-muted/40 p-2 rounded-lg border">
+                          <div className="flex items-center gap-2 px-2">
+                            <Switch
+                              id="vat"
+                              checked={applyVat}
+                              onCheckedChange={setApplyVat}
+                            />
+                            <Label
+                              htmlFor="vat"
+                              className="cursor-pointer text-xs font-medium"
+                            >
+                              VAT
+                            </Label>
+                          </div>
+                          <Separator orientation="vertical" className="h-6" />
+                          <div className="flex items-center gap-2 px-2">
+                            <Switch
+                              id="svc"
+                              checked={applyServiceCharge}
+                              onCheckedChange={setApplyServiceCharge}
+                            />
+                            <Label
+                              htmlFor="svc"
+                              className="cursor-pointer text-xs font-medium"
+                            >
+                              Service Charge
+                            </Label>
                           </div>
                         </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          Không có thông tin phòng
-                        </p>
+                      </div>
+
+                      {/* Bill Metaphor Container */}
+                      <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
+                        {invoicePreview &&
+                        (invoicePreview.posOrderItems?.length > 0 ||
+                          invoicePreview.serviceOrderItems?.length > 0) ? (
+                          <>
+                            <Table>
+                              <TableHeader className="bg-muted/30">
+                                <TableRow>
+                                  <TableHead className="w-[50%] text-xs font-semibold uppercase text-muted-foreground">
+                                    Hạng mục
+                                  </TableHead>
+                                  <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
+                                    SL
+                                  </TableHead>
+                                  <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
+                                    Đơn giá
+                                  </TableHead>
+                                  <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
+                                    Thành tiền
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {/* POS Items */}
+                                {invoicePreview.posOrderItems?.map(
+                                  (item, idx) => (
+                                    <TableRow
+                                      key={`pos-${idx}`}
+                                      className="group hover:bg-muted/10"
+                                    >
+                                      <TableCell className="font-medium group-hover:text-primary transition-colors py-3">
+                                        {item.itemName}
+                                        <span className="block text-xs text-muted-foreground font-normal">
+                                          Minibar / Restaurant
+                                        </span>
+                                      </TableCell>
+                                      <TableCell className="text-right py-3">
+                                        {item.quantity}
+                                      </TableCell>
+                                      <TableCell className="text-right font-mono text-xs py-3">
+                                        {
+                                          formatMoney(item.unitPrice)
+                                            .vndFormatted
+                                        }
+                                      </TableCell>
+                                      <TableCell className="text-right font-mono font-medium py-3">
+                                        {formatMoney(item.amount).vndFormatted}
+                                      </TableCell>
+                                    </TableRow>
+                                  )
+                                )}
+
+                                {/* Service Items */}
+                                {invoicePreview.serviceOrderItems?.map(
+                                  (item, idx) => (
+                                    <TableRow
+                                      key={`svc-${idx}`}
+                                      className="group hover:bg-muted/10"
+                                    >
+                                      <TableCell className="font-medium group-hover:text-primary transition-colors py-3">
+                                        {item.itemName}
+                                        <span className="block text-xs text-muted-foreground font-normal">
+                                          Spa / Laundry / Other
+                                        </span>
+                                      </TableCell>
+                                      <TableCell className="text-right py-3">
+                                        {item.quantity}
+                                      </TableCell>
+                                      <TableCell className="text-right font-mono text-xs py-3">
+                                        {
+                                          formatMoney(item.unitPrice)
+                                            .vndFormatted
+                                        }
+                                      </TableCell>
+                                      <TableCell className="text-right font-mono font-medium py-3">
+                                        {formatMoney(item.amount).vndFormatted}
+                                      </TableCell>
+                                    </TableRow>
+                                  )
+                                )}
+                              </TableBody>
+                            </Table>
+
+                            {/* Bill Footer Summary */}
+                            <div className="bg-muted/10 p-4 border-t space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Tạm tính:
+                                </span>
+                                <span className="font-mono">
+                                  {
+                                    formatMoney(invoicePreview.subTotal)
+                                      .vndFormatted
+                                  }
+                                </span>
+                              </div>
+                              {(invoicePreview.vatAmount > 0 ||
+                                invoicePreview.serviceChargeAmount > 0) && (
+                                <div className="text-xs text-muted-foreground space-y-1 py-1">
+                                  {invoicePreview.vatAmount > 0 && (
+                                    <div className="flex justify-between">
+                                      <span>VAT:</span>
+                                      <span>
+                                        {
+                                          formatMoney(invoicePreview.vatAmount)
+                                            .vndFormatted
+                                        }
+                                      </span>
+                                    </div>
+                                  )}
+                                  {invoicePreview.serviceChargeAmount > 0 && (
+                                    <div className="flex justify-between">
+                                      <span>Service Charge:</span>
+                                      <span>
+                                        {
+                                          formatMoney(
+                                            invoicePreview.serviceChargeAmount
+                                          ).vndFormatted
+                                        }
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              <Separator className="bg-slate-300" />
+                              <div className="flex justify-between items-center pt-1">
+                                <span className="font-semibold text-foreground">
+                                  Tổng phát sinh:
+                                </span>
+                                <span className="font-bold text-xl text-primary font-mono">
+                                  {
+                                    formatMoney(invoicePreview.totalAmount)
+                                      .vndFormatted
+                                  }
+                                </span>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="py-12 flex flex-col items-center text-center p-4">
+                            <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-3">
+                              <Receipt className="w-8 h-8 text-muted-foreground/40" />
+                            </div>
+                            <h3 className="text-base font-semibold text-muted-foreground">
+                              Không có phí phát sinh
+                            </h3>
+                            <p className="text-sm text-muted-foreground/60 max-w-xs mt-1">
+                              Booking này không có các khoản charge từ POS hoặc
+                              Dịch vụ chưa thanh toán.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </ScrollArea>
+
+                {/* RIGHT COL: INVOICE LIST & PAYMENT */}
+                <div className="w-full lg:w-[420px] bg-slate-50 border-l flex flex-col h-full shadow-inner">
+                  <div className="p-6 flex-1 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold uppercase text-muted-foreground flex items-center gap-2">
+                        <CreditCard className="w-4 h-4" />
+                        Hóa đơn cần thanh toán
+                      </h3>
+                      {existingInvoices && (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] font-normal"
+                        >
+                          {existingInvoices.length}
+                        </Badge>
                       )}
-                    </CardContent>
-                  </Card>
-                  <Separator className="my-6" />
-                  <div className="grid gap-2">
-                    <h1>
-                      Lịch sử hóa đơn{" "}
-                      {existingInvoices && existingInvoices.length > 0
-                        ? `(${existingInvoices.length})`
-                        : ""}
-                    </h1>
-                    <div className="">
-                      {isLoadingInvoices ? (
-                        <div className="flex items-center justify-center py-8">
-                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                        </div>
-                      ) : existingInvoices && existingInvoices.length > 0 ? (
-                        <div className="grid gap-3">
-                          {existingInvoices.map((invoice) => (
+                    </div>
+
+                    {isLoadingInvoices ? (
+                      <div className="flex flex-col gap-3">
+                        {[1, 2].map((i) => (
+                          <div
+                            key={i}
+                            className="h-24 bg-muted/20 animate-pulse rounded-lg"
+                          />
+                        ))}
+                      </div>
+                    ) : existingInvoices && existingInvoices.length > 0 ? (
+                      <div className="space-y-3">
+                        {existingInvoices.map((invoice) => {
+                          const isPaid = invoice.status === "Paid";
+                          return (
                             <Card
                               key={invoice.id}
-                              className="p-4 hover:shadow-md transition-shadow cursor-pointer bg-card border"
+                              className={cn(
+                                "cursor-pointer transition-all duration-200 group relative overflow-hidden p-0 ",
+                                isPaid
+                                  ? "opacity-60 bg-slate-100 hover:opacity-100 hover:border-green-500 border-transparent shadow-none"
+                                  : "bg-white shadow-sm border-l-4 border-l-orange-500 hover:shadow-md hover:border-l-orange-600"
+                              )}
                               onClick={() => handleSelectInvoice(invoice.id!)}
                             >
-                              <div className="flex items-center justify-between">
-                                <div className="space-y-1">
-                                  <p className="font-semibold text-sm hover:text-primary">
-                                    {invoice.invoiceNo}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {invoice.issuedAt
-                                      ? format(
-                                          parseISO(invoice.issuedAt),
-                                          "dd/MM/yyyy HH:mm",
-                                          { locale: vi }
-                                        )
-                                      : "N/A"}
-                                  </p>
+                              <CardContent className="p-4">
+                                <div className="flex justify-between items-center">
+                                  <div className="space-y-0.5">
+                                    <p
+                                      className={cn(
+                                        "font-semibold text-sm",
+                                        !isPaid &&
+                                          "text-foreground group-hover:text-primary"
+                                      )}
+                                    >
+                                      {invoice.invoiceNo}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {invoice.issuedAt
+                                        ? format(
+                                            parseISO(invoice.issuedAt),
+                                            "dd/MM HH:mm",
+                                            { locale: vi }
+                                          )
+                                        : "N/A"}
+                                    </p>
+                                  </div>
                                   <Badge
-                                    variant={
-                                      INVOICE_TYPES.find(
-                                        (item) =>
-                                          item.value === invoice.invoiceType
-                                      )?.variant
-                                    }
+                                    variant={isPaid ? "success" : "warning"}
+                                    className="text-[10px] px-2"
                                   >
                                     {
-                                      INVOICE_TYPES.find(
-                                        (item) =>
-                                          item.value === invoice.invoiceType
+                                      INVOICE_STATUSES.find(
+                                        (i) => i.value === invoice.status
                                       )?.label
                                     }
                                   </Badge>
                                 </div>
-                                <div className="text-right space-y-2">
-                                  <Badge
-                                    variant={
-                                      INVOICE_STATUSES.find(
-                                        (item) => item.value === invoice.status
-                                      )?.variant
-                                    }
-                                  >
-                                    {
-                                      INVOICE_STATUSES.find(
-                                        (item) => item.value === invoice.status
-                                      )?.label
-                                    }
-                                  </Badge>
-                                  {(invoice.balance || 0) > 0 && (
-                                    <p className="text-xs text-destructive font-mono">
-                                      Còn:{" "}
+
+                                {!isPaid && (
+                                  <div className="flex justify-between items-end mt-3 pt-2 border-t border-dashed">
+                                    <span className="text-xs text-muted-foreground">
+                                      Còn nợ:
+                                    </span>
+                                    <span className="font-bold text-destructive font-mono text-base">
                                       {
                                         formatMoney(invoice.balance || 0)
                                           .vndFormatted
                                       }
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
+                                    </span>
+                                  </div>
+                                )}
+                              </CardContent>
                             </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <Empty>
-                          <EmptyHeader>
-                            <EmptyMedia variant="icon">
-                              <Receipt />
-                            </EmptyMedia>
-                            <EmptyTitle>Chưa có hóa đơn nào</EmptyTitle>
-                            <EmptyDescription>
-                              Tạo invoice mới để bắt đầu thanh toán
-                            </EmptyDescription>
-                          </EmptyHeader>
-                        </Empty>
-                      )}
-                    </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 px-4 text-sm text-muted-foreground bg-white/50 rounded-lg border border-dashed">
+                        Chưa có hóa đơn nào được tạo.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ACTION PANEL IN RIGHT COL */}
+                  <div className="p-4 bg-white border-t space-y-3 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
+                    {shouldShowCreateInvoice && !isPostCheckout ? (
+                      <Button
+                        className="w-full h-12 text-base shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                        onClick={handleCreateInvoice}
+                        disabled={isCreatingInvoice}
+                        variant="default"
+                      >
+                        {isCreatingInvoice ? (
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        ) : (
+                          <Receipt className="mr-2 h-5 w-5" />
+                        )}
+                        Tạo Invoice thanh toán
+                      </Button>
+                    ) : (
+                      <div className="p-3 bg-green-50 text-green-700 text-sm rounded-md text-center border border-green-100 flex items-center justify-center gap-2 font-medium">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Sẵn sàng hoàn tất
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </>
-          ) : (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Info />
-                </EmptyMedia>
-                <EmptyTitle>Không tìm thấy thông tin</EmptyTitle>
-                <EmptyDescription>
-                  Không tìm thấy thông tin checkout cho booking này
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          )}
-          <SheetFooter className="p-6 pt-4 border-t">
-            <div
-              className={cn("w-full flex space-y-3", {
-                "justify-between":
-                  warnings.length > 0 ||
-                  (!canCheckout && blockingReasons.length > 0),
-                "justify-end":
-                  warnings.length === 0 &&
-                  (canCheckout || blockingReasons.length === 0),
-              })}
-            >
-              {/* Blocking Reasons Alert */}
-              {!canCheckout && blockingReasons.length > 0 && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Không thể checkout</AlertTitle>
-                  <AlertDescription>
-                    <ul className="list-disc list-inside space-y-1">
-                      {blockingReasons.map((reason, i) => (
-                        <li key={i}>{reason}</li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
+            ) : null}
+          </div>
 
-              {/* Warnings Alert */}
-              {warnings.length > 0 && (
-                <Alert variant="warning">
-                  <AlertTriangle />
-                  <AlertTitle>Cảnh báo</AlertTitle>
-                  <AlertDescription>
-                    <ul className="list-disc list-inside space-y-1">
-                      {warnings.map((warning, i) => (
-                        <li key={i}>{warning}</li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
+          <SheetFooter className="p-4 border-t bg-background shrink-0 flex-col sm:flex-row gap-4 sm:items-center sm:justify-between z-20 shadow-sm">
+            <div className="flex-1">
+              {!canCheckout && blockingReasons.length > 0 ? (
+                <div className="flex items-center gap-3 text-destructive text-sm font-medium bg-destructive/5 border border-destructive/10 px-4 py-3 rounded-md">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <span>
+                    {blockingReasons[0]}{" "}
+                    {blockingReasons.length > 1 &&
+                      `(+${blockingReasons.length - 1} vấn đề khác)`}
+                  </span>
+                </div>
+              ) : warnings.length > 0 ? (
+                <div className="flex items-center gap-3 text-orange-600 text-sm font-medium bg-orange-50 border border-orange-100 px-4 py-3 rounded-md">
+                  <AlertTriangle className="w-5 h-5 shrink-0" />
+                  <span>{warnings[0]}</span>
+                </div>
+              ) : (
+                <div className=" items-center gap-2 text-sm text-muted-foreground hidden sm:flex">
+                  <Info className="w-4 h-4" />
+                  <span>
+                    Kiểm tra kỹ thông tin và nhận chìa khóa trước khi hoàn tất.
+                  </span>
+                </div>
               )}
-
-              {/* Post-checkout info */}
-              {isPostCheckout && (
-                <Alert variant="info">
-                  <Info className="h-4 w-4 " />
-                  <AlertDescription>
-                    Booking đã checkout. Chỉ có thể thanh toán các hóa đơn còn
-                    nợ.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div className="flex justify-end space-x-3">
-                {shouldShowCreateInvoice && !isPostCheckout && (
-                  <Button
-                    onClick={handleCreateInvoice}
-                    disabled={isCreatingInvoice}
-                    variant={"success-outline"}
-                  >
-                    {isCreatingInvoice ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Đang tạo invoice...
-                      </>
-                    ) : (
-                      <>
-                        <Receipt className="w-4 h-4 mr-2" />
-                        Tạo Invoice
-                      </>
-                    )}
-                  </Button>
-                )}
-                {/* Only show checkout button if not in post-checkout mode */}
-                {!isPostCheckout && canCheckout && (
-                  <Button
-                    onClick={handleFinalCheckout}
-                    disabled={isCheckingOut}
-                    variant="success"
-                  >
-                    {isCheckingOut ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Đang checkout...
-                      </>
-                    ) : (
-                      "Hoàn tất Checkout"
-                    )}
-                  </Button>
-                )}
-              </div>
             </div>
+
+            {/* Final Action */}
+            {!isPostCheckout && (
+              <Button
+                onClick={handleFinalCheckout}
+                disabled={!canCheckout || isCheckingOut}
+                variant={!canCheckout ? "secondary" : "success"}
+                className={cn(
+                  "w-full sm:w-auto min-w-[200px] h-12 text-base font-semibold",
+                  canCheckout
+                    ? "shadow-lg shadow-green-200 hover:shadow-green-300"
+                    : "opacity-50"
+                )}
+              >
+                {isCheckingOut ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Đang xử
+                    lý...
+                  </>
+                ) : (
+                  <>
+                    Hoàn tất Checkout <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
+            )}
           </SheetFooter>
         </SheetContent>
       </Sheet>
 
-      {/* Invoice Detail Sheet - Q3.3: mở song song */}
+      {/* INVOICE DETAIL SHEET */}
       {activeInvoiceId && (
         <InvoiceDetailSheet
           open={showInvoiceDetail}
@@ -715,7 +684,7 @@ export default function CheckoutSheet({
           bookingId={bookingId}
           invoiceId={activeInvoiceId}
           onBack={handleBackFromDetail}
-          isNewlyCreatedInvoice={!!createdInvoiceId} // Invoice vừa tạo → Checkout type
+          isNewlyCreatedInvoice={!!createdInvoiceId}
         />
       )}
     </>

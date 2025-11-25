@@ -1,4 +1,5 @@
 import z from "zod";
+const ChatStateEnum = z.enum(["Open", "Closed"]);
 
 const ChatEntryResponseSchema = z.object({
   canChat: z.boolean(),
@@ -13,7 +14,7 @@ const ChatEntryResponseSchema = z.object({
 const ChatSessionDetailSchema = z.object({
   id: z.string(),
   bookingRoomId: z.string(),
-  state: z.string(),
+  state: ChatStateEnum,
   startedAt: z.string(),
   endedAt: z.string().nullable(),
   assignedStaffUserId: z.string().nullable(),
@@ -35,8 +36,9 @@ const ChatSessionMessageItemSchema = z.object({
   message: z.string(),
   staffUserId: z.string().nullable(),
   staffName: z.string().nullable(),
-  createdAt: z.string(),
-  detectedLanguage: z.string().optional(),
+  isRead: z.boolean(),
+  readAt: z.string().nullable(),
+  readBy: z.string().nullable(),
 });
 
 const ChatSessionMessagesSchema = z.array(ChatSessionMessageItemSchema);

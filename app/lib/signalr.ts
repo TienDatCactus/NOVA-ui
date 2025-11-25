@@ -10,6 +10,10 @@ export interface ChatMessage {
   staffUserId: string | null;
   staffName: string | null;
   createdAt: string;
+  // Read status fields
+  isRead?: boolean;
+  readAt?: string | null;
+  readBy?: string | null;
   // Translation fields
   translatedText?: string;
   detectedLanguage?: string;
