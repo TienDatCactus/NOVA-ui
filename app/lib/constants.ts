@@ -14,6 +14,7 @@ import {
   Package,
   PackageSearch,
   Plus,
+  Receipt,
   ReceiptText,
   Settings,
   ShoppingCart,
@@ -147,13 +148,10 @@ const SIDEBAR_NAV_MAIN: Array<{
         title: "Vai trò",
         url: FE_URL.dashboard.staff.roles,
       },
-      {
-        title: "Ca làm việc",
-        url: FE_URL.dashboard.staff.workShifts,
-      },
+
       {
         title: "Ngày nghỉ",
-        url: "/dashboard/staff/holidays",
+        url: FE_URL.dashboard.staff.holidays,
       },
       {
         title: "Lịch làm việc",
@@ -199,6 +197,11 @@ const SIDEBAR_NAV_MAIN: Array<{
     url: FE_URL.dashboard.invoices,
     icon: ReceiptText,
   },
+  {
+    title: "Chi phí",
+    url: FE_URL.dashboard.expenses,
+    icon: Receipt,
+  },
 ];
 
 const SIDEBAR_PROJECTS: Array<{
@@ -206,6 +209,11 @@ const SIDEBAR_PROJECTS: Array<{
   url: string;
   icon: LucideIcon;
 }> = [
+  {
+    name: "Ca làm việc",
+    url: FE_URL.dashboard.workShifts,
+    icon: Calendar,
+  },
   {
     name: "Chat",
     url: FE_URL.dashboard.chat,
@@ -311,6 +319,7 @@ const COMMAND_BAR_ROUTES: Array<{
   // Others
   { name: "Tài khoản", icon: Users, href: FE_URL.dashboard.users },
   { name: "Hóa đơn", icon: ReceiptText, href: FE_URL.dashboard.invoices },
+  { name: "Chi phí", icon: Receipt, href: FE_URL.dashboard.expenses },
   { name: "Chat", icon: MessageSquareDot, href: FE_URL.dashboard.chat },
   { name: "Đơn vị tính", icon: PackageSearch, href: FE_URL.dashboard.units },
   { name: "Cài đặt", icon: Settings, href: FE_URL.dashboard.settings },

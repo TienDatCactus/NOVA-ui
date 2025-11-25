@@ -47,8 +47,10 @@ export default [
       ]),
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
+      route("expenses", "routes/expenses/expenses.tsx"),
       route("chat", "routes/chat/chat.tsx"),
       route("users", "routes/users/users.tsx"),
+      route("work-shifts", "routes/work-shifts/work-shifts.tsx"),
       ...prefix("stocks", [
         ...prefix("items", [index("routes/stocks/items/items.tsx")]),
         ...prefix("item-categories", [
@@ -63,7 +65,7 @@ export default [
       ]),
       ...prefix("staff", [
         index("routes/staff/staff/staff.tsx"),
-        route("work-shifts", "routes/staff/work-shifts/work-shifts.tsx"),
+
         route("holidays", "routes/staff/holidays/holidays.tsx"),
         route("schedules", "routes/staff/schedules/schedules.tsx"),
         route("payrolls", "routes/staff/payrolls/payrolls.tsx"),

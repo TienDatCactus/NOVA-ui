@@ -32,15 +32,16 @@ const DASHBOARD = {
   },
   staff: {
     list: "/dashboard/staff",
-    workShifts: "/dashboard/staff/work-shifts",
     schedules: "/dashboard/staff/schedules",
     holidays: "/dashboard/staff/holidays",
     roles: "/dashboard/staff/roles",
   },
   users: "/dashboard/users",
   invoices: "/dashboard/invoices",
+  expenses: "/dashboard/expenses",
   chat: "/dashboard/chat",
   units: "/dashboard/units",
+  workShifts: "/dashboard/work-shifts",
   stocks: {
     items: "/dashboard/stocks/items",
     itemCategories: "/dashboard/stocks/item-categories",

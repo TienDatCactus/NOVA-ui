@@ -58,7 +58,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 export default function App() {
   const navigation = useNavigation();

@@ -6,8 +6,9 @@ import {
   Send,
   UserCheck,
   XCircle,
+  CheckCheck,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -30,7 +31,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { SUPPORTED_LANGUAGES } from "~/lib/constants";
@@ -41,11 +41,15 @@ import { useServices } from "~/routes/services/container/services/query.hooks";
 import { TranslationService } from "~/services/api/translation";
 import { useAuthStore } from "~/store/auth.store";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { format, parseISO, isToday, isYesterday } from "date-fns";
+import { vi } from "date-fns/locale";
 import {
   useAssignStaff,
   useChatMessages,
   useChatSession,
   useCloseSession,
+  useMarkAllRead,
 } from "../container/query.hooks";
 import {
   shouldTranslate,
@@ -65,6 +69,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const [inputMessage, setInputMessage] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Translation state
   const {
@@ -90,6 +95,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
   const assignStaffMutation = useAssignStaff();
   const closeSessionMutation = useCloseSession();
+  const markAllReadMutation = useMarkAllRead();
 
   // Connect to SignalR and join session
   useEffect(() => {
@@ -176,12 +182,54 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     }
   }, [messageHistory]);
 
+  // Virtual scrolling setup
+  const virtualizer = useVirtualizer({
+    count: messages.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 80,
+    overscan: 5,
+  });
+
+  // Scroll to bottom on new messages
   const prevMessageCountRef = useRef(messages.length);
   useEffect(() => {
-    if (messages.length > prevMessageCountRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > prevMessageCountRef.current && virtualizer) {
+      virtualizer.scrollToIndex(messages.length - 1, { align: "end" });
     }
     prevMessageCountRef.current = messages.length;
+  }, [messages.length, virtualizer]);
+
+  // Group messages by date for separators
+  const messagesWithSeparators = useMemo(() => {
+    const grouped: Array<{
+      type: "message" | "separator";
+      data: any;
+      index: number;
+    }> = [];
+    let lastDate: string | null = null;
+
+    messages.forEach((msg, index) => {
+      const msgDate = format(parseISO(msg.createdAt), "yyyy-MM-dd");
+
+      if (msgDate !== lastDate) {
+        // Add date separator
+        const date = parseISO(msg.createdAt);
+        let label: string;
+        if (isToday(date)) {
+          label = "Hôm nay";
+        } else if (isYesterday(date)) {
+          label = "Hôm qua";
+        } else {
+          label = format(date, "dd/MM/yyyy", { locale: vi });
+        }
+        grouped.push({ type: "separator", data: label, index: grouped.length });
+        lastDate = msgDate;
+      }
+
+      grouped.push({ type: "message", data: msg, index: grouped.length });
+    });
+
+    return grouped;
   }, [messages]);
 
   const updateMessage = (messageId: string, updates: Partial<ChatMessage>) => {
@@ -192,6 +240,18 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
   const handleTranslate = (message: ChatMessage) => {
     translateMessage(message, updateMessage);
+  };
+
+  const handleMarkAllRead = () => {
+    if (!sessionId) return;
+    markAllReadMutation.mutate(sessionId, {
+      onSuccess: () => {
+        toast.success("Đã đánh dấu tất cả tin nhắn là đã đọc");
+      },
+      onError: () => {
+        toast.error("Không thể đánh dấu đã đọc");
+      },
+    });
   };
 
   const [isTranslatingInput, setIsTranslatingInput] = useState(false);
@@ -464,6 +524,17 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 </DropdownMenuPortal>
               </DropdownMenuSub>
 
+              <DropdownMenuSeparator />
+
+              {/* Mark All Read */}
+              <DropdownMenuItem
+                onClick={handleMarkAllRead}
+                disabled={markAllReadMutation.isPending}
+              >
+                <CheckCheck className="h-4 w-4 mr-2" />
+                Đánh dấu đã đọc
+              </DropdownMenuItem>
+
               {canSendMessage && (
                 <>
                   <DropdownMenuSeparator />
@@ -483,20 +554,72 @@ export function ChatMain({ sessionId }: ChatMainProps) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto p-4 bg-muted/30"
+        style={{ position: "relative" }}
+      >
         {isConnecting && (
-          <div className="flex justify-center">
+          <div className="flex justify-center py-4">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         )}
 
-        {messages.map((msg) => (
-          <MessageBubble
-            key={msg.id}
-            message={msg}
-            onTranslate={handleTranslate}
-          />
-        ))}
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualItem) => {
+            const item = messagesWithSeparators[virtualItem.index];
+
+            if (!item) return null;
+
+            if (item.type === "separator") {
+              return (
+                <div
+                  key={`separator-${virtualItem.index}`}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <div className="flex justify-center my-4">
+                    <div className="bg-muted px-4 py-1 rounded-full">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {item.data}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={item.data.id}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+                className="pb-4"
+              >
+                <MessageBubble
+                  message={item.data}
+                  onTranslate={handleTranslate}
+                />
+              </div>
+            );
+          })}
+        </div>
         <div ref={messagesEndRef} />
       </div>
 
