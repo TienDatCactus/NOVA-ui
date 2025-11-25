@@ -131,7 +131,7 @@ export default function Component({
       const newQuantity = existingItem.quantity + 1;
       if (
         item.maxQuantityAvailable !== undefined &&
-        newQuantity > item.maxQuantityAvailable
+        newQuantity > (item?.maxQuantityAvailable ?? 0)
       ) {
         toast.error(
           `Số lượng tối đa cho ${item.name} là ${item.maxQuantityAvailable}`
@@ -147,7 +147,7 @@ export default function Component({
       name: item.name,
       unitPrice: item.price,
       imageUrl: item.imageUrls?.[0],
-      maxQuantityAvailable: item.maxQuantityAvailable,
+      maxQuantityAvailable: item.maxQuantityAvailable || undefined,
     });
     toast.success(`Đã thêm ${item.name} vào đơn`);
   };

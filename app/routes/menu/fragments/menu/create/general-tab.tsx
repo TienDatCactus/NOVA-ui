@@ -1,8 +1,10 @@
-import type { UseFormReturn } from "react-hook-form";
 import { ScanBarcode } from "lucide-react";
+import type { UseFormReturn } from "react-hook-form";
 
+import type z from "zod";
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,12 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Switch } from "~/components/ui/switch";
 import { TabsContent } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
 import { UnitSchema } from "~/services/api/units/unit.schema";
-import type z from "zod";
-import { Switch } from "~/components/ui/switch";
 
 const { UnitItemSchema } = UnitSchema;
 type UnitItem = z.infer<typeof UnitItemSchema>;
@@ -40,7 +41,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
   return (
     <TabsContent value="general" className="mt-0 space-y-6 outline-none">
       <div className="grid grid-cols-2 gap-6">
-        <div className="grid gap-2">
+        <div className="space-y-2">
           <FormField
             control={form.control}
             name="Name"
@@ -52,10 +53,39 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                 <FormControl>
                   <Input
                     className="font-medium text-lg"
-                    placeholder="Ví dụ: Phở Bò Đặc Biệt"
+                    placeholder="Ví dụ: Cơm Chiên Dương Châu"
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="Code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Mã SKU <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    startAddon={
+                      <ScanBarcode className=" h-4 w-4 text-muted-foreground" />
+                    }
+                    className="font-mono uppercase"
+                    placeholder="FOOD-NEW"
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
+                    }
+                  />
+                </FormControl>
+                <FormDescription className="text-xs">
+                  Chỉ chứa chữ IN HOA, số, gạch ngang (-) và gạch dưới (_)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -86,7 +116,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                     }}
                     onBlur={field.onBlur}
                     min={0}
-                    endAddon={
+                    startAddon={
                       <span className="text-muted-foreground text-xs font-bold">
                         VND
                       </span>
@@ -97,85 +127,62 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
               </FormItem>
             )}
           />
+        </div>
+
+        <div className="space-y-2">
           <FormField
             control={form.control}
-            name="Code"
+            name="CategoryId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Mã SKU <span className="text-destructive">*</span>
+                  Danh mục <span className="text-destructive">*</span>
                 </FormLabel>
-                <FormControl>
-                  <Input
-                    className="font-mono"
-                    placeholder="FOOD-001"
-                    {...field}
-                    startAddon={
-                      <ScanBarcode className="h-4 w-4 text-muted-foreground" />
-                    }
-                  />
-                </FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn danh mục" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {menuCategories?.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
-        <div className="grid gap-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <FormField
-              control={form.control}
-              name="CategoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Danh mục <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn danh mục" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {menuCategories?.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="UnitId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Đơn vị tính <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn đơn vị" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {units?.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="UnitId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Đơn vị tính <span className="text-destructive">*</span>
+                </FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn đơn vị" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {units?.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -185,7 +192,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                 <FormLabel>Mô tả</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Mô tả thành phần, hương vị..."
+                    placeholder="Mô tả chi tiết món ăn..."
                     className="min-h-[100px] resize-none"
                     {...field}
                   />

@@ -30,14 +30,6 @@ export const columns: ColumnDef<ServiceTypeItem>[] = [
       const type = row.original;
       return (
         <div className="flex items-center gap-3">
-          <Image
-            src={type.images?.[0].url || ""}
-            className="w-6 h-6 object-contain"
-            width={48}
-            height={48}
-            alt={type.name}
-          />
-
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold truncate">{type.name}</span>

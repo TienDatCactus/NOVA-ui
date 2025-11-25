@@ -1,45 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Plus,
-  Trash2,
-  X,
-  Image as ImageIcon,
-  Layers,
-  Package,
-  Undo2,
-  Save,
-  ScanBarcode,
-  ImagePlus,
-  RotateCcw,
-} from "lucide-react";
+import { Image as ImageIcon, Layers, Package, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
-import Image from "~/components/ui/image";
-import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import {
-  Dropzone,
-  DropzoneContent,
-  DropzoneEmptyState,
-} from "~/components/ui/shadcn-io/dropzone";
+import { Form } from "~/components/ui/form";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -48,25 +16,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Switch } from "~/components/ui/switch";
-import { Textarea } from "~/components/ui/textarea";
-import { Badge } from "~/components/ui/badge";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
-import { cn } from "~/lib/utils";
+import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
+import { useStockItemList } from "~/routes/stocks/items/container/query.hooks";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { MenuSchema } from "~/services/api/menu/menu.schema";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { useUpdateMenuItem } from "../container/menu/mutation.hooks";
 import { useMenuItemDetail } from "../container/menu/query.hooks";
-import { useStockItemList } from "~/routes/stocks/items/container/query.hooks";
+import ComponentsTab from "../fragments/menu/edit/components-tab";
 import GeneralTab from "../fragments/menu/edit/general-tab";
 import MediaTab from "../fragments/menu/edit/media-tab";
-import ComponentsTab from "../fragments/menu/edit/components-tab";
+import { onError } from "~/lib/utils";
 
 const { UpdateMenuItemRequestSchema } = MenuSchema;
 type UpdateMenuFormData = z.infer<typeof UpdateMenuItemRequestSchema>;
@@ -119,14 +82,13 @@ export default function EditMenuSheet({
   const { data: units } = useUnits();
   const { data: stockItems } = useStockItemList({ includeInactive: false });
 
-  // --- Effects ---
   useEffect(() => {
     if (menuItem && menuItemDetail) {
       form.reset({
         CategoryId: menuItemDetail.categoryId,
         Code: menuItemDetail.code,
         Name: menuItemDetail.name,
-        Description: menuItemDetail.description,
+        Description: menuItemDetail.description || "",
         UnitId: menuItemDetail.unitId || "",
         Price: menuItemDetail.price,
         Active: menuItemDetail.active,
@@ -157,7 +119,6 @@ export default function EditMenuSheet({
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, [newFiles]);
 
-  // --- Handlers ---
   const handleSubmit = (data: UpdateMenuFormData) => {
     updateMenuItem(
       { ...data, RemoveMediaIds: removeMediaIds, NewImages: newFiles },
@@ -185,7 +146,7 @@ export default function EditMenuSheet({
   if (isLoadingDetail) {
     return (
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="sm:max-w-[700px] p-0">
+        <SheetContent className="sm:max-w-2xl p-0">
           <div className="p-6 space-y-6">
             <Skeleton className="h-8 w-1/2" />
             <Skeleton className="h-10 w-full" />
@@ -198,54 +159,30 @@ export default function EditMenuSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="sm:max-w-[750px] w-full p-0 flex flex-col bg-background">
+      <SheetContent className="sm:max-w-2xl w-full gap-0 p-0 flex flex-col bg-card">
+        <SheetHeader className="px-6 py-4 border-b shrink-0">
+          <div className="space-y-1">
+            <SheetTitle className="text-xl">Chỉnh sửa món</SheetTitle>
+            <SheetDescription>
+              Cập nhật thông tin chi tiết cho{" "}
+              <span className="font-semibold text-foreground">
+                {menuItem.name}
+              </span>
+            </SheetDescription>
+          </div>
+        </SheetHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleSubmit, onError)}
             className="flex flex-col h-full"
           >
-            {/* === HEADER === */}
-            <SheetHeader className="px-6 py-4 border-b shrink-0">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <SheetTitle className="text-xl">Chỉnh sửa món</SheetTitle>
-                  <SheetDescription>
-                    Cập nhật thông tin chi tiết cho{" "}
-                    <span className="font-semibold text-foreground">
-                      {menuItem.name}
-                    </span>
-                  </SheetDescription>
-                </div>
-
-                {/* Active Toggle placed prominently in header */}
-                <FormField
-                  control={form.control}
-                  name="Active"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center space-y-0 gap-2 bg-muted/50 px-3 py-1.5 rounded-full border">
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="scale-75"
-                        />
-                      </FormControl>
-                      <FormLabel className="text-xs font-medium cursor-pointer mb-0 pb-0">
-                        {field.value ? "Đang bán" : "Tạm ngưng"}
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </SheetHeader>
-
             {/* === TABS & BODY === */}
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
               className="flex-1 flex flex-col min-h-0"
             >
-              <TabsList className=" h-12 w-full gap-6">
+              <TabsList className=" h-12 w-full">
                 <TabsTrigger value="general">
                   <Package className="w-4 h-4 mr-2" /> Thông tin chung
                 </TabsTrigger>

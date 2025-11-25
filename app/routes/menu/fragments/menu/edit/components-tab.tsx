@@ -1,9 +1,13 @@
+import { Layers, Plus, Trash2 } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
-import { Plus, Layers, Trash2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { FormControl, FormField, FormItem } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "~/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -11,7 +15,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import {
+  Table,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 import { TabsContent } from "~/components/ui/tabs";
+import { Textarea } from "~/components/ui/textarea";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 
 interface ComponentsTabProps {
@@ -65,90 +78,101 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/30 text-muted-foreground font-medium">
-              <tr>
-                <th className="text-left py-3 px-4 font-medium">Nguyên liệu</th>
-                <th className="text-left py-3 px-4 w-[120px] font-medium">
+          <Table className="w-full text-sm">
+            <TableHeader className="bg-muted/30 text-muted-foreground font-medium">
+              <TableRow>
+                <TableHead className="text-left font-medium">
+                  Nguyên liệu
+                </TableHead>
+                <TableHead className="text-left font-medium w-80">
+                  Ghi chú
+                </TableHead>
+                <TableHead className="text-left w-60 font-medium">
                   Số lượng
-                </th>
-                <th className="w-[50px]"></th>
-              </tr>
-            </thead>
+                </TableHead>
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
             <tbody className="divide-y">
               {fields.map((field, index) => (
-                <tr
+                <TableRow
                   key={field.id}
                   className="group bg-background hover:bg-muted/5"
                 >
-                  <td className="p-3 pl-4 align-top">
+                  <TableCell className="">
                     <FormField
                       control={form.control}
                       name={`Components.${index}.itemId`}
                       render={({ field }) => (
                         <FormItem className="space-y-0">
-                          <Select
-                            onValueChange={(val) => {
-                              field.onChange(val);
-                              const item = stockItems?.find(
-                                (i) => i.id === val
-                              );
-                              if (item) {
-                                form.setValue(
-                                  `Components.${index}.itemCode`,
-                                  item.code
-                                );
-                                form.setValue(
-                                  `Components.${index}.itemName`,
-                                  item.name
-                                );
-                              }
-                            }}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Chọn nguyên liệu" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {stockItems?.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>
-                                  <div className="flex items-center justify-between w-full gap-2">
-                                    <span>{item.name}</span>
-                                    <span className="text-xs text-muted-foreground font-mono">
-                                      {item.unitName}
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormControl>
+                            <Select
+                              onValueChange={(val) => {
+                                field.onChange(val);
+                              }}
+                              value={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Chọn nguyên liệu" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {stockItems?.map((item) => (
+                                  <SelectItem key={item.id} value={item.id}>
+                                    <div className="flex items-center justify-between w-full gap-2">
+                                      <span>{item.name}</span>
+                                      <span className="text-xs text-muted-foreground font-mono">
+                                        {item.unitName}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </td>
-                  <td className="p-3 align-top">
+                  </TableCell>
+                  <TableCell className=" text-center">
+                    <FormField
+                      control={form.control}
+                      name={`Components.${index}.notes`}
+                      render={({ field }) => (
+                        <FormItem className="space-y-0">
+                          <FormControl>
+                            <Textarea
+                              placeholder="Ghi chú thêm..."
+                              className="min-h-[38px] resize-none"
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell className=" text-center">
                     <FormField
                       control={form.control}
                       name={`Components.${index}.quantity`}
                       render={({ field }) => (
                         <FormItem className="space-y-0">
                           <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value))
-                              }
-                              className="h-9 border-transparent bg-transparent hover:bg-muted/10 focus:bg-background focus:border-input text-right"
+                            <Counter
+                              value={field.value}
+                              onChange={field.onChange}
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </td>
-                  <td className="p-3 text-center align-top">
+                  </TableCell>
+                  <TableCell className="p-3 text-center align-top">
                     <Button
                       type="button"
                       variant="ghost"
@@ -158,11 +182,11 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       )}
     </TabsContent>
