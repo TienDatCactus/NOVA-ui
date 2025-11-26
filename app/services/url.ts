@@ -291,6 +291,7 @@ const Stock = {
     reject: (id: string) => `PurchaseRequests/${id}/reject`,
     cancel: (id: string) => `PurchaseRequests/${id}/cancel`,
     receiveStock: (id: string) => `PurchaseRequests/${id}/receive-stock`,
+    export: (id: string) => `PurchaseRequests/${id}/export`,
   },
   StockAdjustments: {
     list: "StockAdjustments",

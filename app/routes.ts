@@ -80,7 +80,8 @@ export default [
     index("routes/customer/chat/inbox.tsx"),
     route("chat", "routes/customer/chat/chat.tsx"),
     route("map", "routes/customer/map/map.tsx"),
-    route("guidelines", "routes/customer/guides/guides.tsx"),
+    route("guides", "routes/customer/guides/guides.tsx"),
+    route("catalog", "routes/customer/catalog/catalog.tsx"),
   ]),
 
   route("*", "routes/not-found.tsx"),

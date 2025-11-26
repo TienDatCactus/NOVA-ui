@@ -238,6 +238,7 @@ export default function EditStockAdjustmentDialog({
                                   <Counter
                                     {...qtyField}
                                     step={0.1}
+                                    minValue={-9999}
                                     className={cn(
                                       "text-right font-mono w-44",
                                       qtyField.value < 0

@@ -86,7 +86,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
 
       <div
         id={qrCodeRegionId}
-        className="rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25"
+        className="rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25 h-full w-full object-cover "
       />
 
       {!isScanning ? (

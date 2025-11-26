@@ -27,7 +27,6 @@ export function useWorkShiftList() {
   });
 }
 
-// GET /api/WorkShifts/active - Query hook for active work shift list only
 export function useActiveWorkShiftList() {
   return useQuery({
     queryKey: ["work-shifts-active"],

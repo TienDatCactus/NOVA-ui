@@ -57,7 +57,7 @@ const CUSTOMER = {
   chat: (roomToken: string) => `/chat?roomToken=${roomToken}`,
   map: "/map",
   guidelines: "/guides",
-  services: "/services",
+  catalog: "/catalog",
 };
 
 const FE_URL = {

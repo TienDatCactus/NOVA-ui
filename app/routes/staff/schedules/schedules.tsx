@@ -12,104 +12,22 @@ import ScheduleStaffView from "./components/schedule-staff-view";
 import UpdateScheduleDialog from "./components/update-schedule-dialog";
 import { useSchedulesContainer } from "./container/container.hooks";
 import SchedulesViewLayout from "./layouts/schedules-view.layout";
+import { useScheduleFilter } from "./container/filter.hooks";
 
 export function clientLoader() {
   return { title: "Lịch làm việc - NOVA" };
 }
 
 export default function Schedules() {
-  const {
-    shifts,
-    workShifts,
-    isPending,
-    filterState,
-    updateFilter,
-    resetFilter,
-    createDialogOpen,
-    setCreateDialogOpen,
-    deleteDialogOpen,
-    setDeleteDialogOpen,
-    updateDialogOpen,
-    setUpdateDialogOpen,
-    selectedShift,
-    handleCreateSuccess,
-    handleDeleteSuccess,
-    handleUpdateSuccess,
-    handleOpenDeleteDialog,
-    handleOpenUpdateDialog,
-    currentWeekStart,
-    weekEnd,
-    handlePrevWeek,
-    handleNextWeek,
-    handleToday,
-    isExporting,
-    handleExportMatrix,
-    handleExportForm2,
-  } = useSchedulesContainer();
-
+  const { filterState, updateFilter, resetFilter } = useScheduleFilter();
+  const { isExporting, handleExportMatrix, handleExportForm2 } =
+    useScheduleExport({
+      currentWeekStart,
+      weekEnd,
+      selectedStaffId: filterState.selectedStaffId,
+    });
   // View mode state
   const [viewMode, setViewMode] = useState<"shift" | "staff">("shift");
-
-  // Attendance dialog states
-  const [markAbsentDialogOpen, setMarkAbsentDialogOpen] = useState(false);
-  const [markAttendanceDialogOpen, setMarkAttendanceDialogOpen] =
-    useState(false);
-  const [selectedAttendance, setSelectedAttendance] =
-    useState<StaffAttendanceListItem | null>(null);
-
-  // Fetch attendance data for the week
-  const { data: attendanceData, refetch: refetchAttendance } = useQuery({
-    queryKey: [
-      "staff-attendances",
-      format(currentWeekStart, "yyyy-MM-dd"),
-      format(weekEnd, "yyyy-MM-dd"),
-    ],
-    queryFn: async () => {
-      const resp = await StaffAttendanceService.getStaffAttendanceList({
-        from: format(currentWeekStart, "yyyy-MM-dd"),
-        to: format(weekEnd, "yyyy-MM-dd"),
-        ...(filterState.selectedStaffId && {
-          staffId: filterState.selectedStaffId,
-        }),
-      });
-      return resp;
-    },
-    staleTime: 2 * 60 * 1000,
-  });
-
-  const handleAddStaff = (shiftId: string, date: string) => {
-    setCreateDialogOpen(true);
-  };
-
-  const handleOpenMarkAbsentDialog = (attendance: StaffAttendanceListItem) => {
-    setSelectedAttendance(attendance);
-    setMarkAbsentDialogOpen(true);
-  };
-
-  const handleOpenMarkAttendanceDialog = (
-    attendance: StaffAttendanceListItem
-  ) => {
-    setSelectedAttendance(attendance);
-    setMarkAttendanceDialogOpen(true);
-  };
-
-  const handleMarkAbsentSuccess = () => {
-    setSelectedAttendance(null);
-    setMarkAbsentDialogOpen(false);
-    refetchAttendance();
-  };
-
-  const handleMarkAttendanceSuccess = () => {
-    setSelectedAttendance(null);
-    setMarkAttendanceDialogOpen(false);
-    refetchAttendance();
-  };
-
-  // Count only shifts with active work shifts
-  const activeShiftsCount = shifts.filter((shift) => {
-    const workShift = workShifts.find((ws) => ws.id === shift.shiftId);
-    return workShift?.active === true;
-  }).length;
 
   return (
     <SchedulesViewLayout
@@ -117,15 +35,6 @@ export default function Schedules() {
       onFilterChange={updateFilter}
       onResetFilter={resetFilter}
       totalShifts={activeShiftsCount}
-      onAddSchedule={() => setCreateDialogOpen(true)}
-      onExportMatrix={handleExportMatrix}
-      onExportForm2={handleExportForm2}
-      isExporting={isExporting}
-      currentWeekStart={currentWeekStart}
-      weekEnd={weekEnd}
-      onPrevWeek={handlePrevWeek}
-      onNextWeek={handleNextWeek}
-      onToday={handleToday}
       viewMode={viewMode}
       onViewModeChange={setViewMode}
     >
@@ -150,11 +59,6 @@ export default function Schedules() {
           shifts={shifts}
           attendanceData={attendanceData || []}
           workShifts={workShifts}
-          weekStart={currentWeekStart}
-          onDeleteStaff={handleOpenDeleteDialog}
-          onEditStaff={handleOpenUpdateDialog}
-          onMarkAttendance={handleOpenMarkAttendanceDialog}
-          onMarkAbsent={handleOpenMarkAbsentDialog}
         />
       )}
 
