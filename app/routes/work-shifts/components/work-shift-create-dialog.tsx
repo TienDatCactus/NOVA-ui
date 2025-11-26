@@ -20,8 +20,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import type { CreateWorkShiftRequest } from "~/services/api/staff/work-shift/dto";
-import { WorkShiftSchema } from "~/services/api/staff/work-shift/work-shift.schema";
+import type { CreateWorkShiftRequest } from "~/services/api/work-shift/dto";
+import { WorkShiftSchema } from "~/services/api/work-shift/work-shift.schema";
 import { useCreateWorkShift } from "../container/mutation.hooks";
 
 interface CreateWorkShiftDialogProps {

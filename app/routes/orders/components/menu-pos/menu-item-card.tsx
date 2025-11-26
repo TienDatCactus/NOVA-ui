@@ -49,7 +49,6 @@ export default function MenuItemCard({
       )}
       onClick={isDisabled ? undefined : addToOrder}
     >
-      {/* === 1. IMAGE AREA (Interactive) === */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {imageUrls && imageUrls[0] ? (
           <Image

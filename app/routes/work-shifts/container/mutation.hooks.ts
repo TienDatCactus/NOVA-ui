@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { WorkShiftService } from "~/services/api/staff/work-shift";
+import { WorkShiftService } from "~/services/api/work-shift";
 import type {
   CreateWorkShiftRequest,
   UpdateWorkShiftRequest,
-} from "~/services/api/staff/work-shift/dto";
+} from "~/services/api/work-shift/dto";
 
 export function useCreateWorkShift() {
   const qc = useQueryClient();

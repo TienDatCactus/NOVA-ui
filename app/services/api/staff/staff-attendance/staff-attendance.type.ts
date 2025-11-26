@@ -3,7 +3,7 @@ export type StaffAttendanceListParams = {
   staffId?: string;
   from?: string; // "yyyy-MM-dd"
   to?: string; // "yyyy-MM-dd"
-  status?: "present" | "absent" | "assigned" | "0" | "1" | "2";
+  status?: "present" | "absent" | "assigned";
 };
 
 // Status enum for attendance

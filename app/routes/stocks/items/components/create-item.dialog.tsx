@@ -57,6 +57,7 @@ export default function CreateItemDialog({
   const { mutate: onSubmit, isPending: isSubmitting } = useCreateStockItem();
   const form = useForm<CreateItemFormData>({
     resolver: zodResolver(FormSchema.CreateItemFormSchema),
+    mode: "onChange",
     defaultValues: {
       code: "",
       name: "",
@@ -153,7 +154,7 @@ export default function CreateItemDialog({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[150px]">
                               <SelectValue placeholder="Chọn danh mục" />
                             </SelectTrigger>
                           </FormControl>

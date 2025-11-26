@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
+import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
 import UpdateWorkShiftDialog from "../components/work-shift-update-dialog";
 import DeleteWorkShiftDialog from "../components/work-shift-delete-dialog";
 
