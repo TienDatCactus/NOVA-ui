@@ -187,6 +187,21 @@ export default function StayDetailBar({
                     ?.label
                 }
               </Badge>
+              {/* Permission Alert (Inline) */}
+              {!permissions.canEditDates && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="h-full flex items-center justify-center px-3 bg-muted/30 rounded-md cursor-help">
+                        <AlertCircle className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>{permissions.dateChangeBlockReason}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
 
             {/* Actions Area */}
@@ -395,22 +410,6 @@ export default function StayDetailBar({
 
         {/* === BODY: TIMELINE & DATES === */}
         <CardContent className=" flex items-end gap-4 h-full">
-          {/* Permission Alert (Inline) */}
-          {!permissions.canEditDates && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="h-full flex items-center justify-center px-3 bg-muted/30 rounded-md cursor-help">
-                    <AlertCircle className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>{permissions.dateChangeBlockReason}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-
           {/* Date Timeline */}
           <div className="flex-1 grid grid-cols-[1fr_auto_1fr]  items-end gap-4">
             {/* Check-in */}
@@ -440,12 +439,12 @@ export default function StayDetailBar({
               </div>
               <Badge
                 variant="secondary"
-                className="rounded-full px-3 py-1 flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border-indigo-100"
+                className="rounded-full px-3 py-1 flex items-center gap-1.5 bg-primary/10 text-primary border-primary/20"
               >
                 <Moon className="w-3 h-3" />
                 <span className="font-mono text-sm">{nights}</span> đêm
               </Badge>
-              <ArrowRight className="w-4 h-4 text-muted-foreground/30 mt-1" />
+              <ArrowRight className="w-4 h-4 text-muted-foreground mt-1" />
             </div>
 
             {/* Check-out */}

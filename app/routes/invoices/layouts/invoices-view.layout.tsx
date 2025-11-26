@@ -1,6 +1,17 @@
-import { ChevronRight, FileText } from "lucide-react";
-import type { ReactNode } from "react";
-import { useState } from "react";
+import {
+  Calendar,
+  ChevronRight,
+  Download,
+  FileText,
+  Filter,
+  LayoutList,
+  RotateCcw,
+  Search,
+} from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { format } from "date-fns";
+import { toast } from "sonner";
+
 import { Button } from "~/components/ui/button";
 import {
   Pagination,
@@ -12,10 +23,6 @@ import {
   PaginationPrevious,
 } from "~/components/ui/pagination";
 import { cn } from "~/lib/utils";
-import { InvoicesService } from "~/services/api/invoices";
-import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
-import InvoicesFilterSidebar from "../fragments/invoices/filter.sidebar";
-import { Label } from "~/components/ui/label";
 import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
@@ -25,8 +32,22 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "~/components/ui/dialog";
-import { format } from "date-fns";
-import { toast } from "sonner";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
+import { Separator } from "~/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+
+import { InvoicesService } from "~/services/api/invoices";
+import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
+import { PAYMENT_METHODS } from "~/services/types/payment.types"; // Assuming you have this
+import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types"; // Assuming you have this
+import type z from "zod";
 
 interface InvoicesViewLayoutProps {
   children: ReactNode;
@@ -73,8 +94,6 @@ function InvoicesViewLayout({
   const handleExport = async () => {
     try {
       const blob = await InvoicesService.exportInvoices(exportDate);
-      console.log("Blob received:", blob);
-
       const url = window.URL.createObjectURL(blob as any);
       const a = document.createElement("a");
       a.href = url;
@@ -98,190 +117,285 @@ function InvoicesViewLayout({
 
   const { pages } = makePageRange(currentPage, totalPages, 7);
 
+  // Logic to show reset button
+  const hasActiveFilters =
+    filters.Keyword ||
+    filters.IssuedFrom ||
+    filters.IssuedTo ||
+    filters.Status ||
+    filters.PaymentMethod;
+
   return (
-    <div className="flex p-4 gap-6 ">
-      <main className="flex-1 flex flex-col space-y-4 overflow-hidden">
-        <div className="flex items-center justify-between mb-6 flex-shrink-0">
+    <div className="flex flex-col h-full bg-muted/10 min-h-screen">
+      {/* === LEVEL 1: GLOBAL HEADER === */}
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between shrink-0">
+        {/* Left: Title */}
+        <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Quản lý hóa đơn</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-xl font-bold tracking-tight">
+              Quản lý hóa đơn
+            </h1>
+            <p className="text-xs text-muted-foreground">
               Tổng{" "}
-              <span className="font-semibold text-foreground">
+              <span className="font-medium text-foreground">
                 {totalInvoices}
               </span>{" "}
-              hóa đơn
+              hóa đơn trong hệ thống
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div>
-              <DatePicker
-                mode="single"
-                value={filters.IssuedFrom}
-                onChange={(value) => {
-                  onFilterChange("IssuedFrom", value?.toISOString());
-                }}
-              />
-            </div>
-            <ChevronRight />
-            <div>
-              <DatePicker
-                mode="single"
-                value={filters.IssuedTo}
-                onChange={(value) => {
-                  onFilterChange("IssuedTo", value?.toISOString());
-                }}
-              />
-            </div>
-
-            <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="success" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  Xuất báo cáo
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Xuất báo cáo hóa đơn</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <Label className="mb-2 block">
-                    Chọn ngày xuất báo cáo (tùy chọn)
-                  </Label>
-                  <DatePicker
-                    value={exportDate}
-                    onChange={(date) =>
-                      setExportDate(format(date ?? "", "yyyy-MM-dd"))
-                    }
-                    placeholder="Chọn ngày hoặc để trống cho tất cả"
-                  />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Để trống để xuất tất cả hóa đơn
-                  </p>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setExportDialogOpen(false);
-                      setExportDate(undefined);
-                    }}
-                  >
-                    Hủy
-                  </Button>
-                  <Button variant="success" onClick={handleExport}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Xuất file
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
         </div>
-        <InvoicesFilterSidebar
-          filters={filters}
-          onFilterChange={onFilterChange}
-          onResetFilters={onResetFilters}
-        />
-        <div className="flex-1 overflow-auto">{children}</div>
 
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                to="#"
-                onClick={(e: any) => {
-                  e?.preventDefault();
-                  handlePageChange(currentPage - 1);
+        {/* Right: Primary Action */}
+        <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="shadow-sm">
+              <Download className="w-4 h-4 mr-2" />
+              Xuất báo cáo
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-primary" />
+                Xuất dữ liệu hóa đơn
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-blue-50 text-blue-700 rounded-md text-sm border border-blue-100">
+                Chọn ngày cụ thể để xuất báo cáo ngày, hoặc để trống để xuất
+                toàn bộ lịch sử.
+              </div>
+              <div className="space-y-2">
+                <Label>Ngày xuất báo cáo</Label>
+                <DatePicker
+                  value={exportDate}
+                  onChange={(date) =>
+                    setExportDate(format(date ?? "", "yyyy-MM-dd"))
+                  }
+                  placeholder="Chọn ngày (Tùy chọn)"
+                  className="w-full"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setExportDialogOpen(false);
+                  setExportDate(undefined);
                 }}
-                aria-disabled={currentPage <= 1}
-              />
-            </PaginationItem>
+              >
+                Hủy bỏ
+              </Button>
+              <Button onClick={handleExport}>Xác nhận xuất</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </header>
 
-            {/* If first page not in range show first + ellipsis */}
-            {pages[0] > 1 && (
-              <>
+      {/* === LEVEL 2: FILTER TOOLBAR === */}
+      <div className="px-6 py-3 bg-background border-b flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between shrink-0">
+        {/* Filter Groups */}
+        <div className="flex flex-wrap items-center gap-3 w-full">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm theo mã, khách hàng..."
+              value={filters.Keyword || ""}
+              onChange={(e) => onFilterChange("Keyword", e.target.value)}
+              className="pl-9 h-9 text-sm bg-background"
+            />
+          </div>
+
+          <Separator orientation="vertical" className="h-6 hidden sm:block" />
+
+          {/* Date Range */}
+          <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-md border">
+            <DatePicker
+              value={filters.IssuedFrom}
+              onChange={(date) =>
+                onFilterChange(
+                  "IssuedFrom",
+                  date ? date.toISOString() : undefined
+                )
+              }
+              placeholder="Từ ngày"
+              className="w-[130px] h-7 text-xs border-0 bg-transparent shadow-none focus:bg-background"
+            />
+            <span className="text-muted-foreground text-[10px]">➔</span>
+            <DatePicker
+              value={filters.IssuedTo}
+              onChange={(date) =>
+                onFilterChange(
+                  "IssuedTo",
+                  date ? date.toISOString() : undefined
+                )
+              }
+              placeholder="Đến ngày"
+              className="w-[130px] h-7 text-xs border-0 bg-transparent shadow-none focus:bg-background"
+            />
+          </div>
+
+          {/* Status Filter (Optional: Add if you have statuses) */}
+          <Select
+            value={filters.Status || "all"}
+            onValueChange={(val) =>
+              onFilterChange("Status", val === "all" ? undefined : val)
+            }
+          >
+            <SelectTrigger className="w-[150px] h-9 text-xs border-dashed">
+              <div className="flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+                <SelectValue placeholder="Trạng thái" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả trạng thái</SelectItem>
+              {INVOICE_STATUSES?.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filters.PaymentMethod || "Unknown"}
+            onValueChange={(val) =>
+              onFilterChange(
+                "PaymentMethod",
+                val as InvoiceListParams["PaymentMethod"]
+              )
+            }
+          >
+            <SelectTrigger className="w-[160px] h-9 text-xs border-dashed">
+              <SelectValue placeholder="Phương thức TT" />
+            </SelectTrigger>
+            <SelectContent>
+              {PAYMENT_METHODS.map((pm) => (
+                <SelectItem key={pm.value} value={pm.value}>
+                  {pm.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Reset */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onResetFilters}
+              className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground ml-auto sm:ml-0"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+              Đặt lại
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* === LEVEL 3: CONTENT AREA === */}
+      <main className="flex-1 p-6 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-auto bg-background rounded-lg border shadow-sm">
+          {children}
+        </div>
+
+        {/* Pagination Footer */}
+        {totalPages > 1 && (
+          <div className="pt-4 flex justify-center shrink-0">
+            <Pagination>
+              <PaginationContent>
                 <PaginationItem>
-                  <PaginationLink
+                  <PaginationPrevious
                     to="#"
                     onClick={(e: any) => {
                       e?.preventDefault();
-                      handlePageChange(1);
+                      handlePageChange(currentPage - 1);
                     }}
                     className={cn(
-                      "px-3 py-1 rounded-md",
-                      currentPage === 1 && "bg-primary text-primary-foreground"
+                      "cursor-pointer",
+                      currentPage <= 1 && "pointer-events-none opacity-50"
                     )}
-                  >
-                    1
-                  </PaginationLink>
+                  />
                 </PaginationItem>
-                {pages[0] > 2 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )}
-              </>
-            )}
 
-            {pages.map((p) => (
-              <PaginationItem key={p}>
-                <PaginationLink
-                  to="#"
-                  onClick={(e: any) => {
-                    e?.preventDefault();
-                    handlePageChange(p);
-                  }}
-                  className={cn(
-                    "px-3 py-1 rounded-md",
-                    p === currentPage && "bg-primary text-primary-foreground"
-                  )}
-                  aria-current={p === currentPage ? "page" : undefined}
-                >
-                  {p}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            {/* If last page not in range show ellipsis + last */}
-            {pages[pages.length - 1] < totalPages && (
-              <>
-                {pages[pages.length - 1] < totalPages - 1 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
+                {pages[0] > 1 && (
+                  <>
+                    <PaginationItem>
+                      <PaginationLink
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(1);
+                        }}
+                      >
+                        1
+                      </PaginationLink>
+                    </PaginationItem>
+                    {pages[0] > 2 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                  </>
                 )}
+
+                {pages.map((p) => (
+                  <PaginationItem key={p}>
+                    <PaginationLink
+                      to="#"
+                      isActive={p === currentPage}
+                      onClick={(e: any) => {
+                        e?.preventDefault();
+                        handlePageChange(p);
+                      }}
+                    >
+                      {p}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
+                {pages[pages.length - 1] < totalPages && (
+                  <>
+                    {pages[pages.length - 1] < totalPages - 1 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                    <PaginationItem>
+                      <PaginationLink
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(totalPages);
+                        }}
+                      >
+                        {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  </>
+                )}
+
                 <PaginationItem>
-                  <PaginationLink
+                  <PaginationNext
                     to="#"
                     onClick={(e: any) => {
                       e?.preventDefault();
-                      handlePageChange(totalPages);
+                      handlePageChange(currentPage + 1);
                     }}
                     className={cn(
-                      "px-3 py-1 rounded-md",
-                      totalPages === currentPage &&
-                        "bg-primary text-primary-foreground"
+                      "cursor-pointer",
+                      currentPage >= totalPages &&
+                        "pointer-events-none opacity-50"
                     )}
-                  >
-                    {totalPages}
-                  </PaginationLink>
+                  />
                 </PaginationItem>
-              </>
-            )}
-
-            <PaginationItem>
-              <PaginationNext
-                to="#"
-                onClick={(e: any) => {
-                  e?.preventDefault();
-                  handlePageChange(currentPage + 1);
-                }}
-                aria-disabled={currentPage >= totalPages}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </main>
     </div>
   );

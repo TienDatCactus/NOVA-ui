@@ -139,7 +139,7 @@ export default function CreateScheduleDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* h-[90vh] + layout cột */}
-      <DialogContent className="max-w-4xl h-[90vh] p-0 flex flex-col">
+      <DialogContent className="max-w-4xl  max-h-[90vh] p-0 flex flex-col">
         {/* Header sticky, không cuộn */}
         <DialogHeader className="px-6 pt-6 pb-4 sticky top-0 z-10 bg-background">
           <DialogTitle>Thêm lịch làm việc</DialogTitle>

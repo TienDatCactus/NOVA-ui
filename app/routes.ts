@@ -48,6 +48,9 @@ export default [
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
       route("expenses", "routes/expenses/expenses.tsx"),
+      ...prefix("expenses", [
+        route("dashboard", "routes/expenses/dashboard/dashboard.tsx"),
+      ]),
       route("chat", "routes/chat/chat.tsx"),
       route("users", "routes/users/users.tsx"),
       route("work-shifts", "routes/work-shifts/work-shifts.tsx"),
@@ -77,6 +80,7 @@ export default [
     index("routes/customer/chat/inbox.tsx"),
     route("chat", "routes/customer/chat/chat.tsx"),
     route("map", "routes/customer/map/map.tsx"),
+    route("guidelines", "routes/customer/guides/guides.tsx"),
   ]),
 
   route("*", "routes/not-found.tsx"),

@@ -49,27 +49,23 @@ function LoadingSkeleton() {
 function EmptyState() {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   return (
-    <>
-      <Empty>
+    <Empty>
+      <EmptyHeader>
         <EmptyMedia variant="icon">
           <FileWarning />
         </EmptyMedia>
-        <EmptyHeader>
-          <EmptyTitle>Không tìm thấy phiếu điều chỉnh</EmptyTitle>
-          <EmptyDescription>
-            Thử thay đổi bộ lọc hoặc tạo phiếu mới
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={() => setOpenCreateDialog(true)}>
-            Tạo phiếu mới
-          </Button>
-        </EmptyContent>
-      </Empty>
+        <EmptyTitle>Không tìm thấy phiếu điều chỉnh</EmptyTitle>
+        <EmptyDescription>
+          Thử thay đổi bộ lọc hoặc tạo phiếu mới
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button onClick={() => setOpenCreateDialog(true)}>Tạo phiếu mới</Button>
+      </EmptyContent>
       <CreateStockAdjustmentDialog
         open={openCreateDialog}
         onOpenChange={setOpenCreateDialog}
       />
-    </>
+    </Empty>
   );
 }

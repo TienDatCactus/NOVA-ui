@@ -1,4 +1,16 @@
+import {
+  CreditCard,
+  Filter,
+  LayoutList,
+  PieChart,
+  RotateCcw,
+  Tags,
+} from "lucide-react";
 import React from "react";
+import { Link } from "react-router";
+
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { DatePicker } from "~/components/ui/date-picker";
 import {
   Select,
@@ -7,10 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Button } from "~/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { Separator } from "~/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { FE_URL } from "~/lib/fe-url";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import type { ExpensesFilter } from "../container/filter.hooks";
+import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
 
+// --- PROPS ---
 interface ExpensesLayoutProps {
   children: React.ReactNode;
   filters: ExpensesFilter;
@@ -18,33 +34,19 @@ interface ExpensesLayoutProps {
   resetFilters: () => void;
   totalExpenses: number;
   totalAmount: number;
+  isDashboardView?: boolean; // ✨ NEW PROP
 }
 
-const EXPENSE_CATEGORIES = [
-  { value: "Procurement", label: "Mua sắm" },
-  { value: "Salary", label: "Lương" },
-  { value: "Utilities", label: "Tiện ích" },
-  { value: "Maintenance", label: "Bảo trì" },
-  { value: "Office", label: "Văn phòng" },
-  { value: "Other", label: "Khác" },
-];
-
-const PAYMENT_METHODS = [
-  { value: "Cash", label: "Tiền mặt" },
-  { value: "BankTransfer", label: "Chuyển khoản" },
-  { value: "CreditCard", label: "Thẻ tín dụng" },
-  { value: "DebitCard", label: "Thẻ ghi nợ" },
-  { value: "EWallet", label: "Ví điện tử" },
-];
-
-const ExpensesLayout = ({
+export default function ExpensesLayout({
   children,
   filters,
   updateFilter,
   resetFilters,
   totalExpenses,
   totalAmount,
-}: ExpensesLayoutProps) => {
+  isDashboardView = false,
+}: ExpensesLayoutProps) {
+  const currentTab = isDashboardView ? "dashboard" : "list";
   const hasActiveFilters = Boolean(
     filters.fromDate ||
       filters.toDate ||
@@ -53,132 +55,174 @@ const ExpensesLayout = ({
   );
 
   return (
-    <div className="grid gap-6 p-6">
-      <div className="flex items-start justify-between">
-        <div className="grid gap-2">
-          <h1 className="text-3xl font-bold">Quản lý chi phí</h1>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>
-              Tổng{" "}
-              <span className="font-semibold text-foreground">
-                {totalExpenses}
-              </span>{" "}
-              chi phí
-            </span>
-            <span className="text-muted-foreground">•</span>
-            <span>
-              Tổng tiền:{" "}
-              <span className="font-semibold text-foreground">
-                {totalAmount.toLocaleString("vi-VN")} VNĐ
-              </span>
-            </span>
-          </div>
+    <div className="flex flex-col h-full bg-muted/10 min-h-screen">
+      {/* === LEVEL 1: GLOBAL HEADER === */}
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between">
+        {/* Left: Title & Tabs */}
+        <div className="flex items-center gap-6">
+          <h1 className="text-xl font-bold tracking-tight">Quản lý chi phí</h1>
+          <Separator orientation="vertical" className="h-6" />
+
+          <Tabs value={currentTab} className="w-auto">
+            <TabsList className="grid w-full grid-cols-2 h-9">
+              <TabsTrigger value="list" asChild className="text-xs px-4">
+                <Link
+                  to={FE_URL.dashboard.expenses}
+                  className="flex items-center gap-2"
+                >
+                  <LayoutList className="w-3.5 h-3.5" />
+                  Danh sách
+                </Link>
+              </TabsTrigger>
+              <TabsTrigger value="dashboard" asChild className="text-xs px-4">
+                <Link
+                  to={FE_URL.dashboard.expensesDashboard}
+                  className="flex items-center gap-2"
+                >
+                  <PieChart className="w-3.5 h-3.5" />
+                  Báo cáo
+                </Link>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="grid gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Từ ngày
-            </label>
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3">
+          {/* Summary Badge (Only show in List view to avoid cluttering dashboard) */}
+          {!isDashboardView && (
+            <div className="hidden lg:flex items-center gap-3 mr-4 text-sm bg-muted/50 px-3 py-1.5 rounded-md border">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Số lượng:</span>
+                <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                  {totalExpenses}
+                </Badge>
+              </div>
+              <Separator orientation="vertical" className="h-4" />
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Tổng chi:</span>
+                <span className="font-mono font-bold text-primary">
+                  {totalAmount.toLocaleString("vi-VN")}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Primary Action */}
+        </div>
+      </header>
+
+      <div className="px-6 py-3 bg-background border-b flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex flex-wrap items-center gap-3 w-full">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium mr-2">
+            <Filter className="w-4 h-4" />
+            Bộ lọc:
+          </div>
+
+          {/* Date Range - Common for both views */}
+          <div className="flex items-center gap-2">
             <DatePicker
               value={filters.fromDate}
-              onChange={(date: Date | undefined) =>
+              onChange={(date) =>
                 updateFilter(
                   "fromDate",
                   date ? date.toISOString().split("T")[0] : undefined
                 )
               }
+              placeholder="Từ ngày"
+              className="w-[130px] h-9 text-xs"
             />
-          </div>
-
-          <div className="grid gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Đến ngày
-            </label>
+            <span className="text-muted-foreground text-xs">-</span>
             <DatePicker
               value={filters.toDate}
-              onChange={(date: Date | undefined) =>
+              onChange={(date) =>
                 updateFilter(
                   "toDate",
                   date ? date.toISOString().split("T")[0] : undefined
                 )
               }
+              placeholder="Đến ngày"
+              className="w-[130px] h-9 text-xs"
             />
           </div>
 
-          <div className="grid gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Danh mục
-            </label>
-            <Select
-              value={filters.categoryId || "all"}
-              onValueChange={(value) =>
-                updateFilter("categoryId", value === "all" ? undefined : value)
-              }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Tất cả danh mục" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                {EXPENSE_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Extended Filters - Only for LIST View */}
+          {!isDashboardView && (
+            <>
+              <Separator
+                orientation="vertical"
+                className="h-6 hidden sm:block"
+              />
 
-          <div className="grid gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Phương thức
-            </label>
-            <Select
-              value={filters.paymentMethod || "all"}
-              onValueChange={(value) =>
-                updateFilter(
-                  "paymentMethod",
-                  value === "all" ? undefined : value
-                )
-              }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Tất cả" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                {PAYMENT_METHODS.map((method) => (
-                  <SelectItem key={method.value} value={method.value}>
-                    {method.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {hasActiveFilters && (
-            <div className="grid gap-1.5">
-              <label className="text-xs font-medium text-transparent">
-                Reset
-              </label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={resetFilters}
-                className="h-10"
+              <Select
+                value={filters.categoryId || "all"}
+                onValueChange={(value) =>
+                  updateFilter(
+                    "categoryId",
+                    value === "all" ? undefined : value
+                  )
+                }
               >
-                <RotateCcw className="h-4 w-4" />
-                Đặt lại
-              </Button>
-            </div>
+                <SelectTrigger className="w-[160px] h-9 text-xs">
+                  <div className="flex items-center gap-2 truncate">
+                    <Tags className="w-3.5 h-3.5 text-muted-foreground" />
+                    <SelectValue placeholder="Tất cả danh mục" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả danh mục</SelectItem>
+                  {ExpenseCategories.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={filters.paymentMethod || "all"}
+                onValueChange={(value) =>
+                  updateFilter(
+                    "paymentMethod",
+                    value === "all" ? undefined : value
+                  )
+                }
+              >
+                <SelectTrigger className="w-[160px] h-9 text-xs">
+                  <div className="flex items-center gap-2 truncate">
+                    <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
+                    <SelectValue placeholder="Tất cả phương thức" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả phương thức</SelectItem>
+                  {PAYMENT_METHODS.map((method) => (
+                    <SelectItem key={method.value} value={method.value}>
+                      {method.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
+
+          {/* Reset Button */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetFilters}
+              className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground ml-auto sm:ml-0"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+              Đặt lại
+            </Button>
           )}
         </div>
       </div>
 
-      <main className="flex-1">{children}</main>
+      {/* === LEVEL 3: CONTENT AREA === */}
+      <main className="flex-1 p-6 overflow-y-auto">{children}</main>
     </div>
   );
-};
-
-export default ExpensesLayout;
+}

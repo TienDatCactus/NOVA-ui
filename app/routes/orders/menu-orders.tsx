@@ -46,7 +46,7 @@ export default function Component({
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Danh sách đơn hàng
+                Danh sách đơn F&B
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Quản lý các đơn hàng POS đang xử lý tại quầy
@@ -87,28 +87,25 @@ export default function Component({
                 </p>
               </div>
             ) : filteredOrders?.length === 0 ? (
-              // Empty State: Căn giữa màn hình
-              <div className="flex h-[60vh] items-center justify-center">
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant={"icon"}>
-                      <Package className="h-12 w-12 text-muted-foreground/50" />
-                    </EmptyMedia>
-                    <EmptyTitle className="mt-4">Không có đơn hàng</EmptyTitle>
-                    <EmptyDescription>
-                      {statusFilter === "All"
-                        ? "Chưa có đơn hàng nào được tạo trong ngày này."
-                        : `Không tìm thấy đơn hàng nào có trạng thái "${
-                            statusFilter === "Open"
-                              ? "Đang mở"
-                              : statusFilter === "Completed"
-                                ? "Hoàn thành"
-                                : "Đã hủy"
-                          }".`}
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              </div>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant={"icon"}>
+                    <Package />
+                  </EmptyMedia>
+                  <EmptyTitle>Không có đơn F&B</EmptyTitle>
+                  <EmptyDescription>
+                    {statusFilter === "All"
+                      ? "Chưa có đơn hàng nào được tạo trong ngày này."
+                      : `Không tìm thấy đơn hàng nào có trạng thái "${
+                          statusFilter === "Open"
+                            ? "Đang mở"
+                            : statusFilter === "Completed"
+                              ? "Hoàn thành"
+                              : "Đã hủy"
+                        }".`}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : (
               <div className="columns-1 gap-4 space-y-4 md:columns-2 xl:columns-3 ">
                 {filteredOrders?.map((order) => (

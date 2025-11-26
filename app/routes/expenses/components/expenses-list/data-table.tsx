@@ -84,7 +84,7 @@ export function DataTable<TData extends ExpenseListItemDto, TValue>({
         />
         <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
           <Plus className="h-4 w-4" />
-          Tạo chi phí
+          Tạo phiếu chi
         </Button>
       </div>
 

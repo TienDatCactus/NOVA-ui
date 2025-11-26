@@ -4,6 +4,7 @@ import {
   MoreHorizontal,
   PackageCheck,
   Pencil,
+  SquareX,
   Trash2,
   XCircle,
 } from "lucide-react";
@@ -121,7 +122,7 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
                 variant="destructive"
                 onClick={() => setOpenCancelDialog(true)}
               >
-                <XCircle className="mr-2 h-4 w-4" />
+                <SquareX className="mr-2 h-4 w-4" />
                 Hủy yêu cầu
               </DropdownMenuItem>
             )}

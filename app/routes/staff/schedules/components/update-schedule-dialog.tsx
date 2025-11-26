@@ -157,7 +157,7 @@ export default function UpdateScheduleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[90vh] p-0 flex flex-col gap-0">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 flex flex-col gap-0">
         <DialogHeader className="px-6 pt-6 pb-5 ">
           <DialogTitle className="text-xl">Cập nhật lịch làm việc</DialogTitle>
           {isLoadingDetail ? (
