@@ -332,7 +332,7 @@ const COMMAND_BAR_ROUTES: Array<{
 
 const CUSTOMER_NAVS = [
   { name: "Inbox", icon: Settings, href: FE_URL.customer.inbox },
-  { name: "Services & F&B", icon: Settings, href: FE_URL.customer.services },
+  { name: "Catalog", icon: Settings, href: FE_URL.customer.catalog },
   { name: "Guidelines", icon: Settings, href: FE_URL.customer.guidelines },
   { name: "Map", icon: Settings, href: FE_URL.customer.map },
 ];

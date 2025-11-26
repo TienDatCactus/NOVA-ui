@@ -1,21 +1,42 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, addMonths, parseISO } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { addMonths, format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { CalendarIcon, ChevronDown, Plus, X } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  ChevronDown,
+  Clock,
+  Repeat,
+  Users,
+  X,
+  Search,
+  CalendarIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
-import { StaffShiftService } from "~/services/api/staff/staff-shift";
-import { WEEKDAYS } from "~/services/api/staff/staff-shift/staff-shift.type";
-import type { CreateShiftScheduleRequest } from "~/services/api/staff/staff-shift/dto";
+
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
+import { Checkbox } from "~/components/ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
@@ -30,22 +51,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "~/components/ui/command";
-import { Calendar } from "~/components/ui/calendar";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+
 import { StaffService } from "~/services/api/staff/staff";
+import { StaffShiftService } from "~/services/api/staff/staff-shift";
+import type { CreateShiftScheduleRequest } from "~/services/api/staff/staff-shift/dto";
+import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
+import { WEEKDAYS } from "~/services/api/staff/staff-shift/staff-shift.type";
 import { WorkShiftService } from "~/services/api/staff/work-shift";
-import { Checkbox } from "~/components/ui/checkbox";
-import { Badge } from "~/components/ui/badge";
 
 const { CreateShiftScheduleRequestSchema } = StaffShiftSchema;
 
@@ -66,16 +82,20 @@ export default function CreateScheduleDialog({
     string[]
   >([]);
 
-  const { data: staffListResponse } = useQuery({
+  // --- Queries ---
+  const { data: staffList = [] } = useQuery({
     queryKey: ["staff-list"],
     queryFn: async () => await StaffService.getStaffList(),
+    enabled: open,
   });
-  const { data: workShifts } = useQuery({
+
+  const { data: workShifts = [] } = useQuery({
     queryKey: ["work-shifts-active"],
     queryFn: async () => await WorkShiftService.getActiveWorkShiftList(),
+    enabled: open,
   });
-  const staffList = staffListResponse || [];
 
+  // --- Form Setup ---
   const form = useForm<CreateShiftScheduleRequest>({
     resolver: zodResolver(CreateShiftScheduleRequestSchema),
     defaultValues: {
@@ -91,374 +111,312 @@ export default function CreateScheduleDialog({
     },
   });
 
-  const stopWheel = (e: React.WheelEvent) => e.stopPropagation();
-  const stopTouch = (e: React.TouchEvent) => e.stopPropagation();
-
+  const primaryStaffId = form.watch("primaryStaffId");
   const repeatWeekly = form.watch("repeatWeekly");
 
   useEffect(() => {
     form.setValue("additionalStaffIds", selectedAdditionalStaff);
   }, [selectedAdditionalStaff, form]);
 
+  // --- Handlers ---
   const onSubmit = async (data: CreateShiftScheduleRequest) => {
     setIsSubmitting(true);
     try {
       await StaffShiftService.createShiftSchedule(data);
-      toast.success("Tạo lịch làm việc thành công");
+      toast.success("Đã tạo lịch làm việc thành công");
       form.reset();
       setSelectedAdditionalStaff([]);
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      console.error("Error creating schedule:", error);
+      console.error(error);
+      toast.error("Lỗi khi tạo lịch");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleAddStaff = (staffId: string) => {
-    if (!selectedAdditionalStaff.includes(staffId)) {
-      setSelectedAdditionalStaff([...selectedAdditionalStaff, staffId]);
-    }
-  };
-  const handleRemoveStaff = (staffId: string) => {
-    setSelectedAdditionalStaff(
-      selectedAdditionalStaff.filter((id) => id !== staffId)
+  const handleToggleAdditionalStaff = (id: string) => {
+    setSelectedAdditionalStaff((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
-  const filteredStaff = staffList?.filter((s) =>
-    s.fullName.toLowerCase().includes(searchStaff.toLowerCase())
+  // Filter staff logic
+  const availableStaffForAdditional = staffList.filter(
+    (s) =>
+      s.id !== primaryStaffId &&
+      s.fullName.toLowerCase().includes(searchStaff.toLowerCase())
   );
 
-  const primaryStaffId = form.watch("primaryStaffId");
-  const selectedStaff = staffList?.filter((s) =>
-    selectedAdditionalStaff.includes(s.id)
-  );
+  const primaryStaffName = staffList.find(
+    (s) => s.id === primaryStaffId
+  )?.fullName;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* h-[90vh] + layout cột */}
-      <DialogContent className="max-w-4xl  max-h-[90vh] p-0 flex flex-col">
-        {/* Header sticky, không cuộn */}
-        <DialogHeader className="px-6 pt-6 pb-4 sticky top-0 z-10 bg-background">
-          <DialogTitle>Thêm lịch làm việc</DialogTitle>
+      <DialogContent className="max-w-5xl h-[90vh] p-0 flex flex-col gap-0 bg-background overflow-hidden">
+        {/* === HEADER === */}
+        <DialogHeader className="px-8 py-5 border-b shrink-0 bg-muted/5">
+          <DialogTitle className="text-xl flex items-center gap-2">
+            <CalendarDays className="w-5 h-5 text-primary" />
+            Thiết lập lịch làm việc
+          </DialogTitle>
+          <DialogDescription>
+            Phân công ca làm việc cho nhân viên và thiết lập chu kỳ lặp lại.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          {/* Thân cuộn độc lập với scrollbar luôn hiện */}
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex-1 min-h-0 flex flex-col"
+            className="flex-1 flex flex-col min-h-0"
           >
-            <div className="flex-1 px-6 overflow-y-scroll">
-              <div className="space-y-6 pb-6">
-                {/* THÔNG TIN NHÂN VIÊN */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">
-                    THÔNG TIN NHÂN VIÊN
-                  </h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Nhân viên chính */}
-                    <FormField
-                      control={form.control}
-                      name="primaryStaffId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nhân viên chính *</FormLabel>
-                          <FormControl>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="w-full justify-between"
-                                >
-                                  {field.value
-                                    ? staffList?.find(
-                                        (s) => s.id === field.value
-                                      )?.fullName
-                                    : "Chọn nhân viên"}
-                                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-[300px] p-0"
-                                align="start"
-                                onWheel={stopWheel}
-                                onTouchMove={stopTouch}
-                              >
-                                <div className="max-h-64 overflow-y-auto">
-                                  <div className="p-2 space-y-1">
-                                    {staffList?.map((staff) => (
-                                      <Button
-                                        key={staff.id}
-                                        variant="ghost"
-                                        className="w-full justify-start h-auto py-2"
-                                        onClick={() => field.onChange(staff.id)}
-                                      >
-                                        <div className="text-left">
-                                          <div className="font-medium">
-                                            {staff.fullName}
-                                          </div>
-                                          <div className="text-xs text-muted-foreground">
-                                            {staff.code}
-                                          </div>
-                                        </div>
-                                      </Button>
-                                    ))}
-                                  </div>
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Thêm nhân viên */}
-                    <div className="space-y-2">
-                      <FormLabel>Chọn nhân viên (Tùy chọn)</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Thêm nhân viên
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-[300px] p-0"
-                          align="start"
-                          onWheel={stopWheel}
-                          onTouchMove={stopTouch}
-                        >
-                          <div className="p-2 border-b">
-                            <input
-                              type="text"
-                              placeholder="Tìm kiếm..."
-                              className="w-full px-3 py-2 text-sm border rounded-md"
-                              value={searchStaff}
-                              onChange={(e) => setSearchStaff(e.target.value)}
-                            />
-                          </div>
-                          <div className="max-h-64 overflow-y-auto">
-                            <div className="p-2 space-y-1">
-                              {filteredStaff?.map((staff) => {
-                                const isSelected =
-                                  selectedAdditionalStaff.includes(staff.id);
-                                const isPrimary = staff.id === primaryStaffId;
-                                if (isPrimary) return null;
-                                return (
-                                  <div
-                                    key={staff.id}
-                                    className={cn(
-                                      "flex items-center justify-between p-2 rounded-md hover:bg-accent cursor-pointer transition-colors",
-                                      isSelected && "bg-accent"
-                                    )}
-                                    onClick={() => {
-                                      if (isSelected)
-                                        handleRemoveStaff(staff.id);
-                                      else handleAddStaff(staff.id);
-                                    }}
-                                  >
-                                    <div className="flex-1">
-                                      <div className="font-medium text-sm">
-                                        {staff.fullName}
-                                      </div>
-                                      <div className="text-xs text-muted-foreground">
-                                        {staff.code}
-                                      </div>
-                                    </div>
-                                    <Checkbox checked={isSelected} />
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-
-                      {selectedStaff && selectedStaff.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2 p-3 bg-muted/30 rounded-md">
-                          {selectedStaff.map((staff) => (
-                            <Badge
-                              key={staff.id}
-                              variant="secondary"
-                              className="gap-1 py-1"
-                            >
-                              {staff.fullName}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveStaff(staff.id)}
-                                className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+            {/* === BODY (Split View) === */}
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+              {/* LEFT COL: PEOPLE (35%) */}
+              <div className="w-full md:w-[35%] border-r bg-muted/10 flex flex-col">
+                <div className="p-6 pb-2">
+                  <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-primary uppercase tracking-wider">
+                    <Users className="w-4 h-4" /> Nhân sự áp dụng
                   </div>
+
+                  {/* Primary Staff */}
+                  <FormField
+                    control={form.control}
+                    name="primaryStaffId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Nhân viên chính{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full justify-between bg-background",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? staffList.find((s) => s.id === field.value)
+                                      ?.fullName
+                                  : "Chọn nhân viên"}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="w-[300px] p-0"
+                            align="start"
+                          >
+                            <Command>
+                              <CommandInput placeholder="Tìm nhân viên..." />
+                              <CommandList>
+                                <CommandEmpty>Không tìm thấy.</CommandEmpty>
+                                <CommandGroup>
+                                  {staffList.map((staff) => (
+                                    <CommandItem
+                                      value={staff.fullName}
+                                      key={staff.id}
+                                      onSelect={() => field.onChange(staff.id)}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          staff.id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex flex-col">
+                                        <span>{staff.fullName}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                          {staff.code}
+                                        </span>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
-                <div className="border-t" />
+                <Separator className="mb-2" />
 
-                {/* CA LÀM VIỆC & LỊCH TRÌNH */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">
-                    CA LÀM VIỆC & LỊCH TRÌNH
-                  </h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Ca làm */}
-                    <FormField
-                      control={form.control}
-                      name="workShiftIds"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Chọn ca làm *</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  className="w-full justify-between"
-                                >
-                                  {field.value?.length
-                                    ? `${field.value.length} ca được chọn`
-                                    : "Chọn ca làm việc"}
-                                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-[300px] p-0"
-                              align="start"
-                              onWheel={stopWheel}
-                              onTouchMove={stopTouch}
-                            >
-                              <Command>
-                                <CommandInput placeholder="Tìm ca làm..." />
-                                <CommandList className="max-h-64 overflow-y-auto">
-                                  <CommandEmpty>
-                                    Không tìm thấy ca làm.
-                                  </CommandEmpty>
-                                  <CommandGroup>
-                                    {workShifts?.map((shift) => {
-                                      const isSelected = field.value?.includes(
-                                        shift.id
-                                      );
-                                      return (
-                                        <CommandItem
-                                          key={shift.id}
-                                          onSelect={() => {
-                                            const newValue = isSelected
-                                              ? field.value.filter(
-                                                  (id) => id !== shift.id
-                                                )
-                                              : [...field.value, shift.id];
-                                            field.onChange(newValue);
-                                          }}
-                                        >
-                                          <div className="flex items-center w-full">
-                                            <Checkbox
-                                              checked={isSelected}
-                                              className="mr-2"
-                                            />
-                                            <div className="flex-1">
-                                              <div className="font-medium">
-                                                {shift.name}
-                                              </div>
-                                              <div className="text-xs text-muted-foreground">
-                                                {shift.startTime?.slice(0, 5)} -{" "}
-                                                {shift.endTime?.slice(0, 5)}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </CommandItem>
-                                      );
-                                    })}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
+                {/* Additional Staff (Scrollable List) */}
+                <div className="flex-1 flex flex-col px-6 pb-4 min-h-0">
+                  <div className="mb-2 flex items-center justify-between">
+                    <FormLabel className="text-xs text-muted-foreground">
+                      Nhân viên phụ (Cùng lịch)
+                    </FormLabel>
+                    {selectedAdditionalStaff.length > 0 && (
+                      <Badge variant="secondary">
+                        {selectedAdditionalStaff.length} đã chọn
+                      </Badge>
+                    )}
+                  </div>
 
-                          {field.value?.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {field.value.map((shiftId) => {
-                                const shift = workShifts?.find(
-                                  (s) => s.id === shiftId
+                  <div className="relative mb-3">
+                    <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                    <input
+                      className="w-full rounded-md border border-input bg-background px-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      placeholder="Tìm thêm nhân viên..."
+                      value={searchStaff}
+                      onChange={(e) => setSearchStaff(e.target.value)}
+                    />
+                  </div>
+
+                  <ScrollArea className="flex-1 -mr-4 pr-4">
+                    <div className="space-y-2">
+                      {availableStaffForAdditional.map((staff) => {
+                        const isSelected = selectedAdditionalStaff.includes(
+                          staff.id
+                        );
+                        return (
+                          <div
+                            key={staff.id}
+                            onClick={() =>
+                              handleToggleAdditionalStaff(staff.id)
+                            }
+                            className={cn(
+                              "flex items-center gap-3 p-2 rounded-lg cursor-pointer border transition-all hover:shadow-sm",
+                              isSelected
+                                ? "bg-primary/5 border-primary/50"
+                                : "bg-background border-transparent hover:bg-background hover:border-border"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {staff.fullName}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {staff.code}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {availableStaffForAdditional.length === 0 && (
+                        <p className="text-xs text-center text-muted-foreground py-4">
+                          Không tìm thấy kết quả
+                        </p>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+
+              {/* RIGHT COL: SCHEDULE (65%) */}
+              <div className="w-full md:w-[65%] flex flex-col min-h-0">
+                <ScrollArea className="flex-1">
+                  <div className="p-8 space-y-8">
+                    {/* 1. Shift Selection */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-wider">
+                        <Clock className="w-4 h-4" /> Thời gian làm việc
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name="workShiftIds"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Ca làm việc{" "}
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {workShifts.map((shift) => {
+                                const isSelected = field.value?.includes(
+                                  shift.id
                                 );
-                                if (!shift) return null;
                                 return (
-                                  <Badge
-                                    key={shiftId}
-                                    variant="secondary"
-                                    className="gap-1"
-                                  >
-                                    {shift.name}
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        field.onChange(
-                                          field.value.filter(
-                                            (id) => id !== shiftId
+                                  <div
+                                    key={shift.id}
+                                    onClick={() => {
+                                      const current = field.value || [];
+                                      const newValue = current.includes(
+                                        shift.id
+                                      )
+                                        ? current.filter(
+                                            (id) => id !== shift.id
                                           )
-                                        )
-                                      }
-                                      className="ml-1 hover:bg-destructive/20 rounded-full"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </Badge>
+                                        : [...current, shift.id];
+                                      field.onChange(newValue);
+                                    }}
+                                    className={cn(
+                                      "cursor-pointer rounded-lg border p-3 flex items-start gap-3 transition-all",
+                                      isSelected
+                                        ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20"
+                                        : "hover:border-primary/50 hover:bg-muted/20"
+                                    )}
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      className="mt-1"
+                                    />
+                                    <div>
+                                      <p className="font-medium text-sm">
+                                        {shift.name}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                                        {shift.startTime.slice(0, 5)} -{" "}
+                                        {shift.endTime.slice(0, 5)}
+                                      </p>
+                                    </div>
+                                  </div>
                                 );
                               })}
                             </div>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    {/* Ngày bắt đầu / Kết thúc */}
-                    <div className="space-y-4">
-                      <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4 pt-2">
                         <FormField
                           control={form.control}
                           name="startDate"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Ngày bắt đầu *</FormLabel>
+                            <FormItem className="flex flex-col">
+                              <FormLabel>Bắt đầu từ</FormLabel>
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <FormControl>
                                     <Button
                                       variant="outline"
                                       className={cn(
-                                        "w-full justify-start text-left font-normal",
+                                        "pl-3 text-left font-normal",
                                         !field.value && "text-muted-foreground"
                                       )}
                                     >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
                                       {field.value
-                                        ? format(
-                                            parseISO(field.value),
-                                            "dd/MM/yyyy",
-                                            { locale: vi }
-                                          )
+                                        ? format(parseISO(field.value), "PPP", {
+                                            locale: vi,
+                                          })
                                         : "Chọn ngày"}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
                                 <PopoverContent
                                   className="w-auto p-0"
                                   align="start"
-                                  onWheel={stopWheel}
-                                  onTouchMove={stopTouch}
                                 >
                                   <Calendar
                                     mode="single"
@@ -472,10 +430,7 @@ export default function CreateScheduleDialog({
                                         date ? format(date, "yyyy-MM-dd") : ""
                                       )
                                     }
-                                    locale={vi}
-                                    captionLayout="dropdown"
-                                    fromYear={2000}
-                                    toYear={new Date().getFullYear() + 10}
+                                    initialFocus
                                   />
                                 </PopoverContent>
                               </Popover>
@@ -483,12 +438,11 @@ export default function CreateScheduleDialog({
                             </FormItem>
                           )}
                         />
-
                         <FormField
                           control={form.control}
                           name="endDate"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                               <FormLabel>Kết thúc</FormLabel>
                               <Popover>
                                 <PopoverTrigger asChild>
@@ -496,26 +450,22 @@ export default function CreateScheduleDialog({
                                     <Button
                                       variant="outline"
                                       className={cn(
-                                        "w-full justify-start text-left font-normal",
+                                        "pl-3 text-left font-normal",
                                         !field.value && "text-muted-foreground"
                                       )}
                                     >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
                                       {field.value
-                                        ? format(
-                                            parseISO(field.value),
-                                            "dd/MM/yyyy",
-                                            { locale: vi }
-                                          )
-                                        : "Chưa xác định"}
+                                        ? format(parseISO(field.value), "PPP", {
+                                            locale: vi,
+                                          })
+                                        : "Chọn ngày"}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
                                 <PopoverContent
                                   className="w-auto p-0"
                                   align="start"
-                                  onWheel={stopWheel}
-                                  onTouchMove={stopTouch}
                                 >
                                   <Calendar
                                     mode="single"
@@ -526,156 +476,157 @@ export default function CreateScheduleDialog({
                                     }
                                     onSelect={(date) =>
                                       field.onChange(
-                                        date ? format(date, "yyyy-MM-dd") : null
+                                        date ? format(date, "yyyy-MM-dd") : ""
                                       )
                                     }
-                                    locale={vi}
-                                    captionLayout="dropdown"
-                                    fromYear={2000}
-                                    toYear={new Date().getFullYear() + 10}
+                                    initialFocus
                                   />
                                 </PopoverContent>
                               </Popover>
-                              <FormDescription className="text-xs">
-                                Nếu để trống, mặc định là 3 tháng
-                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
                     </div>
-                  </div>
 
-                  {/* Lặp lại hàng tuần */}
-                  <FormField
-                    control={form.control}
-                    name="repeatWeekly"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-sm font-medium">
-                            Lặp lại hàng tuần
-                          </FormLabel>
-                          <FormDescription className="text-xs">
-                            Lịch làm việc sẽ được tự động lặp lại vào các ngày
-                            trong tuần
-                          </FormDescription>
+                    <Separator />
+
+                    {/* 2. Recurrence Settings */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-wider">
+                          <Repeat className="w-4 h-4" /> Quy tắc lặp lại
                         </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
-                {/* Tuần */}
-                {repeatWeekly && (
-                  <>
-                    <div className="border-t" />
-                    <FormField
-                      control={form.control}
-                      name="weekDays"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel>Chọn thứ trong tuần</FormLabel>
-                          <div className="flex gap-2 flex-wrap">
-                            {WEEKDAYS.map((day) => (
-                              <FormField
-                                key={day.value}
-                                control={form.control}
-                                name="weekDays"
-                                render={({ field }) => {
-                                  const selected = field.value?.includes(
-                                    day.value
-                                  );
-                                  return (
-                                    <FormItem key={day.value}>
-                                      <FormControl>
-                                        <Button
-                                          type="button"
-                                          variant={
-                                            selected ? "default" : "outline"
+                        <FormField
+                          control={form.control}
+                          name="repeatWeekly"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <FormLabel className="text-sm font-normal">
+                                Lặp lại hàng tuần
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {repeatWeekly && (
+                        <div className="bg-muted/30 rounded-xl p-5 border space-y-5 animate-in slide-in-from-top-2">
+                          <FormField
+                            control={form.control}
+                            name="weekDays"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs font-semibold uppercase text-muted-foreground mb-3 block">
+                                  Áp dụng cho các thứ
+                                </FormLabel>
+                                <div className="flex flex-wrap gap-2">
+                                  {WEEKDAYS.map((day) => {
+                                    const isSelected = field.value?.includes(
+                                      day.value
+                                    );
+                                    return (
+                                      <div
+                                        key={day.value}
+                                        className={cn(
+                                          "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium cursor-pointer transition-all border select-none",
+                                          isSelected
+                                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                                            : "bg-background text-muted-foreground hover:border-primary/50 hover:text-primary"
+                                        )}
+                                        onClick={() => {
+                                          if (isSelected) {
+                                            field.onChange(
+                                              field.value?.filter(
+                                                (v) => v !== day.value
+                                              )
+                                            );
+                                          } else {
+                                            field.onChange([
+                                              ...(field.value || []),
+                                              day.value,
+                                            ]);
                                           }
-                                          className="min-w-[90px]"
-                                          onClick={() => {
-                                            if (selected) {
-                                              field.onChange(
-                                                field.value.filter(
-                                                  (v: number) => v !== day.value
-                                                )
-                                              );
-                                            } else {
-                                              field.onChange([
-                                                ...field.value,
-                                                day.value,
-                                              ]);
-                                            }
-                                          }}
-                                        >
-                                          {day.label}
-                                        </Button>
-                                      </FormControl>
-                                    </FormItem>
-                                  );
-                                }}
-                              />
-                            ))}
-                          </div>
-                          <FormDescription className="text-xs">
-                            Lặp lại thứ {form.watch("weekDays")?.length || 0}{" "}
-                            hàng tuần
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-
-                {/* Ngày lễ */}
-                <div className="border-t pt-4 pb-20">
-                  <FormField
-                    control={form.control}
-                    name="excludeHolidays"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center space-x-3 space-y-0 p-3 bg-muted/30 rounded-md">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
+                                        }}
+                                      >
+                                        {day.label
+                                          .replace("Thứ ", "T")
+                                          .replace("Chủ nhật", "CN")}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">
-                          Không xếp lịch vào ngày lễ
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+
+                          <FormField
+                            control={form.control}
+                            name="excludeHolidays"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel className="font-normal">
+                                    Tự động bỏ qua ngày Lễ/Tết
+                                  </FormLabel>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </ScrollArea>
               </div>
             </div>
 
-            {/* Footer sticky: luôn hiện ở đáy dialog */}
-            <div className="px-6 py-4 border-t bg-background shrink-0">
-              <div className="flex justify-end gap-2">
+            {/* === FOOTER === */}
+            <DialogFooter className="px-8 py-5 border-t shrink-0 bg-background sm:justify-between">
+              <div className="text-sm text-muted-foreground hidden md:block">
+                {primaryStaffName ? (
+                  <span>
+                    Đang xếp lịch cho: <strong>{primaryStaffName}</strong>{" "}
+                    {selectedAdditionalStaff.length > 0 &&
+                      `và ${selectedAdditionalStaff.length} người khác`}
+                  </span>
+                ) : (
+                  <span>Vui lòng chọn nhân viên chính</span>
+                )}
+              </div>
+              <div className="flex gap-3">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   disabled={isSubmitting}
                 >
-                  Bỏ qua
+                  Hủy bỏ
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Đang lưu..." : "Lưu"}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="min-w-[140px]"
+                >
+                  {isSubmitting ? "Đang xử lý..." : "Lưu lịch làm việc"}
                 </Button>
               </div>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

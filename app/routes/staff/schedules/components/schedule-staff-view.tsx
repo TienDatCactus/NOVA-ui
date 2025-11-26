@@ -19,23 +19,12 @@ interface ScheduleStaffViewProps {
   shifts: StaffShiftListItem[];
   attendanceData: StaffAttendanceListItem[];
   workShifts: WorkShiftListItem[];
-  weekStart: Date;
-  onAddStaff?: (shiftId: string, date: string) => void;
-  onDeleteStaff?: (shift: StaffShiftListItem) => void;
-  onEditStaff?: (shift: StaffShiftListItem) => void;
-  onMarkAttendance?: (attendance: StaffAttendanceListItem) => void;
-  onMarkAbsent?: (attendance: StaffAttendanceListItem) => void;
 }
 
 export default function ScheduleStaffView({
   shifts,
   attendanceData,
   workShifts,
-  weekStart,
-  onDeleteStaff,
-  onEditStaff,
-  onMarkAttendance,
-  onMarkAbsent,
 }: ScheduleStaffViewProps) {
   const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
 

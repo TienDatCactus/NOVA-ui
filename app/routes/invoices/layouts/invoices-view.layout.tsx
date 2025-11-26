@@ -7,6 +7,7 @@ import {
   LayoutList,
   RotateCcw,
   Search,
+  CreditCard, // Added missing icon import
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { format } from "date-fns";
@@ -45,9 +46,8 @@ import {
 
 import { InvoicesService } from "~/services/api/invoices";
 import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
-import { PAYMENT_METHODS } from "~/services/types/payment.types"; // Assuming you have this
-import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types"; // Assuming you have this
-import type z from "zod";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
 
 interface InvoicesViewLayoutProps {
   children: ReactNode;
@@ -131,8 +131,11 @@ function InvoicesViewLayout({
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between shrink-0">
         {/* Left: Title */}
         <div className="flex items-center gap-4">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            <FileText className="w-5 h-5" />
+          </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">
+            <h1 className="text-lg font-bold tracking-tight flex items-center gap-2">
               Quản lý hóa đơn
             </h1>
             <p className="text-xs text-muted-foreground">
@@ -148,7 +151,7 @@ function InvoicesViewLayout({
         {/* Right: Primary Action */}
         <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="shadow-sm">
+            <Button variant={"success"}>
               <Download className="w-4 h-4 mr-2" />
               Xuất báo cáo
             </Button>
@@ -156,12 +159,12 @@ function InvoicesViewLayout({
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Download className="w-5 h-5 text-primary" />
+                <Download className="w-5 h-5 text-green-700" />
                 Xuất dữ liệu hóa đơn
               </DialogTitle>
             </DialogHeader>
             <div className="py-4 space-y-4">
-              <div className="p-4 bg-blue-50 text-blue-700 rounded-md text-sm border border-blue-100">
+              <div className="p-4 bg-green-50 text-green-700 rounded-md text-sm border border-green-100">
                 Chọn ngày cụ thể để xuất báo cáo ngày, hoặc để trống để xuất
                 toàn bộ lịch sử.
               </div>
@@ -170,7 +173,7 @@ function InvoicesViewLayout({
                 <DatePicker
                   value={exportDate}
                   onChange={(date) =>
-                    setExportDate(format(date ?? "", "yyyy-MM-dd"))
+                    setExportDate(date ? format(date, "yyyy-MM-dd") : undefined)
                   }
                   placeholder="Chọn ngày (Tùy chọn)"
                   className="w-full"
@@ -187,7 +190,9 @@ function InvoicesViewLayout({
               >
                 Hủy bỏ
               </Button>
-              <Button onClick={handleExport}>Xác nhận xuất</Button>
+              <Button onClick={handleExport} variant="success">
+                Xác nhận{" "}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -237,15 +242,15 @@ function InvoicesViewLayout({
             />
           </div>
 
-          {/* Status Filter (Optional: Add if you have statuses) */}
+          {/* Status Filter */}
           <Select
             value={filters.Status || "all"}
             onValueChange={(val) =>
               onFilterChange("Status", val === "all" ? undefined : val)
             }
           >
-            <SelectTrigger className="w-[150px] h-9 text-xs border-dashed">
-              <div className="flex items-center gap-2">
+            <SelectTrigger className="w-[160px] h-9 text-xs border-dashed">
+              <div className="flex items-center gap-2 truncate">
                 <Filter className="w-3.5 h-3.5 text-muted-foreground" />
                 <SelectValue placeholder="Trạng thái" />
               </div>
@@ -260,19 +265,24 @@ function InvoicesViewLayout({
             </SelectContent>
           </Select>
 
+          {/* Payment Method Filter */}
           <Select
-            value={filters.PaymentMethod || "Unknown"}
+            value={filters.PaymentMethod || "all"} // Changed "Unknown" to "all" for consistency
             onValueChange={(val) =>
               onFilterChange(
                 "PaymentMethod",
-                val as InvoiceListParams["PaymentMethod"]
+                val === "all" ? undefined : (val as any)
               )
             }
           >
-            <SelectTrigger className="w-[160px] h-9 text-xs border-dashed">
-              <SelectValue placeholder="Phương thức TT" />
+            <SelectTrigger className="w-[170px] h-9 text-xs border-dashed">
+              <div className="flex items-center gap-2 truncate">
+                <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
+                <SelectValue placeholder="Phương thức TT" />
+              </div>
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">Tất cả phương thức</SelectItem>
               {PAYMENT_METHODS.map((pm) => (
                 <SelectItem key={pm.value} value={pm.value}>
                   {pm.label}

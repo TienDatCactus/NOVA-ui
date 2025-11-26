@@ -59,91 +59,138 @@ export default function Component({
       el.style.border = "3px solid #0152cb";
       el.style.boxShadow = "0 4px 12px rgba(1, 82, 203, 0.4)";
 
-      const ecoPalmPopup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+      const ecoPalmPopup = new mapboxgl.Popup({
+        offset: 25,
+        closeButton: false, // Cleaner look, user clicks map to close
+        className: "flat-popup", // Custom class if you want to target arrow styling
+      }).setHTML(`
         <div style="
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           background-color: #ffffff;
-          padding: 12px;
+          border: 1px solid #e2e8f0; /* Replaces shadow for definition */
+          border-radius: 8px;
           max-width: 280px;
-          color: #374151;
+          overflow: hidden;
         ">
-          <div style="margin-bottom: 8px;">
-            <h3 style="
-              margin: 0 0 4px 0;
-              font-size: 18px;
-              font-weight: 700;
-              color: #0152cb;
-              line-height: 1.4;
-            ">
-              🏨 Eco Palm Resort
-            </h3>
-            <p style="
-              margin: 0;
-              font-size: 13px;
-              color: #6b7280;
-              line-height: 1.5;
-            ">
-              Sa Pa, Lào Cai, Việt Nam
-            </p>
+          <div style="padding: 16px 16px 12px 16px;">
+            <div style="display: flex; align-items: start; gap: 8px;">
+              <div style="
+                background: #eff6ff; 
+                color: #2563eb; 
+                padding: 6px; 
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              ">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><path d="M10 2h4"/><path d="M9 22h6"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style="
+                  margin: 0;
+                  font-size: 16px;
+                  font-weight: 700;
+                  color: #0f172a;
+                  line-height: 1.2;
+                ">
+                  Eco Palm Resort
+                </h3>
+                <p style="
+                  margin: 4px 0 0 0;
+                  font-size: 12px;
+                  color: #64748b;
+                ">
+                  Sa Pa, Lào Cai
+                </p>
+              </div>
+            </div>
           </div>
-          
+      
           <div style="
-            border-top: 1px solid #f3f4f6; 
-            padding-top: 8px;
-            margin-top: 8px;
+            background-color: #f8fafc; 
+            padding: 12px 16px;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
           ">
-            <div style="display: flex; align-items: center; font-size: 13px; margin-bottom: 6px;">
-              <span style="margin-right: 8px;">📍</span>
-              <span style="color: #4b5563;">22.3147°N, 103.8830°E</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span style="font-size: 12px; color: #475569; font-family: monospace;">
+                22.3147°N, 103.8830°E
+              </span>
             </div>
-            <div style="display: flex; align-items: center; font-size: 13px;">
-              <span style="margin-right: 8px;">⭐</span>
-              <span style="color: #4b5563; font-weight: 600;">Resort cao cấp</span>
+      
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span style="font-size: 12px; color: #475569; font-weight: 600;">
+                Resort cao cấp
+              </span>
             </div>
           </div>
-
-          <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      
+          <div style="
+            padding: 12px 16px; 
+            display: grid; 
+            grid-template-columns: 1fr 1.5fr; 
+            gap: 8px;
+          ">
             <button 
               onclick="window.open('https://www.google.com/maps/search/?api=1&query=Eco+Palm+Resort+Sapa', '_blank')"
               style="
-                background: #f3f4f6;
-                color: #374151;
-                border: 1px solid #e5e7eb;
+                background: #ffffff;
+                color: #334155;
+                border: 1px solid #cbd5e1;
                 padding: 8px;
                 border-radius: 6px;
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 600;
                 cursor: pointer;
-                width: 100%;
+                transition: background 0.2s;
+                box-shadow: none; /* Explicitly removed */
               "
-              onmouseover="this.style.background='#e5e7eb'"
-              onmouseout="this.style.background='#f3f4f6'"
+              onmouseover="this.style.background='#f1f5f9'"
+              onmouseout="this.style.background='#ffffff'"
             >
               Chi tiết
             </button>
+            
             <button 
               onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=22.31465936205685,103.88300318155025', '_blank')"
               style="
-                background: #0152cb;
+                background: #2563eb;
                 color: white;
-                border: none;
+                border: 1px solid #2563eb;
                 padding: 8px;
                 border-radius: 6px;
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 600;
                 cursor: pointer;
-                width: 100%;
-                box-shadow: 0 2px 4px rgba(1, 82, 203, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                transition: background 0.2s;
+                box-shadow: none; /* Explicitly removed */
               "
-              onmouseover="this.style.background='#013d9a'"
-              onmouseout="this.style.background='#0152cb'"
+              onmouseover="this.style.background='#1d4ed8'; this.style.borderColor='#1d4ed8'"
+              onmouseout="this.style.background='#2563eb'; this.style.borderColor='#2563eb'"
             >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+              </svg>
               Dẫn đường
             </button>
           </div>
         </div>
       `);
-
       ecoPalmMarkerRef.current = new mapboxgl.Marker({ element: el })
         .setLngLat([103.88300318155025, 22.31465936205685])
         .setPopup(ecoPalmPopup)
