@@ -153,7 +153,7 @@ export default function EditServiceTypeSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="sm:max-w-[700px] p-0 flex flex-col gap-0 bg-background">
+      <SheetContent className="sm:max-w-2xl overflow-y-auto p-0 flex flex-col gap-0 ">
         {/* === HEADER === */}
         <SheetHeader className="px-6 py-4 border-b shrink-0 flex flex-row items-start justify-between space-y-0">
           <div className="space-y-1">
@@ -174,7 +174,7 @@ export default function EditServiceTypeSheet({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="flex-1 flex flex-col min-h-0"
+            className="flex-1 flex flex-col "
           >
             {/* === TABS === */}
             <Tabs
@@ -182,8 +182,8 @@ export default function EditServiceTypeSheet({
               onValueChange={setActiveTab}
               className="flex-1 flex flex-col min-h-0"
             >
-              <div className="border-b shrink-0">
-                <TabsList className=" p-0 h-12 w-full justify-start">
+              <div className="border-b  shrink-0">
+                <TabsList className="  h-12 w-full justify-start">
                   <TabsTrigger value="general">
                     <Package className="w-4 h-4 mr-2" /> Thông tin chung
                   </TabsTrigger>
@@ -207,63 +207,64 @@ export default function EditServiceTypeSheet({
 
               <ScrollArea className="flex-1">
                 <div className="p-6">
-                  {/* --- TAB 1: GENERAL --- */}
                   <TabsContent
                     value="general"
                     className="mt-0 space-y-6 outline-none"
                   >
                     <div className="space-y-6">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Tên loại dịch vụ{" "}
-                              <span className="text-destructive">*</span>
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                  className="pl-9 text-lg font-medium h-11"
-                                  placeholder="VD: Spa & Massage"
-                                  {...field}
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Tên loại dịch vụ{" "}
+                                <span className="text-destructive">*</span>
+                              </FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                  <Input
+                                    className="pl-9 text-lg font-medium"
+                                    placeholder="VD: Spa & Massage"
+                                    {...field}
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="code"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Mã định danh{" "}
-                              <span className="text-destructive">*</span>
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <ScanBarcode className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                  className="pl-9 font-mono uppercase"
-                                  placeholder="VD: SPA"
-                                  {...field}
-                                />
-                              </div>
-                            </FormControl>
-                            <FormDescription className="text-xs">
-                              Mã viết tắt dùng để quản lý hệ thống (VD: SPA,
-                              FOOD).
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                          control={form.control}
+                          name="code"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Mã định danh{" "}
+                                <span className="text-destructive">*</span>
+                              </FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <ScanBarcode className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                  <Input
+                                    className="pl-9 font-mono uppercase"
+                                    placeholder="VD: SPA"
+                                    {...field}
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormDescription className="text-xs">
+                                Mã viết tắt dùng để quản lý hệ thống (VD: SPA,
+                                FOOD).
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
                       <FormField
                         control={form.control}
@@ -290,7 +291,7 @@ export default function EditServiceTypeSheet({
                         control={form.control}
                         name="active"
                         render={({ field }) => (
-                          <FormItem className="flex items-center space-y-0 gap-2 bg-muted/50 px-3 py-1.5 rounded-full border">
+                          <FormItem>
                             <FormControl>
                               <div className="border-input has-data-[state=checked]:border-primary/50 relative flex w-full items-start gap-2 rounded-md border p-4 shadow-xs outline-none">
                                 <Switch

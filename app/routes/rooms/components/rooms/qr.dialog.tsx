@@ -10,8 +10,8 @@ import {
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useGetRoomQrCode } from "../container/rooms/query.hooks";
-import { useRegenerateRoomQRCode } from "../container/rooms/mutation.hooks";
+import { useGetRoomQrCode } from "../../container/rooms/query.hooks";
+import { useRegenerateRoomQRCode } from "../../container/rooms/mutation.hooks";
 import { X } from "lucide-react";
 import Image from "~/components/ui/image";
 

@@ -40,7 +40,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
   return (
     <TabsContent value="general" className="mt-0 space-y-6 outline-none">
       <div className="grid grid-cols-2 gap-6">
-        <div className="grid gap-2">
+        <div className="space-y-2">
           <FormField
             control={form.control}
             name="Name"
@@ -121,7 +121,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
           />
         </div>
         <div className="grid gap-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="grid gap-2">
             <FormField
               control={form.control}
               name="CategoryId"
@@ -130,7 +130,11 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                   <FormLabel>
                     Danh mục <span className="text-destructive">*</span>
                   </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn danh mục" />
@@ -157,7 +161,11 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                   <FormLabel>
                     Đơn vị tính <span className="text-destructive">*</span>
                   </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn đơn vị" />

@@ -1,13 +1,18 @@
 import { DollarSign } from "lucide-react";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
+  EmptyTitle,
 } from "~/components/ui/empty";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { ExpenseListResponseDto } from "~/services/api/expenses/dto";
 import ExpensesDataTable from "./expenses-list";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import CreateExpenseDialog from "./create-expense.dialog";
 
 interface ExpensesListViewProps {
   expenses: ExpenseListResponseDto;
@@ -42,15 +47,27 @@ function LoadingSkeleton() {
 }
 
 function EmptyState() {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   return (
     <Empty>
-      <EmptyMedia variant="icon">
-        <DollarSign />
-      </EmptyMedia>
-      <EmptyHeader>Không tìm thấy chi phí</EmptyHeader>
-      <EmptyDescription>
-        Thử thay đổi bộ lọc hoặc tạo chi phí mới
-      </EmptyDescription>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <DollarSign />
+        </EmptyMedia>
+        <EmptyTitle>Không tìm thấy chi phí</EmptyTitle>
+        <EmptyDescription>
+          Thử thay đổi bộ lọc hoặc tạo chi phí mới
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button onClick={() => setOpenCreateDialog(true)}>
+          Tạo chi phí mới
+        </Button>
+      </EmptyContent>
+      <CreateExpenseDialog
+        open={openCreateDialog}
+        onOpenChange={setOpenCreateDialog}
+      />
     </Empty>
   );
 }

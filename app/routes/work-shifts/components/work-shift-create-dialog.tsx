@@ -20,7 +20,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { TimePicker24h } from "~/components/ui/time-picker-24h";
 import type { CreateWorkShiftRequest } from "~/services/api/staff/work-shift/dto";
 import { WorkShiftSchema } from "~/services/api/staff/work-shift/work-shift.schema";
 import { useCreateWorkShift } from "../container/mutation.hooks";
@@ -62,7 +61,7 @@ export default function CreateWorkShiftDialog({
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle className="text-xl">Thêm ca làm việc mới</DialogTitle>
-          <DialogDescription className="mt-1">
+          <DialogDescription>
             Tạo ca làm việc mới cho nhân viên khách sạn
           </DialogDescription>
         </DialogHeader>
@@ -70,7 +69,7 @@ export default function CreateWorkShiftDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6 mt-4"
+            className="space-y-6"
           >
             <div className="space-y-4">
               {/* Name */}
@@ -107,7 +106,8 @@ export default function CreateWorkShiftDialog({
                       Giờ bắt đầu <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <TimePicker24h
+                      <Input
+                        type="time"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Chọn giờ bắt đầu"
@@ -131,7 +131,8 @@ export default function CreateWorkShiftDialog({
                       Giờ kết thúc <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <TimePicker24h
+                      <Input
+                        type="time"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Chọn giờ kết thúc"

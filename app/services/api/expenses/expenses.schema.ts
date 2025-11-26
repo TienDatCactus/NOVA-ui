@@ -18,11 +18,11 @@ const ExpenseListItemSchema = z.object({
   amount: z.number(),
   expenseDate: z.string(),
   description: z.string(),
-  paymentMethod: PaymentSchema.PaymentMethodEnum,
+  paymentMethod: PaymentSchema.PaymentMethodEnum.catch("Unknown"),
   paymentMethodName: z.string(),
   receiptNumber: z.string(),
   createdAt: z.string(),
-  createdBy: z.string(),
+  createdBy: z.string().nullable(),
 });
 
 const ExpenseListResponseSchema = z.array(ExpenseListItemSchema);

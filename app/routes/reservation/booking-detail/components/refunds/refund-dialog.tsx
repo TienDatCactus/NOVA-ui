@@ -67,7 +67,6 @@ export default function RefundDialog({
 
   const refundAmount = form.watch("refundAmount");
 
-  // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       form.reset({
@@ -98,6 +97,7 @@ export default function RefundDialog({
     createRefund(data, {
       onSuccess: () => {
         onOpenChange(false);
+        form.reset();
       },
     });
   };
@@ -247,7 +247,7 @@ export default function RefundDialog({
               )}
             />
 
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"

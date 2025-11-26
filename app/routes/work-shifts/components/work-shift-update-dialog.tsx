@@ -1,6 +1,9 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
+import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -19,19 +22,12 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
-import { Card } from "~/components/ui/card";
-import { TimePicker24h } from "~/components/ui/time-picker-24h";
-import { Loader2, Clock } from "lucide-react";
-import { useState, useEffect } from "react";
-import { WorkShiftService } from "~/services/api/staff/work-shift";
-import { WorkShiftSchema } from "~/services/api/staff/work-shift/work-shift.schema";
-import { toast } from "sonner";
 import type {
   UpdateWorkShiftRequest,
   WorkShiftListItem,
 } from "~/services/api/staff/work-shift/dto";
+import { WorkShiftSchema } from "~/services/api/staff/work-shift/work-shift.schema";
 import { useUpdateWorkShift } from "../container/mutation.hooks";
 
 interface UpdateWorkShiftDialogProps {
@@ -92,25 +88,14 @@ export default function UpdateWorkShiftDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle className="text-xl">
-                Cập nhật ca làm việc
-              </DialogTitle>
-              <DialogDescription className="mt-1">
-                Chỉnh sửa thông tin ca làm việc
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle className="text-xl">Cập nhật ca làm việc</DialogTitle>
+          <DialogDescription>Chỉnh sửa thông tin ca làm việc</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6 mt-4"
+            className="space-y-6"
           >
             <div className="space-y-4">
               {/* Name */}
@@ -147,7 +132,8 @@ export default function UpdateWorkShiftDialog({
                       Giờ bắt đầu <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <TimePicker24h
+                      <Input
+                        type="time"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Chọn giờ bắt đầu"
@@ -171,7 +157,8 @@ export default function UpdateWorkShiftDialog({
                       Giờ kết thúc <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <TimePicker24h
+                      <Input
+                        type="time"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Chọn giờ kết thúc"

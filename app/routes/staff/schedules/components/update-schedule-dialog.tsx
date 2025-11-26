@@ -157,7 +157,7 @@ export default function UpdateScheduleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[90vh] p-0 flex flex-col gap-0">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 flex flex-col gap-0">
         <DialogHeader className="px-6 pt-6 pb-5 ">
           <DialogTitle className="text-xl">Cập nhật lịch làm việc</DialogTitle>
           {isLoadingDetail ? (
@@ -200,7 +200,7 @@ export default function UpdateScheduleDialog({
                     {isLoadingDetail ? (
                       <div className="h-11 bg-muted/30 rounded-lg border animate-pulse" />
                     ) : (
-                      <div className="p-3 bg-gradient-to-br from-muted/30 to-muted/10 rounded-lg border h-11 flex items-center">
+                      <div className="p-3 bg-gradient-to-br from-muted/30 to-muted/10 rounded-lg border flex items-center">
                         <p className="font-medium text-sm">{staffName}</p>
                       </div>
                     )}
@@ -301,7 +301,7 @@ export default function UpdateScheduleDialog({
                               <Button
                                 variant="outline"
                                 className={cn(
-                                  "w-full h-11 justify-start text-left font-normal",
+                                  "w-full justify-start text-left font-normal",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >

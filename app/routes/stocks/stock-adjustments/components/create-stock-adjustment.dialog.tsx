@@ -59,7 +59,6 @@ export default function CreateStockAdjustmentDialog({
   open,
   onOpenChange,
 }: CreateStockAdjustmentDialogProps) {
-  // 1. Data & Mutation
   const { data: stockItems = [] } = useStockItemList({
     includeInactive: false,
   });
@@ -67,7 +66,6 @@ export default function CreateStockAdjustmentDialog({
   const { mutate: onCreate, isPending: isSubmitting } =
     useCreateStockAdjustment();
 
-  // 2. Form Setup
   const form = useForm<CreateStockAdjustmentDto>({
     resolver: zodResolver(StockAdjustmentsSchemas.CreateStockAdjustmentSchema),
     defaultValues: {
@@ -99,7 +97,7 @@ export default function CreateStockAdjustmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col gap-0 p-0">
+      <DialogContent className="max-w-5xl overflow-y-auto max-h-[90vh] flex flex-col gap-0 p-0">
         {/* HEADER */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/10">
           <div className="flex items-center justify-between">

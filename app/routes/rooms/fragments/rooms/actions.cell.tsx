@@ -8,10 +8,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import UpdateRoomSheet from "../../components/update-room.sheet";
+import UpdateRoomSheet from "../../components/rooms/update-room.sheet";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
 import { toast } from "sonner";
-import { QrDialog } from "../../components/qr.dialog";
+import { QrDialog } from "../../components/rooms/qr.dialog";
 
 interface RoomActionsCellProps {
   room: RoomListItemDto;

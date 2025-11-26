@@ -39,6 +39,7 @@ const DASHBOARD = {
   users: "/dashboard/users",
   invoices: "/dashboard/invoices",
   expenses: "/dashboard/expenses",
+  expensesDashboard: "/dashboard/expenses/dashboard",
   chat: "/dashboard/chat",
   units: "/dashboard/units",
   workShifts: "/dashboard/work-shifts",
@@ -55,6 +56,8 @@ const CUSTOMER = {
   inbox: "/",
   chat: (roomToken: string) => `/chat?roomToken=${roomToken}`,
   map: "/map",
+  guidelines: "/guides",
+  services: "/services",
 };
 
 const FE_URL = {

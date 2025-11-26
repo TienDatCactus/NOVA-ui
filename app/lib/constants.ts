@@ -94,7 +94,7 @@ const SIDEBAR_NAV_MAIN: Array<{
     ],
   },
   {
-    title: "Dịch vụ",
+    title: " Dịch vụ & F&B",
     url: FE_URL.dashboard.services.list,
     icon: Utensils,
     items: [
@@ -332,8 +332,8 @@ const COMMAND_BAR_ROUTES: Array<{
 
 const CUSTOMER_NAVS = [
   { name: "Inbox", icon: Settings, href: FE_URL.customer.inbox },
-  { name: "Services & F&B", icon: Settings, href: FE_URL.customer.inbox },
-  { name: "Guidelines", icon: Settings, href: FE_URL.customer.inbox },
+  { name: "Services & F&B", icon: Settings, href: FE_URL.customer.services },
+  { name: "Guidelines", icon: Settings, href: FE_URL.customer.guidelines },
   { name: "Map", icon: Settings, href: FE_URL.customer.map },
 ];
 export {

@@ -95,7 +95,7 @@ export default function EditCategoryDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Chỉnh sửa danh mục</DialogTitle>
+          <DialogTitle>Chỉnh sửa danh mục hàng hóa</DialogTitle>
           <DialogDescription>
             Cập nhật thông tin danh mục hàng hóa
           </DialogDescription>

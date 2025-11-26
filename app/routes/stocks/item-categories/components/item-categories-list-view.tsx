@@ -1,12 +1,17 @@
 import { PackageX } from "lucide-react";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
+  EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import ItemCategoriesList from "./item-categories-list";
 import type { ItemCategoryListItemDto } from "~/services/api/stocks/item-category/dto";
+import ItemCategoriesList from "./item-categories-list";
+import CreateCategoryDialog from "./create-category.dialog";
 
 interface ItemCategoriesListViewProps {
   categories: ItemCategoryListItemDto[];
@@ -17,6 +22,7 @@ export default function ItemCategoriesListView({
   categories,
   isLoading,
 }: ItemCategoriesListViewProps) {
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -31,11 +37,22 @@ export default function ItemCategoriesListView({
   if (!categories || categories.length === 0) {
     return (
       <Empty>
-        <EmptyMedia variant="icon">
-          <PackageX />
-        </EmptyMedia>
-        <EmptyTitle>Chưa có danh mục hàng hóa nào.</EmptyTitle>
-        <EmptyDescription>Tạo danh mục đầu tiên để bắt đầu</EmptyDescription>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <PackageX />
+          </EmptyMedia>
+          <EmptyTitle>Chưa có danh mục hàng hóa nào.</EmptyTitle>
+          <EmptyDescription>Tạo danh mục đầu tiên để bắt đầu</EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={() => setOpenCreateDialog(true)}>
+            Tạo danh mục hàng hóa
+          </Button>
+        </EmptyContent>
+        <CreateCategoryDialog
+          open={openCreateDialog}
+          onClose={() => setOpenCreateDialog(false)}
+        />
       </Empty>
     );
   }
