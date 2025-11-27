@@ -45,7 +45,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
   }
 
   return (
-    <div className="space-y-1 max-h-40 overflow-y-auto">
+    <div className="space-y-1 h-32 overflow-y-auto">
       {order.items.map((item) => (
         <div
           key={item.id}
