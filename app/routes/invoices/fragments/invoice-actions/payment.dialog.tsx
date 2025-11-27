@@ -84,7 +84,9 @@ export function InvoicePaymentDialog({
                 <div className="space-y-2">
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>Phương thức thanh toán</SelectTrigger>
+                      <SelectTrigger className="w-40">
+                        Phương thức thanh toán
+                      </SelectTrigger>
                       <SelectContent>
                         {PAYMENT_METHODS.map((method) => (
                           <SelectItem key={method.value} value={method.value}>

@@ -107,7 +107,7 @@ export default function PurchaseRequestDetailDialog({
                 <p className="font-medium pl-6">
                   {format(
                     parseISO(purchaseRequest.requestedAt),
-                    "dd/MM/yyyy HH:mm",
+                    " HH:mm dd/MM/yyyy",
                     { locale: vi }
                   )}
                 </p>
@@ -136,7 +136,7 @@ export default function PurchaseRequestDetailDialog({
                   {purchaseRequest.approvedAt
                     ? format(
                         parseISO(purchaseRequest.approvedAt),
-                        "dd/MM/yyyy HH:mm",
+                        " HH:mm dd/MM/yyyy",
                         { locale: vi }
                       )
                     : "—"}

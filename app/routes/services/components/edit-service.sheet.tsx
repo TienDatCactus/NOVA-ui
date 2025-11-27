@@ -223,7 +223,7 @@ export default function EditServiceSheet({
                                 value={field.value}
                               >
                                 <FormControl>
-                                  <SelectTrigger className="pl-9 relative">
+                                  <SelectTrigger className="pl-9 w-40 relative">
                                     <Layers className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <SelectValue placeholder="Chọn loại" />
                                   </SelectTrigger>
@@ -296,7 +296,7 @@ export default function EditServiceSheet({
                               value={field.value}
                             >
                               <FormControl>
-                                <SelectTrigger className="pl-9 relative">
+                                <SelectTrigger className="pl-9 w-40 relative">
                                   <Package className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                   <SelectValue placeholder="Chọn ĐVT" />
                                 </SelectTrigger>

@@ -52,7 +52,7 @@ export function MessageBubble({
       {/* Message bubble */}
       <div
         className={cn(
-          "max-w-[70%] rounded-lg p-3",
+          "w-fit rounded-lg p-3",
           isOwnMessage
             ? "bg-primary text-primary-foreground rounded-br-none"
             : "bg-muted rounded-bl-none"
@@ -65,12 +65,24 @@ export function MessageBubble({
           </p>
         )}
 
-        {/* Original message text */}
+        {/* Message text - show translated if available and showTranslation is true */}
         <p className="text-sm whitespace-pre-wrap break-words">
-          {message.message}
+          {message.translatedText && message.showTranslation
+            ? message.translatedText
+            : message.message}
+          {message.translatedText && message.showTranslation && (
+            <span
+              className={cn(
+                "ml-1 text-xs italic",
+                isOwnMessage ? "opacity-70" : "text-muted-foreground"
+              )}
+            >
+              (đã dịch)
+            </span>
+          )}
         </p>
 
-        {/* Detected language badge */}
+        {/* Detected language badge - only show when translation is NOT active */}
         {message.detectedLanguage && !message.showTranslation && (
           <Badge
             variant="outline"
@@ -86,30 +98,6 @@ export function MessageBubble({
           </Badge>
         )}
 
-        {/* Translation section */}
-        {message.translatedText && message.showTranslation && (
-          <div
-            className={cn(
-              "mt-2 pt-2 border-t",
-              isOwnMessage
-                ? "border-primary-foreground/20"
-                : "border-muted-foreground/20"
-            )}
-          >
-            <p
-              className={cn(
-                "text-xs mb-1",
-                isOwnMessage ? "opacity-70" : "text-muted-foreground"
-              )}
-            >
-              Đã dịch từ {message.detectedLanguage || "ngôn ngữ khác"}
-            </p>
-            <p className="text-sm whitespace-pre-wrap break-words opacity-90">
-              {message.translatedText}
-            </p>
-          </div>
-        )}
-
         {/* Footer: timestamp + read status + action buttons */}
         <div className="flex items-center justify-between mt-1 gap-2">
           <div className="flex items-center gap-1">
@@ -119,7 +107,9 @@ export function MessageBubble({
                 isOwnMessage ? "opacity-70" : "text-muted-foreground"
               )}
             >
-              {format(parseISO(message.createdAt), "HH:mm", { locale: vi })}
+              {format(parseISO(message.createdAt ?? ""), "HH:mm", {
+                locale: vi,
+              })}
             </p>
 
             {/* Read status indicator (only for staff messages) */}

@@ -140,7 +140,7 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-9 border-transparent bg-transparent hover:bg-muted/10 focus:bg-background focus:border-input">
+                              <SelectTrigger className="h-9 w-40 border-transparent bg-transparent hover:bg-muted/10 focus:bg-background focus:border-input">
                                 <SelectValue placeholder="Chọn nguyên liệu" />
                               </SelectTrigger>
                             </FormControl>

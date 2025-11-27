@@ -29,7 +29,7 @@ function useBookingDetail({
     enabled: enabled && (!!bookingCode || !!bookingId),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 function useBookingRoomsWeek(params?: BookingListParams) {
@@ -42,7 +42,7 @@ function useBookingRoomsWeek(params?: BookingListParams) {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 
@@ -51,6 +51,9 @@ function useBookings(params?: BookingListParams) {
     queryKey: ["bookings", params],
     queryFn: async () => await BookingService.getBookingList(params || {}),
     staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: true,
   });
 }
 
@@ -108,9 +111,9 @@ function useOrderableBookings() {
     queryKey: ["orderable-bookings"],
     queryFn: async () => await BookingService.getOrderableBookings(),
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 

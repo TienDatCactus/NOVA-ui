@@ -14,17 +14,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "~/components/ui/form";
+import { Form } from "~/components/ui/form";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
+import { onError } from "~/lib/utils";
 import { useStockItemList } from "~/routes/stocks/items/container/query.hooks";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { MenuSchema } from "~/services/api/menu/menu.schema";
@@ -33,7 +27,6 @@ import { useCreateMenuItem } from "../container/menu/mutation.hooks";
 import ComponentsTab from "../fragments/menu/create/components-tab";
 import GeneralTab from "../fragments/menu/create/general-tab";
 import MediaTab from "../fragments/menu/create/media-tab";
-import { onError } from "~/lib/utils";
 
 const { CreateMenuItemRequestSchema } = MenuSchema;
 export type CreateMenuFormData = z.infer<typeof CreateMenuItemRequestSchema>;
@@ -115,12 +108,12 @@ export default function CreateMenuDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit, onError)}
-            className="flex-1 flex flex-col min-h-0"
+            className="flex flex-col "
           >
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
-              className="flex-1 flex flex-col min-h-0"
+              className="flex-1 flex flex-col h-full"
             >
               <TabsList className="h-12 gap-6 w-full">
                 <TabsTrigger value="general">
@@ -150,47 +143,42 @@ export default function CreateMenuDialog({
                 </TabsTrigger>
               </TabsList>
 
-              <ScrollArea className="flex-1">
-                <div className="p-6">
-                  {/* --- TAB 1: GENERAL --- */}
-                  <GeneralTab
-                    form={form}
-                    menuCategories={categories}
-                    units={units}
-                  />
+              <div className="p-6">
+                {/* --- TAB 1: GENERAL --- */}
+                <GeneralTab
+                  form={form}
+                  menuCategories={categories}
+                  units={units}
+                />
 
-                  <MediaTab
-                    imagePreview={imagePreview}
-                    handleRemoveImage={handleRemoveImage}
-                    formErrors={form.formState.errors.Images}
-                    onDrop={(acceptedFiles: File[]) => {
-                      const currentImgs = form.getValues("Images") || [];
-                      const totalImgs =
-                        currentImgs.length + acceptedFiles.length;
-                      if (totalImgs > 8) {
-                        return;
-                      }
-                      const newImgs = [...currentImgs, ...acceptedFiles];
-                      form.setValue("Images", newImgs);
-                      setImagePreview((prev) => [
-                        ...prev,
-                        ...acceptedFiles.map((file) =>
-                          URL.createObjectURL(file)
-                        ),
-                      ]);
-                    }}
-                  />
+                <MediaTab
+                  imagePreview={imagePreview}
+                  handleRemoveImage={handleRemoveImage}
+                  formErrors={form.formState.errors.Images}
+                  onDrop={(acceptedFiles: File[]) => {
+                    const currentImgs = form.getValues("Images") || [];
+                    const totalImgs = currentImgs.length + acceptedFiles.length;
+                    if (totalImgs > 8) {
+                      return;
+                    }
+                    const newImgs = [...currentImgs, ...acceptedFiles];
+                    form.setValue("Images", newImgs);
+                    setImagePreview((prev) => [
+                      ...prev,
+                      ...acceptedFiles.map((file) => URL.createObjectURL(file)),
+                    ]);
+                  }}
+                />
 
-                  {/* --- TAB 3: COMPONENTS --- */}
-                  <ComponentsTab
-                    form={form}
-                    fields={fields}
-                    append={append}
-                    remove={remove}
-                    stockItems={stockItems}
-                  />
-                </div>
-              </ScrollArea>
+                {/* --- TAB 3: COMPONENTS --- */}
+                <ComponentsTab
+                  form={form}
+                  fields={fields}
+                  append={append}
+                  remove={remove}
+                  stockItems={stockItems}
+                />
+              </div>
             </Tabs>
 
             <DialogFooter className="p-6 pt-4 border-t shrink-0">

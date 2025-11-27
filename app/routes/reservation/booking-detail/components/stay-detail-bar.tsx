@@ -306,7 +306,7 @@ export default function StayDetailBar({
                                     defaultValue={field.value}
                                   >
                                     <FormControl>
-                                      <SelectTrigger>
+                                      <SelectTrigger className="w-40">
                                         <SelectValue />
                                       </SelectTrigger>
                                     </FormControl>
@@ -392,15 +392,7 @@ export default function StayDetailBar({
                     >
                       <XCircle className="w-4 h-4 mr-2" /> Hủy đặt phòng
                     </DropdownMenuItem>
-                    {bookingDetail.status === "Confirmed" && (
-                      <DropdownMenuItem
-                        onClick={() => handleUpdateBookingStatus("NoShow")}
-                        disabled={!buttonStates.canNoShow}
-                        className="text-orange-600 focus:text-orange-600"
-                      >
-                        <UserX className="w-4 h-4 mr-2" /> Đánh dấu No-Show
-                      </DropdownMenuItem>
-                    )}
+                   
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}

@@ -264,31 +264,55 @@ body {
     --sidebar-ring: oklch(0.439 0 0);
   }
 }
-/* width */
-::-webkit-scrollbar {
-  width: 6px;
-  display: none;
-}
+@layer base {
+  /* === FIREFOX SUPPORT === */
+  * {
+    /* Thanh cuộn mảnh */
+    scrollbar-width: thin;
+    /* Thumb màu border (nhạt), Track trong suốt */
+    scrollbar-color: var(--border) transparent;
+  }
 
-/* Track */
-::-webkit-scrollbar-track {
-  border-radius: 12px;
-  background: #f1f1f1;
-}
+  /* === WEBKIT SUPPORT (Chrome, Edge, Safari) === */
+  ::-webkit-scrollbar {
+    width: 6px; /* Chiều rộng cho scroll dọc */
+    height: 6px; /* Chiều cao cho scroll ngang */
+  }
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #888;
-}
+  /* Phần rãnh (Track) - Để trong suốt cho tinh tế */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 4px; /* Cách lề trên dưới 1 chút cho thoáng */
+  }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-body {
-  -ms-overflow-style: scrollbar; /* Giữ hành vi scroll mặc định */
-}
+  /* Phần tay nắm (Thumb) - Normal State */
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border); /* Màu xám nhạt theo theme */
+    border-radius: 99px; /* Bo tròn tối đa (Pill shape) */
+    border: 1px solid transparent; /* Trick để tạo padding giả nếu cần */
+    background-clip: content-box;
+  }
 
+  /* Phần tay nắm (Thumb) - Hover State */
+  ::-webkit-scrollbar-thumb:hover {
+    /* Khi hover sẽ đậm hơn một chút hoặc dùng màu Primary để nhấn mạnh thương hiệu */
+    background-color: var(--muted-foreground);
+  }
+
+  /* Phần tay nắm (Thumb) - Active/Click State */
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--primary); /* Màu tím thương hiệu NOVA khi kéo */
+  }
+
+  /* Ẩn scrollbar cho các element muốn giấu nhưng vẫn scroll được */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
 /* Button shimmer animation */
 @keyframes shimmer {
   100% {

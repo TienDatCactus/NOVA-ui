@@ -32,10 +32,12 @@ export default function PayrollsFilterSidebar({
               <Select
                 value={filterState.month?.toString() || "all"}
                 onValueChange={(value) =>
-                  updateFilter({ month: value === "all" ? undefined : parseInt(value) })
+                  updateFilter({
+                    month: value === "all" ? undefined : parseInt(value),
+                  })
                 }
               >
-                <SelectTrigger id="filter-month">
+                <SelectTrigger id="filter-month" className="w-40">
                   <SelectValue placeholder="Tất cả" />
                 </SelectTrigger>
                 <SelectContent>
@@ -53,17 +55,21 @@ export default function PayrollsFilterSidebar({
               <Label htmlFor="filter-year">Năm</Label>
               <Select
                 value={filterState.year?.toString() || currentYear.toString()}
-                onValueChange={(value) => updateFilter({ year: parseInt(value) })}
+                onValueChange={(value) =>
+                  updateFilter({ year: parseInt(value) })
+                }
               >
                 <SelectTrigger id="filter-year">
                   <SelectValue placeholder="Chọn năm" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map((y) => (
-                    <SelectItem key={y} value={y.toString()}>
-                      Năm {y}
-                    </SelectItem>
-                  ))}
+                  {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map(
+                    (y) => (
+                      <SelectItem key={y} value={y.toString()}>
+                        Năm {y}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>

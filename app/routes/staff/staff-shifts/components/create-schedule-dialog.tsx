@@ -378,6 +378,7 @@ export default function CreateScheduleDialog({
                               align="start"
                             >
                               <Calendar
+                                captionLayout="dropdown"
                                 mode="single"
                                 selected={
                                   field.value
@@ -427,6 +428,7 @@ export default function CreateScheduleDialog({
                               align="start"
                             >
                               <Calendar
+                                captionLayout="dropdown"
                                 mode="single"
                                 selected={
                                   field.value
@@ -479,49 +481,65 @@ export default function CreateScheduleDialog({
                               <FormLabel className="text-xs font-normal text-muted-foreground">
                                 Các ngày trong tuần
                               </FormLabel>
-                              <div className="flex flex-wrap gap-2">
-                                {WEEKDAYS.map((day) => (
-                                  <FormField
-                                    key={day.value}
-                                    control={form.control}
-                                    name="weekDays"
-                                    render={({ field }) => {
-                                      const isChecked =
-                                        field.value?.includes(day.value) ??
-                                        false;
-                                      return (
-                                        <FormItem key={day.value}>
-                                          <FormControl>
-                                            <div
-                                              onClick={() => {
-                                                const updatedValue = isChecked
-                                                  ? (field.value ?? []).filter(
-                                                      (v) => v !== day.value
-                                                    )
-                                                  : [
-                                                      ...(field.value ?? []),
-                                                      day.value,
-                                                    ];
-                                                field.onChange(updatedValue);
-                                              }}
-                                              className={cn(
-                                                "h-9 w-9 rounded-full flex items-center justify-center text-sm border cursor-pointer select-none transition-all",
-                                                isChecked
-                                                  ? "bg-primary text-primary-foreground border-primary"
-                                                  : "bg-background hover:bg-muted"
-                                              )}
-                                            >
-                                              {day.label
-                                                .replace("Thứ ", "T")
-                                                .replace("Chủ nhật", "CN")}
-                                            </div>
-                                          </FormControl>
-                                        </FormItem>
-                                      );
-                                    }}
-                                  />
-                                ))}
+                              <div className="justify-between flex items-center">
+                                <div className="flex flex-wrap gap-2">
+                                  {WEEKDAYS.map((day) => (
+                                    <FormField
+                                      key={day.value}
+                                      control={form.control}
+                                      name="weekDays"
+                                      render={({ field }) => {
+                                        const isChecked =
+                                          field.value?.includes(day.value) ??
+                                          false;
+                                        return (
+                                          <FormItem key={day.value}>
+                                            <FormControl>
+                                              <div
+                                                onClick={() => {
+                                                  const updatedValue = isChecked
+                                                    ? (
+                                                        field.value ?? []
+                                                      ).filter(
+                                                        (v) => v !== day.value
+                                                      )
+                                                    : [
+                                                        ...(field.value ?? []),
+                                                        day.value,
+                                                      ];
+                                                  field.onChange(updatedValue);
+                                                }}
+                                                className={cn(
+                                                  "h-9 w-9 rounded-full flex items-center justify-center text-sm border cursor-pointer select-none transition-all",
+                                                  isChecked
+                                                    ? "bg-primary text-primary-foreground border-primary"
+                                                    : "bg-background hover:bg-muted"
+                                                )}
+                                              >
+                                                {day.label
+                                                  .replace("Thứ ", "T")
+                                                  .replace("Chủ nhật", "CN")}
+                                              </div>
+                                            </FormControl>
+                                          </FormItem>
+                                        );
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                                <Button
+                                  className="mt-2"
+                                  onClick={() => {
+                                    const allDays = WEEKDAYS.map(
+                                      (day) => day.value
+                                    );
+                                    form.setValue("weekDays", allDays);
+                                  }}
+                                >
+                                  Cả tuần
+                                </Button>
                               </div>
+
                               <FormMessage />
                             </FormItem>
                           )}

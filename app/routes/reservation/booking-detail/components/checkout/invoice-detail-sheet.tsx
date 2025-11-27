@@ -339,7 +339,7 @@ export default function InvoiceDetailSheet({
                       {invoiceDetail.issuedAt
                         ? format(
                             parseISO(invoiceDetail.issuedAt),
-                            "dd/MM/yyyy HH:mm",
+                            " HH:mm dd/MM/yyyy",
                             { locale: vi }
                           )
                         : "N/A"}
@@ -578,7 +578,7 @@ export default function InvoiceDetailSheet({
                                       defaultValue={field.value}
                                     >
                                       <FormControl>
-                                        <SelectTrigger className="h-10">
+                                        <SelectTrigger className="h-10 w-40">
                                           <SelectValue placeholder="Phương thức" />
                                         </SelectTrigger>
                                       </FormControl>

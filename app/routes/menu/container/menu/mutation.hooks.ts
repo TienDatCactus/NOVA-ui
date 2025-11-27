@@ -12,11 +12,19 @@ export function useCreateMenuItem() {
   return useMutation({
     mutationFn: async (data: CreateMenuItemRequestDto) =>
       await MenuService.createMenuItem(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["menu-list"] });
+    onSuccess: (newItem) => {
+      // Invalidate all menu lists (with any params)
       queryClient.invalidateQueries({
-        queryKey: ["menu-list-by-category"],
+        queryKey: ["menu-list"],
+        refetchType: "active", // Only refetch active queries
       });
+
+      // Invalidate specific category list if item has category
+      if (newItem.categoryId) {
+        queryClient.invalidateQueries({
+          queryKey: ["menu-list-by-category", newItem.categoryId],
+        });
+      }
     },
   });
 }
@@ -27,14 +35,22 @@ export function useUpdateMenuItem(itemId: string) {
   return useMutation({
     mutationFn: async (data: UpdateMenuItemRequestDto) =>
       await MenuService.updateMenuItem(itemId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["menu-list"] });
+    onSuccess: (updatedItem) => {
+      // Invalidate all menu lists
       queryClient.invalidateQueries({
-        queryKey: ["menu-list-by-category"],
+        queryKey: ["menu-list"],
+        refetchType: "active",
       });
-      queryClient.invalidateQueries({
-        queryKey: ["menu-item-detail", itemId],
-      });
+
+      // Invalidate specific category list if item has category
+      if (updatedItem.categoryId) {
+        queryClient.invalidateQueries({
+          queryKey: ["menu-list-by-category", updatedItem.categoryId],
+        });
+      }
+
+      // Update the specific item detail cache
+      queryClient.setQueryData(["menu-item-detail", itemId], updatedItem);
     },
   });
 }
@@ -45,11 +61,20 @@ export function useDeleteMenuItem(itemId: string) {
   return useMutation({
     mutationFn: async () => await MenuService.deleteMenuItem(itemId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["menu-list"] });
+      // Invalidate all menu lists
+      queryClient.invalidateQueries({
+        queryKey: ["menu-list"],
+        refetchType: "active",
+      });
+
+      // Invalidate all category lists (can't know which category without the item data)
       queryClient.invalidateQueries({
         queryKey: ["menu-list-by-category"],
+        refetchType: "active",
       });
-      queryClient.invalidateQueries({
+
+      // Remove the deleted item from cache
+      queryClient.removeQueries({
         queryKey: ["menu-item-detail", itemId],
       });
     },

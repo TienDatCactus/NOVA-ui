@@ -186,7 +186,7 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-11 pl-9 relative">
+                              <SelectTrigger className="h-11 w-40 pl-9 relative">
                                 <BedDouble className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <SelectValue placeholder="Chọn loại phòng" />
                               </SelectTrigger>
@@ -221,7 +221,7 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-11 pl-9 relative">
+                              <SelectTrigger className="h-11 w-40 pl-9 relative">
                                 <Activity className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <SelectValue placeholder="Chọn trạng thái" />
                               </SelectTrigger>

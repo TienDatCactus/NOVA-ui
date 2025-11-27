@@ -11,7 +11,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,25 +27,30 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import type { CreateStaffDto } from "~/services/api/staff/staff/dto";
-import { StaffService } from "~/services/api/staff/staff";
-import { StaffRoleService } from "~/services/api/staff/staff-role";
-import type { StaffRoleItem } from "~/services/api/staff/staff-role/dto";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import type { z } from "zod";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { vi } from "date-fns/locale";
-import { ChevronDownIcon, Plus } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronDown,
+  User,
+  Briefcase,
+  BadgeInfo,
+  Mail,
+  Phone,
+  Hash,
+} from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
 import { cn } from "~/lib/utils";
 import { StaffSchema } from "~/services/api/staff/staff/staff.schema";
 import { useStaffRoleList } from "../../staff-role/container/query.hooks";
 import { useCreateStaff } from "../container/query.hooks";
+import { Separator } from "~/components/ui/separator";
 
 interface StaffDialogProps {
   open: boolean;
@@ -59,6 +63,7 @@ export default function CreateStaffDialog({
 }: StaffDialogProps) {
   const { data: roles } = useStaffRoleList();
   const { mutateAsync: createStaff, isPending } = useCreateStaff();
+
   const form = useForm<CreateStaffDto>({
     resolver: zodResolver(StaffSchema.CreateStaffSchema),
     defaultValues: {
@@ -78,7 +83,7 @@ export default function CreateStaffDialog({
   const onSubmit = async (data: CreateStaffDto) => {
     try {
       await createStaff(data);
-      toast.success("Tạo nhân sự thành công");
+      toast.success("Tạo hồ sơ nhân sự thành công");
       onOpenChange(false);
       form.reset();
     } catch (error) {
@@ -89,284 +94,320 @@ export default function CreateStaffDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Thêm nhân sự mới</DialogTitle>
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden max-h-[90vh] flex flex-col">
+        {/* === HEADER === */}
+        <DialogHeader className="px-6 py-4 border-b bg-muted/5 shrink-0">
+          <DialogTitle className="text-lg">Thêm nhân sự mới</DialogTitle>
           <DialogDescription>
-            Điền đầy đủ thông tin để tạo nhân sự mới
+            Tạo hồ sơ và thiết lập vai trò cho nhân viên.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Code */}
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Mã nhân sự <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="NV001" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex-1 overflow-y-auto"
+          >
+            <div className="p-6 space-y-8">
+              {/* 1. THÔNG TIN CƠ BẢN */}
+              <section className="space-y-4">
+                <h1 className="font-bold">Thông tin định danh</h1>
 
-              {/* Full Name */}
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Họ và tên <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Nguyễn Văn A" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Phone Number */}
-              <FormField
-                control={form.control}
-                name="phoneNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Số điện thoại <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="0912345678" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Email */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="email"
-                        placeholder="staff@example.com"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Citizen ID */}
-              <FormField
-                control={form.control}
-                name="citizenId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Số CCCD</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="001234567890"
-                        className="font-mono"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Gender */}
-              <FormField
-                control={form.control}
-                name="gender"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Giới tính</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn giới tính" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Male">Nam</SelectItem>
-                        <SelectItem value="Female">Nữ</SelectItem>
-                        <SelectItem value="Other">Khác</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Date of Birth */}
-              <FormField
-                control={form.control}
-                name="dateOfBirth"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ngày sinh</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Họ và tên <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
+                          <Input
+                            {...field}
+                            placeholder="Ví dụ: Nguyễn Văn A"
+                            className="bg-background"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="code"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Mã nhân viên{" "}
+                            <span className="text-destructive">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              startAddon={<Hash className="opacity-50" />}
+                              {...field}
+                              placeholder="NV001"
+                              className="font-mono"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="gender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Giới tính</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
                           >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: vi })
-                            ) : (
-                              <span>Chọn ngày sinh</span>
-                            )}
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          captionLayout="dropdown"
-                          fromYear={1950}
-                          toYear={2010}
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Chọn" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Male">Nam</SelectItem>
+                              <SelectItem value="Female">Nữ</SelectItem>
+                              <SelectItem value="Other">Khác</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-              {/* Start Date */}
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ngày bắt đầu làm việc</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                  <FormField
+                    control={form.control}
+                    name="dateOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ngày sinh</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal pl-3",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                                {field.value ? (
+                                  format(field.value, "dd/MM/yyyy", {
+                                    locale: vi,
+                                  })
+                                ) : (
+                                  <span>DD/MM/YYYY</span>
+                                )}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              captionLayout="dropdown"
+                              locale={vi}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="citizenId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CCCD / CMND</FormLabel>
                         <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: vi })
-                            ) : (
-                              <span>Chọn ngày bắt đầu</span>
-                            )}
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
+                          <Input
+                            {...field}
+                            placeholder="0010xx..."
+                            className="font-mono"
+                          />
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          captionLayout="dropdown"
-                          fromYear={2000}
-                          toYear={new Date().getFullYear() + 1}
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </section>
 
-              {/* Staff Role ID - Fetch from API */}
-              <FormField
-                control={form.control}
-                name="staffRoleId"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>
-                      Vai trò nhân sự{" "}
-                      <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <div className="flex gap-2">
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+              <Separator className="my-2" />
+
+              {/* 2. LIÊN HỆ */}
+              <section className="space-y-4">
+                <h1 className="font-bold">Thông tin liên hệ</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Số điện thoại{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={"Chọn vai trò"} />
-                          </SelectTrigger>
+                          <Input {...field} placeholder="09xxxx..." />
                         </FormControl>
-                        <SelectContent>
-                          {roles?.map((role) => (
-                            <SelectItem key={role.id} value={role.id}>
-                              {role.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="example@nova.com"
+                              className="pl-9"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </section>
 
-              {/* Note */}
-              <FormField
-                control={form.control}
-                name="note"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Ghi chú</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="Thông tin bổ sung về nhân sự..."
-                        rows={3}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <Separator className="my-2" />
+
+              {/* 3. CÔNG VIỆC */}
+              <section className="space-y-4">
+                <h1 className="font-bold">Thông tin công việc</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="staffRoleId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Vai trò / Chức vụ{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Chọn vai trò" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {roles?.map((role) => (
+                              <SelectItem key={role.id} value={role.id}>
+                                {role.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ngày bắt đầu làm việc</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal pl-3",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                                {field.value ? (
+                                  format(field.value, "dd/MM/yyyy", {
+                                    locale: vi,
+                                  })
+                                ) : (
+                                  <span>DD/MM/YYYY</span>
+                                )}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              fromYear={2010}
+                              toYear={new Date().getFullYear() + 1}
+                              locale={vi}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="note"
+                    render={({ field }) => (
+                      <FormItem className="col-span-1 md:col-span-2">
+                        <FormLabel>Ghi chú thêm</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder="Ghi chú về kinh nghiệm, kỹ năng đặc biệt..."
+                            className="resize-none"
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </section>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="px-6 py-4 border-t bg-background shrink-0">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
               >
-                Hủy
+                Hủy bỏ
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Đang xử lý..." : "Tạo mới"}
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="min-w-[120px]"
+              >
+                {isPending ? "Đang xử lý..." : "Tạo nhân sự"}
               </Button>
             </DialogFooter>
           </form>

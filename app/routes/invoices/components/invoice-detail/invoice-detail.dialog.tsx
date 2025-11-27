@@ -86,7 +86,7 @@ export function InvoiceDetailDialog({
           <div className="text-sm text-muted-foreground mt-1">
             Ngày phát hành:{" "}
             {invoice.issuedAt
-              ? format(new Date(invoice.issuedAt), "dd/MM/yyyy HH:mm")
+              ? format(new Date(invoice.issuedAt), " HH:mm dd/MM/yyyy")
               : "-"}
           </div>
         </DialogHeader>

@@ -13,13 +13,24 @@ export function useCreateRefund(bookingId: string) {
       await RefundsService.createBookingRefund(bookingId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["booking-detail", bookingId],
+        queryKey: ["bookings-detail"],
+        refetchType: "active",
       });
       queryClient.invalidateQueries({
         queryKey: ["refund-history", bookingId],
+        refetchType: "active",
       });
       queryClient.invalidateQueries({
-        queryKey: ["invoices", bookingId],
+        queryKey: ["invoices"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout-pending-charges"],
+        refetchType: "active",
       });
     },
   });
@@ -34,5 +45,8 @@ export function useRefundHistory(bookingId: string, enabled: boolean = true) {
     queryFn: async () => await RefundsService.bookingRefundHistory(bookingId),
     enabled: !!bookingId && enabled,
     staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: true,
   });
 }

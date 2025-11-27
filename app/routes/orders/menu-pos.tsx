@@ -32,6 +32,13 @@ import useMenuFilters from "../menu/container/menu/filter.hooks";
 import type { Route } from "./+types/menu-pos";
 import ScheduledTimeDialog from "./components/scheduled-time.dialog";
 import { useCreatePOSOrderWithItems } from "./container/pos-orders/mutation.hooks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 type MenuItem = z.infer<typeof MenuListItemSchema>;
 
@@ -251,39 +258,38 @@ export default function Component({
               </Button>
             </Link>
             <Separator orientation="vertical" />
-            <Button
-              variant={selectedCategoryId === null ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleCategorySelect(null)}
+            <Select
+              value={selectedCategoryId || "all"}
+              onValueChange={(value) =>
+                handleCategorySelect(value === "all" ? null : value)
+              }
             >
-              <SquareMenu />
-              Tất cả
-            </Button>
-            <Separator orientation="vertical" />
-            <div className="flex items-center gap-2 flex-wrap">
-              {!!menuCategories &&
-                menuCategories.length > 0 &&
-                menuCategories?.map((item) => (
-                  <Button
-                    variant={
-                      selectedCategoryId === item.id ? "default" : "outline"
-                    }
-                    size="sm"
-                    key={item.id}
-                    onClick={() => handleCategorySelect(item.id)}
-                  >
-                    {item.name}
-                    <Badge
-                      className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums ml-1"
-                      variant={
-                        selectedCategoryId === item.id ? "secondary" : "outline"
-                      }
-                    >
-                      {item.menuItemCount}
-                    </Badge>
-                  </Button>
-                ))}
-            </div>
+              <SelectTrigger className="w-[200px] border-primary/50 bg-white shadow-md">
+                <SelectValue placeholder="Chọn danh mục" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <div className="flex items-center justify-between w-full">
+                    <span>Tất cả</span>
+                  </div>
+                </SelectItem>
+                {!!menuCategories &&
+                  menuCategories.length > 0 &&
+                  menuCategories.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <span>{item.name}</span>
+                        <Badge
+                          className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
+                          variant="outline"
+                        >
+                          {item.menuItemCount}
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

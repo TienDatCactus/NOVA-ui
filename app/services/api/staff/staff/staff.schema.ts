@@ -62,10 +62,16 @@ const UpdateStaffSchema = z.object({
   staffRoleId: z.string().min(1, "Vai trò là bắt buộc"),
 });
 
+const TerminateStaffSchema = z.object({
+  terminationDate: z.string(),
+  note: z.string().optional(),
+});
+
 export const StaffSchema = {
   StaffListItemSchema,
   StaffListSchema,
   StaffDetailSchema,
   CreateStaffSchema,
   UpdateStaffSchema,
+  TerminateStaffSchema,
 };

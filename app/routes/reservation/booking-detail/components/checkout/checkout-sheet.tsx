@@ -234,10 +234,7 @@ export default function CheckoutSheet({
                   {isPostCheckout ? (
                     <span>Xem hóa đơn</span>
                   ) : (
-                    <>
-                      <FileText className="h-5 w-5 text-primary" />
-                      Checkout Booking #{bookingCode}
-                    </>
+                    <p>Checkout Booking #{bookingCode}</p>
                   )}
                 </SheetTitle>
                 <SheetDescription>
@@ -529,8 +526,8 @@ export default function CheckoutSheet({
                               className={cn(
                                 "cursor-pointer transition-all duration-200 group relative overflow-hidden p-0 ",
                                 isPaid
-                                  ? "opacity-60 bg-slate-100 hover:opacity-100 hover:border-green-500 border-transparent shadow-none"
-                                  : "bg-white shadow-sm border-l-4 border-l-orange-500 hover:shadow-md hover:border-l-orange-600"
+                                  ? "bg-white shadow-sm hover:border-green-500 border-transparent "
+                                  : "bg-white shadow-sm hover:shadow-md "
                               )}
                               onClick={() => handleSelectInvoice(invoice.id!)}
                             >

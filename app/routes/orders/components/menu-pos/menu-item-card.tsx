@@ -33,10 +33,6 @@ export default function MenuItemCard({
   } = menuItem;
 
   const isOutOfStock = maxQuantityAvailable === 0;
-  const isLowStock =
-    maxQuantityAvailable &&
-    maxQuantityAvailable > 0 &&
-    maxQuantityAvailable <= 5;
   const isDisabled = !active || isOutOfStock;
 
   return (
@@ -80,20 +76,13 @@ export default function MenuItemCard({
                 <Ban className="h-3 w-3" /> Hết hàng
               </Badge>
             )}
-            {isLowStock && !isOutOfStock && active && (
-              <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-none shadow-sm">
-                Còn {maxQuantityAvailable}
-              </Badge>
-            )}
           </div>
 
-          {/* Quick Code Badge (Optional for POS) */}
-          {/* <Badge variant="secondary" className="bg-white/90 backdrop-blur text-[10px] font-mono text-foreground/70 shadow-sm">
-            {code}
-          </Badge> */}
+          <Badge variant="secondary" className="">
+            SL: {maxQuantityAvailable}
+          </Badge>
         </div>
 
-        {/* Hover Overlay (Add Action) */}
         {!isDisabled && (
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
             <div className="bg-white text-primary rounded-full p-3 shadow-lg transform scale-75 group-hover:scale-100 transition-transform">
@@ -133,8 +122,7 @@ export default function MenuItemCard({
                     size="icon"
                     className="h-6 w-6 -mr-2 -mt-1 text-muted-foreground hover:text-foreground"
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering add to cart
-                      // Open details logic if needed
+                      e.stopPropagation();
                     }}
                   >
                     <Info className="h-3.5 w-3.5" />

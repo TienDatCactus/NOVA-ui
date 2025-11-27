@@ -6,6 +6,7 @@ import type {
   StaffDetailDto,
   CreateStaffDto,
   UpdateStaffDto,
+  TerminateStaffDto,
 } from "./dto";
 import type { StaffListParams } from "./staff.types";
 
@@ -85,10 +86,23 @@ async function deleteStaff(id: string): Promise<void> {
   }
 }
 
+async function terminateStaff(
+  id: string,
+  data: TerminateStaffDto
+): Promise<void> {
+  try {
+    await http.post(Staff.terminate(id), data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const StaffService = {
   getStaffList,
   createStaff,
   getStaffById,
   updateStaff,
   deleteStaff,
+  terminateStaff,
 };

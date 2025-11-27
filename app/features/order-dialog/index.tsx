@@ -181,7 +181,7 @@ export default function AddServiceDialog({
                 value={serviceFilters.typeCode}
                 onValueChange={(code) => updateServiceFilter("typeCode", code)}
               >
-                <SelectTrigger className="w-52">
+                <SelectTrigger className="w-40">
                   <SelectValue placeholder="Tất cả loại dịch vụ" />
                 </SelectTrigger>
                 <SelectContent>
@@ -197,7 +197,7 @@ export default function AddServiceDialog({
                 value={menuFilters.categoryCode}
                 onValueChange={(code) => updateMenuFilter("categoryCode", code)}
               >
-                <SelectTrigger className="w-52">
+                <SelectTrigger className="w-40">
                   <SelectValue placeholder="Tất cả danh mục" />
                 </SelectTrigger>
                 <SelectContent>

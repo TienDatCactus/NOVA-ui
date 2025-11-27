@@ -111,11 +111,12 @@ export default function GuestChat({}: Route.ComponentProps) {
   const {
     messages,
     isConnecting,
+    isConnected,
     updateMessage,
     sendMessage: sendMessageViaSignalR,
     loadMessages,
   } = useChatConnection({
-    sessionId: sessionId || "",
+    sessionId: sessionId,
     isGuest: true,
   });
 
@@ -126,9 +127,13 @@ export default function GuestChat({}: Route.ComponentProps) {
         const newMessages = messagesData.filter(
           (m) => !existingIds.has(m.id)
         ) as ChatMessage[];
-        return [...newMessages, ...prev].sort(
+        // Filter out messages without createdAt before sorting
+        const validMessages = [...newMessages, ...prev].filter(
+          (m) => m.createdAt
+        );
+        return validMessages.sort(
           (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
         );
       });
     }
@@ -299,10 +304,19 @@ export default function GuestChat({}: Route.ComponentProps) {
               <span
                 className={cn(
                   "w-2 h-2 rounded-full",
-                  isConnecting ? "bg-yellow-500" : "bg-green-500 animate-pulse"
+                  isConnecting
+                    ? "bg-yellow-500 animate-pulse"
+                    : isConnected
+                      ? "bg-green-500 animate-pulse"
+                      : "bg-gray-400"
                 )}
               />
               <p className="text-xs text-muted-foreground">
+                {isConnecting
+                  ? "Đang kết nối..."
+                  : isConnected
+                    ? "Đang hoạt động"
+                    : "Ngắt kết nối"}
                 {isConnecting ? "Đang kết nối..." : "Trực tuyến"}
               </p>
             </div>
@@ -349,14 +363,17 @@ export default function GuestChat({}: Route.ComponentProps) {
               messages.map((msg, index) => {
                 // Check if date changed compared to previous message to show separator
                 const prevMsg = messages[index - 1];
+                // Only show separator if both messages have createdAt
                 const isNewDay =
-                  !prevMsg ||
-                  new Date(msg.createdAt).toDateString() !==
-                    new Date(prevMsg.createdAt).toDateString();
+                  msg.createdAt &&
+                  (!prevMsg ||
+                    !prevMsg.createdAt ||
+                    new Date(msg.createdAt).toDateString() !==
+                      new Date(prevMsg.createdAt).toDateString());
 
                 return (
                   <div key={msg.id}>
-                    {isNewDay && (
+                    {isNewDay && msg.createdAt && (
                       <div className="flex justify-center my-4">
                         <span className="text-[10px] bg-muted text-muted-foreground px-2 py-1 rounded-full">
                           {new Date(msg.createdAt).toLocaleDateString("vi-VN", {
@@ -532,7 +549,7 @@ export default function GuestChat({}: Route.ComponentProps) {
               type="submit"
               size="icon"
               className="rounded-full shrink-0 shadow-sm"
-              disabled={!inputMessage.trim() || isConnecting}
+              disabled={!inputMessage.trim() || !isConnected}
             >
               {isConnecting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

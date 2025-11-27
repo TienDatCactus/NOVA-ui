@@ -23,12 +23,19 @@ export function useCreatePOSOrder() {
     },
     onSuccess: (_, data) => {
       // Invalidate all POS order lists (all dates)
-      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-list"],
+        refetchType: "active",
+      });
       // Invalidate all order details
-      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail"],
+        refetchType: "active",
+      });
       // Invalidate checkout pending charges
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", data.bookingId],
+        refetchType: "active",
       });
       toast.success("Đã tạo order thành công");
     },
@@ -42,10 +49,17 @@ export function useCreatePOSOrderWithItems() {
       return await OrderService.createPosOrderWithItems(data);
     },
     onSuccess: (_, data) => {
-      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
-      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-list"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail"],
+        refetchType: "active",
+      });
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", data.bookingId],
+        refetchType: "active",
       });
     },
   });

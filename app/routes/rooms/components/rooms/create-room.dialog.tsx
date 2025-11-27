@@ -121,7 +121,7 @@ function CreateRoomDialog({ open, onClose }: CreateRoomDialogProps) {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-40">
                           <SelectValue placeholder="Chọn loại phòng" />
                         </SelectTrigger>
                       </FormControl>
@@ -149,7 +149,7 @@ function CreateRoomDialog({ open, onClose }: CreateRoomDialogProps) {
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-40">
                           <SelectValue placeholder="Chọn trạng thái" />
                         </SelectTrigger>
                       </FormControl>

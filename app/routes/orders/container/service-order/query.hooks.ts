@@ -13,7 +13,7 @@ export function useServiceOrderList(date?: string) {
     staleTime: 30 * 1000, // 30 seconds
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    refetchOnMount: false, // Changed from true
+    refetchOnMount: true,
   });
 }
 

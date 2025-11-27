@@ -200,7 +200,7 @@ export default function RefundDialog({
                   </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-40">
                         <SelectValue placeholder="Chọn phương thức" />
                       </SelectTrigger>
                     </FormControl>

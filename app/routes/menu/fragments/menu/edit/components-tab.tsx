@@ -113,7 +113,7 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                               value={field.value}
                             >
                               <FormControl>
-                                <SelectTrigger>
+                                <SelectTrigger className="w-40">
                                   <SelectValue placeholder="Chọn nguyên liệu" />
                                 </SelectTrigger>
                               </FormControl>

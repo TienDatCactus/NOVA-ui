@@ -131,12 +131,13 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                     Danh mục <span className="text-destructive">*</span>
                   </FormLabel>
                   <Select
+                    key={field.value || "category-select"}
                     onValueChange={field.onChange}
                     value={field.value}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-40">
                         <SelectValue placeholder="Chọn danh mục" />
                       </SelectTrigger>
                     </FormControl>
@@ -162,12 +163,13 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                     Đơn vị tính <span className="text-destructive">*</span>
                   </FormLabel>
                   <Select
+                    key={field.value || "unit-select"}
                     onValueChange={field.onChange}
                     value={field.value}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-40">
                         <SelectValue placeholder="Chọn đơn vị" />
                       </SelectTrigger>
                     </FormControl>

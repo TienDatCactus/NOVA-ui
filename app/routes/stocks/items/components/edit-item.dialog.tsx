@@ -205,6 +205,7 @@ export default function EditItemDialog({
                               <span className="text-destructive">*</span>
                             </FormLabel>
                             <Select
+                              key={field.value || "category-select"}
                               onValueChange={field.onChange}
                               value={field.value}
                             >
@@ -237,6 +238,7 @@ export default function EditItemDialog({
                               <span className="text-destructive">*</span>
                             </FormLabel>
                             <Select
+                              key={field.value || "unit-select"}
                               onValueChange={field.onChange}
                               value={field.value}
                             >

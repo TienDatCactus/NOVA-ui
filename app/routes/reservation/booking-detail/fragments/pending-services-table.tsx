@@ -54,7 +54,7 @@ export default function PendingServicesTable({
               </TableCell>
               <TableCell>
                 <p className="text-xs text-muted-foreground">
-                  {format(parseISO(order.scheduledAt), "dd/MM/yyyy HH:mm", {
+                  {format(parseISO(order.scheduledAt), " HH:mm dd/MM/yyyy", {
                     locale: vi,
                   })}
                 </p>
@@ -62,7 +62,7 @@ export default function PendingServicesTable({
               <TableCell>
                 <p className="text-xs text-muted-foreground">
                   {order.performedAt
-                    ? format(parseISO(order.performedAt), "dd/MM/yyyy HH:mm", {
+                    ? format(parseISO(order.performedAt), " HH:mm dd/MM/yyyy", {
                         locale: vi,
                       })
                     : "—"}

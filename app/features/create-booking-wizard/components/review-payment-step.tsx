@@ -536,7 +536,7 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="w-full">
+                              <SelectTrigger className="w-40">
                                 <SelectValue placeholder="Chọn phương thức thanh toán" />
                               </SelectTrigger>
                             </FormControl>

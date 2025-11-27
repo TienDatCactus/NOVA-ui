@@ -51,8 +51,6 @@ export default function UnifiedScheduleTable({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [markAbsentDialogOpen, setMarkAbsentDialogOpen] = useState(false);
-  const [markAttendanceDialogOpen, setMarkAttendanceDialogOpen] =
-    useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Selected data for dialogs

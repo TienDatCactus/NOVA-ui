@@ -57,7 +57,7 @@ export default function CreateItemDialog({
   const { mutate: onSubmit, isPending: isSubmitting } = useCreateStockItem();
   const form = useForm<CreateItemFormData>({
     resolver: zodResolver(FormSchema.CreateItemFormSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       code: "",
       name: "",
