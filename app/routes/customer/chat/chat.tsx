@@ -111,11 +111,12 @@ export default function GuestChat({}: Route.ComponentProps) {
   const {
     messages,
     isConnecting,
+    isConnected,
     updateMessage,
     sendMessage: sendMessageViaSignalR,
     loadMessages,
   } = useChatConnection({
-    sessionId: sessionId || "",
+    sessionId: sessionId,
     isGuest: true,
   });
 
@@ -303,10 +304,19 @@ export default function GuestChat({}: Route.ComponentProps) {
               <span
                 className={cn(
                   "w-2 h-2 rounded-full",
-                  isConnecting ? "bg-yellow-500" : "bg-green-500 animate-pulse"
+                  isConnecting
+                    ? "bg-yellow-500 animate-pulse"
+                    : isConnected
+                      ? "bg-green-500 animate-pulse"
+                      : "bg-gray-400"
                 )}
               />
               <p className="text-xs text-muted-foreground">
+                {isConnecting
+                  ? "Đang kết nối..."
+                  : isConnected
+                    ? "Đang hoạt động"
+                    : "Ngắt kết nối"}
                 {isConnecting ? "Đang kết nối..." : "Trực tuyến"}
               </p>
             </div>
@@ -539,7 +549,7 @@ export default function GuestChat({}: Route.ComponentProps) {
               type="submit"
               size="icon"
               className="rounded-full shrink-0 shadow-sm"
-              disabled={!inputMessage.trim() || isConnecting}
+              disabled={!inputMessage.trim() || !isConnected}
             >
               {isConnecting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

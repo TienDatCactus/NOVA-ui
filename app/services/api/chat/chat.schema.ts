@@ -36,6 +36,7 @@ const ChatSessionMessageItemSchema = z.object({
   message: z.string(),
   staffUserId: z.string().nullable(),
   staffName: z.string().nullable(),
+  createdAt: z.string().optional(),
   isRead: z.boolean(),
   readAt: z.string().nullable(),
   readBy: z.string().nullable(),

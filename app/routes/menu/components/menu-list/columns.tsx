@@ -33,11 +33,6 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold truncate">{item.name}</span>
-              {!item.active && (
-                <Badge variant="secondary" className="text-xs">
-                  Ngưng hoạt động
-                </Badge>
-              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {item.code}
@@ -105,11 +100,10 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
     ),
     cell: ({ row }) => {
       const active = row.original.active ? "Hoạt động" : "Ngưng hoạt động";
-
       return (
         <div className="flex items-center gap-1">
           <Badge
-            variant={active ? "success" : "destructive"}
+            variant={row.original.active ? "success" : "destructive"}
             className="text-xs"
           >
             {active}

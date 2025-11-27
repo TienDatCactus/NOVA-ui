@@ -29,6 +29,14 @@ export interface SendMessageCommand {
   staffUserId?: string;
 }
 
+// Backend C# expects PascalCase for SignalR commands
+interface SendMessageCommandPascalCase {
+  SessionId: string;
+  Message: string;
+  Sender: "Guest" | "Staff" | "System";
+  StaffUserId?: string;
+}
+
 class SignalRChatService {
   private connection: signalR.HubConnection | null = null;
   private reconnectAttempts = 0;
@@ -112,7 +120,22 @@ class SignalRChatService {
   // Hub method: Send message
   async sendMessage(command: SendMessageCommand): Promise<void> {
     if (!this.connection) throw new Error("Not connected to SignalR");
-    await this.connection.invoke("SendMessage", command);
+
+    // Convert to PascalCase for C# backend
+    const pascalCommand: SendMessageCommandPascalCase = {
+      SessionId: command.sessionId,
+      Message: command.message,
+      Sender: command.sender,
+      StaffUserId: command.staffUserId,
+    };
+
+    // Detailed logging for debugging
+
+    try {
+      await this.connection.invoke("SendMessage", pascalCommand);
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Hub method: Send typing indicator

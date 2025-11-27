@@ -158,7 +158,7 @@ export default function EditMenuSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="sm:max-w-2xl w-full gap-0 p-0 flex flex-col bg-card">
+      <SheetContent className="sm:max-w-2xl w-full gap-0 p-0 flex flex-col bg-card overflow-y-auto">
         <SheetHeader className="px-6 py-4 border-b shrink-0">
           <div className="space-y-1">
             <SheetTitle className="text-xl">Chỉnh sửa món</SheetTitle>
@@ -173,9 +173,8 @@ export default function EditMenuSheet({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit, onError)}
-            className="flex flex-col h-full"
+            className="flex flex-col "
           >
-            {/* === TABS & BODY === */}
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
@@ -243,34 +242,34 @@ export default function EditMenuSheet({
             </Tabs>
 
             {/* === FOOTER === */}
-            <SheetFooter className="p-6 pt-4 border-t shrink-0 bg-background">
-              <Button
-                variant="outline"
-                onClick={handleClose}
-                disabled={isUpdating}
-                type="button"
-              >
-                Hủy bỏ
-              </Button>
-              <Button
-                type="submit"
-                disabled={isUpdating}
-                className="min-w-[140px]"
-              >
-                {isUpdating ? (
-                  <>
-                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />{" "}
-                    Đang lưu...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
-                  </>
-                )}
-              </Button>
-            </SheetFooter>
           </form>
         </Form>
+        <SheetFooter className="p-6 pt-4 border-t shrink-0 bg-background">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isUpdating}
+            type="button"
+          >
+            Hủy bỏ
+          </Button>
+          <Button
+            onClick={form.handleSubmit(handleSubmit, onError)}
+            disabled={isUpdating}
+            className="min-w-[140px]"
+          >
+            {isUpdating ? (
+              <>
+                <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />{" "}
+                Đang lưu...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
+              </>
+            )}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
