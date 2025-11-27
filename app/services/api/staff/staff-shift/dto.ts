@@ -8,7 +8,6 @@ const {
   StaffShiftDetailResponseSchema,
   CreateShiftScheduleRequestSchema,
   UpdateShiftScheduleRequestSchema,
-  StaffShiftMutationResponseSchema,
 } = StaffShiftSchema;
 
 // Export types
@@ -25,7 +24,4 @@ export type CreateShiftScheduleRequest = z.infer<
 >;
 export type UpdateShiftScheduleRequest = z.infer<
   typeof UpdateShiftScheduleRequestSchema
->;
-export type StaffShiftMutationResponseDto = z.infer<
-  typeof StaffShiftMutationResponseSchema
 >;

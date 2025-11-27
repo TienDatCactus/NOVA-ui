@@ -26,8 +26,8 @@ import { Switch } from "~/components/ui/switch";
 import type {
   UpdateWorkShiftRequest,
   WorkShiftListItem,
-} from "~/services/api/staff/work-shift/dto";
-import { WorkShiftSchema } from "~/services/api/staff/work-shift/work-shift.schema";
+} from "~/services/api/work-shift/dto";
+import { WorkShiftSchema } from "~/services/api/work-shift/work-shift.schema";
 import { useUpdateWorkShift } from "../container/mutation.hooks";
 
 interface UpdateWorkShiftDialogProps {

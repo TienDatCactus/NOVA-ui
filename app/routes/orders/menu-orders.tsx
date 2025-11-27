@@ -109,7 +109,6 @@ export default function Component({
             ) : (
               <div className="columns-1 gap-4 space-y-4 md:columns-2 xl:columns-3 ">
                 {filteredOrders?.map((order) => (
-                  // break-inside-avoid: Ngăn không cho thẻ bị cắt đôi khi chuyển cột
                   <div key={order.id} className="break-inside-avoid pb-4">
                     <OrderCard order={order} />
                   </div>

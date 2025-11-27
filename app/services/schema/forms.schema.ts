@@ -29,31 +29,43 @@ const ReviewPaymentFormSchema = z.object({
 /**
  * Schema cho form tạo mới item
  */
-export const CreateItemFormSchema = z.object({
-  code: z
-    .string()
-    .min(1, "Mã hàng hóa là bắt buộc")
-    .max(50, "Mã hàng hóa không được quá 50 ký tự"),
-  name: z
-    .string()
-    .min(1, "Tên hàng hóa là bắt buộc")
-    .max(200, "Tên hàng hóa không được quá 200 ký tự"),
-  description: z.string().max(500, "Mô tả không được quá 500 ký tự").optional(),
-  categoryId: z.uuid("Vui lòng chọn danh mục"),
-  unitId: z.uuid("Vui lòng chọn đơn vị tính"),
-  unitCost: z
-    .number({ message: "Giá nhập phải là số" })
-    .nonnegative("Giá nhập phải lớn hơn hoặc bằng 0"),
-  unitPrice: z
-    .number({ message: "Giá bán phải là số" })
-    .nonnegative("Giá bán phải lớn hơn hoặc bằng 0"),
-  minStock: z
-    .number({ message: "Tồn kho tối thiểu phải là số" })
-    .nonnegative("Tồn kho tối thiểu phải lớn hơn hoặc bằng 0"),
-  maxStock: z
-    .number({ message: "Tồn kho tối đa phải là số" })
-    .nonnegative("Tồn kho tối đa phải lớn hơn hoặc bằng 0"),
-});
+export const CreateItemFormSchema = z
+  .object({
+    code: z
+      .string()
+      .min(1, "Mã hàng hóa là bắt buộc")
+      .max(50, "Mã hàng hóa không được quá 50 ký tự"),
+    name: z
+      .string()
+      .min(1, "Tên hàng hóa là bắt buộc")
+      .max(200, "Tên hàng hóa không được quá 200 ký tự"),
+    description: z
+      .string()
+      .max(500, "Mô tả không được quá 500 ký tự")
+      .optional(),
+    categoryId: z.uuid("Vui lòng chọn danh mục"),
+    unitId: z.uuid("Vui lòng chọn đơn vị tính"),
+    unitCost: z
+      .number({ message: "Giá nhập phải là số" })
+      .nonnegative("Giá nhập phải lớn hơn hoặc bằng 0"),
+    unitPrice: z
+      .number({ message: "Giá bán phải là số" })
+      .nonnegative("Giá bán phải lớn hơn hoặc bằng 0"),
+    minStock: z
+      .number({ message: "Tồn kho tối thiểu phải là số" })
+      .nonnegative("Tồn kho tối thiểu phải lớn hơn hoặc bằng 0"),
+    maxStock: z
+      .number({ message: "Tồn kho tối đa phải là số" })
+      .nonnegative("Tồn kho tối đa phải lớn hơn hoặc bằng 0"),
+  })
+  .refine((data) => data.minStock <= data.maxStock, {
+    message: "Tồn kho tối thiểu phải nhỏ hơn hoặc bằng tồn kho tối đa",
+    path: ["minStock"],
+  })
+  .refine((data) => data.unitCost <= data.unitPrice, {
+    message: "Giá nhập phải nhỏ hơn hoặc bằng giá bán",
+    path: ["unitCost"],
+  });
 
 /**
  * Schema cho form cập nhật item (không có code)

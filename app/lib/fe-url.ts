@@ -32,7 +32,7 @@ const DASHBOARD = {
   },
   staff: {
     list: "/dashboard/staff",
-    schedules: "/dashboard/staff/schedules",
+    shifts: "/dashboard/staff/shifts",
     holidays: "/dashboard/staff/holidays",
     roles: "/dashboard/staff/roles",
   },

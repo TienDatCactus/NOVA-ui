@@ -1,0 +1,125 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { StaffShiftService } from "~/services/api/staff/staff-shift";
+import { StaffAttendanceService } from "~/services/api/staff/staff-attendance";
+import type { StaffShiftListParams } from "~/services/api/staff/staff-shift/staff-shift.type";
+import type { StaffAttendanceListParams } from "~/services/api/staff/staff-attendance/staff-attendance.type";
+import type {
+  CreateShiftScheduleRequest,
+  UpdateShiftScheduleRequest,
+} from "~/services/api/staff/staff-shift/dto";
+import type { MarkAbsentRequest } from "~/services/api/staff/staff-attendance/dto";
+import { DeleteScope } from "~/services/api/staff/staff-shift/staff-shift.type";
+
+export function useStaffShiftList(params?: StaffShiftListParams) {
+  return useQuery({
+    queryKey: ["staff-shifts", params],
+    queryFn: async () => await StaffShiftService.getStaffShiftList(params),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+}
+
+export function useStaffShiftById(id: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ["staff-shift-detail", id],
+    queryFn: async () => await StaffShiftService.getStaffShiftById(id),
+    enabled: options?.enabled ?? !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useCreateShiftSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: CreateShiftScheduleRequest) =>
+      await StaffShiftService.createShiftSchedule(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+    },
+  });
+}
+
+export function useUpdateShiftSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateShiftScheduleRequest;
+    }) => await StaffShiftService.updateShiftSchedule(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+      qc.invalidateQueries({ queryKey: ["staff-shift-detail"] });
+    },
+  });
+}
+
+export function useDeleteStaffShift() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, scope }: { id: string; scope?: DeleteScope }) =>
+      await StaffShiftService.deleteStaffShift(id, scope),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+    },
+  });
+}
+
+export function useExportWeeklyMatrix() {
+  return useMutation({
+    mutationFn: async (params?: { from?: string; to?: string }) =>
+      await StaffShiftService.exportWeeklyMatrix(params),
+  });
+}
+
+export function useExportWeeklyForm2() {
+  return useMutation({
+    mutationFn: async (params: { from: string; to: string }) =>
+      await StaffShiftService.exportWeeklyForm2(params),
+  });
+}
+
+export function useStaffAttendanceList(params: StaffAttendanceListParams) {
+  return useQuery({
+    queryKey: ["staff-attendance", params],
+    queryFn: async () =>
+      await StaffAttendanceService.getStaffAttendanceList(params),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+}
+
+export function useMarkAbsent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      assignmentId,
+      data,
+    }: {
+      assignmentId: string;
+      data: MarkAbsentRequest;
+    }) => await StaffAttendanceService.markAbsent(assignmentId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["staff-attendance"] });
+      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+    },
+  });
+}
+
+export function useMarkPresent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (assignmentId: string) =>
+      await StaffAttendanceService.markPresent(assignmentId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["staff-attendance"] });
+      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+    },
+  });
+}

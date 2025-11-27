@@ -70,7 +70,7 @@ export default [
         index("routes/staff/staff/staff.tsx"),
 
         route("holidays", "routes/staff/holidays/holidays.tsx"),
-        route("schedules", "routes/staff/schedules/schedules.tsx"),
+        route("shifts", "routes/staff/staff-shifts/staff-shifts.tsx"),
         route("payrolls", "routes/staff/payrolls/payrolls.tsx"),
         route("roles", "routes/staff/staff-role/staff-role.tsx"),
       ]),

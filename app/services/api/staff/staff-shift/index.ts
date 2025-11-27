@@ -6,7 +6,6 @@ import type {
   StaffShiftDetailResponseDto,
   CreateShiftScheduleRequest,
   UpdateShiftScheduleRequest,
-  StaffShiftMutationResponseDto,
 } from "./dto";
 import type { StaffShiftListParams } from "./staff-shift.type";
 import { DeleteScope } from "./staff-shift.type";
@@ -32,7 +31,7 @@ async function getStaffShiftList(
 // POST /api/StaffShifts/schedule - Create schedule with repeat logic
 async function createShiftSchedule(
   data: CreateShiftScheduleRequest
-): Promise<StaffShiftMutationResponseDto> {
+): Promise<void> {
   try {
     const resp = await http.post(StaffShift.schedule, data);
     return resp.data;
@@ -59,7 +58,7 @@ async function getStaffShiftById(
 async function deleteStaffShift(
   id: string,
   scope?: DeleteScope
-): Promise<StaffShiftMutationResponseDto> {
+): Promise<void> {
   try {
     const resp = await http.delete(StaffShift.delete(id), {
       params: { scope },
@@ -75,7 +74,7 @@ async function deleteStaffShift(
 async function updateShiftSchedule(
   id: string,
   data: UpdateShiftScheduleRequest
-): Promise<StaffShiftMutationResponseDto> {
+): Promise<void> {
   try {
     const resp = await http.put(
       StaffShift.update(id),

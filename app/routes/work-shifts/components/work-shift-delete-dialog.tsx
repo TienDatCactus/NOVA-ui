@@ -9,8 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import type { WorkShiftListItem } from "~/services/api/staff/work-shift/dto";
-import { WorkShiftService } from "~/services/api/staff/work-shift";
+import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
+import { WorkShiftService } from "~/services/api/work-shift";
 import { toast } from "sonner";
 import { useDeleteWorkShift } from "../container/mutation.hooks";
 

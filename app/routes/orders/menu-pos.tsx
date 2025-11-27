@@ -31,14 +31,7 @@ import { useMenuPosOrderStore } from "~/store/menu-pos-order.store";
 import useMenuFilters from "../menu/container/menu/filter.hooks";
 import type { Route } from "./+types/menu-pos";
 import ScheduledTimeDialog from "./components/scheduled-time.dialog";
-import {
-  useAddBatchItemsToPOSOrder,
-  useCreatePOSOrderWithItems,
-} from "./container/pos-orders/mutation.hooks";
-
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+import { useCreatePOSOrderWithItems } from "./container/pos-orders/mutation.hooks";
 
 type MenuItem = z.infer<typeof MenuListItemSchema>;
 

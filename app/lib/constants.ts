@@ -158,8 +158,8 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.staff.holidays,
       },
       {
-        title: "Lịch làm việc",
-        url: FE_URL.dashboard.staff.schedules,
+        title: "Lịch làm việc của nhân viên",
+        url: FE_URL.dashboard.staff.shifts,
       },
       {
         title: "Bảng lương",
