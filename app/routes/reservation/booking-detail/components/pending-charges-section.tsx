@@ -209,7 +209,7 @@ export default function PendingChargesSection({
                       <TableCell className="text-right text-[10px] text-muted-foreground">
                         {format(
                           parseISO(service.scheduledAt),
-                          "dd/MM/yyyy HH:mm",
+                          " HH:mm dd/MM/yyyy",
                           { locale: vi }
                         )}
                       </TableCell>

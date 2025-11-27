@@ -276,7 +276,7 @@ export default function Component({
                     <Badge
                       className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums ml-1"
                       variant={
-                        selectedCategoryId === item.id ? "secondary" : "outline"
+                        selectedCategoryId === item.id ? "default" : "outline"
                       }
                     >
                       {item.menuItemCount}

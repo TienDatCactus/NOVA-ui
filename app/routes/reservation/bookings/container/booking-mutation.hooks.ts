@@ -17,9 +17,22 @@ function useUpdateBooking(bookingId: string) {
       await BookingService.staffUpdateBookingDetail(bookingId, data),
     onSuccess: (response) => {
       // Don't toast here - let the component handle success message
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["bookings-detail"] });
-      queryClient.invalidateQueries({ queryKey: ["available-rooms"] });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-rooms"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["orderable-bookings"],
+        refetchType: "active",
+      });
     },
   });
 }
@@ -31,10 +44,25 @@ function useChangeRoom(bookingId: string) {
     mutationFn: async (data: StaffChangeRoomRequestDto) =>
       await BookingService.staffChangeRoom(bookingId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["bookings-detail"] });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+        refetchType: "active",
+      });
       queryClient.invalidateQueries({
         queryKey: ["available-rooms-for-change"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-rooms"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-rooms-week"],
+        refetchType: "active",
       });
     },
   });
@@ -48,7 +76,26 @@ function useCancelBooking(bookingId: string) {
       return await BookingService.staffCancelBooking(bookingId);
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-rooms-week"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["orderable-bookings"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-rooms"],
+        refetchType: "active",
+      });
     },
   });
 }
@@ -69,14 +116,27 @@ function useUpdateBookingStatus(bookingId: string) {
 
       queryClient.invalidateQueries({
         queryKey: ["bookings-detail"],
+        refetchType: "active",
       });
 
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
+        refetchType: "active",
       });
 
       queryClient.invalidateQueries({
         queryKey: ["bookings-rooms-week"],
+        refetchType: "active",
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["orderable-bookings"],
+        refetchType: "active",
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["available-rooms"],
+        refetchType: "active",
       });
     },
   });

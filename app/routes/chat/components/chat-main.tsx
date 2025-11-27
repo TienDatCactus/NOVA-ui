@@ -58,6 +58,7 @@ import {
 import { MessageBubble } from "../fragments/message-bubble";
 import { useStaffList } from "~/routes/staff/staff/container/query.hooks";
 import { useUsers } from "~/routes/users/container/useUsers.hooks";
+import { ScrollArea } from "~/components/ui/scroll-area";
 
 interface ChatMainProps {
   sessionId: string | null;
@@ -169,7 +170,9 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
     return () => {
       if (sessionId) {
-        signalRChatService.leaveSession(sessionId);
+        signalRChatService.leaveSession(sessionId).catch((error) => {
+          console.error("Failed to leave session:", error);
+        });
       }
       signalRChatService.offAll("ReceiveMessage");
     };
@@ -178,7 +181,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   // Load initial messages
   useEffect(() => {
     if (messageHistory) {
-      setMessages(messageHistory);
+      setMessages(messageHistory as ChatMessage[]);
     }
   }, [messageHistory]);
 
@@ -209,6 +212,12 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     let lastDate: string | null = null;
 
     messages.forEach((msg, index) => {
+      // Skip messages without createdAt
+      if (!msg.createdAt) {
+        grouped.push({ type: "message", data: msg, index: grouped.length });
+        return;
+      }
+
       const msgDate = format(parseISO(msg.createdAt), "yyyy-MM-dd");
 
       if (msgDate !== lastDate) {

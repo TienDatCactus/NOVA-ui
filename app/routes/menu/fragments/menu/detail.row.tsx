@@ -165,7 +165,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                     {detailData.createdAt
                       ? format(
                           new Date(detailData.createdAt),
-                          "dd/MM/yyyy HH:mm",
+                          " HH:mm dd/MM/yyyy",
                           { locale: vi }
                         )
                       : "N/A"}
@@ -182,7 +182,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                       <span className="font-medium text-foreground">
                         {format(
                           new Date(detailData.updatedAt),
-                          "dd/MM/yyyy HH:mm",
+                          " HH:mm dd/MM/yyyy",
                           { locale: vi }
                         )}
                       </span>

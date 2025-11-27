@@ -324,7 +324,7 @@ export function LockUserDialog({
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Hết hạn khóa:</span>
                     <span className="font-mono text-muted-foreground">
-                      {format(new Date(user.lockoutEnd), "dd/MM/yyyy HH:mm")}
+                      {format(new Date(user.lockoutEnd), " HH:mm dd/MM/yyyy")}
                     </span>
                   </div>
                 )}

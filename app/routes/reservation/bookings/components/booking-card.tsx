@@ -69,7 +69,6 @@ interface BookingCardProps {
 
 export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [noShowDialogOpen, setNoShowDialogOpen] = useState(false);
 
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
@@ -118,17 +117,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       refetch?.();
     } catch {
       toast.error("Check-in thất bại");
-    }
-  };
-
-  const handleNoShow = async () => {
-    try {
-      await updateStatus("NoShow");
-      toast.success("Đã đánh dấu No Show");
-      refetch?.();
-      setNoShowDialogOpen(false);
-    } catch {
-      toast.error("Thao tác thất bại");
     }
   };
 
@@ -284,14 +272,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
                   <XCircle className="mr-2 h-4 w-4" /> Hủy đặt phòng
                 </DropdownMenuItem>
               )}
-              {canMarkNoShow && (
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setNoShowDialogOpen(true)}
-                >
-                  <UserX className="mr-2 h-4 w-4" /> Đánh dấu No Show
-                </DropdownMenuItem>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -372,30 +352,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isProcessing ? "Đang hủy..." : "Hủy đặt phòng"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* No Show Confirmation Dialog */}
-      <AlertDialog open={noShowDialogOpen} onOpenChange={setNoShowDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Đánh dấu No Show</AlertDialogTitle>
-            <AlertDialogDescription>
-              Khách hàng <strong>{booking.customerName}</strong> không đến nhận
-              phòng? Đặt phòng <strong>{booking.bookingCode}</strong> sẽ được
-              đánh dấu là No Show.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>Hủy</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleNoShow}
-              disabled={isProcessing}
-              className="bg-orange-600 text-white hover:bg-orange-700"
-            >
-              {isProcessing ? "Đang xử lý..." : "Xác nhận No Show"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

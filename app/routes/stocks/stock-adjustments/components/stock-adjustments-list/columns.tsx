@@ -42,7 +42,7 @@ export const columns: ColumnDef<StockAdjustmentListItemDto>[] = [
     ),
     cell: ({ row }) => (
       <span className="text-sm">
-        {format(parseISO(row.original.adjustmentDate), "dd/MM/yyyy HH:mm", {
+        {format(parseISO(row.original.adjustmentDate), " HH:mm dd/MM/yyyy", {
           locale: vi,
         })}
       </span>

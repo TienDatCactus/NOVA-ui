@@ -107,7 +107,7 @@ export default function CreateServiceDialog({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full" size="lg">
+                          <SelectTrigger className="w-40">
                             <SelectValue placeholder="Chọn loại dịch vụ" />
                           </SelectTrigger>
                         </FormControl>
@@ -177,7 +177,7 @@ export default function CreateServiceDialog({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-50" size="lg">
+                          <SelectTrigger className="w-40">
                             <SelectValue placeholder="Chọn đơn vị" />
                           </SelectTrigger>
                         </FormControl>

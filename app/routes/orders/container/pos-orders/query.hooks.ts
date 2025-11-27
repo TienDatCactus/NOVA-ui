@@ -13,7 +13,7 @@ export function usePOSOrderList(date?: string) {
     staleTime: 30 * 1000, // 30 seconds
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 

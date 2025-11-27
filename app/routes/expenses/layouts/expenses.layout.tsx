@@ -163,7 +163,7 @@ export default function ExpensesLayout({
                   )
                 }
               >
-                <SelectTrigger className="w-[160px] h-9 text-xs">
+                <SelectTrigger className="w-40 h-9 text-xs">
                   <div className="flex items-center gap-2 truncate">
                     <Tags className="w-3.5 h-3.5 text-muted-foreground" />
                     <SelectValue placeholder="Tất cả danh mục" />
@@ -188,7 +188,7 @@ export default function ExpensesLayout({
                   )
                 }
               >
-                <SelectTrigger className="w-[160px] h-9 text-xs">
+                <SelectTrigger className="w-40 h-9 text-xs">
                   <div className="flex items-center gap-2 truncate">
                     <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
                     <SelectValue placeholder="Tất cả phương thức" />

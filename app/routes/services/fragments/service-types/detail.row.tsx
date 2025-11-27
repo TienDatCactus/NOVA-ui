@@ -166,7 +166,7 @@ export default function ServiceTypeDetailRow({
                   {detailData.createdAt
                     ? format(
                         new Date(detailData.createdAt),
-                        "dd/MM/yyyy HH:mm",
+                        " HH:mm dd/MM/yyyy",
                         { locale: vi }
                       )
                     : "N/A"}
@@ -180,7 +180,7 @@ export default function ServiceTypeDetailRow({
                   {detailData.updatedAt
                     ? format(
                         new Date(detailData.updatedAt),
-                        "dd/MM/yyyy HH:mm",
+                        " HH:mm dd/MM/yyyy",
                         { locale: vi }
                       )
                     : "N/A"}

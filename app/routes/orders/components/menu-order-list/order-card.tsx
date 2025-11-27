@@ -105,7 +105,6 @@ export default function OrderCard({ order }: OrderCardProps) {
       <div className="flex-1 px-4 py-2 bg-white flex flex-col">
         <OrderDetails order={order} />
 
-        {/* Fragment: Add Button (inline with items) */}
         <OrderAddButton orderId={order.id} status={order.status} />
       </div>
 

@@ -84,9 +84,6 @@ export function useUpdateStockItem() {
       });
       toast.success("Cập nhật hàng hóa thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi cập nhật hàng hóa");
-    },
   });
 }
 

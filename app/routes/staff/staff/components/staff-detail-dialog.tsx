@@ -25,7 +25,9 @@ export default function StaffDetailDialog({
   onOpenChange,
   staffId,
 }: StaffDetailDialogProps) {
-  const { data: staff, isLoading } = useStaffDetail(staffId);
+  const { data: staff, isLoading } = useStaffDetail(staffId || "", {
+    enabled: open,
+  });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">

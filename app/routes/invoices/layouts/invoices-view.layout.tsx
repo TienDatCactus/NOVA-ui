@@ -135,7 +135,7 @@ function InvoicesViewLayout({
             <FileText className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight flex items-center gap-2">
+            <h1 className="text-xl font-bold tracking-tight gap-2">
               Quản lý hóa đơn
             </h1>
             <p className="text-xs text-muted-foreground">

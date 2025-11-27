@@ -1,4 +1,4 @@
-import { MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Pencil, Trash2, UserX } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
 import StaffDeleteDialog from "../components/staff-delete-dialog";
+import StaffTerminateDialog from "../components/staff-terminate-dialog";
 import { useState } from "react";
 import StaffUpdateDialog from "../components/staff-update-dialog";
 
@@ -19,6 +20,7 @@ interface StaffActionsCellProps {
 export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [terminateDialogOpen, setTerminateDialogOpen] = useState(false);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -36,6 +38,14 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
         </DropdownMenuItem>
         <DropdownMenuItem
           className="text-destructive focus:text-destructive"
+          onClick={() => setTerminateDialogOpen(true)}
+        >
+          <UserX className="mr-2 h-4 w-4" />
+          Kết thúc hợp đồng
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="text-destructive focus:text-destructive"
           onClick={() => setDeleteDialogOpen(true)}
         >
           <Trash2 className="mr-2 h-4 w-4" />
@@ -51,6 +61,11 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
         staff={staff}
         open={updateDialogOpen}
         onOpenChange={setUpdateDialogOpen}
+      />
+      <StaffTerminateDialog
+        staff={staff}
+        open={terminateDialogOpen}
+        onOpenChange={setTerminateDialogOpen}
       />
     </DropdownMenu>
   );

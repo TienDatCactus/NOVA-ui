@@ -193,6 +193,7 @@ const Staff = {
   detail: (id: string) => `Staffs/${id}`,
   update: (id: string) => `Staffs/${id}`,
   delete: (id: string) => `Staffs/${id}`,
+  terminate: (id: string) => `Staffs/${id}/terminate`,
 };
 
 const StaffRole = {

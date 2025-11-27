@@ -17,7 +17,7 @@ export function useStaffShiftList(params?: StaffShiftListParams) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 
@@ -36,7 +36,14 @@ export function useCreateShiftSchedule() {
     mutationFn: async (data: CreateShiftScheduleRequest) =>
       await StaffShiftService.createShiftSchedule(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+      qc.invalidateQueries({
+        queryKey: ["staff-shifts"],
+        refetchType: "active",
+      });
+      qc.invalidateQueries({
+        queryKey: ["staff-attendance"],
+        refetchType: "active",
+      });
     },
   });
 }
@@ -52,8 +59,18 @@ export function useUpdateShiftSchedule() {
       data: UpdateShiftScheduleRequest;
     }) => await StaffShiftService.updateShiftSchedule(id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
-      qc.invalidateQueries({ queryKey: ["staff-shift-detail"] });
+      qc.invalidateQueries({
+        queryKey: ["staff-shifts"],
+        refetchType: "active",
+      });
+      qc.invalidateQueries({
+        queryKey: ["staff-shift-detail"],
+        refetchType: "active",
+      });
+      qc.invalidateQueries({
+        queryKey: ["staff-attendance"],
+        refetchType: "active",
+      });
     },
   });
 }
@@ -64,7 +81,14 @@ export function useDeleteStaffShift() {
     mutationFn: async ({ id, scope }: { id: string; scope?: DeleteScope }) =>
       await StaffShiftService.deleteStaffShift(id, scope),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+      qc.invalidateQueries({
+        queryKey: ["staff-shifts"],
+        refetchType: "active",
+      });
+      qc.invalidateQueries({
+        queryKey: ["staff-attendance"],
+        refetchType: "active",
+      });
     },
   });
 }
@@ -91,7 +115,7 @@ export function useStaffAttendanceList(params: StaffAttendanceListParams) {
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 
@@ -106,8 +130,14 @@ export function useMarkAbsent() {
       data: MarkAbsentRequest;
     }) => await StaffAttendanceService.markAbsent(assignmentId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["staff-attendance"] });
-      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+      qc.invalidateQueries({
+        queryKey: ["staff-attendance"],
+        refetchType: "active",
+      });
+      qc.invalidateQueries({
+        queryKey: ["staff-shifts"],
+        refetchType: "active",
+      });
     },
   });
 }
@@ -118,8 +148,14 @@ export function useMarkPresent() {
     mutationFn: async (assignmentId: string) =>
       await StaffAttendanceService.markPresent(assignmentId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["staff-attendance"] });
-      qc.invalidateQueries({ queryKey: ["staff-shifts"] });
+      qc.invalidateQueries({
+        queryKey: ["staff-attendance"],
+        refetchType: "active",
+      });
+      qc.invalidateQueries({
+        queryKey: ["staff-shifts"],
+        refetchType: "active",
+      });
     },
   });
 }

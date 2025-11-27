@@ -230,7 +230,7 @@ function RoomTypesDetailDialog({
                     Tạo:{" "}
                     {format(
                       new Date(roomTypeDetail.createdAt),
-                      "dd/MM/yyyy HH:mm",
+                      " HH:mm dd/MM/yyyy",
                       { locale: vi }
                     )}
                   </span>

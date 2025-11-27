@@ -246,7 +246,7 @@ export default function CustomerInfoBar({
                       disabled={!permissions.canUpdateNonStructural}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-9 text-xs">
+                        <SelectTrigger className="h-9 w-40 text-xs">
                           <SelectValue placeholder="Chọn kênh" />
                         </SelectTrigger>
                       </FormControl>

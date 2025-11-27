@@ -199,7 +199,7 @@ export default function PaymentOrderSheet({
                 #{orderId.slice(0, 8).toUpperCase()}
               </span>
               <span>•</span>
-              <span>{format(new Date(), "dd/MM/yyyy HH:mm")}</span>
+              <span>{format(new Date(), " HH:mm dd/MM/yyyy")}</span>
             </SheetDescription>
           </div>
           {orderDetail && getStatusBadge(orderDetail.status)}
@@ -441,7 +441,7 @@ export default function PaymentOrderSheet({
                                   defaultValue={field.value}
                                 >
                                   <FormControl>
-                                    <SelectTrigger className="pl-9 relative">
+                                    <SelectTrigger className="pl-9 w-40 relative">
                                       <CreditCard className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                       <SelectValue placeholder="Phương thức" />
                                     </SelectTrigger>

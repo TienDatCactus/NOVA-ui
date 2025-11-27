@@ -73,9 +73,9 @@ export default function StockAdjustmentDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] p-0 flex flex-col overflow-hidden gap-0">
+      <DialogContent className="max-w-4xl h-[85vh] p-0 flex flex-col overflow-y-auto gap-0">
         {/* --- Header Section --- */}
-        <DialogHeader className="p-6 pb-4 border-b shrink-0 bg-background/95 backdrop-blur z-10">
+        <DialogHeader className="p-6 pb-4 border-b shrink-0 bg-background/95  z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <DialogTitle className="text-xl flex items-center gap-2">

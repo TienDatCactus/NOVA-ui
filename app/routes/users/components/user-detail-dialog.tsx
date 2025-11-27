@@ -144,7 +144,7 @@ export function UserDetailDialog({
                 <p className="text-xs text-muted-foreground">
                   Tài khoản sẽ tự động mở khóa vào lúc:{" "}
                   <span className="font-medium text-foreground">
-                    {format(parseISO(user.lockoutEnd), "dd/MM/yyyy HH:mm")}
+                    {format(parseISO(user.lockoutEnd), " HH:mm dd/MM/yyyy")}
                   </span>
                 </p>
               </div>

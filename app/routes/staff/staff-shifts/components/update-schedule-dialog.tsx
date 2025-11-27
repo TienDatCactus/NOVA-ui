@@ -122,12 +122,10 @@ export default function UpdateScheduleDialog({
     }
     try {
       await updateShiftSchedule.mutateAsync({ id: shift.id, data });
-      toast.success("Cập nhật thành công");
       form.reset();
       onOpenChange(false);
     } catch (error) {
       console.error(error);
-      toast.error("Lỗi khi cập nhật");
     }
   };
 

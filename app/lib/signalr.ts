@@ -9,7 +9,7 @@ export interface ChatMessage {
   message: string;
   staffUserId: string | null;
   staffName: string | null;
-  createdAt: string;
+  createdAt?: string; // Optional since some messages might not have it
   // Read status fields
   isRead?: boolean;
   readAt?: string | null;

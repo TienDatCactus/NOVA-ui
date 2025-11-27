@@ -128,7 +128,7 @@ export default function CreateExpenseDialog({
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="pl-9 relative">
+                            <SelectTrigger className="pl-9 w-40 relative">
                               <Tag className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                               <SelectValue placeholder="Chọn loại" />
                             </SelectTrigger>
@@ -225,7 +225,7 @@ export default function CreateExpenseDialog({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="pl-9 relative">
+                          <SelectTrigger className="pl-9 w-40 relative">
                             <CreditCard className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <SelectValue placeholder="Chọn phương thức" />
                           </SelectTrigger>

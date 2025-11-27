@@ -132,7 +132,7 @@ export default function InvoicesFilterBar({
               onFilterChange("SortBy", value as SortByField)
             }
           >
-            <SelectTrigger className="h-9 w-[130px] text-xs">
+            <SelectTrigger className="h-9 w-40 text-xs">
               <span className="text-muted-foreground mr-1">Sắp xếp:</span>
               <SelectValue />
             </SelectTrigger>

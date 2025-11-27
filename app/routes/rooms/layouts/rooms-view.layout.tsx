@@ -55,7 +55,7 @@ function RoomsViewLayout({
                 )
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-40">
                 <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
@@ -79,7 +79,7 @@ function RoomsViewLayout({
                 )
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-40">
                 <SelectValue placeholder="Hạng phòng" />
               </SelectTrigger>
               <SelectContent>

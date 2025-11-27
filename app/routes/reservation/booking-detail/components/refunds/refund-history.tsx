@@ -73,7 +73,7 @@ export default function RefundHistory({ bookingId }: RefundHistoryProps) {
                 className="bg-destructive/5"
               >
                 <TableCell className="text-sm text-muted-foreground">
-                  {format(parseISO(refund.refundedAt), "dd/MM/yyyy HH:mm", {
+                  {format(parseISO(refund.refundedAt), " HH:mm dd/MM/yyyy", {
                     locale: vi,
                   })}
                 </TableCell>
