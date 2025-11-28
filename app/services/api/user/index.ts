@@ -18,6 +18,7 @@ import type {
   ChangePasswordDto,
   ChangePasswordResponseDto,
   RoleListResponseDto,
+  ChatStaffListDto,
 } from "./dto";
 import type { UserListParams } from "./user.types";
 
@@ -33,6 +34,7 @@ const {
   RemoveRolesResponseSchema,
   ChangePasswordSchema,
   ChangePasswordResponseSchema,
+  ChatStaffListResponseSchema,
 } = UserSchema;
 
 async function getUserList(
@@ -151,6 +153,15 @@ async function changePassword(
   }
 }
 
+async function getChatStaff(): Promise<ChatStaffListDto> {
+  try {
+    const resp = await http.get(User.chatStaff);
+    return ChatStaffListResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const UserService = {
   getUserList,
   getUserDetail,
@@ -162,4 +173,5 @@ export const UserService = {
   assignRoles,
   removeRoles,
   changePassword,
+  getChatStaff,
 };

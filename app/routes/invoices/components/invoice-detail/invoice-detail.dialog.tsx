@@ -29,7 +29,7 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
 import { InvoicesService } from "~/services/api/invoices";
 import { toast } from "sonner";
-import { Download } from "lucide-react";
+import { Download, Printer } from "lucide-react";
 
 type InvoiceDetailDialogProps = {
   open: boolean;
@@ -47,12 +47,13 @@ export function InvoiceDetailDialog({
   });
 
   if (!invoice) return null;
+
   const handleExport = async () => {
     try {
       const blob = await InvoicesService.exportInvoiceById(invoiceId);
       console.log("Blob received:", blob);
 
-      const url = window.URL.createObjectURL(blob as any);
+      const url = window.URL.createObjectURL(blob.data);
       const a = document.createElement("a");
       a.href = url;
       const filename = `invoice-${invoiceId}.xlsx`;
@@ -183,9 +184,9 @@ export function InvoiceDetailDialog({
             </TableBody>
           </Table>
         </div>
-        <DialogFooter className="flex items-center ">
+        <DialogFooter className="flex items-center gap-2">
           <Button variant="success" size="sm" onClick={handleExport}>
-            <Download />
+            <Download className="h-4 w-4" />
             Xuất hóa đơn
           </Button>
           <Button variant="outline" onClick={onClose}>

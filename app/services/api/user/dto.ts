@@ -19,6 +19,8 @@ const {
   RemoveRolesResponseSchema,
   ChangePasswordSchema,
   ChangePasswordResponseSchema,
+  ChatStaffListItemSchema,
+  ChatStaffListResponseSchema,
 } = UserSchema;
 
 // User Item
@@ -45,3 +47,6 @@ export type ChangePasswordDto = z.infer<typeof ChangePasswordSchema>;
 export type ChangePasswordResponseDto = z.infer<
   typeof ChangePasswordResponseSchema
 >;
+
+export type ChatStaffListItemDto = z.infer<typeof ChatStaffListItemSchema>;
+export type ChatStaffListDto = z.infer<typeof ChatStaffListResponseSchema>;

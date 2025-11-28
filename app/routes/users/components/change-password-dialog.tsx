@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toast } from "sonner";
 import { KeyRound } from "lucide-react";
 import {
   Dialog,
@@ -22,8 +20,8 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { UserService } from "~/services/api/user";
 import { UserSchema } from "~/services/api/user/user.schema";
+import { useChangePassword } from "../container/query.hooks";
 
 const { ChangePasswordSchema } = UserSchema;
 
@@ -52,7 +50,7 @@ export default function ChangePasswordDialog({
   UserName,
   onSuccess,
 }: ChangePasswordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutate: changePassword, isPending } = useChangePassword();
 
   const form = useForm<ChangePasswordFormData>({
     resolver: zodResolver(ChangePasswordFormSchema),
@@ -62,34 +60,24 @@ export default function ChangePasswordDialog({
     },
   });
 
-  const handleSubmit = async (data: ChangePasswordFormData) => {
-    if (isSubmitting) return;
-
-    try {
-      setIsSubmitting(true);
-      toast.loading("Đang đổi mật khẩu...", { id: "change-password" });
-
-      await UserService.changePassword(UserId, {
-        newPassword: data.newPassword,
-      });
-
-      toast.success("Đổi mật khẩu thành công", { id: "change-password" });
-      form.reset();
-      onOpenChange(false);
-      onSuccess?.();
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Đổi mật khẩu thất bại. Vui lòng thử lại",
-        { id: "change-password" }
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleSubmit = (data: ChangePasswordFormData) => {
+    changePassword(
+      {
+        id: UserId,
+        data: { newPassword: data.newPassword },
+      },
+      {
+        onSuccess: () => {
+          form.reset();
+          onOpenChange(false);
+          onSuccess?.();
+        },
+      }
+    );
   };
 
   const handleClose = () => {
-    if (isSubmitting) return;
+    if (isPending) return;
     form.reset();
     onOpenChange(false);
   };
@@ -125,7 +113,7 @@ export default function ChangePasswordDialog({
                     <Input
                       type="password"
                       placeholder="Nhập mật khẩu mới"
-                      disabled={isSubmitting}
+                      disabled={isPending}
                       {...field}
                     />
                   </FormControl>
@@ -147,7 +135,7 @@ export default function ChangePasswordDialog({
                     <Input
                       type="password"
                       placeholder="Nhập lại mật khẩu mới"
-                      disabled={isSubmitting}
+                      disabled={isPending}
                       {...field}
                     />
                   </FormControl>
@@ -161,12 +149,12 @@ export default function ChangePasswordDialog({
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                disabled={isSubmitting}
+                disabled={isPending}
               >
                 Hủy
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Đang lưu..." : "Đổi mật khẩu"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Đang lưu..." : "Đổi mật khẩu"}
               </Button>
             </DialogFooter>
           </form>

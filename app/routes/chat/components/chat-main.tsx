@@ -1,5 +1,6 @@
 // 1. External Imports
 import {
+  Check,
   CheckCheck,
   Globe,
   Hash,
@@ -44,8 +45,7 @@ import { MessageBubble } from "../fragments/message-bubble";
 // 4. Hooks, Stores & Services
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
-import { useStaffList } from "~/routes/staff/staff/container/query.hooks";
-import { useUsers } from "~/routes/users/container/useUsers.hooks";
+import { useChatStaff } from "~/routes/users/container/query.hooks";
 import { TranslationService } from "~/services/api/translation";
 import { useAuthStore } from "~/store/auth.store";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
@@ -118,12 +118,10 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const { data: messageHistory, isLoading: isLoadingMessages } =
     useChatMessages(sessionId || "", !!sessionId);
 
-  // Queries for tagging system
-  const { data: staffList } = useUsers();
+  const { data: staffList } = useChatStaff();
   const { data: menuItems } = useMenuList({});
   const { data: serviceItems } = useServices({});
 
-  // Mutations
   const assignStaffMutation = useAssignStaff();
   const closeSessionMutation = useCloseSession();
   const markAllReadMutation = useMarkAllRead();
@@ -454,7 +452,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                         {lang.label}
                         {userLanguage === lang.code && (
                           <span className="ml-auto text-xs text-primary">
-                            ✓
+                            <Check className="h-4 w-4" />
                           </span>
                         )}
                       </DropdownMenuItem>
@@ -493,14 +491,16 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                           )}
                         >
                           <div className="flex flex-col flex-1">
-                            <span className="font-medium">{staff.roles}</span>
+                            <span className="font-medium">
+                              {staff.fullName}
+                            </span>
                             <span className="text-xs text-muted-foreground">
                               {staff.email}
                             </span>
                           </div>
                           {session.assignedStaffUserId === staff.id && (
                             <span className="ml-auto text-xs text-primary">
-                              ✓
+                              <Check className="h-4 w-4" />
                             </span>
                           )}
                         </DropdownMenuItem>

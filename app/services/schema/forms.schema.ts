@@ -148,7 +148,6 @@ export const AddPayrollComponentFormSchema = z.object({
   title: z.string().min(1, "Vui lòng nhập tiêu đề"),
   amount: z.number().min(1, "Vui lòng nhập số tiền"),
   note: z.string().optional(),
-  effectiveDate: z.string().optional(),
 });
 
 export const FormSchema = {

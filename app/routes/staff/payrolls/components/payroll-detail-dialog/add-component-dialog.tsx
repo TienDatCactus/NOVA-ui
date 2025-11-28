@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -26,19 +28,18 @@ import {
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import { ComponentTypeConfig } from "~/services/api/staff/staff-payroll/staff-payroll.type";
 import { FormSchema } from "~/services/schema/forms.schema";
 import { useAddPayrollComponent } from "../../container/query.hooks";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import {
+  Loader2,
+  TrendingUp,
+  TrendingDown,
+  Banknote,
+  AlignLeft,
+} from "lucide-react";
 import { cn } from "~/lib/utils";
+import { Separator } from "~/components/ui/separator";
 
 const { AddPayrollComponentFormSchema } = FormSchema;
 
@@ -51,14 +52,21 @@ interface AddComponentDialogProps {
   onSuccess?: () => void;
 }
 
+// Utility: Format currency (VNĐ)
+const formatCurrencyInput = (value: string | number) => {
+  if (!value) return "";
+  // Xóa các ký tự không phải số
+  const number = value.toString().replace(/[^0-9]/g, "");
+  // Format có dấu chấm phân cách hàng nghìn
+  return new Intl.NumberFormat("vi-VN").format(Number(number));
+};
+
 export default function AddComponentDialog({
   open,
   onOpenChange,
   payrollId,
   onSuccess,
 }: AddComponentDialogProps) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-
   const form = useForm<FormValues>({
     resolver: zodResolver(AddPayrollComponentFormSchema),
     defaultValues: {
@@ -66,13 +74,41 @@ export default function AddComponentDialog({
       title: "",
       amount: 0,
       note: "",
-      effectiveDate: format(new Date(), "yyyy-MM-dd"),
     },
   });
 
   const selectedType = form.watch("type");
-
   const mutation = useAddPayrollComponent();
+
+  // Helper: Xác định màu sắc và Icon dựa trên loại (Cộng/Trừ)
+  const typeConfig = useMemo(() => {
+    const isDeduction = ["Penalty", "Advance", "AdjustmentDecrease"].includes(
+      selectedType
+    );
+    return {
+      isDeduction,
+      color: isDeduction ? "text-red-600" : "text-emerald-600",
+      bgColor: isDeduction ? "bg-red-50" : "bg-emerald-50",
+      borderColor: isDeduction
+        ? "focus-within:ring-red-500"
+        : "focus-within:ring-emerald-500",
+      icon: isDeduction ? (
+        <TrendingDown className="w-4 h-4" />
+      ) : (
+        <TrendingUp className="w-4 h-4" />
+      ),
+      prefix: isDeduction ? "-" : "+",
+    };
+  }, [selectedType]);
+
+  // UX: Tự động fill Title nếu trống khi đổi Type
+  useEffect(() => {
+    const currentTitle = form.getValues("title");
+    if (!currentTitle && selectedType) {
+      // Chỉ gợi ý, không force
+      // form.setValue("title", ComponentTypeConfig[selectedType]?.label || "");
+    }
+  }, [selectedType, form]);
 
   const onSubmit = (data: FormValues) => {
     mutation.mutate(
@@ -89,229 +125,218 @@ export default function AddComponentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Thêm phụ cấp / khấu trừ</DialogTitle>
+      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
+        {/* === HEADER === */}
+        <DialogHeader className="px-6 py-4 border-b bg-muted/5">
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                "p-2 rounded-lg",
+                typeConfig.bgColor,
+                typeConfig.color
+              )}
+            >
+              <Banknote className="w-5 h-5" />
+            </div>
+            <div>
+              <DialogTitle className="text-lg">Điều chỉnh lương</DialogTitle>
+              <DialogDescription className="mt-0.5">
+                Thêm khoản phụ cấp hoặc khấu trừ mới
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Hàng 1: Loại + Tiêu đề */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Loại khoản <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10">
-                          <SelectValue>
-                            {field.value &&
-                              (() => {
-                                const isDeductionType = [
-                                  "Penalty",
-                                  "Advance",
-                                  "AdjustmentDecrease",
-                                ].includes(field.value);
-                                return (
-                                  <div className="flex items-center gap-2">
-                                    <span
-                                      className={`text-base font-bold ${
-                                        isDeductionType
-                                          ? "text-red-600"
-                                          : "text-green-600"
-                                      }`}
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col"
+          >
+            <div className="p-6 space-y-6">
+              {/* 1. SELECTION GROUP */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phân loại</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-11">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(ComponentTypeConfig).map(
+                            ([key, config]) => {
+                              const isDed = [
+                                "Penalty",
+                                "Advance",
+                                "AdjustmentDecrease",
+                              ].includes(key);
+                              return (
+                                <SelectItem key={key} value={key}>
+                                  <div className="flex items-center gap-2.5">
+                                    <div
+                                      className={cn(
+                                        "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border",
+                                        isDed
+                                          ? "border-red-200 bg-red-50 text-red-600"
+                                          : "border-emerald-200 bg-emerald-50 text-emerald-600"
+                                      )}
                                     >
-                                      {isDeductionType ? "-" : "+"}
-                                    </span>
-                                    <span>
-                                      {ComponentTypeConfig[field.value]?.label}
+                                      {isDed ? "-" : "+"}
+                                    </div>
+                                    <span className="font-medium">
+                                      {config.label}
                                     </span>
                                   </div>
-                                );
-                              })()}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Object.entries(ComponentTypeConfig).map(
-                          ([key, config]) => {
-                            const isDeductionType = [
-                              "Penalty",
-                              "Advance",
-                              "AdjustmentDecrease",
-                            ].includes(key);
-                            return (
-                              <SelectItem key={key} value={key}>
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className={`text-base font-bold ${
-                                      isDeductionType
-                                        ? "text-red-600"
-                                        : "text-green-600"
-                                    }`}
-                                  >
-                                    {isDeductionType ? "-" : "+"}
-                                  </span>
-                                  <span>{config.label}</span>
-                                </div>
-                              </SelectItem>
-                            );
-                          }
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                                </SelectItem>
+                              );
+                            }
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Tên khoản <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={
-                          ComponentTypeConfig[selectedType]?.label ||
-                          "Nhập tiêu đề"
-                        }
-                        className="h-10"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Hàng 2: Số tiền + Ngày hiệu lực */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Số tiền <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="text"
-                          placeholder="0"
-                          className="pr-12 h-10"
-                          value={field.value}
-                          onChange={(e) => field.onChange(e)}
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          VNĐ
-                        </span>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="effectiveDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>
-                      Áp dụng từ ngày{" "}
-                      <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Số tiền (VNĐ)</FormLabel>
+                      <FormControl>
+                        <div
+                          className={cn(
+                            "relative group flex items-center border rounded-md overflow-hidden transition-all ring-offset-background",
+                            typeConfig.borderColor
+                          )}
+                        >
+                          {/* Visual Prefix */}
+                          <div
                             className={cn(
-                              "w-full h-10 pl-3 text-left font-normal",
-                              !date && "text-muted-foreground"
+                              "flex items-center justify-center w-12 h-12 bg-muted/20 border-r",
+                              typeConfig.color
                             )}
                           >
-                            {date ? (
-                              format(date, "dd/MM/yyyy")
-                            ) : (
-                              <span>Chọn ngày</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={(newDate) => {
-                            setDate(newDate);
-                            field.onChange(
-                              newDate ? format(newDate, "yyyy-MM-dd") : ""
-                            );
-                          }}
-                          captionLayout="dropdown"
-                          className="rounded-md border"
+                            {typeConfig.icon}
+                          </div>
+
+                          {/* Main Input */}
+                          <Input
+                            type="text"
+                            placeholder="0"
+                            className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 text-lg font-semibold font-mono px-4 shadow-none"
+                            value={
+                              field.value
+                                ? formatCurrencyInput(field.value)
+                                : ""
+                            }
+                            onChange={(e) => {
+                              const rawValue = e.target.value.replace(
+                                /[^0-9]/g,
+                                ""
+                              );
+                              field.onChange(Number(rawValue));
+                            }}
+                          />
+
+                          {/* Suffix */}
+                          <div className="absolute right-4 text-sm text-muted-foreground font-medium pointer-events-none">
+                            VNĐ
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Separator />
+
+              {/* 2. DETAILS GROUP */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Tên khoản mục{" "}
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={`Ví dụ: ${ComponentTypeConfig[selectedType]?.label || "..."}`}
+                          className="h-10"
+                          {...field}
                         />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="note"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <AlignLeft className="w-3.5 h-3.5 text-muted-foreground" />
+                        Ghi chú
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Nhập lý do hoặc chi tiết bổ sung..."
+                          className="resize-none min-h-[80px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            {/* Hàng 3: Ghi chú (full width) */}
-            <FormField
-              control={form.control}
-              name="note"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ghi chú</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Nhập ghi chú..."
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-2 pt-2">
+            {/* === FOOTER === */}
+            <DialogFooter className="px-6 py-4 border-t bg-background shrink-0">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onOpenChange(false)}
                 disabled={mutation.isPending}
               >
-                Hủy
+                Hủy bỏ
               </Button>
-              <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Button
+                type="submit"
+                disabled={mutation.isPending}
+                className={cn(
+                  "min-w-[120px]",
+                  typeConfig.isDeduction
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-primary"
                 )}
-                Thêm
+              >
+                {mutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : typeConfig.isDeduction ? (
+                  "Xác nhận trừ"
+                ) : (
+                  "Xác nhận thêm"
+                )}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

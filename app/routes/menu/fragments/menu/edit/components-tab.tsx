@@ -1,5 +1,6 @@
-import { Layers, Plus, Trash2 } from "lucide-react";
+import { Layers, Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
+import { useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -9,12 +10,18 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import {
   Table,
@@ -26,6 +33,7 @@ import {
 import { TabsContent } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import { cn } from "~/lib/utils";
 
 interface ComponentsTabProps {
   form: UseFormReturn<any>;
@@ -42,6 +50,10 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
   remove,
   stockItems,
 }) => {
+  const [openPopovers, setOpenPopovers] = useState<{ [key: number]: boolean }>(
+    {}
+  );
+
   return (
     <TabsContent value="components" className="mt-0 outline-none">
       <div className="flex items-center justify-between mb-4">
@@ -105,32 +117,96 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                       name={`Components.${index}.itemId`}
                       render={({ field }) => (
                         <FormItem className="space-y-0">
-                          <FormControl>
-                            <Select
-                              onValueChange={(val) => {
-                                field.onChange(val);
-                              }}
-                              value={field.value}
-                            >
+                          <Popover
+                            open={openPopovers[index]}
+                            onOpenChange={(open) =>
+                              setOpenPopovers((prev) => ({
+                                ...prev,
+                                [index]: open,
+                              }))
+                            }
+                          >
+                            <PopoverTrigger asChild>
                               <FormControl>
-                                <SelectTrigger className="w-40">
-                                  <SelectValue placeholder="Chọn nguyên liệu" />
-                                </SelectTrigger>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? stockItems?.find(
+                                        (item) => item.id === field.value
+                                      )?.name
+                                    : "Chọn nguyên liệu"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
                               </FormControl>
-                              <SelectContent>
-                                {stockItems?.map((item) => (
-                                  <SelectItem key={item.id} value={item.id}>
-                                    <div className="flex items-center justify-between w-full gap-2">
-                                      <span>{item.name}</span>
-                                      <span className="text-xs text-muted-foreground font-mono">
-                                        {item.unitName}
-                                      </span>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[300px] p-0"
+                              align="start"
+                            >
+                              <Command>
+                                <CommandInput placeholder="Tìm nguyên liệu..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    Không tìm thấy nguyên liệu.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {stockItems?.map((item) => {
+                                      const isSelected =
+                                        form
+                                          .getValues("Components")
+                                          .some(
+                                            (cmp: any) => cmp.itemId === item.id
+                                          ) && field.value !== item.id;
+
+                                      return (
+                                        <CommandItem
+                                          key={item.id}
+                                          value={item.name}
+                                          disabled={isSelected}
+                                          onSelect={() => {
+                                            field.onChange(item.id);
+                                            form.setValue(
+                                              `Components.${index}.itemCode`,
+                                              item.code
+                                            );
+                                            form.setValue(
+                                              `Components.${index}.itemName`,
+                                              item.name
+                                            );
+                                            setOpenPopovers((prev) => ({
+                                              ...prev,
+                                              [index]: false,
+                                            }));
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === item.id
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex items-center justify-between w-full gap-2">
+                                            <span>{item.name}</span>
+                                            <span className="text-xs text-muted-foreground font-mono">
+                                              {item.unitName}
+                                            </span>
+                                          </div>
+                                        </CommandItem>
+                                      );
+                                    })}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}

@@ -20,6 +20,7 @@ const User = {
   assignRoles: (id: string) => `Users/${id}/roles`,
   removeRoles: (id: string) => `Users/${id}/roles`,
   changePassword: (id: string) => `Users/${id}/change-password`,
+  chatStaff: "Users/chat-staff",
 };
 
 const Booking = {
@@ -317,6 +318,11 @@ const Refunds = {
     `Refunds/booking/${bookingId}/history`,
 };
 
+const FinancialReports = {
+  getFinancialReport: "FinancialReports/dashboard",
+  getFinancialReportCached: "FinancialReports/dashboard/cached",
+};
+
 const Expenses = {
   list: "Expenses",
   create: "Expenses",
@@ -324,6 +330,16 @@ const Expenses = {
   update: (id: string) => `Expenses/${id}`,
   delete: (id: string) => `Expenses/${id}`,
   summary: "Expenses/summary",
+};
+
+const AuditLogs = {
+  list: "AuditLogs",
+  detail: (id: string) => `AuditLogs/${id}`,
+  export: "AuditLogs/export",
+  archive: "AuditLogs/archive",
+  cleanUp: "AuditLogs/cleanup",
+  cleanUpCount: "AuditLogs/cleanup-count",
+  stats: "AuditLogs/stats",
 };
 
 export {
@@ -354,4 +370,6 @@ export {
   Stock,
   Refunds,
   Expenses,
+  FinancialReports,
+  AuditLogs,
 };

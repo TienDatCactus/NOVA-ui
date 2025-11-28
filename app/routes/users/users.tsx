@@ -1,6 +1,6 @@
 import UsersDataTable from "./components/users-list";
 import useUserFilters from "./container/filter.hooks";
-import { useUsers } from "./container/useUsers.hooks";
+import { useUsers } from "./container/query.hooks";
 import UsersViewLayout from "./layouts/users-view.layout";
 
 export default function Component() {

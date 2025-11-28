@@ -37,7 +37,7 @@ import {
   UserX,
   CheckCircle2,
 } from "lucide-react";
-import { useLockUser, useUnlockUser } from "../container/useUsers.hooks";
+import { useLockUser, useUnlockUser } from "../container/query.hooks";
 import type { UserItem } from "~/services/api/user/dto";
 import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
