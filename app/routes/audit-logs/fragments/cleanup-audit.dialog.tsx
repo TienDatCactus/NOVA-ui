@@ -39,17 +39,14 @@ export default function CleanupAuditDialog({
   const [olderThanMonths, setOlderThanMonths] = useState<number>(12);
   const [confirmText, setConfirmText] = useState("");
 
-  // Query số lượng sẽ bị xóa để hiển thị cho user thấy độ nghiêm trọng
-  const { data: countData, isLoading: isCounting } =
-    useCleanupCount(olderThanMonths);
+  const { data: countData, isLoading: isCounting } = useCleanupCount();
   const cleanupMutation = useCleanupAuditLogs();
 
-  // Tính ngày cắt
   const cutoffDate = useMemo(() => {
     return subMonths(new Date(), olderThanMonths);
   }, [olderThanMonths]);
 
-  const CONFIRM_KEYWORD = "DELETE"; // Từ khóa xác nhận
+  const CONFIRM_KEYWORD = "DELETE";
 
   const handleCleanup = async () => {
     if (confirmText !== CONFIRM_KEYWORD) {
@@ -61,7 +58,7 @@ export default function CleanupAuditDialog({
       const result = await cleanupMutation.mutateAsync({
         olderThanMonths: olderThanMonths,
         confirmationText: CONFIRM_KEYWORD,
-        mustArchiveFirst: true, // Giả định logic backend yêu cầu
+        mustArchiveFirst: true,
       });
 
       toast.success(result.message || `Đã dọn dẹp ${result.deletedCount} logs`);
@@ -69,7 +66,6 @@ export default function CleanupAuditDialog({
       setConfirmText("");
     } catch (error) {
       console.error("Cleanup error:", error);
-      toast.error("Có lỗi xảy ra khi dọn dẹp");
     }
   };
 
@@ -86,16 +82,16 @@ export default function CleanupAuditDialog({
 
         <div className="p-6 space-y-6">
           {/* 1. WARNING ALERT */}
-          <Alert
-            variant="destructive"
-            className="bg-red-50 border-red-200 text-red-900"
-          >
+          <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle className="ml-2 font-bold">
               Cảnh báo mất dữ liệu
             </AlertTitle>
             <AlertDescription className="ml-2 mt-1 text-xs opacity-90">
-              Hành động này <strong>không thể hoàn tác</strong> (Irreversible).
+              Hành động này{" "}
+              <span>
+                <b>không thể hoàn tác (Irreversible).</b>
+              </span>{" "}
               Dữ liệu đã xóa sẽ không thể khôi phục lại dưới bất kỳ hình thức
               nào.
             </AlertDescription>
@@ -117,7 +113,7 @@ export default function CleanupAuditDialog({
                 max={60}
                 step={1}
                 onValueChange={(vals) => setOlderThanMonths(vals[0])}
-                className="flex-1"
+                className="flex-1 "
               />
               <div className="flex items-center gap-2 min-w-[5rem]">
                 <Input
@@ -157,8 +153,7 @@ export default function CleanupAuditDialog({
                   Số lượng sẽ xóa
                 </p>
                 <p className="text-sm font-bold font-mono text-destructive">
-                  {isCounting ? "..." : countData?.count.toLocaleString() || 0}{" "}
-                  bản ghi
+                  {isCounting ? "..." : <p>{countData || ""}</p>}
                 </p>
               </div>
             </div>

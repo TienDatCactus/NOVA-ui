@@ -17,7 +17,6 @@ export function useAuditFilters() {
     setFilters((prev) => ({
       ...prev,
       [key]: value,
-      Page: key !== "Page" ? 1 : prev.Page,
     }));
   };
 

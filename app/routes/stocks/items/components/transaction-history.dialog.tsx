@@ -19,10 +19,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import {
-  TransactionDataTable,
-  transactionColumns,
-} from "./transaction-history-list";
+import { TransactionHistoryDataTable } from "./transaction-history-list";
 
 interface TransactionHistoryDialogProps {
   open: boolean;
@@ -119,9 +116,9 @@ export function TransactionHistoryDialog({
               </Empty>
             </div>
           ) : (
-            <TransactionDataTable
-              columns={transactionColumns}
-              data={filteredTransactions}
+            <TransactionHistoryDataTable
+              transactions={filteredTransactions}
+              isLoading={isPending}
             />
           )}
 

@@ -9,8 +9,19 @@ import { FinancialHealthSection } from "./components/financial-health-section";
 import { PaymentCollectionSection } from "./components/payment-collection-section";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Card, CardContent } from "~/components/ui/card";
+import { Button } from "~/components/ui/button"; // Import Button
+import { AlertCircle, Download, RefreshCcw } from "lucide-react"; // Import Icons
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"; // Import Alert
 import type { FinancialReportsListParams } from "~/services/api/finances/finances.types";
 import type { Route } from "./+types/dashboard";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
+import type { isError } from "util";
 
 export default function FinancialDashboard({}: Route.ComponentProps) {
   const [filters, setFilters] = useState<FinancialReportsListParams>({
@@ -20,91 +31,135 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
     TrendDays: 14,
   });
 
+  // Lấy thêm trạng thái isError và error
   const { data, isPending, refetch } = useFinancialDashboard(filters);
 
-  const handleRefresh = () => {
-    refetch();
+  // UX Improvement: Loading state cho nút refresh riêng biệt
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
   };
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Báo cáo tài chính</h1>
-          {data && (
-            <p className="text-sm text-muted-foreground">
-              {data.periodDescription} • Cập nhật lúc{" "}
-              {new Date(data.generatedAt).toLocaleString("vi-VN")}
-            </p>
-          )}
+    <div className="min-h-screen bg-gray-50/50 pb-8">
+      {/* 1. Sticky Header Wrapper */}
+      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 py-4 md:px-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+              Báo cáo tài chính
+            </h1>
+            {data && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {data.periodDescription} • Cập nhật:{" "}
+                <span className="font-medium text-gray-700">
+                  {new Date(data.generatedAt).toLocaleString("vi-VN")}
+                </span>
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Action Buttons */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex gap-2"
+            >
+              <Download className="w-4 h-4" /> Xuất Excel
+            </Button>
+            <DashboardFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              onRefresh={handleRefresh}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <DashboardFilters
-        filters={filters}
-        onFiltersChange={setFilters}
-        onRefresh={handleRefresh}
-      />
-
-      {/* Loading State */}
-      {isPending && (
-        <div className="space-y-6">
-          <Skeleton className="h-[200px]" />
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Skeleton className="h-[400px]" />
-            <Skeleton className="h-[400px]" />
-          </div>
-        </div>
-      )}
-
-      {/* Dashboard Content */}
-      {data && (
-        <>
-          {/* KPI Cards */}
-          <KpiCardsSection
-            todayKpis={data.todayKpis}
-            thisMonthKpis={data.thisMonthKpis}
-            thisYearKpis={data.thisYearKpis}
-          />
-
-          {/* Revenue Breakdown & Booking Metrics */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <RevenueBreakdownSection
-              revenueBreakdown={data.revenueBreakdown}
-              revenueByChannel={data.revenueByChannel}
-            />
-            <BookingMetricsSection metrics={data.bookingMetrics} />
-          </div>
-
-          {/* Revenue Trend Chart */}
-          <RevenueTrendSection data={data.revenueTrend} />
-
-          {/* Financial Health & Payment Collection */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <FinancialHealthSection health={data.financialHealth} />
-            <PaymentCollectionSection
-              paymentCollection={data.paymentCollection}
-              otaReceivable={data.otaReceivable}
-            />
-          </div>
-        </>
-      )}
-
-      {/* Empty State */}
-      {!isPending && !data && (
-        <Card>
-          <CardContent className="flex h-[400px] items-center justify-center">
-            <div className="text-center">
-              <p className="text-lg font-medium">Không có dữ liệu</p>
-              <p className="text-sm text-muted-foreground">
-                Thử chọn khoảng thời gian khác
-              </p>
+      <div className="px-4 md:px-8 py-6 space-y-8">
+        {/* 3. Improved Loading Skeletons */}
+        {isPending && (
+          <div className="space-y-6 animate-pulse">
+            {/* KPI Skeleton Row */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-[120px] rounded-xl" />
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+
+            {/* Chart Skeletons */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Skeleton className="h-[400px] rounded-xl" />
+              <Skeleton className="h-[400px] rounded-xl" />
+            </div>
+            <Skeleton className="h-[300px] rounded-xl" />
+          </div>
+        )}
+
+        {/* 4. Dashboard Content */}
+        {!isPending && data && (
+          <div className="space-y-8">
+            {/* KPI Section */}
+            <section>
+              <KpiCardsSection
+                todayKpis={data.todayKpis}
+                thisMonthKpis={data.thisMonthKpis}
+                thisYearKpis={data.thisYearKpis}
+              />
+            </section>
+
+            {/* Charts Grid */}
+            <div className="grid gap-6 lg:grid-cols-7">
+              <div className="lg:col-span-4">
+                <RevenueTrendSection data={data.revenueTrend} />
+              </div>
+              <div className="lg:col-span-3">
+                <BookingMetricsSection metrics={data.bookingMetrics} />
+              </div>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <RevenueBreakdownSection
+                revenueBreakdown={data.revenueBreakdown}
+                revenueByChannel={data.revenueByChannel}
+              />
+              <div className="space-y-6">
+                <FinancialHealthSection health={data.financialHealth} />
+                <PaymentCollectionSection
+                  paymentCollection={data.paymentCollection}
+                  otaReceivable={data.otaReceivable}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!isPending && !data && (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <AlertCircle className="w-8 h-8 text-gray-400" />
+              </EmptyMedia>
+              <EmptyTitle>Chưa có dữ liệu tài chính</EmptyTitle>
+              <EmptyDescription>
+                Không tìm thấy dữ liệu cho khoảng thời gian này. Hãy thử chọn
+                một ngày khác hoặc kiểm tra lại kết nối.
+              </EmptyDescription>
+              <Button
+                onClick={() =>
+                  setFilters((prev) => ({ ...prev, PeriodType: "ThisMonth" }))
+                }
+              >
+                Xem tháng này
+              </Button>
+            </EmptyHeader>
+          </Empty>
+        )}
+      </div>
     </div>
   );
 }

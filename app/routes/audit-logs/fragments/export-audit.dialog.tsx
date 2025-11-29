@@ -64,7 +64,6 @@ export default function ExportAuditDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Export error:", error);
-      toast.error("Xuất dữ liệu thất bại");
     }
   };
 

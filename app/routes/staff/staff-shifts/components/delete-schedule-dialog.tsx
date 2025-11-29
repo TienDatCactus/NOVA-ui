@@ -120,7 +120,6 @@ export default function DeleteScheduleDialog({
               onValueChange={(value) => setDeleteScope(value as DeleteScope)}
               className="grid gap-3"
             >
-              {/* Option 1: Single */}
               <div>
                 <RadioGroupItem
                   value={DeleteScope.Single}

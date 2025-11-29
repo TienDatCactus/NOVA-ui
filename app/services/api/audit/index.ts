@@ -61,14 +61,10 @@ async function archiveAuditLogs(
   }
 }
 
-async function getCleanupCount(
-  olderThanMonths: number
-): Promise<{ count: number }> {
+async function getCleanupCount(): Promise<string> {
   try {
-    const resp = await http.get(AuditLogs.cleanUpCount, {
-      params: { olderThanMonths },
-    });
-    return resp.data;
+    const resp = await http.get(AuditLogs.cleanUpCount);
+    return resp.data.message;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -80,6 +76,7 @@ async function cleanupAuditLogs(
 ): Promise<{ success: boolean; message: string; deletedCount: number }> {
   try {
     const resp = await http.post(AuditLogs.cleanUp, data);
+    console.log(resp.data);
     return resp.data;
   } catch (error) {
     console.error(error);

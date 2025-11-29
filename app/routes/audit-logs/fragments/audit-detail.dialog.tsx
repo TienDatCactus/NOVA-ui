@@ -286,7 +286,6 @@ export default function AuditDetailDialog({
                   </div>
                 </div>
               )}
-
               {(!data.changes || data.changes.length === 0) && data.success && (
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground border rounded-xl border-dashed">
                   <ScrollText className="w-8 h-8 mb-2 opacity-20" />

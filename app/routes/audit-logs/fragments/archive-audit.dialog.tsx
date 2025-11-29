@@ -57,7 +57,6 @@ export default function ArchiveAuditDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Archive error:", error);
-      toast.error("Lỗi khi thực hiện lưu trữ");
     }
   };
 
@@ -69,7 +68,7 @@ export default function ArchiveAuditDialog({
         {/* === HEADER === */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/5">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-500/10 rounded-lg text-orange-600">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <Archive className="h-5 w-5" />
             </div>
             <div>
@@ -124,7 +123,7 @@ export default function ArchiveAuditDialog({
                   className={cn(
                     "h-7 text-xs",
                     olderThanMonths === months
-                      ? "bg-orange-600 hover:bg-orange-700 text-white"
+                      ? "bg-primary hover:bg-primary/90 text-white"
                       : "text-muted-foreground"
                   )}
                 >
@@ -135,16 +134,16 @@ export default function ArchiveAuditDialog({
           </div>
 
           {/* 2. IMPACT PREVIEW CARD */}
-          <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 flex flex-col gap-3">
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex flex-col gap-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-white rounded-full shadow-sm text-orange-600">
+              <div className="p-2 bg-white rounded-full shadow-sm text-primary">
                 <CalendarClock className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-semibold text-orange-800 uppercase tracking-wide">
+                <p className="text-xs font-semibold text-primary uppercase tracking-wide">
                   Phạm vi ảnh hưởng
                 </p>
-                <p className="text-sm text-orange-900 leading-snug">
+                <p className="text-sm text-primary leading-snug">
                   Toàn bộ nhật ký hoạt động trước ngày <br />
                   <span className="text-lg font-bold font-mono">
                     {format(cutoffDate, "dd/MM/yyyy", { locale: vi })}
@@ -153,9 +152,9 @@ export default function ArchiveAuditDialog({
               </div>
             </div>
 
-            <Separator className="bg-orange-200/50" />
+            <Separator className="bg-primary/50" />
 
-            <div className="flex items-center gap-2 text-xs text-orange-800/80">
+            <div className="flex items-center gap-2 text-xs text-primary/80">
               <HardDriveDownload className="w-3.5 h-3.5" />
               <span>
                 Dữ liệu sẽ được chuyển sang trạng thái "Đã lưu trữ" (Archived)
@@ -186,11 +185,7 @@ export default function ArchiveAuditDialog({
           >
             Hủy bỏ
           </Button>
-          <Button
-            onClick={handleArchive}
-            disabled={archiveMutation.isPending}
-            className="bg-orange-600 hover:bg-orange-700 text-white min-w-[120px]"
-          >
+          <Button onClick={handleArchive} disabled={archiveMutation.isPending}>
             {archiveMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Đang xử lý...

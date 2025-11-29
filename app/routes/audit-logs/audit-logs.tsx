@@ -1,3 +1,4 @@
+import { useDebounceValue } from "usehooks-ts";
 import AuditLogsDataTable from "./components/audit-logs-list";
 import { useAuditFilters } from "./container/filter.hooks";
 import { useAuditLogs } from "./container/query.hooks";
@@ -5,10 +6,12 @@ import AuditLogsLayout from "./layouts/audit-logs.layouts";
 
 export default function AuditLogs() {
   const { filters, resetFilters, updateFilter } = useAuditFilters();
+  const [debouncedKeyword] = useDebounceValue(filters.Keyword || "", 500);
   const { data: logsData, isPending: isLogsLoading } = useAuditLogs({
     ...filters,
+    Keyword: debouncedKeyword,
   });
-
+  console.log(filters);
   return (
     <AuditLogsLayout
       filters={filters}

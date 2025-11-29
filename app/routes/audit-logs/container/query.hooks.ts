@@ -86,11 +86,10 @@ export function useCleanupAuditLogs() {
   });
 }
 
-export function useCleanupCount(olderThanMonths: number) {
+export function useCleanupCount() {
   return useQuery({
-    queryKey: ["audit-cleanup-count", olderThanMonths],
-    queryFn: async () => await AuditService.getCleanupCount(olderThanMonths),
-    enabled: olderThanMonths > 0,
+    queryKey: ["audit-cleanup-count"],
+    queryFn: async () => await AuditService.getCleanupCount(),
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
