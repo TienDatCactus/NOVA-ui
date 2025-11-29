@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useFinancialDashboard } from "./container/query.hooks";
-import { DashboardFilters } from "./components/dashboard-filters";
+import { DashboardFilters } from "./fragments/dashboard-filters";
 import { KpiCardsSection } from "./components/kpi-cards-section";
 import { RevenueBreakdownSection } from "./components/revenue-breakdown-section";
 import { BookingMetricsSection } from "./components/booking-metrics-section";

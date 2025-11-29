@@ -237,7 +237,7 @@ const SIDEBAR_PROJECTS: Array<{
   },
   {
     name: "Cài đặt",
-    url: FE_URL.dashboard.settings,
+    url: FE_URL.dashboard.configs,
     icon: Settings,
   },
   {
@@ -338,7 +338,7 @@ const COMMAND_BAR_ROUTES: Array<{
   },
   { name: "Chat", icon: MessageSquareDot, href: FE_URL.dashboard.chat },
   { name: "Đơn vị tính", icon: PackageSearch, href: FE_URL.dashboard.units },
-  { name: "Cài đặt", icon: Settings, href: FE_URL.dashboard.settings },
+  { name: "Cài đặt", icon: Settings, href: FE_URL.dashboard.configs },
   { name: "Trợ giúp", icon: HelpCircle, href: FE_URL.dashboard.help },
 ];
 

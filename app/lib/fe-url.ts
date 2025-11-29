@@ -53,7 +53,7 @@ const DASHBOARD = {
     purchaseRequests: "/dashboard/stocks/purchase-requests",
     adjustments: "/dashboard/stocks/stock-adjustments",
   },
-  settings: "/settings",
+  configs: "/dashboard/configs",
   help: "/help",
 };
 const CUSTOMER = {
