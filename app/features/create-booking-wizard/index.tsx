@@ -10,7 +10,6 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { DASHBOARD } from "~/lib/fe-url";
 import { useCreateBookingStore } from "~/store/create-booking.store";
-import { useServiceOrderStore } from "~/store/service-order.store";
 
 // --- IMPORTS CÁC WIDGET MỚI ---
 
@@ -22,7 +21,6 @@ import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { CustomerInfoSection } from "./components/customer-info-step";
 import { BookingCartWidget } from "./components/review-payment-step";
 import { RoomSelectionSection } from "./components/room-selection-step";
-import { ServiceQuickAddWidget } from "./components/services-breakfast-step";
 import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
 import { onError } from "~/lib/utils";
 
@@ -47,6 +45,17 @@ const BookingMasterSchema = z
     {
       message: "Ngày trả phòng phải sau ngày nhận phòng",
       path: ["checkoutDate"],
+    }
+  )
+  .refine(
+    (data) => {
+      // Validate: Must select at least 1 room (except for RoomBlock which can have no specific rooms)
+      if (data.bookingType === "RoomBlock") return true;
+      return data.roomIds && data.roomIds.length > 0;
+    },
+    {
+      message: "Phải chọn ít nhất 1 phòng",
+      path: ["roomIds"],
     }
   )
   .refine(
@@ -80,8 +89,6 @@ export default function CreateBookingPage() {
     setData,
     reset: resetStore,
   } = useCreateBookingStore();
-  const { services: serviceOrderServices, clear: clearServices } =
-    useServiceOrderStore();
 
   const { mutateAsync: createBooking, isPending: isSubmitting } =
     useCreateBookingMutation();
@@ -155,7 +162,6 @@ export default function CreateBookingPage() {
   const handleReset = () => {
     if (confirm("Bạn có chắc muốn xóa form?")) {
       resetStore();
-      clearServices();
       form.reset();
       toast.success("Đã làm mới");
     }
@@ -164,10 +170,21 @@ export default function CreateBookingPage() {
   const onSubmit = async (data: z.infer<typeof BookingMasterSchema>) => {
     const isRoomBlock = data.bookingType === "RoomBlock";
 
-    if (!isRoomBlock && serviceOrderServices.length > 0) {
+    // Validate: Check if rooms are selected (except RoomBlock)
+    if (!isRoomBlock && (!data.roomIds || data.roomIds.length === 0)) {
+      toast.error("Vui lòng chọn ít nhất 1 phòng");
+      return;
+    }
+
+    // Validate: Service dates
+    if (
+      !isRoomBlock &&
+      data.serviceOrder?.services &&
+      data.serviceOrder.services.length > 0
+    ) {
       const checkin = new Date(data.checkinDate);
       const checkout = new Date(data.checkoutDate);
-      const hasInvalidDate = serviceOrderServices.some((s) => {
+      const hasInvalidDate = data.serviceOrder.services.some((s: any) => {
         if (!s.scheduledDate) return false;
         const d = new Date(s.scheduledDate);
         return d < checkin || d > checkout;
@@ -189,7 +206,7 @@ export default function CreateBookingPage() {
         serviceOrder: isRoomBlock
           ? undefined
           : {
-              services: serviceOrderServices.map((s) => ({
+              services: (data.serviceOrder?.services || []).map((s) => ({
                 itemType: s.itemType,
                 itemId: s.itemId,
                 quantity: s.quantity,
@@ -216,7 +233,6 @@ export default function CreateBookingPage() {
         onSuccess: () => {
           toast.success("Tạo đặt phòng thành công!");
           resetStore();
-          clearServices();
           navigate(DASHBOARD.bookings.list);
         },
         onError: (err) => {
@@ -262,9 +278,6 @@ export default function CreateBookingPage() {
           <main className="col-span-12 md:col-span-6 flex flex-col overflow-hidden bg-gray-50/50">
             <div className="flex-1 overflow-hidden flex flex-col p-4 gap-4">
               <RoomSelectionSection form={form} />
-            </div>
-            <div className="shrink-0 p-4 bg-white border-t z-20">
-              <ServiceQuickAddWidget form={form} />
             </div>
           </main>
 

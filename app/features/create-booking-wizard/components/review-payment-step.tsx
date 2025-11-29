@@ -11,6 +11,7 @@ import {
   X,
   CircleAlert,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
@@ -52,9 +53,16 @@ import {
 import { formatMoney, useCalculateNights } from "~/lib/utils";
 import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
 import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
-import { useServiceOrderStore } from "~/store/service-order.store";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import type z from "zod";
+import { OrderSchema } from "~/services/api/orders/order.schema";
+import ServiceBreakfastManagerDialog from "./service-breakfast-manager-dialog";
+import ServicePopulateItem from "../fragments/service-populate-item";
+import { useServiceDetail } from "~/routes/services/container/services/query.hooks";
+
+const { ServiceOrderItemSchema } = OrderSchema;
+type ServiceOrderItem = z.infer<typeof ServiceOrderItemSchema>;
 
 interface BookingCartWidgetProps {
   form: UseFormReturn<any>;
@@ -70,9 +78,9 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
   const adultsAmount = form.watch("adultsAmount");
   const childrenAmount = form.watch("childrenAmount");
   const overridePrice = form.watch("overridePrice");
-
-  // 2. GLOBAL STORES
-  const serviceOrderServices = useServiceOrderStore((s) => s.services);
+  const serviceOrderServices = form.watch("serviceOrder.services") || [];
+  const checkinDate = dateRange?.from;
+  const checkoutDate = dateRange?.to;
 
   // 3. CALCULATED VALUES
   const isRoomBlock = bookingType === "RoomBlock";
@@ -108,7 +116,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
       isBreakfastAll: isBreakfastAll || false,
       breakfastDates:
         breakfastDates?.map((d: Date) => format(d, "yyyy-MM-dd")) || [],
-      services: serviceOrderServices.map((s) => ({
+      services: serviceOrderServices.map((s: ServiceOrderItem) => ({
         itemType: s.itemType,
         itemId: s.itemId,
         quantity: s.quantity,
@@ -142,6 +150,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
 
   // State cho popover edit giá
   const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
 
   return (
     <Card className="h-full border-none shadow-none flex flex-col">
@@ -236,19 +245,19 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                       }
                     </span>
                   </div>
-                  {/* Mini list of services */}
-                  <div className="pl-6 space-y-1">
-                    {serviceOrderServices.map((s, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between text-xs text-muted-foreground"
-                      >
-                        <span className="truncate max-w-[120px]">
-                          x{s.quantity} {s.itemId}
-                        </span>
-                        {/* Note: Bạn cần logic map itemId -> name ở đây nếu muốn hiển thị tên đẹp */}
-                      </div>
-                    ))}
+                  {/* Populated service list */}
+                  <div className="pl-2 space-y-2 border-l-2 border-gray-100 ml-1">
+                    {serviceOrderServices.map(
+                      (s: ServiceOrderItem, idx: number) => (
+                        <ServicePopulateItem
+                          key={idx}
+                          id={s.itemId}
+                          quantity={s.quantity}
+                          note={s.note ?? undefined}
+                          itemType={s.itemType}
+                        />
+                      )
+                    )}
                   </div>
                 </div>
               )}
@@ -268,7 +277,20 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
             </Alert>
           )}
 
-          {/* D. SPECIAL REQUEST */}
+          {/* D. ADD SERVICE/BREAKFAST BUTTON */}
+          {!isRoomBlock && (
+            <Button
+              variant="outline"
+              className="w-full border-dashed"
+              onClick={() => setServiceDialogOpen(true)}
+              disabled={!checkinDate || !checkoutDate}
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Thêm dịch vụ & bữa sáng
+            </Button>
+          )}
+
+          {/* E. SPECIAL REQUEST */}
           <FormField
             control={form.control}
             name="specialRequest"
@@ -442,6 +464,13 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
           </Dialog>
         )}
       </div>
+
+      {/* Service & Breakfast Manager Dialog */}
+      <ServiceBreakfastManagerDialog
+        open={serviceDialogOpen}
+        onOpenChange={setServiceDialogOpen}
+        form={form}
+      />
     </Card>
   );
 }

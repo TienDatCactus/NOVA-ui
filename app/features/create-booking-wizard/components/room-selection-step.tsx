@@ -108,15 +108,18 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
     const currentRoomIds = form.getValues("roomIds") || [];
     if (currentRoomIds.length === 0) return;
 
-    const availableRoomIds = new Set<string>();
+    // Only keep rooms that are available AND have status "Ready"
+    const availableReadyRoomIds = new Set<string>();
     availableRooms.forEach((roomType) => {
       roomType.availableRooms.forEach((room) => {
-        availableRoomIds.add(room.roomId);
+        if (room.status === "Ready") {
+          availableReadyRoomIds.add(room.roomId);
+        }
       });
     });
 
     const validRoomIds = currentRoomIds.filter((id: string) =>
-      availableRoomIds.has(id)
+      availableReadyRoomIds.has(id)
     );
 
     if (validRoomIds.length !== currentRoomIds.length) {
@@ -125,11 +128,26 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
         shouldValidate: true,
         shouldDirty: true,
       });
-      toast.warning(`Đã gỡ ${removedCount} phòng do không khả dụng.`);
+      toast.warning(
+        `Đã gỡ ${removedCount} phòng do không khả dụng hoặc đã được đặt.`
+      );
     }
   }, [availableRooms, isPending, form]);
 
   const handleToggleRoom = (roomId: string) => {
+    // Validate room status before allowing selection
+    const room = availableRooms
+      ?.flatMap((rt) => rt.availableRooms)
+      .find((r) => r.roomId === roomId);
+
+    if (!room) return;
+
+    // Only allow selecting "Ready" rooms
+    if (room.status !== "Ready") {
+      toast.error(`Phòng ${room.roomName} không khả dụng (${room.status})`);
+      return;
+    }
+
     const current = form.getValues("roomIds") || [];
     const set = new Set(current as string[]);
     if (set.has(roomId)) set.delete(roomId);
@@ -332,10 +350,19 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
           <Progress
             value={selectionStatus.progress}
             className={cn(
-              "h-1.5 w-full bg-muted",
-              selectionStatus.isSufficient ? "bg-green-500" : "bg-orange-500"
+              "h-1.5 w-full",
+              selectionStatus.isSufficient
+                ? "[&>div]:bg-green-500"
+                : "[&>div]:bg-orange-500"
             )}
           />
+
+          {!selectionStatus.isSufficient && (
+            <p className="text-[10px] text-orange-600 mt-1.5 font-medium">
+              ⚠️ Vui lòng chọn thêm phòng để đủ sức chứa cho {totalGuestsTarget}{" "}
+              khách
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -70,50 +70,33 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
     }
   };
 
-  // Define styles for active states to give clear visual cues
-  const getTypeStyles = (type: string) => {
-    if (bookingType === type) {
-      if (type === "OTA")
-        return "bg-blue-600 text-white hover:bg-blue-700 border-blue-600";
-      if (type === "RoomBlock")
-        return "bg-destructive text-destructive-foreground hover:bg-destructive/90 border-destructive";
-      return "bg-primary text-primary-foreground hover:bg-primary/90 border-primary";
-    }
-    return "bg-white hover:bg-gray-50 text-muted-foreground border-gray-200";
-  };
-
   return (
     <div className="grid gap-6">
       {/* --- 1. BOOKING MODE SELECTOR (Segmented Control Style) --- */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { id: "Direct", icon: Building2, label: "Khách lẻ / Trực tiếp" },
-          { id: "OTA", icon: Globe, label: "Kênh OTA" },
-          { id: "RoomBlock", icon: Ban, label: "Khóa phòng / Bảo trì" },
-        ].map((type) => (
-          <div
-            key={type.id}
-            onClick={() => handleTypeChange(type.id)}
-            className={cn(
-              "cursor-pointer rounded-lg border px-4 py-3 text-center transition-all duration-200 flex flex-col items-center justify-center gap-2 shadow-sm",
-              getTypeStyles(type.id)
-            )}
-          >
-            <type.icon className="h-5 w-5" />
-            <span className="text-sm font-semibold">{type.label}</span>
-          </div>
-        ))}
-      </div>
+      <Select value={bookingType} onValueChange={handleTypeChange}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Chọn loại đặt phòng" />
+        </SelectTrigger>
+        <SelectContent>
+          {[
+            { id: "Direct", icon: Building2, label: "Khách lẻ / Trực tiếp" },
+            { id: "OTA", icon: Globe, label: "Kênh OTA" },
+            { id: "RoomBlock", icon: Ban, label: "Khóa phòng / Bảo trì" },
+          ].map((type) => (
+            <SelectItem value={type.id} key={type.id}>
+              <type.icon className="h-5 w-5" />
+              <span className="text-sm font-semibold">{type.label}</span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-      {/* --- 2. MAIN FORM CONTAINER --- */}
       <div className="rounded-xl border bg-card shadow-sm">
-        {/* A. SOURCE & CONTEXT HEADER */}
         <div className="border-b bg-muted/30 p-4">
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
             Nguồn & Thông tin đặt phòng
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Direct Source Selector */}
+          <div className="grid gap-2">
             {bookingType === "Direct" && (
               <FormField
                 control={form.control}
@@ -123,7 +106,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                     <FormLabel className="text-xs">Nguồn khách</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-white h-9">
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Chọn nguồn" />
                         </SelectTrigger>
                       </FormControl>
@@ -143,7 +126,6 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
               />
             )}
 
-            {/* OTA Source Selector */}
             {bookingType === "OTA" && (
               <>
                 <FormField
@@ -229,16 +211,14 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
             {source === "Agency" && bookingType === "Direct" && (
               <FormField
                 control={form.control}
-                name="otaBookingCode" // Reusing field for agency code? Or separate field
+                name="partnerBookingCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs">
-                      Mã Voucher / Đại lý
-                    </FormLabel>
+                    <FormLabel className="text-xs">Mã Đại lý</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Nhập mã..."
+                        placeholder="Nhập mã đại lý..."
                         className="bg-white h-9"
                       />
                     </FormControl>
@@ -257,36 +237,34 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
             Thông tin khách hàng
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid gap-2">
             {/* Full Name - Full Width on Mobile, 1/2 on Desktop */}
-            <div className="md:col-span-2">
-              <FormField
-                control={form.control}
-                name="guestFullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">
-                      {bookingType === "RoomBlock"
-                        ? "Lý do khóa phòng"
-                        : "Họ và tên khách đại diện"}{" "}
-                      <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder={
-                          bookingType === "RoomBlock"
-                            ? "VD: Bảo trì máy lạnh, Sơn tường..."
-                            : "VD: Nguyễn Văn A"
-                        }
-                        className="bg-white h-10 text-base" // Slightly larger for main input
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="guestFullName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs">
+                    {bookingType === "RoomBlock"
+                      ? "Lý do khóa phòng"
+                      : "Họ và tên khách đại diện"}{" "}
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={
+                        bookingType === "RoomBlock"
+                          ? "VD: Bảo trì máy lạnh, Sơn tường..."
+                          : "VD: Nguyễn Văn A"
+                      }
+                      className="bg-white h-10 text-base" // Slightly larger for main input
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Contact Info (Hidden for RoomBlock) */}
             {bookingType !== "RoomBlock" && (
@@ -297,16 +275,15 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs">Số điện thoại</FormLabel>
-                      <div className="relative">
-                        <Phone className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="09..."
-                            className="bg-white pl-9 h-9"
-                          />
-                        </FormControl>
-                      </div>
+                      <FormControl>
+                        <Input
+                          startAddon={
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                          }
+                          {...field}
+                          placeholder="+84 912 345 678"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -316,17 +293,21 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                   name="guestEmail"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Email</FormLabel>
-                      <div className="relative">
-                        <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="example@gmail.com"
-                            className="bg-white pl-9 h-9"
-                          />
-                        </FormControl>
-                      </div>
+                      <FormLabel className="text-xs">
+                        Email{" "}
+                        {bookingType === "OTA" && (
+                          <span className="text-destructive">*</span>
+                        )}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          startAddon={
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                          }
+                          {...field}
+                          placeholder="example@gmail.com"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -347,7 +328,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
             </h3>
           </div>
 
-          <div className="flex gap-6">
+          <div className="grid gap-2">
             <FormField
               control={form.control}
               name="adultsAmount"
@@ -362,7 +343,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                     <Counter
                       {...field}
                       minValue={1}
-                      maxValue={50}
+                      maxValue={10}
                       className="w-full bg-white h-9 border-gray-200"
                     />
                   </FormControl>
@@ -385,7 +366,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                     <Counter
                       {...field}
                       minValue={0}
-                      maxValue={20}
+                      maxValue={5}
                       className="w-full bg-white h-9 border-gray-200"
                     />
                   </FormControl>
