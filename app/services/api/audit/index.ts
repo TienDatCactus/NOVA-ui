@@ -38,7 +38,7 @@ async function getAuditDetail(id: string): Promise<AuditDetail> {
 
 async function exportAuditLogs(params: ExportAuditRequest): Promise<Blob> {
   try {
-    const resp = await http.get(AuditLogs.export, {
+    const resp = await http.post(AuditLogs.export, {
       params,
       responseType: "blob",
     });

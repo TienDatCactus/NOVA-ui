@@ -89,10 +89,9 @@ export default function AuditDetailDialog({
   const { data, isPending } = useAuditDetail(auditLogId || "", {
     enabled: !!auditLogId && open,
   });
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 gap-0 overflow-y-auto max-h-[90vh] flex flex-col">
+      <DialogContent className=" p-0 gap-0 overflow-y-auto max-h-[90vh] flex flex-col">
         {/* === HEADER === */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/5 shrink-0">
           <div className="flex items-center gap-3">
@@ -241,17 +240,17 @@ export default function AuditDetailDialog({
                     </Badge>
                   </h4>
 
-                  <div className="rounded-lg border overflow-hidden shadow-sm">
+                  <div className="rounded-md border overflow-hidden shadow-sm">
                     <Table>
                       <TableHeader className="bg-muted/50">
                         <TableRow>
-                          <TableHead className="w-[180px]">
+                          <TableHead className="w-fit">
                             Trường dữ liệu
                           </TableHead>
-                          <TableHead className="w-[35%] text-red-600">
+                          <TableHead className="w-fit text-red-600">
                             Giá trị cũ
                           </TableHead>
-                          <TableHead className="text-green-600">
+                          <TableHead className="w-fit text-green-600">
                             Giá trị mới
                           </TableHead>
                         </TableRow>

@@ -15,6 +15,8 @@ export default function AuditLogs() {
       updateFilter={updateFilter}
       resetFilters={resetFilters}
       totalItems={logsData?.totalCount || 0}
+      totalPages={logsData?.totalPages || 0}
+      currentPage={logsData?.page || filters.Page || 1}
     >
       <AuditLogsDataTable
         audits={

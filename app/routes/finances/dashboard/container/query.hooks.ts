@@ -15,7 +15,7 @@ export function useFinancialDashboard(
         IncludeTrend: true,
         TrendDays: 14,
       };
-      return await FinancesService.getFinancialReportCached(queryParams);
+      return await FinancesService.getFinancialReport(queryParams);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,

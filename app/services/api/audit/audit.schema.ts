@@ -64,9 +64,9 @@ const AuditChangesItemSchema = z.object({
 const AuditDetailSchema = z.object({
   id: z.string(),
   timestamp: z.string(),
-  userId: z.string(),
-  username: z.string(),
-  userRole: z.string(),
+  userId: z.string().nullable(),
+  username: z.string().nullable(),
+  userRole: z.string().nullable(),
   module: AuditModuleEnum,
   moduleName: z.string(),
   action: AuditActionEnum,

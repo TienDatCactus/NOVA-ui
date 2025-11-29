@@ -30,10 +30,7 @@ function BookingViewLayout({
 }: BookingViewLayoutProps) {
   return (
     <div className="flex flex-col h-full bg-muted/5 min-h-screen">
-      {/* === STICKY TOOLBAR === */}
-      {/* Giữ bộ lọc luôn hiển thị khi cuộn danh sách phòng dài */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-3 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between transition-all">
-        {/* Left: Search & Filters Context */}
         <div className="flex-1 w-full sm:w-auto min-w-0">
           <SearchRoom
             date={date}

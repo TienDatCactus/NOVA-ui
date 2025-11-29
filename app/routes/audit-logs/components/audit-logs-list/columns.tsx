@@ -1,12 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { AlertCircle, CheckCircle2, Copy } from "lucide-react";
+import { AlertCircle, BadgeInfo, CheckCircle2, Copy } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -19,7 +20,7 @@ import {
   AuditModuleEnum,
 } from "~/services/api/audit/audit.types";
 import type { AuditListItem } from "~/services/api/audit/dto";
-import AuditLogsActionCell from "../../fragments/audit-logs-action.cell";
+import AuditDetailDialog from "../../fragments/audit-detail.dialog";
 
 const UserCell = ({ username }: { username?: string }) => {
   if (!username || username === "System") {
@@ -66,7 +67,6 @@ const ActionBadge = ({
   const actionInfo = AuditActionEnum.find((a) => a.value === action);
   const Icon = actionInfo?.icon;
 
-  // Map màu sắc theo hành động để dễ nhận diện
   const styleMap: Record<string, string> = {
     Create:
       "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300",
@@ -117,7 +117,9 @@ const EntityCell = ({ name, code }: { name: string; code?: string }) => {
           <code className="text-[10px] bg-muted px-1 py-0.5 rounded font-mono border">
             {code}
           </code>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleCopy}
             className="opacity-0 group-hover/code:opacity-100 transition-opacity p-0.5 hover:bg-muted rounded"
             title="Sao chép mã"
@@ -127,7 +129,7 @@ const EntityCell = ({ name, code }: { name: string; code?: string }) => {
             ) : (
               <Copy className="w-3 h-3" />
             )}
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -246,16 +248,24 @@ export const columns: ColumnDef<AuditListItem>[] = [
   },
   {
     id: "actions",
-    header: () => <div className="sr-only">Thao tác</div>, // Screen reader only
     cell: ({ row }) => {
+      const [detailDialogOpen, setDetailDialogOpen] = useState(false);
       return (
-        <div className="flex justify-end">
-          <AuditLogsActionCell audit={row.original} />
-        </div>
+        <>
+          <Button
+            variant={"outline"}
+            size={"icon"}
+            onClick={() => setDetailDialogOpen(true)}
+          >
+            <BadgeInfo />
+          </Button>
+          <AuditDetailDialog
+            open={detailDialogOpen}
+            onOpenChange={setDetailDialogOpen}
+            auditLogId={row.original.id}
+          />
+        </>
       );
     },
-    enableSorting: false,
-    enableHiding: false,
-    size: 50,
   },
 ];

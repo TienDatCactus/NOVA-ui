@@ -77,20 +77,11 @@ export default function CleanupAuditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden border-destructive/20">
         {/* === HEADER (Danger Theme) === */}
-        <DialogHeader className="px-6 py-4 border-b border-destructive/10 bg-destructive/5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white rounded-lg text-destructive shadow-sm">
-              <Trash2 className="h-5 w-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-destructive">
-                Dọn dẹp dữ liệu
-              </DialogTitle>
-              <DialogDescription className="mt-0.5 text-destructive/80">
-                Xóa vĩnh viễn Audit Logs cũ khỏi hệ thống.
-              </DialogDescription>
-            </div>
-          </div>
+        <DialogHeader className="px-6 py-4 border-b ">
+          <DialogTitle>Dọn dẹp dữ liệu</DialogTitle>
+          <DialogDescription>
+            Xóa vĩnh viễn Audit Logs cũ khỏi hệ thống.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="p-6 space-y-6">
