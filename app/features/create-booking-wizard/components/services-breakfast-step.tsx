@@ -69,22 +69,26 @@ export function ServicesBreakfastStep({
       checkoutDate: storeData.checkoutDate,
     });
   }, [storeData, form]);
+  const getInvalidServices = () => {
+    if (!storeData.checkinDate || !storeData.checkoutDate) return [];
+
+    const checkinDate = new Date(storeData.checkinDate);
+    const checkoutDate = new Date(storeData.checkoutDate);
+
+    return services.filter((service) => {
+      if (!service.scheduledDate) return false;
+      const scheduledDate = new Date(service.scheduledDate);
+      return scheduledDate < checkinDate || scheduledDate > checkoutDate;
+    });
+  };
 
   const onSubmit = (data: ServicesBreakfastFormData) => {
-    // Validate service order dates are within booking range
     if (
       services.length > 0 &&
       storeData.checkinDate &&
       storeData.checkoutDate
     ) {
-      const checkinDate = new Date(storeData.checkinDate);
-      const checkoutDate = new Date(storeData.checkoutDate);
-
-      const invalidServices = services.filter((service) => {
-        if (!service.scheduledDate) return false; // Optional field
-        const scheduledDate = new Date(service.scheduledDate);
-        return scheduledDate < checkinDate || scheduledDate > checkoutDate;
-      });
+      const invalidServices = getInvalidServices();
 
       if (invalidServices.length > 0) {
         toast.error(
@@ -101,19 +105,6 @@ export function ServicesBreakfastStep({
 
     toast.success("Đã lưu thông tin bữa sáng và dịch vụ");
     onNext();
-  };
-
-  const getInvalidServices = () => {
-    if (!storeData.checkinDate || !storeData.checkoutDate) return [];
-
-    const checkinDate = new Date(storeData.checkinDate);
-    const checkoutDate = new Date(storeData.checkoutDate);
-
-    return services.filter((service) => {
-      if (!service.scheduledDate) return false;
-      const scheduledDate = new Date(service.scheduledDate);
-      return scheduledDate < checkinDate || scheduledDate > checkoutDate;
-    });
   };
 
   const invalidServices = getInvalidServices();

@@ -128,7 +128,7 @@ export function RevenueBreakdownSection({
         <CardContent>
           <ChartContainer
             config={{
-              amount: { label: "Doanh thu", color: "hsl(var(--chart-1))" },
+              amount: { label: "Doanh thu", color: "var(--chart-1)" },
             }}
             className="h-[250px] w-full"
           >
@@ -145,7 +145,7 @@ export function RevenueBreakdownSection({
                   />
                 }
               />
-              <Bar dataKey="amount" fill="hsl(var(--chart-1))" radius={4} />
+              <Bar dataKey="amount" fill="var(--chart-1)" radius={4} />
             </BarChart>
           </ChartContainer>
         </CardContent>

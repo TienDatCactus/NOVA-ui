@@ -55,6 +55,7 @@ export default [
       route("users", "routes/users/users.tsx"),
       route("work-shifts", "routes/work-shifts/work-shifts.tsx"),
       route("audit-logs", "routes/audit-logs/audit-logs.tsx"),
+      route("configs", "routes/configs/configs.tsx"),
       ...prefix("stocks", [
         ...prefix("items", [index("routes/stocks/items/items.tsx")]),
         ...prefix("item-categories", [

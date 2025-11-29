@@ -235,13 +235,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const handleAssignStaff = useCallback(
     (staffId: string) => {
       if (!sessionId) return;
-      assignStaffMutation.mutate(
-        { sessionId, staffUserId: staffId },
-        {
-          onSuccess: () => toast.success(`Đã gán nhân viên thành công`),
-          onError: () => toast.error("Không thể gán nhân viên"),
-        }
-      );
+      assignStaffMutation.mutate({ sessionId, staffUserId: staffId });
     },
     [sessionId, assignStaffMutation]
   );
