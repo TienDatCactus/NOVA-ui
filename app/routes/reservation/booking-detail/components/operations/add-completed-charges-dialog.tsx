@@ -1,4 +1,4 @@
-import { Search, Utensils, Info, Wrench } from "lucide-react";
+import { Search, Utensils, Info, Wrench, Check } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -347,7 +347,8 @@ export default function AddCompletedChargesDialog({
                                 )}
                                 {isSelected && (
                                   <Badge variant="default" className="text-xs">
-                                    ✓ {selectedData?.quantity}
+                                    <Check className="h-4 w-4" />{" "}
+                                    {selectedData?.quantity}
                                   </Badge>
                                 )}
                               </div>
@@ -522,7 +523,8 @@ export default function AddCompletedChargesDialog({
                                 )}
                                 {isSelected && (
                                   <Badge variant="default" className="text-xs">
-                                    ✓ {selectedData?.quantity}
+                                    <Check className="h-4 w-4" />{" "}
+                                    {selectedData?.quantity}
                                   </Badge>
                                 )}
                               </div>

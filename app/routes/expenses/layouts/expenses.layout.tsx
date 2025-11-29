@@ -107,119 +107,110 @@ export default function ExpensesLayout({
               </div>
             </div>
           )}
-
-          {/* Primary Action */}
         </div>
       </header>
 
-      <div className="px-6 py-3 bg-background border-b flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-wrap items-center gap-3 w-full">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium mr-2">
-            <Filter className="w-4 h-4" />
-            Bộ lọc:
-          </div>
+      {!isDashboardView && (
+        <div className="px-6 py-3 bg-background border-b flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="flex flex-wrap items-center gap-3 w-full">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium mr-2">
+              <Filter className="w-4 h-4" />
+              Bộ lọc:
+            </div>
 
-          {/* Date Range - Common for both views */}
-          <div className="flex items-center gap-2">
-            <DatePicker
-              value={filters.fromDate}
-              onChange={(date) =>
-                updateFilter(
-                  "fromDate",
-                  date ? date.toISOString().split("T")[0] : undefined
-                )
-              }
-              placeholder="Từ ngày"
-              className="w-[130px] h-9 text-xs"
-            />
-            <span className="text-muted-foreground text-xs">-</span>
-            <DatePicker
-              value={filters.toDate}
-              onChange={(date) =>
-                updateFilter(
-                  "toDate",
-                  date ? date.toISOString().split("T")[0] : undefined
-                )
-              }
-              placeholder="Đến ngày"
-              className="w-[130px] h-9 text-xs"
-            />
-          </div>
-
-          {/* Extended Filters - Only for LIST View */}
-          {!isDashboardView && (
-            <>
-              <Separator
-                orientation="vertical"
-                className="h-6 hidden sm:block"
+            {/* Date Range - Common for both views */}
+            <div className="flex items-center gap-2">
+              <DatePicker
+                value={filters.fromDate}
+                onChange={(date) =>
+                  updateFilter(
+                    "fromDate",
+                    date ? date.toISOString().split("T")[0] : undefined
+                  )
+                }
+                placeholder="Từ ngày"
+                className="w-[130px] h-9 text-xs"
               />
-
-              <Select
-                value={filters.categoryId || "all"}
-                onValueChange={(value) =>
+              <span className="text-muted-foreground text-xs">-</span>
+              <DatePicker
+                value={filters.toDate}
+                onChange={(date) =>
                   updateFilter(
-                    "categoryId",
-                    value === "all" ? undefined : value
+                    "toDate",
+                    date ? date.toISOString().split("T")[0] : undefined
                   )
                 }
-              >
-                <SelectTrigger className="w-40 h-9 text-xs">
-                  <div className="flex items-center gap-2 truncate">
-                    <Tags className="w-3.5 h-3.5 text-muted-foreground" />
-                    <SelectValue placeholder="Tất cả danh mục" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả danh mục</SelectItem>
-                  {ExpenseCategories.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Đến ngày"
+                className="w-[130px] h-9 text-xs"
+              />
+            </div>
 
-              <Select
-                value={filters.paymentMethod || "all"}
-                onValueChange={(value) =>
-                  updateFilter(
-                    "paymentMethod",
-                    value === "all" ? undefined : value
-                  )
-                }
-              >
-                <SelectTrigger className="w-40 h-9 text-xs">
-                  <div className="flex items-center gap-2 truncate">
-                    <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
-                    <SelectValue placeholder="Tất cả phương thức" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả phương thức</SelectItem>
-                  {PAYMENT_METHODS.map((method) => (
-                    <SelectItem key={method.value} value={method.value}>
-                      {method.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </>
-          )}
+            {/* Extended Filters - Only for LIST View */}
 
-          {/* Reset Button */}
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetFilters}
-              className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground ml-auto sm:ml-0"
+            <Separator orientation="vertical" className="h-6 hidden sm:block" />
+
+            <Select
+              value={filters.categoryId || "all"}
+              onValueChange={(value) =>
+                updateFilter("categoryId", value === "all" ? undefined : value)
+              }
             >
-              <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-              Đặt lại
-            </Button>
-          )}
+              <SelectTrigger className="w-40 h-9 text-xs">
+                <div className="flex items-center gap-2 truncate">
+                  <Tags className="w-3.5 h-3.5 text-muted-foreground" />
+                  <SelectValue placeholder="Tất cả danh mục" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả danh mục</SelectItem>
+                {ExpenseCategories.map((cat) => (
+                  <SelectItem key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filters.paymentMethod || "all"}
+              onValueChange={(value) =>
+                updateFilter(
+                  "paymentMethod",
+                  value === "all" ? undefined : value
+                )
+              }
+            >
+              <SelectTrigger className="w-40 h-9 text-xs">
+                <div className="flex items-center gap-2 truncate">
+                  <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
+                  <SelectValue placeholder="Tất cả phương thức" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả phương thức</SelectItem>
+                {PAYMENT_METHODS.map((method) => (
+                  <SelectItem key={method.value} value={method.value}>
+                    {method.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Reset Button */}
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetFilters}
+                className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground ml-auto sm:ml-0"
+              >
+                <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                Đặt lại
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* === LEVEL 3: CONTENT AREA === */}
       <main className="flex-1 p-6 overflow-y-auto">{children}</main>

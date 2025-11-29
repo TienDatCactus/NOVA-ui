@@ -169,6 +169,14 @@ const ChangePasswordResponseSchema = z.object({
   meta: z.string().nullable().optional(),
 });
 
+const ChatStaffListItemSchema = z.object({
+  id: z.string(),
+  fullName: z.string(),
+  userName: z.string(),
+  email: z.string(),
+});
+
+const ChatStaffListResponseSchema = z.array(ChatStaffListItemSchema);
 export const UserSchema = {
   UserItemSchema,
   UserListResponseSchema,
@@ -187,4 +195,6 @@ export const UserSchema = {
   RemoveRolesResponseSchema,
   ChangePasswordSchema,
   ChangePasswordResponseSchema,
+  ChatStaffListResponseSchema,
+  ChatStaffListItemSchema,
 };

@@ -28,7 +28,7 @@ import {
   useAssignRoles,
   useRemoveRoles,
   useRoles,
-} from "../container/useUsers.hooks";
+} from "../container/query.hooks";
 import {
   getRoleBadgeColors,
   getRoleDisplayName,

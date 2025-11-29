@@ -30,7 +30,7 @@ import {
 import { cn } from "~/lib/utils";
 import type { CreateUserDto } from "~/services/api/user/dto";
 import { UserSchema } from "~/services/api/user/user.schema";
-import { useCreateUser, useRoles } from "../container/useUsers.hooks";
+import { useCreateUser, useRoles } from "../container/query.hooks";
 
 interface UserFormDialogProps {
   open: boolean;

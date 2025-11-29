@@ -20,7 +20,9 @@ import {
 } from "~/components/ui/sidebar";
 import { COMMAND_BAR_ROUTES } from "~/lib/constants";
 import { DASHBOARD } from "~/lib/fe-url";
+import { signalRChatService } from "~/lib/signalr";
 import { cn } from "~/lib/utils";
+import { useChatConnection } from "~/routes/chat/container/use-chat-connection.hooks";
 const DashboardLayout: React.FC = () => {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
@@ -34,7 +36,6 @@ const DashboardLayout: React.FC = () => {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
-
   return (
     <>
       <SidebarProvider>

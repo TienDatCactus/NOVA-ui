@@ -54,6 +54,7 @@ export default [
       route("chat", "routes/chat/chat.tsx"),
       route("users", "routes/users/users.tsx"),
       route("work-shifts", "routes/work-shifts/work-shifts.tsx"),
+      route("audit-logs", "routes/audit-logs/audit-logs.tsx"),
       ...prefix("stocks", [
         ...prefix("items", [index("routes/stocks/items/items.tsx")]),
         ...prefix("item-categories", [
@@ -73,6 +74,9 @@ export default [
         route("shifts", "routes/staff/staff-shifts/staff-shifts.tsx"),
         route("payrolls", "routes/staff/payrolls/payrolls.tsx"),
         route("roles", "routes/staff/staff-role/staff-role.tsx"),
+      ]),
+      ...prefix("finances", [
+        route("dashboard", "routes/finances/dashboard/dashboard.tsx"),
       ]),
     ]),
   ]),

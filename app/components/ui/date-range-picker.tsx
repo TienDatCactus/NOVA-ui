@@ -56,11 +56,8 @@ export function DateRangePicker({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={cn(
-            "justify-start text-left font-normal h-8 text-xs",
-            !date && "text-muted-foreground",
-            className
-          )}
+          size={"sm"}
+          className={cn(!date && "text-muted-foreground", className)}
         >
           <CalendarIcon className="mr-2 h-3.5 w-3.5" />
           {date?.from ? (

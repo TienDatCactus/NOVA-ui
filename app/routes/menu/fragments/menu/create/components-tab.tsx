@@ -1,7 +1,16 @@
+import { Check, ChevronsUpDown, Layers, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
-import { Plus, Layers, Trash2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import {
   FormControl,
   FormField,
@@ -10,23 +19,15 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { TabsContent } from "~/components/ui/tabs";
-import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
-import {
-  Table,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import { Textarea } from "~/components/ui/textarea";
+import { Table, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { TabsContent } from "~/components/ui/tabs";
+import { cn } from "~/lib/utils";
+import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 
 interface ComponentsTabProps {
   form: UseFormReturn<any>;
@@ -43,6 +44,10 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
   remove,
   stockItems,
 }) => {
+  const [openPopovers, setOpenPopovers] = useState<{ [key: number]: boolean }>(
+    {}
+  );
+
   return (
     <TabsContent value="components" className="mt-0 outline-none">
       <div className="flex items-center justify-between mb-4">
@@ -96,7 +101,7 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
           <Table className="w-full text-sm">
             <TableHeader className="bg-muted/30 text-muted-foreground font-medium">
               <TableRow>
-                <TableHead className="text-left py-3 px-4 font-medium w-[50%]">
+                <TableHead className="text-left py-3 px-4 font-medium w-[30%]">
                   Nguyên liệu
                 </TableHead>
                 <TableHead className="text-left py-3 px-4 font-medium w-[20%]">
@@ -120,43 +125,96 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                       name={`Components.${index}.itemId`}
                       render={({ field }) => (
                         <FormItem className="space-y-0">
-                          <Select
-                            onValueChange={(val) => {
-                              field.onChange(val);
-                              const item = stockItems?.find(
-                                (i) => i.id === val
-                              );
-                              if (item) {
-                                form.setValue(
-                                  `Components.${index}.itemCode`,
-                                  item.code
-                                );
-                                form.setValue(
-                                  `Components.${index}.itemName`,
-                                  item.name
-                                );
-                              }
-                            }}
-                            value={field.value}
+                          <Popover
+                            open={openPopovers[index]}
+                            onOpenChange={(open) =>
+                              setOpenPopovers((prev) => ({
+                                ...prev,
+                                [index]: open,
+                              }))
+                            }
                           >
-                            <FormControl>
-                              <SelectTrigger className="h-9 w-40 border-transparent bg-transparent hover:bg-muted/10 focus:bg-background focus:border-input">
-                                <SelectValue placeholder="Chọn nguyên liệu" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {stockItems?.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>
-                                  <div className="flex items-center justify-between w-full gap-2">
-                                    <span>{item.name}</span>
-                                    <span className="text-xs text-muted-foreground font-mono">
-                                      {item.unitName}
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "h-9 w-full justify-between border-transparent bg-transparent hover:bg-muted/10 focus:bg-background focus:border-input",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? stockItems?.find(
+                                        (item) => item.id === field.value
+                                      )?.name
+                                    : "Chọn nguyên liệu"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[300px] p-0"
+                              align="start"
+                            >
+                              <Command>
+                                <CommandInput placeholder="Tìm nguyên liệu..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    Không tìm thấy nguyên liệu.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {stockItems?.map((item) => {
+                                      const isSelected =
+                                        form
+                                          .getValues("Components")
+                                          .some(
+                                            (cmp: any) => cmp.itemId === item.id
+                                          ) && field.value !== item.id;
+
+                                      return (
+                                        <CommandItem
+                                          key={item.id}
+                                          value={item.name}
+                                          disabled={isSelected}
+                                          onSelect={() => {
+                                            field.onChange(item.id);
+                                            form.setValue(
+                                              `Components.${index}.itemCode`,
+                                              item.code
+                                            );
+                                            form.setValue(
+                                              `Components.${index}.itemName`,
+                                              item.name
+                                            );
+                                            setOpenPopovers((prev) => ({
+                                              ...prev,
+                                              [index]: false,
+                                            }));
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === item.id
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex items-center justify-between w-full gap-2">
+                                            <span>{item.name}</span>
+                                            <span className="text-xs text-muted-foreground font-mono">
+                                              {item.unitName}
+                                            </span>
+                                          </div>
+                                        </CommandItem>
+                                      );
+                                    })}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -169,24 +227,12 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                       render={({ field }) => (
                         <FormItem className="space-y-0">
                           <FormControl>
-                            <Input
-                              type="number"
+                            <Counter
                               value={field.value || ""}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === "" || val === "-") {
-                                  field.onChange(0);
-                                } else {
-                                  const numVal = parseFloat(val);
-                                  if (!isNaN(numVal) && numVal >= 0) {
-                                    field.onChange(numVal);
-                                  }
-                                }
-                              }}
+                              onChange={field.onChange}
                               onBlur={field.onBlur}
-                              min={0}
+                              minValue={0}
                               step={0.1}
-                              className="h-9 border-transparent bg-transparent hover:bg-muted/10 focus:bg-background focus:border-input text-right"
                             />
                           </FormControl>
                           <FormMessage />
@@ -208,7 +254,6 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                                 field.onChange(e.target.value || "")
                               }
                               onBlur={field.onBlur}
-                              className="h-9 border-transparent bg-transparent hover:bg-muted/10 focus:bg-background focus:border-input"
                             />
                           </FormControl>
                           <FormMessage />
@@ -219,9 +264,8 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                   <td className="p-3 text-center">
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={() => remove(index)}
                     >
                       <Trash2 className="w-4 h-4" />

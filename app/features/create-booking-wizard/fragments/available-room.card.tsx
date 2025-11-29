@@ -1,4 +1,4 @@
-import { BedDouble, ChevronDown, Users } from "lucide-react";
+import { BedDouble, Check, ChevronDown, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
@@ -93,7 +93,7 @@ export function AvailableRoomTypeCard({
         {selectedCount > 0 && (
           <div className="flex items-center gap-2 pt-3 border-t">
             <Badge variant="default" className="text-xs font-medium">
-              ✓ Đã chọn {selectedCount} phòng
+              <Check className="h-4 w-4" /> Đã chọn {selectedCount} phòng
             </Badge>
           </div>
         )}

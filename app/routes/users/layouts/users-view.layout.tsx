@@ -8,7 +8,7 @@ import {
 } from "~/components/ui/select";
 import { getRoleDisplayName } from "~/services/types/users.types";
 import type { UserFilters } from "../container/filter.hooks";
-import { useRoles } from "../container/useUsers.hooks";
+import { useRoles } from "../container/query.hooks";
 
 interface UsersViewLayoutProps {
   children: ReactNode;

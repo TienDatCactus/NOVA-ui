@@ -33,7 +33,6 @@ export function useChatConnection({
 
     const chatHubUrl = import.meta.env.VITE_CHAT_HUB_URL;
     if (!chatHubUrl) {
-      console.error("[useChatConnection] ❌ VITE_CHAT_HUB_URL not configured");
       toast.error("Lỗi cấu hình chat. Vui lòng liên hệ quản trị viên.");
       return;
     }
