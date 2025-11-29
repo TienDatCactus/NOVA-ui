@@ -281,6 +281,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                             <Phone className="h-4 w-4 text-muted-foreground" />
                           }
                           {...field}
+                          value={field.value || ""}
                           placeholder="+84 912 345 678"
                         />
                       </FormControl>
@@ -291,7 +292,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                 <FormField
                   control={form.control}
                   name="guestEmail"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel className="text-xs">
                         Email{" "}
@@ -305,10 +306,16 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                             <Mail className="h-4 w-4 text-muted-foreground" />
                           }
                           {...field}
+                          value={field.value || ""}
                           placeholder="example@gmail.com"
                         />
                       </FormControl>
                       <FormMessage />
+                      {bookingType === "OTA" && !field.value && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Email bắt buộc cho booking OTA
+                        </p>
+                      )}
                     </FormItem>
                   )}
                 />

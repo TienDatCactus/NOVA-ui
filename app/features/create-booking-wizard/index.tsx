@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDays, format } from "date-fns";
-import { Loader2, RotateCcw } from "lucide-react";
+import { BookCopy, Loader2, RotateCcw } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router"; // Chỉnh lại import tùy router bạn dùng
@@ -219,35 +219,33 @@ export default function CreateBookingPage() {
         roomPayment: isRoomBlock ? undefined : data.roomPayment,
         internalNote: isRoomBlock
           ? `ROOM BLOCK - ${data.guestFullName}`
-          : data.internalNote,
+          : data.internalNote || null,
 
-        source: isRoomBlock
-          ? BOOKING_SOURCES.find((bs) => bs.key === "RoomBlock")?.value
-          : data.bookingType === "OTA"
-            ? BOOKING_SOURCES.find((bs) => bs.key === "OTA")?.value
-            : data.source ||
-              BOOKING_SOURCES.find((bs) => bs.key === "DirectStaff")?.value,
+        source:
+          (isRoomBlock
+            ? BOOKING_SOURCES.find((bs) => bs.key === "RoomBlock")?.key
+            : data.bookingType === "OTA"
+              ? BOOKING_SOURCES.find((bs) => bs.key === "OTA")?.key
+              : data.source ||
+                BOOKING_SOURCES.find((bs) => bs.key === "DirectStaff")?.key) ||
+          "DirectStaff",
       };
 
-      await createBooking(finalPayload as any, {
+      await createBooking(finalPayload, {
         onSuccess: () => {
           toast.success("Tạo đặt phòng thành công!");
           resetStore();
           navigate(DASHBOARD.bookings.list);
         },
-        onError: (err) => {
-          console.error(err);
+        onError: () => {
           toast.error("Thất bại. Vui lòng kiểm tra lại thông tin.");
         },
       });
-    } catch (e) {
-      console.error("Payload error", e);
-      toast.error("Lỗi xử lý dữ liệu.");
-    }
+    } catch (e) {}
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+    <div className="flex flex-col bg-gray-50 overflow-y-auto">
       <header className="h-14 shrink-0 bg-white border-b px-4 flex items-center justify-between z-30 shadow-sm">
         <div className="flex items-center gap-3">
           <h1 className="font-bold text-lg text-gray-900">Tạo Đặt Phòng</h1>
@@ -275,14 +273,14 @@ export default function CreateBookingPage() {
           </aside>
 
           {/* CENTER: Room Selection */}
-          <main className="col-span-12 md:col-span-6 flex flex-col overflow-hidden bg-gray-50/50">
+          <main className="col-span-12 md:col-span-5 flex flex-col overflow-hidden bg-gray-50/50">
             <div className="flex-1 overflow-hidden flex flex-col p-4 gap-4">
               <RoomSelectionSection form={form} />
             </div>
           </main>
 
           {/* RIGHT: Cart & Payment */}
-          <aside className="col-span-12 md:col-span-3 bg-white border-l flex flex-col shadow-xl z-40 h-full">
+          <aside className="col-span-12 md:col-span-4 bg-white border-l flex flex-col  h-full">
             <div className="flex-1 overflow-hidden flex flex-col">
               <BookingCartWidget form={form} />
             </div>
@@ -290,9 +288,10 @@ export default function CreateBookingPage() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-12 font-bold shadow-md"
+                className="w-full  font-bold shadow-md"
                 disabled={isSubmitting}
               >
+                <BookCopy />
                 {isSubmitting ? (
                   <Loader2 className="animate-spin" />
                 ) : (

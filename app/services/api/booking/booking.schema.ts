@@ -20,7 +20,6 @@ const BookingStatusEnum = z.enum([
   "InHouse",
   "CheckedOut",
   "Cancelled",
-  "NoShow",
 ]);
 
 const StaffCreateBookingSchema = z

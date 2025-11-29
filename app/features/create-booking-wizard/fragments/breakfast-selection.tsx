@@ -1,26 +1,27 @@
-import { Calendar as CalendarIcon, Coffee } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Switch } from "~/components/ui/switch";
-import { Label } from "~/components/ui/label";
-import { Badge } from "~/components/ui/badge";
+import { addDays, eachDayOfInterval, format, isSameDay } from "date-fns";
+import { vi } from "date-fns/locale";
+import { Calendar as CalendarIcon, Check, Coffee } from "lucide-react";
+import { useMemo } from "react";
+
+import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
+import { DatePicker } from "~/components/ui/date-picker";
+import { Label } from "~/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { Button } from "~/components/ui/button";
+import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 
 interface BreakfastSelectionProps {
   isBreakfastAll: boolean;
   breakfastDates: Date[];
   onToggleAll: (value: boolean) => void;
   onSelectDates: (dates: Date[]) => void;
-  checkinDate: string | Date;
-  checkoutDate: string | Date;
+  checkinDate: Date;
+  checkoutDate: Date;
   nights: number;
 }
 
@@ -33,99 +34,149 @@ export function BreakfastSelection({
   checkoutDate,
   nights,
 }: BreakfastSelectionProps) {
+  // 1. Generate Valid Breakfast Days
+  // Logic: Usually breakfast is available from the morning AFTER checkin, up to checkout day.
+  // (Adjust start/end logic based on your specific hotel policy)
+  const availableDates = useMemo(() => {
+    if (!checkinDate || !checkoutDate || nights <= 0) return [];
+    try {
+      return eachDayOfInterval({
+        start: addDays(checkinDate, 1), // Morning after checkin
+        end: checkoutDate,
+      });
+    } catch (e) {
+      return [];
+    }
+  }, [checkinDate, checkoutDate, nights]);
+
+  // UX Decision: If stay is too long (> 14 days), show Calendar Popover.
+  // If short, show Direct Selection Grid.
+  const isLongStay = availableDates.length > 14;
+
+  const handleToggleDate = (date: Date) => {
+    if (isBreakfastAll) return; // Disable manual toggle if "All" is active
+
+    const exists = breakfastDates.find((d) => isSameDay(d, date));
+    let newDates: Date[];
+
+    if (exists) {
+      newDates = breakfastDates.filter((d) => !isSameDay(d, date));
+    } else {
+      newDates = [...breakfastDates, date];
+    }
+    onSelectDates(newDates);
+  };
+
   return (
-    <Card className="p-4 h-full shadow-sm">
-      <CardHeader className="p-0">
-        <div className="flex items-center gap-2">
-          <Coffee className="h-5 w-5 text-muted-foreground" />
-          <CardTitle className="text-lg">Bữa sáng</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4 p-0">
-        {/* Toggle all breakfast */}
-        <div className="flex items-center justify-between p-4 rounded-lg border bg-white">
-          <div className="space-y-1">
-            <Label htmlFor="breakfast-all" className="text-base font-medium">
-              Bữa sáng cho tất cả các ngày
+    <div className="flex flex-col gap-4">
+      {/* === CONTROL ROW === */}
+      <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary shadow-sm dark:bg-primary/10">
+            <Coffee className="h-4 w-4" />
+          </div>
+          <div className="space-y-0.5">
+            <Label
+              htmlFor="breakfast-all"
+              className="text-sm font-medium text-foreground cursor-pointer"
+            >
+              Bữa sáng mỗi ngày
             </Label>
-            <p className="text-sm text-muted-foreground">
-              Áp dụng cho {nights} ngày lưu trú
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+              Áp dụng {nights} đêm
             </p>
           </div>
-          <Switch
-            id="breakfast-all"
-            checked={isBreakfastAll}
-            onCheckedChange={(checked) => {
-              onToggleAll(checked);
-              if (!checked) {
-                onSelectDates([]);
-              }
-            }}
-          />
+        </div>
+        <Switch
+          id="breakfast-all"
+          className="data-[state=checked]:bg-primary"
+          checked={isBreakfastAll}
+          onCheckedChange={(checked) => {
+            onToggleAll(checked);
+            // Optional: If turning ON, we might want to visually select all dates for feedback
+            // If turning OFF, we clear or keep last selection.
+            if (!checked) onSelectDates([]);
+          }}
+        />
+      </div>
+
+      {/* === DATE SELECTION UI === */}
+      <div
+        className={cn(
+          "space-y-3 transition-opacity duration-200",
+          isBreakfastAll && "opacity-50 pointer-events-none"
+        )}
+      >
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-medium text-muted-foreground">
+            {isBreakfastAll
+              ? "Đã bao gồm tất cả các ngày"
+              : "Hoặc chọn ngày cụ thể:"}
+          </Label>
+
+          {!isBreakfastAll && breakfastDates.length > 0 && (
+            <span className="text-xs font-medium text-primary">
+              {breakfastDates.length} ngày đã chọn
+            </span>
+          )}
         </div>
 
-        {!isBreakfastAll && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">
-                Hoặc chọn ngày cụ thể
-              </Label>
-              {breakfastDates.length > 0 && (
-                <Badge variant="secondary" className="text-xs">
-                  {breakfastDates.length} ngày
-                </Badge>
-              )}
-            </div>
+        {isLongStay ? (
+          /* FALLBACK: CALENDAR POPOVER FOR LONG STAYS */
+          <DatePicker
+            mode="multiple"
+            selected={breakfastDates}
+            onSelect={(dates) => onSelectDates(dates || [])}
+            disabled={(date) => date <= checkinDate || date > checkoutDate}
+            locale={vi}
+          />
+        ) : (
+          /* MODERN: DIRECT SELECTION GRID */
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-2">
+            {availableDates.map((date) => {
+              // Check if selected either manually OR because "All" is active
+              const isSelected =
+                isBreakfastAll ||
+                breakfastDates.some((d) => isSameDay(d, date));
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
+              return (
+                <button
+                  key={date.toISOString()}
+                  type="button"
+                  onClick={() => handleToggleDate(date)}
                   className={cn(
-                    "w-full justify-start text-left font-normal",
-                    breakfastDates.length === 0 && "text-muted-foreground"
+                    "group relative flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    isSelected
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-background hover:border-primary/30 hover:bg-primary/5"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {breakfastDates.length > 0
-                    ? `Đã chọn ${breakfastDates.length} ngày`
-                    : "Chọn ngày có bữa sáng"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="multiple"
-                  defaultMonth={checkinDate ? new Date(checkinDate) : undefined}
-                  selected={breakfastDates}
-                  onSelect={(dates) => onSelectDates(dates || [])}
-                  disabled={(date) =>
-                    date <= checkinDate || date > checkoutDate
-                  }
-                  locale={vi}
-                />
-              </PopoverContent>
-            </Popover>
+                  <span className="text-[10px] uppercase text-muted-foreground font-medium mb-0.5">
+                    {format(date, "EEE", { locale: vi })}
+                  </span>
+                  <span className="text-sm font-bold font-mono">
+                    {format(date, "dd/MM")}
+                  </span>
 
-            {breakfastDates.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {breakfastDates.map((date) => (
-                  <Badge
-                    key={format(date, "yyyy-MM-dd")}
-                    variant="info"
-                    className="text-xs"
-                  >
-                    {format(date, "dd/MM", { locale: vi })}
-                  </Badge>
-                ))}
-              </div>
-            )}
+                  {/* Selected Indicator */}
+                  {isSelected && (
+                    <div className="absolute top-1 right-1">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-in zoom-in" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
+      </div>
 
-        <p className="text-xs text-muted-foreground">
-          * Giá bữa sáng sẽ được tính vào tổng hóa đơn
+      {/* Price Hint / Footer */}
+      {!isBreakfastAll && breakfastDates.length === 0 && (
+        <p className="text-[10px] text-muted-foreground italic pl-1">
+          * Khách chưa chọn bữa sáng nào.
         </p>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }
