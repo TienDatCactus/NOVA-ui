@@ -18,10 +18,10 @@ const badgeVariants = cva(
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         success:
-          "border-transparent bg-green-100 text-green-800 [a&]:hover:bg-green-200",
+          "border-transparent bg-green-600 text-white [a&]:hover:bg-green-600/90",
         warning:
-          "border-transparent bg-yellow-100 text-yellow-800 [a&]:hover:bg-yellow-200",
-        info: "border-transparent bg-blue-100 text-blue-800 [a&]:hover:bg-blue-200",
+          "border-transparent bg-red-600 text-white [a&]:hover:bg-red-600/90",
+        info: "border-transparent bg-blue-600 text-white [a&]:hover:bg-blue-600/90",
       },
     },
     defaultVariants: {
@@ -42,7 +42,7 @@ function Badge({
   return (
     <Comp
       data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn("shadow-sm", badgeVariants({ variant }), className)}
       {...props}
     />
   );

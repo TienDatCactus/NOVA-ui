@@ -20,11 +20,12 @@ const User = {
   assignRoles: (id: string) => `Users/${id}/roles`,
   removeRoles: (id: string) => `Users/${id}/roles`,
   changePassword: (id: string) => `Users/${id}/change-password`,
+  chatStaff: "Users/chat-staff",
 };
 
 const Booking = {
   staffCreateBooking: "StaffBookings",
-  preview: "StaffBookings/preview", // this is for the money calculation preview
+  preview: "StaffBookings/preview",
   update: (id: string) => `StaffBookings/${id}`,
   cancel: (id: string) => `StaffBookings/${id}/cancel`,
   pendingCharges: (bookingId: string) =>
@@ -40,8 +41,11 @@ const Booking = {
   detailById: (id: string) => `Bookings/${id}/details`,
   detailByCode: (code: string) => `Bookings/by-code/${code}/details`,
   Export: `Bookings/export`,
+  updateStatus: "Bookings/update-status",
   addToCompletedRoomOrder: (bookingId: string) =>
     `/StaffBookings/${bookingId}/add-completed-charges`,
+  confirmPayment: (id: string) => `StaffBookings/${id}/confirm-payment`,
+  orderableBookings: "StaffBookings/orderable",
 };
 
 const OTAInformation = {
@@ -55,7 +59,14 @@ const Rooms = {
   create: "Rooms",
   update: (id: string) => `Rooms/${id}`,
   getAvailableRoomsInternal: "Rooms/available-with-details",
+
   delete: (id: string) => `Rooms/${id}`,
+  generateQRCode: (id: string, baseUrl?: string) =>
+    `Rooms/${id}/qr-code?baseUrl=${baseUrl}`,
+  regenerateQRCode: (id: string, baseUrl?: string) =>
+    baseUrl
+      ? `Rooms/${id}/qr-code/regenerate?baseUrl=${baseUrl}`
+      : `Rooms/${id}/qr-code/regenerate`,
 };
 
 const RoomTypes = {
@@ -140,6 +151,7 @@ const Orders = {
   payServiceOrderNow: (id: string) => `service-orders/${id}/pay-now`,
   setScheduledServiceOrder: (id: string) =>
     `service-orders/${id}/set-scheduled`,
+  createPosOrderWithItems: "PosOrders/with-items",
 };
 
 const Invoices = {
@@ -150,10 +162,193 @@ const Invoices = {
   markPaid: (id: string) => `Invoices/${id}/mark-paid`, //? mark invoice as paid
   void: (id: string) => `Invoices/${id}/void`, //? void invoice
   detail: (id: string) => `Invoices/${id}`, //? get invoice details
-  listByBooking: (bookingRoomId: string) =>
-    `Invoices/booking-room/${bookingRoomId}`, //? list invoices by booking ID
+  listByBooking: (bookingId: string) => `Invoices/booking/${bookingId}`, //? list invoices by booking ID
   calculateFees: "invoice-preview/calculate-fees",
   previewBookingInvoice: "invoice-preview/preview",
+  payments: (id: string) => `Invoices/${id}/payments`, //? get invoice payments
+  refund: (id: string) => `Invoices/${id}/refund`, //? refund invoice
+  export: (date?: string) =>
+    date ? `Invoices/export?date=${date}` : `Invoices/export`, //? export invoices
+  update: (id: string) => `Invoices/${id}`, //? update invoice details
+  syncInvoice: (invoiceId: string) =>
+    `Invoices/${invoiceId}/sync-pending-orders`, //? sync invoice with pending orders
+  exportById: (id: string) => `Invoices/${id}/export`, //? export invoice by ID
+};
+// Chat endpoints
+const Chat = {
+  entry: (roomToken: string) => `chat/entry?roomToken=${roomToken}`,
+  messages: (sessionId: string) => `chat/sessions/${sessionId}/messages`,
+  session: (sessionId: string) => `chat/sessions/${sessionId}`,
+  sendMessage: "chat/messages",
+  staffInbox: "chat/staff/inbox",
+  assign: (sessionId: string) => `chat/sessions/${sessionId}/assign`,
+  close: (sessionId: string) => `chat/sessions/${sessionId}/close`,
+  markRead: (messageId: string) => `chat/messages/${messageId}/mark-read`,
+  markAllRead: (sessionId: string) =>
+    `chat/sessions/${sessionId}/mark-all-read`,
+};
+
+const Staff = {
+  list: "Staffs",
+  create: "Staffs",
+  detail: (id: string) => `Staffs/${id}`,
+  update: (id: string) => `Staffs/${id}`,
+  delete: (id: string) => `Staffs/${id}`,
+  terminate: (id: string) => `Staffs/${id}/terminate`,
+};
+
+const StaffRole = {
+  list: "StaffRoles",
+  create: "StaffRoles",
+  detail: (id: string) => `StaffRoles/${id}`,
+  update: (id: string) => `StaffRoles/${id}`,
+  delete: (id: string) => `StaffRoles/${id}`,
+};
+
+const WorkShift = {
+  list: "WorkShifts",
+  active: "WorkShifts/active",
+  create: "WorkShifts",
+  detail: (id: string) => `WorkShifts/${id}`,
+  update: (id: string) => `WorkShifts/${id}`,
+  delete: (id: string) => `WorkShifts/${id}`,
+};
+
+const Holiday = {
+  list: "Holidays",
+  create: "Holidays",
+  detail: (id: string) => `Holidays/${id}`,
+  update: (id: string) => `Holidays/${id}`,
+  delete: (id: string) => `Holidays/${id}`,
+};
+
+const StaffShift = {
+  list: "StaffShifts",
+  schedule: "StaffShifts/schedule",
+  detail: (id: string) => `StaffShifts/${id}`,
+  update: (id: string) => `StaffShifts/${id}/schedule`,
+  delete: (id: string) => `StaffShifts/${id}`,
+  exportWeeklyMatrix: "StaffShifts/export-weekly-matrix",
+  exportWeeklyForm2: "StaffShifts/export-weekly-form2",
+};
+
+const StaffAttendance = {
+  list: "StaffShifts/attendance",
+  absent: (assignmentId: string) => `StaffShifts/${assignmentId}/absent`,
+  present: (assignmentId: string) => `StaffShifts/${assignmentId}/present`,
+};
+
+const Discount = {
+  apply: "discount/apply",
+  override: "discount/override",
+};
+
+const StaffPayroll = {
+  grid: "StaffPayrolls/grid",
+  generate: "StaffPayrolls/generate",
+  detail: (id: string) => `StaffPayrolls/${id}`,
+  update: (id: string) => `StaffPayrolls/${id}`,
+  generateSingle: (staffId: string) =>
+    `StaffPayrolls/staff/${staffId}/generate`,
+  applyUnusedLeave: (id: string) => `StaffPayrolls/${id}/apply-unused-leave`,
+  lock: (id: string) => `StaffPayrolls/${id}/lock`,
+  unlock: (id: string) => `StaffPayrolls/${id}/unlock`,
+  getComponents: (id: string) => `StaffPayrolls/${id}/components`,
+  addComponent: (id: string) => `StaffPayrolls/${id}/components`,
+  updateComponent: (componentId: string) =>
+    `StaffPayrolls/components/${componentId}`,
+  deleteComponent: (componentId: string) =>
+    `StaffPayrolls/components/${componentId}`,
+  exportMonthly: "StaffPayrolls/export/monthly",
+  exportPayslip: (id: string) => `StaffPayrolls/${id}/export-payslip`,
+  refreshDays: "StaffPayrolls/refresh-days",
+  refreshSinglePayroll: (id: string) => `StaffPayrolls/${id}/refresh-days`,
+};
+
+const Translation = {
+  translate: "Translation/translate",
+  detect: (text: string) => `Translation/detect-language?text=${text}`,
+};
+
+const Stock = {
+  Items: {
+    list: "Items",
+    create: "Items",
+    detail: (id: string) => `Items/${id}`,
+    update: (id: string) => `Items/${id}`,
+    delete: (id: string) => `Items/${id}`,
+    listByCategory: (categoryId: string) => `Items/by-category/${categoryId}`,
+    listByCode: (code: string) => `Items/by-code/${code}`,
+    lowStock: "Items/low-stock",
+    transactions: (id: string) => `Items/${id}/transactions`,
+    adjustStock: (id: string) => `Items/${id}/adjust-stock`,
+  },
+  PurchaseRequests: {
+    list: "PurchaseRequests",
+    create: "PurchaseRequests",
+    detail: (id: string) => `PurchaseRequests/${id}`,
+    update: (id: string) => `PurchaseRequests/${id}`,
+    delete: (id: string) => `PurchaseRequests/${id}`,
+    approve: (id: string) => `PurchaseRequests/${id}/approve`,
+    reject: (id: string) => `PurchaseRequests/${id}/reject`,
+    cancel: (id: string) => `PurchaseRequests/${id}/cancel`,
+    receiveStock: (id: string) => `PurchaseRequests/${id}/receive-stock`,
+    export: (id: string) => `PurchaseRequests/${id}/export`,
+  },
+  StockAdjustments: {
+    list: "StockAdjustments",
+    create: "StockAdjustments",
+    detail: (id: string) => `StockAdjustments/${id}`,
+    update: (id: string) => `StockAdjustments/${id}`,
+    delete: (id: string) => `StockAdjustments/${id}`,
+    apply: (id: string) => `StockAdjustments/${id}/apply`,
+  },
+  ItemCategories: {
+    list: "ItemCategories",
+    create: "ItemCategories",
+    detail: (id: string) => `ItemCategories/${id}`,
+    update: (id: string) => `ItemCategories/${id}`,
+    delete: (id: string) => `ItemCategories/${id}`,
+  },
+};
+
+const Refunds = {
+  createRefundForBooking: (bookingId: string) => `Refunds/booking/${bookingId}`,
+  getBookingRefundHistory: (bookingId: string) =>
+    `Refunds/booking/${bookingId}/history`,
+};
+
+const FinancialReports = {
+  getFinancialReport: "FinancialReports/dashboard",
+  getFinancialReportCached: "FinancialReports/dashboard/cached",
+};
+
+const Expenses = {
+  list: "Expenses",
+  create: "Expenses",
+  detail: (id: string) => `Expenses/${id}`,
+  update: (id: string) => `Expenses/${id}`,
+  delete: (id: string) => `Expenses/${id}`,
+  summary: "Expenses/summary",
+};
+
+const AuditLogs = {
+  list: "AuditLogs",
+  detail: (id: string) => `AuditLogs/${id}`,
+  export: "AuditLogs/export",
+  archive: "AuditLogs/archive",
+  cleanUp: "AuditLogs/cleanup",
+  cleanUpCount: "AuditLogs/cleanup-count",
+  stats: "AuditLogs/stats",
+};
+
+const Configs = {
+  list: "Configs",
+  groupedList: "Configs/grouped",
+  timezones: "Configs/timezones",
+  detail: (key: string) => `Configs/${key}`,
+  update: (key: string) => `Configs/${key}`,
+  delete: (key: string) => `Configs/${key}`,
 };
 export {
   Auth,
@@ -170,4 +365,20 @@ export {
   Reports,
   Orders,
   Invoices,
+  Staff,
+  StaffRole,
+  WorkShift,
+  Holiday,
+  StaffShift,
+  StaffAttendance,
+  Chat,
+  Discount,
+  StaffPayroll,
+  Translation,
+  Stock,
+  Refunds,
+  Expenses,
+  FinancialReports,
+  AuditLogs,
+  Configs,
 };

@@ -28,14 +28,13 @@ export default [
         route("menu-categories", "routes/menu/menu-categories.tsx"),
       ]),
       ...prefix("bookings", [
-        index("routes/reservation/reports/reports.tsx"),
-        route("grid", "routes/reservation/bookings/grid.tsx"),
         route("list", "routes/reservation/bookings/list.tsx"),
+        route("reports", "routes/reservation/reports/reports.tsx"),
+        route("grid", "routes/reservation/bookings/grid.tsx"),
         route(
           "detail/:bookingCode",
           "routes/reservation/booking-detail/booking-detail.tsx"
         ),
-        route("invoices", "routes/reservation/invoices/invoices.tsx"),
         route("new-booking", "routes/reservation/new-booking.tsx"),
       ]),
       ...prefix("orders", [
@@ -46,11 +45,48 @@ export default [
         index("routes/rooms/rooms.tsx"),
         route("types", "routes/rooms/types.tsx"),
       ]),
-      route("chat", "routes/chat/chat.tsx"),
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
+      route("expenses", "routes/expenses/expenses.tsx"),
+      ...prefix("expenses", [
+        route("dashboard", "routes/expenses/dashboard/dashboard.tsx"),
+      ]),
+      route("chat", "routes/chat/chat.tsx"),
       route("users", "routes/users/users.tsx"),
+      route("work-shifts", "routes/work-shifts/work-shifts.tsx"),
+      route("audit-logs", "routes/audit-logs/audit-logs.tsx"),
+      route("configs", "routes/configs/configs.tsx"),
+      ...prefix("stocks", [
+        ...prefix("items", [index("routes/stocks/items/items.tsx")]),
+        ...prefix("item-categories", [
+          index("routes/stocks/item-categories/item-categories.tsx"),
+        ]),
+        ...prefix("purchase-requests", [
+          index("routes/stocks/purchase-requests/purchase-requests.tsx"),
+        ]),
+        ...prefix("stock-adjustments", [
+          index("routes/stocks/stock-adjustments/stock-adjustments.tsx"),
+        ]),
+      ]),
+      ...prefix("staff", [
+        index("routes/staff/staff/staff.tsx"),
+
+        route("holidays", "routes/staff/holidays/holidays.tsx"),
+        route("shifts", "routes/staff/staff-shifts/staff-shifts.tsx"),
+        route("payrolls", "routes/staff/payrolls/payrolls.tsx"),
+        route("roles", "routes/staff/staff-role/staff-role.tsx"),
+      ]),
+      ...prefix("finances", [
+        route("dashboard", "routes/finances/dashboard/dashboard.tsx"),
+      ]),
     ]),
+  ]),
+  layout("layouts/customer.layout.tsx", [
+    index("routes/customer/chat/inbox.tsx"),
+    route("chat", "routes/customer/chat/chat.tsx"),
+    route("map", "routes/customer/map/map.tsx"),
+    route("guides", "routes/customer/guides/guides.tsx"),
+    route("catalog", "routes/customer/catalog/catalog.tsx"),
   ]),
 
   route("*", "routes/not-found.tsx"),

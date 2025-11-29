@@ -10,7 +10,7 @@ import { Button } from "~/components/ui/button";
 import { MoreHorizontal, Pencil } from "lucide-react";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 import { useState } from "react";
-import { UpdateRoomTypeSheet } from "../../components/update-room-types.sheet";
+import { UpdateRoomTypeSheet } from "../../components/room-types/update-room-types.sheet";
 
 interface RoomTypeActionsCellProps {
   roomType: RoomTypesListItemDto;
@@ -22,11 +22,10 @@ export function RoomTypeActionsCell({ roomType }: RoomTypeActionsCellProps) {
   return (
     <>
       <Button
-        variant={"outline"}
-        className="w-fit"
+        variant={"link"}
+        size="icon"
         onClick={() => setUpdateSheetOpen(true)}
       >
-        <Pencil className="mr-2 h-4 w-4" />
         Chỉnh sửa
       </Button>
       <UpdateRoomTypeSheet

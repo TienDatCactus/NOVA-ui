@@ -1,9 +1,14 @@
 import type { ReactNode } from "react";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { UserPlus } from "lucide-react";
-import UsersCommandBar from "../fragments/command-bar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { getRoleDisplayName } from "~/services/types/users.types";
 import type { UserFilters } from "../container/filter.hooks";
+import { useRoles } from "../container/query.hooks";
 
 interface UsersViewLayoutProps {
   children: ReactNode;
@@ -14,8 +19,6 @@ interface UsersViewLayoutProps {
   ) => void;
   resetFilters: () => void;
   totalUsers: number;
-  onAddUser: () => void;
-  roles: string[];
 }
 
 export default function UsersViewLayout({
@@ -24,36 +27,41 @@ export default function UsersViewLayout({
   updateFilter,
   resetFilters,
   totalUsers,
-  onAddUser,
-  roles,
 }: UsersViewLayoutProps) {
+  const { data: roles } = useRoles();
   return (
     <div className="flex gap-6 p-4 ">
-      <UsersCommandBar
-        filters={filters}
-        updateFilter={updateFilter}
-        resetFilters={resetFilters}
-        roles={roles}
-      />
       <main className="flex-1 space-y-4">
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">Quản lý tài khoản</h1>
-              <Badge variant="secondary" className="text-sm">
-                {totalUsers} tài khoản
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button onClick={onAddUser}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Thêm tài khoản
-              </Button>
-            </div>
+        <div className="flex items-center justify-between">
+          <div className="grid gap-2">
+            <h1 className="text-3xl font-bold">Quản lý tài khoản</h1>
+            <p className="text-sm text-muted-foreground">
+              Tổng{" "}
+              <span className="font-semibold text-foreground">
+                {totalUsers}
+              </span>{" "}
+              tài khoản
+            </p>
           </div>
-          <p className="text-muted-foreground mt-2">
-            Quản lý thông tin và tài khoản người dùng
-          </p>
+
+          <div>
+            <Select
+              value={filters.roleFilter}
+              onValueChange={(value) => updateFilter("roleFilter", value)}
+            >
+              <SelectTrigger className="shadow-md bg-white w-full">
+                <SelectValue placeholder="Chọn vai trò" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả vai trò</SelectItem>
+                {roles?.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {getRoleDisplayName(role)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         {children}
       </main>

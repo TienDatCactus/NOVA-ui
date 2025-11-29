@@ -37,12 +37,22 @@ import { formatMoney } from "~/lib/utils";
 import Image from "~/components/ui/image";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Card } from "~/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 
@@ -101,14 +111,12 @@ export default function Component({
     updateServiceNote,
     setBookingInfo,
     setScheduledAt,
-    clearOrder,
   } = useServicePosOrderStore();
 
   const isEmpty = !selectedService;
   const itemCount = selectedService?.quantity || 0;
 
   const { mutate, isPending, isError } = useCreateServiceOrder();
-
   const [checkoutDialog, setCheckoutDialog] = useState(false);
   const [bookingDialog, setBookingDialog] = useState(false);
   const [scheduledTimeDialog, setScheduledTimeDialog] = useState(false);
@@ -121,6 +129,7 @@ export default function Component({
   const [confirmationDialog, setConfirmationDialog] = useState<{
     open: boolean;
     orderId?: string;
+    customerType?: "In-House" | "Walk-In";
   }>({ open: false });
 
   // Handlers
@@ -211,11 +220,14 @@ export default function Component({
         {
           onSuccess: () => {
             toast.success("Tạo đơn dịch vụ thành công!");
+            // Capture customer type before clearing
+            const wasBooking = !!bookingId;
             setSelectedBookingInfo(null);
             setBookingInfo(null, null);
             setScheduledAt("");
             setConfirmationDialog({
               open: true,
+              customerType: wasBooking ? "In-House" : "Walk-In",
             });
           },
           onError: (error) => {
@@ -241,44 +253,42 @@ export default function Component({
       <header className="flex items-center justify-between p-4 border-b border-accent-foreground/20">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
-            <Link to={DASHBOARD.orders["service-orders"]}>
-              <Button variant="ghost" size="sm" onClick={handleReset}>
+            <Link to={DASHBOARD.orders["serviceOrders"]}>
+              <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
               </Button>
             </Link>
-            <Separator orientation="vertical" />
-            <Button
-              variant={selectedTypeId === null ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleTypeSelect(null)}
+            <Select
+              value={selectedTypeId || "all"}
+              onValueChange={(value) =>
+                handleTypeSelect(value === "all" ? null : value)
+              }
             >
-              <SquareMenu />
-              Tất cả
-            </Button>
-            <Separator orientation="vertical" />
-            <div className="flex items-center gap-2 flex-wrap">
-              {!!serviceTypes &&
-                serviceTypes.length > 0 &&
-                serviceTypes?.map((item) => (
-                  <Button
-                    variant={selectedTypeId === item.id ? "default" : "outline"}
-                    size="sm"
-                    key={item.id}
-                    onClick={() => handleTypeSelect(item.id)}
-                  >
-                    {item.name}
-                    <Badge
-                      className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums ml-1"
-                      variant={
-                        selectedTypeId === item.id ? "secondary" : "outline"
-                      }
-                    >
-                      {item.serviceItemCount}
-                    </Badge>
-                  </Button>
-                ))}
-            </div>
+              <SelectTrigger className="w-[200px] border-primary/50 bg-white shadow-md">
+                <SelectValue placeholder="Chọn loại dịch vụ" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <span>Tất cả</span>
+                </SelectItem>
+                {!!serviceTypes &&
+                  serviceTypes.length > 0 &&
+                  serviceTypes.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      <div className="flex items-center justify-between gap-2 w-full">
+                        <span>{item.name}</span>
+                        <Badge
+                          className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
+                          variant="outline"
+                        >
+                          {item.serviceItemCount}
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -330,12 +340,19 @@ export default function Component({
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center text-muted-foreground">
-                <p className="text-lg font-medium">Không tìm thấy dịch vụ</p>
-                <p className="text-sm">Thử điều chỉnh bộ lọc của bạn</p>
-              </div>
-            </div>
+            <Empty className="flex items-center justify-center h-full">
+              <EmptyHeader className="text-center text-muted-foreground">
+                <EmptyMedia variant={"icon"}>
+                  <SearchIcon className="h-12 w-12 mx-auto" />
+                </EmptyMedia>
+                <EmptyTitle className="text-lg font-medium">
+                  Không tìm thấy dịch vụ
+                </EmptyTitle>
+                <EmptyDescription className="text-sm">
+                  Thử điều chỉnh bộ lọc của bạn
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </main>
 
@@ -349,13 +366,15 @@ export default function Component({
 
             {/* Empty State */}
             {isEmpty && (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center text-muted-foreground space-y-2">
-                  <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
-                  <p className="text-sm font-medium">Chưa chọn dịch vụ</p>
-                  <p className="text-xs">Chọn dịch vụ để bắt đầu</p>
-                </div>
-              </div>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant={"icon"}>
+                    <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
+                  </EmptyMedia>
+                  <EmptyTitle>Chưa chọn dịch vụ</EmptyTitle>
+                  <EmptyDescription>Chọn dịch vụ để bắt đầu</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             )}
 
             {/* Selected Service */}
@@ -480,7 +499,13 @@ export default function Component({
         orderId={confirmationDialog.orderId || ""}
         orderTotal={subtotal}
         itemCount={itemCount}
-        customerInfo={bookingId ? `Booking: ${bookingId}` : "Khách đặt phòng"}
+        customerInfo={
+          confirmationDialog.customerType === "In-House"
+            ? "Khách đặt phòng"
+            : confirmationDialog.customerType === "Walk-In"
+              ? "Khách lẻ"
+              : "Khách đặt phòng"
+        }
         onNewOrder={handleNewOrder}
       />
     </div>

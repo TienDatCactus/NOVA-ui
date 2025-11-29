@@ -12,6 +12,9 @@ interface ExistingRoomItemWrapperProps {
   isExpanded: boolean;
   onSelect: () => void;
   onToggleExpand: () => void;
+  onRemove?: () => void;
+  canRemove?: boolean;
+  removeTooltip?: string;
 }
 
 export default function ExistingRoomItemWrapper({
@@ -20,6 +23,9 @@ export default function ExistingRoomItemWrapper({
   isExpanded,
   onSelect,
   onToggleExpand,
+  onRemove,
+  canRemove = false,
+  removeTooltip,
 }: ExistingRoomItemWrapperProps) {
   const { data: roomDetail, isPending } = useRoomDetail({
     id: room.roomId,
@@ -47,6 +53,9 @@ export default function ExistingRoomItemWrapper({
       isExpanded={isExpanded}
       onSelect={onSelect}
       onToggleExpand={onToggleExpand}
+      onRemove={onRemove}
+      canRemove={canRemove}
+      removeTooltip={removeTooltip}
     />
   );
 }

@@ -1,17 +1,13 @@
 import { useNavigate } from "react-router";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import type { Route } from "./+types/grid";
 import BookingGrid from "./components/booking-grid";
-import BookingGridFilters from "./fragments/booking-grid-filters";
+import BookingGridFilters from "./fragments/booking-grid.filters";
 import { useAvailableRoomsFilter } from "./container/available-booking-filter.hooks";
 import { useAvailableRooms } from "./container/booking-query.hooks";
+import type { Route } from "./+types/grid";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 
@@ -19,7 +15,6 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const navigate = useNavigate();
   const { filters, updateFilter, resetFilters, filterAvailableRooms } =
     useAvailableRoomsFilter();
 
@@ -35,7 +30,6 @@ export default function Component({
   });
 
   const filteredRooms = filterAvailableRooms(rooms ?? []);
-
   return (
     <div className="flex p-4  flex-col space-y-4 h-full">
       <BookingGridFilters

@@ -8,7 +8,7 @@ type CreateBookingInput = z.infer<typeof StaffCreateBookingSchema>;
 
 // Extended type to include bookingType for UI flow
 type CreateBookingData = Partial<CreateBookingInput> & {
-  bookingType?: "Direct" | "OTA";
+  bookingType?: "Direct" | "OTA" | "RoomBlock";
 };
 
 // -------------
@@ -25,10 +25,26 @@ export const useCreateBookingStore = create<CreateBookingState>()(
     (set, get) => ({
       data: {},
       currentStep: 1,
-      setData: (data) =>
-        set({
-          data: { ...get().data, ...data },
-        }),
+      setData: (data) => {
+        const currentData = get().data;
+        const newData = { ...currentData, ...data };
+
+        // Auto-configure based on bookingType
+        if (data.bookingType === "RoomBlock") {
+          newData.source = "RoomBlock";
+          newData.overridePrice = 0;
+          newData.serviceOrder = undefined;
+          newData.roomPayment = undefined;
+          newData.isBreakfastAll = false;
+          newData.breakfastDates = [];
+        } else if (data.bookingType === "Direct") {
+          newData.source = "DirectStaff";
+        } else if (data.bookingType === "OTA") {
+          newData.source = "OTA";
+        }
+
+        set({ data: newData });
+      },
       setStep: (step: number) => set({ currentStep: step }),
       reset: () => set({ data: {}, currentStep: 1 }),
     }),

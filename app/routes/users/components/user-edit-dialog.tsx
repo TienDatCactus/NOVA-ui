@@ -19,7 +19,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Pencil, Loader2 } from "lucide-react";
-import { useUpdateUser } from "../container/useUsers.hooks";
+import { useUpdateUser } from "../container/query.hooks";
 import type { UserItem, UpdateUserDto } from "~/services/api/user/dto";
 import { useEffect } from "react";
 import { UserSchema } from "~/services/api/user/user.schema";
@@ -91,9 +91,6 @@ export function UserEditDialog({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Pencil className="h-5 w-5 text-primary" />
-            </div>
             Cập nhật thông tin khách hàng
           </DialogTitle>
         </DialogHeader>

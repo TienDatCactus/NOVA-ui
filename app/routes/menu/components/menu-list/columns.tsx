@@ -1,6 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
 import { Checkbox } from "~/components/ui/checkbox";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { cn, formatMoney } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import MenuActionsCell from "../../fragments/menu/actions.cell";
@@ -10,72 +11,20 @@ import { Button } from "~/components/ui/button";
 
 export const columns: ColumnDef<MenuListItemDto>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Chọn tất cả"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Chọn dòng"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "index",
-    header: "STT",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STT" />
+    ),
     cell: ({ row }) => {
       return <span className="font-medium">{row.index + 1}</span>;
     },
   },
-  {
-    accessorKey: "image",
-    header: "Hình ảnh",
-    cell: ({ row }) => {
-      const item = row.original;
-      const hasImages = item.imageUrls && item.imageUrls.length > 0;
 
-      return (
-        <div className="flex items-center justify-center">
-          {hasImages ? (
-            <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted">
-              <Image
-                src={item.imageUrls[0]}
-                alt={item.name}
-                width={60}
-                height={60}
-                className="w-full h-full object-cover"
-              />
-              {item.imageUrls.length > 1 && (
-                <div className="absolute bottom-0 right-0 bg-black/70 text-white text-xs px-1 rounded-tl">
-                  +{item.imageUrls.length - 1}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-muted-foreground" />
-            </div>
-          )}
-        </div>
-      );
-    },
-  },
   {
     accessorKey: "name",
-    header: "Tên món",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tên món" />
+    ),
     cell: ({ row }) => {
       const item = row.original;
 
@@ -84,11 +33,6 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold truncate">{item.name}</span>
-              {!item.active && (
-                <Badge variant="secondary" className="text-xs">
-                  Ngưng hoạt động
-                </Badge>
-              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {item.code}
@@ -98,7 +42,6 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
             <Button
               variant="ghost"
               size="icon"
-              className="flex-shrink-0"
               onClick={() => row.toggleExpanded()}
             >
               <ChevronDown
@@ -114,8 +57,20 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
     },
   },
   {
+    accessorKey: "maxQuantityAvailable",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Số lượng tối đa" />
+    ),
+    cell: ({ row }) => {
+      const maxQuantityAvailable = row.original.maxQuantityAvailable || "—";
+      return <p className="text-center">{maxQuantityAvailable}</p>;
+    },
+  },
+  {
     accessorKey: "description",
-    header: "Mô tả",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mô tả" />
+    ),
     cell: ({ row }) => {
       const description = row.original.description || "—";
       return (
@@ -127,7 +82,9 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
   },
   {
     accessorKey: "unitName",
-    header: "Đơn vị",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Đơn vị" />
+    ),
     cell: ({ row }) => {
       return (
         <Badge variant="outline" className="font-normal">
@@ -138,13 +95,17 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
   },
   {
     accessorKey: "components",
-    header: "Trạng thái",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
     cell: ({ row }) => {
       const active = row.original.active ? "Hoạt động" : "Ngưng hoạt động";
-
       return (
         <div className="flex items-center gap-1">
-          <Badge variant={active ? "success" : "warning"} className="text-xs">
+          <Badge
+            variant={row.original.active ? "success" : "destructive"}
+            className="text-xs"
+          >
             {active}
           </Badge>
         </div>
@@ -173,5 +134,7 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

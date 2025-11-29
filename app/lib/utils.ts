@@ -39,13 +39,7 @@ export function formatMoney(amount: number | bigint | string) {
     };
   }
   const amountStr = amount.toString();
-
-  const bigAmount = BigInt(amountStr);
-
-  // Convert BigInt to plain string with thousands separators manually
-  const formattedBase = bigAmount
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formattedBase = amountStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   // Append currency symbols manually
   const usdFormatted = `$${formattedBase}`;
@@ -91,12 +85,23 @@ export const toYMD = (d: unknown) => {
   }
   return undefined;
 };
-
-export const handleLimitInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const max = 99999999999;
-  const min = 0;
-  const value = e.target.valueAsNumber;
-
-  if (value > max) e.target.value = max.toString();
-  if (value < min) e.target.value = min.toString();
+export function detectPoiCategory(props: any) {
+  if (props.amenity) return props.amenity;
+  if (props.tourism) return props.tourism;
+  if (props.shop) return props.shop;
+  if (props.leisure) return props.leisure;
+  if (props.place) return props.place;
+  if (props.highway) return props.highway;
+  return "default";
+}
+export const iconMap: Record<string, string> = {
+  restaurant: "icon-restaurant",
+  cafe: "icon-cafe",
+  fast_food: "icon-fastfood",
+  attraction: "icon-attraction",
+  viewpoint: "icon-viewpoint",
+  square: "icon-square",
+  convenience: "icon-shop",
+  pedestrian: "icon-pedestrian",
+  default: "icon-default",
 };

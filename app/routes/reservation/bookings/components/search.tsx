@@ -165,7 +165,7 @@ function SearchRoom({
       </div>
 
       <Button
-        variant="outline"
+        variant="success"
         size="sm"
         onClick={handleOpenExportDialog}
         disabled={isExporting}

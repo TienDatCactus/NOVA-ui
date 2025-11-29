@@ -34,7 +34,7 @@ import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { ServiceSchema } from "~/services/api/services/service.schema";
 import { useServiceTypes } from "../container/service-types/query.hooks";
 import { useCreateService } from "../container/services/mutation.hooks";
-import { handleLimitInput } from "~/lib/utils";
+import {} from "~/lib/utils";
 
 const { CreateServiceItemRequestSchema } = ServiceSchema;
 
@@ -107,7 +107,7 @@ export default function CreateServiceDialog({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full" size="lg">
+                          <SelectTrigger className="w-40">
                             <SelectValue placeholder="Chọn loại dịch vụ" />
                           </SelectTrigger>
                         </FormControl>
@@ -177,7 +177,7 @@ export default function CreateServiceDialog({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-50" size="lg">
+                          <SelectTrigger className="w-40">
                             <SelectValue placeholder="Chọn đơn vị" />
                           </SelectTrigger>
                         </FormControl>
@@ -206,7 +206,6 @@ export default function CreateServiceDialog({
                       <FormControl>
                         <Input
                           type="number"
-                          onInput={handleLimitInput}
                           placeholder="0"
                           {...field}
                           onChange={(e) =>

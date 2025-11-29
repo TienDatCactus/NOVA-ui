@@ -1,0 +1,328 @@
+import { format, parseISO } from "date-fns";
+import { vi } from "date-fns/locale";
+import {
+  Baby,
+  Building2,
+  CalendarDays,
+  Globe,
+  Mail,
+  Phone,
+  User,
+  Utensils,
+  Wallet,
+} from "lucide-react";
+import type { UseFormReturn } from "react-hook-form";
+
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { cn } from "~/lib/utils";
+import type {
+  BookingDetailResponseDto,
+  StaffUpdateBookingRequestDto,
+} from "~/services/api/booking/dto";
+
+interface CustomerInfoBarProps {
+  bookingDetail: BookingDetailResponseDto;
+  form: UseFormReturn<StaffUpdateBookingRequestDto>;
+  OTAList?: Array<{ id: string; name: string }>;
+  permissions: {
+    canDoSoftUpdate: boolean;
+    canUpdateNonStructural: boolean;
+    canUpdateGuestCount: boolean;
+    canUpdateTotalAmount: boolean;
+  };
+}
+
+export default function CustomerInfoBar({
+  bookingDetail,
+  form,
+  OTAList,
+  permissions,
+}: CustomerInfoBarProps) {
+  return (
+    <div className="bg-background border rounded-lg p-5 shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+        {/* COLUMN 1: CUSTOMER IDENTITY (4 cols) */}
+        <div className="lg:col-span-4 space-y-4 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4">
+          <div className="space-y-1">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+              <User className="w-3.5 h-3.5" /> Khách hàng
+            </h3>
+            <div
+              className="font-medium text-lg text-foreground truncate"
+              title={bookingDetail.customer.fullName}
+            >
+              {bookingDetail.customer.fullName}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {(bookingDetail.customer.email ||
+              bookingDetail.customer.phoneNumber) && (
+              <div className="space-y-2">
+                {bookingDetail.customer.email && (
+                  <a
+                    href={`mailto:${bookingDetail.customer.email}`}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+                  >
+                    <Mail className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                    <span className="truncate">
+                      {bookingDetail.customer.email}
+                    </span>
+                  </a>
+                )}
+                {bookingDetail.customer.phoneNumber && (
+                  <a
+                    href={`tel:${bookingDetail.customer.phoneNumber}`}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+                  >
+                    <Phone className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                    <span>{bookingDetail.customer.phoneNumber}</span>
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* COLUMN 2: GUESTS & MEALS (4 cols) */}
+        <div className="lg:col-span-4 space-y-5 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4">
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="adultsAmount"
+              render={({ field }) => (
+                <FormItem className="space-y-1.5">
+                  <FormLabel className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5" /> Người lớn
+                  </FormLabel>
+                  <FormControl>
+                    <Counter
+                      {...field}
+                      isDisabled={!permissions.canUpdateGuestCount}
+                      className="h-9"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="childrenAmount"
+              render={({ field }) => (
+                <FormItem className="space-y-1.5">
+                  <FormLabel className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
+                    <Baby className="h-3.5 w-3.5" /> Trẻ em
+                  </FormLabel>
+                  <FormControl>
+                    <Counter
+                      {...field}
+                      isDisabled={!permissions.canUpdateGuestCount}
+                      className="h-9"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="breakfastDates"
+            render={({ field }) => {
+              const checkinDate = form.watch("checkinDate");
+              const checkoutDate = form.watch("checkoutDate");
+              const breakfastDates =
+                field.value?.map((item) =>
+                  item.date ? parseISO(item.date) : new Date()
+                ) || [];
+
+              const handleSelectDates = (dates: Date[] | undefined) => {
+                if (!dates) {
+                  field.onChange([]);
+                  return;
+                }
+                const formatted = dates.map((date) => ({
+                  date: format(date, "yyyy-MM-dd"),
+                }));
+                field.onChange(formatted);
+              };
+
+              return (
+                <FormItem className="space-y-1.5">
+                  <FormLabel className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
+                    <Utensils className="h-3.5 w-3.5" /> Đặt ăn sáng
+                  </FormLabel>
+                  <FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-9",
+                            !breakfastDates.length && "text-muted-foreground"
+                          )}
+                          disabled={!permissions.canDoSoftUpdate}
+                        >
+                          <CalendarDays className="mr-2 h-3.5 w-3.5" />
+                          {breakfastDates.length > 0 ? (
+                            <span className="text-foreground font-medium">
+                              {breakfastDates.length} buổi sáng
+                            </span>
+                          ) : (
+                            "Chọn ngày"
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="multiple"
+                          selected={breakfastDates}
+                          onSelect={handleSelectDates}
+                          disabled={(date) => {
+                            const checkin =
+                              checkinDate instanceof Date
+                                ? checkinDate
+                                : parseISO(checkinDate!.toString());
+                            const checkout =
+                              checkoutDate instanceof Date
+                                ? checkoutDate
+                                : parseISO(checkoutDate!.toString());
+                            return date < checkin || date > checkout;
+                          }}
+                          locale={vi}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        </div>
+
+        {/* COLUMN 3: SOURCE & PAYMENT (4 cols) */}
+        <div className="lg:col-span-4 space-y-5">
+          {/* OTA Section - Conditional */}
+          {form.watch("otaInformationId") ? (
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="otaInformationId"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
+                      <Globe className="h-3.5 w-3.5" /> Kênh OTA
+                    </FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={!permissions.canUpdateNonStructural}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-9 w-40 text-xs">
+                          <SelectValue placeholder="Chọn kênh" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {OTAList?.map((ota) => (
+                          <SelectItem key={ota.id} value={ota.id}>
+                            {ota.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="otaBookingCode"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
+                      <Building2 className="h-3.5 w-3.5" /> Mã OTA
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="h-9 font-mono text-xs"
+                        placeholder="Mã đặt phòng"
+                        disabled={!permissions.canUpdateNonStructural}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          ) : (
+            // Visual Placeholder for Direct Bookings to maintain alignment
+            <div className="hidden lg:flex h-[66px] border-2 border-dashed rounded-md bg-muted/10 items-center justify-center text-xs font-medium text-muted-foreground/70">
+              Đặt trực tiếp (Direct Booking)
+            </div>
+          )}
+
+          <FormField
+            control={form.control}
+            name="totalAmount"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
+                  <Wallet className="h-3.5 w-3.5" /> Tổng tiền dự kiến
+                </FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      className="h-10 font-mono font-bold text-lg text-right pr-12 text-primary"
+                      min={0}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
+                      disabled={!permissions.canUpdateTotalAmount}
+                    />
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                      <span className="text-xs text-muted-foreground font-bold">
+                        VND
+                      </span>
+                    </div>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

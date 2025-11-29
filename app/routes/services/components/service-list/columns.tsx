@@ -1,6 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
 import { Checkbox } from "~/components/ui/checkbox";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
 import ServiceActionsCell from "../../fragments/services/actions.cell";
@@ -9,39 +10,19 @@ import { ChevronDown } from "lucide-react";
 
 export const columns: ColumnDef<ServiceItem>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Chọn tất cả"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Chọn dòng"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "index",
-    header: "STT",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STT" />
+    ),
     cell: ({ row }) => {
       return <span className="font-medium">{row.index + 1}</span>;
     },
   },
   {
     accessorKey: "name",
-    header: "Tên dịch vụ",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tên dịch vụ" />
+    ),
     cell: ({ row }) => {
       const service = row.original;
 
@@ -81,7 +62,9 @@ export const columns: ColumnDef<ServiceItem>[] = [
   },
   {
     accessorKey: "description",
-    header: "Mô tả",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mô tả" />
+    ),
     cell: ({ row }) => {
       const description = row.original.description || "—";
       return (
@@ -93,19 +76,19 @@ export const columns: ColumnDef<ServiceItem>[] = [
   },
   {
     accessorKey: "basePrice",
-    header: () => <p className="text-end">Giá cơ bản</p>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Giá cơ bản" />
+    ),
     cell: ({ row }) => {
       const price = row.original.basePrice;
-      return (
-        <p className="text-end font-semibold">
-          {formatMoney(price).vndFormatted}
-        </p>
-      );
+      return <p className="font-semibold">{formatMoney(price).vndFormatted}</p>;
     },
   },
   {
     accessorKey: "unitName",
-    header: "Đơn vị",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Đơn vị" />
+    ),
     cell: ({ row }) => {
       const unitName = row.original.unitName || "—";
       return <span className="text-sm text-muted-foreground">{unitName}</span>;
@@ -113,11 +96,17 @@ export const columns: ColumnDef<ServiceItem>[] = [
   },
   {
     accessorKey: "active",
-    header: () => <p className="text-end">Trạng thái</p>,
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title="Trạng thái"
+        className="text-end"
+      />
+    ),
     cell: ({ row }) => {
       const isActive = row.original.active;
       return (
-        <div className="flex justify-end">
+        <div className="flex ">
           <Badge variant={isActive ? "success" : "warning"}>
             {isActive ? "Hoạt động" : "Ngưng hoạt động"}
           </Badge>

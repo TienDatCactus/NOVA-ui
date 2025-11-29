@@ -3,6 +3,7 @@ import { PaymentSchema } from "~/services/schema/payment.schema";
 
 ///* booking related orders
 const PosOrderStatusEnum = z.enum(["Open", "Completed", "Cancelled"]);
+const CustomerTypeEnum = z.enum(["In-House", "Walk-In"]);
 
 const ServiceOrderItemSchema = z.object({
   itemType: z.enum(["ServiceItem", "MenuItem"]),
@@ -52,7 +53,7 @@ const POSOrderItemSchema = z.object({
   itemName: z.string().optional().nullable(),
   quantity: z.number().min(0),
   unitPrice: z.number().min(0),
-  servedAt: z.date().optional().nullable(),
+  servedAt: z.string().optional().nullable(),
   subtotal: z.number().min(0),
 });
 const POSOrderDetailSchema = z.object({
@@ -67,7 +68,7 @@ const POSOrderDetailSchema = z.object({
   scheduledAt: z.string().optional().nullable(),
   note: z.string().optional().nullable(),
   createdAt: z.string(),
-  customerType: z.string().optional(),
+  customerType: CustomerTypeEnum.optional(),
   items: z.array(POSOrderItemSchema).optional(),
 });
 
@@ -117,12 +118,6 @@ const POSOrderPrintDataSchema = z.object({
   customerName: z.string().min(1).optional().nullable(),
   roomName: z.string().min(1).optional().nullable(),
   bookingCode: z.string().min(1).optional().nullable(),
-});
-
-const POSOrderPayNowRequestSchema = z.object({
-  paymentMethod: PaymentSchema.PaymentMethodEnum,
-  paidAmount: z.number().min(0),
-  transactionReference: z.string(),
 });
 
 // -----------------------------------------------
@@ -238,10 +233,22 @@ const OrderPayNowRequestSchema = z.object({
   transactionReference: z.string().optional().nullable(),
 });
 
+const POSOrderPayNowResponseSchema = z.object({
+  invoiceId: z.string(),
+  invoiceNo: z.string(),
+  total: z.number().min(0),
+  status: z.string(),
+});
+
 const SetScheduledServiceOrderRequestSchema = z.object({
   scheduledAt: z.string(),
 });
 
+const CreatePOSOrderWithItemsRequestSchema = CreatePOSOrderRequestSchema.extend(
+  {
+    items: AddBatchItemsToPOSOrderRequestSchema,
+  }
+);
 export const OrderSchema = {
   // 🔹 Generic service order creation/payment
   ServiceOrderSchema,
@@ -251,6 +258,7 @@ export const OrderSchema = {
   AddSingleItemToPOSOrderRequestSchema,
   AddBatchItemsToPOSOrderRequestSchema,
   PosOrderStatusEnum,
+  CustomerTypeEnum,
   POSOrderListResponseSchema,
   POSOrderItemSchema,
   POSOrderDetailSchema,
@@ -258,10 +266,11 @@ export const OrderSchema = {
   POSOrderPrintItemSchema,
   POSOrderPrintDataSchema,
   CreatePOSOrderRequestSchema,
-  POSOrderPayNowRequestSchema,
+  POSOrderPayNowResponseSchema,
   POSOrderListByBookingResponseSchema,
+  CreatePOSOrderWithItemsRequestSchema,
 
-  // 🔹 Service Orders
+  //  Service Orders
   ServiceOrderListSchema,
   ServiceOrderListByBookingDetailSchema,
   ServiceOrderStatusEnum,

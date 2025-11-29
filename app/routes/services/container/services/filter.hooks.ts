@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ServiceListResponseDto } from "~/services/api/services/dto";
-import type { ServiceFilters } from "~/services/types/service.types";
+import type { ServiceFilters } from "~/services/api/services/service.types";
 
 const defaultFilters: ServiceFilters = {
   typeCode: "",

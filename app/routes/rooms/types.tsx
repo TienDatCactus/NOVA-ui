@@ -1,11 +1,7 @@
-import { useState } from "react";
-
-import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { CreateRoomTypeDialog } from "./components/create-room-types.dialog";
-import RoomTypesViewLayout from "./layouts/room-types-view.layout";
-import RoomTypesDataTable from "./components/room-types-list";
+import RoomTypesDataTable from "./components/room-types/room-types-list";
 import useRoomTypeFilter from "./container/room-types/filter.hooks";
 import { useRoomTypes } from "./container/room-types/query.hooks";
+import RoomTypesViewLayout from "./layouts/room-types-view.layout";
 
 export default function RoomTypesPage() {
   const {
@@ -19,10 +15,7 @@ export default function RoomTypesPage() {
   const { data: roomTypes, isPending } = useRoomTypes({
     includeInactive,
   });
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [selectedRoomTypes, setSelectedRoomTypes] = useState<
-    RoomTypesListItemDto[]
-  >([]);
+
   const filteredRoomTypes = roomTypes ? filterRoomTypes(roomTypes) : [];
 
   return (
@@ -31,19 +24,8 @@ export default function RoomTypesPage() {
       onFilterChange={updateFilter}
       onResetFilters={resetFilters}
       totalRoomTypes={filteredRoomTypes?.length || 0}
-      onAddRoomType={() => setCreateDialogOpen(true)}
     >
-      <RoomTypesDataTable
-        roomTypes={filteredRoomTypes}
-        isLoading={isPending}
-        onAddRoomType={() => setCreateDialogOpen(true)}
-        onSelectionChange={setSelectedRoomTypes}
-      />
-
-      <CreateRoomTypeDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-      />
+      <RoomTypesDataTable roomTypes={filteredRoomTypes} isLoading={isPending} />
     </RoomTypesViewLayout>
   );
 }

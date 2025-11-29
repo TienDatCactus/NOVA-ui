@@ -6,17 +6,15 @@ import type { BookingListParams } from "~/services/api/booking/booking.types";
 import { RoomsService } from "~/services/api/rooms";
 import type { GetAvailableRoomsInternalParams } from "~/services/api/rooms/room.types";
 
-interface UseBookingDetailProps {
-  bookingCode?: string;
-  bookingId?: string;
-  enabled?: boolean;
-}
-
 function useBookingDetail({
   bookingCode,
   bookingId,
   enabled = true,
-}: UseBookingDetailProps) {
+}: {
+  bookingCode?: string;
+  bookingId?: string;
+  enabled?: boolean;
+}) {
   return useQuery({
     queryKey: [
       "bookings-detail",
@@ -29,6 +27,9 @@ function useBookingDetail({
         id: bookingId,
       }),
     enabled: enabled && (!!bookingCode || !!bookingId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: true,
   });
 }
 function useBookingRoomsWeek(params?: BookingListParams) {
@@ -41,7 +42,7 @@ function useBookingRoomsWeek(params?: BookingListParams) {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 
@@ -50,14 +51,10 @@ function useBookings(params?: BookingListParams) {
     queryKey: ["bookings", params],
     queryFn: async () => await BookingService.getBookingList(params || {}),
     staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: true,
   });
-}
-
-interface UseAvailableRoomsParams {
-  checkinDate: Date | string;
-  checkoutDate: Date | string;
-  guests?: number;
-  enabled?: boolean;
 }
 
 function useAvailableRooms({
@@ -65,7 +62,12 @@ function useAvailableRooms({
   checkoutDate,
   guests = 1,
   enabled = false,
-}: UseAvailableRoomsParams) {
+}: {
+  checkinDate: Date | string;
+  checkoutDate: Date | string;
+  guests?: number;
+  enabled?: boolean;
+}) {
   const params: GetAvailableRoomsInternalParams = {
     CheckInDate:
       checkinDate instanceof Date
@@ -86,23 +88,32 @@ function useAvailableRooms({
   });
 }
 
-interface UseAvailableRoomsForChangeParams {
-  bookingId: string;
-  bookingRoomId: string;
-  enabled?: boolean;
-}
-
 function useAvailableRoomsForChange({
   bookingId,
   bookingRoomId,
   enabled = false,
-}: UseAvailableRoomsForChangeParams) {
+}: {
+  bookingId: string;
+  bookingRoomId: string;
+  enabled?: boolean;
+}) {
   return useQuery({
     queryKey: ["available-rooms-for-change", bookingId, bookingRoomId],
     queryFn: async () =>
       await BookingService.getAvailableRoomsForChange(bookingId, bookingRoomId),
     staleTime: 2 * 60 * 1000,
-    enabled: enabled && !!bookingId && !!bookingRoomId,
+    enabled: enabled && !!bookingId,
+  });
+}
+
+function useOrderableBookings() {
+  return useQuery({
+    queryKey: ["orderable-bookings"],
+    queryFn: async () => await BookingService.getOrderableBookings(),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: true,
   });
 }
 
@@ -112,4 +123,5 @@ export {
   useBookingDetail,
   useBookingRoomsWeek,
   useBookings,
+  useOrderableBookings,
 };

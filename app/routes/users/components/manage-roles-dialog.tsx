@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,28 +11,30 @@ import {
   DialogDescription,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormDescription,
-} from "~/components/ui/form";
+import { Form, FormField } from "~/components/ui/form";
 import { Badge } from "~/components/ui/badge";
-import { Shield, Loader2, Plus, Trash2 } from "lucide-react";
+import {
+  Shield,
+  Loader2,
+  Save,
+  Search,
+  Trash2,
+  Plus,
+  AlertCircle,
+} from "lucide-react";
+import { Input } from "~/components/ui/input";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   useAssignRoles,
   useRemoveRoles,
   useRoles,
-} from "../container/useUsers.hooks";
+} from "../container/query.hooks";
 import {
   getRoleBadgeColors,
   getRoleDisplayName,
 } from "~/services/types/users.types";
 import type { UserItem } from "~/services/api/user/dto";
-import { Separator } from "~/components/ui/separator";
+import { cn } from "~/lib/utils";
 
 interface ManageRolesDialogProps {
   user: UserItem;
@@ -42,8 +44,7 @@ interface ManageRolesDialogProps {
 }
 
 const ManageRolesSchema = z.object({
-  rolesToAdd: z.array(z.string()),
-  rolesToRemove: z.array(z.string()),
+  selectedRoles: z.array(z.string()),
 });
 
 type ManageRolesForm = z.infer<typeof ManageRolesSchema>;
@@ -54,334 +55,217 @@ export function ManageRolesDialog({
   onClose,
   onSuccess,
 }: ManageRolesDialogProps) {
-  const { data: allRoles } = useRoles();
-  const { mutate: assignRoles, isPending: isAssigning } = useAssignRoles();
-  const { mutate: removeRoles, isPending: isRemoving } = useRemoveRoles();
-  const [mode, setMode] = useState<"add" | "remove">("add");
+  const { data: allRoles = [] } = useRoles();
+  const { mutateAsync: assignRoles, isPending: isAssigning } = useAssignRoles();
+  const { mutateAsync: removeRoles, isPending: isRemoving } = useRemoveRoles();
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   const form = useForm<ManageRolesForm>({
-    mode: "onChange",
+    resolver: zodResolver(ManageRolesSchema),
     defaultValues: {
-      rolesToAdd: [],
-      rolesToRemove: [],
+      selectedRoles: [],
     },
   });
 
+  // Safe Reset: Only runs when dialog opens
+  useEffect(() => {
+    if (open) {
+      form.reset({ selectedRoles: user.roles || [] });
+      setSearchQuery("");
+    }
+  }, [open, form]);
+
   const isPending = isAssigning || isRemoving;
 
-  const availableRoles = useMemo(() => {
-    if (!allRoles) return [];
-    return allRoles.filter((role) => !user.roles.includes(role));
-  }, [allRoles, user.roles]);
+  // Filter logic
+  const filteredRoles = useMemo(() => {
+    let roles = allRoles;
+    if (searchQuery) {
+      roles = allRoles.filter((role) =>
+        getRoleDisplayName(role)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      );
+    }
+    // Optional: Sort so active roles appear at the top?
+    // For now, keeping alphabetical is usually less confusing for "Search"
+    return roles;
+  }, [allRoles, searchQuery]);
 
-  const handleAssignRoles = (data: ManageRolesForm) => {
-    if (data.rolesToAdd.length === 0) return;
+  const handleSubmit = async (data: ManageRolesForm) => {
+    const originalRoles = user.roles || [];
+    const newRoles = data.selectedRoles;
 
-    assignRoles(
-      {
-        id: user.id,
-        data: { roles: data.rolesToAdd },
-      },
-      {
-        onSuccess: () => {
-          form.reset();
-          onClose();
-          onSuccess?.();
-        },
-      }
-    );
-  };
+    const rolesToAdd = newRoles.filter((r) => !originalRoles.includes(r));
+    const rolesToRemove = originalRoles.filter((r) => !newRoles.includes(r));
 
-  const handleRemoveRoles = (data: ManageRolesForm) => {
-    if (data.rolesToRemove.length === 0) return;
+    if (rolesToAdd.length === 0 && rolesToRemove.length === 0) {
+      onClose();
+      return;
+    }
 
-    removeRoles(
-      {
-        id: user.id,
-        data: { roles: data.rolesToRemove },
-      },
-      {
-        onSuccess: () => {
-          form.reset();
-          onClose();
-          onSuccess?.();
-        },
-      }
-    );
-  };
-
-  const handleSubmit = (data: ManageRolesForm) => {
-    if (mode === "add") {
-      if (data.rolesToAdd.length === 0) {
-        return;
-      }
-      handleAssignRoles(data);
-    } else {
-      if (data.rolesToRemove.length === 0) {
-        return;
-      }
-      handleRemoveRoles(data);
+    try {
+      await Promise.all([
+        rolesToAdd.length > 0 &&
+          assignRoles({ id: user.id, data: { roles: rolesToAdd } }),
+        rolesToRemove.length > 0 &&
+          removeRoles({ id: user.id, data: { roles: rolesToRemove } }),
+      ]);
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      console.error("Failed to update roles", error);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Shield className="h-5 w-5 text-primary" />
-            </div>
-            Quản lý Vai trò
-          </DialogTitle>
-          <DialogDescription>
-            Thêm hoặc xóa vai trò cho{" "}
-            <span className="font-semibold text-foreground">
-              {user.fullName}
-            </span>
-          </DialogDescription>
+      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden flex flex-col max-h-[85vh]">
+        <DialogHeader className="px-6 py-4 bg-muted/10 border-b shrink-0">
+          <DialogTitle>Phân quyền tài khoản</DialogTitle>
+          <DialogDescription>{user.fullName}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Current Roles Section */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-base">Vai trò hiện tại</h3>
-              <Badge variant="outline" className="text-xs">
-                {user.roles.length} vai trò
-              </Badge>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="flex flex-col flex-1 overflow-hidden"
+          >
+            <div className="p-4 border-b shrink-0 bg-background z-10">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Tìm kiếm vai trò..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="flex gap-2 flex-wrap p-4 bg-muted/30 rounded-lg min-h-[60px]">
-              {user.roles.length > 0 ? (
-                user.roles.map((role) => {
-                  const colors = getRoleBadgeColors(role);
-                  return (
-                    <Badge
-                      key={role}
-                      variant="outline"
-                      className={`text-sm py-1.5 px-3 ${colors.bg} ${colors.text} ${colors.border} shadow-sm`}
-                    >
-                      {getRoleDisplayName(role)}
-                    </Badge>
-                  );
-                })
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Chưa có vai trò nào
-                </p>
-              )}
-            </div>
-          </div>
 
-          <Separator />
+            <ScrollArea className="flex-1 bg-gray-50/30">
+              <div className="p-3 space-y-2">
+                <FormField
+                  control={form.control}
+                  name="selectedRoles"
+                  render={({ field }) => (
+                    <>
+                      {filteredRoles.length === 0 ? (
+                        <div className="py-8 text-center text-sm text-muted-foreground">
+                          Không tìm thấy kết quả.
+                        </div>
+                      ) : (
+                        filteredRoles.map((role) => {
+                          const isSelected = field.value?.includes(role);
+                          const colors = getRoleBadgeColors(role);
 
-          {/* Mode Toggle */}
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={mode === "add" ? "default" : "outline"}
-              onClick={() => setMode("add")}
-              className="flex-1 gap-2"
-              disabled={availableRoles.length === 0}
-            >
-              <Plus className="h-4 w-4" />
-              Thêm vai trò
-            </Button>
-            <Button
-              type="button"
-              variant={mode === "remove" ? "destructive" : "outline"}
-              onClick={() => setMode("remove")}
-              className="flex-1 gap-2"
-              disabled={user.roles.length === 0}
-            >
-              <Trash2 className="h-4 w-4" />
-              Xóa vai trò
-            </Button>
-          </div>
-
-          {/* Form Section */}
-          <Form {...form}>
-            <form
-              onSubmit={(e) => {
-                form.handleSubmit(handleSubmit, (errors) => {})(e);
-              }}
-              className="space-y-4"
-            >
-              {mode === "add" ? (
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-base">
-                    Chọn vai trò để thêm
-                  </h3>
-                  {availableRoles.length === 0 ? (
-                    <div className="p-8 text-center border-2 border-dashed rounded-lg">
-                      <Shield className="h-12 w-12 mx-auto opacity-20 mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        Người dùng đã có tất cả vai trò
-                      </p>
-                    </div>
-                  ) : (
-                    <FormField
-                      control={form.control}
-                      name="rolesToAdd"
-                      render={() => (
-                        <FormItem>
-                          <div className="grid grid-cols-2 gap-3">
-                            {availableRoles.map((role) => {
-                              const colors = getRoleBadgeColors(role);
-                              return (
-                                <FormField
-                                  key={role}
-                                  control={form.control}
-                                  name="rolesToAdd"
-                                  render={({ field }) => (
-                                    <FormItem
-                                      key={role}
-                                      className={`flex items-center space-x-3 space-y-0 p-4 rounded-lg border-2 transition-all cursor-pointer hover:bg-muted/50 ${
-                                        field.value?.includes(role)
-                                          ? `${colors.bg} ${colors.border} border-2`
-                                          : "border-muted"
-                                      }`}
-                                    >
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={field.value?.includes(role)}
-                                          onCheckedChange={(checked) => {
-                                            return checked
-                                              ? field.onChange([
-                                                  ...field.value,
-                                                  role,
-                                                ])
-                                              : field.onChange(
-                                                  field.value?.filter(
-                                                    (value) => value !== role
-                                                  )
-                                                );
-                                          }}
-                                        />
-                                      </FormControl>
-                                      <FormLabel
-                                        className={`font-medium cursor-pointer flex-1 ${
-                                          field.value?.includes(role)
-                                            ? colors.text
-                                            : ""
-                                        }`}
-                                      >
-                                        {getRoleDisplayName(role)}
-                                      </FormLabel>
-                                    </FormItem>
+                          return (
+                            <div
+                              key={role}
+                              className={cn(
+                                "flex items-center justify-between p-3 rounded-lg border transition-all duration-200",
+                                isSelected
+                                  ? "bg-white border-primary/20 shadow-sm"
+                                  : "bg-white/50 border-transparent hover:border-gray-200 hover:bg-white"
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                {/* Role Icon/Initial could go here */}
+                                <div className="flex flex-col">
+                                  <span
+                                    className={cn(
+                                      "font-semibold text-sm",
+                                      isSelected
+                                        ? "text-primary"
+                                        : "text-foreground"
+                                    )}
+                                  >
+                                    {getRoleDisplayName(role)}
+                                  </span>
+                                  {isSelected && (
+                                    <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                      Đang kích hoạt
+                                    </span>
                                   )}
-                                />
-                              );
-                            })}
-                          </div>
-                          <FormDescription className="text-xs">
-                            Chọn các vai trò bạn muốn thêm cho người dùng này
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-base">
-                    Chọn vai trò để xóa
-                  </h3>
-                  {user.roles.length === 0 ? (
-                    <div className="p-8 text-center border-2 border-dashed rounded-lg border-destructive/20">
-                      <Shield className="h-12 w-12 mx-auto opacity-20 mb-2 text-destructive" />
-                      <p className="text-sm text-muted-foreground">
-                        Người dùng chưa có vai trò nào
-                      </p>
-                    </div>
-                  ) : (
-                    <FormField
-                      control={form.control}
-                      name="rolesToRemove"
-                      render={() => (
-                        <FormItem>
-                          <div className="grid grid-cols-2 gap-3">
-                            {user.roles.map((role) => {
-                              const colors = getRoleBadgeColors(role);
-                              return (
-                                <FormField
-                                  key={role}
-                                  control={form.control}
-                                  name="rolesToRemove"
-                                  render={({ field }) => {
-                                    const currentValue = field.value || [];
-                                    return (
-                                      <FormItem
-                                        key={role}
-                                        className={`flex items-center space-x-3 space-y-0 p-4 rounded-lg border-2 transition-all cursor-pointer hover:bg-destructive/10 ${
-                                          currentValue.includes(role)
-                                            ? "bg-destructive/10 border-destructive"
-                                            : "border-muted"
-                                        }`}
-                                      >
-                                        <FormControl>
-                                          <Checkbox
-                                            checked={currentValue.includes(
-                                              role
-                                            )}
-                                            onCheckedChange={(checked) => {
-                                              const newValue = checked
-                                                ? [...currentValue, role]
-                                                : currentValue.filter(
-                                                    (value) => value !== role
-                                                  );
-                                              field.onChange(newValue);
-                                            }}
-                                          />
-                                        </FormControl>
-                                        <FormLabel
-                                          className={`font-medium cursor-pointer flex-1 ${
-                                            currentValue.includes(role)
-                                              ? "text-destructive"
-                                              : ""
-                                          }`}
-                                        >
-                                          {getRoleDisplayName(role)}
-                                        </FormLabel>
-                                      </FormItem>
+                                </div>
+                              </div>
+
+                              {/* ACTION BUTTONS */}
+                              {isSelected ? (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30"
+                                  onClick={() => {
+                                    field.onChange(
+                                      field.value.filter((r) => r !== role)
                                     );
                                   }}
-                                />
-                              );
-                            })}
-                          </div>
-                          <FormDescription className="text-xs text-destructive/70">
-                            Chọn các vai trò bạn muốn xóa khỏi người dùng này
-                          </FormDescription>
-                        </FormItem>
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1.5" />
+                                  Gỡ bỏ
+                                </Button>
+                              ) : (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10"
+                                  onClick={() => {
+                                    field.onChange([...field.value, role]);
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4 mr-1.5" />
+                                  Thêm
+                                </Button>
+                              )}
+                            </div>
+                          );
+                        })
                       )}
-                    />
+                    </>
                   )}
-                </div>
-              )}
+                />
+              </div>
+            </ScrollArea>
 
-              <DialogFooter className="gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  disabled={isPending}
-                >
-                  Hủy
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isPending}
-                  variant={mode === "remove" ? "destructive" : "default"}
-                  className="gap-2"
-                >
-                  {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {mode === "add" ? "Thêm vai trò" : "Xóa vai trò"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </div>
+            {/* Changed Warning to Info to be less alarming */}
+            {form.formState.isDirty && (
+              <div className="px-6 py-2 bg-blue-50 border-t border-b border-blue-100 flex items-center gap-2 shrink-0 animate-in slide-in-from-bottom-2">
+                <AlertCircle className="h-4 w-4 text-blue-600 shrink-0" />
+                <p className="text-xs text-blue-700">
+                  Bạn có thay đổi chưa lưu. Nhấn "Lưu thay đổi" để áp dụng.
+                </p>
+              </div>
+            )}
+
+            <DialogFooter className="px-6 py-4 bg-white shrink-0 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isPending}
+              >
+                Hủy bỏ
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isDirty}
+                className="min-w-[120px]"
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Lưu thay đổi
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

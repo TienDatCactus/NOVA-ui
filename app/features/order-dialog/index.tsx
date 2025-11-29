@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
-import { Search } from "lucide-react";
+import { RotateCcw, Search } from "lucide-react";
 import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
 import useMenuFilters from "~/routes/menu/container/menu/filter.hooks";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
@@ -26,15 +26,36 @@ import { useServiceTypes } from "~/routes/services/container/service-types/query
 import useServiceFilters from "~/routes/services/container/services/filter.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
 import { useServiceOrderStore } from "~/store/service-order.store";
-import MenuList from "./components/menu-list";
 import OrderDetail from "./components/order-detail";
-import ServiceList from "./components/service-list";
+import UniversalProductList from "./fragments/product-list";
 
+export type ProductType = "MenuItem" | "ServiceItem";
+
+export interface UnifiedProduct {
+  id: string; // Map từ serviceItemId hoặc itemId
+  type: ProductType; // Để phân biệt xử lý logic
+  name: string;
+  description?: string;
+  price: number; // Map từ basePrice hoặc price
+  image?: string; // Lấy ảnh đầu tiên trong mảng imageUrls
+  code?: string; // Mã sản phẩm (để hiển thị cho chuyên nghiệp)
+}
+const toUnified = (
+  item: any,
+  type: "MenuItem" | "ServiceItem"
+): UnifiedProduct => ({
+  id: type === "MenuItem" ? item.itemId : item.serviceItemId,
+  type,
+  name: item.name,
+  description: item.description,
+  price: type === "MenuItem" ? item.price : item.basePrice,
+  image: item.imageUrls?.[0],
+  code: type === "MenuItem" ? undefined : item.code, // Giả sử Service có code
+});
 interface AddServiceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm?: () => void;
-  bookingId?: string;
   customerName?: string;
   checkinDate?: Date | string;
   checkoutDate?: Date | string;
@@ -44,8 +65,9 @@ export default function AddServiceDialog({
   open,
   onOpenChange,
   onConfirm,
-  bookingId,
   customerName,
+  checkinDate,
+  checkoutDate,
 }: AddServiceDialogProps) {
   const [activeTab, setActiveTab] = useState<"service" | "menu">("service");
   const [searchText, setSearchText] = useState("");
@@ -54,8 +76,6 @@ export default function AddServiceDialog({
   const orderServices = useServiceOrderStore((s) => s.services);
   const addItem = useServiceOrderStore((s) => s.addItem);
   const removeById = useServiceOrderStore((s) => s.removeById);
-  const setQuantity = useServiceOrderStore((s) => s.setQuantity);
-  const clear = useServiceOrderStore((s) => s.clear);
 
   // Service data & filters
   const { data: serviceTypes = [] } = useServiceTypes();
@@ -65,7 +85,7 @@ export default function AddServiceDialog({
     resetFilters: resetServiceFilters,
     filters: serviceFilters,
   } = useServiceFilters();
-  const { data: serviceItems = [] } = useServices({
+  const { data: serviceItems = [], isPending: isLoadingService } = useServices({
     typeCode: serviceFilters.typeCode,
   });
   // Menu data & filters
@@ -76,45 +96,13 @@ export default function AddServiceDialog({
     filterMenuItems,
     resetFilters: resetMenuFilters,
   } = useMenuFilters();
-  const { data: menuItems = [] } = useMenuList({
+  const { data: menuItems = [], isPending: isLoadingMenu } = useMenuList({
     categoryCode: menuFilters.categoryCode,
   });
-
-  // Selection helpers using store
-  const isSelected = (itemId: string) => {
-    return orderServices.some((s) => s.itemId === itemId);
-  };
 
   const getQuantity = (itemId: string): number => {
     const item = orderServices.find((s) => s.itemId === itemId);
     return item?.quantity || 0;
-  };
-
-  const handleQuantityChange = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeById(itemId);
-    } else {
-      setQuantity(itemId, quantity);
-    }
-  };
-
-  const toggleSelectItem = (
-    itemId: string,
-    itemType: "MenuItem" | "ServiceItem"
-  ) => {
-    const exists = orderServices.some((s) => s.itemId === itemId);
-    if (exists) {
-      removeById(itemId);
-    } else {
-      const today = new Date().toISOString().slice(0, 10);
-      addItem({
-        itemType,
-        itemId,
-        quantity: 1,
-        scheduledDate: today,
-        note: "",
-      });
-    }
   };
 
   const handleConfirm = () => {
@@ -122,10 +110,6 @@ export default function AddServiceDialog({
     setActiveTab("service");
     setSearchText("");
     onOpenChange(false);
-  };
-
-  const handleClearAll = () => {
-    clear();
   };
 
   const filteredServiceItems = useMemo(() => {
@@ -143,12 +127,32 @@ export default function AddServiceDialog({
       item.name.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [filterMenuItems, menuItems, searchText]);
-
+  const displayProducts = useMemo(() => {
+    if (activeTab === "menu") {
+      return filteredMenuItems.map((item) => toUnified(item, "MenuItem"));
+    }
+    return filteredServiceItems.map((item) => toUnified(item, "ServiceItem"));
+  }, [activeTab, filteredMenuItems, filteredServiceItems]);
+  // Handle Toggle thông minh
+  const handleToggle = (product: UnifiedProduct) => {
+    const exists = orderServices.some((s) => s.itemId === product.id);
+    if (exists) {
+      removeById(product.id);
+    } else {
+      addItem({
+        itemId: product.id,
+        itemType: product.type,
+        quantity: 1,
+        scheduledDate: new Date().toISOString().slice(0, 10),
+        note: "",
+      });
+    }
+  };
   const totalSelected = orderServices.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] min-h-0 overflow-hidden p-0 bg-background">
+      <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto p-0 bg-accent gap-2">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle>Chọn dịch vụ & món ăn</DialogTitle>
           <DialogDescription>
@@ -177,7 +181,7 @@ export default function AddServiceDialog({
                 value={serviceFilters.typeCode}
                 onValueChange={(code) => updateServiceFilter("typeCode", code)}
               >
-                <SelectTrigger className="w-52">
+                <SelectTrigger className="w-40">
                   <SelectValue placeholder="Tất cả loại dịch vụ" />
                 </SelectTrigger>
                 <SelectContent>
@@ -193,7 +197,7 @@ export default function AddServiceDialog({
                 value={menuFilters.categoryCode}
                 onValueChange={(code) => updateMenuFilter("categoryCode", code)}
               >
-                <SelectTrigger className="w-52">
+                <SelectTrigger className="w-40">
                   <SelectValue placeholder="Tất cả danh mục" />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,58 +209,57 @@ export default function AddServiceDialog({
                 </SelectContent>
               </Select>
             )}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className=" flex items-center gap-2">
               <Input
+                startAddon={
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                }
                 placeholder="Tìm kiếm..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="pl-9"
               />
+              <Button
+                variant="outline"
+                onClick={() => {
+                  resetMenuFilters();
+                  resetServiceFilters();
+                  setSearchText("");
+                }}
+              >
+                <RotateCcw />
+                Đặt lại{" "}
+              </Button>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Filters Row */}
-
         {/* Main Content Grid */}
-        <div className="px-6 pb-4 flex-1 ">
-          <div className="grid md:grid-cols-12 grid-cols-1 gap-4 h-full">
-            <div className="md:col-span-7 col-span-12 overflow-y-auto">
-              {activeTab === "service" ? (
-                <ServiceList
-                  services={filteredServiceItems}
-                  searchText=""
-                  onSearchChange={() => {}}
-                  isSelected={isSelected}
-                  getQuantity={getQuantity}
-                  onToggleSelect={(id) => toggleSelectItem(id, "ServiceItem")}
-                  onQuantityChange={handleQuantityChange}
-                />
-              ) : (
-                <MenuList
-                  menuItems={filteredMenuItems}
-                  searchText=""
-                  onSearchChange={() => {}}
-                  isSelected={isSelected}
-                  getQuantity={getQuantity}
-                  onToggleSelect={(id) => toggleSelectItem(id, "MenuItem")}
-                  onQuantityChange={handleQuantityChange}
-                />
-              )}
-            </div>
+        <div className="px-4 flex-1 overflow-hidden flex flex-col md:flex-row">
+          {/* LEFT: Product List */}
+          <div className="flex-1 overflow-y-auto bg-muted/30 p-2 md:p-4 rounded-lg md:rounded-r-none">
+            <UniversalProductList
+              products={displayProducts}
+              isLoading={
+                activeTab === "menu" ? isLoadingMenu : isLoadingService
+              }
+              getQuantity={getQuantity}
+              onToggle={handleToggle}
+            />
+          </div>
 
-            <div className="md:col-span-5 col-span-12 overflow-y-auto">
-              <OrderDetail
-                onClearAll={handleClearAll}
-                bookingId={bookingId}
-                customerName={customerName}
-              />
-            </div>
+          <div className="hidden md:flex w-[380px] flex-col border-l bg-background">
+            <OrderDetail
+              customerName={customerName}
+              checkinDate={checkinDate}
+              checkoutDate={checkoutDate}
+            />
           </div>
         </div>
 
-        <DialogFooter className="border-t p-6 flex items-center justify-between">
+        <DialogFooter
+          className="border-t p-4 pt-0
+         flex items-center justify-between"
+        >
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Hủy
           </Button>

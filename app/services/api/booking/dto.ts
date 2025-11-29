@@ -23,6 +23,11 @@ const {
   StaffAddCompletedChargesRequestSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
   StaffCheckoutPaymentRequestSchema,
+  UpdateBookingStatusRequestSchema,
+  UpdateBookingStatusResponseSchema,
+  ConfirmBookingPaymentRequestSchema,
+  ConfirmBookingPaymentResponseSchema,
+  OrderableBookingResponseSchema,
 } = BookingSchema;
 
 export type StaffBookingPricePreviewRequestDto = z.infer<
@@ -84,4 +89,22 @@ export type StaffCreateCheckoutInvoiceResponseDto = z.infer<
 
 export type StaffCheckoutPaymentRequestDto = z.infer<
   typeof StaffCheckoutPaymentRequestSchema
+>;
+
+export type UpdateBookingStatusRequestDto = z.infer<
+  typeof UpdateBookingStatusRequestSchema
+>;
+export type UpdateBookingStatusResponseDto = z.infer<
+  typeof UpdateBookingStatusResponseSchema
+>;
+
+export type ConfirmBookingPaymentRequestDto = z.infer<
+  typeof ConfirmBookingPaymentRequestSchema
+>;
+export type ConfirmBookingPaymentResponseDto = z.infer<
+  typeof ConfirmBookingPaymentResponseSchema
+>;
+
+export type OrderableBookingResponseDto = z.infer<
+  typeof OrderableBookingResponseSchema
 >;

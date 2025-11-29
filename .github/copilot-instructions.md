@@ -678,7 +678,7 @@ import { format, parseISO } from "date-fns";
 weekStart: format(currentWeekStart, "yyyy/MM/dd");
 
 // For display
-format(parseISO(booking.segmentFrom), "dd/MM/yyyy HH:mm");
+format(parseISO(booking.segmentFrom), " HH:mm dd/MM/yyyy");
 ```
 
 ### UI Component Styling
@@ -720,7 +720,7 @@ npm run build        # Production build
 ```typescript
 import type { Route } from "./+types/login";
 
-export const loader = async ({ request, params }: Route.LoaderArgs) => {};
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {};
 export default function Component({ loaderData }: Route.ComponentProps) {}
 ```
 

@@ -168,47 +168,70 @@ export default function AddMenuItemDialog({
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {filteredMenuItems.map((item) => (
-                    <Card
-                      key={item.itemId}
-                      className={`p-3 cursor-pointer transition-all hover:shadow-md ${
-                        selectedItem?.itemId === item.itemId
-                          ? "border-primary bg-primary/5"
-                          : ""
-                      }`}
-                      onClick={() => setSelectedItem(item)}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm truncate">
-                              {item.name}
-                            </p>
-                            {!item.active && (
-                              <Badge variant="destructive" className="text-xs">
-                                Hết món
-                              </Badge>
+                  {filteredMenuItems.map((item) => {
+                    const isOutOfStock = item.maxQuantityAvailable === 0;
+                    const isLowStock =
+                      item.maxQuantityAvailable > 0 &&
+                      item.maxQuantityAvailable <= 5;
+
+                    return (
+                      <Card
+                        key={item.itemId}
+                        className={`p-3 cursor-pointer transition-all hover:shadow-md ${
+                          selectedItem?.itemId === item.itemId
+                            ? "border-primary bg-primary/5"
+                            : ""
+                        } ${isOutOfStock ? "opacity-60" : ""}`}
+                        onClick={() => !isOutOfStock && setSelectedItem(item)}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-medium text-sm truncate">
+                                {item.name}
+                              </p>
+                              {!item.active && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
+                                  Hết món
+                                </Badge>
+                              )}
+                              {isOutOfStock && item.active && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
+                                  Hết hàng
+                                </Badge>
+                              )}
+                              {isLowStock && item.active && (
+                                <Badge variant="warning" className="text-xs">
+                                  Còn {item.maxQuantityAvailable}
+                                </Badge>
+                              )}
+                            </div>
+                            {item.description && (
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {item.description}
+                              </p>
                             )}
-                          </div>
-                          {item.description && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {item.description}
+                            <p className="text-sm font-semibold text-primary mt-2">
+                              {formatMoney(item.price).vndFormatted}
                             </p>
+                          </div>
+                          {item.imageUrls && item.imageUrls.length > 0 && (
+                            <Image
+                              src={item.imageUrls[0]}
+                              alt={item.name}
+                              className="w-16 h-16 object-cover rounded"
+                            />
                           )}
-                          <p className="text-sm font-semibold text-primary mt-2">
-                            {formatMoney(item.price).vndFormatted}
-                          </p>
                         </div>
-                        {item.imageUrls && item.imageUrls.length > 0 && (
-                          <Image
-                            src={item.imageUrls[0]}
-                            alt={item.name}
-                            className="w-16 h-16 object-cover rounded"
-                          />
-                        )}
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -224,6 +247,11 @@ export default function AddMenuItemDialog({
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatMoney(selectedItem.price).vndFormatted}
                   </p>
+                  {selectedItem.maxQuantityAvailable !== undefined && (
+                    <Badge variant="secondary" className="text-xs mt-2">
+                      Còn lại: {selectedItem.maxQuantityAvailable}
+                    </Badge>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -231,9 +259,24 @@ export default function AddMenuItemDialog({
                   <div className="flex items-center gap-2">
                     <Counter
                       value={quantity}
-                      onChange={(value) => setQuantity(Math.max(1, value || 1))}
+                      onChange={(value) => {
+                        const newValue = Math.max(1, value || 1);
+                        if (
+                          selectedItem.maxQuantityAvailable !== undefined &&
+                          newValue > selectedItem.maxQuantityAvailable
+                        ) {
+                          return; // Prevent exceeding max
+                        }
+                        setQuantity(newValue);
+                      }}
                     />
                   </div>
+                  {selectedItem.maxQuantityAvailable !== undefined &&
+                    quantity >= selectedItem.maxQuantityAvailable && (
+                      <p className="text-xs text-warning">
+                        Đã đạt số lượng tối đa
+                      </p>
+                    )}
                 </div>
 
                 <div className="pt-2 border-t space-y-1">

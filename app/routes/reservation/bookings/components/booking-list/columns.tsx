@@ -1,9 +1,10 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { vi } from "date-fns/locale";
 import type z from "zod";
 import { Badge } from "~/components/ui/badge";
-import { ActionCell } from "../../fragments/action-cell.list";
+import { ActionCell } from "../../fragments/actions.cell.";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import {
   BOOKING_SOURCES,
@@ -15,21 +16,27 @@ type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [
   {
     accessorKey: "index",
-    header: "STT",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STT" />
+    ),
     cell: ({ row }) => {
       return row.index + 1;
     },
   },
   {
     accessorKey: "bookingCode",
-    header: "Mã đặt phòng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Mã đặt phòng" />
+    ),
     cell: ({ row }) => {
       return <BookingDetailDialog bookingCode={row.original.bookingCode!} />;
     },
   },
   {
     accessorKey: "source",
-    header: "Kênh bán",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Kênh bán" />
+    ),
     cell: ({ row }) => {
       return (
         <span>
@@ -43,11 +50,15 @@ export const columns: ColumnDef<BookingListItem>[] = [
 
   {
     accessorKey: "customerName",
-    header: "Tên khách hàng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tên khách hàng" />
+    ),
   },
   {
     accessorKey: "checkinDate",
-    header: "Ngày nhận phòng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Ngày nhận phòng" />
+    ),
     cell: ({ row }) => {
       return (
         <span>
@@ -60,7 +71,9 @@ export const columns: ColumnDef<BookingListItem>[] = [
   },
   {
     accessorKey: "checkoutDate",
-    header: "Ngày trả phòng",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Ngày trả phòng" />
+    ),
     cell: ({ row }) => {
       return (
         <span>
@@ -73,7 +86,9 @@ export const columns: ColumnDef<BookingListItem>[] = [
   },
   {
     accessorKey: "status",
-    header: "Trạng thái",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
     cell: ({ row }) => {
       return (
         <Badge
@@ -94,5 +109,7 @@ export const columns: ColumnDef<BookingListItem>[] = [
     accessorKey: "action",
     header: () => null,
     cell: ({ row }) => <ActionCell row={row} />,
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

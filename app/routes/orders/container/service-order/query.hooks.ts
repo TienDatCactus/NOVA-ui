@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { OrderService } from "~/services/api/orders";
 
 /**
- * Get list of all service orders (or filter by booking)
+ * Get list of all service orders (or filter by date)
  */
 export function useServiceOrderList(date?: string) {
   return useQuery({
@@ -10,10 +10,10 @@ export function useServiceOrderList(date?: string) {
     queryFn: async () => {
       return await OrderService.getServiceOrderList(date);
     },
-    staleTime: 30 * 1000,
+    staleTime: 30 * 1000, // 30 seconds
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 

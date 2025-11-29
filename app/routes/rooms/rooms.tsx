@@ -1,16 +1,10 @@
 import type { Route } from "./+types/rooms";
-import CreateRoomDialog from "./components/create-room.dialog";
-import RoomsDataTable from "./components/rooms-list";
-import { useRoomTypes } from "./container/room-types/query.hooks";
-import useRoomsContainer from "./container/rooms/container.hooks";
-import BulkActionsToolbar from "./fragments/rooms/bulk-action.dialog";
+import RoomsDataTable from "./components/rooms/rooms-list";
+import useRoomFilters from "./container/rooms/filter.hooks";
+import { useRooms } from "./container/rooms/query.hooks";
 import RoomsViewLayout from "./layouts/rooms-view.layout";
 
-export const action = async ({ request, params }: Route.ActionArgs) => {
-  return {};
-};
-
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
   return {};
 };
 
@@ -18,48 +12,22 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { data: roomTypes } = useRoomTypes();
-  const {
-    filteredRooms,
-    isPending,
-    filters,
-    updateFilter,
-    resetFilters,
-    setCreateDialogOpen,
-    handleBulkDelete,
-    handleBulkStatusChange,
-    handleClearSelection,
-    selectedRooms,
-    setSelectedRooms,
-    createDialogOpen,
-  } = useRoomsContainer();
+  const { filters, updateFilter, resetFilters, filterRooms } = useRoomFilters();
+  const { data: rooms, isPending } = useRooms({
+    date: filters.date,
+    status: filters.status,
+    typeId: filters.typeId,
+  });
+  const filteredRooms = rooms ? filterRooms(rooms) : [];
+
   return (
     <RoomsViewLayout
       filters={filters}
       onFilterChange={updateFilter}
       onResetFilters={resetFilters}
       totalRooms={filteredRooms.length}
-      onAddRoom={() => setCreateDialogOpen(true)}
     >
-      <BulkActionsToolbar
-        selectedRooms={selectedRooms}
-        onBulkDelete={handleBulkDelete}
-        onBulkStatusChange={handleBulkStatusChange}
-        onClearSelection={handleClearSelection}
-      />
-
-      <RoomsDataTable
-        rooms={filteredRooms}
-        isLoading={isPending}
-        onAddRoom={() => setCreateDialogOpen(true)}
-        onSelectionChange={setSelectedRooms}
-      />
-
-      <CreateRoomDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-        roomTypes={roomTypes}
-      />
+      <RoomsDataTable rooms={filteredRooms} isLoading={isPending} />
     </RoomsViewLayout>
   );
 }

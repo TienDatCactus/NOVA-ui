@@ -8,12 +8,12 @@ import { OrderService } from "~/services/api/orders";
  */
 export function usePOSOrderList(date?: string) {
   return useQuery({
-    queryKey: ["pos-order-list", date],
+    queryKey: ["pos-order-list", date ? date : ""],
     queryFn: async () => await OrderService.getPosOrderList(date),
     staleTime: 30 * 1000, // 30 seconds
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 }
 

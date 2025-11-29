@@ -1,7 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { BedDouble, Calendar, Loader2, Users, Utensils } from "lucide-react";
+import {
+  BedDouble,
+  Calendar,
+  CircleAlert,
+  DollarSign,
+  Users,
+  Utensils,
+  Wallet,
+} from "lucide-react";
 import { forwardRef, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -18,14 +26,33 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
 import { formatMoney, onError, useCalculateNights } from "~/lib/utils";
 import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
 import type { StaffBookingPricePreviewRequestDto } from "~/services/api/booking/dto";
 import { FormSchema } from "~/services/schema/forms.schema";
 import type { ReviewPaymentFormData } from "~/services/types/forms.types";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { useServiceOrderStore } from "~/store/service-order.store";
 import useCreateBookingMutation from "../container/create-booking-mutation.hooks";
@@ -44,14 +71,23 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
     const setData = useCreateBookingStore((s) => s.setData);
     const serviceOrderServices = useServiceOrderStore((s) => s.services);
 
+    const isRoomBlock = storeData.bookingType === "RoomBlock";
+
     const { mutateAsync, isPending: isSubmitting } = useCreateBookingMutation();
 
     const form = useForm<ReviewPaymentFormData>({
       resolver: zodResolver(ReviewPaymentFormSchema),
       defaultValues: {
         specialRequest: storeData.specialRequest || "",
-        overridePrice: storeData.overridePrice || null,
+        overridePrice: isRoomBlock ? 0 : storeData.overridePrice || null,
         serviceOrder: undefined, // Services come from global store
+        roomPayment: isRoomBlock
+          ? null
+          : {
+              paymentMethod: undefined,
+              paidAmount: undefined,
+              paymentNote: "",
+            },
       },
       mode: "onChange",
     });
@@ -170,16 +206,27 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
     const finalTotal = getFinalTotal();
 
     const onSubmit = async (data: ReviewPaymentFormData) => {
-      // Build service order from global store
-      const finalServiceOrder = {
-        services: serviceOrderServices,
-      };
+      const finalServiceOrder = isRoomBlock
+        ? undefined
+        : {
+            services: serviceOrderServices,
+          };
 
-      // Save form data to store
+      const finalRoomPayment = isRoomBlock
+        ? undefined
+        : data.roomPayment?.paymentMethod && data.roomPayment?.paidAmount
+          ? {
+              paymentMethod: data.roomPayment.paymentMethod,
+              paidAmount: data.roomPayment.paidAmount,
+              paymentNote: data.roomPayment.paymentNote || undefined,
+            }
+          : undefined;
+
       setData({
         specialRequest: data.specialRequest,
-        overridePrice: data.overridePrice,
+        overridePrice: isRoomBlock ? 0 : data.overridePrice,
         serviceOrder: finalServiceOrder,
+        roomPayment: finalRoomPayment,
       });
 
       try {
@@ -193,9 +240,22 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
           adultsAmount: storeData.adultsAmount!,
           childrenAmount: storeData.childrenAmount ?? 0,
           guestFullName: storeData.guestFullName!,
-          isBreakfastAll: storeData.isBreakfastAll ?? false,
-          overridePrice: data.overridePrice == 0 ? null : data.overridePrice,
+          guestPhone: isRoomBlock ? "" : storeData.guestPhone || "",
+          guestEmail: isRoomBlock ? "" : storeData.guestEmail || "",
+          isBreakfastAll: isRoomBlock
+            ? false
+            : (storeData.isBreakfastAll ?? false),
+          breakfastDates: isRoomBlock ? [] : storeData.breakfastDates,
+          overridePrice: isRoomBlock
+            ? 0
+            : data.overridePrice == 0
+              ? null
+              : data.overridePrice,
+          internalNote: isRoomBlock
+            ? `ROOM BLOCK - ${storeData.guestFullName}`
+            : storeData.internalNote,
           serviceOrder: finalServiceOrder,
+          roomPayment: finalRoomPayment,
         };
 
         await mutateAsync(bookingData, {
@@ -316,6 +376,12 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                       ))}
                     </div>
                   )}
+                  <span className="flex gap-2 justify-end border-t-2 pt-2">
+                    Tổng:{" "}
+                    <span className="text-primary">
+                      {formatMoney(roomTotal).vndFormatted}
+                    </span>
+                  </span>
                 </div>
 
                 {/* Breakfast */}
@@ -335,11 +401,13 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                             ? `Tất cả (${nights} ngày)`
                             : `${storeData.breakfastDates?.length} ngày`}{" "}
                           :{" "}
-                          <span className="font-medium">
-                            {storeData.breakfastDates
-                              ?.map((date) => format(new Date(date), "dd/MM"))
-                              .join(", ")}
-                          </span>
+                          {!storeData.isBreakfastAll && (
+                            <span className="font-medium">
+                              {storeData.breakfastDates
+                                ?.map((date) => format(new Date(date), "dd/MM"))
+                                .join(", ")}
+                            </span>
+                          )}
                         </span>
                         <span className="font-medium">
                           {formatMoney(breakfastTotal).vndFormatted}
@@ -360,6 +428,7 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                       <div className="flex flex-wrap gap-4">
                         {serviceOrderServices.map((service, idx) => (
                           <ServicePopulateItem
+                            key={idx}
                             itemType={service.itemType}
                             id={service.itemId}
                             quantity={service.quantity}
@@ -367,6 +436,12 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                           />
                         ))}
                       </div>
+                      <span className="flex gap-2 justify-end ">
+                        Tổng:{" "}
+                        <span className="text-primary">
+                          {formatMoney(serviceTotal).vndFormatted}
+                        </span>
+                      </span>
                     </div>
                   </>
                 )}
@@ -374,77 +449,231 @@ export default forwardRef<HTMLFormElement, ReviewPaymentStepProps>(
                 <Separator />
 
                 {/* Total */}
-                <div className="flex justify-between text-lg font-semibold">
+                <div className="flex justify-between items-center text-lg font-semibold">
                   <span>Tổng cộng</span>
                   <span className="text-primary">
-                    {formatMoney(finalTotal).vndFormatted}
+                    <FormField
+                      control={form.control}
+                      name="overridePrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Điều chỉnh giá (Tùy chọn)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              defaultValue={
+                                formatMoney(finalTotal).vndFormatted
+                              }
+                              placeholder={`Giá gốc: ${formatMoney(serverTotalAmount).vndFormatted}`}
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                field.onChange(
+                                  value === "" ? null : Number(value)
+                                );
+                              }}
+                            />
+                          </FormControl>
+
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Special Request */}
-            <FormField
-              control={form.control}
-              name="specialRequest"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Yêu cầu đặc biệt</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Nhập yêu cầu đặc biệt (nếu có)"
-                      {...field}
-                      value={field.value || ""}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="specialRequest"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Yêu cầu đặc biệt</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Nhập yêu cầu đặc biệt (nếu có)"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Các yêu cầu về phòng, giường, hoặc dịch vụ bổ sung
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+              {!isRoomBlock && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="success-outline"
+                      className="w-full"
+                      size={"lg"}
+                    >
+                      <DollarSign />
+                      Thanh toán
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Wallet className="h-5 w-5" />
+                        Thanh toán trước (Tùy chọn)
+                      </DialogTitle>
+                    </DialogHeader>
+                    <FormField
+                      control={form.control}
+                      name="roomPayment.paymentMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phương thức thanh toán</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-40">
+                                <SelectValue placeholder="Chọn phương thức thanh toán" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {PAYMENT_METHODS.map((method) => (
+                                <SelectItem
+                                  key={method.value}
+                                  value={method.value}
+                                >
+                                  {method.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            Để trống nếu khách chưa thanh toán (sẽ trả khi
+                            checkout)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormDescription>
-                    Các yêu cầu về phòng, giường, hoặc dịch vụ bổ sung
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
 
-            {/* Override Price */}
-            <FormField
-              control={form.control}
-              name="overridePrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Điều chỉnh giá (Tùy chọn)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder={`Giá gốc: ${formatMoney(serverTotalAmount).vndFormatted}`}
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value === "" ? null : Number(value));
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {field.value && Number(field.value) > 0 ? (
-                      <span className="text-primary font-medium">
-                        Giá sau điều chỉnh:{" "}
-                        {formatMoney(Number(field.value)).vndFormatted}
-                      </span>
-                    ) : (
-                      "Để trống để sử dụng giá mặc định từ hệ thống"
+                    {form.watch("roomPayment.paymentMethod") && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="roomPayment.paidAmount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Số tiền thanh toán</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  max={finalTotal}
+                                  placeholder={`Tổng cần thanh toán: ${formatMoney(finalTotal).vndFormatted}`}
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(event) =>
+                                    field.onChange(+event.target.value)
+                                  }
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                {field.value && Number(field.value) > 0 ? (
+                                  <div className="space-y-1">
+                                    <p className="text-primary font-medium">
+                                      Đã thanh toán:{" "}
+                                      {
+                                        formatMoney(Number(field.value))
+                                          .vndFormatted
+                                      }
+                                    </p>
+                                    {Number(field.value) <= finalTotal ? (
+                                      <p className="text-muted-foreground">
+                                        Còn lại:{" "}
+                                        {
+                                          formatMoney(
+                                            finalTotal - Number(field.value)
+                                          ).vndFormatted
+                                        }
+                                      </p>
+                                    ) : (
+                                      <p className="text-destructive font-medium">
+                                        Vượt quá tổng hóa đơn{" "}
+                                        {
+                                          formatMoney(
+                                            Number(field.value) - finalTotal
+                                          ).vndFormatted
+                                        }
+                                      </p>
+                                    )}
+                                  </div>
+                                ) : (
+                                  "Nhập số tiền khách đã thanh toán (cọc hoặc toàn bộ)"
+                                )}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="roomPayment.paymentNote"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Ghi chú thanh toán</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Ví dụ: Đã nhận cọc 50% qua chuyển khoản"
+                                  {...field}
+                                  value={field.value || ""}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Thông tin bổ sung về giao dịch thanh toán
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
                     )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="success">Lưu thanh toán</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               )}
-            />
-          </div>
-
-          {isSubmitting && (
-            <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Đang tạo đặt phòng...</span>
             </div>
-          )}
+
+            {/* Room Block Notice - No Payment */}
+            {isRoomBlock && (
+              <Alert variant="destructive" className="shadow-sm">
+                <CircleAlert className="h-4 w-4" />
+                <AlertTitle>Khóa phòng (Room Block)</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p>
+                    Phòng sẽ được khóa với giá{" "}
+                    <strong className="text-foreground">0 VND</strong>. Không
+                    cần thanh toán và dịch vụ bổ sung. Phòng không thể được đặt
+                    bởi khách hàng khác trong thời gian này.
+                  </p>
+                  <p className="text-xs">
+                    Lý do khóa:{" "}
+                    <span className="text-foreground font-medium">
+                      {storeData.guestFullName}
+                    </span>
+                  </p>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Payment Dialog - Hidden for RoomBlock */}
+          </div>
         </form>
       </Form>
     );

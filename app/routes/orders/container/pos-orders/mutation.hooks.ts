@@ -1,10 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { OrderService } from "~/services/api/orders";
 import type {
   CreatePOSOrderRequestDto,
   AddSingleItemToPOSOrderRequestDto,
   AddBatchItemsToPOSOrderRequestDto,
-  POSOrderPayNowRequestDto,
+  OrderPayNowRequestDto,
+  CreatePOSOrderWithItemsRequestDto,
 } from "~/services/api/orders/dto";
 
 /**
@@ -19,8 +21,46 @@ export function useCreatePOSOrder() {
     mutationFn: async (data: CreatePOSOrderRequestDto) => {
       return await OrderService.createPOSOrder(data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+    onSuccess: (_, data) => {
+      // Invalidate all POS order lists (all dates)
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-list"],
+        refetchType: "active",
+      });
+      // Invalidate all order details
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail"],
+        refetchType: "active",
+      });
+      // Invalidate checkout pending charges
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", data.bookingId],
+        refetchType: "active",
+      });
+      toast.success("Đã tạo order thành công");
+    },
+  });
+}
+export function useCreatePOSOrderWithItems() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreatePOSOrderWithItemsRequestDto) => {
+      return await OrderService.createPosOrderWithItems(data);
+    },
+    onSuccess: (_, data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-list"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", data.bookingId],
+        refetchType: "active",
+      });
     },
   });
 }
@@ -49,6 +89,10 @@ export function useAddSingleItemToPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã thêm món vào order");
     },
   });
 }
@@ -77,6 +121,10 @@ export function useAddBatchItemsToPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã thêm các món vào order");
     },
   });
 }
@@ -105,6 +153,10 @@ export function useDeleteItemFromPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã xóa món khỏi order");
     },
   });
 }
@@ -127,6 +179,10 @@ export function useCompletePOSOrder() {
         queryKey: ["pos-order-detail", orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã hoàn thành order");
     },
   });
 }
@@ -149,6 +205,10 @@ export function useCancelPOSOrder() {
         queryKey: ["pos-order-detail", orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã hủy order");
     },
   });
 }
@@ -169,7 +229,7 @@ export function usePayPOSOrderNow() {
       data,
     }: {
       orderId: string;
-      data: POSOrderPayNowRequestDto;
+      data: OrderPayNowRequestDto;
     }) => {
       return await OrderService.payPOSOrderNow(orderId, data);
     },
@@ -178,6 +238,10 @@ export function usePayPOSOrderNow() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges"],
+      });
+      toast.success("Đã thanh toán order");
     },
   });
 }
@@ -206,6 +270,7 @@ export function useSetScheduledPOSOrder() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      toast.success("Đã cập nhật thời gian phục vụ");
     },
   });
 }
@@ -240,34 +305,7 @@ export function useSetServedPOSOrderItem() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
-    },
-  });
-}
-
-/**
- * Update note/comment for POS order
- * @param orderId - POS Order ID
- * @param note - Note text to save
- * Invalidates: specific order detail + pos-order-list
- */
-export function useUpdatePOSOrderNote() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      orderId,
-      note,
-    }: {
-      orderId: string;
-      note: string;
-    }) => {
-      return await OrderService.updatePOSOrderNote(orderId, { note });
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["pos-order-detail", variables.orderId],
-      });
-      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      toast.success("Đã đánh dấu món đã phục vụ");
     },
   });
 }
@@ -304,11 +342,13 @@ export function useUpdateScheduledTime() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      toast.success("Đã cập nhật thời gian phục vụ");
     },
   });
 }
 
 export function useMarkItemServed() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({
       orderId,
@@ -322,6 +362,40 @@ export function useMarkItemServed() {
       return await OrderService.setServedOrderItem(orderId, itemId, {
         servedAt,
       });
+    },
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      qc.invalidateQueries({ queryKey: ["pos-order-list"] });
+    },
+  });
+}
+
+/**
+ * Update note/comment for POS order
+ * @param orderId - POS Order ID
+ * @param note - Note text to save
+ * Invalidates: specific order detail + pos-order-list
+ */
+export function useUpdatePOSOrderNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      note,
+    }: {
+      orderId: string;
+      note: string;
+    }) => {
+      return await OrderService.updatePOSOrderNote(orderId, { note });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }

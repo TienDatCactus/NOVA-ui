@@ -25,7 +25,7 @@ const UserDetailResponseSchema = UserItemSchema;
 
 // POST /api/Users - Create request body
 const CreateUserSchema = z.object({
-  userName: z.string().min(1, "Tên đăng nhập không được để trống"),
+  userName: z.string().min(1, "Tên đăng nhập không được để trống").trim(),
   email: z
     .string()
     .min(1, "Email không được để trống")
@@ -34,7 +34,8 @@ const CreateUserSchema = z.object({
     .string()
     .min(1, "Họ tên không được để trống")
     .max(32, "Họ tên không được quá 32 ký tự")
-    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ tên không được chứa ký tự đặc biệt hoặc số"),
+    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ tên không được chứa ký tự đặc biệt hoặc số")
+    .trim(),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
   phoneNumber: z
     .string()
@@ -62,7 +63,8 @@ const UpdateUserSchema = z.object({
     .string()
     .min(1, "Họ tên không được để trống")
     .max(32, "Họ tên không được quá 32 ký tự")
-    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ tên không được chứa ký tự đặc biệt hoặc số"),
+    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ tên không được chứa ký tự đặc biệt hoặc số")
+    .trim(),
   email: z
     .string()
     .min(1, "Email không được để trống")
@@ -83,13 +85,7 @@ const UpdateUserResponseSchema = z.object({
 });
 
 // GET /api/Users/roles - Roles list response
-const RoleListResponseSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
-  data: z.array(z.string()),
-  meta: z.string().nullable().optional(),
-});
+const RoleListResponseSchema = z.array(z.string());
 
 // POST /api/Users/{id}/lock - Lock user request
 const LockUserSchema = z.object({
@@ -173,6 +169,14 @@ const ChangePasswordResponseSchema = z.object({
   meta: z.string().nullable().optional(),
 });
 
+const ChatStaffListItemSchema = z.object({
+  id: z.string(),
+  fullName: z.string(),
+  userName: z.string(),
+  email: z.string(),
+});
+
+const ChatStaffListResponseSchema = z.array(ChatStaffListItemSchema);
 export const UserSchema = {
   UserItemSchema,
   UserListResponseSchema,
@@ -191,4 +195,6 @@ export const UserSchema = {
   RemoveRolesResponseSchema,
   ChangePasswordSchema,
   ChangePasswordResponseSchema,
+  ChatStaffListResponseSchema,
+  ChatStaffListItemSchema,
 };

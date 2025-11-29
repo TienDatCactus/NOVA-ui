@@ -1,13 +1,17 @@
 import {
   type ColumnDef,
+  type ColumnFiltersState,
   type ExpandedState,
   type RowSelectionState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { Plus, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,103 +23,122 @@ import {
 import { cn } from "~/lib/utils";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import ServiceTypeDetailRow from "../../fragments/service-types/detail.row";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Input } from "~/components/ui/input";
+import CreateServiceTypeDialog from "../create-service-type.dialog";
+import { Button } from "~/components/ui/button";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
   columns,
   data,
-  onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [open, setOpen] = useState(false);
   const table = useReactTable({
     data,
     columns,
     state: {
       rowSelection,
+      columnFilters,
     },
     onRowSelectionChange: setRowSelection,
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getRowCanExpand: (row) => true,
     getRowId: (row) => row.id,
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
-  useEffect(() => {
-    const selectedRows = table
-      .getSelectedRowModel()
-      .rows.map((row) => row.original);
-    onSelectionChange?.(selectedRows);
-  }, [rowSelection, onSelectionChange, table]);
-
   return (
-    <div className="rounded-md border bg-card">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
+    <div className="grid gap-2">
+      <div className="flex items-center justify-between py-4">
+        <Input
+          startAddon={<Search />}
+          placeholder="Tìm theo tên loại dịch vụ..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <Button size="sm" onClick={() => setOpen(true)}>
+          <Plus />
+          Tạo loại dịch vụ mới
+        </Button>
+      </div>
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => {
                 return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => {
-              return (
-                <React.Fragment key={row.id}>
-                  <TableRow
-                    data-state={row.getIsSelected() && "selected"}
-                    className={cn("h-16 transition-all")}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.getIsExpanded() && (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className="p-0">
-                        <ServiceTypeDetailRow type={row.original} />
-                      </TableCell>
+                  <React.Fragment key={row.id}>
+                    <TableRow
+                      data-state={row.getIsSelected() && "selected"}
+                      className={cn("h-16 transition-all")}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )}
-                </React.Fragment>
-              );
-            })
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center text-muted-foreground"
-              >
-                Không có dữ liệu
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                    {row.getIsExpanded() && (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="p-0">
+                          <ServiceTypeDetailRow type={row.original} />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  Không có dữ liệu
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <DataTablePagination table={table} />
+      <CreateServiceTypeDialog onClose={() => setOpen(false)} open={open} />
     </div>
   );
 }

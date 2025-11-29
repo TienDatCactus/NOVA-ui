@@ -1,154 +1,228 @@
+import {
+  Ban,
+  CalendarClock,
+  CheckCircle2,
+  CreditCard,
+  MoreVertical,
+  Printer,
+  XCircle,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
-  CheckCircle,
-  XCircle,
-  Calendar,
-  CreditCard,
-  Loader2,
-} from "lucide-react";
-import type { ServiceOrderDetailDto } from "~/services/api/orders/dto";
-import { useState } from "react";
-import UpdateScheduleDialog from "./update-schedule.dialog";
-import PaymentOrderSheet from "../payment-order.sheet";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import type { ServiceOrderPayNowRequestDto } from "~/services/api/orders/dto";
 import {
-  useCompleteServiceOrder,
   useCancelServiceOrder,
+  useCompleteServiceOrder,
   usePayServiceOrderNow,
+  useUpdateServiceOrderSchedule,
 } from "../../container/service-order/mutation.hooks";
-import { useServiceOrderDetail } from "../../container/service-order/query.hooks";
-import { toast } from "sonner";
-import type { PaymentSchema } from "~/services/schema/payment.schema";
-import type z from "zod";
-import { OrderSchema } from "~/services/api/orders/order.schema";
+import PaymentOrderSheet from "../payment-order.sheet";
+import UpdateScheduleDialog from "../update-schedule.dialog";
 
-const { OrderPayNowRequestSchema } = OrderSchema;
+// Giả định type
 
-type PaymentFormData = z.infer<typeof OrderPayNowRequestSchema>;
-interface ServiceOrderActionsProps {
+interface ActionProps {
   orderId: string;
+  status: string;
+  currentScheduledTime?: string | null;
 }
 
-export default function ServiceOrderActions({
-  orderId,
-}: ServiceOrderActionsProps) {
-  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-
-  const { data: order, isLoading } = useServiceOrderDetail(orderId, {
-    enabled: true,
+// --- LOGIC HOOK ---
+function useServiceOrderLogic({ orderId }: { orderId: string }) {
+  const [dialogs, setDialogs] = useState({
+    pay: false,
+    schedule: false,
   });
+
+  const toggle = (key: keyof typeof dialogs, value: boolean) =>
+    setDialogs((prev) => ({ ...prev, [key]: value }));
+
   const completeOrder = useCompleteServiceOrder();
   const cancelOrder = useCancelServiceOrder();
   const payNow = usePayServiceOrderNow();
+  const updateSchedule = useUpdateServiceOrderSchedule();
 
-  const canComplete = order?.status === "Scheduled";
-  const canCancel = order?.status === "Scheduled";
-  const canReschedule = order?.status === "Scheduled";
-  const canPay = order?.status === "Scheduled";
-  const handlePayNow = (data: PaymentFormData) => {
-    payNow.mutate(
-      {
-        orderId,
-        data,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Thanh toán thành công!");
-          setShowPaymentDialog(false);
-        },
-        onError: () => {
-          toast.error("Thanh toán thất bại. Vui lòng thử lại.");
-        },
-      }
-    );
+  const handlers = {
+    handleComplete: () =>
+      completeOrder.mutate(orderId, {
+        onSuccess: () => toast.success("Dịch vụ đã hoàn thành!"),
+      }),
+    handleCancel: () =>
+      cancelOrder.mutate(orderId, {
+        onSuccess: () => toast.success("Đã hủy dịch vụ"),
+      }),
+    handlePay: (data: ServiceOrderPayNowRequestDto) => {
+      payNow.mutate(
+        { orderId, data },
+        {
+          onSuccess: () => {
+            toggle("pay", false);
+            toast.success("Thanh toán thành công!");
+          },
+        }
+      );
+    },
+    handleUpdateSchedule: (date: Date) => {
+      updateSchedule.mutate(
+        { orderId, scheduledAt: date },
+        {
+          onSuccess: () => {
+            toggle("schedule", false);
+            toast.success("Đã cập nhật lịch!");
+          },
+        }
+      );
+    },
   };
+
+  return {
+    dialogs,
+    toggle,
+    handlers,
+    loading: {
+      isCompleting: completeOrder.isPending,
+      isPaying: payNow.isPending,
+      isCancelling: cancelOrder.isPending,
+    },
+  };
+}
+
+// --- COMPONENTS ---
+
+/**
+ * 1. Menu góc trên: Chứa các tác vụ phụ hoặc tác vụ quản lý
+ */
+export function ServiceActionMenu({
+  orderId,
+  status,
+  currentScheduledTime,
+}: ActionProps) {
+  const { dialogs, toggle, handlers, loading } = useServiceOrderLogic({
+    orderId,
+  });
+  const isEditable = status === "Scheduled";
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        {isLoading ? (
-          <Button variant="ghost" size="sm" disabled>
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            Đang tải...
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-400 hover:text-gray-900"
+          >
+            <MoreVertical className="h-4 w-4" />
           </Button>
-        ) : !order ? (
-          <Button variant="ghost" size="sm" disabled>
-            Lỗi tải dữ liệu
-          </Button>
-        ) : (
-          <>
-            {/* {canComplete && (
-              <Button
-                variant="success-outline"
-                size="sm"
-                onClick={() => completeOrder.mutate(order.id)}
-                disabled={completeOrder.isPending}
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Hoàn thành
-              </Button>
-            )} */}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>Quản lý dịch vụ</DropdownMenuLabel>
+          <DropdownMenuSeparator />
 
-            {canReschedule && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowScheduleDialog(true);
-                }}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Đổi lịch
-              </Button>
-            )}
+          <DropdownMenuItem
+            disabled={!isEditable}
+            onClick={() => toggle("schedule", true)}
+          >
+            <CalendarClock className="mr-2 h-4 w-4" /> Đổi lịch hẹn
+          </DropdownMenuItem>
 
-            {canPay && (
-              <Button
-                variant="info"
-                size="sm"
-                onClick={() => {
-                  setShowPaymentDialog(true);
-                }}
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                Thanh toán
-              </Button>
-            )}
+          {/* Ví dụ thêm nút In phiếu nếu cần */}
+          <DropdownMenuItem>
+            <Printer className="mr-2 h-4 w-4" /> In phiếu dịch vụ
+          </DropdownMenuItem>
 
-            {canCancel && (
-              <Button
-                variant="destructive-outline"
-                size="sm"
-                onClick={() => cancelOrder.mutate(order.id)}
-                disabled={cancelOrder.isPending}
+          {isEditable && (
+            <>
+              <DropdownMenuSeparator />
+              {/* Trigger Cancel Logic */}
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={handlers.handleCancel}
               >
-                <XCircle className="h-4 w-4 mr-2" />
-                Hủy đơn
-              </Button>
-            )}
-          </>
-        )}
-      </div>
+                <Ban className="mr-2 h-4 w-4" /> Hủy dịch vụ
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      {order && showScheduleDialog && (
+      {/* Dialogs */}
+      {dialogs.schedule && (
         <UpdateScheduleDialog
-          orderId={order.id}
-          currentScheduledTime={order.scheduledAt}
-          open={showScheduleDialog}
-          onOpenChange={setShowScheduleDialog}
-        />
-      )}
-
-      {order && showPaymentDialog && (
-        <PaymentOrderSheet
-          orderId={order.id}
-          open={showPaymentDialog}
-          onOpenChange={setShowPaymentDialog}
-          onPayNow={handlePayNow}
-          isPaying={payNow.isPending}
-          orderType="service"
+          open={dialogs.schedule}
+          onOpenChange={(v) => toggle("schedule", v)}
+          onConfirm={handlers.handleUpdateSchedule}
+          currentScheduledTime={currentScheduledTime}
         />
       )}
     </>
+  );
+}
+
+/**
+ * 2. Footer Actions: Các nút hành động chính to, rõ ràng
+ */
+export function ServiceFooterActions({ orderId, status }: ActionProps) {
+  const { dialogs, toggle, handlers, loading } = useServiceOrderLogic({
+    orderId,
+  });
+
+  if (status === "Completed") {
+    return (
+      <div className="flex items-center justify-center w-full py-2 bg-green-50 text-green-700 text-sm font-medium rounded border border-green-200">
+        <CheckCircle2 className="mr-2 h-4 w-4" /> Đã hoàn thành
+      </div>
+    );
+  }
+
+  if (status === "Cancelled" || status === "NoShow") {
+    return (
+      <div className="flex items-center justify-center w-full py-2 bg-gray-100 text-gray-500 text-sm font-medium rounded border border-gray-200">
+        <XCircle className="mr-2 h-4 w-4" /> Đã hủy / Không đến
+      </div>
+    );
+  }
+
+  // Status === "Scheduled"
+  return (
+    <div className="grid grid-cols-2 gap-3 w-full">
+      {/* Nút Thanh toán (Có thể thanh toán trước hoặc sau) */}
+      <Button
+        variant="outline"
+        className="border-blue-200 text-blue-700 hover:bg-blue-50"
+        onClick={() => toggle("pay", true)}
+      >
+        <CreditCard className="mr-2 h-4 w-4" /> Thanh toán
+      </Button>
+
+      {/* Nút Hoàn thành (Quan trọng nhất) */}
+      <Button
+        variant="success"
+        onClick={handlers.handleComplete}
+        disabled={loading.isCompleting}
+        className="bg-green-600 hover:bg-green-700 text-white shadow-sm"
+      >
+        <CheckCircle2 className="mr-2 h-4 w-4" /> Hoàn tất
+      </Button>
+
+      {dialogs.pay && (
+        <PaymentOrderSheet
+          orderId={orderId}
+          open={dialogs.pay}
+          onOpenChange={(v) => toggle("pay", v)}
+          onPayNow={handlers.handlePay}
+          isPaying={loading.isPaying}
+          orderType="service"
+        />
+      )}
+    </div>
   );
 }

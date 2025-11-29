@@ -7,17 +7,18 @@ import type { ServicesBreakfastFormData } from "~/services/types/forms.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { useServiceOrderStore } from "~/store/service-order.store";
 
+import { AlertCircle, Plus, UtensilsCrossed } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
+import { Separator } from "~/components/ui/separator";
+import AddServiceDialog from "~/features/order-dialog";
 import { onError, useCalculateNights } from "~/lib/utils";
 import { FormSchema } from "~/services/schema/forms.schema";
-import AddServiceDialog from "~/features/order-dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
-import { Coffee, UtensilsCrossed, Plus } from "lucide-react";
-import { ServiceOrderItem } from "../fragments/service-order-item";
 import { BreakfastSelection } from "../fragments/breakfast-selection";
+import { ServiceOrderTable } from "../fragments/service-order-table";
 
 interface ServicesBreakfastStepProps {
   onNext: () => void;
@@ -45,6 +46,8 @@ export function ServicesBreakfastStep({
             d instanceof Date ? d : new Date(d)
           )
         : [],
+      checkinDate: storeData.checkinDate,
+      checkoutDate: storeData.checkoutDate,
     },
   });
 
@@ -62,10 +65,39 @@ export function ServicesBreakfastStep({
             d instanceof Date ? d : new Date(d)
           )
         : [],
+      checkinDate: storeData.checkinDate,
+      checkoutDate: storeData.checkoutDate,
     });
   }, [storeData, form]);
+  const getInvalidServices = () => {
+    if (!storeData.checkinDate || !storeData.checkoutDate) return [];
+
+    const checkinDate = new Date(storeData.checkinDate);
+    const checkoutDate = new Date(storeData.checkoutDate);
+
+    return services.filter((service) => {
+      if (!service.scheduledDate) return false;
+      const scheduledDate = new Date(service.scheduledDate);
+      return scheduledDate < checkinDate || scheduledDate > checkoutDate;
+    });
+  };
 
   const onSubmit = (data: ServicesBreakfastFormData) => {
+    if (
+      services.length > 0 &&
+      storeData.checkinDate &&
+      storeData.checkoutDate
+    ) {
+      const invalidServices = getInvalidServices();
+
+      if (invalidServices.length > 0) {
+        toast.error(
+          "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú (từ ngày nhận phòng đến ngày trả phòng)"
+        );
+        return;
+      }
+    }
+
     setData({
       isBreakfastAll: data.isBreakfastAll,
       breakfastDates: data.breakfastDates?.map((i) => new Date(i)) || [],
@@ -75,12 +107,9 @@ export function ServicesBreakfastStep({
     onNext();
   };
 
-  const hasBreakfast =
-    form.watch("isBreakfastAll") ||
-    (form.watch("breakfastDates") || []).length > 0;
+  const invalidServices = getInvalidServices();
 
   const handleConfirmServices = () => {
-    // Services are already in the global store when dialog confirms
     setServiceDialogOpen(false);
   };
 
@@ -91,9 +120,24 @@ export function ServicesBreakfastStep({
         onSubmit={form.handleSubmit(onSubmit, onError)}
         className="space-y-6"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Validation Warning - Top Level */}
+        {invalidServices.length > 0 && (
+          <Alert variant="destructive" className="shadow-sm">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>
+              Có {invalidServices.length} dịch vụ nằm ngoài khoảng thời gian lưu
+              trú
+            </AlertTitle>
+            <AlertDescription>
+              Ngày thực hiện dịch vụ phải nằm trong khoảng từ ngày nhận phòng
+              đến ngày trả phòng. Vui lòng chỉnh sửa hoặc xóa các dịch vụ này.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Breakfast Selection */}
-          <div>
+          <div className="space-y-4 h-full">
             {storeData.checkinDate && storeData.checkoutDate && (
               <BreakfastSelection
                 isBreakfastAll={form.watch("isBreakfastAll") || false}
@@ -110,35 +154,48 @@ export function ServicesBreakfastStep({
           </div>
 
           {/* Services Selection */}
-          <div>
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <UtensilsCrossed className="h-5 w-5" />
-                    Dịch vụ kèm theo
-                  </CardTitle>
-                  <Badge variant="secondary" className="text-xs">
-                    Tùy chọn
-                  </Badge>
+          <div className="space-y-4 h-full">
+            <Card className="shadow-sm h-full">
+              <CardHeader className="space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <CardTitle className="text-lg">
+                        Dịch vụ kèm theo
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Tùy chọn thêm
+                      </p>
+                    </div>
+                  </div>
+                  {services.length > 0 && (
+                    <Badge variant="default" className="text-xs font-medium">
+                      {services.length} dịch vụ
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
+
               <CardContent className="space-y-4">
                 {/* Add Service Button */}
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
+                  className="w-full shadow-sm hover:shadow-md transition-shadow"
                   onClick={() => setServiceDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Thêm dịch vụ
                 </Button>
+
                 <AddServiceDialog
                   open={serviceDialogOpen}
                   onOpenChange={setServiceDialogOpen}
                   onConfirm={handleConfirmServices}
                   customerName={storeData.guestFullName}
+                  checkinDate={storeData.checkinDate}
+                  checkoutDate={storeData.checkoutDate}
                 />
 
                 {/* Services List */}
@@ -146,25 +203,35 @@ export function ServicesBreakfastStep({
                   <>
                     <Separator />
                     <div className="space-y-3">
-                      <h4 className="font-semibold text-sm">
-                        Dịch vụ đã chọn ({services.length})
-                      </h4>
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                        {services.map((service) => (
-                          <ServiceOrderItem
-                            key={service.itemId}
-                            service={service}
-                            onRemove={() => removeById(service.itemId)}
-                          />
-                        ))}
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold">
+                          Danh sách dịch vụ
+                        </h4>
+                        <Badge variant="outline" className="text-xs">
+                          {services.length} món
+                        </Badge>
+                      </div>
+
+                      <div className="max-h-[400px] overflow-y-auto">
+                        <ServiceOrderTable
+                          services={services}
+                          onRemove={removeById}
+                          invalidServiceIds={invalidServices.map(
+                            (s) => s.itemId
+                          )}
+                        />
                       </div>
                     </div>
                   </>
                 ) : (
-                  <div className="text-center py-8 text-sm text-muted-foreground">
-                    <UtensilsCrossed className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                    <p>Chưa có dịch vụ nào</p>
-                    <p className="text-xs mt-1">
+                  <div className="rounded-lg border-2 border-dashed bg-muted/30 p-8 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mx-auto mb-3">
+                      <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium mb-1">
+                      Chưa có dịch vụ nào
+                    </p>
+                    <p className="text-xs text-muted-foreground">
                       Nhấn "Thêm dịch vụ" để đặt dịch vụ kèm theo
                     </p>
                   </div>
@@ -177,27 +244,6 @@ export function ServicesBreakfastStep({
                 </p>
               </CardContent>
             </Card>
-          </div>
-        </div>
-
-        {/* Summary Info */}
-        <div className="flex items-center justify-center gap-4 p-4 rounded-lg bg-muted/30">
-          <div className="flex items-center gap-2">
-            <Coffee className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              {hasBreakfast
-                ? form.watch("isBreakfastAll")
-                  ? `Bữa sáng: Tất cả ${nights} ngày`
-                  : `Bữa sáng: ${(form.watch("breakfastDates") || []).length} ngày`
-                : "Không có bữa sáng"}
-            </span>
-          </div>
-          <div className="h-4 w-px bg-border" />
-          <div className="flex items-center gap-2">
-            <UtensilsCrossed className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              Dịch vụ: {services.length} món
-            </span>
           </div>
         </div>
       </form>

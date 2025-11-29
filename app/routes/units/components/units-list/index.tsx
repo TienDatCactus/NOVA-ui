@@ -12,22 +12,16 @@ import {
 } from "~/components/ui/empty";
 import { Package } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import CreateUnitDialog from "../create-unit.dialog";
 
 interface UnitsDataTableProps {
   units: UnitItemDetailResponseDto[];
   isLoading?: boolean;
-  hasFilters?: boolean;
-  onAddUnit: () => void;
-  onSuccess?: () => void;
 }
 
-function UnitsDataTable({
-  units,
-  isLoading,
-  hasFilters,
-  onAddUnit,
-  onSuccess,
-}: UnitsDataTableProps) {
+function UnitsDataTable({ units, isLoading }: UnitsDataTableProps) {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -41,22 +35,6 @@ function UnitsDataTable({
   }
 
   if (!units || units.length === 0) {
-    if (hasFilters) {
-      return (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Package />
-            </EmptyMedia>
-            <EmptyTitle>Không tìm thấy kết quả</EmptyTitle>
-            <EmptyDescription>
-              Thử điều chỉnh bộ lọc hoặc thay đổi từ khóa tìm kiếm
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      );
-    }
-
     return (
       <Empty>
         <EmptyHeader>
@@ -69,18 +47,22 @@ function UnitsDataTable({
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={onAddUnit}>Thêm đơn vị tính đầu tiên</Button>
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            Thêm đơn vị tính đầu tiên
+          </Button>
         </EmptyContent>
+        <CreateUnitDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+        />
       </Empty>
     );
   }
 
   return (
-    <DataTable
-      columns={columns}
-      data={units}
-      onSuccess={onSuccess}
-    />
+    <div className="container mx-auto ">
+      <DataTable columns={columns} data={units} />
+    </div>
   );
 }
 

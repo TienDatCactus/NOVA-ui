@@ -1,11 +1,18 @@
 import {
   type ColumnDef,
+  type ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  useReactTable,
+  getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
-import React from "react";
+import { Search } from "lucide-react";
+import React, { useState } from "react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Input } from "~/components/ui/input";
+import { Card } from "~/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,77 +21,40 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Button } from "~/components/ui/button";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { formatMoney } from "~/lib/utils";
 import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { InvoiceActions } from "../invoice-actions";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  pageCount?: number;
-  currentPage?: number;
-  onPageChange?: (page: number) => void;
 }
 
 export function DataTable<TData extends InvoiceListItemDto, TValue>({
   columns,
   data,
-  pageCount = 1,
-  currentPage = 1,
-  onPageChange,
 }: DataTableProps<TData, TValue>) {
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    state: {
+      columnFilters,
+    },
+    onColumnFiltersChange: setColumnFilters,
+    getExpandedRowModel: getExpandedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    manualPagination: true,
-    pageCount,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getRowCanExpand: () => true,
+    getRowId: (row) => row.invoiceId ?? "",
   });
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1 && onPageChange) {
-      onPageChange(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < pageCount && onPageChange) {
-      onPageChange(currentPage + 1);
-    }
-  };
-
-  const handleFirstPage = () => {
-    if (onPageChange) {
-      onPageChange(1);
-    }
-  };
-
-  const handleLastPage = () => {
-    if (onPageChange) {
-      onPageChange(pageCount);
-    }
-  };
-
-  const handleGoToPage = (page: string) => {
-    if (onPageChange) {
-      onPageChange(Number(page));
-    }
-  };
-
-  // Generate page options for select
-  const pageOptions = Array.from({ length: pageCount }, (_, i) => i + 1);
-
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border bg-card shadow-sm">
+    <div className="grid gap-2">
+      <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -119,6 +89,120 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
                         </TableCell>
                       ))}
                     </TableRow>
+                    {row.getIsExpanded() && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length}
+                          className="p-0 border-b"
+                        >
+                          <div className="flex flex-col md:flex-row gap-6 p-6 bg-muted/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+                            {/* SECTION 1: CONTEXT (Left Side) */}
+                            <div className="flex-1 space-y-4">
+                              <div>
+                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                                  Thông tin khách hàng
+                                </span>
+                                <div className="mt-1 flex items-center gap-2">
+                                  <span className="text-base font-semibold text-foreground">
+                                    {row.original.customerName}
+                                  </span>
+                                  <span className="text-sm text-muted-foreground">
+                                    • {row.original.itemCount} mục
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">
+                                  Phương thức:
+                                </span>
+                                <span className="font-medium text-foreground">
+                                  {PAYMENT_METHODS.find(
+                                    (m) =>
+                                      m.value === row.original.paymentMethod
+                                  )?.label || row.original.paymentMethod}
+                                </span>
+                              </div>
+
+                              {/* Action buttons live here for quick access */}
+                              <div className="pt-2">
+                                <InvoiceActions invoice={row.original} />
+                              </div>
+                            </div>
+
+                            {/* SECTION 2: FINANCIAL BREAKDOWN (Right Side - Receipt Style) */}
+                            <div className="w-full md:w-[300px] bg-background/50 rounded-lg border border-border/50 p-4">
+                              <div className="space-y-2 text-sm">
+                                {/* Row Item */}
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">
+                                    Tạm tính
+                                  </span>
+                                  <span className="font-mono text-foreground">
+                                    {
+                                      formatMoney(row.original.subTotal ?? 0)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">
+                                    VAT
+                                  </span>
+                                  <span className="font-mono text-foreground">
+                                    {
+                                      formatMoney(row.original.vatAmount ?? 0)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">
+                                    Phí dịch vụ
+                                  </span>
+                                  <span className="font-mono text-foreground">
+                                    {
+                                      formatMoney(
+                                        row.original.serviceChargeAmount ?? 0
+                                      ).vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                <div className="my-2 h-px bg-border border-dashed" />
+
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">
+                                    Đã thanh toán
+                                  </span>
+                                  <span className="font-mono text-foreground">
+                                    {
+                                      formatMoney(row.original.paidAmount ?? 0)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                {/* Highlight the Balance */}
+                                <div className="flex justify-between items-center pt-2 mt-2 border-t border-dashed">
+                                  <span className="font-medium text-foreground">
+                                    Còn lại
+                                  </span>
+                                  <span className="font-mono font-bold text-lg text-primary">
+                                    {
+                                      formatMoney(row.original.balance ?? 0)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </React.Fragment>
                 );
               })
@@ -135,61 +219,7 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Trang <span className="font-medium text-foreground">{currentPage}</span> /{" "}
-          <span className="font-medium text-foreground">{pageCount}</span>
-        </div>
-        <div className="flex items-center gap-4">
-          {/* Page selector */}
-          {pageCount > 1 && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Đến trang:</span>
-              <Select
-                value={String(currentPage)}
-                onValueChange={handleGoToPage}
-              >
-                <SelectTrigger className="h-8 w-16">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {pageOptions.map((page) => (
-                    <SelectItem key={page} value={String(page)}>
-                      {page}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Navigation buttons */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePreviousPage}
-              disabled={currentPage <= 1}
-              className="h-8 gap-1"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Trước</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleNextPage}
-              disabled={currentPage >= pageCount}
-              className="h-8 gap-1"
-            >
-              <span className="hidden sm:inline">Sau</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }

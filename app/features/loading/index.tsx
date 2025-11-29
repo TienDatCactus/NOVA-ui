@@ -150,7 +150,7 @@ const GlobalLoader: React.FC<GlobalLoaderProps> = ({
     }
   };
 
-  const loaderContent = (
+  const clientLoaderContent = (
     <div
       className={cn(
         "flex flex-col items-center justify-center gap-4",
@@ -176,12 +176,12 @@ const GlobalLoader: React.FC<GlobalLoaderProps> = ({
   if (fullScreen) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-        {loaderContent}
+        {clientLoaderContent}
       </div>
     );
   }
 
-  return loaderContent;
+  return clientLoaderContent;
 };
 
 export default GlobalLoader;

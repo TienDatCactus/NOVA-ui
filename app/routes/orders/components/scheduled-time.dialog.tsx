@@ -10,7 +10,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Clock, CalendarIcon } from "lucide-react";
-import { format, addMinutes, addHours, parseISO, set } from "date-fns";
+import { format, addMinutes, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -20,6 +20,7 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 type ScheduledTimeDialogProps = {
   open: boolean;
@@ -53,13 +54,17 @@ export default function ScheduledTimeDialog({
       return;
     }
 
+    // Parse time and combine with selected date
     const [hours, minutes] = timeString.split(":").map(Number);
-    const finalDateTime = set(selectedDate, {
-      hours,
-      minutes,
-      seconds: 0,
-      milliseconds: 0,
-    });
+
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const day = selectedDate.getDate();
+
+    // Use Date.UTC to create UTC timestamp to avoid timezone conversion
+    const finalDateTime = new Date(
+      Date.UTC(year, month, day, hours, minutes, 0, 0)
+    );
 
     const servedAtISO = finalDateTime.toISOString();
     onConfirm(servedAtISO);
@@ -85,13 +90,20 @@ export default function ScheduledTimeDialog({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
+      // Preserve the current time when changing date
       const [hours, minutes] = timeString.split(":").map(Number);
-      const newDateTime = set(date, {
-        hours: hours || 0,
-        minutes: minutes || 0,
-        seconds: 0,
-        milliseconds: 0,
-      });
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+      const newDateTime = new Date(
+        year,
+        month,
+        day,
+        hours || 0,
+        minutes || 0,
+        0,
+        0
+      );
       setSelectedDate(newDateTime);
       setCalendarOpen(false);
     }
@@ -101,27 +113,18 @@ export default function ScheduledTimeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle>Thời gian phục vụ</DialogTitle>
-              <DialogDescription>
-                Chọn ngày và thời gian mong muốn phục vụ đơn hàng
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle>Thời gian phục vụ</DialogTitle>
+          <DialogDescription>
+            Chọn ngày và thời gian mong muốn phục vụ đơn hàng
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 ">
           {bookingInfo && (
-            <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-              <p className="font-medium text-foreground mb-1">
-                Thông tin booking
-              </p>
-              <p>{bookingInfo}</p>
-            </div>
+            <Alert variant="info" className="mb-2">
+              <AlertTitle> Thông tin booking</AlertTitle>
+              <AlertDescription>{bookingInfo}</AlertDescription>
+            </Alert>
           )}
 
           <div className="space-y-2">

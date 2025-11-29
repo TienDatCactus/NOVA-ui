@@ -1,41 +1,59 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import type { UserItem } from "~/services/api/user/dto";
 import {
   getRoleBadgeColors,
   getRoleDisplayName,
 } from "~/services/types/users.types";
 import ActionsMenuCell from "../../fragments/actions.cell";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import { UserDetailDialog } from "../user-detail-dialog";
 
 export const columns: ColumnDef<UserItem>[] = [
   {
     accessorKey: "fullName",
-    header: "Họ và tên",
-    cell: ({ row }) => (
-      <span className="font-medium">{row.getValue("fullName")}</span>
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Họ và tên" />
     ),
+    cell: ({ row }) => {
+      const [openDetailDialog, setOpenDetailDialog] = useState(false);
+      return (
+        <>
+          <Button
+            onClick={() => setOpenDetailDialog(true)}
+            variant="link"
+            size="sm"
+          >
+            {row.getValue("fullName")}
+          </Button>
+          <UserDetailDialog
+            open={openDetailDialog}
+            user={row.original}
+            onClose={() => setOpenDetailDialog(false)}
+          />
+        </>
+      );
+    },
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Email" />
+    ),
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <span className="text-sm">{row.getValue("email")}</span>
       </div>
     ),
   },
-  {
-    accessorKey: "phoneNumber",
-    header: "Số điện thoại",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.getValue("phoneNumber")}
-      </span>
-    ),
-  },
+
   {
     accessorKey: "roles",
-    header: "Vai trò",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Vai trò" />
+    ),
     cell: ({ row }) => {
       const roles = row.getValue("roles") as string[];
       return (
@@ -58,24 +76,19 @@ export const columns: ColumnDef<UserItem>[] = [
   },
   {
     id: "status",
-    header: "Trạng thái",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
     cell: ({ row }) => {
       const user = row.original;
-      
-      // Check if user is locked: lockoutEnd exists and is in the future
-      const isLocked = user.lockoutEnd && new Date(user.lockoutEnd) > new Date();
-      
+
+      const isLocked =
+        user.lockoutEnd && new Date(user.lockoutEnd) > new Date();
+
       return isLocked ? (
-        <Badge variant="destructive" className="shadow-sm">
-          Bị khóa
-        </Badge>
+        <Badge variant="destructive">Bị khóa</Badge>
       ) : (
-        <Badge
-          variant="outline"
-          className="bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm"
-        >
-          Hoạt động
-        </Badge>
+        <Badge variant="success">Hoạt động</Badge>
       );
     },
   },
@@ -97,5 +110,7 @@ export const columns: ColumnDef<UserItem>[] = [
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];
