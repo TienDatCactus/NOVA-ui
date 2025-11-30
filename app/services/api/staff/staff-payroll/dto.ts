@@ -13,6 +13,7 @@ const {
   UpdatePayrollSchema,
   PayrollComponentInputSchema,
   PayrollComponentTypeEnum,
+  CreateSalaryExpenseRequestSchema,
 } = StaffPayrollSchema;
 
 // DTOs (consistent naming with Dto suffix)
@@ -44,3 +45,7 @@ export const PayrollGridParamsSchema = z.object({
 });
 
 export type PayrollGridParams = z.infer<typeof PayrollGridParamsSchema>;
+
+export type CreateSalaryExpenseRequestDto = z.infer<
+  typeof CreateSalaryExpenseRequestSchema
+>;

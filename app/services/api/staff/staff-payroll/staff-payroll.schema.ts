@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PaymentSchema } from "~/services/schema/payment.schema";
 
 // Enum for UnusedLeaveMode (chỉ 2 options: PayOut và CarryOver)
 export const UnusedLeaveModeEnum = z.enum(["PayOut", "CarryOver"]);
@@ -47,6 +48,8 @@ const PayrollItemSchema = z.object({
   paidAmount: z.number(),
   remainingAmount: z.number(),
   locked: z.boolean(),
+  hasExpense: z.boolean().optional(),
+  expenseId: z.string().optional().nullable(),
   hasUnusedLeavePending: z.boolean().optional(),
   components: z.array(PayrollComponentSchema).optional().default([]),
 });
@@ -98,6 +101,11 @@ const AddComponentFormSchema = z.object({
   effectiveDate: z.string().optional(),
 });
 
+const CreateSalaryExpenseRequestSchema = z.object({
+  paymentMethod: PaymentSchema.PaymentMethodEnum,
+  receiptNumber: z.string(),
+});
+
 export const StaffPayrollSchema = {
   // Core schemas
   PayrollItemSchema,
@@ -119,4 +127,5 @@ export const StaffPayrollSchema = {
 
   // Form schemas
   AddComponentFormSchema,
+  CreateSalaryExpenseRequestSchema,
 };

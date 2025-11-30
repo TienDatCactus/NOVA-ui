@@ -61,6 +61,7 @@ import {
   useCancelBooking,
   useUpdateBookingStatus,
 } from "../container/booking-mutation.hooks";
+import BookingDetailSheet from "./booking-detail.sheet";
 
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
@@ -97,20 +98,11 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     booking.status === "Confirmed" &&
     !!checkinDate &&
     !isBefore(startOfDay(new Date()), startOfDay(checkinDate));
-  const canMarkNoShow = booking.status === "Confirmed" && isPastCheckinDate;
+
   const canCheckOut =
     booking.status === "InHouse" || booking.status === "CheckedIn";
   const canCancel =
     booking.status === "Pending" || booking.status === "Confirmed";
-  const isCheckedOut = booking.status === "CheckedOut";
-
-  const handleConfirmPayment = async () => {
-    try {
-      navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
-    } catch (error) {
-      console.error("Xác nhận thất bại");
-    }
-  };
 
   const handleCheckIn = async () => {
     try {
@@ -286,10 +278,11 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         {/* BODY SECTION: Main Content */}
         <div className="flex-1 px-4 py-4">
           <div className="mb-4 flex items-start justify-between">
-            <div>
-              <h3 className="line-clamp-1 text-lg font-bold text-gray-900 group-hover:text-primary">
-                {booking.customerName || "Khách vãng lai"}
-              </h3>
+            <div className="flex items-start gap-2">
+              <BookingDetailSheet
+                bookingCode={booking.bookingCode!}
+                customerName={booking.customerName || ""}
+              />
               {renderStatusBadge()}
             </div>
           </div>

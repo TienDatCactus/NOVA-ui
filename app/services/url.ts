@@ -263,6 +263,8 @@ const StaffPayroll = {
   exportPayslip: (id: string) => `StaffPayrolls/${id}/export-payslip`,
   refreshDays: "StaffPayrolls/refresh-days",
   refreshSinglePayroll: (id: string) => `StaffPayrolls/${id}/refresh-days`,
+  createSalaryExpense: (payrollId: string) =>
+    `StaffPayrolls/${payrollId}/create-salary-expense`,
 };
 
 const Translation = {

@@ -27,7 +27,6 @@ const StaffCreateBookingSchema = z
     source: BookingSourceEnum,
     otaInformationId: z.string("Mã thông tin OTA không hợp lệ").optional(),
     otaBookingCode: z.string("Mã OTA booking không hợp lệ").optional(),
-    partnerBookingCode: z.string("Mã đối tác không hợp lệ").optional(),
     roomIds: z
       .array(z.string("Mã phòng không hợp lệ"))
       .min(1, "Phải chọn ít nhất 1 phòng cụ thể"),
@@ -124,19 +123,6 @@ const StaffCreateBookingSchema = z
     {
       message: "Booking OTA phải có email khách hàng để xác nhận",
       path: ["guestEmail"],
-    }
-  )
-  .refine(
-    (data) => {
-      // Agency booking requires partnerBookingCode
-      if (data.source === "Agency") {
-        return !!data.partnerBookingCode && data.partnerBookingCode.length > 0;
-      }
-      return true;
-    },
-    {
-      message: "Booking qua đại lý phải có mã đại lý",
-      path: ["partnerBookingCode"],
     }
   );
 

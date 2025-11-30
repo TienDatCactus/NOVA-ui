@@ -142,12 +142,22 @@ export default function PayrollDetailDialog({
                           <p className="text-[11px] text-muted-foreground">
                             Trạng thái
                           </p>
-                          <Badge
-                            variant={payroll.locked ? "default" : "secondary"}
-                            className="text-xs h-5"
-                          >
-                            {payroll.locked ? "Đã khóa" : "Tạm tính"}
-                          </Badge>
+                          <div className="flex gap-2">
+                            <Badge
+                              variant={payroll.locked ? "default" : "secondary"}
+                              className="text-xs h-5"
+                            >
+                              {payroll.locked ? "Đã khóa" : "Tạm tính"}
+                            </Badge>
+                            {payroll.hasExpense && (
+                              <Badge
+                                variant="default"
+                                className="text-xs h-5 bg-green-600"
+                              >
+                                Đã tạo phiếu chi
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -317,6 +327,8 @@ export default function PayrollDetailDialog({
                   payrollId={payrollId}
                   components={payroll.components || []}
                   componentsTotal={payroll.componentsTotal || 0}
+                  hasExpense={payroll.hasExpense}
+                  locked={payroll.locked}
                   onRefresh={refetch}
                 />
               </TabsContent>

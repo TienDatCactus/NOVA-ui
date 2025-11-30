@@ -43,7 +43,8 @@ async function getExpenseDetail(
 async function createExpense(data: unknown): Promise<void> {
   try {
     const parsedData = CreateExpenseRequestSchema.parse(data);
-    await http.post(Expenses.create, parsedData);
+    const resp = await http.post(Expenses.create, parsedData);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -54,7 +55,8 @@ async function updateExpense(expenseId: string, data: unknown): Promise<void> {
   {
     try {
       const parsedData = UpdateExpenseRequestSchema.parse(data);
-      await http.put(Expenses.update(expenseId), parsedData);
+      const resp = await http.put(Expenses.update(expenseId), parsedData);
+      return resp.data;
     } catch (error) {
       console.error(error);
       return Promise.reject(error);
@@ -63,7 +65,8 @@ async function updateExpense(expenseId: string, data: unknown): Promise<void> {
 }
 async function deleteExpense(expenseId: string): Promise<void> {
   try {
-    await http.delete(Expenses.delete(expenseId));
+    const resp = await http.delete(Expenses.delete(expenseId));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

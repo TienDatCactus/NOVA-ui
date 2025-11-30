@@ -74,7 +74,7 @@ async function updateUser(
   data: UpdateUserDto
 ): Promise<UpdateUserResponseDto> {
   try {
-    const resp: any = await http.put(User.update(id), data);
+    const resp = await http.put(User.update(id), data);
     return UpdateUserResponseSchema.parse(resp);
   } catch (error) {
     console.error(error);
@@ -97,7 +97,7 @@ async function lockUser(
   data: LockUserDto
 ): Promise<LockUserResponseDto> {
   try {
-    const resp: any = await http.post(User.lock(id), data);
+    const resp = await http.post(User.lock(id), data);
     return LockUserResponseSchema.parse(resp);
   } catch (error) {
     console.error(error);
@@ -107,7 +107,7 @@ async function lockUser(
 
 async function unlockUser(id: string): Promise<UnlockUserResponseDto> {
   try {
-    const resp: any = await http.post(User.unlock(id));
+    const resp = await http.post(User.unlock(id));
     return UnlockUserResponseSchema.parse(resp);
   } catch (error) {
     console.error(error);
@@ -120,7 +120,7 @@ async function assignRoles(
   data: AssignRolesDto
 ): Promise<AssignRolesResponseDto> {
   try {
-    const resp: any = await http.post(User.assignRoles(id), data);
+    const resp = await http.post(User.assignRoles(id), data);
     return AssignRolesResponseSchema.parse(resp);
   } catch (error) {
     console.error(error);
@@ -133,7 +133,7 @@ async function removeRoles(
   data: RemoveRolesDto
 ): Promise<RemoveRolesResponseDto> {
   try {
-    const resp: any = await http.delete(User.removeRoles(id), { data });
+    const resp = await http.delete(User.removeRoles(id), { data });
     return RemoveRolesResponseSchema.parse(resp);
   } catch (error) {
     return Promise.reject(error);

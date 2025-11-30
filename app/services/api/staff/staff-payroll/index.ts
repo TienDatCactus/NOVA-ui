@@ -11,6 +11,7 @@ import type {
   UpdatePayrollDto,
   PayrollComponentInputDto,
   PayrollComponentListDto,
+  CreateSalaryExpenseRequestDto,
 } from "./dto";
 
 const {
@@ -294,6 +295,20 @@ async function refreshSinglePayroll(
   }
 }
 
+async function createSalaryExpense(
+  payrollId: string,
+  data: CreateSalaryExpenseRequestDto
+): Promise<void> {
+  try {
+    const resp = await http.post(
+      StaffPayroll.createSalaryExpense(payrollId),
+      data
+    );
+    return resp.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
 export const StaffPayrollService = {
   getPayrollGrid,
   generatePayroll,
@@ -311,4 +326,5 @@ export const StaffPayrollService = {
   exportPayslip,
   refreshDays,
   refreshSinglePayroll,
+  createSalaryExpense,
 };

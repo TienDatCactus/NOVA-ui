@@ -280,6 +280,33 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "hasExpense",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Phiếu chi" />
+    ),
+    cell: ({ row }) => {
+      const hasExpense = row.original.hasExpense;
+
+      if (hasExpense) {
+        return (
+          <div className="flex justify-center">
+            <Badge variant="default" className="text-xs bg-green-600">
+              Đã tạo
+            </Badge>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex justify-center">
+          <Badge variant="outline" className="text-xs text-muted-foreground">
+            Chưa tạo
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
     id: "actions",
     header: () => <div className="text-center">Thao tác</div>,
     cell: ({ row, table }) => {

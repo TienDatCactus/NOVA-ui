@@ -211,7 +211,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
             {source === "Agency" && bookingType === "Direct" && (
               <FormField
                 control={form.control}
-                name="partnerBookingCode"
+                name="otaBookingCode"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs">Mã Đại lý</FormLabel>

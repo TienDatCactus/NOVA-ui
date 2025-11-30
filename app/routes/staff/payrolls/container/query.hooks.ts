@@ -7,6 +7,7 @@ import type {
   UpdatePayrollDto,
   ApplyUnusedLeaveDto,
   PayrollComponentInputDto,
+  CreateSalaryExpenseRequestDto,
 } from "~/services/api/staff/staff-payroll/dto";
 import { toast } from "sonner";
 
@@ -255,6 +256,33 @@ export function useRefreshSinglePayroll() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
       queryClient.invalidateQueries({ queryKey: ["payroll-detail", id] });
+    },
+  });
+}
+
+/**
+ * Hook tạo phiếu chi lương
+ */
+export function useCreateSalaryExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      payrollId,
+      data,
+    }: {
+      payrollId: string;
+      data: CreateSalaryExpenseRequestDto;
+    }) => await StaffPayrollService.createSalaryExpense(payrollId, data),
+    onSuccess: (_, variables) => {
+      toast.success("Tạo phiếu chi lương thành công");
+      queryClient.invalidateQueries({ queryKey: ["payrolls"] });
+      queryClient.invalidateQueries({
+        queryKey: ["payroll-detail", variables.payrollId],
+      });
+    },
+    onError: () => {
+      toast.error("Không thể tạo phiếu chi lương. Vui lòng thử lại.");
     },
   });
 }

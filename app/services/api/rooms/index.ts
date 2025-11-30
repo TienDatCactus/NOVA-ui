@@ -131,7 +131,8 @@ async function getAvailableRoomsInternal(
 
 async function deleteRoom(id: string) {
   try {
-    await http.delete(Rooms.delete(id));
+    const resp = await http.delete(Rooms.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
