@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Plus, RotateCcw } from "lucide-react";
+import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -23,7 +23,7 @@ import type {
 } from "~/services/api/booking/dto";
 import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
-import { AddRoomModal } from "./add-room-modal";
+import { AddRoomModal } from "./operations/add-room-modal";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -119,7 +119,7 @@ export default function BookingRoomsBar({
 
   return (
     <>
-      <Card className="shadow-sm flex flex-col w-80">
+      <Card className="shadow-sm flex flex-col w-96">
         <CardHeader className="text-card-foreground">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-medium uppercase">
@@ -137,7 +137,7 @@ export default function BookingRoomsBar({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 overflow-y-auto space-y-2">
+        <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
           {/* Existing Rooms */}
           {bookingDetail.rooms.map((room) => (
             <ExistingRoomItemWrapper
@@ -158,7 +158,6 @@ export default function BookingRoomsBar({
               }
             />
           ))}
-
           {/* New Rooms Being Added */}
           {fields.filter(
             (_, index) => form.watch(`rooms.${index}.action`) === "Add"
@@ -198,23 +197,26 @@ export default function BookingRoomsBar({
               </div>
             </>
           )}
-
           {/* Rooms Being Removed */}
           {fields.filter(
             (_, index) => form.watch(`rooms.${index}.action`) === "Remove"
           ).length > 0 && (
-            <>
-              <Separator className="my-3" />
-              <div className="text-xs font-semibold text-destructive mb-2">
-                Phòng sẽ bị xóa (
-                {
-                  fields.filter(
-                    (_, index) =>
-                      form.watch(`rooms.${index}.action`) === "Remove"
-                  ).length
-                }
-                )
+            <div className="mt-4 space-y-3">
+              {/* Header nhỏ gọn, không chiếm diện tích */}
+              <div className="flex items-center gap-2 px-1">
+                <div className="h-1 w-1 rounded-full bg-destructive" />
+                <span className="text-xs font-semibold text-destructive uppercase tracking-wider">
+                  Đang chờ xóa (
+                  {
+                    fields.filter(
+                      (_, index) =>
+                        form.watch(`rooms.${index}.action`) === "Remove"
+                    ).length
+                  }
+                  )
+                </span>
               </div>
+
               <div className="space-y-2">
                 {fields.map((field, index) => {
                   const action = form.watch(`rooms.${index}.action`);
@@ -231,34 +233,42 @@ export default function BookingRoomsBar({
                   if (!existingRoom) return null;
 
                   return (
-                    <Card
+                    <div
                       key={field.id}
-                      className="bg-destructive/5 border-destructive/20 p-0"
+                      className="group flex items-center justify-between p-3 rounded-lg border border-destructive/20 bg-destructive/5 transition-all hover:bg-destructive/10"
                     >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="font-medium text-sm line-through text-muted-foreground">
-                              {existingRoom.roomName}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {existingRoom.roomTypeName}
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => remove(index)}
-                          >
-                            <RotateCcw /> Hoàn tác
-                          </Button>
+                      {/* Left: Info */}
+                      <div className="flex items-center gap-3">
+                        {/* Icon visual anchor */}
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background/50 text-destructive shadow-sm">
+                          <Trash2 className="h-4 w-4" />
                         </div>
-                      </CardContent>
-                    </Card>
+
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-sm font-medium text-destructive line-through decoration-destructive/50 opacity-80">
+                            {existingRoom.roomName}
+                          </span>
+                          <span className="text-[10px] text-destructive/70 uppercase tracking-wide">
+                            {existingRoom.roomTypeName}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Action */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => remove(index)}
+                        className="h-8 px-3 text-xs text-destructive hover:text-destructive hover:bg-background/80 shadow-sm"
+                      >
+                        <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                        Hoàn tác
+                      </Button>
+                    </div>
                   );
                 })}
               </div>
-            </>
+            </div>
           )}
         </CardContent>
       </Card>

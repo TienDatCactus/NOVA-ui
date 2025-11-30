@@ -1,10 +1,13 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { Badge } from "~/components/ui/badge";
-import { DataTableColumnHeader } from "~/components/table/table-header";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useState } from "react";
+import { DataTableColumnHeader } from "~/components/table/table-header";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import type { StockAdjustmentListItemDto } from "~/services/api/stocks/stock-adjustments/dto";
 import StockAdjustmentActionCell from "../../fragments/stock-adjustment-action.cell";
+import StockAdjustmentDetailDialog from "../stock-adjustment-detail.dialog";
 
 export const columns: ColumnDef<StockAdjustmentListItemDto>[] = [
   {
@@ -12,11 +15,25 @@ export const columns: ColumnDef<StockAdjustmentListItemDto>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Mã phiếu" />
     ),
-    cell: ({ row }) => (
-      <span className="font-mono text-sm font-medium">
-        {row.original.reference}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const [openDetailDialog, setOpenDetailDialog] = useState(false);
+      return (
+        <>
+          <Button
+            onClick={() => setOpenDetailDialog(true)}
+            variant={"link"}
+            size={"sm"}
+          >
+            {row.original.reference}
+          </Button>
+          <StockAdjustmentDetailDialog
+            adjustmentId={row.original.id}
+            onOpenChange={setOpenDetailDialog}
+            open={openDetailDialog}
+          />
+        </>
+      );
+    },
   },
   {
     accessorKey: "adjustmentDate",
@@ -25,7 +42,7 @@ export const columns: ColumnDef<StockAdjustmentListItemDto>[] = [
     ),
     cell: ({ row }) => (
       <span className="text-sm">
-        {format(parseISO(row.original.adjustmentDate), "dd/MM/yyyy HH:mm", {
+        {format(parseISO(row.original.adjustmentDate), " HH:mm dd/MM/yyyy", {
           locale: vi,
         })}
       </span>

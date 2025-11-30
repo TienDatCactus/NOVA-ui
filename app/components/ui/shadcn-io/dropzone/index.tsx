@@ -169,16 +169,16 @@ export const DropzoneEmptyState = ({
   let caption = "";
 
   if (accept) {
-    caption += "Accepts ";
+    caption += "Chấp nhận định dạng: ";
     caption += new Intl.ListFormat("en").format(Object.keys(accept));
   }
 
   if (minSize && maxSize) {
-    caption += ` between ${renderBytes(minSize)} and ${renderBytes(maxSize)}`;
+    caption += ` từ ${renderBytes(minSize)} đến ${renderBytes(maxSize)}`;
   } else if (minSize) {
-    caption += ` at least ${renderBytes(minSize)}`;
+    caption += ` ít nhất ${renderBytes(minSize)}`;
   } else if (maxSize) {
-    caption += ` less than ${renderBytes(maxSize)}`;
+    caption += ` nhỏ hơn ${renderBytes(maxSize)}`;
   }
 
   return (
@@ -187,10 +187,10 @@ export const DropzoneEmptyState = ({
         <UploadIcon size={16} />
       </div>
       <p className="my-2 w-full truncate text-wrap font-medium text-sm">
-        Upload {maxFiles === 1 ? "a file" : "files"}
+        Tải lên {maxFiles === 1 ? "một tệp" : "các tệp"}
       </p>
       <p className="w-full truncate text-wrap text-muted-foreground text-xs">
-        Drag and drop or click to upload
+        Kéo và thả hoặc nhấp để tải lên
       </p>
       {caption && (
         <p className="text-wrap text-muted-foreground text-xs">{caption}.</p>

@@ -1,7 +1,7 @@
 import {
   type LucideIcon,
-  Bath,
   BarChart3,
+  Bath,
   Calendar,
   FileText,
   Grid3x3,
@@ -9,18 +9,20 @@ import {
   HousePlus,
   List,
   ListOrdered,
-  LogIn,
   MessageSquareDot,
   Package,
   PackageSearch,
   Plus,
+  Receipt,
   ReceiptText,
+  ScrollText,
   Settings,
   ShoppingCart,
   Tag,
+  TrendingUp,
+  UserCog,
   Users,
   Utensils,
-  UserCog,
   UtensilsCrossed,
 } from "lucide-react";
 import FE_URL from "~/lib/fe-url";
@@ -68,6 +70,10 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.bookings.list,
       },
       {
+        title: "Hóa đơn đặt phòng",
+        url: "/dashboard/bookings/invoices",
+      },
+      {
         title: "Đặt phòng mới",
         url: FE_URL.dashboard.bookings.newBooking,
       },
@@ -89,7 +95,7 @@ const SIDEBAR_NAV_MAIN: Array<{
     ],
   },
   {
-    title: "Dịch vụ",
+    title: " Dịch vụ & F&B",
     url: FE_URL.dashboard.services.list,
     icon: Utensils,
     items: [
@@ -147,17 +153,14 @@ const SIDEBAR_NAV_MAIN: Array<{
         title: "Vai trò",
         url: FE_URL.dashboard.staff.roles,
       },
-      {
-        title: "Ca làm việc",
-        url: FE_URL.dashboard.staff.workShifts,
-      },
+
       {
         title: "Ngày nghỉ",
-        url: "/dashboard/staff/holidays",
+        url: FE_URL.dashboard.staff.holidays,
       },
       {
-        title: "Lịch làm việc",
-        url: FE_URL.dashboard.staff.schedules,
+        title: "Lịch làm việc của nhân viên",
+        url: FE_URL.dashboard.staff.shifts,
       },
       {
         title: "Bảng lương",
@@ -199,6 +202,16 @@ const SIDEBAR_NAV_MAIN: Array<{
     url: FE_URL.dashboard.invoices,
     icon: ReceiptText,
   },
+  {
+    title: "Chi phí",
+    url: FE_URL.dashboard.expenses,
+    icon: Receipt,
+  },
+  {
+    title: "Báo cáo tài chính",
+    url: FE_URL.dashboard.finances.dashboard,
+    icon: TrendingUp,
+  },
 ];
 
 const SIDEBAR_PROJECTS: Array<{
@@ -207,9 +220,19 @@ const SIDEBAR_PROJECTS: Array<{
   icon: LucideIcon;
 }> = [
   {
+    name: "Ca làm việc",
+    url: FE_URL.dashboard.workShifts,
+    icon: Calendar,
+  },
+  {
     name: "Chat",
     url: FE_URL.dashboard.chat,
     icon: MessageSquareDot,
+  },
+  {
+    name: "Audit Logs",
+    url: FE_URL.dashboard.auditLogs,
+    icon: ScrollText,
   },
   {
     name: "Đơn vị tính",
@@ -218,7 +241,7 @@ const SIDEBAR_PROJECTS: Array<{
   },
   {
     name: "Cài đặt",
-    url: FE_URL.dashboard.settings,
+    url: FE_URL.dashboard.configs,
     icon: Settings,
   },
   {
@@ -311,25 +334,31 @@ const COMMAND_BAR_ROUTES: Array<{
   // Others
   { name: "Tài khoản", icon: Users, href: FE_URL.dashboard.users },
   { name: "Hóa đơn", icon: ReceiptText, href: FE_URL.dashboard.invoices },
+  { name: "Chi phí", icon: Receipt, href: FE_URL.dashboard.expenses },
+  {
+    name: "Báo cáo tài chính",
+    icon: TrendingUp,
+    href: FE_URL.dashboard.finances.dashboard,
+  },
   { name: "Chat", icon: MessageSquareDot, href: FE_URL.dashboard.chat },
   { name: "Đơn vị tính", icon: PackageSearch, href: FE_URL.dashboard.units },
-  { name: "Cài đặt", icon: Settings, href: FE_URL.dashboard.settings },
+  { name: "Cài đặt", icon: Settings, href: FE_URL.dashboard.configs },
   { name: "Trợ giúp", icon: HelpCircle, href: FE_URL.dashboard.help },
 ];
 
 const CUSTOMER_NAVS = [
   { name: "Inbox", icon: Settings, href: FE_URL.customer.inbox },
-  { name: "Services & F&B", icon: Settings, href: FE_URL.customer.inbox },
-  { name: "Guidelines", icon: Settings, href: FE_URL.customer.inbox },
+  { name: "Catalog", icon: Settings, href: FE_URL.customer.catalog },
+  { name: "Guidelines", icon: Settings, href: FE_URL.customer.guidelines },
   { name: "Map", icon: Settings, href: FE_URL.customer.map },
 ];
 export {
   CHECK_IN_TIME,
   CHECK_OUT_TIME,
   COMMAND_BAR_ROUTES,
+  CUSTOMER_NAVS,
   SIDEBAR_NAV_MAIN,
   SIDEBAR_PROJECTS,
   SIDEBAR_TEAMS,
   SUPPORTED_LANGUAGES,
-  CUSTOMER_NAVS,
 };

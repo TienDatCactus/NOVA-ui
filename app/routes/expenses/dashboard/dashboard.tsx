@@ -1,0 +1,253 @@
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { Calendar, CalendarDays, Filter, LayoutDashboard } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
+import { useDashboardData } from "./container/dashboard.hooks";
+import MetricsCards from "./components/metrics-cards";
+import CategoryChart from "./components/category-chart";
+import MonthlyTrendChart from "./components/monthly-trend-chart";
+import useExpensesFilters from "../container/filter.hooks";
+import ExpensesLayout from "../layouts/expenses.layout";
+import { FE_URL } from "~/lib/fe-url";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfQuarter,
+  endOfQuarter,
+  startOfYear,
+  endOfYear,
+  subMonths,
+} from "date-fns";
+import { Separator } from "~/components/ui/separator";
+import { DatePicker } from "~/components/ui/date-picker";
+import { DateRangePicker } from "~/components/ui/date-range-picker";
+
+export default function ExpenseDashboard() {
+  const navigate = useNavigate();
+  const { filters, updateFilter } = useExpensesFilters();
+
+  const { totalAmount, byCategory, byMonth, isPending, isEmpty } =
+    useDashboardData({
+      fromDate: filters.fromDate,
+      toDate: filters.toDate,
+    });
+
+  // --- Handlers ---
+
+  const handleCategoryClick = (category: string) => {
+    // Navigate to expense list filtered by this category and current date range
+    const searchParams = new URLSearchParams({
+      category,
+      from: filters.fromDate || "",
+      to: filters.toDate || "",
+    });
+    navigate(`${FE_URL.dashboard.expenses}?${searchParams.toString()}`);
+  };
+
+  const handleMonthClick = (monthKey: string) => {
+    // monthKey format: "YYYY-MM"
+    const [year, month] = monthKey.split("-");
+    if (year && month) {
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const from = format(startOfMonth(date), "yyyy-MM-dd");
+      const to = format(endOfMonth(date), "yyyy-MM-dd");
+
+      // Navigate to expense list filtered by that specific month
+      const searchParams = new URLSearchParams({ from, to });
+      navigate(`${FE_URL.dashboard.expenses}?${searchParams.toString()}`);
+    }
+  };
+
+  const setQuickFilter = (
+    range: "thisMonth" | "lastMonth" | "thisQuarter" | "thisYear"
+  ) => {
+    const now = new Date();
+    let from: Date, to: Date;
+
+    switch (range) {
+      case "thisMonth":
+        from = startOfMonth(now);
+        to = endOfMonth(now);
+        break;
+      case "lastMonth":
+        const lastMonth = subMonths(now, 1);
+        from = startOfMonth(lastMonth);
+        to = endOfMonth(lastMonth);
+        break;
+      case "thisQuarter":
+        from = startOfQuarter(now);
+        to = endOfQuarter(now);
+        break;
+      case "thisYear":
+        from = startOfYear(now);
+        to = endOfYear(now);
+        break;
+    }
+
+    updateFilter("fromDate", format(from, "yyyy-MM-dd"));
+    updateFilter("toDate", format(to, "yyyy-MM-dd"));
+  };
+
+  return (
+    <ExpensesLayout
+      filters={filters}
+      updateFilter={updateFilter}
+      resetFilters={() => {}}
+      totalExpenses={0} // Not needed for dashboard layout usually
+      totalAmount={totalAmount}
+      isDashboardView={true} // Flag to hide default list filters if needed
+    >
+      <div className="space-y-8 pb-10">
+        {/* 1. HEADER & TOOLBAR */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              <LayoutDashboard className="w-6 h-6 text-primary" />
+              Tổng quan chi phí
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Theo dõi dòng tiền chi tiêu và xu hướng tài chính.
+            </p>
+          </div>
+
+          {/* Unified Toolbar */}
+          <div className="flex items-center gap-2 bg-background p-1 rounded-lg border shadow-sm overflow-x-auto">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setQuickFilter("thisMonth")}
+              className="text-xs h-8 font-medium"
+            >
+              Tháng này
+            </Button>
+            <Separator orientation="vertical" className="h-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setQuickFilter("lastMonth")}
+              className="text-xs h-8 font-medium"
+            >
+              Tháng trước
+            </Button>
+            <Separator orientation="vertical" className="h-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setQuickFilter("thisQuarter")}
+              className="text-xs h-8 font-medium"
+            >
+              Quý này
+            </Button>
+            <Separator orientation="vertical" className="h-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setQuickFilter("thisYear")}
+              className="text-xs h-8 font-medium"
+            >
+              Năm nay
+            </Button>
+
+            {/* Custom Date Range Picker */}
+            <div className="ml-2 pl-2 border-l">
+              <DateRangePicker
+                from={filters.fromDate ? new Date(filters.fromDate) : undefined}
+                to={filters.toDate ? new Date(filters.toDate) : undefined}
+                onRangeChange={(range) => {
+                  updateFilter(
+                    "fromDate",
+                    range.from ? format(range.from, "yyyy-MM-dd") : undefined
+                  );
+                  updateFilter(
+                    "toDate",
+                    range.to ? format(range.to, "yyyy-MM-dd") : undefined
+                  );
+                }}
+                placeholder="Tùy chọn"
+                className="gap-2"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 2. CONTENT AREA */}
+        {isPending ? (
+          <DashboardSkeleton />
+        ) : isEmpty ? (
+          <DashboardEmptyState onReset={() => setQuickFilter("thisMonth")} />
+        ) : (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* KPI Cards */}
+            <section>
+              <MetricsCards
+                totalAmount={totalAmount}
+                byCategory={byCategory}
+                byMonth={byMonth}
+              />
+            </section>
+
+            {/* Charts Row */}
+            <section className="grid gap-6 md:grid-cols-12">
+              {/* Trend Chart (Wider) */}
+              <div className="md:col-span-7 xl:col-span-8">
+                <MonthlyTrendChart
+                  byMonth={byMonth}
+                  onMonthClick={handleMonthClick}
+                />
+              </div>
+
+              {/* Category Chart (Square-ish) */}
+              <div className="md:col-span-5 xl:col-span-4">
+                <CategoryChart
+                  byCategory={byCategory}
+                  totalAmount={totalAmount}
+                  onCategoryClick={handleCategoryClick}
+                />
+              </div>
+            </section>
+          </div>
+        )}
+      </div>
+    </ExpensesLayout>
+  );
+}
+
+// --- SUB-COMPONENTS ---
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-[140px] rounded-xl" />
+        ))}
+      </div>
+      <div className="grid gap-6 md:grid-cols-12">
+        <Skeleton className="md:col-span-8 h-[350px] rounded-xl" />
+        <Skeleton className="md:col-span-4 h-[350px] rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+function DashboardEmptyState({ onReset }: { onReset: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed rounded-xl bg-muted/10">
+      <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
+        <Filter className="w-8 h-8 text-muted-foreground/50" />
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-2">
+        Chưa có dữ liệu chi phí
+      </h3>
+      <p className="text-sm text-muted-foreground max-w-sm mb-6">
+        Không tìm thấy khoản chi nào trong khoảng thời gian này. Hãy thử chọn
+        mốc thời gian khác.
+      </p>
+      <Button variant="outline" onClick={onReset}>
+        Xem tháng này
+      </Button>
+    </div>
+  );
+}

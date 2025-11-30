@@ -69,7 +69,6 @@ interface BookingCardProps {
 
 export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [noShowDialogOpen, setNoShowDialogOpen] = useState(false);
 
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
@@ -271,14 +270,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
                   onClick={() => setCancelDialogOpen(true)}
                 >
                   <XCircle className="mr-2 h-4 w-4" /> Hủy đặt phòng
-                </DropdownMenuItem>
-              )}
-              {canMarkNoShow && (
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setNoShowDialogOpen(true)}
-                >
-                  <UserX className="mr-2 h-4 w-4" /> Đánh dấu No Show
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>

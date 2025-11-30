@@ -6,6 +6,7 @@ import type {
   AddSingleItemToPOSOrderRequestDto,
   CreatePOSOrderRequestDto,
   CreatePOSOrderResponseDto,
+  CreatePOSOrderWithItemsRequestDto,
   CreateServiceOrderRequestDto,
   CreateServiceOrderResponseDto,
   OrderPayNowRequestDto,
@@ -35,6 +36,7 @@ const {
   CreateServiceOrderResponseSchema,
   ServiceOrderListSchema,
   OrderPayNowRequestSchema,
+  CreatePOSOrderWithItemsRequestSchema,
 } = OrderSchema;
 
 /**
@@ -46,6 +48,18 @@ async function createPOSOrder(
   try {
     const resp = await http.post(Orders.createPosOrder, data);
     return CreatePOSOrderResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function createPosOrderWithItems(
+  data: CreatePOSOrderWithItemsRequestDto
+) {
+  try {
+    const resp = await http.post(Orders.createPosOrderWithItems, data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -381,4 +395,5 @@ export const OrderService = {
   getServiceOrderList,
   payServiceOrderNow,
   setScheduledServiceOrder,
+  createPosOrderWithItems,
 };

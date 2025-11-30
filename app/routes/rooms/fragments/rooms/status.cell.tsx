@@ -67,6 +67,7 @@ function RoomStatusCell({ room }: RoomStatusCellProps) {
     >
       <SelectTrigger
         className={cn(
+          "w-40",
           currentStatusColor.trigger,
           currentStatusColor.focus,
           currentStatusColor.svg

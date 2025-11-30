@@ -19,41 +19,7 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
       return <span className="font-medium">{row.index + 1}</span>;
     },
   },
-  {
-    accessorKey: "image",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Hình ảnh" />
-    ),
-    cell: ({ row }) => {
-      const item = row.original;
-      const hasImages = item.imageUrls && item.imageUrls.length > 0;
 
-      return (
-        <div className="flex items-center ">
-          {hasImages ? (
-            <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted">
-              <Image
-                src={item.imageUrls[0]}
-                alt={item.name}
-                width={60}
-                height={60}
-                className="w-full h-full object-cover"
-              />
-              {item.imageUrls.length > 1 && (
-                <div className="absolute bottom-0 right-0 bg-black/70 text-white text-xs px-1 rounded-tl">
-                  +{item.imageUrls.length - 1}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-muted-foreground" />
-            </div>
-          )}
-        </div>
-      );
-    },
-  },
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -67,11 +33,6 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold truncate">{item.name}</span>
-              {!item.active && (
-                <Badge variant="secondary" className="text-xs">
-                  Ngưng hoạt động
-                </Badge>
-              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {item.code}
@@ -81,7 +42,6 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
             <Button
               variant="ghost"
               size="icon"
-              className="flex-shrink-0"
               onClick={() => row.toggleExpanded()}
             >
               <ChevronDown
@@ -94,6 +54,16 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
           )}
         </div>
       );
+    },
+  },
+  {
+    accessorKey: "maxQuantityAvailable",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Số lượng tối đa" />
+    ),
+    cell: ({ row }) => {
+      const maxQuantityAvailable = row.original.maxQuantityAvailable || "—";
+      return <p className="text-center">{maxQuantityAvailable}</p>;
     },
   },
   {
@@ -130,10 +100,12 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
     ),
     cell: ({ row }) => {
       const active = row.original.active ? "Hoạt động" : "Ngưng hoạt động";
-
       return (
         <div className="flex items-center gap-1">
-          <Badge variant={active ? "success" : "warning"} className="text-xs">
+          <Badge
+            variant={row.original.active ? "success" : "destructive"}
+            className="text-xs"
+          >
             {active}
           </Badge>
         </div>

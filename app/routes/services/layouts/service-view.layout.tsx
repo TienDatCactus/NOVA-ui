@@ -63,7 +63,7 @@ export default function ServicesViewLayout({
                 value={filters.typeCode || ""}
                 onValueChange={(value) => updateFilter("typeCode", value)}
               >
-                <SelectTrigger className="shadow-md w-full bg-white">
+                <SelectTrigger className="shadow-md w-40 bg-white">
                   <SelectValue placeholder="Chọn loại dịch vụ" />
                 </SelectTrigger>
                 <SelectContent>

@@ -1,5 +1,5 @@
 import type { Route } from "./+types/rooms";
-import RoomsDataTable from "./components/rooms-list";
+import RoomsDataTable from "./components/rooms/rooms-list";
 import useRoomFilters from "./container/rooms/filter.hooks";
 import { useRooms } from "./container/rooms/query.hooks";
 import RoomsViewLayout from "./layouts/rooms-view.layout";

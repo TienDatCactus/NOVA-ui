@@ -37,7 +37,7 @@ import {
   UserX,
   CheckCircle2,
 } from "lucide-react";
-import { useLockUser, useUnlockUser } from "../container/useUsers.hooks";
+import { useLockUser, useUnlockUser } from "../container/query.hooks";
 import type { UserItem } from "~/services/api/user/dto";
 import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
@@ -324,7 +324,7 @@ export function LockUserDialog({
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Hết hạn khóa:</span>
                     <span className="font-mono text-muted-foreground">
-                      {format(new Date(user.lockoutEnd), "dd/MM/yyyy HH:mm")}
+                      {format(new Date(user.lockoutEnd), " HH:mm dd/MM/yyyy")}
                     </span>
                   </div>
                 )}

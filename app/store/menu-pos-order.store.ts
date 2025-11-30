@@ -13,6 +13,8 @@ export type MenuPosCartItem = {
   // For custom items
   customItemName?: string;
   customItemDescription?: string;
+  // Inventory control
+  maxQuantityAvailable?: number; // Maximum quantity that can be ordered
 };
 
 type MenuPosOrderState = {
@@ -98,22 +100,41 @@ export const useMenuPosOrderStore = create<MenuPosOrderState>()(
         const existingItem = items.find((i) => i.id === item.id);
 
         if (existingItem) {
+          // Check if increment would exceed max available
+          const newQuantity = existingItem.quantity + (item.quantity || 1);
+          const maxAvailable = existingItem.maxQuantityAvailable;
+
+          if (maxAvailable !== undefined && newQuantity > maxAvailable) {
+            // Don't add, quantity would exceed max available
+            console.warn(`Cannot add more: max available is ${maxAvailable}`);
+            return;
+          }
+
           // Increment quantity if item already in cart
           set({
             items: items.map((i) =>
-              i.id === item.id
-                ? { ...i, quantity: i.quantity + (item.quantity || 1) }
-                : i
+              i.id === item.id ? { ...i, quantity: newQuantity } : i
             ),
           });
         } else {
+          // Check max available for new item
+          const requestedQuantity = item.quantity || 1;
+          const maxAvailable = item.maxQuantityAvailable;
+
+          if (maxAvailable !== undefined && requestedQuantity > maxAvailable) {
+            console.warn(
+              `Cannot add: requested ${requestedQuantity} but only ${maxAvailable} available`
+            );
+            return;
+          }
+
           // Add new item to cart
           set({
             items: [
               ...items,
               {
                 ...item,
-                quantity: item.quantity || 1,
+                quantity: requestedQuantity,
               },
             ],
           });
@@ -131,6 +152,18 @@ export const useMenuPosOrderStore = create<MenuPosOrderState>()(
       updateQuantity: (id, quantity) => {
         if (quantity <= 0) {
           get().removeItem(id);
+          return;
+        }
+
+        // Check max available before updating
+        const item = get().items.find((i) => i.id === id);
+        if (
+          item?.maxQuantityAvailable !== undefined &&
+          quantity > item.maxQuantityAvailable
+        ) {
+          console.warn(
+            `Cannot update: max available is ${item.maxQuantityAvailable}`
+          );
           return;
         }
 

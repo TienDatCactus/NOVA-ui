@@ -1,19 +1,39 @@
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { FileText, Loader2, Package } from "lucide-react";
+import {
+  CalendarDays,
+  CreditCard,
+  FileText,
+  Loader2,
+  Package,
+  User,
+} from "lucide-react";
+
 import { Badge } from "~/components/ui/badge";
-import { Card } from "~/components/ui/card";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+
 import { usePurchaseRequestDetail } from "../container/query.hooks";
 import { getStatusBadge } from "./purchase-requests-list/columns";
+import { Button } from "~/components/ui/button";
 
 interface PurchaseRequestDetailDialogProps {
   open: boolean;
@@ -36,195 +56,218 @@ export default function PurchaseRequestDetailDialog({
       0
     ) || 0;
 
+  // Helper for currency format
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(value);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] p-4 flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="text-xl">
-            Chi tiết phiếu đề nghị mua hàng
-          </DialogTitle>
-          <DialogDescription className="mt-1">
-            {purchaseRequest?.requestNumber}
-          </DialogDescription>
-          {purchaseRequest && getStatusBadge(purchaseRequest.status)}
+      <DialogContent className="max-w-5xl max-h-[90vh]  p-0 gap-0 flex flex-col overflow-y-auto">
+        {/* --- Header Section --- */}
+        <DialogHeader className="p-6 pb-4 border-b shrink-0 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <DialogTitle className="text-xl flex items-center gap-3">
+                Chi tiết phiếu đề nghị
+                {purchaseRequest && getStatusBadge(purchaseRequest.status)}
+              </DialogTitle>
+              <DialogDescription className="font-mono text-sm text-primary font-medium bg-primary/5 w-fit px-2 py-0.5 rounded">
+                #{purchaseRequest?.requestNumber}
+              </DialogDescription>
+            </div>
+            {purchaseRequest?.isReceived && (
+              <Badge
+                variant="outline"
+                className="border-green-500 text-green-600 bg-green-50"
+              >
+                <Package className="w-3 h-3 mr-1" /> Đã nhận hàng
+              </Badge>
+            )}
+          </div>
         </DialogHeader>
 
         {isPending ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex-1 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : purchaseRequest ? (
-          <ScrollArea className="flex-1">
-            <div className="p-6 space-y-6">
-              {/* Thông tin chung */}
-              <Card className="p-4 bg-muted/30">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Số phiếu</p>
-                    <p className="font-mono font-semibold">
-                      {purchaseRequest.requestNumber}
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Ngày tạo</p>
-                    <p className="font-medium">
-                      {format(
-                        parseISO(purchaseRequest.requestedAt),
-                        "dd/MM/yyyy HH:mm",
-                        { locale: vi }
-                      )}
-                    </p>
-                  </div>
-                  {purchaseRequest.approvedByName && (
-                    <>
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground">
-                          Người phê duyệt
-                        </p>
-                        <p className="font-medium">
-                          {purchaseRequest.approvedByName}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground">
-                          Ngày phê duyệt
-                        </p>
-                        <p className="font-medium">
-                          {purchaseRequest.approvedAt
-                            ? format(
-                                parseISO(purchaseRequest.approvedAt),
-                                "dd/MM/yyyy HH:mm",
-                                { locale: vi }
-                              )
-                            : "—"}
-                        </p>
-                      </div>
-                    </>
+          <div className="p-6 space-y-8">
+            {/* --- 1. General Info Grid (Clean Data Display) --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <CalendarDays className="h-4 w-4" />
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    Ngày tạo
+                  </span>
+                </div>
+                <p className="font-medium pl-6">
+                  {format(
+                    parseISO(purchaseRequest.requestedAt),
+                    " HH:mm dd/MM/yyyy",
+                    { locale: vi }
                   )}
-                  <div className="space-y-1 col-span-2">
-                    <p className="text-xs text-muted-foreground">Trạng thái</p>
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(purchaseRequest.status)}
-                      {purchaseRequest.isReceived && (
-                        <Badge variant="default">Đã nhận hàng</Badge>
-                      )}
-                    </div>
-                  </div>
-                  {purchaseRequest.notes && (
-                    <div className="space-y-1 col-span-2">
-                      <p className="text-xs text-muted-foreground">Ghi chú</p>
-                      <p className="text-sm">{purchaseRequest.notes}</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-
-              {/* Danh sách hàng hóa */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                  <h3 className="font-semibold">
-                    Danh sách hàng hóa ({purchaseRequest.items.length})
-                  </h3>
-                </div>
-
-                <div className="space-y-2">
-                  {purchaseRequest.items.map((item: any, index: number) => (
-                    <Card key={item.id} className="p-4">
-                      <div className="flex gap-4">
-                        <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary font-semibold shrink-0">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <p className="font-semibold text-base">
-                                {item.freeTextItemName}
-                              </p>
-                              {item.itemCode && (
-                                <p className="text-xs text-muted-foreground font-mono mt-0.5">
-                                  {item.itemCode}
-                                </p>
-                              )}
-                              {item.freeTextItemDescription && (
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  {item.freeTextItemDescription}
-                                </p>
-                              )}
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className="font-bold text-primary">
-                                {(
-                                  item.quantity * item.unitCost
-                                ).toLocaleString()}{" "}
-                                VNĐ
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                {item.quantity.toLocaleString()} ×{" "}
-                                {item.unitCost.toLocaleString()} VNĐ
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-muted-foreground">
-                                Số lượng:
-                              </span>
-                              <span className="font-semibold">
-                                {item.quantity.toLocaleString()}
-                              </span>
-                              {item.freeTextUnitName && (
-                                <span className="text-muted-foreground">
-                                  {item.freeTextUnitName}
-                                </span>
-                              )}
-                            </div>
-                            <Separator orientation="vertical" className="h-4" />
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-muted-foreground">
-                                Đơn giá:
-                              </span>
-                              <span className="font-semibold">
-                                {item.unitCost.toLocaleString()} VNĐ
-                              </span>
-                            </div>
-                          </div>
-
-                          {item.note && (
-                            <div className="pt-2 border-t">
-                              <p className="text-xs text-muted-foreground">
-                                Ghi chú: {item.note}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                </p>
               </div>
 
-              {/* Tổng cộng */}
-              <Card className="p-4 bg-primary/5 border-primary/20">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-lg">
-                    Tổng chi phí ước tính:
-                  </span>
-                  <span className="font-bold text-2xl text-primary">
-                    {totalCost.toLocaleString()} VNĐ
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    Người duyệt
                   </span>
                 </div>
-              </Card>
+                <p className="font-medium pl-6">
+                  {purchaseRequest.approvedByName || "—"}
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <CalendarDays className="h-4 w-4" />
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    Ngày duyệt
+                  </span>
+                </div>
+                <p className="font-medium pl-6">
+                  {purchaseRequest.approvedAt
+                    ? format(
+                        parseISO(purchaseRequest.approvedAt),
+                        " HH:mm dd/MM/yyyy",
+                        { locale: vi }
+                      )
+                    : "—"}
+                </p>
+              </div>
+
+              {/* Notes spanning standard width */}
+              <div className="space-y-1.5 md:col-span-2 lg:col-span-1">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <FileText className="h-4 w-4" />
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    Ghi chú phiếu
+                  </span>
+                </div>
+                <p
+                  className="pl-6 text-muted-foreground italic truncate"
+                  title={purchaseRequest.notes}
+                >
+                  {purchaseRequest.notes || "Không có ghi chú"}
+                </p>
+              </div>
             </div>
-          </ScrollArea>
+
+            <Separator />
+
+            {/* --- 2. Items Table (The UX Upgrade) --- */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                <h3 className="font-semibold text-base">Danh sách hàng hóa</h3>
+                <Badge variant="secondary" className="ml-2 rounded-full px-2">
+                  {purchaseRequest.items.length}
+                </Badge>
+              </div>
+
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader className="bg-muted/40">
+                    <TableRow>
+                      <TableHead className="w-[50px] text-center">
+                        STT
+                      </TableHead>
+                      <TableHead className="min-w-[200px]">
+                        Tên hàng hóa
+                      </TableHead>
+                      <TableHead className="text-right">Số lượng</TableHead>
+                      <TableHead className="text-right">Đơn giá</TableHead>
+                      <TableHead className="text-right font-semibold text-foreground">
+                        Thành tiền
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {purchaseRequest.items.map((item: any, index: number) => (
+                      <TableRow key={item.id} className="hover:bg-muted/10">
+                        <TableCell className="text-center font-medium text-muted-foreground">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-medium text-sm">
+                              {item.freeTextItemName}
+                            </span>
+                            {(item.itemCode ||
+                              item.freeTextItemDescription) && (
+                              <div className="text-xs text-muted-foreground flex gap-2">
+                                {item.itemCode && (
+                                  <span className="font-mono bg-muted px-1 rounded">
+                                    {item.itemCode}
+                                  </span>
+                                )}
+                                <span className="truncate max-w-[200px]">
+                                  {item.freeTextItemDescription}
+                                </span>
+                              </div>
+                            )}
+                            {item.note && (
+                              <p className="text-xs text-amber-600/80 italic mt-1">
+                                Note: {item.note}
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-col items-end">
+                            <span className="font-medium">
+                              {item.quantity.toLocaleString()}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {item.freeTextUnitName}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-muted-foreground">
+                          {item.unitCost.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-medium">
+                          {(item.quantity * item.unitCost).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableFooter className="bg-muted/20">
+                    <TableRow>
+                      <TableCell
+                        colSpan={4}
+                        className="text-right font-bold text-muted-foreground uppercase text-xs"
+                      >
+                        Tổng chi phí ước tính
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="text-lg font-bold text-primary">
+                          {formatCurrency(totalCost)}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
+                </Table>
+              </div>
+            </div>
+          </div>
         ) : (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-muted-foreground">
-              Không tìm thấy dữ liệu phiếu đề nghị
-            </p>
+          <div className="flex items-center justify-center flex-1 text-muted-foreground">
+            Không tìm thấy dữ liệu
           </div>
         )}
+        <DialogFooter className="p-6 pt-4 border-t shrink-0">
+          <DialogClose>
+            <Button variant={"outline"}>Đóng</Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

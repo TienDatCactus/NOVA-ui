@@ -27,6 +27,9 @@ import {
 } from "~/components/ui/tooltip";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import { InvoicesService } from "~/services/api/invoices";
+import { toast } from "sonner";
+import { Download, Printer } from "lucide-react";
 
 type InvoiceDetailDialogProps = {
   open: boolean;
@@ -42,7 +45,31 @@ export function InvoiceDetailDialog({
   const { data: invoice } = useInvoiceDetail(invoiceId, {
     enabled: open,
   });
+
   if (!invoice) return null;
+
+  const handleExport = async () => {
+    try {
+      const blob = await InvoicesService.exportInvoiceById(invoiceId);
+      console.log("Blob received:", blob);
+
+      const url = window.URL.createObjectURL(blob.data);
+      const a = document.createElement("a");
+      a.href = url;
+      const filename = `invoice-${invoiceId}.xlsx`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Xuất báo cáo thành công");
+    } catch (e) {
+      console.error(e);
+      toast.error("Xuất báo cáo thất bại");
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-card shadow-sm rounded-2xl p-6 max-w-3xl w-full">
@@ -60,7 +87,7 @@ export function InvoiceDetailDialog({
           <div className="text-sm text-muted-foreground mt-1">
             Ngày phát hành:{" "}
             {invoice.issuedAt
-              ? format(new Date(invoice.issuedAt), "dd/MM/yyyy HH:mm")
+              ? format(new Date(invoice.issuedAt), " HH:mm dd/MM/yyyy")
               : "-"}
           </div>
         </DialogHeader>
@@ -157,7 +184,11 @@ export function InvoiceDetailDialog({
             </TableBody>
           </Table>
         </div>
-        <DialogFooter className="flex flex-row gap-4 justify-end pt-4">
+        <DialogFooter className="flex items-center gap-2">
+          <Button variant="success" size="sm" onClick={handleExport}>
+            <Download className="h-4 w-4" />
+            Xuất hóa đơn
+          </Button>
           <Button variant="outline" onClick={onClose}>
             Đóng
           </Button>

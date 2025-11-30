@@ -1,4 +1,12 @@
-import { ChevronUp, Hash, Loader2, Send } from "lucide-react";
+import {
+  ChevronUp,
+  Hash,
+  Loader2,
+  Send,
+  MessageSquare,
+  User,
+  AlertTriangle,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -34,6 +42,16 @@ import { MessageBubble } from "~/routes/chat/fragments/message-bubble";
 import type { Route } from "./+types/chat";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { cn } from "~/lib/utils";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
 
 export default function GuestChat({}: Route.ComponentProps) {
   const [searchParams] = useSearchParams();
@@ -47,8 +65,9 @@ export default function GuestChat({}: Route.ComponentProps) {
   const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
   const { data: menuItems, isPending: isMenuLoading } = useMenuList({});
   const { data: serviceItems, isPending: isServiceLoading } = useServices({});
-  let isLoadingItems = isMenuLoading || isServiceLoading;
+  const isLoadingItems = isMenuLoading || isServiceLoading;
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const { translateMessage } = useTranslateMessage();
 
@@ -83,7 +102,6 @@ export default function GuestChat({}: Route.ComponentProps) {
   const {
     data: messagesData,
     isLoading: isLoadingMessages,
-
     isFetching,
   } = useChatMessages(sessionId || "", !!sessionId, {
     page: currentPage,
@@ -93,34 +111,44 @@ export default function GuestChat({}: Route.ComponentProps) {
   const {
     messages,
     isConnecting,
+    isConnected,
     updateMessage,
     sendMessage: sendMessageViaSignalR,
     loadMessages,
   } = useChatConnection({
-    sessionId: sessionId || "",
+    sessionId: sessionId,
     isGuest: true,
   });
 
-  // Accumulate messages from multiple pages
   useEffect(() => {
     if (messagesData) {
       setAllMessages((prev) => {
         const existingIds = new Set(prev.map((m) => m.id));
-        const newMessages = messagesData.filter((m) => !existingIds.has(m.id));
-        return [...newMessages, ...prev];
+        const newMessages = messagesData.filter(
+          (m) => !existingIds.has(m.id)
+        ) as ChatMessage[];
+        // Filter out messages without createdAt before sorting
+        const validMessages = [...newMessages, ...prev].filter(
+          (m) => m.createdAt
+        );
+        return validMessages.sort(
+          (a, b) =>
+            new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
+        );
       });
     }
-  }, [messagesData]);
-
-  // Load accumulated messages into SignalR state
+  }, [messagesData]); // Load accumulated messages into SignalR state
   useEffect(() => {
     if (allMessages.length > 0) {
       loadMessages(allMessages);
     }
   }, [allMessages, loadMessages]);
 
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   // Load more handler
@@ -136,8 +164,11 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   const handleTagItem = (item: any, type: "menu" | "service") => {
     const tag = type === "menu" ? `#món:${item.name}` : `#dv:${item.name}`;
-    setInputMessage((prev) => `${prev} ${tag}`.trim());
+    setInputMessage((prev) => `${prev} ${tag} `.trim()); // Add space after tag
     setIsItemPopoverOpen(false);
+    // Focus back to input
+    const input = document.getElementById("chat-input");
+    input?.focus();
   };
 
   const handleSendMessage = async () => {
@@ -146,6 +177,10 @@ export default function GuestChat({}: Route.ComponentProps) {
     try {
       await sendMessageViaSignalR(inputMessage);
       setInputMessage("");
+      // Force scroll to bottom
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     } catch (error) {
       // Error already toasted in hook
     }
@@ -159,82 +194,53 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   if (isLoadingEntry) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center space-y-2">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-          <p className="text-sm text-muted-foreground">
-            Đang kiểm tra quyền truy cập...
+      <div className="flex h-dvh items-center justify-center bg-background">
+        <div className="flex flex-col items-center  space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary relative z-10" />
+          <p className="text-sm font-medium text-muted-foreground animate-pulse">
+            Đang kết nối với lễ tân...
           </p>
         </div>
       </div>
     );
   }
 
-  // Handle entry error (network error, etc.)
   if (entryError) {
     return (
-      <div className="flex h-screen items-center justify-center p-4">
-        <div className="text-center space-y-4 max-w-md">
-          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
-            <span className="text-3xl">⚠️</span>
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-destructive">
-              Lỗi kết nối
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {entryError instanceof Error
-                ? entryError.message
-                : "Không thể kết nối đến server. Vui lòng thử lại sau."}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => window.location.reload()}
-            className="mt-4"
-          >
-            Thử lại
-          </Button>
-        </div>
-      </div>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <AlertTriangle />
+          </EmptyMedia>
+          <EmptyTitle className="text-xl font-semibold text-destructive">
+            Lỗi kết nối
+          </EmptyTitle>
+          <EmptyDescription className="text-sm text-muted-foreground">
+            {entryError instanceof Error
+              ? entryError.message
+              : "Không thể kết nối đến server. Vui lòng thử lại sau."}
+          </EmptyDescription>
+          <EmptyContent>
+            <Button
+              variant="outline"
+              onClick={() => window.location.reload()}
+              className="mt-4"
+            >
+              Thử lại
+            </Button>
+          </EmptyContent>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
-  // Show error dialog when canChat is false
   if (showErrorDialog && entry) {
     return (
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Không thể truy cập Chat</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              <p className="text-base">{entry.message}</p>
-              {entry.roomName && (
-                <div className="bg-muted p-3 rounded-md space-y-1 text-sm">
-                  <p>
-                    <span className="font-medium">Phòng:</span> {entry.roomName}
-                  </p>
-                  {entry.customerName && (
-                    <p>
-                      <span className="font-medium">Khách hàng:</span>{" "}
-                      {entry.customerName}
-                    </p>
-                  )}
-                  {entry.checkinDate && (
-                    <p>
-                      <span className="font-medium">Check-in:</span>{" "}
-                      {new Date(entry.checkinDate).toLocaleDateString("vi-VN")}
-                    </p>
-                  )}
-                  {entry.checkoutDate && (
-                    <p>
-                      <span className="font-medium">Check-out:</span>{" "}
-                      {new Date(entry.checkoutDate).toLocaleDateString("vi-VN")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </AlertDialogDescription>
+            <AlertDialogTitle>Không thể truy cập</AlertDialogTitle>
+            <AlertDialogDescription>{entry.message}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={handleErrorDialogClose}>
@@ -248,40 +254,33 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   if (isLoadingSession || isLoadingMessages) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center space-y-2">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+      <div className="flex h-dvh items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
           <p className="text-sm text-muted-foreground">
-            Đang tải phiên chat...
+            Đang tải lịch sử trò chuyện...
           </p>
         </div>
       </div>
     );
   }
 
-  if (sessionError) {
+  if (sessionError || !session) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-dvh items-center justify-center bg-background">
         <div className="text-center space-y-2">
-          <p className="text-destructive font-semibold">Lỗi tải phiên chat</p>
-          <p className="text-sm text-muted-foreground">
-            {sessionError instanceof Error
-              ? sessionError.message
-              : "Không thể kết nối đến server"}
+          <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+            <MessageSquare className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="text-destructive font-semibold">
+            Không tìm thấy phiên chat
           </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center space-y-2">
-          <p className="text-muted-foreground">Không tìm thấy phiên chat</p>
           <p className="text-sm text-muted-foreground">
-            Session ID: {sessionId || "N/A"}
+            Vui lòng quét lại mã QR hoặc liên hệ lễ tân.
           </p>
+          <Button variant="link" onClick={() => navigate("/")}>
+            Quay về trang chủ
+          </Button>
         </div>
       </div>
     );
@@ -290,55 +289,121 @@ export default function GuestChat({}: Route.ComponentProps) {
   const canSendMessage = session.state === "Open";
 
   return (
-    <div className="h-full flex flex-col relative bg-background overflow-hidden">
-      <div className="flex-1 overflow-y-auto min-h-0 space-y-4 bg-background p-4">
-        {/* Load more button */}
-        {hasMore && (
-          <div className="flex justify-center py-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLoadMore}
-              disabled={isFetching}
-            >
-              {isFetching ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Đang tải...
-                </>
-              ) : (
-                <>
-                  <ChevronUp className="h-4 w-4 mr-2" />
-                  Xem thêm tin nhắn cũ
-                </>
-              )}
-            </Button>
+    <div className="flex flex-col h-dvh bg-background">
+      {/* Header */}
+      <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-4 justify-between sticky top-0 z-20 shadow-sm">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 border">
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              LT
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="font-semibold text-sm">Lễ Tân (Reception)</h1>
+            <div className="flex items-center gap-1.5">
+              <span
+                className={cn(
+                  "w-2 h-2 rounded-full",
+                  isConnecting
+                    ? "bg-yellow-500 animate-pulse"
+                    : isConnected
+                      ? "bg-green-500 animate-pulse"
+                      : "bg-gray-400"
+                )}
+              />
+              <p className="text-xs text-muted-foreground">
+                {isConnecting
+                  ? "Đang kết nối..."
+                  : isConnected
+                    ? "Đang hoạt động"
+                    : "Ngắt kết nối"}
+                {isConnecting ? "Đang kết nối..." : "Trực tuyến"}
+              </p>
+            </div>
           </div>
-        )}
+        </div>
+        {/* Optional: Add call button or info button here */}
+      </header>
 
-        {/* Connection status */}
-        {isConnecting && (
-          <div className="flex justify-center">
-            <Loader2 className="h-6 w-6 animate-spin" />
+      {/* Messages Area */}
+      <div className="flex-1 overflow-hidden relative bg-muted/30">
+        <ScrollArea className="h-full px-4 py-4" ref={scrollAreaRef}>
+          <div className="space-y-6 pb-4">
+            {/* Load More Trigger */}
+            {hasMore && (
+              <div className="flex justify-center py-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLoadMore}
+                  disabled={isFetching}
+                  className="text-xs text-muted-foreground hover:bg-transparent"
+                >
+                  {isFetching ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : (
+                    <ChevronUp className="h-3 w-3 mr-1" />
+                  )}
+                  Tải tin nhắn cũ hơn
+                </Button>
+              </div>
+            )}
+
+            {/* Messages List */}
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 opacity-50">
+                <MessageSquare className="h-12 w-12 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  Chưa có tin nhắn nào.
+                  <br />
+                  Hãy bắt đầu trò chuyện với lễ tân.
+                </p>
+              </div>
+            ) : (
+              messages.map((msg, index) => {
+                // Check if date changed compared to previous message to show separator
+                const prevMsg = messages[index - 1];
+                // Only show separator if both messages have createdAt
+                const isNewDay =
+                  msg.createdAt &&
+                  (!prevMsg ||
+                    !prevMsg.createdAt ||
+                    new Date(msg.createdAt).toDateString() !==
+                      new Date(prevMsg.createdAt).toDateString());
+
+                return (
+                  <div key={msg.id}>
+                    {isNewDay && msg.createdAt && (
+                      <div className="flex justify-center my-4">
+                        <span className="text-[10px] bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                          {new Date(msg.createdAt).toLocaleDateString("vi-VN", {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                          })}
+                        </span>
+                      </div>
+                    )}
+                    <MessageBubble
+                      message={msg}
+                      onTranslate={handleTranslate}
+                      isGuest={true}
+                    />
+                  </div>
+                );
+              })
+            )}
+            <div ref={messagesEndRef} />
           </div>
-        )}
-
-        {/* Messages list */}
-        {messages.map((msg) => (
-          <MessageBubble
-            key={msg.id}
-            message={msg}
-            onTranslate={handleTranslate}
-            isGuest={true}
-          />
-        ))}
-        <div ref={messagesEndRef} />
+        </ScrollArea>
       </div>
 
-      <div className="border-t bg-card p-4 ">
+      {/* Input Area */}
+      <div className="bg-background border-t p-3 pb-safe-area sticky bottom-0 z-20">
         {!canSendMessage ? (
-          <div className="text-center text-sm text-muted-foreground py-2">
-            Phiên chat đã đóng
+          <div className="p-3 bg-muted/50 rounded-lg text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-gray-400" />
+            Phiên chat đã kết thúc
           </div>
         ) : (
           <form
@@ -346,7 +411,7 @@ export default function GuestChat({}: Route.ComponentProps) {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="flex items-center gap-2"
+            className="flex items-end gap-2 max-w-4xl mx-auto"
           >
             <Popover
               open={isItemPopoverOpen}
@@ -355,113 +420,142 @@ export default function GuestChat({}: Route.ComponentProps) {
               <PopoverTrigger asChild>
                 <Button
                   type="button"
-                  variant="outline"
-                  size={"icon"}
-                  className="rounded-full"
-                  onClick={() => {
-                    setIsItemPopoverOpen(true);
-                  }}
-                  disabled={isConnecting}
-                  title="Tag món ăn hoặc dịch vụ"
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  title="Tag món ăn/dịch vụ"
                 >
-                  <Hash className="h-4 w-4" />
+                  <Hash className="h-5 w-5" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="start" className="w-80">
+              <PopoverContent
+                align="start"
+                side="top"
+                className="w-80 p-0 overflow-hidden"
+                sideOffset={10}
+              >
+                <div className="bg-muted/50 px-4 py-2 border-b">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase">
+                    Gắn thẻ nhanh
+                  </h4>
+                </div>
                 <Tabs defaultValue="menu" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="menu">Món ăn</TabsTrigger>
-                    <TabsTrigger value="services">Dịch vụ</TabsTrigger>
+                  <TabsList className="w-full rounded-none border-b bg-transparent p-0 h-10">
+                    <TabsTrigger
+                      value="menu"
+                      className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+                    >
+                      Món ăn
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="services"
+                      className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+                    >
+                      Dịch vụ
+                    </TabsTrigger>
                   </TabsList>
-                  <TabsContent value="menu" className="mt-2">
-                    {isLoadingItems ? (
-                      <div className="flex justify-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                      </div>
-                    ) : menuItems && menuItems.length > 0 ? (
-                      <ScrollArea className="h-64">
-                        <div className="space-y-1">
-                          {menuItems.map((item) => (
-                            <Button
-                              key={item.itemId}
-                              variant="ghost"
-                              className="w-full justify-start text-left h-auto py-2"
-                              onClick={() => handleTagItem(item, "menu")}
-                            >
-                              <div className="flex flex-col items-start">
-                                <span className="font-medium">{item.name}</span>
-                                {item.description && (
-                                  <span className="text-xs text-muted-foreground line-clamp-1">
-                                    {item.description}
-                                  </span>
-                                )}
-                                <span className="text-xs text-primary">
-                                  {item.price?.toLocaleString("vi-VN")} VNĐ
-                                </span>
-                              </div>
-                            </Button>
-                          ))}
+
+                  <div className="h-64">
+                    <TabsContent value="menu" className="h-full mt-0">
+                      {isLoadingItems ? (
+                        <div className="flex h-full items-center justify-center">
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                         </div>
-                      </ScrollArea>
-                    ) : (
-                      <div className="text-center py-8 text-sm text-muted-foreground">
-                        Không có món ăn
-                      </div>
-                    )}
-                  </TabsContent>
-                  <TabsContent value="services" className="mt-2">
-                    {isLoadingItems ? (
-                      <div className="flex justify-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                      </div>
-                    ) : serviceItems && serviceItems.length > 0 ? (
-                      <ScrollArea className="h-64">
-                        <div className="space-y-1">
-                          {serviceItems.map((item) => (
-                            <Button
-                              key={item.serviceItemId}
-                              variant="ghost"
-                              className="w-full justify-start text-left h-auto py-2"
-                              onClick={() => handleTagItem(item, "service")}
-                            >
-                              <div className="flex flex-col items-start">
-                                <span className="font-medium">{item.name}</span>
-                                {item.description && (
-                                  <span className="text-xs text-muted-foreground line-clamp-1">
-                                    {item.description}
+                      ) : (
+                        <ScrollArea className="h-full">
+                          {menuItems && menuItems.length > 0 ? (
+                            <div className="p-1">
+                              {menuItems.map((item) => (
+                                <button
+                                  key={item.itemId}
+                                  type="button"
+                                  className="w-full text-left px-3 py-2 hover:bg-accent rounded-md transition-colors group"
+                                  onClick={() => handleTagItem(item, "menu")}
+                                >
+                                  <div className="font-medium text-sm group-hover:text-primary transition-colors">
+                                    {item.name}
+                                  </div>
+                                  <div className="flex justify-between items-center mt-0.5">
+                                    <span className="text-xs text-muted-foreground line-clamp-1 max-w-[180px]">
+                                      {item.description || "Không có mô tả"}
+                                    </span>
+                                    <span className="text-xs font-mono">
+                                      {item.price?.toLocaleString()}đ
+                                    </span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-8 text-center text-xs text-muted-foreground">
+                              Không có dữ liệu
+                            </div>
+                          )}
+                        </ScrollArea>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="services" className="h-full mt-0">
+                      {/* Similar structure for services */}
+                      <ScrollArea className="h-full">
+                        {serviceItems && serviceItems.length > 0 ? (
+                          <div className="p-1">
+                            {serviceItems.map((item) => (
+                              <button
+                                key={item.serviceItemId}
+                                type="button"
+                                className="w-full text-left px-3 py-2 hover:bg-accent rounded-md transition-colors group"
+                                onClick={() => handleTagItem(item, "service")}
+                              >
+                                <div className="font-medium text-sm group-hover:text-primary transition-colors">
+                                  {item.name}
+                                </div>
+                                <div className="flex justify-between items-center mt-0.5">
+                                  <span className="text-xs text-muted-foreground line-clamp-1 max-w-[180px]">
+                                    {item.description || "Không có mô tả"}
                                   </span>
-                                )}
-                                <span className="text-xs text-primary">
-                                  {item.basePrice?.toLocaleString("vi-VN")} VNĐ
-                                </span>
-                              </div>
-                            </Button>
-                          ))}
-                        </div>
+                                  <span className="text-xs font-mono">
+                                    {item.basePrice?.toLocaleString()}đ
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-8 text-center text-xs text-muted-foreground">
+                            Không có dữ liệu
+                          </div>
+                        )}
                       </ScrollArea>
-                    ) : (
-                      <div className="text-center py-8 text-sm text-muted-foreground">
-                        Không có dịch vụ
-                      </div>
-                    )}
-                  </TabsContent>
+                    </TabsContent>
+                  </div>
                 </Tabs>
               </PopoverContent>
             </Popover>
-            <Input
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Nhập tin nhắn..."
-              disabled={isConnecting}
-              className="flex-1 rounded-full"
-            />
+
+            <div className="flex-1 relative">
+              <Input
+                id="chat-input"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder="Nhập tin nhắn..."
+                disabled={isConnecting}
+                className="pr-10 rounded-full bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/20 focus-visible:border-primary"
+                autoComplete="off"
+              />
+            </div>
+
             <Button
               type="submit"
-              size={"icon"}
-              className="rounded-full"
-              disabled={!inputMessage.trim() || isConnecting}
+              size="icon"
+              className="rounded-full shrink-0 shadow-sm"
+              disabled={!inputMessage.trim() || !isConnected}
             >
-              <Send className="h-4 w-4" />
+              {isConnecting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </Button>
           </form>
         )}

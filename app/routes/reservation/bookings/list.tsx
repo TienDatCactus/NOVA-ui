@@ -17,7 +17,7 @@ export default function Component({
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const { data, isPending, refetch } = useBookings({
-    date: date ? format(date, "yyyy-MM-dd") : undefined,
+    date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
   });
   const { filters, filteredBookings, handleFiltersChange, handleResetFilters } =
     useSearchBooking(data);

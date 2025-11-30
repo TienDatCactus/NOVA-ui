@@ -1,4 +1,7 @@
+// 1. External Imports
 import {
+  Check,
+  CheckCheck,
   Globe,
   Hash,
   Languages,
@@ -7,8 +10,10 @@ import {
   UserCheck,
   XCircle,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+
+// 2. UI Component Imports
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -33,11 +38,14 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { SUPPORTED_LANGUAGES } from "~/lib/constants";
-import { signalRChatService, type ChatMessage } from "~/lib/signalr";
-import { cn } from "~/lib/utils";
+
+// 3. Local Components & Fragments
+import { MessageBubble } from "../fragments/message-bubble";
+
+// 4. Hooks, Stores & Services
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
+import { useChatStaff } from "~/routes/users/container/query.hooks";
 import { TranslationService } from "~/services/api/translation";
 import { useAuthStore } from "~/store/auth.store";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
@@ -46,26 +54,44 @@ import {
   useChatMessages,
   useChatSession,
   useCloseSession,
+  useMarkAllRead,
 } from "../container/query.hooks";
 import {
   shouldTranslate,
   useTranslateMessage,
 } from "../container/translation.hooks";
-import { MessageBubble } from "../fragments/message-bubble";
-import { useStaffList } from "~/routes/staff/staff/container/query.hooks";
+import { useChatConnection } from "../container/use-chat-connection.hooks";
+
+// 5. Utils & Types
+import { SUPPORTED_LANGUAGES } from "~/lib/constants";
+import type { ChatMessage } from "~/lib/signalr";
+import { cn } from "~/lib/utils";
 
 interface ChatMainProps {
   sessionId: string | null;
 }
 
 export function ChatMain({ sessionId }: ChatMainProps) {
+  // --- Refs & State ---
   const user = useAuthStore((s) => s.user);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputMessage, setInputMessage] = useState("");
-  const [isConnecting, setIsConnecting] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [inputMessage, setInputMessage] = useState("");
 
-  // Translation state
+  // Consolidated translation state to reduce re-renders
+  const [translationState, setTranslationState] = useState<{
+    isTranslating: boolean;
+    translatedText: string;
+    sourceLang: string | null;
+  }>({
+    isTranslating: false,
+    translatedText: "",
+    sourceLang: null,
+  });
+
+  const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
+
+  // --- Store & Hooks ---
   const {
     userLanguage,
     autoTranslateEnabled,
@@ -73,165 +99,171 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     setUserLanguage,
     setAutoTranslate,
   } = useChatTranslationStore();
+
   const { translateMessage, autoTranslateMessage } = useTranslateMessage();
 
-  const effectiveLanguage = sessionId
-    ? sessionLanguageOverrides[sessionId] || userLanguage
-    : userLanguage;
+  const effectiveLanguage = useMemo(
+    () =>
+      sessionId
+        ? sessionLanguageOverrides[sessionId] || userLanguage
+        : userLanguage,
+    [sessionId, sessionLanguageOverrides, userLanguage]
+  );
 
+  // --- Data Fetching ---
   const { data: session, isLoading: isLoadingSession } = useChatSession(
     sessionId || "",
     !!sessionId
   );
   const { data: messageHistory, isLoading: isLoadingMessages } =
     useChatMessages(sessionId || "", !!sessionId);
-  const { data: staffList } = useStaffList();
+
+  const { data: staffList } = useChatStaff();
+  const { data: menuItems } = useMenuList({});
+  const { data: serviceItems } = useServices({});
 
   const assignStaffMutation = useAssignStaff();
   const closeSessionMutation = useCloseSession();
+  const markAllReadMutation = useMarkAllRead();
 
-  // Connect to SignalR and join session
-  useEffect(() => {
-    if (!sessionId) return;
+  // --- SignalR Connection ---
+  const {
+    messages,
+    isConnecting,
+    isConnected,
+    updateMessage,
+    sendMessage: sendMessageViaSignalR,
+    loadMessages,
+  } = useChatConnection({
+    sessionId: sessionId, // Don't fallback to "" - let hook handle null
+    isGuest: false,
+    userId: user?.id,
+  });
 
-    const connectSignalR = async () => {
-      setIsConnecting(true);
-      try {
-        await signalRChatService.connect(import.meta.env.VITE_CHAT_HUB_URL);
-        await signalRChatService.joinSession(sessionId);
-        signalRChatService.onReceiveMessage(async (message: ChatMessage) => {
-          // Auto-detect language and translate guest messages if enabled
-          if (message.sender === "Guest") {
-            try {
-              // Always detect language for guest messages
-              const detection = await TranslationService.detectLanguage(
-                message.message
-              );
-              const detectedLang = detection?.language;
+  // --- Effects ---
 
-              const messageWithDetection = {
-                ...message,
-                detectedLanguage: detectedLang,
-              };
-
-              // Auto-translate if enabled and translation is needed
-              if (
-                autoTranslateEnabled &&
-                shouldTranslate(detectedLang, effectiveLanguage)
-              ) {
-                const translatedMessage =
-                  await autoTranslateMessage(messageWithDetection);
-                setMessages((prev) => {
-                  if (prev.some((m) => m.id === translatedMessage.id))
-                    return prev;
-                  return [...prev, translatedMessage];
-                });
-              } else {
-                setMessages((prev) => {
-                  if (prev.some((m) => m.id === messageWithDetection.id))
-                    return prev;
-                  return [...prev, messageWithDetection];
-                });
-              }
-            } catch (error) {
-              console.error("Language detection failed:", error);
-              // Fallback to original message
-              setMessages((prev) => {
-                if (prev.some((m) => m.id === message.id)) return prev;
-                return [...prev, message];
-              });
-            }
-          } else {
-            setMessages((prev) => {
-              if (prev.some((m) => m.id === message.id)) return prev;
-              return [...prev, message];
-            });
-          }
-        });
-
-        console.log("[Chat] Connected to session:", sessionId);
-      } catch (error) {
-        toast.error("Không thể kết nối chat. Vui lòng tải lại trang.");
-        console.error(error);
-      } finally {
-        setIsConnecting(false);
-      }
-    };
-
-    connectSignalR();
-
-    return () => {
-      if (sessionId) {
-        signalRChatService.leaveSession(sessionId);
-      }
-      signalRChatService.offAll("ReceiveMessage");
-    };
-  }, [sessionId]);
-
-  // Load initial messages
+  // 1. Load History
   useEffect(() => {
     if (messageHistory) {
-      setMessages(messageHistory);
+      loadMessages(messageHistory as ChatMessage[]);
     }
-  }, [messageHistory]);
+  }, [messageHistory, loadMessages]);
 
-  const prevMessageCountRef = useRef(messages.length);
+  // 2. Auto-translate Guest Messages
   useEffect(() => {
-    if (messages.length > prevMessageCountRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const lastMessage = messages[messages.length - 1];
+
+    // Guard clause: Exit early if condition not met
+    if (
+      !lastMessage ||
+      lastMessage.sender !== "Guest" ||
+      lastMessage.detectedLanguage // Already processed
+    ) {
+      return;
     }
-    prevMessageCountRef.current = messages.length;
+
+    const processGuestMessage = async () => {
+      try {
+        const detection = await TranslationService.detectLanguage(
+          lastMessage.message
+        );
+        const detectedLang = detection?.language;
+
+        // Optimistic update for detection
+        updateMessage(lastMessage.id, { detectedLanguage: detectedLang });
+
+        if (
+          autoTranslateEnabled &&
+          shouldTranslate(detectedLang, effectiveLanguage)
+        ) {
+          const translatedMessage = await autoTranslateMessage({
+            ...lastMessage,
+            detectedLanguage: detectedLang,
+          });
+
+          updateMessage(lastMessage.id, {
+            translatedText: translatedMessage.translatedText,
+            showTranslation: true,
+          });
+        }
+      } catch (error) {
+        console.error("Auto-translation failed:", error);
+      }
+    };
+
+    processGuestMessage();
+  }, [
+    messages,
+    autoTranslateEnabled,
+    effectiveLanguage,
+    updateMessage,
+    autoTranslateMessage,
+  ]);
+
+  // 3. Auto-scroll to bottom on new messages
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
-  const updateMessage = (messageId: string, updates: Partial<ChatMessage>) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === messageId ? { ...msg, ...updates } : msg))
-    );
-  };
+  // --- Handlers (Memoized) ---
 
-  const handleTranslate = (message: ChatMessage) => {
-    translateMessage(message, updateMessage);
-  };
+  const handleTranslate = useCallback(
+    (message: ChatMessage) => {
+      translateMessage(message, updateMessage);
+    },
+    [translateMessage, updateMessage]
+  );
 
-  const [isTranslatingInput, setIsTranslatingInput] = useState(false);
-  const [translatedInput, setTranslatedInput] = useState("");
-  const [inputSourceLang, setInputSourceLang] = useState<string | null>(null);
-  const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
-  const { data: menuItems } = useMenuList({});
-  const { data: serviceItems } = useServices({});
-  const [isLoadingItems, setIsLoadingItems] = useState(false);
+  const handleMarkAllRead = useCallback(() => {
+    if (!sessionId) return;
+    markAllReadMutation.mutate(sessionId, {
+      onSuccess: () => toast.success("Đã đánh dấu tất cả tin nhắn là đã đọc"),
+      onError: () => toast.error("Không thể đánh dấu đã đọc"),
+    });
+  }, [sessionId, markAllReadMutation]);
 
-  const handleTagItem = (item: any, type: "menu" | "service") => {
+  const handleCloseSession = useCallback(() => {
+    if (!sessionId) return;
+    closeSessionMutation.mutate(sessionId, {
+      onSuccess: () => toast.success("Đã đóng phiên chat"),
+      onError: () => toast.error("Không thể đóng phiên chat"),
+    });
+  }, [sessionId, closeSessionMutation]);
+
+  const handleAssignStaff = useCallback(
+    (staffId: string) => {
+      if (!sessionId) return;
+      assignStaffMutation.mutate({ sessionId, staffUserId: staffId });
+    },
+    [sessionId, assignStaffMutation]
+  );
+
+  const handleTagItem = useCallback((item: any, type: "menu" | "service") => {
     const tag = type === "menu" ? `#món:${item.name}` : `#dv:${item.name}`;
     setInputMessage((prev) => `${prev} ${tag}`.trim());
     setIsItemPopoverOpen(false);
-  };
+  }, []);
 
   const handleDetectAndTranslateInput = async () => {
     if (!inputMessage.trim()) return;
 
-    setIsTranslatingInput(true);
+    setTranslationState((prev) => ({ ...prev, isTranslating: true }));
+
     try {
       const detection = await TranslationService.detectLanguage(inputMessage);
       const detectedLang = detection?.language;
 
-      if (!detectedLang) {
-        toast.error("Không thể nhận diện ngôn ngữ");
-        setIsTranslatingInput(false);
-        return;
-      }
-
-      setInputSourceLang(detectedLang);
+      if (!detectedLang) throw new Error("Could not detect language");
 
       const guestMessages = messages.filter((m) => m.sender === "Guest");
-      const latestGuestMessage = guestMessages[guestMessages.length - 1];
       const targetLang =
-        latestGuestMessage?.detectedLanguage || effectiveLanguage;
+        guestMessages[guestMessages.length - 1]?.detectedLanguage ||
+        effectiveLanguage;
 
-      // Check if translation is needed using shouldTranslate
       if (!shouldTranslate(detectedLang, targetLang)) {
-        toast.info("Tin nhắn đã ở ngôn ngữ của khách hoặc không thể dịch");
-        setIsTranslatingInput(false);
+        toast.info("Không cần dịch (ngôn ngữ trùng khớp hoặc không hỗ trợ)");
         return;
       }
 
@@ -241,60 +273,95 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         targetLanguage: targetLang,
       });
 
-      setTranslatedInput(result.translatedText);
-
-      const sourceLangLabel =
-        SUPPORTED_LANGUAGES.find((l) => l.code === detectedLang)?.label ||
-        detectedLang.toUpperCase();
-      const targetLangLabel =
-        SUPPORTED_LANGUAGES.find((l) => l.code === targetLang)?.label ||
-        targetLang.toUpperCase();
-
-      toast.success(`Đã dịch từ ${sourceLangLabel} sang ${targetLangLabel}`);
-    } catch (error) {
-      console.error("Translation failed:", error);
-      toast.error("Không thể dịch tin nhắn");
-    } finally {
-      setIsTranslatingInput(false);
-    }
-  };
-
-  // Send message
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim() || !sessionId || !user) return;
-
-    try {
-      // Send translated version if available, otherwise send original
-      const messageToSend = translatedInput || inputMessage.trim();
-
-      await signalRChatService.sendMessage({
-        sessionId,
-        message: messageToSend,
-        sender: "Staff",
-        staffUserId: user.id,
+      setTranslationState({
+        isTranslating: false,
+        translatedText: result.translatedText,
+        sourceLang: detectedLang,
       });
 
-      setInputMessage("");
-      setTranslatedInput("");
-      setInputSourceLang(null);
+      toast.success("Dịch tin nhắn thành công");
     } catch (error) {
-      toast.error("Không thể gửi tin nhắn");
-      console.error(error);
+      console.error("Input translation error:", error);
+      toast.error("Không thể dịch tin nhắn");
+      setTranslationState((prev) => ({ ...prev, isTranslating: false }));
     }
   };
 
-  // Close session
-  const handleCloseSession = () => {
-    if (!sessionId) return;
-    closeSessionMutation.mutate(sessionId, {
-      onSuccess: () => {
-        toast.success("Đã đóng phiên chat");
-      },
-      onError: () => {
-        toast.error("Không thể đóng phiên chat");
-      },
-    });
+  const handleSendMessage = async () => {
+    console.group("[Staff Chat] handleSendMessage");
+    console.log("Input Message:", inputMessage);
+    console.log("User Object:", user);
+    console.log("User ID:", user?.id);
+    console.log("Session ID:", sessionId);
+    console.log("Translation State:", translationState);
+    console.groupEnd();
+
+    if (!inputMessage.trim() || !user?.id) {
+      console.warn("[Staff Chat] Validation failed:", {
+        hasInput: !!inputMessage.trim(),
+        hasUserId: !!user?.id,
+        user: user,
+      });
+      toast.error("Vui lòng đăng nhập lại");
+      return;
+    }
+
+    try {
+      const messageToSend =
+        translationState.translatedText || inputMessage.trim();
+
+      console.log("[Staff Chat] Sending message:", {
+        original: inputMessage,
+        translated: translationState.translatedText || "(none)",
+        final: messageToSend,
+        userId: user.id,
+        sessionId,
+      });
+
+      await sendMessageViaSignalR(messageToSend);
+
+      console.log("[Staff Chat] ✅ Message sent, clearing state");
+
+      // Clear input after successful send
+      setInputMessage("");
+      setTranslationState({
+        isTranslating: false,
+        translatedText: "",
+        sourceLang: null,
+      });
+
+      // Force scroll to bottom
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } catch (error) {
+      console.group("[Staff Chat] ❌ Send Message Error");
+      console.error("Error object:", error);
+      console.error(
+        "Error type:",
+        error instanceof Error ? error.constructor.name : typeof error
+      );
+      console.error(
+        "Error message:",
+        error instanceof Error ? error.message : String(error)
+      );
+      console.error(
+        "Error stack:",
+        error instanceof Error ? error.stack : undefined
+      );
+      console.error("Context at error:", {
+        inputMessage,
+        messageToSend: translationState.translatedText || inputMessage.trim(),
+        user: user,
+        userId: user?.id,
+        sessionId,
+        translationState,
+      });
+      console.groupEnd();
+    }
   };
+
+  // --- Render Helpers ---
 
   if (!sessionId) {
     return (
@@ -303,9 +370,9 @@ export function ChatMain({ sessionId }: ChatMainProps) {
           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
             <Send className="h-8 w-8 text-muted-foreground" />
           </div>
-          <p className="font-medium mb-1">Chọn một cuộc trò chuyện</p>
+          <p className="font-medium mb-1">Chọn cuộc trò chuyện</p>
           <p className="text-sm text-muted-foreground">
-            Chọn một tin nhắn từ danh sách bên trái để bắt đầu
+            Bắt đầu từ danh sách bên trái
           </p>
         </div>
       </div>
@@ -322,8 +389,8 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
   if (!session) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-muted-foreground">Không tìm thấy phiên chat</p>
+      <div className="flex-1 flex items-center justify-center text-muted-foreground">
+        Không tìm thấy phiên chat
       </div>
     );
   }
@@ -331,8 +398,9 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const canSendMessage = session.state === "Open";
 
   return (
-    <div className="flex-1 overflow-y-auto min-h-0 flex flex-col bg-background">
-      <div className="flex items-center justify-between border-b p-4 bg-white shadow-sm">
+    <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-background">
+      {/* 1. Header */}
+      <div className="flex items-center justify-between border-b p-4 bg-white shadow-sm shrink-0">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
             <AvatarFallback>{session.customerName.charAt(0)}</AvatarFallback>
@@ -353,16 +421,15 @@ export function ChatMain({ sessionId }: ChatMainProps) {
             </Badge>
           )}
 
-          {/* Unified Settings Dropdown */}
+          {/* Settings Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" variant="outline">
                 <Languages className="h-4 w-4 mr-2" />
-                Cài đặt Chat
+                Cài đặt
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
-              {/* Language Selection */}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   Ngôn ngữ dịch đích
@@ -379,7 +446,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                         {lang.label}
                         {userLanguage === lang.code && (
                           <span className="ml-auto text-xs text-primary">
-                            ✓
+                            <Check className="h-4 w-4" />
                           </span>
                         )}
                       </DropdownMenuItem>
@@ -387,84 +454,66 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-
               <DropdownMenuSeparator />
-
-              {/* Auto-translate Toggle */}
-              <div className="px-2 py-2">
-                <div className="flex items-center justify-between">
-                  <Label
-                    htmlFor="auto-translate-menu"
-                    className="text-sm cursor-pointer"
-                  >
-                    Tự động dịch tin nhắn
-                  </Label>
-                  <Switch
-                    id="auto-translate-menu"
-                    checked={autoTranslateEnabled}
-                    onCheckedChange={setAutoTranslate}
-                  />
-                </div>
+              <div className="px-2 py-2 flex items-center justify-between">
+                <Label
+                  htmlFor="auto-translate"
+                  className="text-sm cursor-pointer"
+                >
+                  Tự động dịch
+                </Label>
+                <Switch
+                  id="auto-translate"
+                  checked={autoTranslateEnabled}
+                  onCheckedChange={setAutoTranslate}
+                />
               </div>
-
               <DropdownMenuSeparator />
-
-              {/* Staff Assignment */}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Gán nhân viên</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    {staffList && staffList.length > 0 ? (
+                    {staffList?.length ? (
                       staffList.map((staff) => (
                         <DropdownMenuItem
                           key={staff.id}
-                          onClick={() => {
-                            if (!sessionId) return;
-                            assignStaffMutation.mutate(
-                              {
-                                sessionId,
-                                staffUserId: staff.id,
-                              },
-                              {
-                                onSuccess: () => {
-                                  toast.success(`Đã gán cho ${staff.fullName}`);
-                                },
-                                onError: () => {
-                                  toast.error("Không thể gán nhân viên");
-                                },
-                              }
-                            );
-                          }}
+                          onClick={() => handleAssignStaff(staff.id)}
+                          disabled={assignStaffMutation.isPending}
                           className={cn(
                             session.assignedStaffUserId === staff.id &&
                               "bg-muted"
                           )}
-                          disabled={assignStaffMutation.isPending}
                         >
                           <div className="flex flex-col flex-1">
                             <span className="font-medium">
                               {staff.fullName}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {staff.staffRoleName}
+                              {staff.email}
                             </span>
                           </div>
                           {session.assignedStaffUserId === staff.id && (
                             <span className="ml-auto text-xs text-primary">
-                              ✓
+                              <Check className="h-4 w-4" />
                             </span>
                           )}
                         </DropdownMenuItem>
                       ))
                     ) : (
                       <DropdownMenuItem disabled>
-                        Không có nhân viên
+                        Không có dữ liệu
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleMarkAllRead}
+                disabled={markAllReadMutation.isPending}
+              >
+                <CheckCheck className="h-4 w-4 mr-2" /> Đánh dấu đã đọc
+              </DropdownMenuItem>
               {canSendMessage && (
                 <>
                   <DropdownMenuSeparator />
@@ -473,8 +522,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                     disabled={closeSessionMutation.isPending}
                     className="text-destructive focus:text-destructive"
                   >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Đóng phiên chat
+                    <XCircle className="h-4 w-4 mr-2" /> Đóng phiên chat
                   </DropdownMenuItem>
                 </>
               )}
@@ -483,26 +531,39 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
-        {isConnecting && (
-          <div className="flex justify-center">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        )}
+      {/* 2. Messages Area */}
+      <div className="flex-1 overflow-hidden relative bg-muted/30">
+        <ScrollArea className="h-full px-4 py-4" ref={scrollContainerRef}>
+          <div className="space-y-4 pb-4">
+            {isConnecting && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            )}
 
-        {messages.map((msg) => (
-          <MessageBubble
-            key={msg.id}
-            message={msg}
-            onTranslate={handleTranslate}
-          />
-        ))}
-        <div ref={messagesEndRef} />
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 opacity-50">
+                <Send className="h-12 w-12 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  Chưa có tin nhắn nào trong cuộc trò chuyện này.
+                </p>
+              </div>
+            ) : (
+              messages.map((msg) => (
+                <MessageBubble
+                  key={msg.id}
+                  message={msg}
+                  onTranslate={handleTranslate}
+                />
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
       </div>
 
-      {/* Input */}
-      <div className="border-t p-4 bg-white">
+      {/* 3. Input Area */}
+      <div className="border-t p-4 bg-white shrink-0">
         {!canSendMessage ? (
           <div className="text-center text-sm text-muted-foreground py-2">
             Phiên chat đã đóng
@@ -510,26 +571,31 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         ) : (
           <div className="space-y-2">
             {/* Translation Preview */}
-            {translatedInput && (
-              <div className="bg-muted/50 rounded-md p-3 border border-border">
+            {translationState.translatedText && (
+              <div className="bg-muted/50 rounded-md p-3 border border-border animate-in fade-in slide-in-from-bottom-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Bản gốc ({inputSourceLang?.toUpperCase()}):
+                    <p className="text-xs text-muted-foreground">
+                      Gốc ({translationState.sourceLang?.toUpperCase()}):{" "}
+                      <span className="text-foreground">{inputMessage}</span>
                     </p>
-                    <p className="text-sm mb-2">{inputMessage}</p>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Bản dịch sẽ gửi:
-                    </p>
-                    <p className="text-sm font-medium">{translatedInput}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Globe className="h-3 w-3 text-primary" />
+                      <p className="text-sm font-medium">
+                        {translationState.translatedText}
+                      </p>
+                    </div>
                   </div>
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => {
-                      setTranslatedInput("");
-                      setInputSourceLang(null);
-                    }}
+                    onClick={() =>
+                      setTranslationState((prev) => ({
+                        ...prev,
+                        translatedText: "",
+                        sourceLang: null,
+                      }))
+                    }
                   >
                     <XCircle className="h-4 w-4" />
                   </Button>
@@ -554,12 +620,8 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="rounded-full"
-                    onClick={() => {
-                      setIsItemPopoverOpen(true);
-                    }}
-                    disabled={isConnecting}
-                    title="Tag món ăn hoặc dịch vụ"
+                    className="rounded-full shrink-0"
+                    disabled={!isConnected}
                   >
                     <Hash className="h-4 w-4" />
                   </Button>
@@ -571,121 +633,94 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                       <TabsTrigger value="services">Dịch vụ</TabsTrigger>
                     </TabsList>
                     <TabsContent value="menu" className="mt-2">
-                      {isLoadingItems ? (
-                        <div className="flex justify-center py-8">
-                          <Loader2 className="h-6 w-6 animate-spin" />
-                        </div>
-                      ) : menuItems && menuItems.length > 0 ? (
-                        <ScrollArea className="h-64">
+                      <ScrollArea className="h-64">
+                        {menuItems?.length ? (
                           <div className="space-y-1">
                             {menuItems.map((item) => (
-                              <Button
+                              <TagItemButton
                                 key={item.itemId}
-                                variant="ghost"
-                                className="w-full justify-start text-left h-auto py-2"
+                                name={item.name}
+                                description={item.description ?? ""}
+                                price={item.price}
                                 onClick={() => handleTagItem(item, "menu")}
-                              >
-                                <div className="flex flex-col items-start">
-                                  <span className="font-medium">
-                                    {item.name}
-                                  </span>
-                                  {item.description && (
-                                    <span className="text-xs text-muted-foreground line-clamp-1">
-                                      {item.description}
-                                    </span>
-                                  )}
-                                  <span className="text-xs text-primary">
-                                    {item.price?.toLocaleString("vi-VN")} VNĐ
-                                  </span>
-                                </div>
-                              </Button>
+                              />
                             ))}
                           </div>
-                        </ScrollArea>
-                      ) : (
-                        <div className="text-center py-8 text-sm text-muted-foreground">
-                          Không có món ăn
-                        </div>
-                      )}
+                        ) : (
+                          <div className="text-center py-8 text-sm text-muted-foreground">
+                            Không có dữ liệu
+                          </div>
+                        )}
+                      </ScrollArea>
                     </TabsContent>
                     <TabsContent value="services" className="mt-2">
-                      {isLoadingItems ? (
-                        <div className="flex justify-center py-8">
-                          <Loader2 className="h-6 w-6 animate-spin" />
-                        </div>
-                      ) : serviceItems && serviceItems.length > 0 ? (
-                        <ScrollArea className="h-64">
+                      <ScrollArea className="h-64">
+                        {serviceItems?.length ? (
                           <div className="space-y-1">
                             {serviceItems.map((item) => (
-                              <Button
+                              <TagItemButton
                                 key={item.serviceItemId}
-                                variant="ghost"
-                                className="w-full justify-start text-left h-auto py-2"
+                                name={item.name}
+                                description={item.description}
+                                price={item.basePrice}
                                 onClick={() => handleTagItem(item, "service")}
-                              >
-                                <div className="flex flex-col items-start">
-                                  <span className="font-medium">
-                                    {item.name}
-                                  </span>
-                                  {item.description && (
-                                    <span className="text-xs text-muted-foreground line-clamp-1">
-                                      {item.description}
-                                    </span>
-                                  )}
-                                  <span className="text-xs text-primary">
-                                    {item.basePrice?.toLocaleString("vi-VN")}{" "}
-                                    VNĐ
-                                  </span>
-                                </div>
-                              </Button>
+                              />
                             ))}
                           </div>
-                        </ScrollArea>
-                      ) : (
-                        <div className="text-center py-8 text-sm text-muted-foreground">
-                          Không có dịch vụ
-                        </div>
-                      )}
+                        ) : (
+                          <div className="text-center py-8 text-sm text-muted-foreground">
+                            Không có dữ liệu
+                          </div>
+                        )}
+                      </ScrollArea>
                     </TabsContent>
                   </Tabs>
                 </PopoverContent>
               </Popover>
+
               <Input
                 value={inputMessage}
                 onChange={(e) => {
                   setInputMessage(e.target.value);
-                  // Clear translation if user edits message
-                  if (translatedInput) {
-                    setTranslatedInput("");
-                    setInputSourceLang(null);
+                  if (translationState.translatedText) {
+                    setTranslationState((prev) => ({
+                      ...prev,
+                      translatedText: "",
+                      sourceLang: null,
+                    }));
                   }
                 }}
-                placeholder="Nhập tin nhắn..."
-                disabled={isConnecting}
+                placeholder={
+                  isConnected ? "Nhập tin nhắn..." : "Đang kết nối..."
+                }
+                disabled={!isConnected}
                 className="flex-1 rounded-full"
               />
+
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                className="rounded-full"
+                className="rounded-full shrink-0"
                 onClick={handleDetectAndTranslateInput}
                 disabled={
-                  !inputMessage.trim() || isTranslatingInput || isConnecting
+                  !inputMessage.trim() ||
+                  translationState.isTranslating ||
+                  !isConnected
                 }
-                title="Dịch tin nhắn sang ngôn ngữ của khách"
               >
-                {isTranslatingInput ? (
+                {translationState.isTranslating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Globe className="h-4 w-4" />
                 )}
               </Button>
+
               <Button
                 type="submit"
                 size="icon"
-                className="rounded-full"
-                disabled={!inputMessage.trim() || isConnecting}
+                className="rounded-full shrink-0"
+                disabled={!inputMessage.trim() || !isConnected}
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -696,3 +731,34 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     </div>
   );
 }
+
+// Helper Component for the Popover List Items to keep the main render clean
+const TagItemButton = ({
+  name,
+  description,
+  price,
+  onClick,
+}: {
+  name: string;
+  description?: string;
+  price?: number;
+  onClick: () => void;
+}) => (
+  <Button
+    variant="ghost"
+    className="w-full justify-start text-left h-auto py-2"
+    onClick={onClick}
+  >
+    <div className="flex flex-col items-start w-full">
+      <span className="font-medium truncate w-full">{name}</span>
+      {description && (
+        <span className="text-xs text-muted-foreground line-clamp-1">
+          {description}
+        </span>
+      )}
+      <span className="text-xs text-primary">
+        {price?.toLocaleString("vi-VN")} VNĐ
+      </span>
+    </div>
+  </Button>
+);

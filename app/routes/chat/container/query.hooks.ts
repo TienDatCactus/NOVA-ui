@@ -51,7 +51,6 @@ export function useStaffInbox(params?: ChatMessagesParams) {
     queryKey: ["staff-chat-inbox", params],
     queryFn: async () => await ChatService.getStaffChatInbox(params),
     staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 30 * 1000, // Poll every 30s for new sessions
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });
@@ -99,6 +98,73 @@ export function useCloseSession() {
     mutationFn: (sessionId: string) => ChatService.closeChatSession(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff-chat-inbox"] });
+    },
+  });
+}
+
+// Mutation: Mark message as read
+export function useMarkRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (messageId: string) => ChatService.markRead(messageId),
+    onMutate: async (messageId) => {
+      // Optimistically update message as read
+      const queryKeys = queryClient.getQueriesData({
+        queryKey: ["chat-messages"],
+      });
+
+      queryKeys.forEach(([key, data]) => {
+        if (data && Array.isArray(data)) {
+          const updatedMessages = data.map((msg: any) =>
+            msg.id === messageId
+              ? { ...msg, isRead: true, readAt: new Date().toISOString() }
+              : msg
+          );
+          queryClient.setQueryData(key, updatedMessages);
+        }
+      });
+    },
+    onError: (error, messageId) => {
+      // Rollback on error
+      queryClient.invalidateQueries({ queryKey: ["chat-messages"] });
+    },
+  });
+}
+
+// Mutation: Mark all messages in session as read
+export function useMarkAllRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (sessionId: string) => ChatService.markAllRead(sessionId),
+    onMutate: async (sessionId) => {
+      // Optimistically mark all messages in session as read
+      const queryKey = ["chat-messages", sessionId];
+      const previousData = queryClient.getQueryData(queryKey);
+
+      if (previousData && Array.isArray(previousData)) {
+        const updatedMessages = previousData.map((msg: any) => ({
+          ...msg,
+          isRead: true,
+          readAt: new Date().toISOString(),
+        }));
+        queryClient.setQueryData(queryKey, updatedMessages);
+      }
+
+      return { previousData };
+    },
+    onError: (error, sessionId, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          ["chat-messages", sessionId],
+          context.previousData
+        );
+      }
+    },
+    onSuccess: (data, sessionId) => {
+      queryClient.invalidateQueries({ queryKey: ["chat-messages", sessionId] });
     },
   });
 }

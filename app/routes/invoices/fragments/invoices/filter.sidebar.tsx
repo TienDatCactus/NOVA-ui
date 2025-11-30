@@ -68,7 +68,6 @@ export default function InvoicesFilterBar({
   onFilterChange,
   onResetFilters,
 }: InvoicesFilterBarProps) {
-  // Logic: Calculate active filters to show "Reset" button
   const activeFiltersCount =
     (filters.Status ? 1 : 0) +
     (filters.PaymentMethod ? 1 : 0) +
@@ -85,7 +84,7 @@ export default function InvoicesFilterBar({
   const { data: bookings } = useBookings();
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 px-2">
       <div className="flex flex-col gap-4 md:flex-row items-center md:justify-between">
         <div>
           <Input
@@ -133,7 +132,7 @@ export default function InvoicesFilterBar({
               onFilterChange("SortBy", value as SortByField)
             }
           >
-            <SelectTrigger className="h-9 w-[130px] text-xs">
+            <SelectTrigger className="h-9 w-40 text-xs">
               <span className="text-muted-foreground mr-1">Sắp xếp:</span>
               <SelectValue />
             </SelectTrigger>

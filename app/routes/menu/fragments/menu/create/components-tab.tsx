@@ -1,0 +1,284 @@
+import { Check, ChevronsUpDown, Layers, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import type { UseFormReturn } from "react-hook-form";
+
+import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Table, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { TabsContent } from "~/components/ui/tabs";
+import { cn } from "~/lib/utils";
+import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+
+interface ComponentsTabProps {
+  form: UseFormReturn<any>;
+  fields: any[];
+  append: (value: any) => void;
+  remove: (index: number) => void;
+  stockItems?: StockItemsListItemDto[];
+}
+
+const ComponentsTab: React.FC<ComponentsTabProps> = ({
+  form,
+  fields,
+  append,
+  remove,
+  stockItems,
+}) => {
+  const [openPopovers, setOpenPopovers] = useState<{ [key: number]: boolean }>(
+    {}
+  );
+
+  return (
+    <TabsContent value="components" className="mt-0 outline-none">
+      <div className="flex items-center justify-between mb-4">
+        <div className="space-y-1">
+          <h4 className="text-sm font-medium">Công thức định lượng</h4>
+          <p className="text-xs text-muted-foreground">
+            Trừ kho tự động khi bán món này.
+          </p>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() =>
+            append({
+              itemId: "",
+              itemCode: "",
+              itemName: "",
+              quantity: 1,
+              notes: "",
+            })
+          }
+        >
+          <Plus className="w-3.5 h-3.5 mr-1.5" /> Thêm dòng
+        </Button>
+      </div>
+
+      {fields.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed rounded-lg bg-muted/5">
+          <Layers className="w-10 h-10 text-muted-foreground/20 mb-3" />
+          <p className="text-sm text-muted-foreground">
+            Chưa có nguyên liệu nào
+          </p>
+          <Button
+            variant="link"
+            onClick={() =>
+              append({
+                itemId: "",
+                itemCode: "",
+                itemName: "",
+                quantity: 1,
+                notes: "",
+              })
+            }
+          >
+            Thêm nguyên liệu đầu tiên
+          </Button>
+        </div>
+      ) : (
+        <div className="border rounded-lg overflow-hidden">
+          <Table className="w-full text-sm">
+            <TableHeader className="bg-muted/30 text-muted-foreground font-medium">
+              <TableRow>
+                <TableHead className="text-left py-3 px-4 font-medium w-[30%]">
+                  Nguyên liệu
+                </TableHead>
+                <TableHead className="text-left py-3 px-4 font-medium w-[20%]">
+                  Số lượng
+                </TableHead>
+                <TableHead className="text-left py-3 px-4 font-medium w-[20%]">
+                  Ghi chú
+                </TableHead>
+                <TableHead className="w-[10%]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <tbody className="divide-y">
+              {fields.map((field, index) => (
+                <TableRow
+                  key={field.id}
+                  className="group bg-background hover:bg-muted/5"
+                >
+                  <td className="p-3 pl-4">
+                    <FormField
+                      control={form.control}
+                      name={`Components.${index}.itemId`}
+                      render={({ field }) => (
+                        <FormItem className="space-y-0">
+                          <Popover
+                            open={openPopovers[index]}
+                            onOpenChange={(open) =>
+                              setOpenPopovers((prev) => ({
+                                ...prev,
+                                [index]: open,
+                              }))
+                            }
+                          >
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "h-9 w-full justify-between border-transparent bg-transparent hover:bg-muted/10 focus:bg-background focus:border-input",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? stockItems?.find(
+                                        (item) => item.id === field.value
+                                      )?.name
+                                    : "Chọn nguyên liệu"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[300px] p-0"
+                              align="start"
+                            >
+                              <Command>
+                                <CommandInput placeholder="Tìm nguyên liệu..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    Không tìm thấy nguyên liệu.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {stockItems?.map((item) => {
+                                      const isSelected =
+                                        form
+                                          .getValues("Components")
+                                          .some(
+                                            (cmp: any) => cmp.itemId === item.id
+                                          ) && field.value !== item.id;
+
+                                      return (
+                                        <CommandItem
+                                          key={item.id}
+                                          value={item.name}
+                                          disabled={isSelected}
+                                          onSelect={() => {
+                                            field.onChange(item.id);
+                                            form.setValue(
+                                              `Components.${index}.itemCode`,
+                                              item.code
+                                            );
+                                            form.setValue(
+                                              `Components.${index}.itemName`,
+                                              item.name
+                                            );
+                                            setOpenPopovers((prev) => ({
+                                              ...prev,
+                                              [index]: false,
+                                            }));
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === item.id
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex items-center justify-between w-full gap-2">
+                                            <span>{item.name}</span>
+                                            <span className="text-xs text-muted-foreground font-mono">
+                                              {item.unitName}
+                                            </span>
+                                          </div>
+                                        </CommandItem>
+                                      );
+                                    })}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td className="p-3">
+                    <FormField
+                      control={form.control}
+                      name={`Components.${index}.quantity`}
+                      render={({ field }) => (
+                        <FormItem className="space-y-0">
+                          <FormControl>
+                            <Counter
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              minValue={0}
+                              step={0.1}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td className="p-3">
+                    <FormField
+                      control={form.control}
+                      name={`Components.${index}.notes`}
+                      render={({ field }) => (
+                        <FormItem className="space-y-0">
+                          <FormControl>
+                            <Input
+                              placeholder="..."
+                              value={field.value || ""}
+                              onChange={(e) =>
+                                field.onChange(e.target.value || "")
+                              }
+                              onBlur={field.onBlur}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td className="p-3 text-center">
+                    <Button
+                      type="button"
+                      variant="destructive-ghost"
+                      size="icon"
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </td>
+                </TableRow>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      )}
+    </TabsContent>
+  );
+};
+
+export default ComponentsTab;

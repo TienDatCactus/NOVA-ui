@@ -6,6 +6,7 @@ import type {
   AddSingleItemToPOSOrderRequestDto,
   AddBatchItemsToPOSOrderRequestDto,
   OrderPayNowRequestDto,
+  CreatePOSOrderWithItemsRequestDto,
 } from "~/services/api/orders/dto";
 
 /**
@@ -22,14 +23,44 @@ export function useCreatePOSOrder() {
     },
     onSuccess: (_, data) => {
       // Invalidate all POS order lists (all dates)
-      queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-list"],
+        refetchType: "active",
+      });
       // Invalidate all order details
-      queryClient.invalidateQueries({ queryKey: ["pos-order-detail"] });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail"],
+        refetchType: "active",
+      });
       // Invalidate checkout pending charges
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", data.bookingId],
+        refetchType: "active",
       });
       toast.success("Đã tạo order thành công");
+    },
+  });
+}
+export function useCreatePOSOrderWithItems() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreatePOSOrderWithItemsRequestDto) => {
+      return await OrderService.createPosOrderWithItems(data);
+    },
+    onSuccess: (_, data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-list"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["pos-order-detail"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", data.bookingId],
+        refetchType: "active",
+      });
     },
   });
 }
@@ -317,7 +348,7 @@ export function useUpdateScheduledTime() {
 }
 
 export function useMarkItemServed() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({
       orderId,
@@ -331,6 +362,12 @@ export function useMarkItemServed() {
       return await OrderService.setServedOrderItem(orderId, itemId, {
         servedAt,
       });
+    },
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({
+        queryKey: ["pos-order-detail", variables.orderId],
+      });
+      qc.invalidateQueries({ queryKey: ["pos-order-list"] });
     },
   });
 }

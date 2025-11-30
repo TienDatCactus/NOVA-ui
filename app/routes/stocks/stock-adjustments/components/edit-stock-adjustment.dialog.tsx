@@ -110,7 +110,7 @@ export default function EditStockAdjustmentDialog({
   if (isLoadingAdj) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
+        <DialogContent className="max-w-5xl  max-h-[90vh] flex flex-col">
           <DialogHeader className="px-6 py-4 border-b">
             <Skeleton className="h-6 w-48" />
           </DialogHeader>
@@ -127,7 +127,7 @@ export default function EditStockAdjustmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col gap-0 p-0">
+      <DialogContent className="max-w-5xl  max-h-[90vh] flex flex-col gap-0 p-0">
         {/* HEADER */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/10">
           <div className="flex items-center justify-between">
@@ -209,14 +209,20 @@ export default function EditStockAdjustmentDialog({
                             control={form.control}
                             name={`items.${index}.itemId`}
                             render={({ field: itemField }) => (
-                              <ItemCombobox
-                                value={itemField.value}
-                                onChange={itemField.onChange}
-                                items={stockItems}
-                                hasError={
-                                  !!form.formState.errors.items?.[index]?.itemId
-                                }
-                              />
+                              <FormItem>
+                                <FormControl>
+                                  <ItemCombobox
+                                    value={itemField.value}
+                                    onChange={itemField.onChange}
+                                    items={stockItems}
+                                    hasError={
+                                      !!form.formState.errors.items?.[index]
+                                        ?.itemId
+                                    }
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
                             )}
                           />
                         </TableCell>
@@ -232,6 +238,7 @@ export default function EditStockAdjustmentDialog({
                                   <Counter
                                     {...qtyField}
                                     step={0.1}
+                                    minValue={-9999}
                                     className={cn(
                                       "text-right font-mono w-44",
                                       qtyField.value < 0
@@ -241,7 +248,8 @@ export default function EditStockAdjustmentDialog({
                                           : ""
                                     )}
                                   />
-                                </FormControl>
+                                </FormControl>{" "}
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -261,6 +269,7 @@ export default function EditStockAdjustmentDialog({
                                     className="border-transparent focus:border-input bg-transparent focus:bg-background"
                                   />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />

@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { Loader2, Languages, Globe } from "lucide-react";
+import { Loader2, Languages, Globe, Check, CheckCheck } from "lucide-react";
 import { cn } from "~/lib/utils";
 import type { ChatMessage } from "~/lib/signalr";
 import { format, parseISO } from "date-fns";
@@ -52,7 +52,7 @@ export function MessageBubble({
       {/* Message bubble */}
       <div
         className={cn(
-          "max-w-[70%] rounded-lg p-3",
+          "w-fit rounded-lg p-3",
           isOwnMessage
             ? "bg-primary text-primary-foreground rounded-br-none"
             : "bg-muted rounded-bl-none"
@@ -65,12 +65,24 @@ export function MessageBubble({
           </p>
         )}
 
-        {/* Original message text */}
+        {/* Message text - show translated if available and showTranslation is true */}
         <p className="text-sm whitespace-pre-wrap break-words">
-          {message.message}
+          {message.translatedText && message.showTranslation
+            ? message.translatedText
+            : message.message}
+          {message.translatedText && message.showTranslation && (
+            <span
+              className={cn(
+                "ml-1 text-xs italic",
+                isOwnMessage ? "opacity-70" : "text-muted-foreground"
+              )}
+            >
+              (đã dịch)
+            </span>
+          )}
         </p>
 
-        {/* Detected language badge */}
+        {/* Detected language badge - only show when translation is NOT active */}
         {message.detectedLanguage && !message.showTranslation && (
           <Badge
             variant="outline"
@@ -86,40 +98,43 @@ export function MessageBubble({
           </Badge>
         )}
 
-        {/* Translation section */}
-        {message.translatedText && message.showTranslation && (
-          <div
-            className={cn(
-              "mt-2 pt-2 border-t",
-              isOwnMessage
-                ? "border-primary-foreground/20"
-                : "border-muted-foreground/20"
-            )}
-          >
+        {/* Footer: timestamp + read status + action buttons */}
+        <div className="flex items-center justify-between mt-1 gap-2">
+          <div className="flex items-center gap-1">
             <p
               className={cn(
-                "text-xs mb-1",
+                "text-xs",
                 isOwnMessage ? "opacity-70" : "text-muted-foreground"
               )}
             >
-              Đã dịch từ {message.detectedLanguage || "ngôn ngữ khác"}
+              {format(parseISO(message.createdAt ?? ""), "HH:mm", {
+                locale: vi,
+              })}
             </p>
-            <p className="text-sm whitespace-pre-wrap break-words opacity-90">
-              {message.translatedText}
-            </p>
-          </div>
-        )}
 
-        {/* Footer: timestamp + action buttons */}
-        <div className="flex items-center justify-between mt-1 gap-2">
-          <p
-            className={cn(
-              "text-xs",
-              isOwnMessage ? "opacity-70" : "text-muted-foreground"
+            {/* Read status indicator (only for staff messages) */}
+            {isStaff && isOwnMessage && (
+              <div
+                className={cn(
+                  "flex items-center",
+                  isOwnMessage
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground"
+                )}
+                title={
+                  message.isRead && message.readAt
+                    ? `Đã đọc lúc ${format(parseISO(message.readAt), "HH:mm dd/MM/yyyy", { locale: vi })}`
+                    : "Đã gửi"
+                }
+              >
+                {message.isRead ? (
+                  <CheckCheck className="h-3 w-3" />
+                ) : (
+                  <Check className="h-3 w-3" />
+                )}
+              </div>
             )}
-          >
-            {format(parseISO(message.createdAt), "HH:mm", { locale: vi })}
-          </p>
+          </div>
 
           <div className="flex items-center gap-1">
             {/* Translation toggle button */}

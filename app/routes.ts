@@ -47,8 +47,15 @@ export default [
       ]),
       route("units", "routes/units/units.tsx"),
       route("invoices", "routes/invoices/invoices.tsx"),
+      route("expenses", "routes/expenses/expenses.tsx"),
+      ...prefix("expenses", [
+        route("dashboard", "routes/expenses/dashboard/dashboard.tsx"),
+      ]),
       route("chat", "routes/chat/chat.tsx"),
       route("users", "routes/users/users.tsx"),
+      route("work-shifts", "routes/work-shifts/work-shifts.tsx"),
+      route("audit-logs", "routes/audit-logs/audit-logs.tsx"),
+      route("configs", "routes/configs/configs.tsx"),
       ...prefix("stocks", [
         ...prefix("items", [index("routes/stocks/items/items.tsx")]),
         ...prefix("item-categories", [
@@ -63,11 +70,14 @@ export default [
       ]),
       ...prefix("staff", [
         index("routes/staff/staff/staff.tsx"),
-        route("work-shifts", "routes/staff/work-shifts/work-shifts.tsx"),
+
         route("holidays", "routes/staff/holidays/holidays.tsx"),
-        route("schedules", "routes/staff/schedules/schedules.tsx"),
+        route("shifts", "routes/staff/staff-shifts/staff-shifts.tsx"),
         route("payrolls", "routes/staff/payrolls/payrolls.tsx"),
         route("roles", "routes/staff/staff-role/staff-role.tsx"),
+      ]),
+      ...prefix("finances", [
+        route("dashboard", "routes/finances/dashboard/dashboard.tsx"),
       ]),
     ]),
   ]),
@@ -75,6 +85,8 @@ export default [
     index("routes/customer/chat/inbox.tsx"),
     route("chat", "routes/customer/chat/chat.tsx"),
     route("map", "routes/customer/map/map.tsx"),
+    route("guides", "routes/customer/guides/guides.tsx"),
+    route("catalog", "routes/customer/catalog/catalog.tsx"),
   ]),
 
   route("*", "routes/not-found.tsx"),

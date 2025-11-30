@@ -51,12 +51,19 @@ export const useChatTranslationStore = create<ChatTranslationState>()(
           return { sessionLanguageOverrides: rest };
         }),
       setTranslationCache: (key, value) =>
-        set((state) => ({
-          translationCache: {
-            ...state.translationCache,
-            [key]: value,
-          },
-        })),
+        set((state) => {
+          const newCache = { ...state.translationCache };
+
+          // LRU: Remove oldest entry if cache exceeds 20 items
+          const cacheKeys = Object.keys(newCache);
+          if (cacheKeys.length >= 20) {
+            // Remove first (oldest) key
+            delete newCache[cacheKeys[0]];
+          }
+
+          newCache[key] = value;
+          return { translationCache: newCache };
+        }),
       clearTranslationCache: () => set({ translationCache: {} }),
     }),
     {

@@ -16,7 +16,7 @@ const StaffShiftDetailItemSchema = z.object({
   id: z.string(),
   staffId: z.string(),
   staffName: z.string().optional(),
-  workShiftId: z.string(),
+  workShiftId: z.string().optional(),
   shiftName: z.string().optional(),
   workDate: z.string(), // "yyyy-MM-dd"
   status: z.string().optional(),

@@ -100,7 +100,7 @@ export default function PaymentDialog({
           <div className="space-y-2">
             <Label htmlFor="payment-method">Phương thức thanh toán</Label>
             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-              <SelectTrigger id="payment-method">
+              <SelectTrigger id="payment-method" className="w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

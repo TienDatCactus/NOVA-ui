@@ -1,19 +1,21 @@
-/**
- * Booking Update Validation Rules
- *
- * Implements business logic for determining when booking updates are allowed
- * based on BookingStatus and InvoiceStatus
- */
-
 import { InvoiceSchema } from "~/services/api/invoices/invoice.schema";
 import type z from "zod";
 
 type Invoice = z.infer<typeof InvoiceSchema.InvoiceListItemSchema>;
 
-/**
- * Invoice statuses that indicate "financial lock" - money has been collected
- */
+/** Statuses that allow structural changes (if unpaid) */
+const PRE_STAY_STATUSES = ["Pending", "Confirmed"];
+
+/** Statuses that indicate the guest is currently valid in system */
+const ACTIVE_STAY_STATUSES = ["CheckedIn", "InHouse"];
+
+/** Statuses considered "Dead" - limited updates allowed */
+const CLOSED_STATUSES = ["CheckedOut", "Cancelled", "NoShow"];
+
+/** Invoice statuses that indicate "financial lock" */
 const LOCKED_INVOICE_STATUSES = ["PartiallyPaid", "Paid", "Overpaid"] as const;
+
+// --- HELPERS ---
 
 /**
  * Check if a room invoice has financial lock (money collected)
@@ -26,6 +28,7 @@ export function isInvoiceFinanciallyLocked(invoice: Invoice): boolean {
 
 /**
  * Check if any room-related invoice has been paid
+ * (Used to lock Dates, Room Changes, Guest Counts)
  */
 export function hasAnyLockedRoomInvoice(invoices: Invoice[]): boolean {
   const roomInvoices = invoices.filter(
@@ -37,18 +40,96 @@ export function hasAnyLockedRoomInvoice(invoices: Invoice[]): boolean {
   return roomInvoices.some((inv) => isInvoiceFinanciallyLocked(inv));
 }
 
+// --- VALIDATION RULES ---
+
 /**
- * Main validation: Can perform heavy updates (rooms, dates)?
- *
- * Returns true only if:
- * - BookingStatus is Pending
- * - AND no room invoices have been paid
+ * 1. Validate: Non-Structural Updates
+ * Fields: Note, OTA Info, Customer Info
+ * Rule: Allowed everywhere EXCEPT Cancelled
  */
-export function canPerformHeavyUpdate(
+export function canUpdateNonStructural(bookingStatus: string): boolean {
+  return bookingStatus !== "Cancelled";
+}
+
+/**
+ * 2. Validate: Update Dates (Check-in / Check-out)
+ * Rule:
+ * - Only Pending/Confirmed
+ * - Must NOT have locked invoices
+ */
+export function canUpdateDates(
   bookingStatus: string,
   invoices: Invoice[]
 ): boolean {
-  if (bookingStatus !== "Pending") {
+  // Strict: Cannot change dates if guest already checked in (per current docs)
+  if (!PRE_STAY_STATUSES.includes(bookingStatus)) {
+    return false;
+  }
+
+  // Financial Lock: Cannot change dates if money paid
+  if (hasAnyLockedRoomInvoice(invoices)) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Get reason why Date Update is blocked
+ */
+export function getDateUpdateBlockReason(
+  bookingStatus: string,
+  invoices: Invoice[]
+): string | null {
+  if (ACTIVE_STAY_STATUSES.includes(bookingStatus)) {
+    return "Không thể thay đổi ngày khi khách đang ở (CheckedIn). Vui lòng checkout hoặc tạo booking mới cho ngày gia hạn.";
+  }
+
+  if (CLOSED_STATUSES.includes(bookingStatus)) {
+    return "Không thể thay đổi ngày cho booking đã kết thúc hoặc hủy.";
+  }
+
+  if (hasAnyLockedRoomInvoice(invoices)) {
+    return "Booking đã có thanh toán. Vui lòng Void/Refund hóa đơn trước khi đổi ngày.";
+  }
+
+  return null;
+}
+
+/**
+ * 3. Validate: Add Room
+ * Rule:
+ * - Allowed for Pending/Confirmed (if unpaid)
+ * - ESPECIALLY ALLOWED for CheckedIn/InHouse (Guest wants extra room)
+ */
+export function canAddRoom(
+  bookingStatus: string,
+  invoices: Invoice[]
+): boolean {
+  // Case A: Guest is already here -> Allow adding more rooms
+  if (ACTIVE_STAY_STATUSES.includes(bookingStatus)) {
+    return true;
+  }
+
+  // Case B: Future booking -> Allow only if no financial lock
+  if (PRE_STAY_STATUSES.includes(bookingStatus)) {
+    return !hasAnyLockedRoomInvoice(invoices);
+  }
+
+  return false;
+}
+
+/**
+ * 4. Validate: Change/Remove Room & Guest Count
+ * Rule: Stricter than Add Room.
+ * - Only Pending/Confirmed
+ * - No financial lock
+ */
+export function canModifyExistingStructure(
+  bookingStatus: string,
+  invoices: Invoice[]
+): boolean {
+  if (!PRE_STAY_STATUSES.includes(bookingStatus)) {
     return false;
   }
 
@@ -59,103 +140,18 @@ export function canPerformHeavyUpdate(
   return true;
 }
 
-/**
- * Get detailed reason why heavy update is blocked
- */
-export function getHeavyUpdateBlockReason(
-  bookingStatus: string,
-  invoices: Invoice[]
-): string | null {
-  if (bookingStatus !== "Pending") {
-    return "Không thể thay đổi cấu trúc booking khi khách đã check-in hoặc booking đã hoàn tất. Vui lòng sử dụng chức năng Void/Refund.";
-  }
-
-  if (hasAnyLockedRoomInvoice(invoices)) {
-    return "Không thể cập nhật thông tin phòng vì booking đã có hóa đơn đã thanh toán một phần hoặc toàn bộ. Vui lòng sử dụng chức năng Void/Refund.";
-  }
-
-  return null;
+export function canUpdateTotalAmount(bookingStatus: string): boolean {
+  // Allow almost everywhere except Cancelled
+  return bookingStatus !== "Cancelled";
 }
 
-/**
- * Soft updates (adults, children, totalAmount, breakfast, notes)
- * Only allowed in Pending status
- */
-export function canPerformSoftUpdate(bookingStatus: string): boolean {
-  return bookingStatus === "Pending";
+export function isBookingCompletelyLocked(bookingStatus: string): boolean {
+  return bookingStatus === "Cancelled";
 }
 
-/**
- * Check if adding rooms is allowed
- * Only Pending status with no payments
- */
-export function canAddRooms(
+export function canUpdateGuestCount(
   bookingStatus: string,
   invoices: Invoice[]
 ): boolean {
-  return canPerformHeavyUpdate(bookingStatus, invoices);
-}
-
-/**
- * Check if removing rooms is allowed
- * (Stricter than adding - only when invoices are unlocked)
- */
-export function canRemoveRooms(
-  bookingStatus: string,
-  invoices: Invoice[]
-): boolean {
-  return canPerformHeavyUpdate(bookingStatus, invoices);
-}
-
-/**
- * Check if changing dates is allowed
- *
- * STRICT RULE: Only Pending status with no payments
- */
-export function canChangeDates(
-  bookingStatus: string,
-  invoices: Invoice[]
-): boolean {
-  if (bookingStatus !== "Pending") {
-    return false;
-  }
-
-  // Cannot change if any payment exists
-  return !invoices.some((inv) => isInvoiceFinanciallyLocked(inv));
-}
-
-/**
- * Get detailed reason why date change is blocked
- */
-export function getDateChangeBlockReason(
-  bookingStatus: string,
-  invoices: Invoice[]
-): string | null {
-  // Check status first
-  if (
-    bookingStatus === "CheckedIn" ||
-    bookingStatus === "InHouse" ||
-    bookingStatus === "CheckedOut" ||
-    bookingStatus === "Cancelled" ||
-    bookingStatus === "NoShow"
-  ) {
-    return "Không thể thay đổi ngày check-in/check-out sau khi khách đã nhận phòng hoặc booking đã hoàn tất.";
-  }
-
-  if (bookingStatus === "Confirmed") {
-    return "Không thể thay đổi ngày sau khi booking đã được xác nhận.";
-  }
-
-  // Check payment lock
-  const hasAnyPayment = invoices.some((inv) => isInvoiceFinanciallyLocked(inv));
-
-  if (hasAnyPayment) {
-    const paidInvoices = invoices.filter((inv) =>
-      isInvoiceFinanciallyLocked(inv)
-    );
-    const invoiceTypes = paidInvoices.map((inv) => inv.invoiceType).join(", ");
-    return `Không thể thay đổi ngày check-in/check-out vì đã có thanh toán (${invoiceTypes}). Vui lòng hoàn trả thanh toán trước khi thay đổi ngày.`;
-  }
-
-  return null;
+  return canModifyExistingStructure(bookingStatus, invoices);
 }

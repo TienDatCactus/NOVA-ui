@@ -1,44 +1,44 @@
-import { useState, useMemo } from "react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Badge } from "~/components/ui/badge";
 import {
   ArrowLeft,
+  Plus,
   RotateCcw,
   SearchIcon,
   SquareMenu,
-  Plus,
 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 
-import type { MenuListItemSchema } from "~/services/api/menu/menu.schema";
 import type { z } from "zod";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
+import type { MenuListItemSchema } from "~/services/api/menu/menu.schema";
 import { useMenuCategories } from "../menu/container/menu-categories/query.hooks";
 import { useMenuList } from "../menu/container/menu/query.hooks";
 import BookingSelectionDialog from "./components/booking-selection.dialog";
 import CartItem from "./components/cart-item";
 import CartSummary from "./components/cart-summary";
 import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
+import CustomItemDialog from "./components/menu-pos/custom-item.dialog";
 import MenuItemCard from "./components/menu-pos/menu-item-card";
 import OrderConfirmationDialog from "./components/order-confirmation.dialog";
-import CustomItemDialog from "./components/menu-pos/custom-item.dialog";
 
-import useMenuFilters from "../menu/container/menu/filter.hooks";
 import { Link } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
-import type { Route } from "./+types/menu-pos";
 import { useMenuPosOrderStore } from "~/store/menu-pos-order.store";
-import {
-  useAddBatchItemsToPOSOrder,
-  useCreatePOSOrder,
-} from "./container/pos-orders/mutation.hooks";
+import useMenuFilters from "../menu/container/menu/filter.hooks";
+import type { Route } from "./+types/menu-pos";
 import ScheduledTimeDialog from "./components/scheduled-time.dialog";
-
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+import { useCreatePOSOrderWithItems } from "./container/pos-orders/mutation.hooks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 type MenuItem = z.infer<typeof MenuListItemSchema>;
 
@@ -53,7 +53,20 @@ export default function Component({
   const { data: menuItems, isLoading: isLoadingMenu } = useMenuList({
     categoryCode: filters.categoryCode,
   });
-
+  const [checkoutDialog, setCheckoutDialog] = useState(false);
+  const [bookingDialog, setBookingDialog] = useState(false);
+  const [scheduledTimeDialog, setScheduledTimeDialog] = useState(false);
+  const [customItemDialog, setCustomItemDialog] = useState(false);
+  const [selectedBookingInfo, setSelectedBookingInfo] = useState<{
+    bookingId: string;
+    bookingRoomId: string;
+    bookingCode?: string;
+  } | null>(null);
+  const [confirmationDialog, setConfirmationDialog] = useState<{
+    open: boolean;
+    orderId?: string;
+    customerType?: "In-House" | "Walk-In";
+  }>({ open: false });
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null
   );
@@ -102,26 +115,31 @@ export default function Component({
 
   const isEmpty = items.length === 0;
 
-  const { mutate: createOrder, isError } = useCreatePOSOrder();
-  const { mutate: addItems } = useAddBatchItemsToPOSOrder();
-
-  const [checkoutDialog, setCheckoutDialog] = useState(false);
-  const [bookingDialog, setBookingDialog] = useState(false);
-  const [scheduledTimeDialog, setScheduledTimeDialog] = useState(false);
-  const [customItemDialog, setCustomItemDialog] = useState(false);
-  const [selectedBookingInfo, setSelectedBookingInfo] = useState<{
-    bookingId: string;
-    bookingRoomId: string;
-    bookingCode?: string;
-  } | null>(null);
-  const [confirmationDialog, setConfirmationDialog] = useState<{
-    open: boolean;
-    orderId?: string;
-    customerType?: "In-House" | "Walk-In";
-  }>({ open: false });
+  const { mutate: createOrder, isError } = useCreatePOSOrderWithItems();
 
   // Handlers
   const handleAddToCart = (item: MenuItem) => {
+    // Check if out of stock
+    if (item.maxQuantityAvailable === 0) {
+      toast.error(`${item.name} hiện đã hết hàng`);
+      return;
+    }
+
+    // Check if adding would exceed max available
+    const existingItem = items.find((i) => i.id === item.itemId);
+    if (existingItem) {
+      const newQuantity = existingItem.quantity + 1;
+      if (
+        item.maxQuantityAvailable !== undefined &&
+        newQuantity > (item?.maxQuantityAvailable ?? 0)
+      ) {
+        toast.error(
+          `Số lượng tối đa cho ${item.name} là ${item.maxQuantityAvailable}`
+        );
+        return;
+      }
+    }
+
     addItem({
       id: item.itemId,
       menuItemId: item.itemId,
@@ -129,6 +147,7 @@ export default function Component({
       name: item.name,
       unitPrice: item.price,
       imageUrl: item.imageUrls?.[0],
+      maxQuantityAvailable: item.maxQuantityAvailable || undefined,
     });
     toast.success(`Đã thêm ${item.name} vào đơn`);
   };
@@ -201,20 +220,10 @@ export default function Component({
           bookingRoomId,
           scheduledAt: finalScheduledAt,
           note: notes || "",
+          items,
         },
         {
-          onSuccess: (data) => {
-            const newOrderId = data.posOrderId;
-            if (items.length > 0) {
-              addItems({
-                orderId: newOrderId,
-                data: items.map((item) => ({
-                  ...item,
-                })),
-              });
-            }
-            toast.success("Tạo đơn hàng thành công!");
-            // Capture customer type before clearing
+          onSuccess: () => {
             const wasBooking = !!bookingId;
             setSelectedBookingInfo(null);
             setBookingInfo(null, null);
@@ -224,10 +233,6 @@ export default function Component({
               open: true,
               customerType: wasBooking ? "In-House" : "Walk-In",
             });
-          },
-          onError: (error) => {
-            console.error("Create order failed:", error);
-            toast.error("Không thể tạo đơn hàng. Vui lòng thử lại.");
           },
         }
       );
@@ -247,45 +252,44 @@ export default function Component({
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
             <Link to={DASHBOARD.orders.menuOrders}>
-              <Button variant="ghost" size="sm" onClick={handleReset}>
+              <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
               </Button>
             </Link>
             <Separator orientation="vertical" />
-            <Button
-              variant={selectedCategoryId === null ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleCategorySelect(null)}
+            <Select
+              value={selectedCategoryId || "all"}
+              onValueChange={(value) =>
+                handleCategorySelect(value === "all" ? null : value)
+              }
             >
-              <SquareMenu />
-              Tất cả
-            </Button>
-            <Separator orientation="vertical" />
-            <div className="flex items-center gap-2 flex-wrap">
-              {!!menuCategories &&
-                menuCategories.length > 0 &&
-                menuCategories?.map((item) => (
-                  <Button
-                    variant={
-                      selectedCategoryId === item.id ? "default" : "outline"
-                    }
-                    size="sm"
-                    key={item.id}
-                    onClick={() => handleCategorySelect(item.id)}
-                  >
-                    {item.name}
-                    <Badge
-                      className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums ml-1"
-                      variant={
-                        selectedCategoryId === item.id ? "secondary" : "outline"
-                      }
-                    >
-                      {item.menuItemCount}
-                    </Badge>
-                  </Button>
-                ))}
-            </div>
+              <SelectTrigger className="w-[200px] border-primary/50 bg-white shadow-md">
+                <SelectValue placeholder="Chọn danh mục" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <div className="flex items-center justify-between w-full">
+                    <span>Tất cả</span>
+                  </div>
+                </SelectItem>
+                {!!menuCategories &&
+                  menuCategories.length > 0 &&
+                  menuCategories.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <span>{item.name}</span>
+                        <Badge
+                          className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
+                          variant="outline"
+                        >
+                          {item.menuItemCount}
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -356,7 +360,7 @@ export default function Component({
             <Separator className="my-2" />
             <div className="flex-1 flex flex-col justify-between space-y-2">
               {items.length > 0 && (
-                <div className="space-y-4 p-2 overflow-y-auto flex-1 max-h-[50vh]">
+                <div className="space-y-4  overflow-y-auto flex-1 max-h-[50vh]">
                   {items.map((item) => (
                     <CartItem
                       key={item.id}

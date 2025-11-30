@@ -20,11 +20,12 @@ const User = {
   assignRoles: (id: string) => `Users/${id}/roles`,
   removeRoles: (id: string) => `Users/${id}/roles`,
   changePassword: (id: string) => `Users/${id}/change-password`,
+  chatStaff: "Users/chat-staff",
 };
 
 const Booking = {
   staffCreateBooking: "StaffBookings",
-  preview: "StaffBookings/preview", // this is for the money calculation preview
+  preview: "StaffBookings/preview",
   update: (id: string) => `StaffBookings/${id}`,
   cancel: (id: string) => `StaffBookings/${id}/cancel`,
   pendingCharges: (bookingId: string) =>
@@ -150,6 +151,7 @@ const Orders = {
   payServiceOrderNow: (id: string) => `service-orders/${id}/pay-now`,
   setScheduledServiceOrder: (id: string) =>
     `service-orders/${id}/set-scheduled`,
+  createPosOrderWithItems: "PosOrders/with-items",
 };
 
 const Invoices = {
@@ -170,6 +172,7 @@ const Invoices = {
   update: (id: string) => `Invoices/${id}`, //? update invoice details
   syncInvoice: (invoiceId: string) =>
     `Invoices/${invoiceId}/sync-pending-orders`, //? sync invoice with pending orders
+  exportById: (id: string) => `Invoices/${id}/export`, //? export invoice by ID
 };
 // Chat endpoints
 const Chat = {
@@ -180,6 +183,9 @@ const Chat = {
   staffInbox: "chat/staff/inbox",
   assign: (sessionId: string) => `chat/sessions/${sessionId}/assign`,
   close: (sessionId: string) => `chat/sessions/${sessionId}/close`,
+  markRead: (messageId: string) => `chat/messages/${messageId}/mark-read`,
+  markAllRead: (sessionId: string) =>
+    `chat/sessions/${sessionId}/mark-all-read`,
 };
 
 const Staff = {
@@ -188,6 +194,7 @@ const Staff = {
   detail: (id: string) => `Staffs/${id}`,
   update: (id: string) => `Staffs/${id}`,
   delete: (id: string) => `Staffs/${id}`,
+  terminate: (id: string) => `Staffs/${id}/terminate`,
 };
 
 const StaffRole = {
@@ -286,6 +293,7 @@ const Stock = {
     reject: (id: string) => `PurchaseRequests/${id}/reject`,
     cancel: (id: string) => `PurchaseRequests/${id}/cancel`,
     receiveStock: (id: string) => `PurchaseRequests/${id}/receive-stock`,
+    export: (id: string) => `PurchaseRequests/${id}/export`,
   },
   StockAdjustments: {
     list: "StockAdjustments",
@@ -304,6 +312,44 @@ const Stock = {
   },
 };
 
+const Refunds = {
+  createRefundForBooking: (bookingId: string) => `Refunds/booking/${bookingId}`,
+  getBookingRefundHistory: (bookingId: string) =>
+    `Refunds/booking/${bookingId}/history`,
+};
+
+const FinancialReports = {
+  getFinancialReport: "FinancialReports/dashboard",
+  getFinancialReportCached: "FinancialReports/dashboard/cached",
+};
+
+const Expenses = {
+  list: "Expenses",
+  create: "Expenses",
+  detail: (id: string) => `Expenses/${id}`,
+  update: (id: string) => `Expenses/${id}`,
+  delete: (id: string) => `Expenses/${id}`,
+  summary: "Expenses/summary",
+};
+
+const AuditLogs = {
+  list: "AuditLogs",
+  detail: (id: string) => `AuditLogs/${id}`,
+  export: "AuditLogs/export",
+  archive: "AuditLogs/archive",
+  cleanUp: "AuditLogs/cleanup",
+  cleanUpCount: "AuditLogs/cleanup-count",
+  stats: "AuditLogs/stats",
+};
+
+const Configs = {
+  list: "Configs",
+  groupedList: "Configs/grouped",
+  timezones: "Configs/timezones",
+  detail: (key: string) => `Configs/${key}`,
+  update: (key: string) => `Configs/${key}`,
+  delete: (key: string) => `Configs/${key}`,
+};
 export {
   Auth,
   User,
@@ -330,4 +376,9 @@ export {
   StaffPayroll,
   Translation,
   Stock,
+  Refunds,
+  Expenses,
+  FinancialReports,
+  AuditLogs,
+  Configs,
 };

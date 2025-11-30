@@ -67,7 +67,6 @@ export function useGeneratePayroll() {
       queryClient.invalidateQueries({
         queryKey: ["payrolls", variables.year, variables.month],
       });
-      toast.success("Tạo bảng lương thành công");
     },
     onError: (error: any) => {
       toast.error(error?.message || "Lỗi khi tạo bảng lương");

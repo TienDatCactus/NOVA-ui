@@ -19,10 +19,17 @@ export function useCreateServiceOrder() {
     mutationFn: (data: CreateServiceOrderRequestDto) =>
       OrderService.createServiceOrder(data),
     onSuccess: (_, data) => {
-      queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
-      queryClient.invalidateQueries({ queryKey: ["service-order-detail"] });
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-list"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["service-order-detail"],
+        refetchType: "active",
+      });
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", data.bookingId],
+        refetchType: "active",
       });
       toast.success("Đã tạo service order thành công");
     },
@@ -172,8 +179,3 @@ export function useUpdateServiceOrderSchedule() {
     },
   });
 }
-
-/**
- * Create service order with items (for Service POS)
- * Similar to menu POS but creates service orders instead
- */

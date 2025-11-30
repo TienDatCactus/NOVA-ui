@@ -28,15 +28,15 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
   const canAddItem = ["Unpaid", "DepositOnly"].includes(invoice.status);
 
   const { mutate: addCustomItem, isPending: isAddingItem } = useAddCustomItem(
-    invoice.invoiceId
+    invoice?.invoiceId || ""
   );
   const { mutate: invoicePayment, isPending: isPayingInvoice } =
-    useInvoicePayment(invoice.invoiceId);
+    useInvoicePayment(invoice?.invoiceId || "");
   const { mutate: refund, isPending: isRefunding } = useRefund(
-    invoice.invoiceId
+    invoice?.invoiceId || ""
   );
   const { mutate: voidInvoice, isPending: isVoidingInvoice } = useVoidInvoice(
-    invoice.invoiceId
+    invoice?.invoiceId || ""
   );
 
   const remainingBalance =

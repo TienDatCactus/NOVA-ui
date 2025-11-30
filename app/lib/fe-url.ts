@@ -32,28 +32,36 @@ const DASHBOARD = {
   },
   staff: {
     list: "/dashboard/staff",
-    workShifts: "/dashboard/staff/work-shifts",
-    schedules: "/dashboard/staff/schedules",
+    shifts: "/dashboard/staff/shifts",
     holidays: "/dashboard/staff/holidays",
     roles: "/dashboard/staff/roles",
   },
   users: "/dashboard/users",
   invoices: "/dashboard/invoices",
+  expenses: "/dashboard/expenses",
+  expensesDashboard: "/dashboard/expenses/dashboard",
+  finances: {
+    dashboard: "/dashboard/finances/dashboard",
+  },
   chat: "/dashboard/chat",
+  auditLogs: "/dashboard/audit-logs",
   units: "/dashboard/units",
+  workShifts: "/dashboard/work-shifts",
   stocks: {
     items: "/dashboard/stocks/items",
     itemCategories: "/dashboard/stocks/item-categories",
     purchaseRequests: "/dashboard/stocks/purchase-requests",
     adjustments: "/dashboard/stocks/stock-adjustments",
   },
-  settings: "/settings",
+  configs: "/dashboard/configs",
   help: "/help",
 };
 const CUSTOMER = {
   inbox: "/",
   chat: (roomToken: string) => `/chat?roomToken=${roomToken}`,
   map: "/map",
+  guidelines: "/guides",
+  catalog: "/catalog",
 };
 
 const FE_URL = {

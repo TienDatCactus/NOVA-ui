@@ -1,8 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Save, Trash2, Search, ArrowRight } from "lucide-react";
+import { Loader2, Plus, Save, Search, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { cn } from "~/lib/utils"; // Standard shadcn util
 import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +28,12 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import {
   Table,
   TableBody,
@@ -29,26 +42,11 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "~/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { Badge } from "~/components/ui/badge";
-import { useCreateStockAdjustment } from "../container/query.hooks";
+import { cn } from "~/lib/utils"; // Standard shadcn util
 import type { CreateStockAdjustmentDto } from "~/services/api/stocks/stock-adjustments/dto";
 import { StockAdjustmentsSchemas } from "~/services/api/stocks/stock-adjustments/stock-adjustments.schema";
 import { useStockItemList } from "../../items/container/query.hooks";
-import { useState } from "react";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { useCreateStockAdjustment } from "../container/query.hooks";
 
 interface CreateStockAdjustmentDialogProps {
   open: boolean;
@@ -59,7 +57,6 @@ export default function CreateStockAdjustmentDialog({
   open,
   onOpenChange,
 }: CreateStockAdjustmentDialogProps) {
-  // 1. Data & Mutation
   const { data: stockItems = [] } = useStockItemList({
     includeInactive: false,
   });
@@ -67,7 +64,6 @@ export default function CreateStockAdjustmentDialog({
   const { mutate: onCreate, isPending: isSubmitting } =
     useCreateStockAdjustment();
 
-  // 2. Form Setup
   const form = useForm<CreateStockAdjustmentDto>({
     resolver: zodResolver(StockAdjustmentsSchemas.CreateStockAdjustmentSchema),
     defaultValues: {
@@ -99,7 +95,7 @@ export default function CreateStockAdjustmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col gap-0 p-0">
+      <DialogContent className="max-w-5xl overflow-y-auto max-h-[90vh] flex flex-col gap-0 p-0">
         {/* HEADER */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/10">
           <div className="flex items-center justify-between">
@@ -208,6 +204,8 @@ export default function CreateStockAdjustmentDialog({
                                           ? "text-green-600 font-bold bg-green-50 border-green-200"
                                           : ""
                                     )}
+                                    step={0.1}
+                                    minValue={-99999}
                                   />
                                 </FormControl>
                               </FormItem>
@@ -242,7 +240,7 @@ export default function CreateStockAdjustmentDialog({
                             size="icon"
                             className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity"
                             onClick={() => remove(index)}
-                            disabled={fields.length === 1} // Prevent deleting last row if desired
+                            disabled={fields.length === 1}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

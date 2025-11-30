@@ -1,9 +1,11 @@
 import {
   CheckCircle,
+  Download,
   Eye,
   MoreHorizontal,
   PackageCheck,
   Pencil,
+  SquareX,
   Trash2,
   XCircle,
 } from "lucide-react";
@@ -28,6 +30,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { PurchaseRequestsService } from "~/services/api/stocks/purchase-requests";
+import { toast } from "sonner";
 
 interface PurchaseRequestActionCellProps {
   purchaseRequest: PurchaseRequestListItemDto;
@@ -58,6 +62,29 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
   const hasAnyAction =
     canEdit || canDelete || canApprove || canReject || canCancel || canReceive;
 
+  const handleExport = async () => {
+    try {
+      const blob = await PurchaseRequestsService.exportPurchaseRequest(
+        purchaseRequest.id
+      );
+      console.log("Blob received:", blob);
+
+      const url = window.URL.createObjectURL(blob as any);
+      const a = document.createElement("a");
+      a.href = url;
+      const filename = `purchase-request-${purchaseRequest.id}.xlsx`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Xuất báo cáo thành công");
+    } catch (e) {
+      console.error(e);
+      toast.error("Xuất báo cáo thất bại");
+    }
+  };
   // Always show action button to allow viewing details
   return (
     <div className="flex justify-end items-center gap-2">
@@ -115,13 +142,16 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-
+            <DropdownMenuItem onClick={handleExport} className="text-green-700">
+              <Download className="mr-2 h-4 w-4 text-green-700" />
+              Xuất phiếu
+            </DropdownMenuItem>
             {canCancel && (
               <DropdownMenuItem
                 variant="destructive"
                 onClick={() => setOpenCancelDialog(true)}
               >
-                <XCircle className="mr-2 h-4 w-4" />
+                <SquareX className="mr-2 h-4 w-4" />
                 Hủy yêu cầu
               </DropdownMenuItem>
             )}

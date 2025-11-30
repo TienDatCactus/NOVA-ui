@@ -1,20 +1,31 @@
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { ImageIcon, Package } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
+  CalendarDays,
+  Copy,
+  ImageIcon,
+  Layers,
+  LayoutGrid,
+  Package,
+  Tag,
+} from "lucide-react";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import Image from "~/components/ui/image";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { Skeleton } from "~/components/ui/skeleton";
-import { formatMoney } from "~/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { cn, formatMoney } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { useMenuItemDetail } from "../../container/menu/query.hooks";
+import { toast } from "sonner";
 
 interface MenuDetailRowProps {
   menuItem: MenuListItemDto;
@@ -25,176 +36,217 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
 
   if (isPending) {
     return (
-      <div className="p-6 bg-muted/30 border-t">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Skeleton className="h-64 col-span-1" />
-          <Skeleton className="h-64 col-span-2" />
+      <div className="p-6 bg-slate-50/50 border-t">
+        <div className="flex gap-8">
+          <Skeleton className="h-48 w-48 rounded-xl" />
+          <div className="flex-1 space-y-4">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-24 w-full" />
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!detailData) {
-    return (
-      <div className="p-6 text-center text-muted-foreground">
-        Không thể tải thông tin chi tiết
-      </div>
-    );
-  }
+  if (!detailData) return null;
 
   const hasImages = detailData.images && detailData.images.length > 0;
-  const hasComponents =
-    detailData.components && detailData.components.length > 0;
+  const mainImage = hasImages ? detailData.images![0] : null;
+  const subImages = hasImages ? detailData.images!.slice(1, 4) : [];
 
   return (
-    <div className="p-6 bg-muted/30 border-t">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Image Gallery Section */}
-        <div className="col-span-1">
-          {hasImages ? (
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <ImageIcon className="w-4 h-4" />
-                Hình ảnh ({detailData.images?.length})
-              </h4>
-              <div className=" grid place-items-center ">
-                <Carousel className="w-50">
-                  <CarouselContent>
-                    {detailData.images?.map((img, index) => (
-                      <CarouselItem key={index} className="w-fit">
+    <div className="bg-slate-50/80 border-t shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* === LEFT COLUMN: VISUALS === */}
+          <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">
+            {mainImage ? (
+              <div className="space-y-3">
+                <div className="relative  w-full overflow-hidden rounded-xl border bg-background shadow-sm">
+                  <ImageZoom>
+                    <Image
+                      src={mainImage.url}
+                      alt={detailData.name}
+                      className="h-full w-full aspect-square object-cover transition-transform hover:scale-105 duration-500"
+                    />
+                  </ImageZoom>
+                </div>
+                {/* Sub Images Grid - Show max 3 more images directly */}
+                {subImages.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {subImages.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="aspect-square rounded-lg overflow-hidden border bg-background cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         <ImageZoom>
                           <Image
                             src={img.url}
-                            height={200}
-                            width={200}
-                            alt={`${detailData.name} - ${index + 1}`}
-                            className="w-full h-full object-cover"
+                            alt="sub"
+                            className="h-full w-full object-cover"
                           />
                         </ImageZoom>
-                      </CarouselItem>
+                      </div>
                     ))}
-                  </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </Carousel>
+                  </div>
+                )}
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 bg-muted rounded-md border border-dashed">
-              <ImageIcon className="w-10 h-10 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Chưa có hình ảnh</p>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="aspect-square w-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-slate-100 text-muted-foreground">
+                <ImageIcon className="h-10 w-10 opacity-20" />
+                <span className="text-xs mt-2 font-medium">Không có ảnh</span>
+              </div>
+            )}
+          </div>
 
-        <div className="col-span-1 md:col-span-2 grid grid-cols-2">
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-muted-foreground">
-              Thông tin cơ bản
-            </h4>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          {/* === RIGHT COLUMN: INFORMATION === */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* SECTION 1: GENERAL INFO */}
+            <div className="space-y-6">
+              {/* Header: Name, Price, Status */}
               <div>
-                <p className="text-muted-foreground mb-1">Tên món</p>
-                <p className="font-medium">{detailData.name}</p>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="rounded-md font-mono text-xs text-muted-foreground px-1.5 py-0 h-5"
+                      >
+                        {detailData.code}
+                      </Badge>
+                      <h3 className="text-xl font-bold text-foreground">
+                        {detailData.name}
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <LayoutGrid className="w-3.5 h-3.5" />{" "}
+                        {detailData.categoryName}
+                      </span>
+                      <Separator orientation="vertical" className="h-3" />
+                      <span>ĐVT: {detailData.unitName}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-primary font-mono tracking-tight">
+                      {formatMoney(detailData.price).vndFormatted}
+                    </div>
+                    <Badge
+                      variant={detailData.active ? "default" : "secondary"}
+                      className="mt-1"
+                    >
+                      {detailData.active ? "Đang bán" : "Ngừng bán"}
+                    </Badge>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Mã món</p>
-                <p className="font-mono">{detailData.code}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Danh mục</p>
-                <p className="font-medium">{detailData.categoryName}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Đơn vị</p>
-                <p className="font-medium">{detailData.unitName}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Giá bán</p>
-                <p className="font-semibold">
-                  {formatMoney(detailData.price).vndFormatted}
+
+              <Separator />
+
+              {/* Description */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-primary" /> Mô tả chi tiết
+                </h4>
+                <p className="text-sm text-muted-foreground leading-relaxed bg-background/50 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
+                  {detailData.description || "Chưa có mô tả cho món ăn này."}
                 </p>
               </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Trạng thái</p>
-                <Badge variant={detailData.active ? "default" : "secondary"}>
-                  {detailData.active ? "Hoạt động" : "Ngưng"}
-                </Badge>
-              </div>
-              {/* Timestamps */}
-              {(detailData.createdAt || detailData.updatedAt) && (
-                <div className="flex flex-col gap-4 text-xs text-muted-foreground">
-                  {detailData.createdAt && (
-                    <div>
-                      <span>Ngày tạo: </span>
-                      <span className="font-medium text-foreground">
-                        {format(
+
+              {/* Metadata Footer (Timestamps) */}
+              <div className="flex flex-col gap-2 text-xs text-muted-foreground bg-white/50 p-3 rounded border">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="w-3.5 h-3.5" />
+                    <span>Ngày tạo:</span>
+                  </div>
+                  <span className="font-medium text-foreground">
+                    {detailData.createdAt
+                      ? format(
                           new Date(detailData.createdAt),
-                          "dd/MM/yyyy HH:mm",
+                          " HH:mm dd/MM/yyyy",
                           { locale: vi }
-                        )}
-                      </span>
-                    </div>
-                  )}
-                  {detailData.updatedAt && (
-                    <div>
-                      <span>Cập nhật: </span>
+                        )
+                      : "N/A"}
+                  </span>
+                </div>
+                {detailData.updatedAt && (
+                  <>
+                    <Separator className="bg-border/50" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CalendarDays className="w-3.5 h-3.5" />
+                        <span>Cập nhật:</span>
+                      </div>
                       <span className="font-medium text-foreground">
                         {format(
                           new Date(detailData.updatedAt),
-                          "dd/MM/yyyy HH:mm",
+                          " HH:mm dd/MM/yyyy",
                           { locale: vi }
                         )}
                       </span>
                     </div>
-                  )}
-                </div>
-              )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-3">
-            {/* Description */}
-            {detailData.description && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  Mô tả
+            {/* SECTION 2: RECIPE / COMPONENTS */}
+            <div className="bg-background rounded-xl border shadow-sm overflow-hidden h-fit">
+              <div className="px-4 py-3 border-b bg-muted/10 flex items-center justify-between">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-indigo-500" />
+                  Công thức / Định lượng
                 </h4>
-                <p className="text-sm leading-relaxed text-wrap">
-                  {detailData.description}
-                </p>
+                <Badge variant="secondary" className="h-5 text-[10px]">
+                  {detailData.components?.length || 0} thành phần
+                </Badge>
               </div>
-            )}
 
-            {/* Components */}
-            {hasComponents && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Package className="w-4 h-4" />
-                  Thành phần ({detailData.components.length})
-                </h4>
-                <div className="space-y-2 max-h-[160px] overflow-y-auto">
-                  {detailData.components.map((component) => (
-                    <div
-                      key={component.id}
-                      className="flex items-center justify-between p-2.5 bg-background rounded-md border text-sm"
-                    >
-                      <div className="flex-1">
-                        <p className="font-medium">{component.itemName}</p>
-                        {component.notes && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {component.notes}
-                          </p>
-                        )}
+              <ScrollArea className="h-[250px]">
+                {detailData.components && detailData.components.length > 0 ? (
+                  <div className="divide-y">
+                    {detailData.components.map((comp, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-3 hover:bg-muted/5 transition-colors group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-1 h-6 w-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0">
+                            {i + 1}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">
+                              {comp.itemName}
+                            </p>
+                            {comp.notes ? (
+                              <p className="text-xs text-muted-foreground italic mt-0.5">
+                                "{comp.notes}"
+                              </p>
+                            ) : (
+                              <p className="text-[10px] text-muted-foreground/50 mt-0.5 italic">
+                                Không có ghi chú
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm font-mono font-bold text-foreground bg-muted/30 px-2 py-1 rounded">
+                            x{comp.quantity}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-muted-foreground ml-3">
-                        x{component.quantity}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-6 gap-2">
+                    <Package className="w-8 h-8 opacity-20" />
+                    <p className="text-sm">Không có thành phần định lượng</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
           </div>
         </div>
       </div>

@@ -73,7 +73,6 @@ async function createMenuItem(
   try {
     const formData = new FormData();
 
-    // Append non-file fields
     formData.append("CategoryId", data.CategoryId);
     formData.append("Code", data.Code);
     formData.append("Name", data.Name);
@@ -82,21 +81,24 @@ async function createMenuItem(
     formData.append("Price", data.Price.toString());
     formData.append("Active", data.Active.toString());
 
-    // Append components as JSON string
-    formData.append("Components", JSON.stringify(data.Components));
-
-    // Append images if provided
-    if (data.Images && data.Images.length > 0) {
+    if (data.Images?.length) {
       data.Images.forEach((file) => {
         formData.append("Images", file);
       });
     }
 
+    if (data.Components?.length) {
+      data.Components.forEach((comp, index) => {
+        Object.entries(comp).forEach(([key, value]) => {
+          formData.append(`Components[${index}][${key}]`, String(value));
+        });
+      });
+    }
+
     const resp = await http.post(Menu.create, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
+
     return CreateMenuItemResponseSchema.parse(resp.data);
   } catch (error) {
     return Promise.reject(error);
@@ -104,7 +106,7 @@ async function createMenuItem(
 }
 
 /**
- * Update an existing menu item
+ * Update an existing menu comp
  * Note: For file uploads, use FormData
  */
 async function updateMenuItem(
@@ -114,7 +116,6 @@ async function updateMenuItem(
   try {
     const formData = new FormData();
 
-    // Append non-file fields
     formData.append("CategoryId", data.CategoryId);
     formData.append("Code", data.Code);
     formData.append("Name", data.Name);
@@ -123,28 +124,30 @@ async function updateMenuItem(
     formData.append("Price", data.Price.toString());
     formData.append("Active", data.Active.toString());
 
-    // Append components as JSON string
-    formData.append("Components", JSON.stringify(data.Components));
+    if (data.Components?.length) {
+      data.Components.forEach((comp, index) => {
+        Object.entries(comp).forEach(([key, value]) => {
+          formData.append(`Components[${index}][${key}]`, String(value));
+        });
+      });
+    }
 
-    // Append media IDs to remove
-    if (data.RemoveMediaIds && data.RemoveMediaIds.length > 0) {
+    if (data.RemoveMediaIds?.length) {
       data.RemoveMediaIds.forEach((id) => {
         formData.append("RemoveMediaIds", id);
       });
     }
 
-    // Append new images if provided
-    if (data.NewImages && data.NewImages.length > 0) {
+    if (data.NewImages?.length) {
       data.NewImages.forEach((file) => {
         formData.append("NewImages", file);
       });
     }
 
     const resp = await http.put(Menu.update(itemId), formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
+
     return resp.data;
   } catch (error) {
     return Promise.reject(error);

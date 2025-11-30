@@ -1,10 +1,11 @@
 import z from "zod";
+const ChatStateEnum = z.enum(["Open", "Closed"]);
 
 const ChatEntryResponseSchema = z.object({
   canChat: z.boolean(),
   message: z.string().nullable(),
   sessionId: z.string().optional().nullable(),
-  roomName: z.string(),
+  roomName: z.string().nullable(),
   customerName: z.string().optional().nullable(),
   checkinDate: z.string().optional().nullable(),
   checkoutDate: z.string().optional().nullable(),
@@ -13,14 +14,14 @@ const ChatEntryResponseSchema = z.object({
 const ChatSessionDetailSchema = z.object({
   id: z.string(),
   bookingRoomId: z.string(),
-  state: z.string(),
+  state: ChatStateEnum,
   startedAt: z.string(),
   endedAt: z.string().nullable(),
   assignedStaffUserId: z.string().nullable(),
   assignedStaffName: z.string().nullable(),
   lastMessageAt: z.string().nullable(),
   lastMessagePreview: z.string().nullable(),
-  roomName: z.string(),
+  roomName: z.string().nullable(),
   customerName: z.string(),
   customerEmail: z.email().optional().nullable(),
   customerPhone: z.string(),
@@ -35,8 +36,10 @@ const ChatSessionMessageItemSchema = z.object({
   message: z.string(),
   staffUserId: z.string().nullable(),
   staffName: z.string().nullable(),
-  createdAt: z.string(),
-  detectedLanguage: z.string().optional(),
+  createdAt: z.string().optional(),
+  isRead: z.boolean(),
+  readAt: z.string().nullable(),
+  readBy: z.string().nullable(),
 });
 
 const ChatSessionMessagesSchema = z.array(ChatSessionMessageItemSchema);

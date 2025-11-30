@@ -32,45 +32,12 @@ function UsersDataTable({ users, isLoading }: UsersDataTableProps) {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   if (isLoading) {
     return (
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="font-semibold">Họ và tên</TableHead>
-              <TableHead className="font-semibold">Email</TableHead>
-              <TableHead className="font-semibold">Số điện thoại</TableHead>
-              <TableHead className="font-semibold">Vai trò</TableHead>
-              <TableHead className="font-semibold">Trạng thái</TableHead>
-              <TableHead className="font-semibold text-center">
-                Thao tác
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: 5 }).map((_, idx) => (
-              <TableRow key={idx}>
-                <TableCell>
-                  <Skeleton className="h-4 w-32" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-20" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-28" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-6 w-40" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-6 w-24" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-8 w-20 ml-auto" />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="flex flex-col gap-2">
+        {Array(8)
+          .fill(0)
+          .map((_, index) => (
+            <Skeleton key={index} className="h-10 w-full" />
+          ))}
       </div>
     );
   }

@@ -138,6 +138,17 @@ async function receiveStock(
   }
 }
 
+async function exportPurchaseRequest(prId: string) {
+  try {
+    const resp = await http.get(Stock.PurchaseRequests.export(prId), {
+      responseType: "blob",
+    });
+    return resp;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const PurchaseRequestsService = {
   getPurchaseRequestList,
   createPurchaseRequest,
@@ -148,4 +159,5 @@ export const PurchaseRequestsService = {
   rejectPurchaseRequest,
   cancelPurchaseRequest,
   receiveStock,
+  exportPurchaseRequest,
 };

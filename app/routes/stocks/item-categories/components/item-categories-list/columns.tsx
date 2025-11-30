@@ -63,7 +63,7 @@ export const columns: ColumnDef<ItemCategoryListItemDto>[] = [
       const date = row.getValue("createdAt") as string;
       return (
         <div className="text-sm text-muted-foreground">
-          {format(parseISO(date), "dd/MM/yyyy HH:mm")}
+          {format(parseISO(date), "HH:mm dd/MM/yyyy")}
         </div>
       );
     },

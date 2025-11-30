@@ -111,7 +111,7 @@ async function assignChatSession(
   staffUserId: string
 ): Promise<void> {
   try {
-    await axios.post(Chat.assign(sessionId), { staffUserId });
+    await http.post(Chat.assign(sessionId), { staffUserId });
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -131,6 +131,23 @@ async function closeChatSession(sessionId: string): Promise<void> {
   }
 }
 
+async function markRead(messageId: string) {
+  try {
+    await http.post(Chat.markRead(messageId));
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+async function markAllRead(sessionId: string) {
+  try {
+    await http.post(Chat.markAllRead(sessionId));
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const ChatService = {
   getChatEntry,
   getChatSession,
@@ -139,4 +156,6 @@ export const ChatService = {
   getStaffChatInbox,
   assignChatSession,
   closeChatSession,
+  markRead,
+  markAllRead,
 };

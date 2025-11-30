@@ -62,7 +62,7 @@ export default function MenuViewLayout({
                 value={filters.categoryCode || ""}
                 onValueChange={(value) => updateFilter("categoryCode", value)}
               >
-                <SelectTrigger className="shadow-md bg-white w-full">
+                <SelectTrigger className="shadow-md w-40 bg-white ">
                   <SelectValue placeholder="Chọn danh mục" />
                 </SelectTrigger>
                 <SelectContent>

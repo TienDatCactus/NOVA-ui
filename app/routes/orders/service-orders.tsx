@@ -88,31 +88,27 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
               </div>
             ) : filteredOrders.length === 0 ? (
               // Empty State: Căn giữa viewport
-              <div className="flex h-[60vh] items-center justify-center">
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant={"icon"}>
-                      <HandPlatter className="h-12 w-12 text-muted-foreground/50" />
-                    </EmptyMedia>
-                    <EmptyTitle className="mt-4">
-                      Không tìm thấy đơn dịch vụ
-                    </EmptyTitle>
-                    <EmptyDescription>
-                      {statusFilter === "All"
-                        ? "Chưa có yêu cầu dịch vụ nào cho ngày này."
-                        : `Không có đơn dịch vụ nào đang ở trạng thái "${
-                            statusFilter === "Scheduled"
-                              ? "Đã lên lịch"
-                              : statusFilter === "Completed"
-                                ? "Hoàn thành"
-                                : statusFilter === "Cancelled"
-                                  ? "Đã hủy"
-                                  : "Không đến"
-                          }".`}
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              </div>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant={"icon"}>
+                    <HandPlatter />
+                  </EmptyMedia>
+                  <EmptyTitle>Không tìm thấy đơn dịch vụ</EmptyTitle>
+                  <EmptyDescription>
+                    {statusFilter === "All"
+                      ? "Chưa có yêu cầu dịch vụ nào cho ngày này."
+                      : `Không có đơn dịch vụ nào đang ở trạng thái "${
+                          statusFilter === "Scheduled"
+                            ? "Đã lên lịch"
+                            : statusFilter === "Completed"
+                              ? "Hoàn thành"
+                              : statusFilter === "Cancelled"
+                                ? "Đã hủy"
+                                : "Không đến"
+                        }".`}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : (
               // --- MASONRY GRID LAYOUT ---
               // columns-1: Mobile
