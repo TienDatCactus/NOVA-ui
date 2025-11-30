@@ -64,7 +64,6 @@ export default function OrderItemCard({
   const start = checkinDate ? startOfDay(toDate(checkinDate)!) : undefined;
   const end = checkoutDate ? endOfDay(toDate(checkoutDate)!) : undefined;
 
-  // clamp function: returns a Date within [start, end]
   const clamp = (date: Date, min?: Date, max?: Date) => {
     if (min && isBefore(date, min)) return min;
     if (max && isAfter(date, max)) return max;
@@ -74,8 +73,7 @@ export default function OrderItemCard({
   // Set default scheduled date to a clamped value on mount if not set
   useEffect(() => {
     if (!scheduledDate) {
-      // prefer checkin date if present, else today
-      const base = start ?? clamp(new Date(), undefined, end); // clamp today to end if checkout exists
+      const base = start ?? clamp(new Date(), undefined, end);
       if (base) {
         const defaultDate = format(base, "yyyy-MM-dd");
         setScheduledDate(itemId, defaultDate);

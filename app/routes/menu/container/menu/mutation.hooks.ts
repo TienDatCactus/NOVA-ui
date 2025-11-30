@@ -13,7 +13,6 @@ export function useCreateMenuItem() {
     mutationFn: async (data: CreateMenuItemRequestDto) =>
       await MenuService.createMenuItem(data),
     onSuccess: (newItem) => {
-      // Invalidate all menu lists (with any params)
       queryClient.invalidateQueries({
         queryKey: ["menu-list"],
         refetchType: "active", // Only refetch active queries
@@ -36,21 +35,20 @@ export function useUpdateMenuItem(itemId: string) {
     mutationFn: async (data: UpdateMenuItemRequestDto) =>
       await MenuService.updateMenuItem(itemId, data),
     onSuccess: (updatedItem) => {
-      // Invalidate all menu lists
       queryClient.invalidateQueries({
         queryKey: ["menu-list"],
         refetchType: "active",
       });
 
-      // Invalidate specific category list if item has category
       if (updatedItem.categoryId) {
         queryClient.invalidateQueries({
           queryKey: ["menu-list-by-category", updatedItem.categoryId],
         });
       }
 
-      // Update the specific item detail cache
-      queryClient.setQueryData(["menu-item-detail", itemId], updatedItem);
+      queryClient.invalidateQueries({
+        queryKey: ["menu-item-detail", itemId],
+      });
     },
   });
 }

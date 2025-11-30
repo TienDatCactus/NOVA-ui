@@ -25,7 +25,7 @@ const User = {
 
 const Booking = {
   staffCreateBooking: "StaffBookings",
-  preview: "StaffBookings/preview", // this is for the money calculation preview
+  preview: "StaffBookings/preview",
   update: (id: string) => `StaffBookings/${id}`,
   cancel: (id: string) => `StaffBookings/${id}/cancel`,
   pendingCharges: (bookingId: string) =>
@@ -342,6 +342,14 @@ const AuditLogs = {
   stats: "AuditLogs/stats",
 };
 
+const Configs = {
+  list: "Configs",
+  groupedList: "Configs/grouped",
+  timezones: "Configs/timezones",
+  detail: (key: string) => `Configs/${key}`,
+  update: (key: string) => `Configs/${key}`,
+  delete: (key: string) => `Configs/${key}`,
+};
 export {
   Auth,
   User,
@@ -372,4 +380,5 @@ export {
   Expenses,
   FinancialReports,
   AuditLogs,
+  Configs,
 };
