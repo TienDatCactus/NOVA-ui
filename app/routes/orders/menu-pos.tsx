@@ -3,7 +3,9 @@ import {
   Plus,
   RotateCcw,
   SearchIcon,
-  SquareMenu,
+  ShoppingBasket,
+  Receipt,
+  Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -39,6 +41,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "~/components/ui/tooltip";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
 
 type MenuItem = z.infer<typeof MenuListItemSchema>;
 
@@ -245,31 +261,46 @@ export default function Component({
   const handleNewOrder = () => {
     clearOrder();
   };
-
+  const isInvalid = useMemo(
+    () =>
+      menuItems?.some((item) => {
+        const cartItem = items.find((i) => i.id === item.itemId);
+        if (!cartItem) return false;
+        return (
+          item.maxQuantityAvailable !== undefined &&
+          cartItem.quantity > (item?.maxQuantityAvailable || 0)
+        );
+      }),
+    [items, menuItems]
+  );
   return (
-    <div className="flex flex-col h-screen">
-      <header className="flex items-center justify-between p-4 border-b  border-accent-foreground/20">
+    <div className="flex flex-col h-screen bg-background">
+      <header className="flex items-center justify-between px-6 py-3 border-b bg-background z-20 shadow-sm">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
             <Link to={DASHBOARD.orders.menuOrders}>
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="pl-0 hover:bg-transparent hover:text-primary"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 Quay lại
               </Button>
             </Link>
-            <Separator orientation="vertical" />
+            <Separator orientation="vertical" className="h-6" />
             <Select
               value={selectedCategoryId || "all"}
               onValueChange={(value) =>
                 handleCategorySelect(value === "all" ? null : value)
               }
             >
-              <SelectTrigger className="w-[200px] border-primary/50 bg-white shadow-md">
+              <SelectTrigger className="w-[220px] bg-muted/40 border-transparent hover:bg-muted/60 focus:ring-0 focus:ring-offset-0">
                 <SelectValue placeholder="Chọn danh mục" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
-                  <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center justify-between w-full font-medium">
                     <span>Tất cả</span>
                   </div>
                 </SelectItem>
@@ -280,8 +311,8 @@ export default function Component({
                       <div className="flex items-center justify-between w-full gap-2">
                         <span>{item.name}</span>
                         <Badge
-                          className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
-                          variant="outline"
+                          className="h-5 min-w-5 rounded-full px-1.5 font-mono tabular-nums text-[10px]"
+                          variant="secondary"
                         >
                           {item.menuItemCount}
                         </Badge>
@@ -293,41 +324,55 @@ export default function Component({
           </div>
         </div>
 
-        <div className="flex items-center h-5 gap-2">
-          <Button variant="outline" size="sm" onClick={handleReset}>
-            <RotateCcw className="h-4 w-4" />
-            Đặt lại
-          </Button>
-          <Separator orientation="vertical" />
-          <Button
-            variant="info-outline"
-            size="sm"
-            onClick={() => setCustomItemDialog(true)}
-          >
-            <Plus className="h-4 w-4" />
-            Món tùy chỉnh
-          </Button>
-          <Separator orientation="vertical" />
+        <div className="flex items-center h-9 gap-3">
           <Input
-            startAddon={<SearchIcon />}
+            startAddon={
+              <SearchIcon className="h-4 w-4 text-muted-foreground" />
+            }
             placeholder="Tìm kiếm món..."
             value={filters.searchText}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-64"
+            className="w-64 bg-muted/40 border-transparent focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary"
           />
+          <Separator orientation="vertical" className="h-6" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCustomItemDialog(true)}
+            className="border-dashed"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Món tùy chỉnh
+          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleReset}
+                  className="h-9 w-9"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Đặt lại bộ lọc</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden ">
-        <main className="flex-1 overflow-auto p-6 ">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Main Content (Grid) */}
+        <main className="flex-1 overflow-y-auto p-6 bg-muted/5">
           {isLoadingMenu ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
-                <Skeleton key={i} className="h-60 " />
+                <Skeleton key={i} className="aspect-[4/5] rounded-xl" />
               ))}
             </div>
           ) : filteredItems && filteredItems.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20">
               {filteredItems.map((item) => (
                 <MenuItemCard
                   key={item.itemId}
@@ -337,52 +382,101 @@ export default function Component({
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center text-muted-foreground">
-                <p className="text-lg font-medium">Không tìm thấy món</p>
-                <p className="text-sm">Thử điều chỉnh bộ lọc của bạn</p>
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+              <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center opacity-50">
+                <SearchIcon className="h-10 w-10" />
               </div>
+              <div className="space-y-1">
+                <p className="text-xl font-semibold text-foreground">
+                  Không tìm thấy món ăn
+                </p>
+                <p className="text-muted-foreground">
+                  Thử tìm kiếm từ khóa khác hoặc đặt lại bộ lọc
+                </p>
+              </div>
+              <Button variant="outline" onClick={handleReset}>
+                Đặt lại bộ lọc
+              </Button>
             </div>
           )}
         </main>
 
-        {/* Cart Sidebar */}
-        <aside className=" p-2 overflow-y-auto ">
-          <div className="w-md bg-card rounded-xl h-full border p-4 flex flex-col ">
-            <div className="flex items-center justify-between ">
-              <h2 className="text-lg font-semibold">Tóm tắt đơn hàng</h2>
-              {orderId && (
-                <Badge variant="outline" className="font-mono">
-                  {orderId}
-                </Badge>
-              )}
+        {/* Sidebar (Cart) */}
+        <aside className="w-[420px] flex flex-col border-l bg-background shadow-2xl shadow-black/5 z-10 relative">
+          {/* 1. Header */}
+          <div className="flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur z-10">
+            <div className="flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-primary" />
+              <h2 className="font-semibold text-base">Đơn hàng hiện tại</h2>
             </div>
-            <Separator className="my-2" />
-            <div className="flex-1 flex flex-col justify-between space-y-2">
-              {items.length > 0 && (
-                <div className="space-y-4  overflow-y-auto flex-1 max-h-[50vh]">
-                  {items.map((item) => (
-                    <CartItem
-                      key={item.id}
-                      cartItem={item}
-                      onQuantityChange={(qty) => updateQuantity(item.id, qty)}
-                      onRemove={() => removeItem(item.id)}
-                    />
-                  ))}
-                </div>
-              )}
+            {items.length > 0 ? (
+              <div className="flex items-center gap-2">
+                {orderId && (
+                  <Badge variant="secondary" className="font-mono">
+                    {orderId}
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  onClick={clearOrder}
+                  title="Xóa tất cả"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Badge
+                variant="outline"
+                className="text-xs text-muted-foreground font-normal"
+              >
+                Mới
+              </Badge>
+            )}
+          </div>
 
-              {/* Cart Summary */}
-              <CartSummary
-                itemCount={itemCount}
-                subtotal={subtotal}
-                isEmpty={isEmpty}
-                notes={notes}
-                onNotesChange={setNotes}
-                onConfirm={handleConfirm}
-                onClearCart={clearOrder}
-              />
-            </div>
+          {/* 2. Scrollable Items Area */}
+          <ScrollArea className="flex-1">
+            {items.length > 0 ? (
+              <div className="flex flex-col p-4 gap-3">
+                {items.map((item) => (
+                  <CartItem
+                    key={item.id}
+                    cartItem={item}
+                    onQuantityChange={(qty) => updateQuantity(item.id, qty)}
+                    onRemove={() => removeItem(item.id)}
+                    isInvalid={isInvalid}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <ShoppingBasket />
+                  </EmptyMedia>
+                  <EmptyTitle>Giỏ hàng trống</EmptyTitle>
+                  <EmptyDescription>
+                    Chọn món từ thực đơn để bắt đầu tạo đơn.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+          </ScrollArea>
+
+          {/* 3. Sticky Footer (Summary & Action) */}
+          <div className="p-4 border-t bg-muted/5 space-y-4">
+            {/* This component usually handles Subtotal display, Tax, and the Main Action Button */}
+            <CartSummary
+              itemCount={itemCount}
+              subtotal={subtotal}
+              notes={notes}
+              onNotesChange={setNotes}
+              onConfirm={handleConfirm}
+              onClearCart={clearOrder}
+              isInvalid={isInvalid}
+            />
           </div>
         </aside>
       </div>

@@ -171,8 +171,8 @@ export default function AddMenuItemDialog({
                   {filteredMenuItems.map((item) => {
                     const isOutOfStock = item.maxQuantityAvailable === 0;
                     const isLowStock =
-                      item.maxQuantityAvailable > 0 &&
-                      item.maxQuantityAvailable <= 5;
+                      (item.maxQuantityAvailable || 0) > 0 &&
+                      (item.maxQuantityAvailable || 0) <= 5;
 
                     return (
                       <Card
@@ -263,7 +263,7 @@ export default function AddMenuItemDialog({
                         const newValue = Math.max(1, value || 1);
                         if (
                           selectedItem.maxQuantityAvailable !== undefined &&
-                          newValue > selectedItem.maxQuantityAvailable
+                          newValue > (selectedItem.maxQuantityAvailable || 0)
                         ) {
                           return; // Prevent exceeding max
                         }
@@ -271,8 +271,8 @@ export default function AddMenuItemDialog({
                       }}
                     />
                   </div>
-                  {selectedItem.maxQuantityAvailable !== undefined &&
-                    quantity >= selectedItem.maxQuantityAvailable && (
+                  {(selectedItem.maxQuantityAvailable || 0) !== undefined &&
+                    quantity >= (selectedItem.maxQuantityAvailable || 0) && (
                       <p className="text-xs text-warning">
                         Đã đạt số lượng tối đa
                       </p>
