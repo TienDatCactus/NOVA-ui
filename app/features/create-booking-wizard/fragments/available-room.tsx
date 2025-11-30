@@ -202,13 +202,6 @@ export function AvailableRoomRow({
                 </div>
               )}
             </div>
-
-            {/* Helper Text for Selection */}
-            {hasAvailableRooms && !hasSelection && (
-              <p className="mt-2 text-sm text-muted-foreground/60 text-center uppercase tracking-widest font-medium">
-                Lựa chọn phòng bằng cách nhấn vào tên phòng
-              </p>
-            )}
           </div>
         </CollapsibleContent>
       </Collapsible>

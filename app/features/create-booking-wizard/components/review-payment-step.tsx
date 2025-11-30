@@ -529,20 +529,20 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                 {/* QUICK ACTIONS */}
                                 <div className="flex gap-1.5">
                                   <Button
+                                    variant={"outline"}
                                     type="button"
                                     onClick={() =>
                                       field.onChange(
                                         Math.round(finalTotal * 0.5)
                                       )
                                     }
-                                    className="px-2 py-0.5 text-[10px] font-medium border rounded-md hover:bg-muted transition-colors text-muted-foreground"
                                   >
                                     50%
                                   </Button>
                                   <Button
+                                    variant={"outline"}
                                     type="button"
                                     onClick={() => field.onChange(finalTotal)}
-                                    className="px-2 py-0.5 text-[10px] font-medium border border-primary/20 bg-primary/5 text-primary rounded-md hover:bg-primary/10 transition-colors"
                                   >
                                     100%
                                   </Button>

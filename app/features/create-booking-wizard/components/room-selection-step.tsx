@@ -312,14 +312,14 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                 <>
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   <span>
-                    Sufficient ({selectionStatus.currentCapacity}/
+                    Đủ chỗ ({selectionStatus.currentCapacity}/
                     {totalGuestsTarget})
                   </span>
                 </>
               ) : (
                 <>
                   <Users className="h-3.5 w-3.5" />
-                  <span>Missing {selectionStatus.missing} spots</span>
+                  <span>Thiếu {selectionStatus.missing} chỗ</span>
                 </>
               )}
             </div>
@@ -336,8 +336,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
           {/* Warning Message */}
           {!selectionStatus.isSufficient && (
             <p className="text-xs text-orange-600 dark:text-orange-400 mt-1.5 font-medium animate-pulse">
-              Please select more rooms to accommodate {totalGuestsTarget}{" "}
-              guests.
+              Vui chọn thêm phòng để đủ chỗ cho {totalGuestsTarget} khách.
             </p>
           )}
         </div>

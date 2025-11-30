@@ -121,17 +121,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     }
   };
 
-  const handleNoShow = async () => {
-    try {
-      await updateStatus("NoShow");
-      toast.success("Đã đánh dấu No Show");
-      refetch?.();
-      setNoShowDialogOpen(false);
-    } catch {
-      toast.error("Thao tác thất bại");
-    }
-  };
-
   const handleCancel = async () => {
     try {
       await cancelBooking();
@@ -378,28 +367,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       </AlertDialog>
 
       {/* No Show Confirmation Dialog */}
-      <AlertDialog open={noShowDialogOpen} onOpenChange={setNoShowDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Đánh dấu No Show</AlertDialogTitle>
-            <AlertDialogDescription>
-              Khách hàng <strong>{booking.customerName}</strong> không đến nhận
-              phòng? Đặt phòng <strong>{booking.bookingCode}</strong> sẽ được
-              đánh dấu là No Show.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>Hủy</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleNoShow}
-              disabled={isProcessing}
-              className="bg-orange-600 text-white hover:bg-orange-700"
-            >
-              {isProcessing ? "Đang xử lý..." : "Xác nhận No Show"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
