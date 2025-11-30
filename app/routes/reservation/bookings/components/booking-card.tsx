@@ -356,6 +356,8 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* No Show Confirmation Dialog */}
     </>
   );
 }
