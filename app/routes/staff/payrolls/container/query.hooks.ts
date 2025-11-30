@@ -68,9 +68,6 @@ export function useGeneratePayroll() {
         queryKey: ["payrolls", variables.year, variables.month],
       });
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi tạo bảng lương");
-    },
   });
 }
 

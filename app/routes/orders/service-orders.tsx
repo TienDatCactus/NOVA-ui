@@ -90,24 +90,18 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
       <div className="flex-shrink-0 bg-background border-b z-10 shadow-sm">
         {/* Top Row: Title & Date Nav */}
         <div className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {/* Visual Anchor: Blue for Services */}
-            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 flex items-center justify-center">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                Quản lý Dịch vụ
-              </h1>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{dailySummary.count} yêu cầu</span>
-                <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                <span className="font-mono font-medium text-foreground">
-                  {formatMoney(dailySummary.total).vndFormatted}
-                </span>
-                <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                <span>doanh thu</span>
-              </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              Quản lý Đơn Dịch Vụ
+            </h1>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{dailySummary.count} yêu cầu</span>
+              <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+              <span className="font-mono font-medium text-foreground">
+                {formatMoney(dailySummary.total).vndFormatted}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+              <span>doanh thu</span>
             </div>
           </div>
 
@@ -204,13 +198,10 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
               <div className="flex h-[50vh] flex-col items-center justify-center">
                 <Empty>
                   <EmptyHeader>
-                    <EmptyMedia
-                      variant="icon"
-                      className="bg-blue-50 rounded-full p-4 text-blue-200"
-                    >
-                      <HandPlatter className="h-8 w-8 text-blue-400" />
+                    <EmptyMedia variant="icon">
+                      <HandPlatter className="h-8 w-8" />
                     </EmptyMedia>
-                    <EmptyTitle>Không có yêu cầu dịch vụ</EmptyTitle>
+                    <EmptyTitle>Không có đơn dịch vụ</EmptyTitle>
                     <EmptyDescription>
                       {statusFilter === "All"
                         ? `Không có dịch vụ nào trong ngày ${format(selectedDate || new Date(), "dd/MM")}.`

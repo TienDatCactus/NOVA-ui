@@ -269,7 +269,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                       Loại phòng khả dụng
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {availableRooms.length} types
+                      {availableRooms.length} loại phòng
                     </span>
                   </div>
 

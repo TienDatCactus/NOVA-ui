@@ -258,7 +258,8 @@ export default function Component({
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
               </Button>
-            </Link>
+            </Link>{" "}
+            <Separator orientation="vertical" className="h-6" />
             <Select
               value={selectedTypeId || "all"}
               onValueChange={(value) =>
@@ -357,109 +358,107 @@ export default function Component({
         </main>
 
         {/* Cart Sidebar - Single Service Selection */}
-        <aside className="p-2">
-          <div className="w-md bg-card rounded-xl h-full border p-4  overflow-y-auto flex flex-col">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Dịch vụ đã chọn</h2>
-            </div>
-            <Separator className="my-2" />
-
-            {/* Empty State */}
-            {isEmpty && (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant={"icon"}>
-                    <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
-                  </EmptyMedia>
-                  <EmptyTitle>Chưa chọn dịch vụ</EmptyTitle>
-                  <EmptyDescription>Chọn dịch vụ để bắt đầu</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
-
-            {/* Selected Service */}
-            {selectedService && (
-              <div className="flex-1 flex flex-col justify-between space-y-4">
-                {/* Service Info Card */}
-                <Card className="rounded-lg border p-3 ">
-                  {selectedService.imageUrl && (
-                    <Image
-                      src={selectedService.imageUrl}
-                      alt={selectedService.name}
-                      className="w-full h-32 object-cover rounded-md"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-sm">
-                      {selectedService.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedService.code}
-                    </p>
-                    <p className="text-sm font-mono font-bold text-primary mt-1">
-                      {formatMoney(selectedService.unitPrice).vndFormatted}
-                    </p>
-                  </div>
-
-                  {/* Quantity Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity" className="text-xs">
-                      Số lượng
-                    </Label>
-                    <Counter
-                      value={selectedService.quantity}
-                      onChange={(e) => updateServiceQuantity(e || 1)}
-                    />
-                  </div>
-
-                  {/* Notes Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="note" className="text-xs">
-                      Ghi chú
-                    </Label>
-                    <Textarea
-                      id="note"
-                      placeholder="Ghi chú cho dịch vụ..."
-                      value={selectedService.note || ""}
-                      onChange={(e) => updateServiceNote(e.target.value)}
-                      rows={3}
-                      className="text-sm resize-none"
-                    />
-                  </div>
-
-                  {/* Subtotal */}
-                  <div className="pt-2 border-t">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Tổng cộng</span>
-                      <span className="text-lg font-bold text-primary font-mono">
-                        {formatMoney(subtotal).vndFormatted}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Action Buttons */}
-                <div className="space-y-2">
-                  <Button
-                    onClick={handleConfirm}
-                    className="w-full"
-                    size="lg"
-                    disabled={isEmpty}
-                  >
-                    Xác nhận đơn
-                  </Button>
-                  <Button
-                    onClick={clearService}
-                    variant="outline"
-                    className="w-full"
-                    size="sm"
-                  >
-                    Xóa dịch vụ
-                  </Button>
-                </div>
-              </div>
-            )}
+        <aside className="w-md shadow-md h-full border p-4  overflow-y-auto flex flex-col">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Dịch vụ đã chọn</h2>
           </div>
+          <Separator className="my-2" />
+
+          {/* Empty State */}
+          {isEmpty && (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant={"icon"}>
+                  <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
+                </EmptyMedia>
+                <EmptyTitle>Chưa chọn dịch vụ</EmptyTitle>
+                <EmptyDescription>Chọn dịch vụ để bắt đầu</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+
+          {/* Selected Service */}
+          {selectedService && (
+            <div className="flex-1 flex flex-col justify-between space-y-4">
+              {/* Service Info Card */}
+              <Card className="border-none bg-transparent ">
+                {selectedService.imageUrl && (
+                  <Image
+                    src={selectedService.imageUrl}
+                    alt={selectedService.name}
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                )}
+                <div>
+                  <h3 className="font-semibold text-sm">
+                    {selectedService.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedService.code}
+                  </p>
+                  <p className="text-sm font-mono font-bold text-primary mt-1">
+                    {formatMoney(selectedService.unitPrice).vndFormatted}
+                  </p>
+                </div>
+
+                {/* Quantity Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="quantity" className="text-xs">
+                    Số lượng
+                  </Label>
+                  <Counter
+                    value={selectedService.quantity}
+                    onChange={(e) => updateServiceQuantity(e || 1)}
+                  />
+                </div>
+
+                {/* Notes Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="note" className="text-xs">
+                    Ghi chú
+                  </Label>
+                  <Textarea
+                    id="note"
+                    placeholder="Ghi chú cho dịch vụ..."
+                    value={selectedService.note || ""}
+                    onChange={(e) => updateServiceNote(e.target.value)}
+                    rows={3}
+                    className="text-sm resize-none"
+                  />
+                </div>
+
+                {/* Subtotal */}
+                <div className="pt-2 border-t">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Tổng cộng</span>
+                    <span className="text-lg font-bold text-primary font-mono">
+                      {formatMoney(subtotal).vndFormatted}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <Button
+                  onClick={handleConfirm}
+                  className="w-full"
+                  size="lg"
+                  disabled={isEmpty}
+                >
+                  Xác nhận đơn
+                </Button>
+                <Button
+                  onClick={clearService}
+                  variant="outline"
+                  className="w-full"
+                  size="sm"
+                >
+                  Xóa dịch vụ
+                </Button>
+              </div>
+            </div>
+          )}
         </aside>
       </div>
 

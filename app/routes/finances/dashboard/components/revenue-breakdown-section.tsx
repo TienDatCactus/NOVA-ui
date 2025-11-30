@@ -18,10 +18,10 @@ interface RevenueBreakdownSectionProps {
 }
 
 const revenueTypeColors: Record<string, string> = {
-  Room: "hsl(var(--chart-1))",
-  FnB: "hsl(var(--chart-2))",
-  Service: "hsl(var(--chart-3))",
-  Other: "hsl(var(--chart-4))",
+  Room: "var(--chart-1)",
+  FnB: "var(--chart-2)",
+  Service: "var(--chart-3)",
+  Other: "var(--chart-4)",
 };
 
 export function RevenueBreakdownSection({
@@ -85,7 +85,7 @@ export function RevenueBreakdownSection({
                           <tspan
                             x={viewBox.cx}
                             y={viewBox.cy}
-                            className="fill-foreground text-3xl font-bold"
+                            className="fill-foreground text-xl font-bold"
                           >
                             {totalRevenue.toLocaleString("vi-VN")}
                           </tspan>

@@ -295,7 +295,7 @@ export default function Component({
                 handleCategorySelect(value === "all" ? null : value)
               }
             >
-              <SelectTrigger className="w-[220px] bg-muted/40 border-transparent hover:bg-muted/60 focus:ring-0 focus:ring-offset-0">
+              <SelectTrigger className="w-[200px] border-primary/50 bg-white shadow-md">
                 <SelectValue placeholder="Chọn danh mục" />
               </SelectTrigger>
               <SelectContent>
@@ -405,10 +405,7 @@ export default function Component({
         <aside className="w-[420px] flex flex-col border-l bg-background shadow-2xl shadow-black/5 z-10 relative">
           {/* 1. Header */}
           <div className="flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur z-10">
-            <div className="flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-primary" />
-              <h2 className="font-semibold text-base">Đơn hàng hiện tại</h2>
-            </div>
+            <h2 className="font-semibold text-xl">Đơn hàng hiện tại</h2>
             {items.length > 0 ? (
               <div className="flex items-center gap-2">
                 {orderId && (

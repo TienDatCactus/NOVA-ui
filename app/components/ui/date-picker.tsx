@@ -42,7 +42,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "dd/MM/yyyy", { locale: vi }) : placeholder}
+          {value && format(value, "dd/MM/yyyy", { locale: vi })}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

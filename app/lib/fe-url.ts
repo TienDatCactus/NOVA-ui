@@ -9,7 +9,6 @@ const DASHBOARD = {
     reports: "/dashboard/bookings/reports",
     grid: "/dashboard/bookings/grid",
     list: "/dashboard/bookings/list",
-    invoices: "/dashboard/bookings/invoices",
     bookingDetail: (bookingCode: string) =>
       `/dashboard/bookings/detail/${bookingCode}`,
     newBooking: "/dashboard/bookings/new-booking",

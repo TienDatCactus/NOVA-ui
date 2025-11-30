@@ -1,7 +1,25 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Calculator,
+  CalendarDays,
+  Check,
+  Loader2,
+  Search,
+  User,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { z } from "zod";
+import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -10,43 +28,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { toast } from "sonner";
-import {
-  Loader2,
-  Search,
-  Calculator,
-  Users,
-  User,
-  CalendarDays,
-  Check,
-} from "lucide-react";
-import { Input } from "~/components/ui/input";
-import {
-  useGeneratePayroll,
-  useGenerateSinglePayroll,
-} from "../container/query.hooks";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "~/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import {
   Form,
   FormControl,
@@ -55,9 +36,27 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { useStaffList } from "../../staff/container/query.hooks";
-import { cn } from "~/lib/utils";
+import { Input } from "~/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { cn } from "~/lib/utils";
+import { useStaffList } from "../../staff/container/query.hooks";
+import {
+  useGeneratePayroll,
+  useGenerateSinglePayroll,
+} from "../container/query.hooks";
 
 const generatePayrollSchema = z
   .object({

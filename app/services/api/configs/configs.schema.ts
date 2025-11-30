@@ -16,6 +16,7 @@ const ConfigListResponseSchema = z.array(ConfigListItemSchema);
 const ConfigGroupItemSchema = z.object({
   key: z.string(),
   shortKey: z.string(),
+  displayName: z.string(),
   dataType: z.string(),
   currentValue: z.string(),
   defaultValue: z.string(),

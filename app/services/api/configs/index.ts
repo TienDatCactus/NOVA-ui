@@ -1,6 +1,6 @@
 import http from "~/lib/http";
 import { Configs } from "~/services/url";
-import { ConfigSchema } from "./configs.schem";
+import { ConfigSchema } from "./configs.schema";
 import type {
   ConfigListResponse,
   GroupedConfigListResponse,

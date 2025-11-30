@@ -60,7 +60,7 @@ export default function PrintPreviewDialog({
                 </h2>
                 <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-medium uppercase tracking-wide">
                   <MapPin className="h-3 w-3" />
-                  <span>Danang, Vietnam</span>
+                  <span>SAPA, Vietnam</span>
                 </div>
               </div>
 
@@ -104,8 +104,8 @@ export default function PrintPreviewDialog({
               {/* 3. ITEMS LIST */}
               <div className="space-y-3 pb-4 border-b-2 border-zinc-800">
                 <div className="grid grid-cols-12 text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
-                  <span className="col-span-1">Qty</span>
-                  <span className="col-span-7">Item</span>
+                  <span className="col-span-2">Qty</span>
+                  <span className="col-span-6">Item</span>
                   <span className="col-span-4 text-right">Amount</span>
                 </div>
 
@@ -113,7 +113,7 @@ export default function PrintPreviewDialog({
                   {printData.items.map((item, i) => (
                     <div
                       key={i}
-                      className="grid grid-cols-12 gap-1 items-start"
+                      className="grid grid-cols-12 gap-1 items-center"
                     >
                       <span className="col-span-1 font-mono font-bold pt-0.5">
                         {item.quantity}
@@ -128,9 +128,7 @@ export default function PrintPreviewDialog({
                           </p>
                         )}
                       </div>
-                      {/* Assuming item has price, otherwise calculate or hide. Using explicit placeholder logic here since DTO might vary */}
                       <span className="col-span-4 text-right font-mono">
-                        {/* Replace with item.totalPrice if available in DTO */}
                         ---
                       </span>
                     </div>

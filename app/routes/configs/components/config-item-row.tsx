@@ -41,7 +41,7 @@ export default function ConfigItemRow({ config }: ConfigItemRowProps) {
       )}
     >
       {isModified && (
-        <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-amber-500" />
+        <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-primary" />
       )}
 
       <div className="col-span-11 md:col-span-5 flex flex-col justify-center gap-1 pl-3">
@@ -53,16 +53,16 @@ export default function ConfigItemRow({ config }: ConfigItemRowProps) {
             )}
             title={config.key}
           >
-            {config.shortKey}
+            {config.displayName || config.key}
           </span>
 
           {isModified && (
-            <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 ring-4 ring-amber-500/10 animate-pulse" />
+            <span className="flex h-1.5 w-1.5 rounded-full bg-primary ring-4 ring-primary/10 animate-pulse" />
           )}
         </div>
 
         {/* Description: High readability text */}
-        <p className="line-clamp-1 text-[11px] text-muted-foreground/70 leading-relaxed pr-4">
+        <p className="line-clamp-1 text-[11px] text-muted-foreground leading-relaxed pr-4">
           {config.description || (
             <span className="italic opacity-50">Không có mô tả</span>
           )}
@@ -75,10 +75,10 @@ export default function ConfigItemRow({ config }: ConfigItemRowProps) {
             className={cn(
               "relative max-w-full truncate rounded px-2 py-0.5 text-sm font-mono transition-colors border",
               isModified
-                ? "bg-amber-50 text-amber-900 border-amber-200/50 dark:bg-amber-950/30 dark:text-amber-100 dark:border-amber-900"
+                ? "bg-primary/10 text-primary border-primary/20 dark:bg-primary/20 dark:text-primary dark:border-primary/30"
                 : "bg-muted/30 text-foreground border-transparent",
               isEmpty &&
-                "italic text-muted-foreground/50 bg-transparent border-dashed border-border"
+                "italic text-muted-foreground bg-transparent border-dashed border-border"
             )}
             title={config.currentValue || "Empty"}
           >
@@ -87,7 +87,7 @@ export default function ConfigItemRow({ config }: ConfigItemRowProps) {
         </div>
 
         {/* Default Value: Contextual Help */}
-        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50 font-mono pl-1">
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono pl-1">
           <CornerDownRight className="h-3 w-3 opacity-50" />
           <span>Mặc định :</span>
           <span

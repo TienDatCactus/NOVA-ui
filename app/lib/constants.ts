@@ -230,7 +230,7 @@ const SIDEBAR_PROJECTS: Array<{
     icon: MessageSquareDot,
   },
   {
-    name: "Audit Logs",
+    name: "Lịch sử truy vấn",
     url: FE_URL.dashboard.auditLogs,
     icon: ScrollText,
   },
@@ -276,11 +276,7 @@ const COMMAND_BAR_ROUTES: Array<{
     icon: List,
     href: FE_URL.dashboard.bookings.list,
   },
-  {
-    name: "Hóa đơn đặt phòng",
-    icon: FileText,
-    href: FE_URL.dashboard.bookings.invoices,
-  },
+
   {
     name: "Đặt phòng mới",
     icon: Plus,

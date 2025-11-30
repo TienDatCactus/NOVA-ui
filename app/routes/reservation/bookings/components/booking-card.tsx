@@ -53,7 +53,10 @@ import { Separator } from "~/components/ui/separator";
 import { DASHBOARD } from "~/lib/fe-url";
 import { cn, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
+import {
+  BOOKING_SOURCES,
+  BOOKING_STATUSES,
+} from "~/services/api/booking/booking.types";
 import {
   useCancelBooking,
   useUpdateBookingStatus,
@@ -72,8 +75,9 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
-  const { mutateAsync: cancelBooking, isPending: isCancelling } =
-    useCancelBooking(booking.bookingId || "");
+  const { mutateAsync: cancelBooking } = useCancelBooking(
+    booking.bookingId || ""
+  );
   const navigate = useNavigate();
 
   const statusConfig = BOOKING_STATUSES.find((s) => s.value === booking.status);
@@ -247,7 +251,10 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
                 <User className="h-3 w-3" />
               )}
               <span className="truncate max-w-[80px]">
-                {booking.source === "OTA" ? booking.otaName : "Khách lẻ"}
+                {booking.source === "OTA"
+                  ? booking.otaName
+                  : BOOKING_SOURCES.find((s) => s.key === booking.source)
+                      ?.label || "Trực tiếp"}
               </span>
             </div>
           </div>

@@ -8,11 +8,18 @@ import {
   MapPin,
   Utensils,
   MoreVertical,
+  Notebook,
+  NotepadText,
 } from "lucide-react";
 
 import { cn, formatMoney } from "~/lib/utils";
 import type { POSOrderDetailDto } from "~/services/api/orders/dto";
 import { OrderActionMenu } from "./order-actions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 interface OrderCardProps {
   order: POSOrderDetailDto;
@@ -77,6 +84,16 @@ export default function OrderCard({ order, onClick }: OrderCardProps) {
               )}
             >
               {statusLabels[order.status]}
+            </span>
+            <span>
+              {(order.note?.length ?? 0) > 0 && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <NotepadText className="h-4 w-4 text-amber-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>{order.note}</TooltipContent>
+                </Tooltip>
+              )}
             </span>
           </div>
 

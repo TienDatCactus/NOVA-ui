@@ -302,7 +302,8 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
               {(isBreakfastAll || (breakfastDates?.length ?? 0) > 0) && (
                 <div className="flex justify-between text-sm items-center">
                   <span className="text-foreground/90">
-                    Bữa sáng ({isBreakfastAll ? "All" : breakfastDates?.length})
+                    Bữa sáng (
+                    {isBreakfastAll ? "Tất cả" : breakfastDates?.length})
                   </span>
                   <span className="font-mono tabular-nums text-foreground/90">
                     {

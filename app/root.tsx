@@ -51,7 +51,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <MapProvider>{children}</MapProvider>
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-right"
+          richColors // <--- This does the heavy lifting
+          closeButton // Adds a small X to close
+          theme="system"
+          toastOptions={{
+            className: "font-sans",
+            style: {
+              borderRadius: "12px",
+            },
+          }}
+        />
         <ScrollRestoration />
         <Scripts />
       </body>

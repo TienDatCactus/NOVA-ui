@@ -1,7 +1,4 @@
 import { Loader2 } from "lucide-react";
-import { Card } from "~/components/ui/card";
-import GeneratePayrollDialog from "./components/generate-payroll-dialog";
-import PayrollDetailDialog from "./components/payroll-detail-dialog";
 import PayrollsList from "./components/payrolls-list";
 import { usePayrollFilter } from "./container/filter.hooks";
 import { usePayrolls } from "./container/query.hooks";
