@@ -27,6 +27,7 @@ const StaffCreateBookingSchema = z
     source: BookingSourceEnum,
     otaInformationId: z.string("Mã thông tin OTA không hợp lệ").optional(),
     otaBookingCode: z.string("Mã OTA booking không hợp lệ").optional(),
+    partnerBookingCode: z.string("Mã đối tác không hợp lệ").optional(),
     roomIds: z
       .array(z.string("Mã phòng không hợp lệ"))
       .min(1, "Phải chọn ít nhất 1 phòng cụ thể"),
@@ -97,6 +98,45 @@ const StaffCreateBookingSchema = z
       message:
         "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú (từ ngày nhận phòng đến ngày trả phòng)",
       path: ["serviceOrder"],
+    }
+  )
+  .refine(
+    (data) => {
+      // OTA booking requires otaInformationId and otaBookingCode
+      if (data.source === "OTA") {
+        return !!data.otaInformationId && !!data.otaBookingCode;
+      }
+      return true;
+    },
+    {
+      message: "Booking OTA phải có kênh OTA và mã booking OTA",
+      path: ["otaInformationId"],
+    }
+  )
+  .refine(
+    (data) => {
+      // OTA booking requires guest email for confirmation
+      if (data.source === "OTA") {
+        return !!data.guestEmail && data.guestEmail.length > 0;
+      }
+      return true;
+    },
+    {
+      message: "Booking OTA phải có email khách hàng để xác nhận",
+      path: ["guestEmail"],
+    }
+  )
+  .refine(
+    (data) => {
+      // Agency booking requires partnerBookingCode
+      if (data.source === "Agency") {
+        return !!data.partnerBookingCode && data.partnerBookingCode.length > 0;
+      }
+      return true;
+    },
+    {
+      message: "Booking qua đại lý phải có mã đại lý",
+      path: ["partnerBookingCode"],
     }
   );
 
