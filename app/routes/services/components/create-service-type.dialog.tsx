@@ -1,21 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ImagePlus,
-  Layers,
-  Package,
-  Plus,
-  RotateCcw,
-  Trash2,
-  X,
-  ScanBarcode,
-  Tag,
   AlignLeft,
   ImageIcon,
+  ImagePlus,
+  Package,
+  Plus,
+  ScanBarcode,
+  Tag,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -36,21 +34,14 @@ import {
 } from "~/components/ui/form";
 import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
+import { Dropzone } from "~/components/ui/shadcn-io/dropzone";
 import { Switch } from "~/components/ui/switch";
-import { Textarea } from "~/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Badge } from "~/components/ui/badge";
-import {
-  Dropzone,
-  DropzoneContent,
-  DropzoneEmptyState,
-} from "~/components/ui/shadcn-io/dropzone";
+import { Textarea } from "~/components/ui/textarea";
 
+import { Separator } from "~/components/ui/separator";
 import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
 import { useCreateServiceType } from "../container/service-types/mutation.hooks";
-import { cn } from "~/lib/utils";
-import { Separator } from "~/components/ui/separator";
 
 const { CreateServiceTypeRequestSchema } = ServiceTypesSchema;
 type CreateServiceTypeFormData = z.infer<typeof CreateServiceTypeRequestSchema>;

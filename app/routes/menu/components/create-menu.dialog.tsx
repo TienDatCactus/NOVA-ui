@@ -45,7 +45,7 @@ export default function CreateMenuDialog({
   const [activeTab, setActiveTab] = useState("general");
 
   const form = useForm<CreateMenuFormData>({
-    resolver: zodResolver(CreateMenuItemRequestSchema) as any,
+    resolver: zodResolver(CreateMenuItemRequestSchema),
     defaultValues: {
       CategoryId: "",
       Code: "",

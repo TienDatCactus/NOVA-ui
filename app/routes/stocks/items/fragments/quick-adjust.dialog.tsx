@@ -164,7 +164,7 @@ export function QuickAdjustDialog({
                   <FormItem>
                     <FormLabel>Số lượng điều chỉnh</FormLabel>
                     <FormControl>
-                      <Counter {...field} minValue={-9999} />
+                      <Counter {...field} minValue={-currentStock} />
                     </FormControl>
                     <FormDescription>
                       <div>

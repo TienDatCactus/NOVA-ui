@@ -102,11 +102,11 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                   <Input
                     type="number"
                     className="font-semibold text-right"
-                    value={field.value || ""}
+                    value={field.value ?? ""}
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === "" || val === "-") {
-                        field.onChange(0);
+                        field.onChange(undefined);
                       } else {
                         const numVal = parseInt(val, 10);
                         if (!isNaN(numVal)) {

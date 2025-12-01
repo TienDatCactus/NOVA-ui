@@ -1,16 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Activity,
-  BedDouble,
-  DoorOpen,
-  Hash,
-  Save,
-  Trash2,
-  X,
-  Loader2,
-  AlertTriangle,
-} from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { AlertTriangle, BedDouble, Hash, Loader2, Save } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -38,11 +28,11 @@ import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
-  SelectGroup,
-  SelectLabel,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 
@@ -54,6 +44,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { cn } from "~/lib/utils";
 import type {
   RoomListItemDto,
   UpdateRoomDetailRequestDto,
@@ -62,7 +53,6 @@ import { RoomSchema } from "~/services/api/rooms/room.schema";
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useRoomTypes } from "../../container/room-types/query.hooks";
 import { useUpdateRoom } from "../../container/rooms/mutation.hooks";
-import { cn } from "~/lib/utils";
 
 const { UpdateRoomDetailRequestSchema } = RoomSchema;
 

@@ -174,17 +174,23 @@ function SearchRoom({
         Xuất File
       </Button>
 
-      {hasActiveFilters && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onReset}
-          className="h-9 gap-1"
-        >
-          <X className="h-4 w-4" />
-          Xóa bộ lọc
-        </Button>
-      )}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onReset}
+        className="h-9 gap-1"
+      >
+        Tất cả đặt phòng
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onReset}
+        className="h-9 gap-1 text-muted-foreground hover:text-foreground"
+      >
+        <X className="h-4 w-4" />
+        Xóa bộ lọc
+      </Button>
 
       {/* Export Dialog */}
       <Dialog open={openExportDialog} onOpenChange={setOpenExportDialog}>

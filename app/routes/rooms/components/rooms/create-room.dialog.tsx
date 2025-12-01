@@ -39,14 +39,9 @@ import { useCreateRoom } from "../../container/rooms/mutation.hooks";
 import { useRoomTypes } from "../../container/room-types/query.hooks";
 import { cn } from "~/lib/utils";
 
-const { CreateRoomResponseSchema } = RoomSchema;
-const CreateRoomFormSchema = CreateRoomResponseSchema.pick({
-  roomName: true,
-  roomTypeId: true,
-  status: true,
-});
+const { CreateRoomRequestSchema } = RoomSchema;
 
-type CreateRoomFormData = z.infer<typeof CreateRoomFormSchema>;
+type CreateRoomFormData = z.infer<typeof CreateRoomRequestSchema>;
 
 interface CreateRoomDialogProps {
   open: boolean;
@@ -58,7 +53,7 @@ function CreateRoomDialog({ open, onClose }: CreateRoomDialogProps) {
   const { mutate, isPending } = useCreateRoom();
 
   const form = useForm<CreateRoomFormData>({
-    resolver: zodResolver(CreateRoomFormSchema),
+    resolver: zodResolver(CreateRoomRequestSchema),
     defaultValues: {
       roomName: "",
       roomTypeId: "",

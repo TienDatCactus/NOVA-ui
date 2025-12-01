@@ -22,9 +22,7 @@ const StockAdjustmentListSchema = z.array(StockAdjustmentListItemSchema);
 
 const CreateStockAdjustmentItemSchema = z.object({
   itemId: z.string("Vui lòng chọn hàng hóa").min(1, "Vui lòng chọn hàng hóa"),
-  quantityDiff: z
-    .number("Số lượng điều chỉnh phải là số")
-    .min(1, "Số lượng điều chỉnh phải khác 0"),
+  quantityDiff: z.number("Số lượng điều chỉnh phải là số"),
   note: z.string().optional(),
 });
 

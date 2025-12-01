@@ -89,9 +89,9 @@ export const CreateMenuItemRequestSchema = z.object({
   UnitId: z.string().min(1, "Vui lòng chọn đơn vị tính"),
   Price: z
     .number("Giá bán phải là số")
-    .min(0, "Giá bán phải lớn hơn hoặc bằng 0")
+    .min(1, "Giá bán phải lớn hơn 0")
     .max(1000000000, "Giá bán không được vượt quá 1 tỷ VNĐ"),
-  Active: z.boolean().default(true),
+  Active: z.boolean(),
   Images: z
     .array(z.instanceof(File))
     .max(10, "Chỉ được tải lên tối đa 10 ảnh")
