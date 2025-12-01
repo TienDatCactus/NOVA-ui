@@ -2,12 +2,12 @@ import { useMemo, useState } from "react";
 
 export interface WorkShiftFilters {
   searchQuery: string;
-  activeFilter: "all" | "active";
+  isActive: "all" | "active" | "inactive";
 }
 
 const defaultFilters: WorkShiftFilters = {
   searchQuery: "",
-  activeFilter: "all",
+  isActive: "all",
 };
 
 export function useWorkShiftFilter() {

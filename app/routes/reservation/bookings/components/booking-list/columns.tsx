@@ -29,7 +29,12 @@ export const columns: ColumnDef<BookingListItem>[] = [
       <DataTableColumnHeader column={column} title="Mã đặt phòng" />
     ),
     cell: ({ row }) => {
-      return <BookingDetailDialog bookingCode={row.original.bookingCode!} />;
+      return (
+        <BookingDetailDialog
+          bookingCode={row.original.bookingCode!}
+          customerName={row.original.customerName || ""}
+        />
+      );
     },
   },
   {

@@ -43,10 +43,6 @@ import type { POSOrderDetailDto } from "~/services/api/orders/dto";
 // Extend OrderStatus to include 'All' for the UI filter
 type FilterStatus = OrderStatus | "All";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

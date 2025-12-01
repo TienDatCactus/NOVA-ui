@@ -15,6 +15,7 @@ export function useCreateServiceType() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service-types"] });
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      toast.success("Tạo loại dịch vụ thành công");
     },
   });
 }
@@ -28,6 +29,7 @@ export function useUpdateServiceType(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service-types"] });
       queryClient.invalidateQueries({ queryKey: ["service-types-detail", id] });
+      toast.success("Cập nhật loại dịch vụ thành công");
     },
   });
 }
@@ -40,6 +42,7 @@ export function useDeleteServiceType(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service-types"] });
       queryClient.invalidateQueries({ queryKey: ["service-types-detail", id] });
+      toast.success("Xóa loại dịch vụ thành công");
     },
   });
 }

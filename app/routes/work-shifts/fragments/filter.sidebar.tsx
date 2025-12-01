@@ -27,8 +27,7 @@ export default function WorkShiftsFilterSidebar({
   onFilterChange,
   onResetFilters,
 }: WorkShiftsFilterSidebarProps) {
-  const activeFiltersCount =
-    (filters.searchQuery !== "" ? 1 : 0) + (filters.isActive !== "all" ? 1 : 0);
+  const activeFiltersCount = filters.searchQuery !== "" ? 1 : 0;
 
   return (
     <aside className="w-72 flex-shrink-0 space-y-2">
@@ -58,21 +57,6 @@ export default function WorkShiftsFilterSidebar({
             startAddon={<Search className="text-muted-foreground" />}
           />
           <Separator />
-          <Select
-            value={filters.isActive}
-            onValueChange={(value) =>
-              onFilterChange("isActive", value as "all" | "active" | "inactive")
-            }
-          >
-            <SelectTrigger className="shadow-md bg-white w-full">
-              <SelectValue placeholder="Chọn trạng thái" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Đang hoạt động</SelectItem>
-              <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
-              <SelectItem value="all">Tất cả</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </Card>
     </aside>

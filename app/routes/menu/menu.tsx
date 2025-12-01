@@ -6,10 +6,6 @@ import useMenuFilters from "./container/menu/filter.hooks";
 import { useMenuList } from "./container/menu/query.hooks";
 import MenuViewLayout from "./layouts/menu-view.layout";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

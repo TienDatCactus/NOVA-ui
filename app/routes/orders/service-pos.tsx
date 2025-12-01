@@ -52,10 +52,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

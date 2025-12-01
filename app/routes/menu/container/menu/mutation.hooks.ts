@@ -24,6 +24,7 @@ export function useCreateMenuItem() {
           queryKey: ["menu-list-by-category", newItem.categoryId],
         });
       }
+      toast.success("Tạo món ăn thành công");
     },
   });
 }
@@ -49,6 +50,7 @@ export function useUpdateMenuItem(itemId: string) {
       queryClient.invalidateQueries({
         queryKey: ["menu-item-detail", itemId],
       });
+      toast.success("Cập nhật món ăn thành công");
     },
   });
 }
@@ -75,6 +77,7 @@ export function useDeleteMenuItem(itemId: string) {
       queryClient.removeQueries({
         queryKey: ["menu-item-detail", itemId],
       });
+      toast.success("Xóa món ăn thành công");
     },
   });
 }

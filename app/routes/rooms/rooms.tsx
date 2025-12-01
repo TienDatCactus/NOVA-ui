@@ -4,10 +4,6 @@ import useRoomFilters from "./container/rooms/filter.hooks";
 import { useRooms } from "./container/rooms/query.hooks";
 import RoomsViewLayout from "./layouts/rooms-view.layout";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

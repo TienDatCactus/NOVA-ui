@@ -1,10 +1,6 @@
 import BookingFlow from "~/features/create-booking-wizard";
 import type { Route } from "./+types/new-booking";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

@@ -4,10 +4,6 @@ import useServiceTypeFilters from "./container/service-types/filter.hooks";
 import { useServiceTypes } from "./container/service-types/query.hooks";
 import ServiceTypesViewLayout from "./layouts/service-types-view.layout";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

@@ -204,7 +204,7 @@ export default function CreateStockAdjustmentDialog({
                                           ? "text-green-600 font-bold bg-green-50 border-green-200"
                                           : ""
                                     )}
-                                    step={0.1}
+                                    step={1}
                                     minValue={-99999}
                                   />
                                 </FormControl>

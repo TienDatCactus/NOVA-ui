@@ -29,7 +29,6 @@ import { useMenuItemDetail } from "../container/menu/query.hooks";
 import ComponentsTab from "../fragments/menu/edit/components-tab";
 import GeneralTab from "../fragments/menu/edit/general-tab";
 import MediaTab from "../fragments/menu/edit/media-tab";
-import { onError } from "~/lib/utils";
 
 const { UpdateMenuItemRequestSchema } = MenuSchema;
 type UpdateMenuFormData = z.infer<typeof UpdateMenuItemRequestSchema>;
@@ -121,8 +120,14 @@ export default function EditMenuSheet({
   const handleSubmit = (data: UpdateMenuFormData) => {
     updateMenuItem(
       { ...data, RemoveMediaIds: removeMediaIds, NewImages: newFiles },
-      { onSuccess: handleClose }
+      { onSuccess: () => handleClose() }
     );
+  };
+
+  const handleError = (errors: any) => {
+    if (errors.Components) {
+      setActiveTab("components");
+    }
   };
 
   const handleClose = () => {
@@ -172,7 +177,7 @@ export default function EditMenuSheet({
         </SheetHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit, onError)}
+            onSubmit={form.handleSubmit(handleSubmit, handleError)}
             className="flex flex-col "
           >
             <Tabs
@@ -254,7 +259,7 @@ export default function EditMenuSheet({
             Hủy bỏ
           </Button>
           <Button
-            onClick={form.handleSubmit(handleSubmit, onError)}
+            onClick={form.handleSubmit(handleSubmit, handleError)}
             disabled={isUpdating}
             className="min-w-[140px]"
           >

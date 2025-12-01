@@ -22,10 +22,6 @@ import MenuCard from "./components/menu-card";
 import ServiceCard from "./components/service-card";
 import type { Route } from "./+types/catalog";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function CustomerGuidesPage({}: Route.ComponentProps) {
   const [searchQuery, setSearchQuery] = useState("");
 

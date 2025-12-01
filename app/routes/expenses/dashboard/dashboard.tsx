@@ -1,28 +1,26 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { Calendar, CalendarDays, Filter, LayoutDashboard } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { Skeleton } from "~/components/ui/skeleton";
-import { useDashboardData } from "./container/dashboard.hooks";
-import MetricsCards from "./components/metrics-cards";
-import CategoryChart from "./components/category-chart";
-import MonthlyTrendChart from "./components/monthly-trend-chart";
-import useExpensesFilters from "../container/filter.hooks";
-import ExpensesLayout from "../layouts/expenses.layout";
-import { FE_URL } from "~/lib/fe-url";
 import {
+  endOfMonth,
+  endOfQuarter,
+  endOfYear,
   format,
   startOfMonth,
-  endOfMonth,
   startOfQuarter,
-  endOfQuarter,
   startOfYear,
-  endOfYear,
   subMonths,
 } from "date-fns";
-import { Separator } from "~/components/ui/separator";
-import { DatePicker } from "~/components/ui/date-picker";
+import { Filter, LayoutDashboard } from "lucide-react";
+import { useNavigate } from "react-router";
+import { Button } from "~/components/ui/button";
 import { DateRangePicker } from "~/components/ui/date-range-picker";
+import { Separator } from "~/components/ui/separator";
+import { Skeleton } from "~/components/ui/skeleton";
+import { FE_URL } from "~/lib/fe-url";
+import useExpensesFilters from "../container/filter.hooks";
+import ExpensesLayout from "../layouts/expenses.layout";
+import CategoryChart from "./components/category-chart";
+import MetricsCards from "./components/metrics-cards";
+import MonthlyTrendChart from "./components/monthly-trend-chart";
+import { useDashboardData } from "./container/dashboard.hooks";
 
 export default function ExpenseDashboard() {
   const navigate = useNavigate();
@@ -34,10 +32,7 @@ export default function ExpenseDashboard() {
       toDate: filters.toDate,
     });
 
-  // --- Handlers ---
-
   const handleCategoryClick = (category: string) => {
-    // Navigate to expense list filtered by this category and current date range
     const searchParams = new URLSearchParams({
       category,
       from: filters.fromDate || "",
@@ -47,7 +42,6 @@ export default function ExpenseDashboard() {
   };
 
   const handleMonthClick = (monthKey: string) => {
-    // monthKey format: "YYYY-MM"
     const [year, month] = monthKey.split("-");
     if (year && month) {
       const date = new Date(parseInt(year), parseInt(month) - 1, 1);
@@ -95,9 +89,9 @@ export default function ExpenseDashboard() {
       filters={filters}
       updateFilter={updateFilter}
       resetFilters={() => {}}
-      totalExpenses={0} // Not needed for dashboard layout usually
+      totalExpenses={Object.keys(byMonth).length}
       totalAmount={totalAmount}
-      isDashboardView={true} // Flag to hide default list filters if needed
+      isDashboardView={true}
     >
       <div className="space-y-8 pb-10">
         {/* 1. HEADER & TOOLBAR */}

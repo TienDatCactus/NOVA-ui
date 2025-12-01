@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { ItemCategoryService } from "~/services/api/stocks/item-category";
 import type { ItemCategoryListParams } from "~/services/api/stocks/item-category/item-category.types";
 import type {
@@ -31,6 +32,7 @@ export function useCreateItemCategory() {
       await ItemCategoryService.createItemCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["item-categories"] });
+      toast.success("Tạo danh mục hàng hóa thành công");
     },
   });
 }
@@ -51,6 +53,7 @@ export function useUpdateItemCategory() {
       queryClient.invalidateQueries({
         queryKey: ["item-category", variables.id],
       });
+      toast.success("Cập nhật danh mục hàng hóa thành công");
     },
   });
 }
@@ -63,6 +66,7 @@ export function useDeleteItemCategory() {
       await ItemCategoryService.deleteItemCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["item-categories"] });
+      toast.success("Xóa danh mục hàng hóa thành công");
     },
   });
 }

@@ -3,10 +3,6 @@ import useUnitFilters from "./container/filter.hooks";
 import { useUnits } from "./container/unit-query.hooks";
 import UnitsViewLayout from "./layouts/units-view.layout";
 
-export function clientLoader() {
-  return { title: "Đơn vị tính - NOVA" };
-}
-
 export default function Units() {
   const { refetch } = useUnits();
   const { filters, updateFilter, resetFilters } = useUnitFilters();

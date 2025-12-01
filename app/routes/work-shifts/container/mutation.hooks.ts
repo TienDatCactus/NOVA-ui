@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { WorkShiftService } from "~/services/api/work-shift";
 import type {
   CreateWorkShiftRequest,
@@ -14,6 +15,7 @@ export function useCreateWorkShift() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work-shifts"] });
+      toast.success("Tạo ca làm việc thành công");
     },
   });
 }
@@ -27,6 +29,7 @@ export function useDeleteWorkShift() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work-shifts"] });
+      toast.success("Xóa ca làm việc thành công");
     },
   });
 }
@@ -43,6 +46,7 @@ export function useUpdateWorkShift() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work-shifts"] });
+      toast.success("Cập nhật ca làm việc thành công");
     },
   });
 }

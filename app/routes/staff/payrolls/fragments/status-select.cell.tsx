@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { Loader2, Lock, Unlock } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -6,8 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { cn } from "~/lib/utils";
 import { useLockPayroll, useUnlockPayroll } from "../container/query.hooks";
 
 interface StatusSelectCellProps {
@@ -21,30 +21,34 @@ export default function StatusSelectCell({
   locked,
   onSuccess,
 }: StatusSelectCellProps) {
+  // Local state for optimistic UI updates
   const [currentStatus, setCurrentStatus] = useState(locked);
+
+  // Sync local state if parent prop changes (e.g. after refetch)
   useEffect(() => {
     setCurrentStatus(locked);
-  }, [locked, payrollId]);
+  }, [locked]);
 
   const { mutate: lockPayroll, isPending: isLocking } = useLockPayroll();
   const { mutate: unlockPayroll, isPending: isUnlocking } = useUnlockPayroll();
 
   const handleStatusChange = (value: string) => {
-    if (value === "locked") {
-      lockPayroll(payrollId, {
-        onSuccess: () => {
-          setCurrentStatus(true);
-          onSuccess?.();
-        },
-      });
-    } else {
-      unlockPayroll(payrollId, {
-        onSuccess: () => {
-          setCurrentStatus(false);
-          onSuccess?.();
-        },
-      });
-    }
+    const isLockingAction = value === "locked";
+
+    // Optimistic update
+    setCurrentStatus(isLockingAction);
+
+    const mutationFn = isLockingAction ? lockPayroll : unlockPayroll;
+
+    mutationFn(payrollId, {
+      onSuccess: () => {
+        onSuccess?.();
+      },
+      onError: () => {
+        // Revert on error
+        setCurrentStatus(!isLockingAction);
+      },
+    });
   };
 
   const isLoading = isLocking || isUnlocking;
@@ -57,11 +61,12 @@ export default function StatusSelectCell({
         disabled={isLoading}
       >
         <SelectTrigger
-          className={`w-[120px] h-8 text-xs ${
+          className={cn(
+            "h-8 w-[130px] text-xs font-medium transition-colors duration-200",
             currentStatus
-              ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-              : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700"
-          }`}
+              ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 hover:border-primary/30"
+              : "bg-muted text-muted-foreground border-transparent hover:bg-muted/80 hover:text-foreground"
+          )}
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
@@ -72,17 +77,17 @@ export default function StatusSelectCell({
             <SelectValue />
           )}
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="end">
           <SelectItem value="unlocked" className="text-xs">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-gray-500" />
-              <span>Tạm tính</span>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Unlock className="h-3.5 w-3.5" />
+              <span>Tạm tính (Mở)</span>
             </div>
           </SelectItem>
           <SelectItem value="locked" className="text-xs">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500" />
-              <span>Đã khóa</span>
+            <div className="flex items-center gap-2 text-primary font-medium">
+              <Lock className="h-3.5 w-3.5" />
+              <span>Đã chốt (Khóa)</span>
             </div>
           </SelectItem>
         </SelectContent>

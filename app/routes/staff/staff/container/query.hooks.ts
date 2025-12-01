@@ -77,6 +77,7 @@ export function useUpdateStaff() {
         queryKey: ["staff", variables.id],
         refetchType: "active",
       });
+      toast.success("Cập nhật nhân sự thành công");
     },
   });
 }
@@ -94,6 +95,7 @@ export function useDeleteStaff() {
         queryKey: ["staffs"],
         refetchType: "active",
       });
+      toast.success("Xóa nhân sự thành công");
     },
   });
 }
