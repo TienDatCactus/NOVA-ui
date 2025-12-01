@@ -1,5 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Power } from "lucide-react";
+import {
+  Box,
+  CircleDollarSign,
+  FileText,
+  Layers,
+  Power,
+  Tag,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
@@ -34,10 +41,8 @@ import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { ServiceSchema } from "~/services/api/services/service.schema";
 import { useServiceTypes } from "../container/service-types/query.hooks";
 import { useCreateService } from "../container/services/mutation.hooks";
-import {} from "~/lib/utils";
 
 const { CreateServiceItemRequestSchema } = ServiceSchema;
-
 type CreateServiceFormData = z.infer<typeof CreateServiceItemRequestSchema>;
 
 interface CreateServiceDialogProps {
@@ -49,7 +54,7 @@ export default function CreateServiceDialog({
   open,
   onClose,
 }: CreateServiceDialogProps) {
-  const form = useForm({
+  const form = useForm<CreateServiceFormData>({
     resolver: zodResolver(CreateServiceItemRequestSchema),
     defaultValues: {
       code: "",
@@ -58,7 +63,7 @@ export default function CreateServiceDialog({
       serviceTypeId: "",
       unitId: "",
       basePrice: 0,
-      active: true,
+      active: false,
     },
   });
 
@@ -67,8 +72,11 @@ export default function CreateServiceDialog({
   const { data: servicesTypesData } = useServiceTypes();
 
   const handleSubmit = (data: CreateServiceFormData) => {
-    mutate(data);
-    handleClose();
+    mutate(data, {
+      onSuccess: () => {
+        handleClose();
+      },
+    });
   };
 
   const handleClose = () => {
@@ -78,28 +86,34 @@ export default function CreateServiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] flex flex-col gap-0 p-0">
-        <DialogHeader className="p-6 pb-4 border-b">
-          <DialogTitle>Thêm dịch vụ mới</DialogTitle>
-          <DialogDescription>
-            Điền thông tin chi tiết cho dịch vụ mới. Tất cả các trường đánh dấu
-            * đều bắt buộc.
-          </DialogDescription>
+      <DialogContent className="sm:max-w-[700px] gap-0 p-0 overflow-hidden">
+        {/* Header */}
+        <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+          <div>
+            <DialogTitle className="text-xl">Thêm dịch vụ mới</DialogTitle>
+            <DialogDescription className="mt-1">
+              Thiết lập thông tin cơ bản cho dịch vụ hoặc sản phẩm mới.
+            </DialogDescription>
+          </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        {/* Body */}
+        <div className="p-6 max-h-[75vh] overflow-y-auto">
           <Form {...form}>
             <form
+              id="create-service-form"
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-4"
+              className="space-y-6"
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Group 1: Classification */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="serviceTypeId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
+                      <FormLabel className="flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-muted-foreground" />
                         Loại dịch vụ <span className="text-destructive">*</span>
                       </FormLabel>
                       <Select
@@ -107,18 +121,16 @@ export default function CreateServiceDialog({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-40">
-                            <SelectValue placeholder="Chọn loại dịch vụ" />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn nhóm dịch vụ" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {!!servicesTypesData &&
-                            servicesTypesData.length > 0 &&
-                            servicesTypesData?.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
-                                {type.name}
-                              </SelectItem>
-                            ))}
+                          {servicesTypesData?.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -131,29 +143,14 @@ export default function CreateServiceDialog({
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
+                      <FormLabel className="flex items-center gap-1.5">
+                        <Tag className="w-3.5 h-3.5 text-muted-foreground" />
                         Mã dịch vụ <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="VD: SPA001, FOOD001" {...field} />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Tên dịch vụ <span className="text-destructive">*</span>
-                      </FormLabel>
-                      <FormControl>
                         <Input
-                          placeholder="VD: Massage body, Bữa sáng buffet"
+                          placeholder="VD: SVC-001"
+                          className="font-mono"
                           {...field}
                         />
                       </FormControl>
@@ -163,7 +160,28 @@ export default function CreateServiceDialog({
                 />
               </div>
 
-              <div className="flex justify-evenly ">
+              {/* Group 2: Basic Info */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tên hiển thị <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="VD: Massage Thụy Điển 60p"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Group 3: Pricing & Unit */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="unitId"
@@ -177,7 +195,7 @@ export default function CreateServiceDialog({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-40">
+                          <SelectTrigger>
                             <SelectValue placeholder="Chọn đơn vị" />
                           </SelectTrigger>
                         </FormControl>
@@ -199,36 +217,49 @@ export default function CreateServiceDialog({
                   name="basePrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Đơn giá (VNĐ){" "}
+                      <FormLabel className="flex items-center gap-1.5">
+                        <CircleDollarSign className="w-3.5 h-3.5 text-muted-foreground" />
+                        Đơn giá niêm yết{" "}
                         <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            className="pr-12 text-right font-mono"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                            <span className="text-xs text-muted-foreground font-medium">
+                              VNĐ
+                            </span>
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+
+              {/* Description */}
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mô tả</FormLabel>
+                    <FormLabel className="flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                      Mô tả
+                    </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Mô tả chi tiết về dịch vụ..."
-                        className="resize-none"
-                        rows={3}
+                        placeholder="Thông tin chi tiết về dịch vụ..."
+                        className="resize-none min-h-[80px]"
                         {...field}
                       />
                     </FormControl>
@@ -237,29 +268,28 @@ export default function CreateServiceDialog({
                 )}
               />
 
+              {/* Status Switch (Card Style) */}
               <FormField
                 control={form.control}
                 name="active"
                 render={({ field }) => (
-                  <FormItem className=" has-data-[state=checked]:border-primary/50 relative flex w-full items-start gap-2 rounded-md border-2 border-dashed p-4 shadow-xs outline-none">
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm bg-card">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base flex items-center gap-2">
+                        <Power className="w-4 h-4 text-primary" />
+                        Kích hoạt ngay
+                      </FormLabel>
+                      <FormDescription>
+                        Dịch vụ sẽ xuất hiện trong menu bán hàng ngay khi tạo
+                        xong.
+                      </FormDescription>
+                    </div>
                     <FormControl>
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="order-1 h-4 w-6 after:absolute after:inset-0 [&_span]:size-3 data-[state=checked]:[&_span]:translate-x-2.5 data-[state=checked]:[&_span]:rtl:-translate-x-2.5"
                       />
                     </FormControl>
-                    <div className="flex grow items-center gap-3">
-                      <Power />
-                      <div className="grid grow gap-2">
-                        <FormLabel className="text-base">
-                          Trạng thái hoạt động
-                        </FormLabel>
-                        <FormDescription>
-                          Bật để dịch vụ có thể được sử dụng ngay
-                        </FormDescription>
-                      </div>
-                    </div>
                   </FormItem>
                 )}
               />
@@ -267,22 +297,26 @@ export default function CreateServiceDialog({
           </Form>
         </div>
 
-        <DialogFooter className="p-6 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClose}
-            disabled={isPending}
-          >
-            Hủy
-          </Button>
-          <Button
-            type="submit"
-            onClick={form.handleSubmit(handleSubmit)}
-            disabled={isPending}
-          >
-            {isPending ? "Đang thêm..." : "Thêm dịch vụ"}
-          </Button>
+        {/* Footer */}
+        <DialogFooter className="px-6 py-4 bg-muted/10 border-t">
+          <div className="flex justify-end gap-2 w-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isPending}
+            >
+              Đóng
+            </Button>
+            <Button
+              type="submit"
+              onClick={form.handleSubmit(handleSubmit)}
+              disabled={isPending}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {isPending ? "Đang xử lý..." : "Tạo dịch vụ"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -135,8 +135,7 @@ http.interceptors.response.use(
         isRefreshing = false;
       }
     } else if (status && status !== 401) {
-      // Only show error toast for non-401 errors (401 is handled above)
-      toast.error(message || "Đã có lỗi xảy ra. Vui lòng thử lại.");
+      toast.error("Đã có lỗi xảy ra. Vui lòng thử lại.");
     }
 
     return Promise.reject(error);

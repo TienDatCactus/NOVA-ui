@@ -137,10 +137,7 @@ export default function CreateServiceTypeDialog({
         {/* === HEADER === */}
         <DialogHeader className="px-6 py-4 border-b shrink-0 flex flex-row items-start justify-between space-y-0">
           <div className="space-y-1">
-            <DialogTitle className="text-xl flex items-center gap-2">
-              <Layers className="w-5 h-5 text-primary" />
-              Thêm loại dịch vụ
-            </DialogTitle>
+            <DialogTitle className="text-xl">Thêm loại dịch vụ</DialogTitle>
             <DialogDescription>
               Định nghĩa nhóm dịch vụ mới (Spa, F&B, Tour...).
             </DialogDescription>

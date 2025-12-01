@@ -1,77 +1,133 @@
+import { format } from "date-fns";
+import { BookingSchema } from "./booking.schema";
 import type { UpdateBookingRoomRequestDto } from "./dto";
 
-/**
- * Helper utilities for UpdateBookingRequestDto room operations
- *
- * Three operation types:
- * 1. ADD: Add a new room to the booking
- * 2. CHANGE: Swap an existing room to a different room
- * 3. REMOVE: Remove a room from the booking
- */
+const { UpdateBookingRoomRequestSchema } = BookingSchema;
 
 /**
- * CREATE ADD OPERATION ➕
- * Add a new room to the booking
- *
- * @example
- * const addRoomOp = createAddRoomOperation(
- *   "room-301-id",
- *   "2025-01-10",
- *   "2025-01-15"
- * );
- * // { action: "Add", bookingRoomId: null, roomId: "room-301-id", fromDate: "2025-01-10", toDate: "2025-01-15" }
+ * Creates a validated "Add" room operation
+ * @throws Error if validation fails
  */
 export function createAddRoomOperation(
   roomId: string,
-  fromDate: string,
-  toDate: string
+  fromDate: string | Date,
+  toDate: string | Date
 ): UpdateBookingRoomRequestDto {
-  return {
-    action: "Add",
+  // Validate inputs
+  if (!roomId || (typeof roomId === "string" && roomId.trim() === "")) {
+    throw new Error("Room ID không hợp lệ");
+  }
+
+  if (!fromDate || !toDate) {
+    throw new Error("Ngày checkin/checkout không được để trống");
+  }
+
+  // Normalize dates to yyyy-MM-dd format
+  let from: string;
+  let to: string;
+
+  try {
+    from = fromDate instanceof Date ? format(fromDate, "yyyy-MM-dd") : fromDate;
+    to = toDate instanceof Date ? format(toDate, "yyyy-MM-dd") : toDate;
+
+    // Validate date format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) {
+      throw new Error(`Ngày checkin không đúng format yyyy-MM-dd: ${from}`);
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(to)) {
+      throw new Error(`Ngày checkout không đúng format yyyy-MM-dd: ${to}`);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("format")) {
+      throw error;
+    }
+    throw new Error(
+      `Lỗi định dạng ngày: ${error instanceof Error ? error.message : "Unknown"}`
+    );
+  }
+
+  const operation = {
+    action: "Add" as const,
     bookingRoomId: null,
-    roomId,
-    fromDate,
-    toDate,
+    roomId: roomId.trim(),
+    fromDate: from,
+    toDate: to,
   };
+
+  // Validate before returning
+  const result = UpdateBookingRoomRequestSchema.safeParse(operation);
+
+  if (!result.success) {
+    const errorMessages = result.error.issues
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join(", ");
+    throw new Error(`Dữ liệu phòng không hợp lệ: ${errorMessages}`);
+  }
+
+  return result.data;
 }
 
 /**
- * CREATE CHANGE OPERATION 🔄
- * Swap an existing room to a different room (keeps same dates)
- *
- * @example
- * const changeRoomOp = createChangeRoomOperation(
- *   "booking-room-101-id",
- *   "room-102-id"
- * );
- * // { action: "Change", bookingRoomId: "booking-room-101-id", newRoomId: "room-102-id" }
+ * Creates a validated "Change" room operation
+ * @throws Error if validation fails
  */
 export function createChangeRoomOperation(
   bookingRoomId: string,
-  newRoomId: string
+  newRoomId: string,
+  fromDate?: string | Date,
+  toDate?: string | Date
 ): UpdateBookingRoomRequestDto {
-  return {
-    action: "Change",
+  const operation: UpdateBookingRoomRequestDto = {
+    action: "Change" as const,
     bookingRoomId,
     newRoomId,
   };
+
+  // Add optional dates if provided
+  if (fromDate) {
+    operation.fromDate =
+      fromDate instanceof Date ? format(fromDate, "yyyy-MM-dd") : fromDate;
+  }
+  if (toDate) {
+    operation.toDate =
+      toDate instanceof Date ? format(toDate, "yyyy-MM-dd") : toDate;
+  }
+
+  const result = UpdateBookingRoomRequestSchema.safeParse(operation);
+
+  if (!result.success) {
+    const errorMessages = result.error.issues
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join(", ");
+    throw new Error(`Dữ liệu đổi phòng không hợp lệ: ${errorMessages}`);
+  }
+
+  return result.data;
 }
 
 /**
- * CREATE REMOVE OPERATION ❌
- * Remove a room from the booking
- *
- * @example
- * const removeRoomOp = createRemoveRoomOperation("booking-room-201-id");
- * // { action: "Remove", bookingRoomId: "booking-room-201-id" }
+ * Creates a validated "Remove" room operation
+ * @throws Error if validation fails
  */
 export function createRemoveRoomOperation(
   bookingRoomId: string
 ): UpdateBookingRoomRequestDto {
-  return {
-    action: "Remove",
+  const operation = {
+    action: "Remove" as const,
     bookingRoomId,
   };
+
+  const result = UpdateBookingRoomRequestSchema.safeParse(operation);
+
+  if (!result.success) {
+    const errorMessages = result.error.issues
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join(", ");
+    throw new Error(`Dữ liệu xóa phòng không hợp lệ: ${errorMessages}`);
+  }
+
+  return result.data;
 }
 
 /**

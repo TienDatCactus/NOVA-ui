@@ -43,7 +43,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
-import { formatMoney, toYMD, useCalculateNights } from "~/lib/utils";
+import { formatMoney, onError, toYMD, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
@@ -139,26 +139,80 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   // --- Effects ---
   useEffect(() => {
     if (bookingDetail && bookingDetail.id) {
-      form.reset({
-        checkinDate: bookingDetail.checkinDate,
-        checkoutDate: bookingDetail.checkoutDate,
-        adultsAmount: bookingDetail.adults,
-        childrenAmount: bookingDetail.children || 0,
-        note: bookingDetail.note || "",
-        otaBookingCode: bookingDetail.source === "OTA" ? "" : "",
-        otaInformationId: bookingDetail.source === "OTA" ? "" : "",
-        customerId: bookingDetail.customer.id,
-        totalAmount: bookingDetail.totalAmount || 0,
-        breakfastDates:
-          bookingDetail.breakfastDates?.map((date) => {
-            return { date: date };
-          }) || [],
-        rooms: bookingDetail.rooms || [],
-      });
+      const currentRooms = form.getValues("rooms") || [];
+      const hasPendingRoomChanges = currentRooms.some(
+        (room) =>
+          room.action === "Add" ||
+          room.action === "Remove" ||
+          room.action === "Change"
+      );
+
+      form.reset(
+        {
+          checkinDate: bookingDetail.checkinDate,
+          checkoutDate: bookingDetail.checkoutDate,
+          adultsAmount: bookingDetail.adults,
+          childrenAmount: bookingDetail.children || 0,
+          note: bookingDetail.note || "",
+          otaBookingCode: bookingDetail.source === "OTA" ? "" : "",
+          otaInformationId: bookingDetail.source === "OTA" ? "" : "",
+          customerId: bookingDetail.customer.id,
+          totalAmount: bookingDetail.totalAmount || 0,
+          breakfastDates:
+            bookingDetail.breakfastDates?.map((date) => {
+              return { date: date };
+            }) || [],
+          rooms: hasPendingRoomChanges ? currentRooms : [],
+        },
+        {
+          keepDirty: true, // ✅ Preserve dirty state
+          keepValues: false, // We're providing new values explicitly
+        }
+      );
     }
-  }, [bookingDetail]);
+  }, [bookingDetail?.id]); // ✅ Only re-run when ID changes, not whole object
 
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
+    console.log("=== FORM SUBMISSION DEBUG ===");
+    console.log("Raw form data:", data);
+    console.log("Rooms array:", data.rooms);
+
+    // Re-validate rooms before submit to catch any transformation issues
+    if (data.rooms && data.rooms.length > 0) {
+      try {
+        data.rooms.forEach((room, idx) => {
+          console.log(`Room operation ${idx}:`, {
+            action: room.action,
+            actionType: typeof room.action,
+            bookingRoomId: room.bookingRoomId,
+            roomId: room.roomId,
+            newRoomId: room.newRoomId,
+            fromDate: room.fromDate,
+            toDate: room.toDate,
+          });
+
+          // Validate each room operation
+          const result =
+            BookingSchema.UpdateBookingRoomRequestSchema.safeParse(room);
+
+          if (!result.success) {
+            console.error("Invalid room operation:", room, result.error);
+            const errorMsg = result.error.issues
+              .map((e) => `${e.path.join(".")}: ${e.message}`)
+              .join(", ");
+            throw new Error(
+              `Phòng ${room.roomId || room.bookingRoomId || "unknown"} không hợp lệ: ${errorMsg}`
+            );
+          }
+        });
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Dữ liệu phòng không hợp lệ"
+        );
+        return; // Stop submission
+      }
+    }
+
     const hasDatesChanged =
       data.checkinDate !== bookingDetail?.checkinDate ||
       data.checkoutDate !== bookingDetail?.checkoutDate;
@@ -199,7 +253,48 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       rooms: data.rooms,
     };
 
-    updateBooking(payload, {});
+    console.log("Payload to send:", JSON.stringify(payload, null, 2));
+
+    updateBooking(payload, {
+      onError: (error: any) => {
+        console.error("=== UPDATE BOOKING ERROR ===");
+        console.error("Error object:", error);
+
+        // ✅ Handle Zod validation errors
+        if (error.response?.data?.errors) {
+          const validationErrors = error.response.data.errors;
+          console.error("Validation errors from API:", validationErrors);
+
+          // Display each validation error
+          Object.entries(validationErrors).forEach(([field, messages]) => {
+            if (Array.isArray(messages)) {
+              messages.forEach((msg) => {
+                toast.error(`${field}: ${msg}`);
+              });
+            } else {
+              toast.error(`${field}: ${messages}`);
+            }
+          });
+        }
+
+        // ✅ Handle form validation errors
+        if (error.errors) {
+          console.error("Form validation errors:", error.errors);
+          error.errors.forEach((err: any) => {
+            const fieldPath = err.path?.join(".") || "unknown";
+            toast.error(`${fieldPath}: ${err.message}`);
+          });
+        }
+
+        // ✅ Generic error message
+        if (!error.response?.data?.errors && !error.errors) {
+          toast.error(error.message || "Cập nhật booking thất bại");
+        }
+      },
+      onSuccess: () => {
+        toast.success("Cập nhật booking thành công");
+      },
+    });
   };
 
   const handleAddCompletedCharges = (data: any) => {
@@ -356,7 +451,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         bookingDetail={bookingDetail}
         financialSummary={financialSummary}
         onReset={() => form.reset()}
-        onSave={form.handleSubmit(handleSubmit)}
+        onSave={form.handleSubmit(handleSubmit, onError)}
         onCheckout={() => setCheckoutOpen(true)}
       />
 
