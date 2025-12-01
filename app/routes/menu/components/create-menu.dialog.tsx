@@ -82,7 +82,19 @@ export default function CreateMenuDialog({
   };
 
   const handleSubmit = (data: CreateMenuFormData) => {
+    console.log(data.Components.length);
+    if (data.Components.length <= 0) {
+      onError("Vui lòng thêm định lượng cho món ăn.");
+      setActiveTab("components");
+      return;
+    }
     createMenuItem(data, { onSuccess: handleClose });
+  };
+
+  const handleError = (errors: any) => {
+    if (errors.Components) {
+      setActiveTab("components");
+    }
   };
 
   const handleClose = () => {
@@ -107,7 +119,7 @@ export default function CreateMenuDialog({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit, onError)}
+            onSubmit={form.handleSubmit(handleSubmit, handleError)}
             className="flex flex-col "
           >
             <Tabs

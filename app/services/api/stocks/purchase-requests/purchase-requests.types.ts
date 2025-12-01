@@ -13,10 +13,6 @@ export const PURCHASE_REQUESTS_STATUS = [
     value: "Draft",
   },
   {
-    label: "Chờ duyệt",
-    value: "PendingApproval",
-  },
-  {
     label: "Đã duyệt",
     value: "Approved",
   },

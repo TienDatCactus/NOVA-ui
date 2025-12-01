@@ -17,6 +17,7 @@ export function useCreateMenuCategory() {
       await MenuCategoryService.createMenuCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-category-list"] });
+      toast.success("Tạo danh mục thực đơn thành công");
     },
   });
 }
@@ -36,6 +37,7 @@ export function useUpdateMenuCategory(categoryId: string) {
       queryClient.invalidateQueries({
         queryKey: ["menu-category-detail", categoryId],
       });
+      toast.success("Cập nhật danh mục thực đơn thành công");
     },
   });
 }
@@ -51,6 +53,7 @@ export function useDeleteMenuCategory() {
       await MenuCategoryService.deleteMenuCategory(categoryId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-category-list"] });
+      toast.success("Xóa danh mục thực đơn thành công");
     },
   });
 }

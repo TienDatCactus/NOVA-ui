@@ -9,7 +9,7 @@ export function useMenuList(
   return useQuery({
     queryKey: ["menu-list", params],
     queryFn: async () => await MenuService.getMenuList(params ?? {}),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 0, // 2 minutes
     enabled: options?.enabled,
   });
 }

@@ -43,7 +43,7 @@ export default function ConfigsPage() {
               </Empty>
             </div>
           ) : (
-            <div className=" animate-in slide-in-from-bottom-2 duration-500">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {configData?.map((module: any) => (
                 <ModuleCard key={module.module} module={module} />
               ))}
@@ -55,8 +55,6 @@ export default function ConfigsPage() {
   );
 }
 
-// === INTERNAL COMPONENT: SKELETON ===
-// Tailored to look exactly like the ModuleCard -> GroupSection structure
 function ConfigsSkeleton() {
   return (
     <div className="space-y-8">

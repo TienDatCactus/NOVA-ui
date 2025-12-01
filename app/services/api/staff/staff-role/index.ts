@@ -79,7 +79,8 @@ async function updateStaffRole(
  */
 async function deleteStaffRole(id: string): Promise<void> {
   try {
-    await http.delete(StaffRole.delete(id));
+    const resp = await http.delete(StaffRole.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

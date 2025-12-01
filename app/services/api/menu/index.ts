@@ -159,7 +159,8 @@ async function updateMenuItem(
  */
 async function deleteMenuItem(itemId: string): Promise<void> {
   try {
-    await http.delete(Menu.delete(itemId));
+    const resp = await http.delete(Menu.delete(itemId));
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }

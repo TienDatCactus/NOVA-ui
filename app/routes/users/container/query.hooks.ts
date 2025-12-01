@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { UserService } from "~/services/api/user";
 import type { UserListParams } from "~/services/api/user/user.types";
 import type {
@@ -66,6 +67,7 @@ export function useCreateUser() {
         queryKey: ["users"],
         refetchType: "active",
       });
+      toast.success("Tạo người dùng thành công");
     },
   });
 }
@@ -86,6 +88,7 @@ export function useUpdateUser() {
         queryKey: ["users", variables.id],
         refetchType: "active",
       });
+      toast.success("Cập nhật người dùng thành công");
     },
   });
 }
@@ -105,6 +108,7 @@ export function useLockUser() {
         queryKey: ["users", variables.id],
         refetchType: "active",
       });
+      toast.success("Khóa người dùng thành công");
     },
   });
 }
@@ -123,6 +127,7 @@ export function useUnlockUser() {
         queryKey: ["users", id],
         refetchType: "active",
       });
+      toast.success("Mở khóa người dùng thành công");
     },
   });
 }
@@ -142,6 +147,7 @@ export function useAssignRoles() {
         queryKey: ["users", variables.id],
         refetchType: "active",
       });
+      toast.success("Gán quyền thành công");
     },
   });
 }
@@ -161,6 +167,7 @@ export function useRemoveRoles() {
         queryKey: ["users", variables.id],
         refetchType: "active",
       });
+      toast.success("Xóa quyền thành công");
     },
   });
 }
@@ -177,6 +184,7 @@ export function useChangePassword() {
         queryKey: ["users", variables.id],
         refetchType: "active",
       });
+      toast.success("Đổi mật khẩu thành công");
     },
   });
 }

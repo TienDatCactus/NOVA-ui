@@ -2,10 +2,6 @@ import { Button } from "~/components/ui/button";
 import type { Route } from "./+types/not-found";
 import { useNavigate } from "react-router";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

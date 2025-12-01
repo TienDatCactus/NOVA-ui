@@ -57,14 +57,12 @@ export default function ActionsMenuCell({
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
         workShift={workShift}
-        onSuccess={() => onSuccess?.()}
       />
 
       <DeleteWorkShiftDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         workShift={workShift}
-        onSuccess={() => onSuccess?.()}
       />
     </>
   );

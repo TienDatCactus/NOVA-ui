@@ -1,6 +1,6 @@
 import http from "~/lib/http";
 import { Configs } from "~/services/url";
-import { ConfigSchema } from "./configs.schem";
+import { ConfigSchema } from "./configs.schema";
 import type {
   ConfigListResponse,
   GroupedConfigListResponse,
@@ -71,7 +71,8 @@ async function updateConfig(
 
 async function deleteConfig(key: string): Promise<void> {
   try {
-    await http.delete(Configs.delete(key));
+    const resp = await http.delete(Configs.delete(key));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

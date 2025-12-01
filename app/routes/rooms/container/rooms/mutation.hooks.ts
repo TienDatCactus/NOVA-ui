@@ -19,6 +19,7 @@ function useCreateRoom() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      toast.success("Tạo phòng thành công");
     },
   });
 }
@@ -36,6 +37,7 @@ function useUpdateRoom() {
     }) => await RoomsService.updateRoomDetail(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      toast.success("Cập nhật phòng thành công");
     },
   });
 }
@@ -48,6 +50,7 @@ function useUpdateRoomStatus() {
       await RoomsService.updateRoomStatus(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      toast.success("Cập nhật trạng thái phòng thành công");
     },
   });
 }
@@ -59,6 +62,7 @@ function useDeleteRoom() {
     mutationFn: async (id: string) => await RoomsService.deleteRoom(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      toast.success("Xóa phòng thành công");
     },
   });
 }
@@ -73,6 +77,7 @@ function useRegenerateRoomQRCode() {
       queryClient.invalidateQueries({
         queryKey: ["room-qr-code", variables.roomId],
       });
+      toast.success("Tạo lại mã QR thành công");
     },
   });
 }

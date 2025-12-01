@@ -3,6 +3,7 @@ import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   AlertCircle,
+  ArrowRight,
   Banknote,
   CalendarClock,
   CheckCircle2,
@@ -10,28 +11,26 @@ import {
   FileText,
   Hash,
   Loader2,
-  Utensils,
+  Receipt,
   Sparkles,
+  Utensils,
   XCircle,
-  ArrowRight,
 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
-import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -44,10 +43,10 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
+import { Switch } from "~/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -56,9 +55,9 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { cn, formatMoney } from "~/lib/utils";
 
+import { useCalculateInvoiceFees } from "~/routes/reservation/booking-detail/container/use-booking-checkout.hooks";
 import type { POSOrderItemDto } from "~/services/api/orders/dto";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
@@ -94,23 +93,33 @@ export default function PaymentOrderSheet({
     useServiceOrderDetail(orderId, {
       enabled: orderType === "service" && open,
     });
-
   const isPending = orderType === "menu" ? isPendingPOS : isPendingService;
 
-  // --- Data Normalization ---
+  const [applyVat, setApplyVat] = useState(true);
+  const [applyServiceCharge, setApplyServiceCharge] = useState(true);
+
   const orderDetail =
     orderType === "menu" ? posOrderDetail : serviceOrderDetail;
 
-  const totalAmount =
-    orderType === "menu"
-      ? posOrderDetail?.totalAmount || 0
-      : serviceOrderDetail?.total || 0;
-
   const subTotal =
     orderType === "menu"
-      ? posOrderDetail?.subtotalAmount || 0
+      ? posOrderDetail?.totalAmount || 0
       : (serviceOrderDetail?.unitPrice || 0) *
         (serviceOrderDetail?.quantity || 0);
+
+  const { data: calculatedFees, isPending: isCalculatingFees } =
+    useCalculateInvoiceFees(
+      {
+        subtotalAmount: subTotal,
+        applyVat,
+        applyServiceCharge,
+      },
+      open && subTotal > 0
+    );
+
+  const displayVatAmount = calculatedFees?.vatAmount ?? 0;
+  const displayServiceChargeAmount = calculatedFees?.serviceChargeAmount ?? 0;
+  const displayTotalAmount = calculatedFees?.totalAmount ?? subTotal;
 
   // --- Form Setup ---
   const paymentForm = useForm<PaymentFormData>({
@@ -118,24 +127,28 @@ export default function PaymentOrderSheet({
     mode: "onChange",
     defaultValues: {
       paymentMethod: "Cash",
-      paidAmount: totalAmount,
+      paidAmount: displayTotalAmount,
       transactionReference: "",
     },
   });
 
-  // --- Effects & Logic ---
   const paidAmount = paymentForm.watch("paidAmount");
+
+  // Real-time Change Calculation
   const changeAmount = useMemo(() => {
-    return paidAmount > totalAmount ? paidAmount - totalAmount : 0;
-  }, [paidAmount, totalAmount]);
+    return paidAmount > displayTotalAmount
+      ? paidAmount - displayTotalAmount
+      : 0;
+  }, [paidAmount, displayTotalAmount]);
 
-  const isPaymentValid = paidAmount >= totalAmount;
+  const isPaymentValid = paidAmount >= displayTotalAmount;
 
+  // Auto-fill amount when total changes
   useEffect(() => {
-    if (totalAmount > 0 && open) {
-      paymentForm.setValue("paidAmount", totalAmount);
+    if (displayTotalAmount > 0 && open) {
+      paymentForm.setValue("paidAmount", displayTotalAmount);
     }
-  }, [totalAmount, paymentForm, open]);
+  }, [displayTotalAmount, paymentForm, open]);
 
   const handleSubmit = (data: PaymentFormData) => {
     if (!isPaymentValid) {
@@ -147,18 +160,17 @@ export default function PaymentOrderSheet({
     onPayNow(data);
   };
 
-  // --- Render Helpers ---
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Completed":
         return (
-          <Badge className="bg-green-600 hover:bg-green-700">
+          <Badge className="bg-green-600 hover:bg-green-700 h-6">
             <CheckCircle2 className="w-3 h-3 mr-1" /> Hoàn thành
           </Badge>
         );
       case "Cancelled":
         return (
-          <Badge variant="destructive">
+          <Badge variant="destructive" className="h-6">
             <XCircle className="w-3 h-3 mr-1" /> Đã hủy
           </Badge>
         );
@@ -167,13 +179,17 @@ export default function PaymentOrderSheet({
         return (
           <Badge
             variant="secondary"
-            className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+            className="bg-blue-100 text-blue-700 hover:bg-blue-200 h-6"
           >
             <CalendarClock className="w-3 h-3 mr-1" /> Đang xử lý
           </Badge>
         );
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return (
+          <Badge variant="outline" className="h-6">
+            {status}
+          </Badge>
+        );
     }
   };
 
@@ -181,47 +197,45 @@ export default function PaymentOrderSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[90vw] lg:max-w-[1100px] p-0 flex flex-col bg-background"
+        className="w-full sm:max-w-[95vw] lg:max-w-[1200px] p-0 flex flex-col bg-background border-l shadow-2xl"
       >
         {/* === HEADER === */}
-        <SheetHeader className="px-8 py-6 border-b shrink-0 flex flex-row items-center justify-between space-y-0">
-          <div className="space-y-1">
-            <SheetTitle className="text-2xl font-light flex items-center gap-3">
-              {orderType === "menu" ? (
-                <Utensils className="w-6 h-6 stroke-[1.5]" />
-              ) : (
-                <Sparkles className="w-6 h-6 stroke-[1.5]" />
-              )}
-              Thanh toán {orderType === "menu" ? "Đơn hàng" : "Dịch vụ"}
+        <SheetHeader className="px-8 py-5 border-b shrink-0 flex flex-row items-center justify-between space-y-0 bg-background z-10">
+          <div>
+            <SheetTitle className="text-xl font-bold tracking-tight">
+              Thanh toán {orderType === "menu" ? "Đơn hàng F&B" : "Dịch vụ"}
             </SheetTitle>
-            <SheetDescription className="flex items-center gap-2 text-xs uppercase tracking-wide font-medium">
-              <span className="font-mono bg-muted px-1.5 rounded border">
+            <SheetDescription className="flex items-center gap-2 text-xs">
+              <span className="font-mono font-medium text-foreground bg-muted px-1.5 py-0.5 rounded">
                 #{orderId.slice(0, 8).toUpperCase()}
               </span>
-              <span>•</span>
-              <span>{format(new Date(), " HH:mm dd/MM/yyyy")}</span>
+              <span className="text-muted-foreground">•</span>
+              <span>{format(new Date(), "HH:mm dd/MM/yyyy")}</span>
             </SheetDescription>
           </div>
           {orderDetail && getStatusBadge(orderDetail.status)}
         </SheetHeader>
 
-        {/* === BODY === */}
+        {/* === BODY: SPLIT VIEW === */}
         {isPending ? (
-          <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          <div className="flex-1 flex flex-col items-center justify-center gap-2">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">
+              Đang tải thông tin đơn hàng...
+            </p>
           </div>
         ) : orderDetail ? (
-          <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-            {/* LEFT: DETAILS (READ ONLY) */}
-            <ScrollArea className="flex-1 border-r">
-              <div className="p-8 space-y-8">
-                {/* Order Info Grid */}
-                <div className="grid grid-cols-2 gap-6 text-sm">
-                  <div className="space-y-1">
-                    <span className="text-xs text-muted-foreground font-semibold uppercase flex items-center gap-1.5">
-                      <CalendarClock className="w-3.5 h-3.5" /> Thời gian
+          <div className="flex-1 overflow-hidden flex flex-col lg:flex-row bg-muted/5">
+            {/* LEFT PANE: ORDER DETAILS (READ ONLY) */}
+            <ScrollArea className="flex-1 lg:border-r border-b lg:border-b-0 bg-background">
+              <div className="p-8 space-y-8 max-w-3xl mx-auto lg:mx-0">
+                {/* 1. Meta Info Cards */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl border bg-card/50 flex flex-col gap-1">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider flex items-center gap-1.5">
+                      <CalendarClock className="w-3 h-3" /> Thời gian tạo
                     </span>
-                    <p className="font-medium pl-5">
+                    <span className="font-medium text-sm">
                       {orderDetail.createdAt
                         ? format(
                             parseISO(orderDetail.createdAt),
@@ -229,48 +243,54 @@ export default function PaymentOrderSheet({
                             { locale: vi }
                           )
                         : "N/A"}
-                    </p>
+                    </span>
                   </div>
                   {orderDetail.scheduledAt && (
-                    <div className="space-y-1">
-                      <span className="text-xs text-muted-foreground font-semibold uppercase flex items-center gap-1.5">
-                        <CalendarClock className="w-3.5 h-3.5" /> Lịch hẹn
+                    <div className="p-4 rounded-xl border bg-amber-50/50 border-amber-100 flex flex-col gap-1">
+                      <span className="text-[10px] uppercase font-bold text-amber-700 tracking-wider flex items-center gap-1.5">
+                        <CalendarClock className="w-3 h-3" /> Lịch hẹn
                       </span>
-                      <p className="font-medium pl-5">
+                      <span className="font-medium text-sm text-amber-900">
                         {format(
                           parseISO(orderDetail.scheduledAt),
                           "HH:mm - dd/MM/yyyy",
                           { locale: vi }
                         )}
-                      </p>
+                      </span>
                     </div>
                   )}
                 </div>
 
                 <Separator />
 
-                {/* Items Table */}
+                {/* 2. Items List */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    Chi tiết đơn hàng
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold flex items-center gap-2 text-foreground">
+                      <FileText className="w-4 h-4 text-muted-foreground" />
+                      Chi tiết hạng mục
+                    </h3>
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {orderType === "menu" ? posOrderDetail?.items?.length : 1}{" "}
+                      món
+                    </Badge>
+                  </div>
 
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="rounded-lg border shadow-sm overflow-hidden bg-card">
                     <Table>
-                      <TableHeader>
-                        <TableRow className="hover:bg-transparent bg-muted/5">
-                          <TableHead className="h-10 text-xs font-bold uppercase w-[50%]">
+                      <TableHeader className="bg-muted/30">
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead className="h-9 text-[11px] font-bold uppercase w-[50%]">
                             Hạng mục
                           </TableHead>
-                          <TableHead className="h-10 text-xs font-bold uppercase text-right">
+                          <TableHead className="h-9 text-[11px] font-bold uppercase text-right">
                             Đơn giá
                           </TableHead>
-                          <TableHead className="h-10 text-xs font-bold uppercase text-center">
+                          <TableHead className="h-9 text-[11px] font-bold uppercase text-center">
                             SL
                           </TableHead>
-                          <TableHead className="h-10 text-xs font-bold uppercase text-right">
-                            Tổng
+                          <TableHead className="h-9 text-[11px] font-bold uppercase text-right">
+                            Thành tiền
                           </TableHead>
                         </TableRow>
                       </TableHeader>
@@ -281,10 +301,10 @@ export default function PaymentOrderSheet({
                               key={item.id}
                               className="border-b hover:bg-muted/5"
                             >
-                              <TableCell className="py-3 font-medium">
+                              <TableCell className="py-3 font-medium text-sm">
                                 {item.itemName}
                                 {item.customItemName && (
-                                  <span className="block text-xs text-muted-foreground">
+                                  <span className="block text-xs text-muted-foreground italic mt-0.5">
                                     ({item.customItemName})
                                   </span>
                                 )}
@@ -292,8 +312,8 @@ export default function PaymentOrderSheet({
                               <TableCell className="py-3 text-right font-mono text-xs text-muted-foreground">
                                 {formatMoney(item.unitPrice).vndFormatted}
                               </TableCell>
-                              <TableCell className="py-3 text-center text-xs font-medium">
-                                {item.quantity}
+                              <TableCell className="py-3 text-center text-xs font-medium bg-muted/10">
+                                x{item.quantity}
                               </TableCell>
                               <TableCell className="py-3 text-right font-mono text-sm font-semibold">
                                 {formatMoney(item.subtotal).vndFormatted}
@@ -302,11 +322,11 @@ export default function PaymentOrderSheet({
                           ))
                         ) : serviceOrderDetail ? (
                           <TableRow className="border-b hover:bg-muted/5">
-                            <TableCell className="py-3 font-medium">
+                            <TableCell className="py-3 font-medium text-sm">
                               {serviceOrderDetail.serviceItemName ||
                                 serviceOrderDetail.customServiceName}
-                              <span className="block text-xs text-muted-foreground font-mono">
-                                {serviceOrderDetail.serviceItemCode}
+                              <span className="block text-xs text-muted-foreground font-mono mt-0.5 opacity-70">
+                                Code: {serviceOrderDetail.serviceItemCode}
                               </span>
                             </TableCell>
                             <TableCell className="py-3 text-right font-mono text-xs text-muted-foreground">
@@ -315,8 +335,8 @@ export default function PaymentOrderSheet({
                                   .vndFormatted
                               }
                             </TableCell>
-                            <TableCell className="py-3 text-center text-xs font-medium">
-                              {serviceOrderDetail.quantity}
+                            <TableCell className="py-3 text-center text-xs font-medium bg-muted/10">
+                              x{serviceOrderDetail.quantity}
                             </TableCell>
                             <TableCell className="py-3 text-right font-mono text-sm font-semibold">
                               {formatMoney(subTotal).vndFormatted}
@@ -326,7 +346,7 @@ export default function PaymentOrderSheet({
                           <TableRow>
                             <TableCell
                               colSpan={4}
-                              className="text-center py-8 text-muted-foreground"
+                              className="text-center py-8 text-muted-foreground text-sm"
                             >
                               Không có dữ liệu
                             </TableCell>
@@ -337,199 +357,261 @@ export default function PaymentOrderSheet({
                   </div>
                 </div>
 
-                {/* Note */}
+                {/* 3. Note */}
                 {orderDetail.note && (
-                  <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 text-sm text-amber-900">
-                    <span className="font-bold mr-2">Ghi chú:</span>{" "}
+                  <div className="bg-yellow-50/50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-900">
+                    <span className="font-bold text-xs uppercase tracking-wide text-yellow-700 block mb-1">
+                      Ghi chú
+                    </span>
                     {orderDetail.note}
                   </div>
                 )}
               </div>
             </ScrollArea>
 
-            {/* RIGHT: PAYMENT (ACTIONABLE) */}
-            <div className="w-full lg:w-[420px] bg-muted/5 border-l flex flex-col h-full">
-              <div className="p-8 flex-1 overflow-y-auto">
-                {/* 1. Financial Summary */}
-                <div className="space-y-3 mb-8">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tạm tính</span>
-                    <span className="font-mono">
-                      {formatMoney(subTotal).vndFormatted}
-                    </span>
-                  </div>
+            {/* RIGHT PANE: PAYMENT ACTIONS (FIXED WIDTH) */}
+            <div className="w-full lg:w-[480px] bg-background flex flex-col h-full shadow-[0_0_15px_rgba(0,0,0,0.05)] z-20">
+              {/* Financial Summary */}
+              <div className="p-6 pb-2 space-y-6 flex-1 overflow-y-auto">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold flex items-center gap-2 text-foreground">
+                    <Receipt className="w-4 h-4 text-muted-foreground" />
+                    Tóm tắt thanh toán
+                  </h3>
 
-                  {/* Fees (Conditional Render) */}
-                  {(orderDetail.vatAmount > 0 ||
-                    orderDetail.serviceChargeAmount > 0) && (
-                    <>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">VAT</span>
-                        <span className="font-mono">
-                          {formatMoney(orderDetail.vatAmount || 0).vndFormatted}
+                  <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-dashed">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Tạm tính</span>
+                      <span className="font-mono font-medium">
+                        {formatMoney(subTotal).vndFormatted}
+                      </span>
+                    </div>
+
+                    {/* FEE SWITCHES */}
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            id="apply-vat"
+                            checked={applyVat}
+                            onCheckedChange={setApplyVat}
+                          />
+                          <label
+                            htmlFor="apply-vat"
+                            className="text-sm font-medium cursor-pointer select-none"
+                          >
+                            VAT (8%)
+                          </label>
+                        </div>
+                        <span
+                          className={cn(
+                            "font-mono text-sm",
+                            !applyVat &&
+                              "text-muted-foreground line-through opacity-50"
+                          )}
+                        >
+                          {isCalculatingFees ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            formatMoney(displayVatAmount).vndFormatted
+                          )}
                         </span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Phí dịch vụ
-                        </span>
-                        <span className="font-mono">
-                          {
-                            formatMoney(orderDetail.serviceChargeAmount || 0)
-                              .vndFormatted
-                          }
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            id="apply-service"
+                            checked={applyServiceCharge}
+                            onCheckedChange={setApplyServiceCharge}
+                          />
+                          <label
+                            htmlFor="apply-service"
+                            className="text-sm font-medium cursor-pointer select-none"
+                          >
+                            Phí dịch vụ (5%)
+                          </label>
+                        </div>
+                        <span
+                          className={cn(
+                            "font-mono text-sm",
+                            !applyServiceCharge &&
+                              "text-muted-foreground line-through opacity-50"
+                          )}
+                        >
+                          {isCalculatingFees ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            formatMoney(displayServiceChargeAmount).vndFormatted
+                          )}
                         </span>
                       </div>
-                    </>
-                  )}
+                    </div>
 
-                  <Separator />
+                    <Separator className="bg-border/50" />
 
-                  <div className="flex justify-between items-center pt-2">
-                    <span className="font-semibold text-lg">
-                      Tổng thanh toán
-                    </span>
-                    <span className="font-mono text-2xl font-bold text-primary tracking-tight">
-                      {formatMoney(totalAmount).vndFormatted}
-                    </span>
+                    <div className="flex justify-between items-end pt-1">
+                      <span className="text-base font-bold">
+                        Tổng thanh toán
+                      </span>
+                      <span className="font-mono text-2xl font-bold text-primary tracking-tighter">
+                        {isCalculatingFees ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          formatMoney(displayTotalAmount).vndFormatted
+                        )}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 2. Payment Form */}
-                <div className="space-y-6 animate-in slide-in-from-bottom-2 fade-in duration-500">
-                  <div className="bg-background border rounded-lg p-5 shadow-sm">
-                    <h4 className="text-xs font-bold uppercase text-muted-foreground mb-4">
-                      Nhập thanh toán
-                    </h4>
+                {/* Payment Form */}
+                <div className="pt-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <Form {...paymentForm}>
+                    <form className="space-y-5">
+                      {/* Amount Input */}
+                      <FormField
+                        control={paymentForm.control}
+                        name="paidAmount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <Input
+                              startAddon={<Banknote className="h-6 w-6" />}
+                              endAddon={
+                                <span className=" text-sm font-bold text-muted-foreground pointer-events-none">
+                                  VND
+                                </span>
+                              }
+                              type="number"
+                              className={cn(
+                                "h-12 text-2xl font-bold font-mono ",
+                                !isPaymentValid &&
+                                  "border-destructive focus-visible:ring-destructive/20 bg-destructive/5"
+                              )}
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
+                            />
 
-                    <Form {...paymentForm}>
-                      <form className="space-y-5">
+                            {/* Quick Actions */}
+                            <div className="flex gap-2 justify-end mt-1.5">
+                              <Button
+                                variant="link"
+                                size="sm"
+                                type="button"
+                                onClick={() =>
+                                  paymentForm.setValue(
+                                    "paidAmount",
+                                    displayTotalAmount
+                                  )
+                                }
+                                className="text-[10px] font-bold uppercase tracking-wide text-primary hover:underline"
+                              >
+                                Thanh toán đủ
+                              </Button>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Method & Ref */}
+                      <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={paymentForm.control}
-                          name="paidAmount"
+                          name="paymentMethod"
+                          render={({ field }) => (
+                            <FormItem>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="h-11">
+                                    <div className="flex items-center gap-2">
+                                      <CreditCard className="w-4 h-4 text-muted-foreground" />
+                                      <SelectValue placeholder="Phương thức" />
+                                    </div>
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {PAYMENT_METHODS.filter(
+                                    (pm) => !pm.disabled
+                                  ).map((pm) => (
+                                    <SelectItem key={pm.value} value={pm.value}>
+                                      {pm.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={paymentForm.control}
+                          name="transactionReference"
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
                                 <div className="relative">
-                                  <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
+                                  <Hash className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                                   <Input
-                                    type="number"
-                                    className="pl-10 pr-12 h-12 text-lg font-bold font-mono text-right"
+                                    placeholder="Mã giao dịch (Optional)"
+                                    className="pl-9 h-11"
                                     {...field}
-                                    onChange={(e) =>
-                                      field.onChange(Number(e.target.value))
-                                    }
+                                    value={field.value || ""}
                                   />
-                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
-                                    VND
-                                  </span>
                                 </div>
                               </FormControl>
-                              <FormMessage />
                             </FormItem>
                           )}
                         />
+                      </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <FormField
-                            control={paymentForm.control}
-                            name="paymentMethod"
-                            render={({ field }) => (
-                              <FormItem>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="pl-9 w-40 relative">
-                                      <CreditCard className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                      <SelectValue placeholder="Phương thức" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {PAYMENT_METHODS.filter(
-                                      (pm) => !pm.disabled
-                                    ).map((pm) => (
-                                      <SelectItem
-                                        key={pm.value}
-                                        value={pm.value}
-                                      >
-                                        {pm.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={paymentForm.control}
-                            name="transactionReference"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <div className="relative">
-                                    <Hash className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                      placeholder="Mã GD"
-                                      className="pl-9"
-                                      {...field}
-                                      value={field.value || ""}
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                      {/* Change Display */}
+                      <div
+                        className={cn(
+                          "rounded-xl border p-4 transition-all duration-300",
+                          changeAmount > 0
+                            ? "bg-emerald-50 border-emerald-200 opacity-100 translate-y-0"
+                            : "opacity-0 -translate-y-4 pointer-events-none absolute"
+                        )}
+                      >
+                        <div className="flex justify-between items-center text-emerald-800">
+                          <span className="font-semibold text-sm">
+                            Tiền thừa trả khách
+                          </span>
+                          <span className="font-mono font-bold text-xl">
+                            {formatMoney(changeAmount).vndFormatted}
+                          </span>
                         </div>
-
-                        {/* Feedback: Change Amount */}
-                        {changeAmount > 0 && (
-                          <div className="flex justify-between items-center p-3 bg-green-50 text-green-700 rounded-md border border-green-100">
-                            <span className="text-sm font-medium">
-                              Tiền thừa trả khách:
-                            </span>
-                            <span className="font-mono font-bold text-lg">
-                              {formatMoney(changeAmount).vndFormatted}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Feedback: Error */}
-                        {!isPaymentValid && paidAmount > 0 && (
-                          <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 p-2 rounded">
-                            <AlertCircle className="w-4 h-4" /> Số tiền chưa đủ
-                          </div>
-                        )}
-                      </form>
-                    </Form>
-                  </div>
+                      </div>
+                    </form>
+                  </Form>
                 </div>
               </div>
 
-              {/* 3. Footer Action */}
+              {/* Action Footer */}
               <div className="p-6 border-t bg-background">
                 <Button
-                  className="w-full h-12 text-base font-semibold shadow-md transition-all hover:scale-[1.01]"
+                  size="lg"
+                  className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
                   onClick={paymentForm.handleSubmit(handleSubmit)}
                   disabled={isPaying || !isPaymentValid}
                 >
                   {isPaying ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
                   ) : (
-                    <>
-                      Xác nhận thanh toán{" "}
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
+                    <CheckCircle2 className="w-5 h-5 mr-2" />
                   )}
+                  {isPaying ? "Đang xử lý..." : "Xác nhận thanh toán"}
                 </Button>
               </div>
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+          <div className="flex-1 flex items-center justify-center text-muted-foreground bg-muted/5">
             Không tìm thấy thông tin đơn hàng
           </div>
         )}

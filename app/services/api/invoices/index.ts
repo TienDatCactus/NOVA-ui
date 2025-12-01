@@ -261,10 +261,11 @@ async function updateInvoice(
   data: UpdateInvoiceRequestDto
 ): Promise<void> {
   try {
-    await http.put(
+    const resp = await http.put(
       Invoices.update(invoiceId),
       UpdateInvoiceRequestSchema.parse(data)
     );
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

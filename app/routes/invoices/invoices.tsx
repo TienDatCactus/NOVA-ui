@@ -3,10 +3,6 @@ import InvoicesDataTable from "./components/invoices-list";
 import useInvoicesContainer from "./container/invoices/container.hooks";
 import InvoicesViewLayout from "./layouts/invoices-view.layout";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

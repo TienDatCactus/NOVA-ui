@@ -43,12 +43,14 @@ interface UpdateHolidayDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   holiday: HolidayListItem | null;
+  onSuccess?: () => void;
 }
 
 export default function UpdateHolidayDialog({
   open,
   onOpenChange,
   holiday,
+  onSuccess,
 }: UpdateHolidayDialogProps) {
   const form = useForm<UpdateHolidayRequest>({
     resolver: zodResolver(HolidaySchema.UpdateHolidayRequestSchema),
@@ -85,6 +87,7 @@ export default function UpdateHolidayDialog({
         {
           onSuccess: () => {
             onOpenChange(false);
+            onSuccess?.();
           },
         }
       );

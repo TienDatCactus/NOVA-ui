@@ -52,7 +52,12 @@ export function useCalculateInvoiceFees(
   enabled = false
 ) {
   return useQuery({
-    queryKey: ["calculate-fees", data],
+    queryKey: [
+      "calculate-fees",
+      data.subtotalAmount,
+      data.applyVat,
+      data.applyServiceCharge,
+    ],
     queryFn: () => InvoicesService.calculateInvoiceFees(data),
     enabled: enabled && data.subtotalAmount > 0,
     staleTime: 0,

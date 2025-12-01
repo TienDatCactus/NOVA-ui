@@ -69,7 +69,8 @@ async function updateItemCategory(
 
 async function deleteItemCategory(id: string): Promise<void> {
   try {
-    await http.delete(Stock.ItemCategories.delete(id));
+    const resp = await http.delete(Stock.ItemCategories.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

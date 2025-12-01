@@ -269,7 +269,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                       Loại phòng khả dụng
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {availableRooms.length} types
+                      {availableRooms.length} loại phòng
                     </span>
                   </div>
 
@@ -293,11 +293,11 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
         <div className="shrink-0 border-t sticky bottom-0 bg-background p-3 shadow-md z-20 ">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="text-xs font-medium text-foreground">
-              Selected:{" "}
+              Đã chọn:{" "}
               <span className="text-primary font-bold">
                 {selectionStatus.roomCount}
               </span>{" "}
-              room(s)
+              phòng
             </div>
 
             <div

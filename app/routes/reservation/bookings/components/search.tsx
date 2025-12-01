@@ -144,7 +144,7 @@ function SearchRoom({
         </Select>
 
         <Select value={filters.source} onValueChange={handleSourceChange}>
-          <SelectTrigger className="w-[180px] h-9  bg-white shadow-sm">
+          <SelectTrigger className="w-[180px] h-9 bg-white shadow-sm">
             <SelectValue placeholder="Kênh đặt" />
           </SelectTrigger>
           <SelectContent>
@@ -157,10 +157,9 @@ function SearchRoom({
           </SelectContent>
         </Select>
         <DatePicker
-          value={date}
+          value={date ? date : new Date()}
           onChange={onDateChange}
-          placeholder="Chọn ngày"
-          className="w-[180px] h-9 bg-white shadow-sm"
+          className="w-[180px] h-9 shadow-sm"
         />
       </div>
 

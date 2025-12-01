@@ -127,7 +127,6 @@ export default function PayrollsLayout({
                 <SelectValue placeholder="Tháng" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Cả năm</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                   <SelectItem key={m} value={m.toString()}>
                     Tháng {m}

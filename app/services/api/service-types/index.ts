@@ -105,7 +105,8 @@ async function getServiceTypeDetail(
 
 async function deleteServiceType(id: string) {
   try {
-    await http.delete(ServiceTypes.delete(id));
+    const resp = await http.delete(ServiceTypes.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

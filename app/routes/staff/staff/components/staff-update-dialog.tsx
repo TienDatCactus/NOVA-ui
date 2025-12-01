@@ -71,7 +71,6 @@ export default function EditStaffDialog({
 }: EditStaffDialogProps) {
   const { data: roles } = useStaffRoleList();
 
-  // Chỉ fetch khi dialog mở và có staff ID
   const { data: staffDetail, isLoading: isLoadingDetail } = useStaffDetail(
     staff?.id || "",
     { enabled: open && !!staff?.id }
@@ -105,7 +104,6 @@ export default function EditStaffDialog({
         citizenId: staffDetail.citizenId || "",
         note: staffDetail.note || "",
         staffRoleId: staffDetail.staffRoleId || "",
-        // Parse date an toàn
         dateOfBirth: staffDetail.dateOfBirth
           ? typeof staffDetail.dateOfBirth === "string"
             ? parseISO(staffDetail.dateOfBirth)

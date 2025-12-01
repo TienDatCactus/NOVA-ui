@@ -62,7 +62,7 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
       <DataTableColumnHeader column={column} title="Số lượng tối đa" />
     ),
     cell: ({ row }) => {
-      const maxQuantityAvailable = row.original.maxQuantityAvailable || "—";
+      const maxQuantityAvailable = row.original.maxQuantityAvailable;
       return <p className="text-center">{maxQuantityAvailable}</p>;
     },
   },

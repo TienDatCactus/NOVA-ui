@@ -237,7 +237,7 @@ export default function EditStockAdjustmentDialog({
                                 <FormControl>
                                   <Counter
                                     {...qtyField}
-                                    step={0.1}
+                                    step={1}
                                     minValue={-9999}
                                     className={cn(
                                       "text-right font-mono w-44",

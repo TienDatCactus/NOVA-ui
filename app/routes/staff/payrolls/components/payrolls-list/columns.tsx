@@ -1,28 +1,34 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "~/components/ui/badge";
-import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
-import { Checkbox } from "~/components/ui/checkbox";
+import { Check, X } from "lucide-react";
+import { useState } from "react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { cn, formatMoney } from "~/lib/utils";
+import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import StatusSelectCell from "../../fragments/status-select.cell";
-import { Button } from "~/components/ui/button";
 import PayrollDetailDialog from "../payroll-detail-dialog";
-import { useState } from "react";
 
 export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     accessorKey: "index",
     header: "STT",
     cell: ({ row }) => {
-      return <span className="font-medium">{row.index + 1}</span>;
+      return (
+        <span className="text-muted-foreground font-mono text-xs">
+          {row.index + 1}
+        </span>
+      );
     },
+    size: 50,
     enableSorting: false,
     enableHiding: false,
   },
   {
     accessorKey: "staffCode",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Mã nhân viên" />
+      <DataTableColumnHeader column={column} title="Mã NV" />
     ),
     cell: ({ row }) => {
       const [openDetailDialog, setOpenDetailDialog] = useState(false);
@@ -30,7 +36,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
         <>
           <Button
             variant="link"
-            className="p-0"
+            className="p-0 h-auto font-mono font-semibold text-primary"
             onClick={() => setOpenDetailDialog(true)}
           >
             {row.getValue("staffCode")}
@@ -48,11 +54,16 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     accessorKey: "staffName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Tên nhân viên" />
+      <DataTableColumnHeader column={column} title="Họ và tên" />
     ),
     cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span className="font-medium">{row.getValue("staffName")}</span>
+      <div className="flex flex-col max-w-[180px]">
+        <span
+          className="font-medium truncate"
+          title={row.getValue("staffName")}
+        >
+          {row.getValue("staffName")}
+        </span>
       </div>
     ),
     enableHiding: false,
@@ -66,44 +77,44 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
       );
     },
   },
+  // --- Days Group ---
   {
     accessorKey: "assignedDays",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Ngày công định mức" />
+      <DataTableColumnHeader column={column} title="Định mức" />
     ),
-    cell: ({ row }) => {
-      const assignedDays = row.getValue("assignedDays") as number;
-      return (
-        <div className="flex flex-col items-center">
-          <span className="font-mono font-medium">{assignedDays}</span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="text-center font-mono text-muted-foreground">
+        {row.getValue("assignedDays")}
+      </div>
+    ),
   },
   {
     accessorKey: "workDays",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Ngày công thực tế" />
+      <DataTableColumnHeader column={column} title="Thực tế" />
     ),
-    cell: ({ row }) => {
-      const workDays = row.getValue("workDays") as number;
-      return (
-        <div className="flex flex-col items-center">
-          <span className="font-mono font-medium">{workDays}</span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="text-center font-mono font-medium">
+        {row.getValue("workDays")}
+      </div>
+    ),
   },
   {
     accessorKey: "paidLeaveDaysUsed",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Phép có lương" />
+      <DataTableColumnHeader column={column} title="Phép (L)" />
     ),
     cell: ({ row }) => {
-      const used = row.getValue("paidLeaveDaysUsed") as number;
+      const val = row.getValue("paidLeaveDaysUsed") as number;
       return (
-        <div className="flex flex-col items-center">
-          <span className="font-mono text-sm">{used}</span>
+        <div
+          className={cn(
+            "text-center font-mono",
+            val === 0 && "text-muted-foreground/50"
+          )}
+        >
+          {val}
         </div>
       );
     },
@@ -111,48 +122,37 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     accessorKey: "unpaidLeaveDays",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Phép không lương" />
+      <DataTableColumnHeader column={column} title="Nghỉ (KL)" />
     ),
     cell: ({ row }) => {
-      const unpaid = row.getValue("unpaidLeaveDays") as number;
+      const val = row.getValue("unpaidLeaveDays") as number;
       return (
-        <div className="flex justify-center">
-          <span className="font-mono text-sm">{unpaid}</span>
+        <div
+          className={cn(
+            "text-center font-mono",
+            val > 0 ? "text-destructive" : "text-muted-foreground/50"
+          )}
+        >
+          {val}
         </div>
       );
     },
   },
-  {
-    accessorKey: "baseSalaryFullMonth",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Lương cơ bản (tháng đủ)" />
-    ),
-    cell: ({ row }) => {
-      const amount = row.getValue("baseSalaryFullMonth") as number;
-      return (
-        <div className="text-right">
-          <span className="font-mono text-sm">
-            {amount.toLocaleString("vi-VN")}
-          </span>
-        </div>
-      );
-    },
-  },
+  // --- Salary & Money Group ---
   {
     accessorKey: "baseSalaryCalculated",
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title="Lương cơ bản tính theo công"
+        title="Lương theo công"
+        className="justify-end"
       />
     ),
     cell: ({ row }) => {
       const amount = row.getValue("baseSalaryCalculated") as number;
       return (
-        <div className="text-right">
-          <span className="font-mono text-sm">
-            {amount.toLocaleString("vi-VN")}
-          </span>
+        <div className="text-right font-mono text-muted-foreground">
+          {formatMoney(amount).vndFormatted}
         </div>
       );
     },
@@ -160,21 +160,24 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     accessorKey: "componentsTotal",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Phụ cấp/Khấu trừ" />
+      <DataTableColumnHeader
+        column={column}
+        title="Phụ cấp/Trừ"
+        className="justify-end"
+      />
     ),
     cell: ({ row }) => {
       const amount = row.getValue("componentsTotal") as number;
-      const isPositive = amount >= 0;
       return (
-        <div className="text-right">
-          <span
-            className={`font-mono text-sm ${
-              isPositive ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {amount >= 0 ? "+" : ""}
-            {amount.toLocaleString("vi-VN")}
-          </span>
+        <div
+          className={cn(
+            "text-right font-mono",
+            amount < 0 ? "text-destructive" : "text-foreground",
+            amount === 0 && "text-muted-foreground/50"
+          )}
+        >
+          {amount > 0 ? "+" : ""}
+          {formatMoney(amount).vndFormatted}
         </div>
       );
     },
@@ -182,15 +185,17 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     accessorKey: "totalAmount",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Tổng thu nhập kỳ này" />
+      <DataTableColumnHeader
+        column={column}
+        title="Tổng thu nhập"
+        className="justify-end"
+      />
     ),
     cell: ({ row }) => {
       const amount = row.getValue("totalAmount") as number;
       return (
-        <div className="text-right">
-          <span className="font-mono font-semibold text-base">
-            {amount.toLocaleString("vi-VN")}
-          </span>
+        <div className="text-center font-mono font-bold text-primary">
+          {formatMoney(amount).vndFormatted}
         </div>
       );
     },
@@ -199,15 +204,22 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     accessorKey: "paidAmount",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Đã thanh toán" />
+      <DataTableColumnHeader
+        column={column}
+        title="Đã thanh toán"
+        className="justify-end"
+      />
     ),
     cell: ({ row }) => {
       const paid = row.getValue("paidAmount") as number;
       return (
-        <div className="text-right">
-          <span className="font-mono text-sm">
-            {paid.toLocaleString("vi-VN")}
-          </span>
+        <div
+          className={cn(
+            "text-right font-mono",
+            paid === 0 && "text-muted-foreground/50"
+          )}
+        >
+          {formatMoney(paid).vndFormatted}
         </div>
       );
     },
@@ -215,54 +227,97 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     accessorKey: "remainingAmount",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Còn phải trả" />
+      <DataTableColumnHeader
+        column={column}
+        title="Còn lại"
+        className="justify-end"
+      />
     ),
     cell: ({ row }) => {
       const remaining = row.getValue("remainingAmount") as number;
+
+      // Logic:
+      // > 0: Company owes Employee (Standard) -> Bold
+      // < 0: Employee owes Company (Deduction needed) -> Destructive (Red)
+      // = 0: Cleared -> Muted
+
       return (
         <div className="text-right">
           <span
-            className={`font-mono text-sm ${remaining > 0 ? "text-orange-600" : remaining < 0 ? "text-red-600" : "text-green-600"}`}
+            className={cn(
+              "font-mono font-medium",
+              remaining < 0 ? "text-destructive" : "text-foreground",
+              remaining === 0 && "text-muted-foreground/50"
+            )}
           >
-            {remaining.toLocaleString("vi-VN")}
+            {formatMoney(remaining).vndFormatted}
           </span>
         </div>
       );
     },
   },
+  // --- Status Group ---
   {
     accessorKey: "hasUnusedLeavePending",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Còn ngày dư chưa xử lý" />
+      <DataTableColumnHeader column={column} title="Ngày dư" />
     ),
     cell: ({ row }) => {
       const hasUnusedLeavePending = row.getValue(
         "hasUnusedLeavePending"
       ) as boolean;
 
-      if (!hasUnusedLeavePending) {
+      if (!hasUnusedLeavePending) return null;
+
+      return (
+        <div className="flex ">
+          <Badge
+            variant="destructive"
+            className="h-6 w-6 p-0 flex items-center  rounded-full"
+          >
+            <span className="sr-only">Chưa xử lý</span>!
+          </Badge>
+        </div>
+      );
+    },
+    size: 60,
+  },
+  {
+    accessorKey: "hasExpense",
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title="Phiếu chi"
+        className="justify-center"
+      />
+    ),
+    cell: ({ row }) => {
+      const hasExpense = row.original.hasExpense;
+
+      if (hasExpense) {
         return (
           <div className="flex justify-center">
-            <Badge variant="outline" className="text-xs">
-              Đã xử lý
-            </Badge>
+            <Check className="h-4 w-4 " />
           </div>
         );
       }
 
       return (
         <div className="flex justify-center">
-          <Badge variant="secondary" className="text-xs">
-            Chưa xử lý
-          </Badge>
+          <X className="h-4 w-4" />
         </div>
       );
     },
+    size: 80,
   },
   {
     accessorKey: "locked",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Trạng thái" />
+      <DataTableColumnHeader
+        column={column}
+        title="Trạng thái"
+        className="justify-center"
+      />
     ),
     cell: ({ row, table }) => {
       const locked = row.getValue("locked") as boolean;
@@ -278,20 +333,21 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
       );
     },
     enableHiding: false,
+    size: 140,
   },
   {
     id: "actions",
-    header: () => <div className="text-center">Thao tác</div>,
     cell: ({ row, table }) => {
       const payroll = row.original;
       const onSuccess = (table.options.meta as any)?.onSuccess;
 
       return (
-        <div className="flex justify-center">
+        <div className="flex ">
           <ActionsMenuCell payroll={payroll} onSuccess={onSuccess} />
         </div>
       );
     },
+    size: 40,
     enableHiding: false,
   },
 ];

@@ -62,14 +62,13 @@ export default function EditComponentDialog({
 }: EditComponentDialogProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(AddPayrollComponentFormSchema),
     defaultValues: {
       type: "Bonus",
       title: "",
       amount: 0,
       note: "",
-      effectiveDate: "",
     },
   });
 
@@ -83,7 +82,6 @@ export default function EditComponentDialog({
         title: component.title,
         amount: component.amount,
         note: component.note || "",
-        effectiveDate: "",
       });
     }
   }, [component, form]);
@@ -93,7 +91,7 @@ export default function EditComponentDialog({
   const onSubmit = (data: FormValues) => {
     if (!component) return;
     mutation.mutate(
-      { componentId: component.componentId, payrollId, data },
+      { componentId: component.componentId, data },
       {
         onSuccess: () => {
           onOpenChange(false);
@@ -230,51 +228,6 @@ export default function EditComponentDialog({
                         </span>
                       </div>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="effectiveDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Áp dụng từ ngày</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal h-10",
-                              !date && "text-muted-foreground"
-                            )}
-                          >
-                            {date ? (
-                              format(date, "dd/MM/yyyy")
-                            ) : (
-                              <span>Chọn ngày</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={(newDate) => {
-                            setDate(newDate);
-                            field.onChange(
-                              newDate ? format(newDate, "yyyy-MM-dd") : ""
-                            );
-                          }}
-                          captionLayout="dropdown"
-                          className="rounded-md border"
-                        />
-                      </PopoverContent>
-                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}

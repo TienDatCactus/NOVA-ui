@@ -3,10 +3,6 @@ import type { Route } from "./+types/chat";
 import { ChatMain } from "./components/chat-main";
 import { ChatSidebar } from "./components/chat-sidebar";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

@@ -219,7 +219,14 @@ export default function StayDetailBar({
                     <DoorOpen className="w-4 h-4 mr-2" /> Nhận phòng
                   </Button>
                 )}
-
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setNoteModalOpen(true)}
+              >
+                <PenLine className="w-4 h-4 mr-2" />
+                Ghi chú
+              </Button>
               {/* Primary Action: Payment (Pending) */}
               {bookingDetail.status === "Pending" && (
                 <Dialog>
@@ -392,7 +399,6 @@ export default function StayDetailBar({
                     >
                       <XCircle className="w-4 h-4 mr-2" /> Hủy đặt phòng
                     </DropdownMenuItem>
-                   
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
@@ -460,20 +466,7 @@ export default function StayDetailBar({
             />
           </div>
 
-          <Separator orientation="vertical" className="h-10 hidden md:block" />
-
           {/* Notes Trigger */}
-          <div className="w-full md:w-48 pt-5">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setNoteModalOpen(true)}
-              className="w-full justify-start text-muted-foreground hover:text-foreground border-dashed"
-            >
-              <PenLine className="w-4 h-4 mr-2" />
-              Ghi chú đặt phòng...
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </form>

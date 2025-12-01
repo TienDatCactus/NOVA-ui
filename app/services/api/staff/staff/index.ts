@@ -79,7 +79,8 @@ async function updateStaff(
  */
 async function deleteStaff(id: string): Promise<void> {
   try {
-    await http.delete(Staff.delete(id));
+    const resp = await http.delete(Staff.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -91,7 +92,8 @@ async function terminateStaff(
   data: TerminateStaffDto
 ): Promise<void> {
   try {
-    await http.post(Staff.terminate(id), data);
+    const resp = await http.post(Staff.terminate(id), data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

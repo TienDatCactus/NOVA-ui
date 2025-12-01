@@ -8,7 +8,7 @@ import {
 import { cn } from "~/lib/utils";
 import ConfigItemRow from "./config-item-row";
 import type z from "zod";
-import type { ConfigSchema } from "~/services/api/configs/configs.schem";
+import type { ConfigSchema } from "~/services/api/configs/configs.schema";
 
 interface GroupSectionProps {
   group: z.infer<typeof ConfigSchema.ConfigGroupSchema>;
@@ -36,7 +36,6 @@ export default function GroupSection({
       onOpenChange={setIsOpen}
       className={cn(
         "group/section transition-all duration-300 ease-in-out",
-        // Khi mở: Tạo border nhẹ và background mờ để tách biệt vùng làm việc
         isOpen
           ? "rounded-lg border border-border bg-card/50 my-2 shadow-sm"
           : "border border-transparent hover:bg-muted/30 rounded-lg"
@@ -55,7 +54,6 @@ export default function GroupSection({
                   : "text-muted-foreground/60 group-hover/section:text-foreground"
               )}
             >
-              {/* Dùng FolderOpen khi mở, Layers khi đóng để tạo cảm giác tương tác */}
               {isOpen ? (
                 <FolderOpen className="h-4 w-4" />
               ) : (
@@ -72,26 +70,26 @@ export default function GroupSection({
               >
                 {group.groupDisplayName}
               </span>
-              {/* Ẩn moduleKey ở đây vì đã có ở Header ModuleCard -> Giảm nhiễu */}
             </div>
           </div>
 
           {/* === RIGHT: Meta & Actions === */}
           <div className="flex items-center gap-3">
-            {/* Status Indicator (Chỉ hiện khi có thay đổi hoặc khi hover) */}
             {(isModified || isOpen) && (
               <div
                 className={cn(
                   "flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium border transition-all",
                   isModified
-                    ? "border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:border-amber-900 dark:text-amber-500" // Warning look
+                    ? "border-primary/20 bg-primary/10 text-primary dark:bg-primary/20 dark:border-primary/30 dark:text-primary" // Primary look
                     : "border-border text-muted-foreground bg-transparent" // Neutral look
                 )}
               >
                 <span>
                   {customizedCount}/{totalItems}
                 </span>
-                {isModified && <span className="hidden sm:inline">edited</span>}
+                {isModified && (
+                  <span className="hidden sm:inline">đã chỉnh sửa</span>
+                )}
               </div>
             )}
 

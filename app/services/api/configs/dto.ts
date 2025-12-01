@@ -1,5 +1,5 @@
 import type z from "zod";
-import { ConfigSchema } from "./configs.schem";
+import { ConfigSchema } from "./configs.schema";
 
 const {
   ConfigDetailSchema,

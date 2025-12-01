@@ -16,7 +16,6 @@ function useUpdateBooking(bookingId: string) {
     mutationFn: async (data: StaffUpdateBookingRequestDto) =>
       await BookingService.staffUpdateBookingDetail(bookingId, data),
     onSuccess: (response) => {
-      // Don't toast here - let the component handle success message
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
         refetchType: "active",
@@ -33,6 +32,7 @@ function useUpdateBooking(bookingId: string) {
         queryKey: ["orderable-bookings"],
         refetchType: "active",
       });
+      toast.success("Cập nhật đặt phòng thành công");
     },
   });
 }
@@ -64,6 +64,7 @@ function useChangeRoom(bookingId: string) {
         queryKey: ["bookings-rooms-week"],
         refetchType: "active",
       });
+      toast.success("Đổi phòng thành công");
     },
   });
 }
@@ -96,6 +97,7 @@ function useCancelBooking(bookingId: string) {
         queryKey: ["available-rooms"],
         refetchType: "active",
       });
+      toast.success("Hủy đặt phòng thành công");
     },
   });
 }

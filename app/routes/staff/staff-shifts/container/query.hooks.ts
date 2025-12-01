@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { StaffShiftService } from "~/services/api/staff/staff-shift";
 import { StaffAttendanceService } from "~/services/api/staff/staff-attendance";
 import type { StaffShiftListParams } from "~/services/api/staff/staff-shift/staff-shift.type";
@@ -44,6 +45,7 @@ export function useCreateShiftSchedule() {
         queryKey: ["staff-attendance"],
         refetchType: "active",
       });
+      toast.success("Tạo lịch làm việc thành công");
     },
   });
 }
@@ -71,6 +73,7 @@ export function useUpdateShiftSchedule() {
         queryKey: ["staff-attendance"],
         refetchType: "active",
       });
+      toast.success("Cập nhật lịch làm việc thành công");
     },
   });
 }
@@ -89,6 +92,7 @@ export function useDeleteStaffShift() {
         queryKey: ["staff-attendance"],
         refetchType: "active",
       });
+      toast.success("Xóa lịch làm việc thành công");
     },
   });
 }
@@ -138,6 +142,7 @@ export function useMarkAbsent() {
         queryKey: ["staff-shifts"],
         refetchType: "active",
       });
+      toast.success("Đánh dấu vắng mặt thành công");
     },
   });
 }
@@ -156,6 +161,7 @@ export function useMarkPresent() {
         queryKey: ["staff-shifts"],
         refetchType: "active",
       });
+      toast.success("Đánh dấu có mặt thành công");
     },
   });
 }

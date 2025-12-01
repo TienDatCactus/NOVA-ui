@@ -2,10 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
 import {
   AlertTriangle,
+  Check,
   CreditCard,
   DoorOpen,
   FileWarning,
   Loader2,
+  NotebookPen,
   Receipt,
   RotateCcw,
   Save,
@@ -20,6 +22,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -280,49 +283,73 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             />
 
             <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
-              <DialogContent className="max-w-xl">
-                {/* ... (Note Dialog Content Giữ nguyên) ... */}
-                <DialogHeader>
-                  <DialogTitle>Ghi chú đặt phòng</DialogTitle>
-                  <DialogDescription>
-                    Ghi chú nội bộ (khách không thấy)
-                  </DialogDescription>
+              <DialogContent className="sm:max-w-[500px] gap-0 p-0 overflow-hidden">
+                <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-primary/10 rounded-md">
+                      <NotebookPen className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <DialogTitle>Ghi chú đặt phòng</DialogTitle>
+                      <DialogDescription className="mt-1">
+                        Ghi chú nội bộ dành cho nhân viên (Khách sẽ không thấy)
+                      </DialogDescription>
+                    </div>
+                  </div>
                 </DialogHeader>
-                <FormField
-                  control={form.control}
-                  name="note"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          disabled={!permissions.canDoSoftUpdate}
-                          rows={6}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setNoteModalOpen(false)}
-                  >
-                    Đóng
-                  </Button>
-                  {/* Note: Saving here just closes dialog, user must click Main Save */}
-                  <Button onClick={() => setNoteModalOpen(false)}>Xong</Button>
+
+                {/* Body */}
+                <div className="p-6">
+                  <FormField
+                    control={form.control}
+                    name="note"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            disabled={!permissions.canDoSoftUpdate}
+                            placeholder="Nhập các lưu ý quan trọng về khách hàng hoặc đơn đặt phòng này..."
+                            className="min-h-[200px] resize-none bg-muted/30 focus:bg-background transition-colors border-dashed focus:border-solid"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
+
+                {/* Footer */}
+                <DialogFooter className="px-6 py-4 bg-muted/10 border-t">
+                  <div className="flex w-full justify-between items-center">
+                    {/* Nhắc nhở nhỏ bên trái (Optional) */}
+                    <span className="text-[11px] text-muted-foreground italic">
+                      * Đừng quên bấm "Lưu thay đổi" ở màn hình chính
+                    </span>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => setNoteModalOpen(false)}
+                      >
+                        Hủy
+                      </Button>
+                      <Button
+                        onClick={() => setNoteModalOpen(false)}
+                        className="bg-primary/90 hover:bg-primary"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        Áp dụng
+                      </Button>
+                    </div>
+                  </div>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
         </Form>
       </div>
 
-      {/* SMART ACTION BAR 
-        Fixed at bottom, changes based on IsDirty state 
-      */}
       <BookingActionsBar
         isDirty={isDirty}
         isUpdating={isUpdating}

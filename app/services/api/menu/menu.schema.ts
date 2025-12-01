@@ -104,6 +104,7 @@ export const CreateMenuItemRequestSchema = z.object({
           .min(1, "Vui lòng chọn nguyên liệu"),
         quantity: z
           .number("Số lượng phải là số")
+          .min(1, "Số lượng phải lớn hơn hoặc bằng 1")
           .nonnegative("Số lượng phải lớn hơn hoặc bằng 0")
           .max(10000, "Số lượng không được vượt quá 10,000"),
         notes: z
@@ -126,6 +127,9 @@ export const UpdateMenuItemRequestSchema = CreateMenuItemRequestSchema.extend({
     .array(z.instanceof(File))
     .max(8, "Chỉ được tải lên tối đa 8 ảnh")
     .optional(),
+}).refine((data) => data.Components.length > 0, {
+  message: "Vui lòng thêm ít nhất 1 nguyên liệu vào công thức định lượng",
+  path: ["Components"],
 });
 
 export const UpdateMenuItemResponseSchema = MenuItemDetailSchema;

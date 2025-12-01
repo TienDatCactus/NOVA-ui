@@ -83,12 +83,10 @@ export default function CreateStaffDialog({
   const onSubmit = async (data: CreateStaffDto) => {
     try {
       await createStaff(data);
-      toast.success("Tạo hồ sơ nhân sự thành công");
       onOpenChange(false);
       form.reset();
     } catch (error) {
       console.error("Staff dialog error:", error);
-      toast.error("Không thể tạo nhân sự mới");
     }
   };
 

@@ -74,10 +74,11 @@ async function addItemToPOSOrder(
   data: AddSingleItemToPOSOrderRequestDto
 ): Promise<void> {
   try {
-    await http.post(
+    const resp = await http.post(
       Orders.addItemsToPos(orderId),
       AddSingleItemToPOSOrderRequestSchema.parse(data)
     );
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -92,9 +93,10 @@ async function addBatchItemsToPOSOrder(
   data: AddBatchItemsToPOSOrderRequestDto
 ): Promise<void> {
   try {
-    await http.post(Orders.addBatchItemsToPos(orderId), {
+    const resp = await http.post(Orders.addBatchItemsToPos(orderId), {
       items: AddBatchItemsToPOSOrderRequestSchema.parse(data),
     });
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -109,7 +111,8 @@ async function deleteItemFromPOSOrder(
   itemId: string
 ): Promise<void> {
   try {
-    await http.delete(Orders.deleteItemFromPos(orderId, itemId));
+    const resp = await http.delete(Orders.deleteItemFromPos(orderId, itemId));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -121,7 +124,8 @@ async function deleteItemFromPOSOrder(
  */
 async function cancelPOSOrder(orderId: string): Promise<void> {
   try {
-    await http.post(Orders.cancelPosOrder(orderId), null);
+    const resp = await http.post(Orders.cancelPosOrder(orderId), null);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -133,7 +137,8 @@ async function cancelPOSOrder(orderId: string): Promise<void> {
  */
 async function completePOSOrder(orderId: string): Promise<void> {
   try {
-    await http.post(Orders.completePosOrder(orderId), null);
+    const resp = await http.post(Orders.completePosOrder(orderId), null);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -237,7 +242,8 @@ async function updatePOSOrderNote(
   data: { note: string }
 ): Promise<void> {
   try {
-    await http.post(Orders.updateNote(orderId), data);
+    const resp = await http.post(Orders.updateNote(orderId), data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -273,10 +279,11 @@ async function updateServiceOrder(
   data: UpdateServiceOrderRequestDto
 ): Promise<void> {
   try {
-    await http.put(
+    const resp = await http.put(
       Orders.updateServiceOrder(orderId),
       UpdateServiceOrderRequestSchema.parse(data)
     );
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -303,7 +310,8 @@ async function getServiceOrderDetail(
  */
 async function completeServiceOrder(orderId: string): Promise<void> {
   try {
-    await http.post(Orders.completeServiceOrder(orderId), null);
+    const resp = await http.post(Orders.completeServiceOrder(orderId), null);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -315,7 +323,8 @@ async function completeServiceOrder(orderId: string): Promise<void> {
  */
 async function cancelServiceOrder(orderId: string): Promise<void> {
   try {
-    await http.post(Orders.cancelServiceOrder(orderId), null);
+    const resp = await http.post(Orders.cancelServiceOrder(orderId), null);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -349,7 +358,8 @@ async function payServiceOrderNow(
   data: ServiceOrderPayNowRequestDto
 ): Promise<void> {
   try {
-    await http.post(Orders.payServiceOrderNow(orderId), data);
+    const resp = await http.post(Orders.payServiceOrderNow(orderId), data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -364,7 +374,11 @@ async function setScheduledServiceOrder(
   data: SetScheduledServiceOrderRequestDto
 ): Promise<void> {
   try {
-    await http.post(Orders.setScheduledServiceOrder(orderId), data);
+    const resp = await http.post(
+      Orders.setScheduledServiceOrder(orderId),
+      data
+    );
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

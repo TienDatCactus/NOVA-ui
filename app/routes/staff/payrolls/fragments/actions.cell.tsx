@@ -5,11 +5,18 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Button } from "~/components/ui/button";
-import { MoreHorizontal, FileText, Edit, RefreshCw } from "lucide-react";
+import {
+  MoreHorizontal,
+  FileText,
+  Edit,
+  RefreshCw,
+  DollarSign,
+} from "lucide-react";
 import { useState } from "react";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
 import UpdatePayrollDialog from "../components/update-payroll-dialog";
+import CreateSalaryExpenseDialog from "../components/create-salary-expense-dialog";
 import { toast } from "sonner";
 import { useRefreshSinglePayroll } from "../container/query.hooks";
 
@@ -24,6 +31,7 @@ export default function ActionsMenuCell({
 }: ActionsMenuCellProps) {
   const [updateOpen, setUpdateOpen] = useState(false);
   const [applyLeaveOpen, setApplyLeaveOpen] = useState(false);
+  const [createExpenseOpen, setCreateExpenseOpen] = useState(false);
 
   const { mutate: refreshSingle, isPending: isRefreshing } =
     useRefreshSinglePayroll();
@@ -64,6 +72,18 @@ export default function ActionsMenuCell({
             <span>Áp dụng chế độ xử lý phép dư</span>
           </DropdownMenuItem>
           <DropdownMenuItem
+            onClick={() => setCreateExpenseOpen(true)}
+            disabled={!payroll.locked || payroll.hasExpense}
+            className={
+              !payroll.locked || payroll.hasExpense
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            }
+          >
+            <DollarSign className="mr-2 h-4 w-4" />
+            <span>Tạo phiếu chi lương</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
             onClick={handleRefreshSingle}
             disabled={isRefreshing}
           >
@@ -88,6 +108,14 @@ export default function ActionsMenuCell({
           open={applyLeaveOpen}
           onOpenChange={setApplyLeaveOpen}
           onSuccess={onSuccess}
+        />
+      )}
+
+      {createExpenseOpen && (
+        <CreateSalaryExpenseDialog
+          payroll={payroll}
+          open={createExpenseOpen}
+          onOpenChange={setCreateExpenseOpen}
         />
       )}
     </>

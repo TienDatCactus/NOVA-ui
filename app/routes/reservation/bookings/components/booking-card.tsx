@@ -53,11 +53,15 @@ import { Separator } from "~/components/ui/separator";
 import { DASHBOARD } from "~/lib/fe-url";
 import { cn, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
+import {
+  BOOKING_SOURCES,
+  BOOKING_STATUSES,
+} from "~/services/api/booking/booking.types";
 import {
   useCancelBooking,
   useUpdateBookingStatus,
 } from "../container/booking-mutation.hooks";
+import BookingDetailSheet from "./booking-detail.sheet";
 
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
@@ -72,8 +76,9 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
-  const { mutateAsync: cancelBooking, isPending: isCancelling } =
-    useCancelBooking(booking.bookingId || "");
+  const { mutateAsync: cancelBooking } = useCancelBooking(
+    booking.bookingId || ""
+  );
   const navigate = useNavigate();
 
   const statusConfig = BOOKING_STATUSES.find((s) => s.value === booking.status);
@@ -93,20 +98,11 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     booking.status === "Confirmed" &&
     !!checkinDate &&
     !isBefore(startOfDay(new Date()), startOfDay(checkinDate));
-  const canMarkNoShow = booking.status === "Confirmed" && isPastCheckinDate;
+
   const canCheckOut =
     booking.status === "InHouse" || booking.status === "CheckedIn";
   const canCancel =
     booking.status === "Pending" || booking.status === "Confirmed";
-  const isCheckedOut = booking.status === "CheckedOut";
-
-  const handleConfirmPayment = async () => {
-    try {
-      navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
-    } catch (error) {
-      console.error("Xác nhận thất bại");
-    }
-  };
 
   const handleCheckIn = async () => {
     try {
@@ -247,7 +243,10 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
                 <User className="h-3 w-3" />
               )}
               <span className="truncate max-w-[80px]">
-                {booking.source === "OTA" ? booking.otaName : "Khách lẻ"}
+                {booking.source === "OTA"
+                  ? booking.otaName
+                  : BOOKING_SOURCES.find((s) => s.key === booking.source)
+                      ?.label || "Trực tiếp"}
               </span>
             </div>
           </div>
@@ -279,10 +278,11 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         {/* BODY SECTION: Main Content */}
         <div className="flex-1 px-4 py-4">
           <div className="mb-4 flex items-start justify-between">
-            <div>
-              <h3 className="line-clamp-1 text-lg font-bold text-gray-900 group-hover:text-primary">
-                {booking.customerName || "Khách vãng lai"}
-              </h3>
+            <div className="flex items-start gap-2">
+              <BookingDetailSheet
+                bookingCode={booking.bookingCode!}
+                customerName={booking.customerName || ""}
+              />
               {renderStatusBadge()}
             </div>
           </div>

@@ -4,14 +4,12 @@ export type ExpensesFilter = {
   fromDate?: string;
   toDate?: string;
   categoryId?: string;
-  paymentMethod?: string;
 };
 
 const initialState: ExpensesFilter = {
   fromDate: undefined,
   toDate: undefined,
   categoryId: undefined,
-  paymentMethod: undefined,
 };
 
 export default function useExpensesFilters() {

@@ -35,19 +35,6 @@ export default function WorkShiftsViewLayout({
               ca
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={filters.activeFilter === "active"}
-                onCheckedChange={(checked) =>
-                  updateFilter("activeFilter", checked ? "active" : "all")
-                }
-                value="active"
-                id="active"
-              />
-              <Label htmlFor="active">Đang hoạt động</Label>
-            </div>
-          </div>
         </div>
         {children}
       </main>

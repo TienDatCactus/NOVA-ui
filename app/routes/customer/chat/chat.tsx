@@ -116,7 +116,7 @@ export default function GuestChat({}: Route.ComponentProps) {
     sendMessage: sendMessageViaSignalR,
     loadMessages,
   } = useChatConnection({
-    sessionId: sessionId,
+    sessionId: sessionId ?? null,
     isGuest: true,
   });
 

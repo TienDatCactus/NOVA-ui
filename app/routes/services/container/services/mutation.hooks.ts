@@ -13,6 +13,7 @@ export function useCreateService() {
       await ServicesService.createService(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      toast.success("Tạo dịch vụ thành công");
     },
   });
 }
@@ -30,6 +31,7 @@ export function useUpdateService() {
     }) => await ServicesService.updateService(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      toast.success("Cập nhật dịch vụ thành công");
     },
   });
 }
@@ -40,6 +42,7 @@ export function useDeleteService() {
     mutationFn: async (id: string) => await ServicesService.deleteService(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      toast.success("Xóa dịch vụ thành công");
     },
   });
 }

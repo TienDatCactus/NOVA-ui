@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { HolidayService } from "~/services/api/holiday";
 import type {
   CreateHolidayRequest,
@@ -14,6 +15,7 @@ export function useCreateHoliday() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["holidays"] });
+      toast.success("Tạo ngày nghỉ thành công");
     },
   });
 }
@@ -27,6 +29,7 @@ export function useDeleteHoliday() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["holidays"] });
+      toast.success("Xóa ngày nghỉ thành công");
     },
   });
 }
@@ -43,6 +46,7 @@ export function useUpdateHoliday() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["holidays"] });
+      toast.success("Cập nhật ngày nghỉ thành công");
     },
   });
 }

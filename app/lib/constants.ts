@@ -69,10 +69,7 @@ const SIDEBAR_NAV_MAIN: Array<{
         title: "Danh sách đặt phòng",
         url: FE_URL.dashboard.bookings.list,
       },
-      {
-        title: "Hóa đơn đặt phòng",
-        url: "/dashboard/bookings/invoices",
-      },
+
       {
         title: "Đặt phòng mới",
         url: FE_URL.dashboard.bookings.newBooking,
@@ -230,7 +227,7 @@ const SIDEBAR_PROJECTS: Array<{
     icon: MessageSquareDot,
   },
   {
-    name: "Audit Logs",
+    name: "Lịch sử truy vấn",
     url: FE_URL.dashboard.auditLogs,
     icon: ScrollText,
   },
@@ -276,11 +273,7 @@ const COMMAND_BAR_ROUTES: Array<{
     icon: List,
     href: FE_URL.dashboard.bookings.list,
   },
-  {
-    name: "Hóa đơn đặt phòng",
-    icon: FileText,
-    href: FE_URL.dashboard.bookings.invoices,
-  },
+
   {
     name: "Đặt phòng mới",
     icon: Plus,
@@ -352,6 +345,9 @@ const CUSTOMER_NAVS = [
   { name: "Guidelines", icon: Settings, href: FE_URL.customer.guidelines },
   { name: "Map", icon: Settings, href: FE_URL.customer.map },
 ];
+
+const TOP_NAV_CONFIG = {};
+
 export {
   CHECK_IN_TIME,
   CHECK_OUT_TIME,
@@ -361,4 +357,5 @@ export {
   SIDEBAR_PROJECTS,
   SIDEBAR_TEAMS,
   SUPPORTED_LANGUAGES,
+  TOP_NAV_CONFIG,
 };

@@ -26,10 +26,6 @@ import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { Route } from "./+types/forgot-password";
 import { useAuth } from "./container/auth.hooks";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function ForgotPassword() {
   const { forgotPassword, isLoading } = useAuth();
 
