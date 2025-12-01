@@ -16,8 +16,10 @@ import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -132,13 +134,6 @@ export function ReportsTableModal({
     return { days, dates, roomTypes, getIntensity };
   }, [data]);
 
-  // --- Export Logic ---
-  const handleExport = () => {
-    if (!data?.dailyAvailability) return;
-    // ... (Keep your existing export logic here, it was fine)
-    // Just ensuring we don't break functionality while refactoring UI
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 bg-background">
@@ -156,14 +151,6 @@ export function ReportsTableModal({
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={resetToToday}>
               <RotateCcw className="h-4 w-4 mr-2" /> Hôm nay
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleExport}
-              disabled={!processedData}
-            >
-              <Download className="h-4 w-4 mr-2" /> Xuất Excel
             </Button>
           </div>
         </DialogHeader>
@@ -216,7 +203,6 @@ export function ReportsTableModal({
                   mode="single"
                   selected={dateRange.to}
                   onSelect={(d) => d && setDateRange({ ...dateRange, to: d })}
-                  initialFocus
                 />
               </PopoverContent>
             </Popover>
@@ -251,11 +237,11 @@ export function ReportsTableModal({
         <div className="flex-1 overflow-auto relative">
           {isLoading ? (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              Loading data...
+              Đang tải...
             </div>
           ) : !processedData ? (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              No data available.
+              Không có dữ liệu.
             </div>
           ) : (
             <Table>
@@ -292,8 +278,6 @@ export function ReportsTableModal({
               <TableBody>
                 {CATEGORIES.map((category) => {
                   const isExpanded = expandedRows.has(category.key);
-
-                  // Calculate max value for this category across all days (for heatmap scaling)
                   const maxVal = Math.max(
                     ...processedData.days.map((d: any) =>
                       Object.values(
@@ -397,6 +381,11 @@ export function ReportsTableModal({
             </Table>
           )}
         </div>
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <DialogClose>
+            <Button variant="outline">Đóng</Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

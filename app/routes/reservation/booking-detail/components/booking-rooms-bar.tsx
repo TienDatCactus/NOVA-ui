@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowLeftRight, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,7 +16,10 @@ import {
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { createRemoveRoomOperation } from "~/services/api/booking/booking.helpers";
+import {
+  createAddRoomOperation,
+  createRemoveRoomOperation,
+} from "~/services/api/booking/booking.helpers";
 import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
@@ -24,6 +27,14 @@ import type {
 import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
 import { AddRoomModal } from "./operations/add-room-modal";
+import { Dropdown } from "react-day-picker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import ChangeRoomDialog from "../../bookings/components/change-room.dialog";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -48,6 +59,7 @@ export default function BookingRoomsBar({
 }: BookingRoomsBarProps) {
   const { fields, remove, append } = roomsFieldArray;
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
+  const [changeRoomModalOpen, setChangeRoomModalOpen] = useState(false);
   const [removeRoomConfirmOpen, setRemoveRoomConfirmOpen] = useState(false);
   const [roomToRemove, setRoomToRemove] = useState<{
     bookingRoomId: string;
@@ -97,24 +109,67 @@ export default function BookingRoomsBar({
   };
 
   const handleAddRoom = (roomId: string) => {
-    const checkinDate = form.watch("checkinDate");
-    const checkoutDate = form.watch("checkoutDate");
+    try {
+      // Check if room already exists in booking
+      const roomAlreadyInBooking = bookingDetail.rooms.some(
+        (room) => room.roomId === roomId
+      );
+      if (roomAlreadyInBooking) {
+        toast.warning("Phòng này đã có trong booking");
+        return;
+      }
 
-    append({
-      action: "Add",
-      bookingRoomId: null,
-      roomId,
-      fromDate:
+      // Check if room is already being added (in pending operations)
+      const currentRooms = form.getValues("rooms") || [];
+      const roomAlreadyBeingAdded = currentRooms.some(
+        (room) => room.action === "Add" && room.roomId === roomId
+      );
+      if (roomAlreadyBeingAdded) {
+        toast.warning("Phòng này đã được thêm vào danh sách chờ");
+        return;
+      }
+
+      const checkinDate = form.watch("checkinDate");
+      const checkoutDate = form.watch("checkoutDate");
+
+      // Validate dates exist
+      if (!checkinDate || !checkoutDate) {
+        toast.error("Vui lòng kiểm tra lại ngày checkin/checkout");
+        return;
+      }
+
+      // Normalize dates BEFORE passing to helper
+      const fromDate =
         checkinDate instanceof Date
           ? format(checkinDate, "yyyy-MM-dd")
-          : checkinDate?.toString() || format(new Date(), "yyyy-MM-dd"),
-      toDate:
+          : typeof checkinDate === "string"
+            ? checkinDate
+            : null;
+
+      const toDate =
         checkoutDate instanceof Date
           ? format(checkoutDate, "yyyy-MM-dd")
-          : checkoutDate?.toString() || format(new Date(), "yyyy-MM-dd"),
-    });
+          : typeof checkoutDate === "string"
+            ? checkoutDate
+            : null;
 
-    toast.success("Đã thêm phòng mới");
+      if (!fromDate || !toDate) {
+        toast.error("Định dạng ngày không hợp lệ");
+        return;
+      }
+
+      // Use helper function with built-in validation
+      const operation = createAddRoomOperation(roomId, fromDate, toDate);
+
+      // Append validated operation
+      append(operation);
+      toast.success("Đã thêm phòng mới");
+    } catch (error) {
+      console.error("Add room failed:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Thêm phòng thất bại"
+      );
+    }
   };
 
   return (
@@ -125,16 +180,33 @@ export default function BookingRoomsBar({
             <CardTitle className="text-base font-medium uppercase">
               Danh sách phòng
             </CardTitle>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setAddRoomModalOpen(true)}
-              disabled={!permissions.canAddRooms}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Thêm
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={!permissions.canAddRooms}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => setAddRoomModalOpen(true)}
+                  disabled={!permissions.canAddRooms}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Thêm phòng
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setChangeRoomModalOpen(true)}
+                  disabled={!permissions.canAddRooms}
+                >
+                  <ArrowLeftRight className="h-4 w-4 mr-1" />
+                  Đổi phòng
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
@@ -277,6 +349,11 @@ export default function BookingRoomsBar({
         onOpenChange={setAddRoomModalOpen}
         onAddRoom={handleAddRoom}
         bookingDetail={bookingDetail}
+      />
+      <ChangeRoomDialog
+        open={changeRoomModalOpen}
+        onOpenChange={setChangeRoomModalOpen}
+        bookingCode={bookingDetail.bookingCode}
       />
       <AlertDialog
         open={removeRoomConfirmOpen}

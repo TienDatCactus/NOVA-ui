@@ -73,7 +73,7 @@ interface BookingCardProps {
 
 export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
   const { mutateAsync: cancelBooking } = useCancelBooking(
@@ -91,7 +91,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     : null;
 
   const isArrivingToday = !!(checkinDate && isToday(checkinDate));
-  const isPastCheckinDate = !!(checkinDate && isAfter(new Date(), checkinDate));
 
   const canConfirmPayment = booking.status === "Pending";
   const canCheckIn =
@@ -279,9 +278,19 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         <div className="flex-1 px-4 py-4">
           <div className="mb-4 flex items-start justify-between">
             <div className="flex items-start gap-2">
+              <Button
+                variant="link"
+                className="p-0 h-auto font-bold text-lg text-gray-900 hover:text-primary hover:no-underline"
+              >
+                {/* Removed <h3> inside button for better semantics */}
+                <span className="line-clamp-1 text-left">
+                  {booking.customerName || "Khách vãng lai"}
+                </span>
+              </Button>
               <BookingDetailSheet
                 bookingCode={booking.bookingCode!}
-                customerName={booking.customerName || ""}
+                open={detailSheetOpen}
+                onOpenChange={setDetailSheetOpen}
               />
               {renderStatusBadge()}
             </div>

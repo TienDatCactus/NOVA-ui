@@ -75,7 +75,7 @@ export default function ServiceBreakfastManagerDialog({
     } else {
       // Logic: Add new
       const defaultDate = checkinDate
-        ? format(checkinDate, "yyyy-MM-dd")
+        ? format(checkoutDate, "yyyy-MM-dd")
         : format(new Date(), "yyyy-MM-dd");
 
       const newService: ServiceOrderItem = {

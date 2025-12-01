@@ -25,6 +25,7 @@ import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import CreateServiceTypeDialog from "../create-service-type.dialog";
+import CreateServiceDialog from "../create-service.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -71,7 +72,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
         />
         <Button onClick={() => setOpen(true)} size={"sm"}>
           <Plus className="h-4 w-4 " />
-          Thêm loại dịch vụ
+          Thêm dịch vụ
         </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
@@ -135,7 +136,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
-      <CreateServiceTypeDialog onClose={() => setOpen(false)} open={open} />
+      <CreateServiceDialog onClose={() => setOpen(false)} open={open} />
     </div>
   );
 }

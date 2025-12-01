@@ -62,14 +62,15 @@ const getPaymentStatusBadge = (statusKey: string | undefined) => {
 
 interface BookingDetailSheetProps {
   bookingCode: string;
-  customerName: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export default function BookingDetailSheet({
+  open,
+  onOpenChange,
   bookingCode,
-  customerName,
 }: BookingDetailSheetProps) {
-  const [open, setOpen] = useState(false);
   const { data, isPending, error } = useBookingDetail({
     bookingCode,
     enabled: open,
@@ -84,19 +85,7 @@ export default function BookingDetailSheet({
   const remainingAmount = data ? data.totalAmount - data.paidAmount : 0;
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="link"
-          className="p-0 h-auto font-bold text-lg text-gray-900 hover:text-primary hover:no-underline"
-        >
-          {/* Removed <h3> inside button for better semantics */}
-          <span className="line-clamp-1 text-left">
-            {customerName || "Khách vãng lai"}
-          </span>
-        </Button>
-      </SheetTrigger>
-
+    <Sheet open={open} onOpenChange={onOpenChange}>
       {/* Added flex col and max-h-screen to ensure footer sticks */}
       <SheetContent className="w-full sm:max-w-2xl gap-0 p-0 flex flex-col h-full">
         {/* === HEADER === */}
@@ -158,7 +147,7 @@ export default function BookingDetailSheet({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setOpen(false)}
+                onClick={() => onOpenChange(false)}
               >
                 Đóng
               </Button>

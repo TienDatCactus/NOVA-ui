@@ -290,7 +290,7 @@ export default function InvoiceDetailSheet({
               invoiceDetail?.status !== "Paid" &&
               invoiceDetail?.status !== "Voided" && (
                 <Button
-                  variant="ghost"
+                  variant="info-outline"
                   size="sm"
                   onClick={handleSyncInvoice}
                   disabled={isSyncingInvoice}
