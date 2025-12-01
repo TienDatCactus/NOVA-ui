@@ -129,10 +129,18 @@ export default function CheckoutSheet({
   const activeInvoiceId = selectedInvoiceId || createdInvoiceId;
 
   const shouldShowCreateInvoice = useMemo(() => {
-    if (!existingInvoices || existingInvoices.length === 0) return true;
-    return false;
-  }, [invoicePreview, existingInvoices]);
+    const hasCheckoutInvoice = existingInvoices?.some(
+      (inv) => inv.invoiceType === "Checkout" && inv.status !== "Voided"
+    );
 
+    if (hasCheckoutInvoice) return false;
+
+    const hasPendingOrders =
+      (pendingCharges?.pendingOrders?.posOrders?.length || 0) > 0 ||
+      (pendingCharges?.pendingOrders?.serviceOrders?.length || 0) > 0;
+
+    return hasPendingOrders;
+  }, [existingInvoices, pendingCharges]);
   const handleCreateInvoice = () => {
     createInvoice(undefined, {
       onSuccess: (data) => {
