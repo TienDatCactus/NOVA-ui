@@ -130,7 +130,7 @@ function SearchRoom({
           />
         </div>
 
-        <Select value={filters.status} onValueChange={handleStatusChange}>
+        {/* <Select value={filters.status} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-[180px] h-9 bg-white shadow-sm">
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
@@ -155,7 +155,7 @@ function SearchRoom({
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
         <DatePicker
           value={date ? date : new Date()}
           onChange={onDateChange}

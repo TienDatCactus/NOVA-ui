@@ -408,6 +408,7 @@ const BookingDetailItemSchema = z.object({
   invoiceStatus: InvoiceSchema.InvoiceStatusEnum.optional().nullable(),
   paymentMethod: PaymentSchema.PaymentMethodEnum.optional().nullable(),
   otaName: z.string().optional().nullable(),
+  breakfastDates: z.array(z.string()).optional(),
   customer: z.object({
     id: z.string(),
     fullName: z.string(),

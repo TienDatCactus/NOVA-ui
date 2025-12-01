@@ -156,10 +156,6 @@ export default function CustomerInfoBar({
             render={({ field }) => {
               const checkinDate = form.watch("checkinDate");
               const checkoutDate = form.watch("checkoutDate");
-              const breakfastDates =
-                field.value?.map((item) =>
-                  item.date ? parseISO(item.date) : new Date()
-                ) || [];
 
               const handleSelectDates = (dates: Date[] | undefined) => {
                 if (!dates) {
@@ -184,14 +180,15 @@ export default function CustomerInfoBar({
                           variant="outline"
                           className={cn(
                             "w-full justify-start text-left font-normal h-9",
-                            !breakfastDates.length && "text-muted-foreground"
+                            !form.watch("breakfastDates")?.length &&
+                              "text-muted-foreground"
                           )}
                           disabled={!permissions.canDoSoftUpdate}
                         >
                           <CalendarDays className="mr-2 h-3.5 w-3.5" />
-                          {breakfastDates.length > 0 ? (
+                          {(form.watch("breakfastDates")?.length ?? 0 > 0) ? (
                             <span className="text-foreground font-medium">
-                              {breakfastDates.length} buổi sáng
+                              {form.watch("breakfastDates")?.length} buổi sáng
                             </span>
                           ) : (
                             "Chọn ngày"
@@ -201,7 +198,11 @@ export default function CustomerInfoBar({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="multiple"
-                          selected={breakfastDates}
+                          selected={form
+                            .watch("breakfastDates")
+                            ?.map((bd) =>
+                              parseISO(bd.date ?? new Date().toISOString())
+                            )}
                           onSelect={handleSelectDates}
                           disabled={(date) => {
                             const checkin =

@@ -128,17 +128,7 @@ export default function CheckoutSheet({
 
   const activeInvoiceId = selectedInvoiceId || createdInvoiceId;
 
-  const totalDebt = useMemo(() => {
-    const pendingPreview = invoicePreview?.totalAmount || 0;
-    const otherInvoicesBalance =
-      existingInvoices?.reduce((acc, inv) => acc + (inv.balance || 0), 0) || 0;
-
-    return pendingPreview + otherInvoicesBalance;
-  }, [pendingCharges, invoicePreview, existingInvoices]);
-
   const shouldShowCreateInvoice = useMemo(() => {
-    const hasPendingItems = (invoicePreview?.totalAmount || 0) > 0;
-    if (hasPendingItems) return true;
     if (!existingInvoices || existingInvoices.length === 0) return true;
     return false;
   }, [invoicePreview, existingInvoices]);
@@ -177,48 +167,6 @@ export default function CheckoutSheet({
     setCreatedInvoiceId(null);
   };
 
-  const renderDebtStatus = () => {
-    if (isLoadingCharges) return null;
-
-    if (totalDebt === 0) {
-      return (
-        <div className="flex flex-col items-end px-4 py-2 bg-green-50 border border-green-100 rounded-lg">
-          <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" /> Trạng thái
-          </span>
-          <span className="text-lg font-bold text-green-700 font-mono">
-            Đã thanh toán đầy đủ
-          </span>
-        </div>
-      );
-    }
-
-    // Case 2: Debt > 0 (Guest needs to pay)
-    if (totalDebt > 0) {
-      return (
-        <div className="flex flex-col items-end px-4 py-2 bg-red-50 border border-red-100 rounded-lg">
-          <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
-            Khách cần trả
-          </span>
-          <span className="text-xl font-bold text-red-700 font-mono">
-            {formatMoney(totalDebt).vndFormatted}
-          </span>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col items-end px-4 py-2 bg-orange-50 border border-orange-100 rounded-lg">
-        <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
-          Cần hoàn tiền
-        </span>
-        <span className="text-xl font-bold text-orange-700 font-mono">
-          {formatMoney(Math.abs(totalDebt)).vndFormatted}
-        </span>
-      </div>
-    );
-  };
-
   return (
     <>
       <Sheet open={open} onOpenChange={handleSheetClose}>
@@ -228,21 +176,18 @@ export default function CheckoutSheet({
         >
           {/* HEADER */}
           <SheetHeader className="px-6 py-4 border-b bg-background shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <SheetTitle className="text-xl flex items-center gap-2">
-                  {isPostCheckout ? (
-                    <span>Xem hóa đơn</span>
-                  ) : (
-                    <p>Checkout Booking #{bookingCode}</p>
-                  )}
-                </SheetTitle>
-                <SheetDescription>
-                  Kiểm tra các khoản phí phát sinh, thanh toán hóa đơn và hoàn
-                  tất thủ tục trả phòng.
-                </SheetDescription>
-              </div>
-              {renderDebtStatus()}
+            <div className="space-y-1">
+              <SheetTitle className="text-xl flex items-center gap-2">
+                {isPostCheckout ? (
+                  <span>Xem hóa đơn</span>
+                ) : (
+                  <p>Checkout Booking #{bookingCode}</p>
+                )}
+              </SheetTitle>
+              <SheetDescription>
+                Kiểm tra các khoản phí phát sinh, thanh toán hóa đơn và hoàn tất
+                thủ tục trả phòng.
+              </SheetDescription>
             </div>
           </SheetHeader>
 
@@ -520,6 +465,9 @@ export default function CheckoutSheet({
                       <div className="space-y-3">
                         {existingInvoices.map((invoice) => {
                           const isPaid = invoice.status === "Paid";
+                          if (invoice.status == "Voided") {
+                            return null;
+                          }
                           return (
                             <Card
                               key={invoice.id}
@@ -590,14 +538,13 @@ export default function CheckoutSheet({
                     )}
                   </div>
 
-                  {/* ACTION PANEL IN RIGHT COL */}
-                  <div className="p-4 bg-white border-t space-y-3 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
+                  <div className="p-4 bg-white border-t space-y-3 shadow-md z-10">
                     {shouldShowCreateInvoice && !isPostCheckout ? (
                       <Button
                         className="w-full h-12 text-base shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99]"
                         onClick={handleCreateInvoice}
                         disabled={isCreatingInvoice}
-                        variant="default"
+                        variant="success"
                       >
                         {isCreatingInvoice ? (
                           <Loader2 className="mr-2 h-5 w-5 animate-spin" />

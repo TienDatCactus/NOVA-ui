@@ -15,6 +15,8 @@ interface MediaTabProps {
   removeMediaIds: string[];
   toggleRemoveExisting: (id: string) => void;
   onDrop: (acceptedFiles: File[]) => void;
+  handleRemoveNew: (index: number) => void;
+  formErrors?: { message?: string; type?: string };
 }
 
 const MediaTab: React.FC<MediaTabProps> = ({
@@ -24,6 +26,8 @@ const MediaTab: React.FC<MediaTabProps> = ({
   removeMediaIds,
   toggleRemoveExisting,
   onDrop,
+  handleRemoveNew,
+  formErrors,
 }) => {
   return (
     <TabsContent
@@ -35,9 +39,16 @@ const MediaTab: React.FC<MediaTabProps> = ({
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h4 className="text-sm font-medium">Thư viện ảnh</h4>
-            <p className="text-xs text-muted-foreground">
-              Kéo thả hoặc nhấn vào ô dấu cộng để thêm ảnh. Tối đa 8 ảnh.
-            </p>
+            {formErrors && formErrors.message && (
+              <p className="text-xs text-destructive font-medium">
+                {formErrors.message}
+              </p>
+            )}
+            {!formErrors?.message && (
+              <p className="text-xs text-muted-foreground">
+                Kéo thả hoặc nhấn vào ô dấu cộng để thêm ảnh. Tối đa 10 ảnh.
+              </p>
+            )}
           </div>
           {/* Hiển thị số lượng ảnh */}
           <Badge variant="outline" className="h-6">
@@ -53,7 +64,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
           {/* 1. UPLOAD BUTTON (Ô đầu tiên) */}
           <Dropzone
             accept={{ "image/*": [] }}
-            maxFiles={8}
             onDrop={onDrop}
             className="group aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer bg-muted/5"
           >
@@ -85,7 +95,7 @@ const MediaTab: React.FC<MediaTabProps> = ({
                 type="button"
                 size="icon"
                 variant="destructive-ghost"
-                onClick={() => onDrop(newFiles.filter((_, i) => i !== index))}
+                onClick={() => handleRemoveNew(index)}
                 className="absolute w-6 h-6 top-1.5 right-1.5 p-1.5 rounded-full bg-black/50 text-white hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
               >
                 <X className="w-3.5 h-3.5" />

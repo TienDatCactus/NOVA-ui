@@ -7,7 +7,7 @@ import {
   Trash2,
   Utensils,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type z from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -51,10 +51,6 @@ interface ServiceOrderItemRowProps {
   checkoutDate?: Date;
 }
 
-/**
- * Single Row Component
- * Handles data fetching and individual interactions
- */
 function ServiceOrderItemRow({
   service,
   onRemove,
@@ -63,7 +59,7 @@ function ServiceOrderItemRow({
   checkinDate,
   checkoutDate,
 }: ServiceOrderItemRowProps) {
-  // 1. Fetch Details based on Type
+  const [note, setNote] = useState(service.note || "");
   const { data: serviceDetail, isLoading: isLoadingService } = useServiceDetail(
     service.itemId,
     { enabled: service.itemType === "ServiceItem" }
@@ -76,7 +72,6 @@ function ServiceOrderItemRow({
 
   const isLoading = isLoadingService || isLoadingMenu;
 
-  // 2. Resolve Display Data
   const displayName = useMemo(() => {
     if (service.itemType === "ServiceItem" && serviceDetail)
       return serviceDetail.name;
@@ -86,10 +81,26 @@ function ServiceOrderItemRow({
 
   const ItemIcon = service.itemType === "MenuItem" ? Utensils : Sparkles;
 
-  // 3. Handle Date Logic
-  const scheduledDate = service.scheduledDate
-    ? parseISO(service.scheduledDate)
-    : undefined;
+  const scheduledDate = (() => {
+    // If service has a scheduledDate, validate it's within checkin/checkout range
+    if (service.scheduledDate) {
+      const date = parseISO(service.scheduledDate);
+      if (checkinDate && checkoutDate) {
+        // Check if date is within range
+        if (date >= checkinDate && date < checkoutDate) {
+          return date;
+        }
+      } else {
+        // No range validation, use the date
+        return date;
+      }
+    }
+
+    // Fallback: checkinDate + 1 day, or undefined
+    return checkinDate
+      ? new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000)
+      : undefined;
+  })();
 
   const dateDisplay = useMemo(() => {
     if (!scheduledDate) return "Chọn ngày";
@@ -97,6 +108,9 @@ function ServiceOrderItemRow({
     return format(scheduledDate, "dd/MM/yyyy");
   }, [scheduledDate]);
 
+  const handleUpdateNote = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate({ note: note });
+  };
   if (isLoading) {
     return (
       <div className="flex items-center gap-4 py-3 border-b px-4">
@@ -131,7 +145,6 @@ function ServiceOrderItemRow({
             <ItemIcon className="h-4 w-4" />
           </div>
 
-          {/* Name & Type */}
           <div className="min-w-0">
             <p
               className={cn(
@@ -194,24 +207,24 @@ function ServiceOrderItemRow({
               }
               disabled={(date) => {
                 if (!checkinDate || !checkoutDate) return false;
-                return date < checkinDate || date > checkoutDate;
+                return date < checkinDate || date >= checkoutDate;
               }}
-              initialFocus
               locale={vi}
             />
           </PopoverContent>
         </Popover>
 
         {/* Note Input (Minimal) */}
-        <div className="relative flex-1 group/input">
-          <MessageSquare className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50 group-focus-within/input:text-primary transition-colors" />
-          <Input
-            value={service.note || ""}
-            onChange={(e) => onUpdate({ note: e.target.value })}
-            placeholder="Thêm ghi chú..."
-            className="h-7 border-transparent bg-transparent pl-7 text-xs shadow-none placeholder:text-muted-foreground/50 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-ring"
-          />
-        </div>
+        <Input
+          onBlur={handleUpdateNote}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Thêm ghi chú..."
+          startAddon={
+            <MessageSquare className="h-3 w-3 text-muted-foreground/50" />
+          }
+          className="h-7 border-transparent bg-transparent text-xs shadow-none placeholder:text-muted-foreground/50 focus-visible:bg-background "
+        />
       </div>
     </div>
   );

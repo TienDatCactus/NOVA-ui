@@ -38,8 +38,10 @@ export function formatMoney(amount: number | bigint | string) {
       vndFormatted: "0 ₫",
     };
   }
-  const amountStr = amount.toString();
-  const formattedBase = amountStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const numericAmount =
+    typeof amount === "string" ? parseFloat(amount) : Number(amount);
+  const fixedAmount = numericAmount.toFixed(2);
+  const formattedBase = fixedAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   // Append currency symbols manually
   const usdFormatted = `$${formattedBase}`;

@@ -146,6 +146,11 @@ export default function EditMenuSheet({
     );
   };
 
+  const handleRemoveNew = (index: number) => {
+    URL.revokeObjectURL(newPreviews[index]);
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // --- Render Loading ---
   if (isLoadingDetail || isLoadingCategories || isLoadingUnits) {
     return (
@@ -230,7 +235,22 @@ export default function EditMenuSheet({
                     newPreviews={newPreviews}
                     removeMediaIds={removeMediaIds}
                     toggleRemoveExisting={toggleRemoveExisting}
+                    handleRemoveNew={handleRemoveNew}
+                    formErrors={form.formState.errors.NewImages}
                     onDrop={(acceptedFiles) => {
+                      const currentTotal =
+                        (menuItemDetail?.images?.length || 0) +
+                        newFiles.length -
+                        removeMediaIds.length;
+                      const totalAfter = currentTotal + acceptedFiles.length;
+                      if (totalAfter > 10) {
+                        form.setError("NewImages", {
+                          type: "manual",
+                          message: "Chỉ được tải lên tối đa 10 ảnh",
+                        });
+                        return;
+                      }
+                      form.clearErrors("NewImages");
                       setNewFiles((prev) => [...prev, ...acceptedFiles]);
                     }}
                   />

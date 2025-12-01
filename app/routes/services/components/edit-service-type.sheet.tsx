@@ -148,6 +148,7 @@ export default function EditServiceTypeSheet({
   };
 
   const removeNewFile = (index: number) => {
+    form.clearErrors("newImages");
     setNewFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -330,10 +331,26 @@ export default function EditServiceTypeSheet({
                     className="mt-0 space-y-4 outline-none"
                   >
                     <div className="flex justify-between items-center">
-                      <h4 className="text-sm font-medium">Thư viện ảnh</h4>
-                      <span className="text-xs text-muted-foreground">
-                        Tối đa 8 ảnh
-                      </span>
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-medium">Thư viện ảnh</h4>
+                        {form.formState.errors.newImages?.message && (
+                          <p className="text-xs text-destructive font-medium">
+                            {form.formState.errors.newImages.message as string}
+                          </p>
+                        )}
+                        {!form.formState.errors.newImages?.message && (
+                          <p className="text-xs text-muted-foreground">
+                            Kéo thả hoặc nhấn vào ô dấu cộng để thêm ảnh. Tối đa
+                            8 ảnh.
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="h-6">
+                        {(serviceTypeDetails?.images?.length || 0) +
+                          newFiles.length -
+                          removeMediaIds.length}{" "}
+                        / 8
+                      </Badge>
                     </div>
 
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
@@ -341,9 +358,22 @@ export default function EditServiceTypeSheet({
                       <Dropzone
                         accept={{ "image/*": [] }}
                         maxFiles={8}
-                        onDrop={(accepted) =>
-                          setNewFiles((prev) => [...prev, ...accepted])
-                        }
+                        onDrop={(accepted) => {
+                          const currentTotal =
+                            (serviceTypeDetails?.images?.length || 0) +
+                            newFiles.length -
+                            removeMediaIds.length;
+                          const totalAfter = currentTotal + accepted.length;
+                          if (totalAfter > 8) {
+                            form.setError("newImages", {
+                              type: "manual",
+                              message: "Chỉ được tải lên tối đa 8 ảnh",
+                            });
+                            return;
+                          }
+                          form.clearErrors("newImages");
+                          setNewFiles((prev) => [...prev, ...accepted]);
+                        }}
                         className="group aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer bg-muted/5"
                       >
                         <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">

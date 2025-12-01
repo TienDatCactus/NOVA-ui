@@ -139,8 +139,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   // --- Effects ---
   useEffect(() => {
     if (bookingDetail && bookingDetail.id) {
-      // Reset form with new data.
-      // Important: This clears the 'isDirty' state after a successful fetch or save.
       form.reset({
         checkinDate: bookingDetail.checkinDate,
         checkoutDate: bookingDetail.checkoutDate,
@@ -151,13 +149,15 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         otaInformationId: bookingDetail.source === "OTA" ? "" : "",
         customerId: bookingDetail.customer.id,
         totalAmount: bookingDetail.totalAmount || 0,
-        breakfastDates: [],
-        rooms: [],
+        breakfastDates:
+          bookingDetail.breakfastDates?.map((date) => {
+            return { date: date };
+          }) || [],
+        rooms: bookingDetail.rooms || [],
       });
     }
-  }, [bookingDetail]); // form is stable, safe to include
+  }, [bookingDetail]);
 
-  // --- Handlers ---
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
     const hasDatesChanged =
       data.checkinDate !== bookingDetail?.checkinDate ||
