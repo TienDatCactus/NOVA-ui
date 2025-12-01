@@ -58,7 +58,10 @@ export default function ServiceBreakfastManagerDialog({
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   })();
 
-  const handleAddService = (serviceId: string) => {
+  const handleAddService = (
+    serviceId: string,
+    itemType: "ServiceItem" | "MenuItem" = "ServiceItem"
+  ) => {
     const exists = services.find(
       (s: ServiceOrderItem) => s.itemId === serviceId
     );
@@ -76,7 +79,7 @@ export default function ServiceBreakfastManagerDialog({
         : format(new Date(), "yyyy-MM-dd");
 
       const newService: ServiceOrderItem = {
-        itemType: "ServiceItem",
+        itemType: itemType,
         itemId: serviceId,
         quantity: 1,
         scheduledDate: defaultDate,
@@ -182,7 +185,6 @@ export default function ServiceBreakfastManagerDialog({
                     </p>
                   </div>
 
-                  {/* Action Button: Visible here for quick access */}
                   <Button
                     variant="outline"
                     size="sm"

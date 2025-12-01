@@ -69,6 +69,10 @@ const POSOrderDetailSchema = z.object({
   note: z.string().optional().nullable(),
   createdAt: z.string(),
   customerType: CustomerTypeEnum.optional(),
+  bookingId: z.string().optional().nullable(),
+  bookingCode: z.string().optional().nullable(),
+  bookingRoomId: z.string().optional().nullable(),
+  roomName: z.string().optional().nullable(),
   items: z.array(POSOrderItemSchema).optional(),
 });
 

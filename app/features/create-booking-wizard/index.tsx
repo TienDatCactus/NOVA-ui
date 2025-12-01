@@ -1,12 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDays, format } from "date-fns";
-import { BookCopy, Loader2, RotateCcw } from "lucide-react";
+import {
+  AlertTriangle,
+  BookCopy,
+  Eraser,
+  Loader2,
+  RotateCcw,
+} from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router"; // Chỉnh lại import tùy router bạn dùng
 import { toast } from "sonner";
 
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { DASHBOARD } from "~/lib/fe-url";
 import { useCreateBookingStore } from "~/store/create-booking.store";
@@ -22,7 +28,19 @@ import { CustomerInfoSection } from "./components/customer-info-step";
 import { BookingCartWidget } from "./components/review-payment-step";
 import { RoomSelectionSection } from "./components/room-selection-step";
 import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
-import { onError } from "~/lib/utils";
+import { cn, onError } from "~/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import { isDirty } from "zod/v3";
 
 const BookingMasterSchema = z
   .object({
@@ -65,10 +83,6 @@ const BookingMasterSchema = z
 
       const checkinDate = new Date(data.checkinDate);
       const checkoutDate = new Date(data.checkoutDate);
-
-      // Reset hours để so sánh chính xác
-      checkinDate.setHours(0, 0, 0, 0);
-      checkoutDate.setHours(23, 59, 59, 999);
 
       return data.serviceOrder.services.every((service) => {
         if (!service.scheduledDate) return true;
@@ -160,23 +174,14 @@ export default function CreateBookingPage() {
   }, [form.watch, setData]);
 
   const handleReset = () => {
-    if (confirm("Bạn có chắc muốn xóa form?")) {
-      resetStore();
-      form.reset();
-      toast.success("Đã làm mới");
-    }
+    resetStore();
+    form.reset();
+    toast.success("Đã làm mới");
   };
 
   const onSubmit = async (data: z.infer<typeof BookingMasterSchema>) => {
     const isRoomBlock = data.bookingType === "RoomBlock";
 
-    // Validate: Check if rooms are selected (except RoomBlock)
-    if (!isRoomBlock && (!data.roomIds || data.roomIds.length === 0)) {
-      toast.error("Vui lòng chọn ít nhất 1 phòng");
-      return;
-    }
-
-    // Validate: Service dates
     if (
       !isRoomBlock &&
       data.serviceOrder?.services &&
@@ -187,7 +192,7 @@ export default function CreateBookingPage() {
       const hasInvalidDate = data.serviceOrder.services.some((s: any) => {
         if (!s.scheduledDate) return false;
         const d = new Date(s.scheduledDate);
-        return d < checkin || d > checkout;
+        return d < checkin || d >= checkout;
       });
 
       if (hasInvalidDate) {
@@ -245,15 +250,61 @@ export default function CreateBookingPage() {
   };
 
   return (
-    <div className="flex flex-col bg-gray-50 overflow-y-auto">
+    <div className="flex flex-col h-full bg-gray-50 overflow-y-auto">
       <header className="h-14 shrink-0 bg-white border-b px-4 flex items-center justify-between z-30 shadow-sm">
         <div className="flex items-center gap-3">
           <h1 className="font-bold text-lg text-gray-900">Tạo Đặt Phòng</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={handleReset}>
-            <RotateCcw className="mr-2 h-3.5 w-3.5" /> Làm mới
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={!isDirty}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                Làm mới
+              </Button>
+            </AlertDialogTrigger>
+
+            <AlertDialogContent className="max-w-[400px]">
+              <AlertDialogHeader>
+                <div className="flex items-center gap-3">
+                  {/* Visual Indicator: Icon cảnh báo nổi bật */}
+                  <div className="p-2 rounded-full bg-red-100 text-red-600 dark:bg-red-900/20">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <AlertDialogTitle>Xác nhận làm mới?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm text-muted-foreground">
+                      Hành động này sẽ xóa toàn bộ dữ liệu bạn vừa nhập.
+                      <br />
+                      <span className="font-medium text-foreground">
+                        Bạn không thể hoàn tác hành động này.
+                      </span>
+                    </AlertDialogDescription>
+                  </div>
+                </div>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter className="mt-2">
+                <AlertDialogCancel className="h-9">Hủy</AlertDialogCancel>
+
+                <AlertDialogAction
+                  onClick={handleReset}
+                  className={cn(
+                    buttonVariants({ variant: "destructive", size: "default" }),
+                    "h-9"
+                  )}
+                >
+                  <Eraser className="w-4 h-4 mr-2" />
+                  Xóa & Làm mới
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Button variant="outline" size="sm" asChild>
             <Link to={DASHBOARD.bookings.list}>Thoát</Link>
           </Button>

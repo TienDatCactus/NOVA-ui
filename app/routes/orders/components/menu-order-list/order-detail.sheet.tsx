@@ -1,46 +1,35 @@
 import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
 import {
+  BedDouble,
   CalendarClock,
   Clock,
-  Receipt,
+  Hash,
   StickyNote,
   User,
-  BedDouble,
-  CreditCard,
-  MoreVertical,
-  Printer,
   X,
-  Hash,
-  ChevronRight,
 } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
 import { cn, formatMoney } from "~/lib/utils";
 import type { POSOrderDetailDto } from "~/services/api/orders/dto";
 
-import OrderItemsList from "./order-items-list";
+import InlineNoteEditor from "./inline-note-editor";
 import {
   OrderActionMenu,
   OrderAddButton,
   OrderFooterActions,
 } from "./order-actions";
-import InlineNoteEditor from "./inline-note-editor";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
+import OrderItemsList from "./order-items-list";
+import { usePOSOrderDetail } from "../../container/pos-orders/query.hooks";
 
 interface OrderDetailSheetProps {
   order: POSOrderDetailDto | null;
@@ -70,7 +59,8 @@ export default function OrderDetailSheet({
   open,
   onOpenChange,
 }: OrderDetailSheetProps) {
-  if (!order) return null;
+  const { data: orderDetail } = usePOSOrderDetail(order?.id || "");
+  if (!order || !orderDetail) return null;
 
   const statusStyle = statusStyles[order.status] || statusStyles.Open;
   const statusLabel = statusLabels[order.status] || order.status;
@@ -87,7 +77,7 @@ export default function OrderDetailSheet({
         <SheetHeader className="flex-none px-6 py-5 border-b bg-background z-10 flex flex-row items-start justify-between space-y-0">
           <div className="flex items-start gap-2">
             <SheetTitle className="text-xl font-bold tracking-tight font-mono">
-              #{order.id.slice(-6).toUpperCase()}
+              #{orderDetail.id.slice(-6).toUpperCase()}
             </SheetTitle>
             <Badge
               variant="outline"
@@ -102,9 +92,9 @@ export default function OrderDetailSheet({
 
           <div className="flex items-center gap-1 -mr-2">
             <OrderActionMenu
-              orderId={order.id}
-              status={order.status}
-              currentScheduledTime={order.scheduledAt}
+              orderId={orderDetail.id}
+              status={orderDetail.status}
+              currentScheduledTime={orderDetail.scheduledAt}
             />
             <Button
               variant="ghost"
@@ -135,10 +125,12 @@ export default function OrderDetailSheet({
                   </span>
                 </div>
                 <div className="font-medium text-sm pl-6">
-                  {isCustomerInHouse ? "Khách phòng" : "Khách lẻ"}
-                  {order.customerId && (
+                  {isCustomerInHouse
+                    ? `Khách lưu trú ${orderDetail.roomName || `#${orderDetail.bookingCode}`}`
+                    : "Khách lẻ"}
+                  {orderDetail.customerId && (
                     <span className="block text-xs text-muted-foreground font-mono mt-0.5">
-                      {order.customerId.slice(0, 8)}...
+                      {orderDetail.customerId.slice(0, 8)}...
                     </span>
                   )}
                 </div>
@@ -147,7 +139,7 @@ export default function OrderDetailSheet({
               {/* Right: Timing */}
               <div className="p-4 space-y-1">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  {order.scheduledAt ? (
+                  {orderDetail.scheduledAt ? (
                     <CalendarClock className="h-3.5 w-3.5 text-amber-600" />
                   ) : (
                     <Clock className="h-3.5 w-3.5" />
@@ -157,16 +149,16 @@ export default function OrderDetailSheet({
                   </span>
                 </div>
                 <div className="font-medium text-sm pl-6">
-                  {order.scheduledAt ? (
+                  {orderDetail.scheduledAt ? (
                     <span className="text-amber-700 font-semibold">
-                      {format(parseISO(order.scheduledAt), "HH:mm dd/MM")}
+                      {format(parseISO(orderDetail.scheduledAt), "HH:mm dd/MM")}
                     </span>
                   ) : (
                     <span>
-                      {format(parseISO(order.createdAt), "HH:mm dd/MM")}
+                      {format(parseISO(orderDetail.createdAt), "HH:mm dd/MM")}
                     </span>
                   )}
-                  {order.scheduledAt && (
+                  {orderDetail.scheduledAt && (
                     <span className="block text-xs text-amber-600/80">
                       (Đã hẹn giờ)
                     </span>
@@ -184,9 +176,9 @@ export default function OrderDetailSheet({
                 </span>
               </div>
               <InlineNoteEditor
-                orderId={order.id}
-                initialNote={order.note || ""}
-                disabled={order.status !== "Open"}
+                orderId={orderDetail.id}
+                initialNote={orderDetail.note || ""}
+                disabled={orderDetail.status !== "Open"}
               />
             </div>
 
@@ -195,16 +187,19 @@ export default function OrderDetailSheet({
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                   <Hash className="h-3.5 w-3.5" /> Danh sách món (
-                  {order.items?.length || 0})
+                  {orderDetail.items?.length || 0})
                 </h3>
-                {order.status === "Open" && (
-                  <OrderAddButton orderId={order.id} status={order.status} />
+                {orderDetail.status === "Open" && (
+                  <OrderAddButton
+                    orderId={orderDetail.id}
+                    status={orderDetail.status}
+                  />
                 )}
               </div>
 
               {/* Items List Component */}
               <div className="rounded-lg border bg-background shadow-sm overflow-hidden">
-                <OrderItemsList items={order.items || []} />
+                <OrderItemsList items={orderDetail.items || []} />
               </div>
             </div>
           </div>
@@ -218,22 +213,26 @@ export default function OrderDetailSheet({
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Tổng tiền hàng</span>
                 <span className="font-mono text-foreground">
-                  {formatMoney(order.subtotalAmount).vndFormatted}
+                  {formatMoney(orderDetail.subtotalAmount).vndFormatted}
                 </span>
               </div>
 
-              {(order.serviceChargeAmount > 0 || order.vatAmount > 0) && (
+              {(orderDetail.serviceChargeAmount > 0 ||
+                orderDetail.vatAmount > 0) && (
                 <>
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Phí dịch vụ & Khác</span>
                     <span className="font-mono text-foreground">
-                      {formatMoney(order.serviceChargeAmount).vndFormatted}
+                      {
+                        formatMoney(orderDetail.serviceChargeAmount)
+                          .vndFormatted
+                      }
                     </span>
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>VAT</span>
                     <span className="font-mono text-foreground">
-                      {formatMoney(order.vatAmount).vndFormatted}
+                      {formatMoney(orderDetail.vatAmount).vndFormatted}
                     </span>
                   </div>
                 </>
@@ -248,12 +247,12 @@ export default function OrderDetailSheet({
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Thanh toán
                 </span>
-                {order.invoiceId ? (
+                {orderDetail.invoiceId ? (
                   <Badge
                     variant="secondary"
                     className="w-fit font-mono text-[10px] px-1.5 h-5"
                   >
-                    INV: {order.invoiceId}
+                    INV: {orderDetail.invoiceId}
                   </Badge>
                 ) : (
                   <span className="text-[10px] text-muted-foreground italic">
@@ -262,16 +261,16 @@ export default function OrderDetailSheet({
                 )}
               </div>
               <span className="text-2xl font-bold tracking-tight text-primary font-mono">
-                {formatMoney(order.totalAmount).vndFormatted}
+                {formatMoney(orderDetail.totalAmount).vndFormatted}
               </span>
             </div>
 
             {/* Main Action */}
             <div className="pt-2">
               <OrderFooterActions
-                orderId={order.id}
-                status={order.status}
-                invoiceId={order.invoiceId}
+                orderId={orderDetail.id}
+                status={orderDetail.status}
+                invoiceId={orderDetail.invoiceId}
               />
             </div>
           </div>

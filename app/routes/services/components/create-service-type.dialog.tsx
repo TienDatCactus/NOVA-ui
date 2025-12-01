@@ -114,10 +114,20 @@ export default function CreateServiceTypeDialog({
   }, [files]);
 
   const onDropFiles = (accepted: File[]) => {
+    const totalFiles = files.length + accepted.length;
+    if (totalFiles > 8) {
+      form.setError("images", {
+        type: "manual",
+        message: "Chỉ được tải lên tối đa 8 ảnh",
+      });
+      return;
+    }
+    form.clearErrors("images");
     setFiles((prev) => [...prev, ...accepted]);
   };
 
   const removeImage = (index: number) => {
+    form.clearErrors("images");
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -283,7 +293,14 @@ export default function CreateServiceTypeDialog({
                   className="mt-0 space-y-4 outline-none"
                 >
                   <div className="flex justify-between items-center">
-                    <h4 className="text-sm font-medium">Thư viện ảnh</h4>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-medium">Thư viện ảnh</h4>
+                      {form.formState.errors.images?.message && (
+                        <p className="text-xs text-destructive font-medium">
+                          {form.formState.errors.images.message as string}
+                        </p>
+                      )}
+                    </div>
                     <span className="text-xs text-muted-foreground">
                       {previews.length} / 8 ảnh
                     </span>

@@ -402,7 +402,7 @@ export default function Component({
         </main>
 
         {/* Sidebar (Cart) */}
-        <aside className="w-[420px] flex flex-col border-l bg-background shadow-2xl shadow-black/5 z-10 relative">
+        <aside className="w-[420px] overflow-y-auto flex flex-col border-l bg-background shadow-2xl shadow-black/5 z-10 relative">
           {/* 1. Header */}
           <div className="flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur z-10">
             <h2 className="font-semibold text-xl">Đơn hàng hiện tại</h2>

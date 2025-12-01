@@ -1,18 +1,16 @@
 import z from "zod";
 import { PaymentSchema } from "../../schema/payment.schema";
 
-const InvoiceStatusEnum = z
-  .enum([
-    "Unpaid",
-    "DepositOnly",
-    "PartiallyPaid",
-    "Paid",
-    "Overpaid",
-    "Refunded",
-    "Chargeback",
-    "Voided",
-  ])
-  .or(z.string());
+const InvoiceStatusEnum = z.enum([
+  "Unpaid",
+  "DepositOnly",
+  "PartiallyPaid",
+  "Paid",
+  "Overpaid",
+  "Refunded",
+  "Chargeback",
+  "Voided",
+]);
 
 const InvoiceTypeEnum = z.enum([
   "Deposit", // Hóa đơn cọc/deposit
@@ -96,8 +94,8 @@ const InvoiceDetailSchema = z.object({
   total: z.number().optional().nullable(),
   paidAmount: z.number().optional().nullable(),
   balance: z.number().optional().nullable(),
-  paymentMethod: z.string().optional().nullable(),
-  status: z.string().optional().nullable(),
+  paymentMethod: PaymentSchema.PaymentMethodEnum.optional().nullable(),
+  status: InvoiceStatusEnum.optional().nullable(),
   issuedAt: z.string().optional().nullable(),
   items: z.array(InvoiceDetailItemSchema).optional().nullable(),
 });

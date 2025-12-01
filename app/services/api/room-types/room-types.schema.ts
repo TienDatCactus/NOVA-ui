@@ -2,8 +2,8 @@ import z from "zod";
 
 const RoomTypesListItem = z.object({
   id: z.string(),
-  code: z.string().min(2).max(100),
-  name: z.string().min(2).max(100),
+  code: z.string().max(100),
+  name: z.string().max(100),
   baseRate: z.number().min(0),
   active: z.boolean(),
   roomsCount: z.number().min(0),
@@ -32,13 +32,24 @@ const RoomTypesDetailResponseSchema = z.object({
 });
 
 const EditRoomTypesRequestSchema = z.object({
-  code: z.string(),
-  name: z.string(),
+  code: z
+    .string()
+    .min(1, "Mã hạng phòng là bắt buộc")
+    .max(100, "Mã hạng phòng tối đa 100 ký tự"),
+  name: z
+    .string()
+    .min(1, "Tên hạng phòng là bắt buộc")
+    .max(100, "Tên hạng phòng tối đa 100 ký tự"),
   description: z.string().optional(),
-  baseRate: z.number(),
+  baseRate: z
+    .number("Giá cơ bản là bắt buộc")
+    .min(1, "Giá cơ bản phải lớn hơn 0"),
   active: z.boolean(),
-  maxOccupancy: z.number().optional(),
-  images: z.array(z.instanceof(File).optional()),
+  maxOccupancy: z
+    .number()
+    .min(1, "Sức chứa tối thiểu là 1 người")
+    .max(20, "Sức chứa tối đa là 20 người"),
+  images: z.array(z.instanceof(File)).optional(),
 });
 
 const UpdateRoomTypesDetailRequestSchema = EditRoomTypesRequestSchema.extend({

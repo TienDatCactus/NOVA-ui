@@ -196,12 +196,12 @@ export default function InvoiceDetailSheet({
   }, [invoiceDetail?.status]);
 
   const paymentValidation = useMemo(() => {
-    if (!invoiceDetail) return { isValid: false };
+    if (!invoiceDetail || !invoiceDetail.status) return { isValid: false };
     return validatePaymentAmount(
       amount,
       invoiceDetail.balance || 0,
       calculatedFees?.totalAmount || invoiceDetail.total || 0,
-      invoiceDetail.status || ""
+      invoiceDetail.status
     );
   }, [amount, invoiceDetail, calculatedFees]);
 
@@ -288,7 +288,7 @@ export default function InvoiceDetailSheet({
           <div className="flex items-center gap-2">
             {isCheckoutInvoice &&
               invoiceDetail?.status !== "Paid" &&
-              invoiceDetail?.status !== "Void" && (
+              invoiceDetail?.status !== "Voided" && (
                 <Button
                   variant="ghost"
                   size="sm"

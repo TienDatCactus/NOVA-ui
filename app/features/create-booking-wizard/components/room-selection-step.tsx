@@ -8,7 +8,7 @@ import {
   RotateCcw,
   Users,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -27,6 +27,13 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { cn, useCalculateNights } from "~/lib/utils";
 import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { AvailableRoomRow } from "../fragments/available-room";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
 
 interface RoomSelectionSectionProps {
   form: UseFormReturn<any>;
@@ -117,11 +124,8 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
       shouldDirty: true,
     });
   };
-
   return (
-    // Outer Container: Full height, flex column for sticky header/footer
     <div className="flex flex-col justify-between rounded-md bg-background flex-1">
-      {/* === 1. HEADER (Sticky) === */}
       <div>
         <div className="border-b p-4 bg-background  space-y-4">
           <div className="flex items-center gap-2">
@@ -228,10 +232,20 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
         <div className=" ">
           <ScrollArea className="h-full w-full">
             <div className="flex flex-col w-full pb-20">
-              {" "}
-              {/* pb-20 for footer space */}
-              {/* Loading State */}
-              {isPending && !availableRooms && (
+              {!shouldFetch && !availableRooms && (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia>
+                      <AlertCircle />
+                    </EmptyMedia>
+                    <EmptyTitle>Không có phòng trống</EmptyTitle>
+                    <EmptyDescription className="text-xs">
+                      Hãy thử thay đổi ngày hoặc số lượng khách.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
+              {shouldFetch && isPending && (
                 <div className="divide-y p-1">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="p-4 space-y-3">
@@ -244,26 +258,9 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                   ))}
                 </div>
               )}
-              {/* Empty State */}
-              {!isPending && availableRooms?.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground space-y-3 px-6">
-                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                    <AlertCircle className="h-6 w-6 opacity-50" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">
-                      No rooms found
-                    </p>
-                    <p className="text-xs">
-                      Try changing your dates or guest count.
-                    </p>
-                  </div>
-                </div>
-              )}
-              {/* List State */}
-              {!isPending && availableRooms && availableRooms.length > 0 && (
+
+              {availableRooms && availableRooms.length > 0 && (
                 <>
-                  {/* Sticky Subheader inside scroll area */}
                   <div className="px-4 py-2 bg-muted/30 border-b flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm">
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                       Loại phòng khả dụng

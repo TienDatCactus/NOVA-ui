@@ -112,7 +112,10 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                       </FormControl>
                       <SelectContent>
                         {BOOKING_SOURCES.filter(
-                          (s) => s.key !== "OTA" && s.key !== "RoomBlock"
+                          (s) =>
+                            s.key !== "OTA" &&
+                            s.key !== "RoomBlock" &&
+                            s.key !== "DirectCustomer"
                         ).map((bs) => (
                           <SelectItem value={bs.key} key={bs.key}>
                             {bs.label}

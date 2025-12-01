@@ -2,8 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
-  AlertCircle,
-  ArrowRight,
   Banknote,
   CalendarClock,
   CheckCircle2,
@@ -12,8 +10,6 @@ import {
   Hash,
   Loader2,
   Receipt,
-  Sparkles,
-  Utensils,
   XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";

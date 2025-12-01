@@ -27,6 +27,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -313,7 +314,7 @@ export default function StayDetailBar({
                                     defaultValue={field.value}
                                   >
                                     <FormControl>
-                                      <SelectTrigger className="w-40">
+                                      <SelectTrigger className="w-full">
                                         <SelectValue />
                                       </SelectTrigger>
                                     </FormControl>
@@ -343,27 +344,27 @@ export default function StayDetailBar({
                                 <FormItem className="col-span-2 sm:col-span-1">
                                   <FormLabel>Số tiền thu</FormLabel>
                                   <FormControl>
-                                    <div className="relative">
-                                      <Input
-                                        type="number"
-                                        {...field}
-                                        className="pr-12 text-right font-mono font-bold"
-                                        onChange={(e) =>
-                                          field.onChange(
-                                            parseFloat(e.target.value) || 0
-                                          )
-                                        }
-                                      />
-                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                                        VND
-                                      </span>
-                                    </div>
+                                    <Input
+                                      type="number"
+                                      {...field}
+                                      className="text-right font-mono font-bold"
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          parseFloat(e.target.value) || 0
+                                        )
+                                      }
+                                      endAddon={
+                                        <span className=" text-xs text-muted-foreground">
+                                          VND
+                                        </span>
+                                      }
+                                    />
                                   </FormControl>
                                 </FormItem>
                               )}
                             />
                           </div>
-                          <DialogClose asChild>
+                          <DialogFooter>
                             <Button
                               type="submit"
                               className="w-full mt-2"
@@ -373,7 +374,7 @@ export default function StayDetailBar({
                                 ? "Đang xử lý..."
                                 : "Xác nhận đã thu tiền"}
                             </Button>
-                          </DialogClose>
+                          </DialogFooter>
                         </form>
                       </Form>
                     </div>

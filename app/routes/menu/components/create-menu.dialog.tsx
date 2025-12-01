@@ -75,7 +75,6 @@ export default function CreateMenuDialog({
     const currentImgs = form.getValues("Images") || [];
     const newImgs = currentImgs.filter((_, i) => i !== index);
     form.setValue("Images", newImgs);
-    form.clearErrors("Images");
 
     URL.revokeObjectURL(imagePreview[index]);
     setImagePreview((prev) => prev.filter((_, i) => i !== index));
@@ -170,9 +169,14 @@ export default function CreateMenuDialog({
                   onDrop={(acceptedFiles: File[]) => {
                     const currentImgs = form.getValues("Images") || [];
                     const totalImgs = currentImgs.length + acceptedFiles.length;
-                    if (totalImgs > 8) {
+                    if (totalImgs > 10) {
+                      form.setError("Images", {
+                        type: "manual",
+                        message: "Chỉ được tải lên tối đa 10 ảnh",
+                      });
                       return;
                     }
+                    form.clearErrors("Images");
                     const newImgs = [...currentImgs, ...acceptedFiles];
                     form.setValue("Images", newImgs);
                     setImagePreview((prev) => [

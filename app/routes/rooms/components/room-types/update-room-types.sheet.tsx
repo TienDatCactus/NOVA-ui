@@ -210,10 +210,22 @@ export function UpdateRoomTypeSheet({
 
   // --- Handlers ---
   const onDropNewFiles = (accepted: File[]) => {
+    const currentTotal =
+      (existingImages?.length || 0) + newFiles.length - removeMediaIds.length;
+    const totalAfter = currentTotal + accepted.length;
+    if (totalAfter > 8) {
+      form.setError("images", {
+        type: "manual",
+        message: "Chỉ được tải lên tối đa 8 ảnh",
+      });
+      return;
+    }
+    form.clearErrors("images");
     setNewFiles((prev) => [...prev, ...accepted]);
   };
 
   const removeNewFile = (index: number) => {
+    form.clearErrors("images");
     setNewFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -375,11 +387,16 @@ export function UpdateRoomTypeSheet({
                               </FormLabel>
                               <FormControl>
                                 <Input
+                                  type="number"
                                   className="font-semibold text-right text-lg h-12"
                                   {...field}
-                                  onChange={(e) =>
-                                    field.onChange(parseFloat(e.target.value))
-                                  }
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    field.onChange(
+                                      val === "" ? undefined : parseFloat(val)
+                                    );
+                                  }}
                                   endAddon={
                                     <span className="text-sm font-bold text-muted-foreground">
                                       VND
@@ -461,10 +478,26 @@ export function UpdateRoomTypeSheet({
                       className="mt-0 space-y-4 outline-none"
                     >
                       <div className="flex justify-between items-center">
-                        <h4 className="text-sm font-medium">Thư viện ảnh</h4>
-                        <span className="text-xs text-muted-foreground">
-                          Tối đa 8 ảnh
-                        </span>
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-medium">Thư viện ảnh</h4>
+                          {form.formState.errors.images?.message && (
+                            <p className="text-xs text-destructive font-medium">
+                              {form.formState.errors.images.message as string}
+                            </p>
+                          )}
+                          {!form.formState.errors.images?.message && (
+                            <p className="text-xs text-muted-foreground">
+                              Kéo thả hoặc nhấn vào ô dấu cộng để thêm ảnh. Tối
+                              đa 8 ảnh.
+                            </p>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="h-6">
+                          {(existingImages?.length || 0) +
+                            newFiles.length -
+                            removeMediaIds.length}{" "}
+                          / 8
+                        </Badge>
                       </div>
 
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">

@@ -94,7 +94,7 @@ export const CreateMenuItemRequestSchema = z.object({
   Active: z.boolean().default(true),
   Images: z
     .array(z.instanceof(File))
-    .max(8, "Chỉ được tải lên tối đa 8 ảnh")
+    .max(10, "Chỉ được tải lên tối đa 10 ảnh")
     .optional(),
   Components: z
     .array(
@@ -121,11 +121,11 @@ export const CreateMenuItemResponseSchema = MenuItemDetailSchema;
 export const UpdateMenuItemRequestSchema = CreateMenuItemRequestSchema.extend({
   RemoveMediaIds: z
     .array(z.string())
-    .max(8, "Chỉ được xóa tối đa 8 ảnh")
+    .max(10, "Chỉ được xóa tối đa 10 ảnh")
     .optional(),
   NewImages: z
     .array(z.instanceof(File))
-    .max(8, "Chỉ được tải lên tối đa 8 ảnh")
+    .max(10, "Chỉ được tải lên tối đa 10   ảnh")
     .optional(),
 }).refine((data) => data.Components.length > 0, {
   message: "Vui lòng thêm ít nhất 1 nguyên liệu vào công thức định lượng",

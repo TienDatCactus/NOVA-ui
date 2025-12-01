@@ -74,6 +74,9 @@ interface BookingCartWidgetProps {
 }
 
 export function BookingCartWidget({ form }: BookingCartWidgetProps) {
+  const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
+
   // --- 1. DATA WATCHERS ---
   const roomIds = form.watch("roomIds") || [];
   const dateRange = form.watch("dateRange");
@@ -146,10 +149,13 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
       : serverTotal;
   const hasNotes = !!specialRequest || !!internalNote;
 
-  // --- 3. LOCAL STATE ---
-  const [isEditingPrice, setIsEditingPrice] = useState(false);
-  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
-
+  const handleRemoveRoom = (roomId: string) => {
+    const updatedRoomIds = roomIds.filter((id: string) => id !== roomId);
+    form.setValue("roomIds", updatedRoomIds, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
   return (
     <Card className="flex h-full gap-0 flex-col overflow-y-auto">
       {/* === HEADER === */}
@@ -259,7 +265,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
               {roomsDetails?.map((room) => (
                 <div
                   key={room.roomId}
-                  className="flex justify-between text-sm items-start group"
+                  className="flex justify-between text-sm items-center group"
                 >
                   <div className="flex flex-col">
                     <span className="font-medium text-foreground">
@@ -269,8 +275,17 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                       {room.roomTypeName}
                     </span>
                   </div>
-                  <span className="font-mono text-foreground/90 tabular-nums">
-                    {formatMoney(room.dailyPrice * nights).vndFormatted}
+                  <span className="flex items-center gap-3">
+                    <span className="font-mono text-foreground/90 tabular-nums">
+                      {formatMoney(room.dailyPrice * nights).vndFormatted}
+                    </span>
+                    <Button
+                      onClick={() => handleRemoveRoom(room.roomId)}
+                      variant={"destructive-ghost"}
+                      size={"icon"}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </span>
                 </div>
               ))}
