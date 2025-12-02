@@ -1,22 +1,24 @@
 {
-  "title": "Explore NOVA Resort",
-  "subtitle": "Experience premium cuisine and services",
+  "title": "Highland Service & Menu",
+  "subtitle": "Taste of the Highlands",
+  "description": "Experience the misty flavors and serene services of the mountains.",
   "search": {
-    "placeholder": "What food or service are you looking for?",
-    "noResults": "No matching results found"
+    "placeholder": "Search dishes, treks, services..."
   },
   "tabs": {
     "food": "Cuisine",
     "service": "Services"
   },
-  "card": {
-    "outOfStock": "Out of Stock",
-    "suspended": "Suspended",
-    "price": "Price",
-    "available": "{{count}} available"
-  },
+  "loading": "Gathering ingredients from the valley...",
   "empty": {
-    "title": "No items yet",
-    "description": "Try searching with different keywords"
+    "searching": {
+      "title": "Hidden in the mist",
+      "description": "We couldn't find anything matching your search. Try looking for something else."
+    },
+    "noItems": {
+      "title": "Quiet in the valley",
+      "description": "There are no items here right now. The harvest is coming soon."
+    },
+    "clearButton": "Clear Mist"
   }
 }

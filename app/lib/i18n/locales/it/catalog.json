@@ -1,17 +1,24 @@
 {
-  "title": "Menu e Servizi",
-  "subtitle": "Esplora tutti i menu e servizi di Eco Palms House",
+  "title": "Servizio e Menu di Montagna",
+  "subtitle": "Sapore delle Alture",
+  "description": "Sperimenta i sapori nebbiosi e i servizi sereni delle montagne.",
   "search": {
-    "placeholder": "Cerca menu o servizi..."
+    "placeholder": "Cerca piatti, trekking, servizi..."
   },
   "tabs": {
-    "menu": "Menu",
-    "services": "Servizi"
+    "food": "Cucina",
+    "service": "Servizi"
   },
-  "status": {
-    "available": "Disponibile",
-    "unavailable": "Non disponibile",
-    "outOfStock": "Esaurito",
-    "suspended": "Sospeso"
+  "loading": "Raccogliendo ingredienti dalla valle...",
+  "empty": {
+    "searching": {
+      "title": "Nascosto nella nebbia",
+      "description": "Non siamo riusciti a trovare nulla che corrisponda alla tua ricerca. Prova a cercare qualcos'altro."
+    },
+    "noItems": {
+      "title": "Quiete nella valle",
+      "description": "Non ci sono elementi qui al momento. Il raccolto sta arrivando presto."
+    },
+    "clearButton": "Cancella Nebbia"
   }
 }

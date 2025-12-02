@@ -1,17 +1,24 @@
 {
-  "title": "菜单和服务",
-  "subtitle": "探索 Eco Palms House 的所有菜单和服务",
+  "title": "高原服务与菜单",
+  "subtitle": "高原的味道",
+  "description": "体验山的迷雾风味和宁静服务。",
   "search": {
-    "placeholder": "搜索菜单或服务..."
+    "placeholder": "搜索菜肴、徒步、服务..."
   },
   "tabs": {
-    "menu": "菜单",
-    "services": "服务"
+    "food": "美食",
+    "service": "服务"
   },
-  "status": {
-    "available": "可用",
-    "unavailable": "不可用",
-    "outOfStock": "缺货",
-    "suspended": "已暂停"
+  "loading": "正在从山谷收集食材...",
+  "empty": {
+    "searching": {
+      "title": "隐藏在雾中",
+      "description": "我们找不到与您的搜索匹配的任何内容。请尝试寻找其他内容。"
+    },
+    "noItems": {
+      "title": "山谷的宁静",
+      "description": "目前这里没有项目。收获即将到来。"
+    },
+    "clearButton": "清除雾气"
   }
 }

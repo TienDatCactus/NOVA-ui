@@ -17,5 +17,11 @@
   "sort": "Ordina",
   "select": "Seleziona",
   "submit": "Invia",
-  "reset": "Reimposta"
+  "reset": "Reimposta",
+  "nav": {
+    "inbox": "Posta in arrivo",
+    "catalog": "Catalogo",
+    "guidelines": "Linee guida",
+    "map": "Mappa"
+  }
 }

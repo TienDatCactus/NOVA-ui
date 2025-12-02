@@ -17,5 +17,11 @@
   "sort": "정렬",
   "select": "선택",
   "submit": "제출",
-  "reset": "재설정"
+  "reset": "재설정",
+  "nav": {
+    "inbox": "받은편지함",
+    "catalog": "카탈로그",
+    "guidelines": "가이드라인",
+    "map": "지도"
+  }
 }

@@ -15,5 +15,11 @@
   "previous": "Trước",
   "submit": "Gửi",
   "success": "Thành công",
-  "failed": "Thất bại"
+  "failed": "Thất bại",
+  "nav": {
+    "inbox": "Hộp thư",
+    "catalog": "Danh mục",
+    "guidelines": "Hướng dẫn",
+    "map": "Bản đồ"
+  }
 }

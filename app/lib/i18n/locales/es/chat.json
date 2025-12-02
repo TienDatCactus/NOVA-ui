@@ -52,12 +52,26 @@
     "tagItems": "Etiquetar comida/servicio",
     "quickTag": "Etiqueta Rápida",
     "menu": "Menú",
-    "services": "Servicios"
+    "services": "Servicios",
+    "title": "Chat con Recepción",
+    "placeholder": "Escribe un mensaje...",
+    "send": "Enviar",
+    "connected": "Conectado",
+    "reconnecting": "Reconectando...",
+    "translation": {
+      "auto": "Traducción automática",
+      "show": "Mostrar traducción",
+      "hide": "Ocultar traducción",
+      "detected": "Detectado: {{language}}"
+    },
+    "tag": {
+      "menu": "Etiquetar elemento del menú",
+      "service": "Etiquetar servicio"
+    }
   },
-  "translation": {
-    "original": "Original",
-    "translated": "Traducido",
-    "translating": "Traduciendo...",
-    "error": "Error de traducción"
+  "qrScanner": {
+    "cameraError": "No se puede acceder a la cámara",
+    "startScan": "Comenzar escaneo",
+    "scanning": "Escaneando... (Toca para detener)"
   }
 }

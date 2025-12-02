@@ -16,361 +16,412 @@ import {
   Moon,
   Coffee,
   Bath,
-  Tv,
-  Refrigerator,
-  Wind,
+  CableCar,
   Shield,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
+import { cn } from "~/lib/utils";
 
 export default function GuidesPage() {
   const { t } = useTranslation("guides");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/20 to-background">
-      {/* Header */}
-      <div className="bg-primary text-primary-foreground py-12 px-6">
-        <div className="max-w-4xl mx-auto text-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-lg opacity-90">{t("subtitle")}</p>
+    <div className="min-h-screen bg-stone-50 text-stone-800 font-sans">
+      {/* --- HERO SECTION --- */}
+      <div className="relative h-[40vh] md:h-[50vh] w-full overflow-hidden">
+        {/* Placeholder: Sapa Rice Terraces */}
+        <img
+          src="https://images.unsplash.com/photo-1531213203257-16afb0eac5d6?q=80&w=2836&auto=format&fit=crop"
+          alt="Sapa Landscape"
+          className="w-full h-full object-cover filter brightness-[0.85]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-stone-900/20 to-transparent" />
+
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white">
+          <div className="max-w-4xl mx-auto space-y-4">
+            <Badge className="bg-emerald-600/90 hover:bg-emerald-700 text-white border-none backdrop-blur-md px-3 py-1 text-sm font-light tracking-widest uppercase">
+              Eco Palms House
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight">
+              {t("title") || "Sổ tay Lưu trú"}
+            </h1>
+            <p className="text-lg md:text-xl text-stone-200 max-w-2xl font-light">
+              {t("subtitle") ||
+                "Hòa mình vào thiên nhiên Sapa với những lưu ý nhỏ để kỳ nghỉ trọn vẹn."}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-12 space-y-8">
-        {/* Check-in/Check-out Times */}
-        <Card className="shadow-sm border-primary/10">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <Clock className="h-6 w-6 text-primary" />
-              {t("times.title")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
-                <Sun className="h-5 w-5 text-orange-500 mt-1" />
-                <div>
-                  <p className="font-semibold">{t("times.checkin")}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("times.checkinTime")}
-                  </p>
-                </div>
+      {/* --- MAIN CONTENT --- */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 -mt-10 relative z-10">
+        {/* 1. KEY INFO ROW (Time & Wifi) */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          {/* Time Schedule */}
+          <Card className="md:col-span-2 shadow-xl shadow-stone-200/50 border-none bg-white/95 backdrop-blur">
+            <CardHeader className="pb-2 border-b border-stone-100">
+              <CardTitle className="flex items-center gap-2 text-emerald-800">
+                <Clock className="h-5 w-5" />
+                {t("times.title")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 grid sm:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <TimeItem
+                  icon={<Sun className="h-5 w-5 text-amber-500" />}
+                  label={t("times.checkin")}
+                  value={t("times.checkinTime")}
+                />
+                <TimeItem
+                  icon={<Moon className="h-5 w-5 text-indigo-500" />}
+                  label={t("times.checkout")}
+                  value={t("times.checkoutTime")}
+                />
               </div>
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
-                <Moon className="h-5 w-5 text-blue-500 mt-1" />
-                <div>
-                  <p className="font-semibold">{t("times.checkout")}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("times.checkoutTime")}
-                  </p>
-                </div>
+              <div className="space-y-4 sm:border-l sm:border-stone-100 sm:pl-6">
+                <TimeItem
+                  icon={<Coffee className="h-5 w-5 text-emerald-700" />}
+                  label={t("times.breakfast")}
+                  value={t("times.breakfastTime")}
+                />
+                <TimeItem
+                  icon={
+                    <UtensilsCrossed className="h-5 w-5 text-emerald-700" />
+                  }
+                  label={t("times.dinner")}
+                  value={t("times.dinnerTime")}
+                />
               </div>
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
-                <Coffee className="h-5 w-5 text-amber-600 mt-1" />
-                <div>
-                  <p className="font-semibold">{t("times.breakfast")}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("times.breakfastTime")}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
-                <UtensilsCrossed className="h-5 w-5 text-green-600 mt-1" />
-                <div>
-                  <p className="font-semibold">{t("times.dinner")}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("times.dinnerTime")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Wi-Fi Information */}
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <Wifi className="h-6 w-6 text-primary" />
-              {t("wifi.title")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                <span className="text-sm font-medium">{t("wifi.network")}</span>
-                <Badge variant="secondary" className="font-mono">
-                  Eco Palms House
-                </Badge>
+          {/* Wifi Card (Vertical) */}
+          <Card className="shadow-xl shadow-stone-200/50 border-none bg-emerald-900 text-white flex flex-col justify-center overflow-hidden relative">
+            {/* Abstract Pattern overlay */}
+            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+            <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+
+            <CardContent className="p-8 text-center space-y-6 relative z-10">
+              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto backdrop-blur-sm">
+                <Wifi className="h-8 w-8" />
               </div>
-              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                <span className="text-sm font-medium">
-                  {t("wifi.password")}
-                </span>
-                <Badge variant="secondary" className="font-mono">
+              <div>
+                <p className="text-emerald-200 text-sm font-medium uppercase tracking-wider mb-1">
+                  Network
+                </p>
+                <p className="text-xl font-semibold">Eco Palms House</p>
+              </div>
+              <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+                <p className="text-emerald-200 text-xs font-medium uppercase tracking-wider mb-1">
+                  Password
+                </p>
+                <p className="text-2xl font-mono tracking-widest font-bold">
                   loveeco12
-                </Badge>
+                </p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Hot Water Usage */}
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <Droplet className="h-6 w-6 text-blue-500" />
-              {t("hotWater.title")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="mt-1 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                1
+        {/* 2. MASONRY GRID FOR RULES & INFO */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+          {/* COL 1: Essentials */}
+          <div className="space-y-6">
+            {/* Hot Water */}
+            <InfoCard
+              icon={<Droplet className="text-sky-500" />}
+              title={t("hotWater.title")}
+            >
+              <div className="relative rounded-lg overflow-hidden mb-4 h-32">
+                {/* Placeholder: Bathroom/Water */}
+                <img
+                  src="https://images.unsplash.com/photo-1584622050111-993a426fbf0a?q=80&w=2940&auto=format&fit=crop"
+                  className="w-full h-full object-cover"
+                  alt="Bathroom"
+                />
+                <div className="absolute inset-0 bg-black/20" />
               </div>
-              <p className="text-sm">{t("hotWater.step1")}</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="mt-1 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                2
+              <div className="space-y-3 text-sm text-stone-600">
+                <Step number="1" text={t("hotWater.step1")} />
+                <Step number="2" text={t("hotWater.step2")} />
               </div>
-              <p className="text-sm">{t("hotWater.step2")}</p>
-            </div>
-          </CardContent>
-        </Card>
+            </InfoCard>
 
-        {/* Important Notes */}
-        <Card className="shadow-sm border-orange-200">
-          <CardHeader className="bg-orange-50">
-            <CardTitle className="flex items-center gap-3">
-              <Leaf className="h-6 w-6 text-green-600" />
-              {t("notes.title")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 pt-6">
-            {/* Room Design & Amenities */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Bed className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold">{t("notes.roomDesign.title")}</h4>
-              </div>
-              <ul className="space-y-2 ml-7 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>{t("notes.roomDesign.ecoStyle")}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>{t("notes.roomDesign.noLaundry")}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>
-                    {t("notes.roomDesign.beanBag")}{" "}
-                    <strong className="text-destructive">500,000 VND</strong>.
-                  </span>
-                </li>
+            {/* Towels (Warning) */}
+            <Card className="border-amber-200 bg-amber-50/50 shadow-none">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-amber-800 flex items-center gap-2 text-base">
+                  <Bath className="h-5 w-5" /> {t("notes.towels.title")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-amber-900/80 space-y-2">
+                <p>{t("notes.towels.purpose")}</p>
+                <p className="font-medium bg-amber-100 p-2 rounded text-amber-800">
+                  ⚠️ {t("notes.towels.warning")} <strong>1,000,000 VND</strong>.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* COL 2: Nature & Room */}
+          <div className="space-y-6">
+            {/* Room Design */}
+            <InfoCard
+              icon={<Leaf className="text-emerald-600" />}
+              title={t("notes.roomDesign.title")}
+            >
+              <ul className="space-y-3 text-sm text-stone-600">
+                <BulletItem text={t("notes.roomDesign.ecoStyle")} />
+                <BulletItem text={t("notes.roomDesign.noLaundry")} />
+                <BulletItem
+                  text={
+                    <span>
+                      {t("notes.roomDesign.beanBag")}{" "}
+                      <strong className="text-red-600">500,000 VND</strong>
+                    </span>
+                  }
+                />
               </ul>
-            </div>
+            </InfoCard>
 
-            <Separator />
-
-            {/* Towels */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Bath className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold">{t("notes.towels.title")}</h4>
+            {/* Food Rule with Image */}
+            <Card className="overflow-hidden border-none shadow-md">
+              <div className="h-32 bg-stone-200 relative">
+                {/* Placeholder: Cozy room interior */}
+                <img
+                  src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2940&auto=format&fit=crop"
+                  className="w-full h-full object-cover"
+                  alt="Room Interior"
+                />
               </div>
-              <Alert className="border-yellow-200 bg-yellow-50">
-                <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                <AlertDescription className="text-sm space-y-2">
-                  <p>{t("notes.towels.purpose")}</p>
-                  <p>
-                    {t("notes.towels.warning")}{" "}
-                    <strong className="text-destructive">1,000,000 VND</strong>.
-                  </p>
-                </AlertDescription>
-              </Alert>
-            </div>
-
-            <Separator />
-
-            {/* Electrical Devices */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Cable className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold">{t("notes.electrical.title")}</h4>
-              </div>
-              <ul className="space-y-2 ml-7 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>{t("notes.electrical.safety")}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>{t("notes.electrical.turnOff")}</span>
-                </li>
-              </ul>
-            </div>
-
-            <Separator />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <UtensilsCrossed className="h-5 w-5 text-stone-500" />
+                  {t("notes.food.title")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Alert className="bg-stone-50 border-stone-200">
+                  <Bug className="h-4 w-4 text-stone-600" />
+                  <AlertDescription className="text-stone-600 text-sm mt-1">
+                    {t("notes.food.warning")}
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
 
             {/* Fire Safety */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Flame className="h-5 w-5 text-red-500" />
-                <h4 className="font-semibold text-red-600">
+            <Alert
+              variant="destructive"
+              className="bg-red-50 border-red-200 text-red-900"
+            >
+              <Flame className="h-4 w-4 text-red-600" />
+              <div className="ml-2">
+                <p className="font-bold text-sm mb-1">
                   {t("notes.fire.title")}
-                </h4>
+                </p>
+                <p className="text-xs opacity-90 leading-relaxed">
+                  {t("notes.fire.warning")}
+                </p>
               </div>
-              <Alert variant="destructive" className="border-red-200">
-                <Shield className="h-4 w-4" />
-                <AlertDescription className="text-sm space-y-2">
-                  <p>{t("notes.fire.material")}</p>
-                  <p className="font-semibold">{t("notes.fire.warning")}</p>
-                  <p>{t("notes.fire.emergency")}</p>
-                </AlertDescription>
-              </Alert>
-            </div>
+            </Alert>
+          </div>
 
-            <Separator />
+          {/* COL 3: Services (Darker/Different tone for contrast) */}
+          <div className="space-y-6">
+            <div className="bg-emerald-50 rounded-2xl p-6 space-y-6 border border-emerald-100">
+              <h3 className="font-bold text-emerald-900 flex items-center gap-2 text-lg">
+                <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                {t("services.title")}
+              </h3>
 
-            {/* Food in Room */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <UtensilsCrossed className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold">{t("notes.food.title")}</h4>
-              </div>
-              <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
-                <p className="text-sm">{t("notes.food.warning")}</p>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Insects & Nature */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Bug className="h-5 w-5 text-green-600" />
-                <h4 className="font-semibold">{t("notes.insects.title")}</h4>
-              </div>
-              <ul className="space-y-2 ml-7 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>{t("notes.insects.nature")}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>{t("notes.insects.prevention")}</span>
-                </li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Popular Services */}
-        <Card className="shadow-sm border-primary/20 bg-gradient-to-br from-primary/5 to-background">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-              {t("services.title")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4">
               {/* Cable Car */}
-              <div className="flex items-start gap-4 p-4 bg-background rounded-lg border shadow-sm hover:shadow-md transition-shadow">
-                <div className="mt-1 p-2 bg-primary/10 rounded-lg">
-                  <Cable className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold mb-1">
-                    {t("services.cableCar.title")}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {t("services.cableCar.description")}
-                  </p>
-                </div>
-              </div>
+              <ServiceItem
+                icon={<CableCar className="h-5 w-5 text-white" />}
+                title={t("services.cableCar.title")}
+                desc={t("services.cableCar.description")}
+                color="bg-sky-500"
+              />
 
               {/* Massage */}
-              <div className="flex items-start gap-4 p-4 bg-background rounded-lg border shadow-sm hover:shadow-md transition-shadow">
-                <div className="mt-1 p-2 bg-primary/10 rounded-lg">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold mb-1">
-                    {t("services.massage")}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {t("services.massageDescription")}
-                  </p>
-                </div>
-              </div>
+              <ServiceItem
+                icon={<Sparkles className="h-5 w-5 text-white" />}
+                title={t("services.massage")}
+                desc={t("services.massageDescription")}
+                color="bg-purple-500"
+              />
 
-              {/* Happy Hour */}
-              <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-200 shadow-sm hover:shadow-md transition-shadow">
-                <div className="mt-1 p-2 bg-orange-500/10 rounded-lg">
-                  <Wine className="h-6 w-6 text-orange-600" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold">
-                      {t("services.happyHour.title")}
-                    </h4>
-                    <Badge variant="secondary" className="text-xs">
-                      {t("services.happyHour.time")}
+              {/* Happy Hour Banner */}
+              <div className="relative rounded-xl overflow-hidden text-white mt-4 group cursor-default">
+                <img
+                  src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2940&auto=format&fit=crop"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
+                  alt="Cocktail"
+                />
+                <div className="absolute inset-0 bg-orange-900/60 mix-blend-multiply" />
+                <div className="relative p-4">
+                  <div className="flex justify-between items-start">
+                    <Wine className="h-6 w-6 text-orange-200" />
+                    <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-none">
+                      15:00 - 18:00
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">
+                  <h4 className="font-bold mt-2 text-lg">
+                    {t("services.happyHour.title")}
+                  </h4>
+                  <p className="text-orange-100 text-xs mt-1 leading-snug">
                     {t("services.happyHour.description")}
                   </p>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-orange-500/10 rounded-md border border-orange-300">
-                    <span className="text-2xl">👉</span>
-                    <p className="text-sm font-semibold text-orange-700">
-                      {t("services.happyHour.promotion")}
-                    </p>
+                  <div className="mt-3 inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold border border-white/30">
+                    {t("services.happyHour.promotion")}
                   </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Thank You Note */}
-        <Card className="shadow-lg border-primary/30 bg-gradient-to-br from-primary/10 via-background to-green-50">
-          <CardContent className="pt-6 text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="p-4 bg-primary/10 rounded-full">
-                <Leaf className="h-10 w-10 text-green-600" />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold">{t("thanks.title")}</h3>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            {/* Electrical */}
+            <InfoCard
+              icon={<Cable className="text-stone-500" />}
+              title={t("notes.electrical.title")}
+            >
+              <ul className="space-y-3 text-sm text-stone-600">
+                <BulletItem text={t("notes.electrical.safety")} />
+                <BulletItem text={t("notes.electrical.turnOff")} />
+              </ul>
+            </InfoCard>
+          </div>
+        </div>
+
+        {/* --- FOOTER --- */}
+        <div className="mt-16 text-center space-y-6 pb-8">
+          <Separator className="max-w-xs mx-auto bg-stone-200" />
+          <div className="space-y-2">
+            <h3 className="font-serif text-2xl font-bold text-emerald-900">
+              {t("thanks.title")}
+            </h3>
+            <p className="text-stone-500 max-w-lg mx-auto leading-relaxed">
               {t("thanks.message")}
             </p>
-            <div className="pt-4">
-              <Badge variant="outline" className="text-sm px-4 py-2">
-                Eco-Friendly • Sustainable Tourism • Natural Living
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Footer */}
-      <div className="bg-muted/30 py-8 px-6 mt-12">
-        <div className="max-w-4xl mx-auto text-center text-sm text-muted-foreground">
-          <p>
-            Nếu quý khách cần hỗ trợ thêm, vui lòng liên hệ lễ tân hoặc gọi số
-            điện thoại khẩn cấp được cung cấp tại phòng.
-          </p>
+          </div>
+          <div className="flex justify-center gap-2">
+            <Badge
+              variant="outline"
+              className="border-stone-300 text-stone-500 font-normal"
+            >
+              Eco-Friendly
+            </Badge>
+            <Badge
+              variant="outline"
+              className="border-stone-300 text-stone-500 font-normal"
+            >
+              Sustainable
+            </Badge>
+            <Badge
+              variant="outline"
+              className="border-stone-300 text-stone-500 font-normal"
+            >
+              Sapa, Vietnam
+            </Badge>
+          </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* --- SUB-COMPONENTS FOR CLEANER CODE --- */
+
+function InfoCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: any;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="border-none shadow-md shadow-stone-100 hover:shadow-lg transition-shadow">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base text-stone-800">
+          {icon} {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+function TimeItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 p-1.5 bg-stone-50 rounded-md border border-stone-100 shrink-0">
+        {icon}
+      </div>
+      <div>
+        <p className="font-semibold text-sm text-stone-800">{label}</p>
+        <p className="text-sm text-stone-500 font-medium">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function BulletItem({ text }: { text: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-2.5">
+      <span className="text-emerald-500 mt-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+      <span className="leading-relaxed">{text}</span>
+    </li>
+  );
+}
+
+function Step({ number, text }: { number: string; text: string }) {
+  return (
+    <div className="flex gap-3">
+      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-100 text-[10px] font-bold text-sky-700">
+        {number}
+      </div>
+      <p className="leading-snug">{text}</p>
+    </div>
+  );
+}
+
+function ServiceItem({
+  icon,
+  title,
+  desc,
+  color,
+}: {
+  icon: any;
+  title: string;
+  desc: string;
+  color: string;
+}) {
+  return (
+    <div className="flex gap-4">
+      <div
+        className={cn(
+          "h-10 w-10 rounded-xl flex items-center justify-center shadow-sm shrink-0",
+          color
+        )}
+      >
+        {icon}
+      </div>
+      <div>
+        <h4 className="font-bold text-stone-800 text-sm">{title}</h4>
+        <p className="text-xs text-stone-500 mt-0.5 leading-relaxed">{desc}</p>
       </div>
     </div>
   );

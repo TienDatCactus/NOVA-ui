@@ -52,15 +52,11 @@
     "tagItems": "Tag món ăn/dịch vụ",
     "quickTag": "Gắn thẻ nhanh",
     "menu": "Món ăn",
-    "services": "Dịch vụ"
-  },
-  "chat": {
+    "services": "Dịch vụ",
     "title": "Chat với lễ tân",
     "placeholder": "Nhập tin nhắn...",
     "send": "Gửi",
-    "connecting": "Đang kết nối...",
     "connected": "Đã kết nối",
-    "disconnected": "Mất kết nối",
     "reconnecting": "Đang kết nối lại...",
     "translation": {
       "auto": "Tự động dịch",
@@ -72,5 +68,10 @@
       "menu": "Gắn thẻ món ăn",
       "service": "Gắn thẻ dịch vụ"
     }
+  },
+  "qrScanner": {
+    "cameraError": "Không thể truy cập camera",
+    "startScan": "Bắt đầu quét",
+    "scanning": "Đang quét... (Nhấn để dừng)"
   }
 }

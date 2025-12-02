@@ -1,22 +1,24 @@
 {
-  "title": "Khám phá NOVA Resort",
-  "subtitle": "Trải nghiệm ẩm thực và dịch vụ cao cấp",
+  "title": "Dịch vụ & Thực đơn Cao nguyên",
+  "subtitle": "Hương vị của Cao nguyên",
+  "description": "Trải nghiệm hương vị sương mù và dịch vụ thanh bình của núi rừng.",
   "search": {
-    "placeholder": "Bạn đang tìm món ăn hay dịch vụ gì?",
-    "noResults": "Không tìm thấy kết quả phù hợp"
+    "placeholder": "Tìm món ăn, trekking, dịch vụ..."
   },
   "tabs": {
     "food": "Ẩm thực",
     "service": "Dịch vụ"
   },
-  "card": {
-    "outOfStock": "Hết món",
-    "suspended": "Tạm ngưng",
-    "price": "Giá",
-    "available": "Còn {{count}} phần"
-  },
+  "loading": "Đang lấy nguyên liệu từ thung lũng...",
   "empty": {
-    "title": "Chưa có món nào",
-    "description": "Hãy thử tìm kiếm từ khóa khác"
+    "searching": {
+      "title": "Ẩn trong sương mù",
+      "description": "Chúng tôi không tìm thấy gì phù hợp với tìm kiếm của bạn. Hãy thử tìm kiếm thứ khác."
+    },
+    "noItems": {
+      "title": "Yên tĩnh trong thung lũng",
+      "description": "Hiện tại chưa có mục nào ở đây. Mùa thu hoạch sắp tới."
+    },
+    "clearButton": "Xóa sương mù"
   }
 }

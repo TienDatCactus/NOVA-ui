@@ -52,12 +52,26 @@
     "tagItems": "음식/서비스 태그",
     "quickTag": "빠른 태그",
     "menu": "메뉴",
-    "services": "서비스"
+    "services": "서비스",
+    "title": "프런트와 채팅",
+    "placeholder": "메시지를 입력하세요...",
+    "send": "보내기",
+    "connected": "연결됨",
+    "reconnecting": "재연결 중...",
+    "translation": {
+      "auto": "자동 번역",
+      "show": "번역 보기",
+      "hide": "번역 숨기기",
+      "detected": "감지됨: {{language}}"
+    },
+    "tag": {
+      "menu": "메뉴 항목 태그",
+      "service": "서비스 태그"
+    }
   },
-  "translation": {
-    "original": "원본",
-    "translated": "번역됨",
-    "translating": "번역 중...",
-    "error": "번역 오류"
+  "qrScanner": {
+    "cameraError": "카메라에 액세스할 수 없습니다",
+    "startScan": "스캔 시작",
+    "scanning": "스캔 중... (탭하여 중지)"
   }
 }

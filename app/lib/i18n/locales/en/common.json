@@ -15,5 +15,11 @@
   "previous": "Previous",
   "submit": "Submit",
   "success": "Success",
-  "failed": "Failed"
+  "failed": "Failed",
+  "nav": {
+    "inbox": "Inbox",
+    "catalog": "Catalog",
+    "guidelines": "Guidelines",
+    "map": "Map"
+  }
 }

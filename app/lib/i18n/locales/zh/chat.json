@@ -52,12 +52,26 @@
     "tagItems": "标记食物/服务",
     "quickTag": "快速标签",
     "menu": "菜单",
-    "services": "服务"
+    "services": "服务",
+    "title": "与前台聊天",
+    "placeholder": "输入消息...",
+    "send": "发送",
+    "connected": "已连接",
+    "reconnecting": "重新连接中...",
+    "translation": {
+      "auto": "自动翻译",
+      "show": "显示翻译",
+      "hide": "隐藏翻译",
+      "detected": "检测到：{{language}}"
+    },
+    "tag": {
+      "menu": "标记菜单项",
+      "service": "标记服务"
+    }
   },
-  "translation": {
-    "original": "原文",
-    "translated": "已翻译",
-    "translating": "翻译中...",
-    "error": "翻译错误"
+  "qrScanner": {
+    "cameraError": "无法访问相机",
+    "startScan": "开始扫描",
+    "scanning": "扫描中...（点击停止）"
   }
 }

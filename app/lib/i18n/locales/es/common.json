@@ -17,5 +17,11 @@
   "sort": "Ordenar",
   "select": "Seleccionar",
   "submit": "Enviar",
-  "reset": "Restablecer"
+  "reset": "Restablecer",
+  "nav": {
+    "inbox": "Bandeja de entrada",
+    "catalog": "Catálogo",
+    "guidelines": "Guías",
+    "map": "Mapa"
+  }
 }

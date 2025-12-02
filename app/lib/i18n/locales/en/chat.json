@@ -52,15 +52,11 @@
     "tagItems": "Tag food/service",
     "quickTag": "Quick Tag",
     "menu": "Menu",
-    "services": "Services"
-  },
-  "chat": {
+    "services": "Services",
     "title": "Chat with Reception",
     "placeholder": "Type a message...",
     "send": "Send",
-    "connecting": "Connecting...",
     "connected": "Connected",
-    "disconnected": "Disconnected",
     "reconnecting": "Reconnecting...",
     "translation": {
       "auto": "Auto-translate",
@@ -72,5 +68,10 @@
       "menu": "Tag menu item",
       "service": "Tag service"
     }
+  },
+  "qrScanner": {
+    "cameraError": "Cannot access camera",
+    "startScan": "Start scanning",
+    "scanning": "Scanning... (Tap to stop)"
   }
 }

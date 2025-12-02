@@ -52,12 +52,26 @@
     "tagItems": "Tagga cibo/servizio",
     "quickTag": "Tag Rapido",
     "menu": "Menu",
-    "services": "Servizi"
+    "services": "Servizi",
+    "title": "Chat con la Reception",
+    "placeholder": "Scrivi un messaggio...",
+    "send": "Invia",
+    "connected": "Connesso",
+    "reconnecting": "Riconnessione...",
+    "translation": {
+      "auto": "Traduzione automatica",
+      "show": "Mostra traduzione",
+      "hide": "Nascondi traduzione",
+      "detected": "Rilevato: {{language}}"
+    },
+    "tag": {
+      "menu": "Tagga elemento del menu",
+      "service": "Tagga servizio"
+    }
   },
-  "translation": {
-    "original": "Originale",
-    "translated": "Tradotto",
-    "translating": "Traduzione...",
-    "error": "Errore di traduzione"
+  "qrScanner": {
+    "cameraError": "Impossibile accedere alla fotocamera",
+    "startScan": "Inizia a scansionare",
+    "scanning": "Scansione in corso... (Tocca per fermare)"
   }
 }

@@ -17,5 +17,11 @@
   "sort": "排序",
   "select": "选择",
   "submit": "提交",
-  "reset": "重置"
+  "reset": "重置",
+  "nav": {
+    "inbox": "收件箱",
+    "catalog": "目录",
+    "guidelines": "指南",
+    "map": "地图"
+  }
 }

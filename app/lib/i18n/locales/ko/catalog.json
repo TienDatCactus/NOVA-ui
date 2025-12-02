@@ -1,17 +1,24 @@
 {
-  "title": "메뉴 & 서비스",
-  "subtitle": "Eco Palms House의 모든 메뉴와 서비스를 둘러보세요",
+  "title": "고원 서비스 & 메뉴",
+  "subtitle": "고원의 맛",
+  "description": "산의 안개 낀 풍미와 평온한 서비스를 경험하세요.",
   "search": {
-    "placeholder": "메뉴 또는 서비스 검색..."
+    "placeholder": "요리, 트레킹, 서비스 검색..."
   },
   "tabs": {
-    "menu": "메뉴",
-    "services": "서비스"
+    "food": "요리",
+    "service": "서비스"
   },
-  "status": {
-    "available": "이용 가능",
-    "unavailable": "이용 불가",
-    "outOfStock": "품절",
-    "suspended": "일시 중단"
+  "loading": "계곡에서 재료를 모으는 중...",
+  "empty": {
+    "searching": {
+      "title": "안개 속에 숨겨짐",
+      "description": "검색과 일치하는 항목을 찾을 수 없습니다. 다른 것을 찾아보세요."
+    },
+    "noItems": {
+      "title": "계곡의 고요함",
+      "description": "지금은 여기에 항목이 없습니다. 수확이 곧 올 것입니다."
+    },
+    "clearButton": "안개 제거"
   }
 }

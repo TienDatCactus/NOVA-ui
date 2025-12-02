@@ -1,4 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 import { BookingService } from "~/services/api/booking";
 import type { StaffBookingPricePreviewRequestDto } from "~/services/api/booking/dto";
 
@@ -12,19 +14,26 @@ export function useOTAInfo({ selection }: { selection: boolean }) {
 }
 
 export function usePreviewBookingPrice(
-  data: StaffBookingPricePreviewRequestDto,
-  options?: { enabled: boolean }
+  data: StaffBookingPricePreviewRequestDto
 ) {
-  return useQuery({
-    queryKey: ["preview-booking-price", data],
-    queryFn: async () => {
+  return useMutation({
+    mutationFn: async () => {
       const idempotencyKey = crypto.randomUUID();
       return await BookingService.staffBookingPricePreview(
         idempotencyKey,
         data
       );
     },
-    staleTime: 30 * 1000, // 30 seconds - shorter for real-time pricing
-    enabled: !!options?.enabled && !!(data.checkinDate && data.checkoutDate),
+    onSuccess: () => {
+      toast.success("Tính toán giá dự kiến thành công.");
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof AxiosError
+          ? error.response?.data?.message ||
+              "Đã có lỗi xảy ra khi tính toán giá dự kiến."
+          : "Đã có lỗi xảy ra khi tính toán giá dự kiến."
+      );
+    },
   });
 }
