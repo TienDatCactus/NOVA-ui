@@ -12,8 +12,8 @@ export default function Component({
 }: Route.ComponentProps) {
   const { filters, updateFilter, resetFilters } = useMenuFilters();
   const { data: menuData, isPending } = useMenuList({
-    categoryCode: filters.categoryCode,
-    includeInactive: filters.activeFilter !== "active",
+    categoryCode: filters.categoryCode || undefined,
+    includeInactive: filters.activeFilter === "active",
   });
 
   return (

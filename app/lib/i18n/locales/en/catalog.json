@@ -1,0 +1,24 @@
+{
+  "title": "Highland Service & Menu",
+  "subtitle": "Taste of the Highlands",
+  "description": "Experience the misty flavors and serene services of the mountains.",
+  "search": {
+    "placeholder": "Search dishes, treks, services..."
+  },
+  "tabs": {
+    "food": "Cuisine",
+    "service": "Services"
+  },
+  "loading": "Gathering ingredients from the valley...",
+  "empty": {
+    "searching": {
+      "title": "Hidden in the mist",
+      "description": "We couldn't find anything matching your search. Try looking for something else."
+    },
+    "noItems": {
+      "title": "Quiet in the valley",
+      "description": "There are no items here right now. The harvest is coming soon."
+    },
+    "clearButton": "Clear Mist"
+  }
+}

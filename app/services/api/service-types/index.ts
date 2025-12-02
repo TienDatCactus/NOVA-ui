@@ -73,7 +73,7 @@ async function createServiceType(
     const formData = new FormData();
     formData.append("code", parsed.code);
     formData.append("name", parsed.name);
-    formData.append("description", parsed.description);
+    formData.append("description", parsed.description ?? "");
     formData.append("active", String(parsed.active));
     if (Array.isArray(parsed.images)) {
       parsed.images.forEach((f) => {

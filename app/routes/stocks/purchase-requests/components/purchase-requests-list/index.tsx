@@ -25,7 +25,7 @@ function PurchaseRequestsDataTable({
   }
   return (
     <div className="container mx-auto ">
-      <DataTable columns={columns} data={purchaseRequests} />;
+      <DataTable columns={columns} data={purchaseRequests} />
     </div>
   );
 }

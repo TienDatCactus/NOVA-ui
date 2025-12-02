@@ -1,19 +1,22 @@
 import {
+  CloudFog, // Represents Sapa's mist
+  Leaf, // Nature element
   Loader2,
+  Map, // Represents exploration/trekking
+  Mountain, // Represents Fansipan/mountains
   Search,
   Sparkles,
   UtensilsCrossed,
   XCircle,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import { cn } from "~/lib/utils";
 import {
   useCustomerMenuList,
   useCustomerServices,
@@ -23,6 +26,7 @@ import ServiceCard from "./components/service-card";
 import type { Route } from "./+types/catalog";
 
 export default function CustomerGuidesPage({}: Route.ComponentProps) {
+  const { t } = useTranslation("catalog");
   const [searchQuery, setSearchQuery] = useState("");
 
   // --- Data Fetching ---
@@ -52,139 +56,176 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
   const clearSearch = () => setSearchQuery("");
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    // Base: A soft, misty stone color
+    <div className="min-h-screen bg-stone-50/80 relative flex flex-col font-sans selection:bg-emerald-200 selection:text-emerald-900">
+      {/* === BACKGROUND LAYERS (Terraces & Mist) === */}
+
       {/* === HERO HEADER === */}
-      {/* UX: Using a gradient/image background makes it feel more like a 'Guide' than a 'List' */}
-      <div className="relative bg-primary/5 pb-12 pt-12 md:pt-20 border-b">
-        <div className="container mx-auto px-4 space-y-6 text-center max-w-2xl">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-background border shadow-sm text-xs font-medium text-primary mb-2">
-              <Sparkles className="w-3 h-3" />
-              Trải nghiệm đẳng cấp
-            </div>
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-              Khám phá NOVA Resort
+      <div className="relative pt-20 pb-24 md:pt-28 md:pb-36">
+        <div className="container mx-auto px-4 flex flex-col items-center text-center max-w-3xl space-y-8">
+          {/* Badge: Styled like natural fabric or a leaf */}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100/50 border border-emerald-200 text-sm font-medium text-emerald-800 shadow-sm backdrop-blur-sm">
+              <Mountain className="w-3.5 h-3.5" />
+              {t("subtitle")}
+            </span>
+          </div>
+
+          {/* Titles */}
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+            <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight text-emerald-950 drop-shadow-sm">
+              {t("title")}
             </h1>
-            <p className="text-muted-foreground text-lg leading-relaxed">
-              Tận hưởng ẩm thực tinh hoa và các dịch vụ thư giãn hàng đầu được
-              tuyển chọn dành riêng cho bạn.
+            <p className="text-stone-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto flex items-center justify-center gap-2">
+              <CloudFog className="w-5 h-5 text-stone-400" />
+              {t("description")}
             </p>
           </div>
 
-          {/* Search Bar (Floating) */}
-          <div className="relative max-w-lg mx-auto shadow-lg rounded-full">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <Search className="h-5 w-5" />
+          {/* Search Bar: Floating in the mist */}
+          <div className="w-full max-w-xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+            <div className="relative group">
+              {/* Soft Green Glow */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-200/50 to-teal-200/50 rounded-full blur opacity-40 group-hover:opacity-60 transition duration-500"></div>
+
+              <div className="relative bg-white/70 backdrop-blur-xl rounded-full shadow-lg border border-white/50 flex items-center p-1.5 transition-all ring-1 ring-stone-900/5 focus-within:ring-2 focus-within:ring-emerald-500/30">
+                <div className="pl-4 text-emerald-700/60">
+                  <Search className="h-5 w-5" />
+                </div>
+                <Input
+                  placeholder={t("search.placeholder")}
+                  className="h-11 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-3 text-base placeholder:text-stone-400 text-emerald-950 w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={clearSearch}
+                    className="p-2 mr-1 text-stone-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-full transition-all"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
             </div>
-            <Input
-              placeholder="Bạn đang tìm món ăn hay dịch vụ gì?"
-              className="h-12 pl-12 pr-10 rounded-full border-transparent bg-background focus-visible:ring-2 focus-visible:ring-primary/20 text-base shadow-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button
-                onClick={clearSearch}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <XCircle className="h-5 w-5" />
-              </button>
-            )}
           </div>
         </div>
       </div>
 
       {/* === MAIN CONTENT === */}
-      <div className="flex-1 container mx-auto px-4 -mt-8 mb-12 relative z-10">
-        <Tabs defaultValue="menu" className="w-full space-y-8">
-          {/* Tabs List (Floating Pill Style) */}
-          <div className="flex justify-center">
-            <TabsList className="h-12 p-1 bg-background/80 backdrop-blur-md border shadow-md rounded-full inline-flex">
-              <TabsTrigger
+      <div className="flex-1 container mx-auto px-4 relative z-10 -mt-12 mb-20">
+        <Tabs defaultValue="menu" className="w-full space-y-10">
+          {/* Tabs Navigation: Stone pill on glass */}
+          <div className="flex justify-center sticky top-6 z-30">
+            <TabsList className="h-14 p-1.5 bg-white/60 backdrop-blur-md border border-white/40 shadow-xl shadow-stone-500/5 rounded-full inline-flex items-center gap-1 ring-1 ring-stone-900/5">
+              <NatureTabTrigger
                 value="menu"
-                className="rounded-full px-6 h-10 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-              >
-                <UtensilsCrossed className="h-4 w-4 mr-2" />
-                Ẩm thực
-                <Badge
-                  variant="secondary"
-                  className="ml-2 bg-white/20 text-current border-0 hidden sm:inline-flex"
-                >
-                  {menuItems?.length || 0}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger
+                icon={UtensilsCrossed}
+                label={t("tabs.food")}
+                count={menuItems?.length}
+              />
+              <NatureTabTrigger
                 value="services"
-                className="rounded-full px-6 h-10 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Dịch vụ
-                <Badge
-                  variant="secondary"
-                  className="ml-2 bg-white/20 text-current border-0 hidden sm:inline-flex"
-                >
-                  {services?.length || 0}
-                </Badge>
-              </TabsTrigger>
+                icon={Map} // Changed icon to Map for "Services/Treks" feel
+                label={t("tabs.service")}
+                count={services?.length}
+              />
             </TabsList>
           </div>
 
-          {/* --- MENU TAB --- */}
-          <TabsContent
-            value="menu"
-            className="space-y-6 focus-visible:outline-none"
-          >
-            {isLoadingMenu ? (
-              <LoadingGrid />
-            ) : filteredMenuItems.length === 0 ? (
-              <EmptyState
-                type="menu"
-                isSearching={!!searchQuery}
-                onClear={clearSearch}
-              />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredMenuItems.map((item) => (
-                  <MenuCard key={item.itemId} item={item} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+          <div className="min-h-[400px]">
+            {/* --- MENU TAB --- */}
+            <TabsContent
+              value="menu"
+              className="space-y-6 focus-visible:outline-none animate-in fade-in zoom-in-95 duration-500"
+            >
+              {isLoadingMenu ? (
+                <LoadingNature />
+              ) : filteredMenuItems.length === 0 ? (
+                <EmptyState
+                  type="menu"
+                  isSearching={!!searchQuery}
+                  onClear={clearSearch}
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-8">
+                  {filteredMenuItems.map((item) => (
+                    <MenuCard key={item.itemId} item={item} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
 
-          {/* --- SERVICES TAB --- */}
-          <TabsContent
-            value="services"
-            className="space-y-6 focus-visible:outline-none"
-          >
-            {isLoadingServices ? (
-              <LoadingGrid />
-            ) : filteredServices.length === 0 ? (
-              <EmptyState
-                type="service"
-                isSearching={!!searchQuery}
-                onClear={clearSearch}
-              />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredServices.map((service) => (
-                  <ServiceCard key={service.serviceItemId} service={service} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+            {/* --- SERVICES TAB --- */}
+            <TabsContent
+              value="services"
+              className="space-y-6 focus-visible:outline-none animate-in fade-in zoom-in-95 duration-500"
+            >
+              {isLoadingServices ? (
+                <LoadingNature />
+              ) : filteredServices.length === 0 ? (
+                <EmptyState
+                  type="service"
+                  isSearching={!!searchQuery}
+                  onClear={clearSearch}
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-8">
+                  {filteredServices.map((service) => (
+                    <ServiceCard
+                      key={service.serviceItemId}
+                      service={service}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </div>
   );
 }
 
-// --- Sub-Components for cleaner code ---
+// --- Nature Themed Sub-Components ---
 
-function LoadingGrid() {
+function NatureTabTrigger({ value, icon: Icon, label, count = 0 }: any) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-muted-foreground animate-pulse">
-      <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary/50" />
-      <p>Đang tải trải nghiệm tuyệt vời...</p>
+    <TabsTrigger
+      value={value}
+      className="rounded-full px-6 h-full text-base font-medium 
+      text-stone-500 
+      data-[state=active]:bg-emerald-700 data-[state=active]:text-white data-[state=active]:shadow-md
+      hover:text-emerald-800 transition-all duration-300"
+    >
+      <Icon className="h-4 w-4 mr-2.5" />
+      {label}
+      {count > 0 && (
+        <Badge
+          variant="secondary"
+          className="ml-2.5 bg-stone-200/50 text-stone-600 
+          data-[state=active]:bg-white/20 data-[state=active]:text-white
+          border-0 h-5 px-1.5 min-w-[1.25rem] hidden sm:inline-flex items-center justify-center pointer-events-none"
+        >
+          {count}
+        </Badge>
+      )}
+    </TabsTrigger>
+  );
+}
+
+function LoadingNature() {
+  const { t } = useTranslation("catalog");
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-stone-400">
+      <div className="relative">
+        <div className="absolute inset-0 bg-emerald-200/40 rounded-full blur-xl animate-pulse"></div>
+        {/* CloudFog icon mimics the Sapa weather */}
+        <CloudFog className="relative h-12 w-12 animate-bounce text-emerald-600/70 duration-[2000ms]" />
+      </div>
+      <p className="mt-6 text-sm font-medium tracking-wide text-emerald-800/60">
+        {t("loading")}
+      </p>
     </div>
   );
 }
@@ -198,26 +239,31 @@ function EmptyState({
   isSearching: boolean;
   onClear: () => void;
 }) {
+  const { t } = useTranslation("catalog");
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/30 rounded-2xl border-2 border-dashed border-muted">
-      <div className="w-16 h-16 bg-background rounded-full flex items-center justify-center mb-4 shadow-sm">
+    <div className="flex flex-col items-center justify-center py-20 px-4 text-center border border-dashed border-emerald-900/10 rounded-3xl bg-white/30 backdrop-blur-sm">
+      <div className="w-20 h-20 bg-white/60 rounded-full flex items-center justify-center mb-6 shadow-sm border border-emerald-100">
         {type === "menu" ? (
-          <UtensilsCrossed className="h-8 w-8 text-muted-foreground/50" />
+          <UtensilsCrossed className="h-8 w-8 text-emerald-800/40" />
         ) : (
-          <Sparkles className="h-8 w-8 text-muted-foreground/50" />
+          <Leaf className="h-8 w-8 text-emerald-800/40" />
         )}
       </div>
-      <h3 className="text-lg font-semibold text-foreground">
-        {isSearching ? "Không tìm thấy kết quả nào" : "Danh sách đang trống"}
+      <h3 className="text-xl font-serif font-bold text-emerald-950">
+        {isSearching ? t("empty.searching.title") : t("empty.noItems.title")}
       </h3>
-      <p className="text-muted-foreground max-w-xs mx-auto mt-2">
+      <p className="text-stone-500 max-w-sm mx-auto mt-2 mb-8 leading-relaxed">
         {isSearching
-          ? "Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc để xem tất cả."
-          : "Hiện tại chưa có mục nào được hiển thị ở đây. Vui lòng quay lại sau."}
+          ? t("empty.searching.description")
+          : t("empty.noItems.description")}
       </p>
       {isSearching && (
-        <Button variant="outline" className="mt-6" onClick={onClear}>
-          Xóa tìm kiếm
+        <Button
+          variant="outline"
+          onClick={onClear}
+          className="rounded-full px-8 border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900 transition-colors"
+        >
+          {t("empty.clearButton")}
         </Button>
       )}
     </div>

@@ -1,0 +1,78 @@
+{
+  "title": "Eco Palms House 住宿信息",
+  "subtitle": "舒适安全住宿的详细指南",
+  "times": {
+    "title": "时间安排",
+    "checkin": "入住",
+    "checkinTime": "下午1:00起",
+    "checkout": "退房",
+    "checkoutTime": "上午11:00前",
+    "breakfast": "早餐",
+    "breakfastTime": "餐厅 上午7:30 – 9:30",
+    "dinner": "晚餐订购",
+    "dinnerTime": "晚上8:30前"
+  },
+  "wifi": {
+    "title": "Wi-Fi 信息",
+    "network": "网络名称：",
+    "password": "密码："
+  },
+  "hotWater": {
+    "title": "使用热水",
+    "step1": "将水龙头手柄向左转动，等待约3-5分钟。",
+    "step2": "在寒冷的日子里，热水可能流动较慢，请耐心等待。"
+  },
+  "notes": {
+    "title": "重要提示",
+    "roomDesign": {
+      "title": "房间设计和设施",
+      "ecoStyle": "Eco Palms House 采用生态旅游风格建造，帮助您体验自然宁静，因此房间内没有电视或冰箱。",
+      "noLaundry": "请勿在房间内洗涤或晾晒衣物，以避免霉菌并保护家具。",
+      "beanBag": "请保持豆袋干燥；如果弄湿，很难清洁，可能会产生特殊清洁费"
+    },
+    "towels": {
+      "title": "毛巾",
+      "purpose": "白色毛巾专门为洗浴和个人使用准备。",
+      "warning": "如果用于其他目的（清洁地板、鞋子、宠物...），毛巾可能会损坏无法清洗。在这种情况下，我们必须收取更换费"
+    },
+    "electrical": {
+      "title": "电器设备",
+      "safety": "出于安全原因，请勿使用大功率电器（如电饭煲、炉灶或您携带的吹风机）。",
+      "turnOff": "外出时，请记得关闭所有电器以节省能源并确保安全。"
+    },
+    "fire": {
+      "title": "消防安全",
+      "material": "平房由天然材料制成，对火灾相当敏感。",
+      "warning": "因此，请勿在房间内吸烟、点蜡烛或使用明火。",
+      "emergency": "如有紧急情况，请立即通知工作人员。"
+    },
+    "food": {
+      "title": "房间内食物",
+      "warning": "请勿将食物带入房间。食物碎屑会吸引\"不速之客\" 🐭。谁知道呢，一只老鼠可能会来您的房间拍照，成为偶像，然后接管世界并统治宇宙 🌌。"
+    },
+    "insects": {
+      "title": "昆虫和自然环境",
+      "nature": "在靠近自然的地方，偶尔可能会出现小昆虫。",
+      "prevention": "您可以通过关闭门窗和关闭不必要的灯光来减少这种情况。"
+    }
+  },
+  "services": {
+    "title": "Eco Palms House 热门服务",
+    "cableCar": {
+      "title": "番西邦缆车票",
+      "description": "避免排队 – 前台将帮助您快速预订官方门票。"
+    },
+    "massage": "放松按摩",
+    "massageDescription": "徒步旅行后帮助身体更快恢复的绝佳选择。",
+    "happyHour": {
+      "title": "欢乐时光 – 鸡尾酒和啤酒",
+      "time": "下午3:00 – 6:00",
+      "description": "享受山谷日落美景及特别优惠：",
+      "promotion": "菜单上的鸡尾酒和啤酒买一送一"
+    }
+  },
+  "thanks": {
+    "title": "感谢您选择 Eco Palms House！",
+    "message": "我们希望您在这里的住宿能为您带来放松的时刻、亲近自然以及许多难忘的体验 🌿"
+  }
+}

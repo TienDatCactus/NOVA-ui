@@ -1,0 +1,24 @@
+{
+  "title": "Explorar el Área",
+  "search": {
+    "placeholder": "Ingresa el nombre del lugar para buscar",
+    "searching": "Buscando...",
+    "noResults": "No se encontraron resultados"
+  },
+  "categories": {
+    "all": "Todos",
+    "restaurant": "Restaurantes",
+    "cafe": "Cafés",
+    "bar": "Bares",
+    "hotel": "Hoteles",
+    "spa": "Spas",
+    "shopping": "Compras",
+    "park": "Parques",
+    "attraction": "Atracciones",
+    "noCategories": "No hay categorías para mostrar"
+  },
+  "resort": {
+    "name": "Eco Palms House",
+    "yourLocation": "Tu Ubicación"
+  }
+}

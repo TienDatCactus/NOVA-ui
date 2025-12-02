@@ -30,13 +30,12 @@ import FE_URL from "~/lib/fe-url";
 // Translation supported languages
 const SUPPORTED_LANGUAGES = [
   { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "ja", label: "日本語", flag: "🇯🇵" },
   { code: "ko", label: "한국어", flag: "🇰🇷" },
-  { code: "zh", label: "中文", flag: "🇨🇳" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "de", label: "Deutsch", flag: "🇩🇪" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "hi", label: "हिन्दी", flag: "🇮🇳" }, // Hindu → Hindi (ngôn ngữ)
+  { code: "it", label: "Italiano", flag: "🇮🇹" }, // Ý
+  { code: "es", label: "Español", flag: "🇪🇸" }, // Tây Ban Nha
+  { code: "zh", label: "中文", flag: "🇨🇳" }, // Trung Quốc
 ];
 
 const CHECK_IN_TIME = "13:00 PM";
@@ -340,10 +339,10 @@ const COMMAND_BAR_ROUTES: Array<{
 ];
 
 const CUSTOMER_NAVS = [
-  { name: "Inbox", icon: Settings, href: FE_URL.customer.inbox },
-  { name: "Catalog", icon: Settings, href: FE_URL.customer.catalog },
-  { name: "Guidelines", icon: Settings, href: FE_URL.customer.guidelines },
-  { name: "Map", icon: Settings, href: FE_URL.customer.map },
+  { name: "nav.inbox", icon: Settings, href: FE_URL.customer.inbox },
+  { name: "nav.catalog", icon: Settings, href: FE_URL.customer.catalog },
+  { name: "nav.guidelines", icon: Settings, href: FE_URL.customer.guidelines },
+  { name: "nav.map", icon: Settings, href: FE_URL.customer.map },
 ];
 
 const TOP_NAV_CONFIG = {};

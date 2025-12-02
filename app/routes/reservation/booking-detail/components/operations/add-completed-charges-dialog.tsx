@@ -9,6 +9,7 @@ import {
   Trash2,
   ShoppingBasketIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -125,16 +126,38 @@ export default function AddCompletedChargesDialog({
     setMap: Function,
     id: string,
     delta: number,
-    itemData?: any
+    itemData?: any,
+    isMenuType: boolean = false
   ) => {
     const newMap = new Map(map);
     const existing = newMap.get(id);
 
     if (existing) {
       const newQty = existing.quantity + delta;
+
+      // Validate max quantity for menu items
+      if (isMenuType && delta > 0) {
+        const maxAvailable = existing.item.maxQuantityAvailable;
+        if (maxAvailable !== undefined && maxAvailable !== null) {
+          if (newQty > maxAvailable) {
+            toast.error(
+              `Số lượng tối đa cho ${existing.item.name} là ${maxAvailable}`
+            );
+            return;
+          }
+        }
+      }
+
       if (newQty <= 0) newMap.delete(id);
       else newMap.set(id, { ...existing, quantity: newQty });
     } else if (delta > 0 && itemData) {
+      // Check availability for new menu item
+      if (isMenuType) {
+        if (itemData.maxQuantityAvailable === 0) {
+          toast.error(`${itemData.name} hiện đã hết hàng`);
+          return;
+        }
+      }
       newMap.set(id, { item: itemData, quantity: 1 });
     }
     setMap(newMap);
@@ -273,17 +296,24 @@ export default function AddCompletedChargesDialog({
                       ? selectedPOSItems
                       : selectedServiceItems;
                   const qty = map.get(id)?.quantity || 0;
+                  const isOutOfStock =
+                    activeTab === "pos" && item.maxQuantityAvailable === 0;
+                  const maxAvailable =
+                    activeTab === "pos" ? item.maxQuantityAvailable : undefined;
 
                   return (
                     <Card
                       key={id}
                       className={cn(
                         "group relative flex flex-col justify-between overflow-hidden transition-all hover:shadow-md cursor-pointer border-2",
-                        qty > 0
-                          ? "border-primary bg-primary/5"
-                          : "border-transparent hover:border-muted"
+                        isOutOfStock
+                          ? "opacity-50 cursor-not-allowed border-muted"
+                          : qty > 0
+                            ? "border-primary bg-primary/5"
+                            : "border-transparent hover:border-muted"
                       )}
-                      onClick={() =>
+                      onClick={() => {
+                        if (isOutOfStock) return;
                         updateQuantity(
                           map,
                           activeTab === "pos"
@@ -291,22 +321,42 @@ export default function AddCompletedChargesDialog({
                             : setSelectedServiceItems,
                           id,
                           1,
-                          item
-                        )
-                      }
+                          item,
+                          activeTab === "pos"
+                        );
+                      }}
                     >
                       <div className="p-4 space-y-2">
                         <div className="flex justify-between items-start">
                           <h4 className="font-semibold line-clamp-2 text-sm min-h-[2.5em]">
                             {item.name}
                           </h4>
-                          {qty > 0 && (
+                          {isOutOfStock ? (
+                            <Badge
+                              variant="destructive"
+                              className="ml-2 shrink-0 text-[10px]"
+                            >
+                              Hết hàng
+                            </Badge>
+                          ) : qty > 0 ? (
                             <Badge className="ml-2 shrink-0">{qty}</Badge>
-                          )}
+                          ) : null}
                         </div>
-                        <p className="text-primary font-bold">
-                          {formatMoney(price).vndFormatted}
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-primary font-bold">
+                            {formatMoney(price).vndFormatted}
+                          </p>
+                          {!isOutOfStock &&
+                            maxAvailable !== undefined &&
+                            maxAvailable !== null && (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] text-muted-foreground"
+                              >
+                                Còn {maxAvailable}
+                              </Badge>
+                            )}
+                        </div>
                       </div>
                       {/* Hover Actions (Desktop) or Always Visible if Qty > 0 */}
                       <div
@@ -329,7 +379,9 @@ export default function AddCompletedChargesDialog({
                                 ? setSelectedPOSItems
                                 : setSelectedServiceItems,
                               id,
-                              -1
+                              -1,
+                              undefined,
+                              activeTab === "pos"
                             );
                           }}
                         >
@@ -342,6 +394,7 @@ export default function AddCompletedChargesDialog({
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 text-primary hover:bg-primary/10"
+                          disabled={isOutOfStock}
                           onClick={(e) => {
                             e.stopPropagation();
                             updateQuantity(
@@ -351,7 +404,8 @@ export default function AddCompletedChargesDialog({
                                 : setSelectedServiceItems,
                               id,
                               1,
-                              item
+                              item,
+                              activeTab === "pos"
                             );
                           }}
                         >
@@ -401,7 +455,9 @@ export default function AddCompletedChargesDialog({
                               selectedPOSItems,
                               setSelectedPOSItems,
                               item.itemId,
-                              d
+                              d,
+                              undefined,
+                              true
                             )
                           }
                         />

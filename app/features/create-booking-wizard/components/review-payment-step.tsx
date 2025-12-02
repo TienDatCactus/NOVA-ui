@@ -13,7 +13,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import type z from "zod";
 
@@ -137,10 +137,34 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
     serviceOrderServices,
   ]);
 
-  const { data: pricePreview, isLoading: isCalculating } =
-    usePreviewBookingPrice(previewRequest, {
-      enabled: roomIds.length > 0 && !!checkinDate && !!checkoutDate,
-    });
+  const {
+    data: pricePreview,
+    mutate: previewBookingPrice,
+    isPending: isCalculating,
+  } = usePreviewBookingPrice(previewRequest);
+
+  // Trigger price calculation when dependencies change
+  useEffect(() => {
+    if (
+      roomIds.length > 0 &&
+      checkinDate &&
+      checkoutDate &&
+      previewRequest.checkinDate &&
+      previewRequest.checkoutDate
+    ) {
+      previewBookingPrice();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    checkinDate,
+    checkoutDate,
+    JSON.stringify(previewRequest.roomTypes),
+    previewRequest.isBreakfastAll,
+    JSON.stringify(previewRequest.breakfastDates),
+    JSON.stringify(previewRequest.services),
+    previewRequest.adultsAmount,
+    previewRequest.childrenAmount,
+  ]);
 
   const serverTotal = pricePreview?.total ?? 0;
   const finalTotal =

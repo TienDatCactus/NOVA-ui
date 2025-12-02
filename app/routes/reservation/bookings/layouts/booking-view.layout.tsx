@@ -77,7 +77,7 @@ function BookingViewLayout({
                 title="Chế độ Danh sách"
               >
                 <List className="h-4 w-4 mr-2" />
-                <span className="text-xs font-medium">List</span>
+                <span className="text-xs font-medium">Danh sách</span>
               </Button>
             </div>
           </div>

@@ -280,6 +280,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
             <div className="flex items-start gap-2">
               <Button
                 variant="link"
+                onClick={() => setDetailSheetOpen(true)}
                 className="p-0 h-auto font-bold text-lg text-gray-900 hover:text-primary hover:no-underline"
               >
                 {/* Removed <h3> inside button for better semantics */}

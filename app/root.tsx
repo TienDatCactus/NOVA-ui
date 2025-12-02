@@ -27,6 +27,8 @@ import "./index.css";
 import { Toaster } from "./components/ui/sonner";
 import { SpinnerLoader } from "./features/loading";
 import { MapProvider } from "./routes/customer/map/context/map-context";
+import "~/lib/i18n"; // Initialize i18n
+import "~/lib/i18n/types"; // TypeScript types
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {

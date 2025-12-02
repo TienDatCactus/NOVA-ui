@@ -1,15 +1,18 @@
 import {
-  ChevronUp,
-  Hash,
-  Loader2,
-  Send,
-  MessageSquare,
-  User,
   AlertTriangle,
+  ChevronUp,
+  CloudFog,
+  Hash,
+  Leaf,
+  Loader2,
+  Map as MapIcon,
+  MessageSquare,
+  Mountain,
+  Send,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,19 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import type { ChatMessage } from "~/lib/signalr";
 import STORAGE, { deleteStorage, setStorage } from "~/lib/storage";
 
-import {
-  useChatEntry,
-  useChatMessages,
-  useChatSession,
-} from "~/routes/chat/container/query.hooks";
-import { useTranslateMessage } from "~/routes/chat/container/translation.hooks";
-import { useChatConnection } from "~/routes/chat/container/use-chat-connection.hooks";
-import { MessageBubble } from "~/routes/chat/fragments/message-bubble";
-import type { Route } from "./+types/chat";
-import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
-import { useServices } from "~/routes/services/container/services/query.hooks";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { cn } from "~/lib/utils";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
   Empty,
   EmptyContent,
@@ -52,8 +43,22 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
+import { cn } from "~/lib/utils";
+import {
+  useChatEntry,
+  useChatMessages,
+  useChatSession,
+} from "~/routes/chat/container/query.hooks";
+import { useTranslateMessage } from "~/routes/chat/container/translation.hooks";
+import { useChatConnection } from "~/routes/chat/container/use-chat-connection.hooks";
+import { MessageBubble } from "~/routes/chat/fragments/message-bubble";
+import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
+import { useServices } from "~/routes/services/container/services/query.hooks";
+import type { Route } from "./+types/chat";
+import { BackgroundLayer } from "~/routes/chat/components/chat-main";
 
 export default function GuestChat({}: Route.ComponentProps) {
+  const { t } = useTranslation("chat");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const roomToken = searchParams.get("roomToken");
@@ -194,11 +199,15 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   if (isLoadingEntry) {
     return (
-      <div className="flex h-dvh items-center justify-center bg-background">
-        <div className="flex flex-col items-center  space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin text-primary relative z-10" />
-          <p className="text-sm font-medium text-muted-foreground animate-pulse">
-            Đang kết nối với lễ tân...
+      <div className="flex h-dvh items-center justify-center bg-stone-50">
+        <BackgroundLayer />
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-emerald-200/40 rounded-full blur-xl animate-pulse"></div>
+            <CloudFog className="h-12 w-12 animate-bounce text-emerald-600/70 duration-[2000ms] relative z-10" />
+          </div>
+          <p className="text-sm font-medium text-emerald-800/60 animate-pulse tracking-wide">
+            {t("chat.connectingReception", "Connecting to the valley...")}
           </p>
         </div>
       </div>
@@ -208,25 +217,29 @@ export default function GuestChat({}: Route.ComponentProps) {
   if (entryError) {
     return (
       <Empty>
+        <BackgroundLayer />
         <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <AlertTriangle />
+          <EmptyMedia
+            variant="icon"
+            className="bg-red-50 text-red-500 rounded-full p-4"
+          >
+            <AlertTriangle className="h-8 w-8" />
           </EmptyMedia>
-          <EmptyTitle className="text-xl font-semibold text-destructive">
-            Lỗi kết nối
+          <EmptyTitle className="text-xl font-serif font-bold text-red-700">
+            {t("chat.connectionError")}
           </EmptyTitle>
-          <EmptyDescription className="text-sm text-muted-foreground">
+          <EmptyDescription className="text-sm text-stone-500">
             {entryError instanceof Error
               ? entryError.message
-              : "Không thể kết nối đến server. Vui lòng thử lại sau."}
+              : t("chat.serverError")}
           </EmptyDescription>
           <EmptyContent>
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
-              className="mt-4"
+              className="mt-4 border-red-200 text-red-700 hover:bg-red-50"
             >
-              Thử lại
+              {t("chat.retry")}
             </Button>
           </EmptyContent>
         </EmptyHeader>
@@ -237,14 +250,21 @@ export default function GuestChat({}: Route.ComponentProps) {
   if (showErrorDialog && entry) {
     return (
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white/90 backdrop-blur-md border-stone-200">
           <AlertDialogHeader>
-            <AlertDialogTitle>Không thể truy cập</AlertDialogTitle>
-            <AlertDialogDescription>{entry.message}</AlertDialogDescription>
+            <AlertDialogTitle className="text-stone-800">
+              {t("chat.cannotAccess")}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-stone-600">
+              {entry.message}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={handleErrorDialogClose}>
-              Đóng
+            <AlertDialogAction
+              onClick={handleErrorDialogClose}
+              className="bg-emerald-700 hover:bg-emerald-800"
+            >
+              {t("chat.close")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -254,12 +274,11 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   if (isLoadingSession || isLoadingMessages) {
     return (
-      <div className="flex h-dvh items-center justify-center bg-background">
+      <div className="flex h-dvh items-center justify-center bg-stone-50">
+        <BackgroundLayer />
         <div className="text-center space-y-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-          <p className="text-sm text-muted-foreground">
-            Đang tải lịch sử trò chuyện...
-          </p>
+          <Loader2 className="h-10 w-10 animate-spin text-emerald-600 mx-auto" />
+          <p className="text-sm text-stone-500">{t("chat.loadingHistory")}</p>
         </div>
       </div>
     );
@@ -267,19 +286,22 @@ export default function GuestChat({}: Route.ComponentProps) {
 
   if (sessionError || !session) {
     return (
-      <div className="flex h-dvh items-center justify-center bg-background">
+      <div className="flex h-dvh items-center justify-center bg-stone-50">
+        <BackgroundLayer />
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
-            <MessageSquare className="h-6 w-6 text-muted-foreground" />
+          <div className="w-16 h-16 bg-stone-200/50 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-stone-200">
+            <Mountain className="h-8 w-8 text-stone-400" />
           </div>
-          <p className="text-destructive font-semibold">
-            Không tìm thấy phiên chat
+          <p className="text-stone-800 font-semibold font-serif">
+            {t("chat.sessionNotFound")}
           </p>
-          <p className="text-sm text-muted-foreground">
-            Vui lòng quét lại mã QR hoặc liên hệ lễ tân.
-          </p>
-          <Button variant="link" onClick={() => navigate("/")}>
-            Quay về trang chủ
+          <p className="text-sm text-stone-500">{t("chat.rescanQR")}</p>
+          <Button
+            variant="link"
+            onClick={() => navigate("/")}
+            className="text-emerald-700"
+          >
+            {t("chat.backHome")}
           </Button>
         </div>
       </div>
@@ -289,44 +311,46 @@ export default function GuestChat({}: Route.ComponentProps) {
   const canSendMessage = session.state === "Open";
 
   return (
-    <div className="flex flex-col h-dvh bg-background">
-      {/* Header */}
-      <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-4 justify-between sticky top-0 z-20 shadow-sm">
+    <div className="flex flex-col h-dvh relative selection:bg-emerald-200 selection:text-emerald-900 font-sans">
+      <BackgroundLayer />
+
+      {/* Header - Glassmorphic */}
+      <header className="h-16 border-b border-white/20 bg-white/60 backdrop-blur-xl flex items-center px-4 justify-between sticky top-0 z-20 shadow-sm shadow-stone-900/5">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border">
-            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+          <Avatar className="h-10 w-10 border border-white/50 shadow-sm">
+            <AvatarFallback className="bg-emerald-100 text-emerald-800 font-medium font-serif">
               LT
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="font-semibold text-sm">Lễ Tân (Reception)</h1>
+            <h1 className="font-semibold text-sm text-stone-800">
+              {t("chat.reception")}
+            </h1>
             <div className="flex items-center gap-1.5">
               <span
                 className={cn(
-                  "w-2 h-2 rounded-full",
+                  "w-2 h-2 rounded-full shadow-sm",
                   isConnecting
-                    ? "bg-yellow-500 animate-pulse"
+                    ? "bg-amber-400 animate-pulse"
                     : isConnected
-                      ? "bg-green-500 animate-pulse"
-                      : "bg-gray-400"
+                      ? "bg-emerald-500 shadow-emerald-200"
+                      : "bg-stone-300"
                 )}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-stone-500">
                 {isConnecting
-                  ? "Đang kết nối..."
+                  ? t("chat.connecting")
                   : isConnected
-                    ? "Đang hoạt động"
-                    : "Ngắt kết nối"}
-                {isConnecting ? "Đang kết nối..." : "Trực tuyến"}
+                    ? t("chat.active")
+                    : t("chat.disconnected")}
               </p>
             </div>
           </div>
         </div>
-        {/* Optional: Add call button or info button here */}
       </header>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-hidden relative bg-muted/30">
+      {/* Messages Area - Transparent to show pattern */}
+      <div className="flex-1 overflow-hidden relative">
         <ScrollArea className="h-full px-4 py-4" ref={scrollAreaRef}>
           <div className="space-y-6 pb-4">
             {/* Load More Trigger */}
@@ -337,33 +361,35 @@ export default function GuestChat({}: Route.ComponentProps) {
                   size="sm"
                   onClick={handleLoadMore}
                   disabled={isFetching}
-                  className="text-xs text-muted-foreground hover:bg-transparent"
+                  className="text-xs text-stone-400 hover:text-emerald-700 hover:bg-emerald-50/50 rounded-full"
                 >
                   {isFetching ? (
                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                   ) : (
                     <ChevronUp className="h-3 w-3 mr-1" />
                   )}
-                  Tải tin nhắn cũ hơn
+                  {t("chat.loadOlder")}
                 </Button>
               </div>
             )}
 
             {/* Messages List */}
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 opacity-50">
-                <MessageSquare className="h-12 w-12 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
-                  Chưa có tin nhắn nào.
+              <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 opacity-70">
+                <div className="w-16 h-16 bg-white/40 rounded-full flex items-center justify-center border border-white/60">
+                  <Leaf className="h-8 w-8 text-emerald-800/30" />
+                </div>
+                <p className="text-sm text-stone-500 font-medium">
+                  {t("chat.noMessages")}
                   <br />
-                  Hãy bắt đầu trò chuyện với lễ tân.
+                  <span className="text-xs font-normal opacity-70">
+                    {t("chat.startChat")}
+                  </span>
                 </p>
               </div>
             ) : (
               messages.map((msg, index) => {
-                // Check if date changed compared to previous message to show separator
                 const prevMsg = messages[index - 1];
-                // Only show separator if both messages have createdAt
                 const isNewDay =
                   msg.createdAt &&
                   (!prevMsg ||
@@ -374,8 +400,8 @@ export default function GuestChat({}: Route.ComponentProps) {
                 return (
                   <div key={msg.id}>
                     {isNewDay && msg.createdAt && (
-                      <div className="flex justify-center my-4">
-                        <span className="text-[10px] bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                      <div className="flex justify-center my-6">
+                        <span className="text-[10px] bg-white/40 backdrop-blur-sm border border-white/30 text-stone-500 px-3 py-1 rounded-full shadow-sm">
                           {new Date(msg.createdAt).toLocaleDateString("vi-VN", {
                             weekday: "short",
                             day: "numeric",
@@ -398,12 +424,12 @@ export default function GuestChat({}: Route.ComponentProps) {
         </ScrollArea>
       </div>
 
-      {/* Input Area */}
-      <div className="bg-background border-t p-3 pb-safe-area sticky bottom-0 z-20">
+      {/* Input Area - Floating Glass */}
+      <div className="bg-white/60 backdrop-blur-xl border-t border-white/40 p-3 pb-safe-area sticky bottom-0 z-20 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.02)]">
         {!canSendMessage ? (
-          <div className="p-3 bg-muted/50 rounded-lg text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-gray-400" />
-            Phiên chat đã kết thúc
+          <div className="p-3 bg-stone-100/50 border border-stone-200/50 rounded-lg text-center text-sm text-stone-500 flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-stone-400" />
+            {t("chat.sessionEnded")}
           </div>
         ) : (
           <form
@@ -422,8 +448,8 @@ export default function GuestChat({}: Route.ComponentProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="shrink-0 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10"
-                  title="Tag món ăn/dịch vụ"
+                  className="shrink-0 rounded-full text-stone-500 hover:text-emerald-700 hover:bg-emerald-50"
+                  title={t("chat.tagItems")}
                 >
                   <Hash className="h-5 w-5" />
                 </Button>
@@ -431,35 +457,28 @@ export default function GuestChat({}: Route.ComponentProps) {
               <PopoverContent
                 align="start"
                 side="top"
-                className="w-80 p-0 overflow-hidden"
+                className="w-80 p-0 overflow-hidden border-stone-200/60 bg-white/90 backdrop-blur-xl shadow-xl shadow-stone-900/5"
                 sideOffset={10}
               >
-                <div className="bg-muted/50 px-4 py-2 border-b">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase">
-                    Gắn thẻ nhanh
+                <div className="bg-emerald-50/50 px-4 py-2 border-b border-emerald-100/50">
+                  <h4 className="text-xs font-semibold text-emerald-800 uppercase flex items-center gap-2">
+                    <Leaf className="w-3 h-3" />
+                    {t("chat.quickTag")}
                   </h4>
                 </div>
                 <Tabs defaultValue="menu" className="w-full">
-                  <TabsList className="w-full rounded-none border-b bg-transparent p-0 h-10">
-                    <TabsTrigger
-                      value="menu"
-                      className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                    >
-                      Món ăn
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="services"
-                      className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                    >
-                      Dịch vụ
+                  <TabsList className="w-full rounded-none border-b border-stone-100  p-0 h-10">
+                    <TabsTrigger value="menu">{t("chat.menu")}</TabsTrigger>
+                    <TabsTrigger value="services">
+                      {t("chat.services")}
                     </TabsTrigger>
                   </TabsList>
 
-                  <div className="h-64">
+                  <div className="h-64 bg-white/40">
                     <TabsContent value="menu" className="h-full mt-0">
                       {isLoadingItems ? (
                         <div className="flex h-full items-center justify-center">
-                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                          <Loader2 className="h-5 w-5 animate-spin text-stone-400" />
                         </div>
                       ) : (
                         <ScrollArea className="h-full">
@@ -469,17 +488,17 @@ export default function GuestChat({}: Route.ComponentProps) {
                                 <button
                                   key={item.itemId}
                                   type="button"
-                                  className="w-full text-left px-3 py-2 hover:bg-accent rounded-md transition-colors group"
+                                  className="w-full text-left px-3 py-2 hover:bg-emerald-50/60 rounded-md transition-colors group"
                                   onClick={() => handleTagItem(item, "menu")}
                                 >
-                                  <div className="font-medium text-sm group-hover:text-primary transition-colors">
+                                  <div className="font-medium text-sm text-stone-700 group-hover:text-emerald-800 transition-colors">
                                     {item.name}
                                   </div>
                                   <div className="flex justify-between items-center mt-0.5">
-                                    <span className="text-xs text-muted-foreground line-clamp-1 max-w-[180px]">
+                                    <span className="text-xs text-stone-500 line-clamp-1 max-w-[180px]">
                                       {item.description || "Không có mô tả"}
                                     </span>
-                                    <span className="text-xs font-mono">
+                                    <span className="text-xs font-mono text-emerald-700 font-medium">
                                       {item.price?.toLocaleString()}đ
                                     </span>
                                   </div>
@@ -487,7 +506,8 @@ export default function GuestChat({}: Route.ComponentProps) {
                               ))}
                             </div>
                           ) : (
-                            <div className="p-8 text-center text-xs text-muted-foreground">
+                            <div className="p-8 text-center text-xs text-stone-400 flex flex-col items-center gap-2">
+                              <CloudFog className="h-6 w-6 opacity-50" />
                               Không có dữ liệu
                             </div>
                           )}
@@ -504,17 +524,17 @@ export default function GuestChat({}: Route.ComponentProps) {
                               <button
                                 key={item.serviceItemId}
                                 type="button"
-                                className="w-full text-left px-3 py-2 hover:bg-accent rounded-md transition-colors group"
+                                className="w-full text-left px-3 py-2 hover:bg-emerald-50/60 rounded-md transition-colors group"
                                 onClick={() => handleTagItem(item, "service")}
                               >
-                                <div className="font-medium text-sm group-hover:text-primary transition-colors">
+                                <div className="font-medium text-sm text-stone-700 group-hover:text-emerald-800 transition-colors">
                                   {item.name}
                                 </div>
                                 <div className="flex justify-between items-center mt-0.5">
-                                  <span className="text-xs text-muted-foreground line-clamp-1 max-w-[180px]">
+                                  <span className="text-xs text-stone-500 line-clamp-1 max-w-[180px]">
                                     {item.description || "Không có mô tả"}
                                   </span>
-                                  <span className="text-xs font-mono">
+                                  <span className="text-xs font-mono text-emerald-700 font-medium">
                                     {item.basePrice?.toLocaleString()}đ
                                   </span>
                                 </div>
@@ -522,7 +542,8 @@ export default function GuestChat({}: Route.ComponentProps) {
                             ))}
                           </div>
                         ) : (
-                          <div className="p-8 text-center text-xs text-muted-foreground">
+                          <div className="p-8 text-center text-xs text-stone-400 flex flex-col items-center gap-2">
+                            <MapIcon className="h-6 w-6 opacity-50" />
                             Không có dữ liệu
                           </div>
                         )}
@@ -538,9 +559,9 @@ export default function GuestChat({}: Route.ComponentProps) {
                 id="chat-input"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Nhập tin nhắn..."
+                placeholder="Message reception..."
                 disabled={isConnecting}
-                className="pr-10 rounded-full bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/20 focus-visible:border-primary"
+                className="pr-10 rounded-full bg-stone-100/50 border-transparent focus-visible:bg-white focus-visible:ring-emerald-500/20 focus-visible:border-emerald-200 transition-all text-stone-800 placeholder:text-stone-400"
                 autoComplete="off"
               />
             </div>
@@ -548,11 +569,11 @@ export default function GuestChat({}: Route.ComponentProps) {
             <Button
               type="submit"
               size="icon"
-              className="rounded-full shrink-0 shadow-sm"
+              className="rounded-full shrink-0 shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white transition-all hover:scale-105 active:scale-95"
               disabled={!inputMessage.trim() || !isConnected}
             >
               {isConnecting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-white/80" />
               ) : (
                 <Send className="h-4 w-4" />
               )}

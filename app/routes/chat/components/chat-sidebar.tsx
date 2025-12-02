@@ -1,13 +1,19 @@
-import { MessageSquare, RotateCw, X } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
+import {
+  MessageSquare,
+  RotateCw,
+  X,
+  CloudFog,
+  Search,
+  Leaf,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useStaffInbox } from "../container/query.hooks";
 import ChatSessionCard from "../fragments/chat-session.cards";
-import { Separator } from "~/components/ui/separator";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { useState, useMemo } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { cn } from "~/lib/utils";
 
 interface ChatSidebarProps {
   activeSessionId: string | null;
@@ -36,23 +42,28 @@ export function ChatSidebar({
     );
   }, [sessions, debouncedSearch]);
 
+  // Shared container style for the sidebar (Glass pane)
+  const containerClasses =
+    "flex w-80 flex-col border-r border-white/40 bg-white/60 backdrop-blur-xl h-full shadow-[5px_0_15px_-5px_rgba(0,0,0,0.03)]";
+
   if (isLoading) {
     return (
-      <div className="flex w-80 flex-col border border-r p-4">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Hộp thư đến</h1>
-            <p className="text-sm text-muted-foreground">
-              Danh sách tin nhắn từ khách
-            </p>
-          </div>
+      <div className={cn(containerClasses, "p-4")}>
+        <div className="mb-6 space-y-1">
+          <h1 className="text-2xl font-bold text-stone-800 tracking-tight ">
+            Hộp thư đến
+          </h1>
+          <p className="text-sm text-stone-500">Đang tải danh sách...</p>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {Array(5)
             .fill(0)
             .map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full" />
+              <Skeleton
+                key={i}
+                className="h-20 w-full rounded-xl bg-stone-200/50"
+              />
             ))}
         </div>
       </div>
@@ -61,19 +72,18 @@ export function ChatSidebar({
 
   if (!sessions || sessions.length === 0) {
     return (
-      <div className="flex w-80 flex-col border border-r p-4">
+      <div className={cn(containerClasses, "p-4")}>
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Hộp thư đến</h1>
-            <p className="text-sm text-muted-foreground">
-              Danh sách tin nhắn từ khách
-            </p>
+            <h1 className="text-2xl font-bold text-stone-800 ">Hộp thư đến</h1>
+            <p className="text-sm text-stone-500">Danh sách tin nhắn</p>
           </div>
           <Button
             size="icon"
             variant="ghost"
             onClick={() => refetch()}
             disabled={isRefetching}
+            className="text-stone-400 hover:text-emerald-700 hover:bg-emerald-50/50 rounded-full"
           >
             <RotateCw
               className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
@@ -82,12 +92,16 @@ export function ChatSidebar({
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-            <MessageSquare className="h-8 w-8 text-muted-foreground" />
+          <div className="w-20 h-20 rounded-full bg-white/50 border border-white/60 shadow-sm flex items-center justify-center mb-4 relative">
+            {/* Decorative mist */}
+            <div className="absolute inset-0 bg-emerald-100/20 rounded-full blur-xl"></div>
+            <CloudFog className="h-10 w-10 text-stone-400/70" />
           </div>
-          <p className="font-medium mb-1">Chưa có tin nhắn</p>
-          <p className="text-sm text-muted-foreground">
-            Các tin nhắn từ khách sẽ hiển thị ở đây
+          <p className="font-semibold text-stone-700 mb-1">
+            Thung lũng yên tĩnh
+          </p>
+          <p className="text-sm text-stone-500 max-w-[200px]">
+            Hiện chưa có tin nhắn nào từ khách hàng.
           </p>
         </div>
       </div>
@@ -95,16 +109,23 @@ export function ChatSidebar({
   }
 
   return (
-    <div className="flex w-80 flex-col space-y-4 border border-r p-4">
+    <div className={cn(containerClasses, "p-4 space-y-4")}>
       <div className="grid gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Hộp thư đến</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-stone-800 ">Hộp thư đến</h1>
+            <div className="flex items-center gap-1 text-xs font-medium text-emerald-700/80 bg-emerald-50/50 px-2 py-0.5 rounded-full w-fit mt-1">
+              <Leaf className="w-3 h-3" />
+              {sessions.length} cuộc hội thoại
+            </div>
+          </div>
           <Button
             size="icon"
             variant="ghost"
             onClick={() => refetch()}
             disabled={isRefetching}
             title="Làm mới"
+            className="text-stone-400 hover:text-emerald-700 hover:bg-emerald-50/50 rounded-full transition-all hover:rotate-180 duration-500"
           >
             <RotateCw
               className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
@@ -112,10 +133,13 @@ export function ChatSidebar({
           </Button>
         </div>
 
-        <div className="relative">
+        <div className="relative group">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-emerald-600 transition-colors">
+            <Search className="h-4 w-4" />
+          </div>
           <Input
-            placeholder="Tìm kiếm tin nhắn..."
-            className="w-full rounded-full bg-background pr-8"
+            placeholder="Tìm theo tên, phòng..."
+            className="w-full rounded-full bg-white/50 border-white/60 pl-9 pr-8 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-300 placeholder:text-stone-400 text-stone-700 shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -123,7 +147,7 @@ export function ChatSidebar({
             <Button
               size="icon"
               variant="ghost"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full hover:bg-stone-200/50 text-stone-400 hover:text-stone-600"
               onClick={() => setSearchTerm("")}
             >
               <X className="h-3 w-3" />
@@ -132,11 +156,16 @@ export function ChatSidebar({
         </div>
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto">
+      <div className="flex-1 space-y-2 overflow-y-auto pr-1 -mr-2 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent">
         {filteredSessions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center p-6 text-muted-foreground">
-            <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
-            <p className="text-sm">Không tìm thấy kết quả</p>
+          <div className="flex flex-col items-center justify-center text-center p-6 text-stone-500">
+            <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mb-3">
+              <Search className="h-5 w-5 opacity-40" />
+            </div>
+            <p className="text-sm font-medium">Không tìm thấy kết quả</p>
+            <p className="text-xs text-stone-400 mt-1">
+              Thử tìm kiếm với từ khóa khác
+            </p>
           </div>
         ) : (
           filteredSessions.map((session) => (

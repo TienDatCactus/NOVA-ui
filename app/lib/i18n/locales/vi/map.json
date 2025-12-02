@@ -1,0 +1,24 @@
+{
+  "title": "Khám phá khu vực",
+  "search": {
+    "placeholder": "Nhập tên địa điểm để tìm kiếm",
+    "searching": "Đang tìm kiếm...",
+    "noResults": "Không tìm thấy kết quả"
+  },
+  "categories": {
+    "all": "Tất cả",
+    "restaurant": "Nhà hàng",
+    "cafe": "Quán cà phê",
+    "bar": "Bar",
+    "hotel": "Khách sạn",
+    "spa": "Spa",
+    "shopping": "Mua sắm",
+    "park": "Công viên",
+    "attraction": "Điểm tham quan",
+    "noCategories": "Không có danh mục nào để hiển thị"
+  },
+  "resort": {
+    "name": "Eco Palms House",
+    "yourLocation": "Vị trí của bạn"
+  }
+}

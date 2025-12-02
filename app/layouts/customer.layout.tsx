@@ -1,6 +1,7 @@
-import { Globe, Menu, User } from "lucide-react";
-import React from "react";
+import { Globe, Menu, Mountain, TreePalm, User } from "lucide-react";
+import React, { useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -20,49 +21,82 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { CUSTOMER_NAVS, SUPPORTED_LANGUAGES } from "~/lib/constants";
 import { cn } from "~/lib/utils";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
+import { syncI18nWithStore } from "~/lib/i18n/sync-store";
 
 const CustomerLayout: React.FC = () => {
   const isMobile = useIsMobile();
+  const { i18n, t } = useTranslation("common");
   const { userLanguage, setUserLanguage } = useChatTranslationStore();
   const location = useLocation();
+
+  // Sync i18n with chat translation store
+  useEffect(() => {
+    const unsubscribe = syncI18nWithStore();
+    return () => unsubscribe();
+  }, []);
 
   const currentLanguage =
     SUPPORTED_LANGUAGES.find((lang) => lang.code === userLanguage) ||
     SUPPORTED_LANGUAGES[0];
 
-  // UX: Helper to determine active state visually
+  const handleLanguageChange = (langCode: string) => {
+    i18n.changeLanguage(langCode);
+    setUserLanguage(langCode);
+  };
+
   const isActive = (path: string) => location.pathname === path;
 
+  // --- Background Layer (Sapa Terrain & Mist) ---
+  const BackgroundLayer = () => (
+    <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-stone-50">
+      {/* Topographic Lines Pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 C 20 10 40 10 50 0 C 60 10 80 10 100 0' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3Cpath d='M0 20 C 20 30 40 30 50 20 C 60 30 80 30 100 20' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3Cpath d='M0 40 C 20 50 40 50 50 40 C 60 50 80 50 100 40' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3C/svg%3E")`,
+          backgroundSize: "400px 400px",
+        }}
+      ></div>
+      {/* Mist Gradients */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-emerald-50/40 via-white/30 to-transparent"></div>
+      <div className="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-teal-100/20 rounded-full blur-3xl"></div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col bg-background w-full relative">
+    <div className="min-h-screen flex flex-col w-full relative font-sans selection:bg-emerald-200 selection:text-emerald-900">
+      <BackgroundLayer />
+
       {!isMobile && (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 w-full border-b border-white/20 bg-white/60 backdrop-blur-xl supports-[backdrop-filter]:bg-white/40 shadow-sm shadow-stone-900/5">
           <div className="container mx-auto flex h-16 items-center justify-between px-4">
-            {/* Brand / Logo */}
-            <div className="flex items-center gap-2 cursor-pointer">
-              <Avatar>
-                <AvatarFallback className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
-                  N
+            <div className="flex items-center gap-2 cursor-pointer group">
+              <Avatar className="transition-transform group-hover:scale-105">
+                <AvatarFallback className=" bg-emerald-700 rounded-xl flex items-center justify-center text-white font-serif font-bold shadow-md shadow-emerald-900/10">
+                  <TreePalm className="h-5 w-5" />
                 </AvatarFallback>
               </Avatar>
-              <span className="font-bold text-lg tracking-tight">NOVA</span>
+              <span className="font-serif font-bold text-xl tracking-tight text-stone-800 group-hover:text-emerald-800 transition-colors">
+                Eco Palm Sapa
+              </span>
             </div>
 
             {/* Desktop Navigation */}
             <NavigationMenu>
-              <NavigationMenuList className="gap-1">
+              <NavigationMenuList className="gap-2">
                 {CUSTOMER_NAVS.map((nav) => (
                   <NavigationMenuItem key={nav.name}>
                     <NavigationMenuLink
                       asChild
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        "bg-transparent hover:bg-accent hover:text-accent-foreground transition-all",
-                        isActive(nav.href) &&
-                          "bg-accent/50 text-primary font-medium"
+                        "bg-transparent h-9 px-4 rounded-full transition-all duration-300",
+                        isActive(nav.href)
+                          ? "bg-emerald-100/50 text-emerald-800 font-medium shadow-sm"
+                          : "text-stone-600 hover:bg-white/50 hover:text-emerald-700"
                       )}
                     >
-                      <Link to={nav.href}>{nav.name}</Link>
+                      <Link to={nav.href}>{t(nav.name)}</Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 ))}
@@ -70,13 +104,13 @@ const CustomerLayout: React.FC = () => {
             </NavigationMenu>
 
             {/* Actions: Language & User */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-2 text-muted-foreground hover:text-foreground"
+                    className="gap-2 text-stone-500 hover:text-emerald-800 hover:bg-emerald-50/50 rounded-full px-3 transition-all"
                   >
                     <Globe className="h-4 w-4" />
                     <span className="text-xs font-medium">
@@ -84,26 +118,35 @@ const CustomerLayout: React.FC = () => {
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[150px]">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[150px] bg-white/90 backdrop-blur-xl border-white/40 shadow-lg shadow-stone-500/10"
+                >
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <DropdownMenuItem
                       key={lang.code}
-                      onClick={() => setUserLanguage(lang.code)}
+                      onClick={() => handleLanguageChange(lang.code)}
                       className={cn(
-                        "justify-between",
+                        "justify-between cursor-pointer focus:bg-emerald-50 focus:text-emerald-800",
                         userLanguage === lang.code &&
-                          "bg-accent text-accent-foreground"
+                          "bg-emerald-50 text-emerald-800 font-medium"
                       )}
                     >
                       <span>{lang.label}</span>
-                      <span className="text-lg leading-none">{lang.flag}</span>
+                      <span className="text-lg leading-none opacity-80">
+                        {lang.flag}
+                      </span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Optional: User Profile Trigger */}
-              <Button variant="outline" size="icon" className="rounded-full">
+              {/* User Profile Trigger */}
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full border-stone-200 bg-white/50 hover:bg-white hover:text-emerald-700 hover:border-emerald-200 shadow-sm transition-all"
+              >
                 <User className="h-4 w-4" />
               </Button>
             </div>
@@ -113,12 +156,12 @@ const CustomerLayout: React.FC = () => {
 
       {/* --- MAIN CONTENT --- */}
       {/* Flex-1 ensures it pushes the footer down */}
-      <main className="flex-1 w-full relative flex flex-col">
+      <main className="flex-1 w-full relative flex flex-col z-10">
         <Outlet />
       </main>
 
       {isMobile && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-lg pb-safe-area">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/20 bg-white/80 backdrop-blur-xl pb-safe-area shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
           <div className="flex h-16 items-center justify-around px-2">
             {CUSTOMER_NAVS.map((nav) => {
               const active = isActive(nav.href);
@@ -127,15 +170,45 @@ const CustomerLayout: React.FC = () => {
                   key={nav.name}
                   to={nav.href}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 w-full h-full rounded-md transition-colors",
+                    "flex flex-col items-center justify-center gap-1 w-full h-full rounded-xl transition-all duration-300",
                     active
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "text-emerald-700 scale-105"
+                      : "text-stone-400 hover:text-stone-600"
                   )}
                 >
-                  {/* Replace <Menu /> with nav.icon if available */}
-                  <Menu className={cn("h-5 w-5", active && "fill-current")} />
-                  <span className="text-[10px] font-medium">{nav.name}</span>
+                  {/* Visual Indicator for Active State */}
+                  <div
+                    className={cn(
+                      "absolute top-0 w-8 h-1 rounded-b-full transition-all duration-300 bg-emerald-500 shadow-emerald-200 shadow-sm",
+                      active ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+
+                  {/* Icon */}
+                  <div
+                    className={cn(
+                      "p-1.5 rounded-full transition-colors",
+                      active ? "bg-emerald-100/50" : "bg-transparent"
+                    )}
+                  >
+                    {/* Assuming nav might have an icon property, strictly using Menu as fallback per original code, but styled nicely */}
+                    {/* Ideally replace Menu with dynamic icons (e.g. nav.icon) if available */}
+                    <Menu
+                      className={cn(
+                        "h-5 w-5",
+                        active && "fill-emerald-700/20 stroke-emerald-700"
+                      )}
+                    />
+                  </div>
+
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium transition-colors",
+                      active ? "text-emerald-800" : "text-stone-500"
+                    )}
+                  >
+                    {t(nav.name)}
+                  </span>
                 </Link>
               );
             })}

@@ -32,23 +32,17 @@ export default function BookingGridFilters({
     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-2">
       {/* LEFT: FILTER GROUPS */}
       <div className="flex flex-1 flex-col lg:flex-row items-start lg:items-center gap-3 w-full">
-        {/* 1. Search Input (Standalone) */}
-        <div className="relative w-full lg:w-[320px]">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-            <Search className="h-4 w-4" />
-          </div>
+        <div className=" lg:w-[320px]">
           <Input
+            startAddon={<Search className=" h-4 w-4 text-muted-foreground" />}
             placeholder="Tìm theo tên phòng, hạng phòng..."
             value={filters.searchText}
             onChange={(e) => updateFilters("searchText", e.target.value)}
-            className="pl-9 h-10 bg-background border-input/60 focus-visible:ring-1 focus-visible:ring-primary/20"
+            className="bg-background border-input/60 focus-visible:ring-1 focus-visible:ring-primary/20"
           />
         </div>
 
-        {/* 2. Context Group (Dates + Guests) */}
-        {/* Gom nhóm lại tạo cảm giác như một thanh công cụ thống nhất */}
         <div className="flex items-center gap-0 rounded-lg border bg-background p-1 shadow-sm w-full lg:w-auto overflow-x-auto">
-          {/* Start Date */}
           <div className="flex items-center gap-2 px-2 min-w-[140px]">
             <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
             <div className="flex-1">

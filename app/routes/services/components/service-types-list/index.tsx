@@ -12,6 +12,8 @@ import {
 } from "~/components/ui/empty";
 import { FolderTree } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { useState } from "react";
+import CreateServiceTypeDialog from "../create-service-type.dialog";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
@@ -24,6 +26,7 @@ function ServiceTypesDataTable({
   types,
   isLoading,
 }: ServiceTypesDataTableProps) {
+  const [open, setOpen] = useState(false);
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -49,6 +52,10 @@ function ServiceTypesDataTable({
             thêm loại dịch vụ đầu tiên.
           </EmptyDescription>
         </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={() => setOpen(true)}>Thêm loại dịch vụ</Button>
+        </EmptyContent>
+        <CreateServiceTypeDialog open={open} onClose={() => setOpen(false)} />
       </Empty>
     );
   }

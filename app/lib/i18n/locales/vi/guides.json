@@ -1,0 +1,78 @@
+{
+  "title": "Thông báo lưu trú tại Eco Palms House",
+  "subtitle": "Hướng dẫn chi tiết để kỳ nghỉ của bạn thật thoải mái và an toàn",
+  "times": {
+    "title": "Thời gian",
+    "checkin": "Check-in",
+    "checkinTime": "Từ 13:00 (1 giờ chiều)",
+    "checkout": "Check-out",
+    "checkoutTime": "Trước 11:00 sáng",
+    "breakfast": "Ăn sáng",
+    "breakfastTime": "7:30 – 9:30 sáng tại nhà hàng",
+    "dinner": "Order bữa tối",
+    "dinnerTime": "Đến 20:30 tối"
+  },
+  "wifi": {
+    "title": "Thông tin Wi-Fi",
+    "network": "Tên mạng:",
+    "password": "Mật khẩu:"
+  },
+  "hotWater": {
+    "title": "Sử dụng nước nóng",
+    "step1": "Vặn tay cầm vòi về phía trái và chờ khoảng 3–5 phút.",
+    "step2": "Vào những ngày lạnh, nước nóng có thể chảy chậm hơn một chút, mong quý khách kiên nhẫn chờ."
+  },
+  "notes": {
+    "title": "Một vài lưu ý quan trọng",
+    "roomDesign": {
+      "title": "Thiết kế & tiện nghi phòng",
+      "ecoStyle": "Eco Palms House được xây dựng theo phong cách du lịch sinh thái, để quý khách cảm nhận sự yên bình tự nhiên, nên trong phòng không có TV hay tủ lạnh.",
+      "noLaundry": "Vui lòng không giặt giũ hay phơi quần áo trong phòng để tránh ẩm mốc và bảo vệ nội thất.",
+      "beanBag": "Xin giữ bean bag luôn khô ráo; nếu bị ướt rất khó làm sạch và có thể phát sinh phí vệ sinh đặc biệt"
+    },
+    "towels": {
+      "title": "Khăn tắm",
+      "purpose": "Khăn trắng được chuẩn bị riêng cho việc tắm rửa, lau người.",
+      "warning": "Nếu dùng cho mục đích khác (lau sàn, giày dép, thú cưng…), khăn có thể hỏng không thể giặt sạch. Khi đó, chúng tôi buộc phải thu phí thay thế"
+    },
+    "electrical": {
+      "title": "Thiết bị điện",
+      "safety": "Vì lý do an toàn, vui lòng không sử dụng thiết bị điện công suất lớn (như nồi cơm điện, bếp, máy sấy tóc mang theo…).",
+      "turnOff": "Khi ra ngoài, hãy nhớ tắt hết các thiết bị điện để tiết kiệm năng lượng và giữ an toàn."
+    },
+    "fire": {
+      "title": "An toàn phòng cháy",
+      "material": "Các bungalow được làm từ vật liệu tự nhiên nên khá nhạy cảm với lửa.",
+      "warning": "Vì vậy, xin vui lòng không hút thuốc, đốt nến hoặc sử dụng lửa trong phòng.",
+      "emergency": "Nếu có sự cố khẩn cấp, hãy báo ngay cho nhân viên."
+    },
+    "food": {
+      "title": "Đồ ăn trong phòng",
+      "warning": "Vui lòng không mang đồ ăn vào trong phòng. Vụn đồ ăn sẽ thu hút \"những vị khách không mời\" 🐭. Biết đâu một chú chuột sẽ vào phòng chụp ảnh, trở thành idol, rồi tiếp quản cả thế giới và thống trị vũ trụ 🌌."
+    },
+    "insects": {
+      "title": "Côn trùng & môi trường tự nhiên",
+      "nature": "Ở nơi gần gũi thiên nhiên, thỉnh thoảng có thể xuất hiện côn trùng nhỏ.",
+      "prevention": "Quý khách có thể hạn chế bằng cách đóng cửa và tắt bớt đèn khi không cần thiết."
+    }
+  },
+  "services": {
+    "title": "Dịch vụ được khách yêu thích tại Eco Palms House",
+    "cableCar": {
+      "title": "Đặt vé cáp treo Fansipan",
+      "description": "Tránh phải xếp hàng, lễ tân sẽ hỗ trợ đặt vé chính thức nhanh chóng."
+    },
+    "massage": "Massage thư giãn",
+    "massageDescription": "Lựa chọn tuyệt vời sau các chuyến trekking, giúp cơ thể hồi phục nhanh hơn.",
+    "happyHour": {
+      "title": "Happy Hour – Cocktail & Beer",
+      "time": "15:00 – 18:00",
+      "description": "Tận hưởng khung cảnh hoàng hôn trên thung lũng cùng ưu đãi đặc biệt:",
+      "promotion": "Mua 1 tặng 1 cho cocktail & beer trong danh sách menu của chúng tôi"
+    }
+  },
+  "thanks": {
+    "title": "Cảm ơn quý khách đã lựa chọn Eco Palms House!",
+    "message": "Chúng tôi mong rằng kỳ nghỉ tại đây sẽ mang lại cho quý khách những phút giây thư giãn, gần gũi với thiên nhiên và thật nhiều kỷ niệm đáng nhớ 🌿"
+  }
+}

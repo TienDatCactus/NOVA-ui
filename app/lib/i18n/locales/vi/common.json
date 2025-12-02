@@ -1,0 +1,25 @@
+{
+  "loading": "Đang tải...",
+  "error": "Có lỗi xảy ra",
+  "retry": "Thử lại",
+  "cancel": "Hủy",
+  "confirm": "Xác nhận",
+  "close": "Đóng",
+  "save": "Lưu",
+  "delete": "Xóa",
+  "edit": "Chỉnh sửa",
+  "search": "Tìm kiếm",
+  "noResults": "Không tìm thấy kết quả",
+  "back": "Quay lại",
+  "next": "Tiếp theo",
+  "previous": "Trước",
+  "submit": "Gửi",
+  "success": "Thành công",
+  "failed": "Thất bại",
+  "nav": {
+    "inbox": "Hộp thư",
+    "catalog": "Danh mục",
+    "guidelines": "Hướng dẫn",
+    "map": "Bản đồ"
+  }
+}

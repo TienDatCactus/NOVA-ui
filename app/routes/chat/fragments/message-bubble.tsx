@@ -1,7 +1,15 @@
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { Loader2, Languages, Globe, Check, CheckCheck } from "lucide-react";
+import {
+  Loader2,
+  Languages,
+  Globe,
+  Check,
+  CheckCheck,
+  Leaf,
+  CloudFog,
+} from "lucide-react";
 import { cn } from "~/lib/utils";
 import type { ChatMessage } from "~/lib/signalr";
 import { format, parseISO } from "date-fns";
@@ -20,15 +28,20 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const isStaff = message.sender === "Staff";
   const isSystem = message.sender === "System";
+  // Determine if the message is from the current user view
   const isOwnMessage = isGuest
     ? message.sender === "Guest"
     : message.sender === "Staff";
 
+  // --- SYSTEM MESSAGE: Misty Pill ---
   if (isSystem) {
     return (
-      <div className="flex justify-center my-4">
-        <div className="bg-muted px-4 py-2 rounded-full">
-          <p className="text-xs text-muted-foreground">{message.message}</p>
+      <div className="flex justify-center my-6">
+        <div className="bg-stone-200/50 backdrop-blur-sm border border-stone-200/50 px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2">
+          <CloudFog className="w-3 h-3 text-stone-500" />
+          <p className="text-xs font-medium text-stone-600">
+            {message.message}
+          </p>
         </div>
       </div>
     );
@@ -37,90 +50,92 @@ export function MessageBubble({
   return (
     <div
       className={cn(
-        "flex items-start gap-3",
+        "flex items-end gap-3 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300",
         isOwnMessage ? "justify-end" : "justify-start"
       )}
     >
+      {/* --- AVATAR (Left / Incoming) --- */}
       {!isOwnMessage && (
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>
+        <Avatar className="h-8 w-8 border border-white/60 shadow-sm bg-stone-100">
+          <AvatarFallback className="bg-stone-200 text-stone-600 text-xs font-serif">
             {isStaff ? message.staffName?.[0] || "S" : "K"}
           </AvatarFallback>
         </Avatar>
       )}
 
-      {/* Message bubble */}
+      {/* --- MESSAGE BUBBLE CONTAINER --- */}
       <div
         className={cn(
-          "w-fit rounded-lg p-3",
+          "max-w-[80%] w-fit px-4 py-3 shadow-sm relative group transition-all",
+          // Rounding: "Pebble" shape
+          "rounded-2xl",
           isOwnMessage
-            ? "bg-primary text-primary-foreground rounded-br-none"
-            : "bg-muted rounded-bl-none"
+            ? "bg-emerald-600 text-white rounded-br-sm shadow-emerald-900/10" // Own: Deep Forest Green
+            : "bg-white/80 backdrop-blur-md border border-white/50 text-stone-800 rounded-bl-sm shadow-stone-900/5" // Incoming: Misty Glass
         )}
       >
-        {/* Staff name (for staff messages from other staff) */}
+        {/* Staff name (for group chats context) */}
         {isStaff && message.staffName && !isOwnMessage && (
-          <p className="text-xs font-semibold mb-1 opacity-90">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-1 opacity-80 flex items-center gap-1">
+            <Leaf className="w-3 h-3" />
             {message.staffName}
           </p>
         )}
 
-        {/* Message text - show translated if available and showTranslation is true */}
-        <p className="text-sm whitespace-pre-wrap break-words">
+        {/* Message Content */}
+        <div className="text-sm whitespace-pre-wrap break-words leading-relaxed font-normal">
           {message.translatedText && message.showTranslation
             ? message.translatedText
             : message.message}
+
+          {/* Translation Indicator */}
           {message.translatedText && message.showTranslation && (
             <span
               className={cn(
-                "ml-1 text-xs italic",
-                isOwnMessage ? "opacity-70" : "text-muted-foreground"
+                "ml-1.5 text-[10px] italic font-medium inline-flex items-center gap-0.5",
+                isOwnMessage ? "text-emerald-200" : "text-emerald-600/70"
               )}
             >
               (đã dịch)
             </span>
           )}
-        </p>
+        </div>
 
-        {/* Detected language badge - only show when translation is NOT active */}
+        {/* Detected Language Badge */}
         {message.detectedLanguage && !message.showTranslation && (
           <Badge
             variant="outline"
             className={cn(
-              "mt-2 text-xs",
+              "mt-2 text-[10px] h-5 px-1.5 font-normal border",
               isOwnMessage
-                ? "border-primary-foreground/30 text-primary-foreground"
-                : "border-muted-foreground/30"
+                ? "border-emerald-400/30 text-emerald-50 bg-emerald-700/30"
+                : "border-stone-200 text-stone-500 bg-stone-50/50"
             )}
           >
-            <Globe className="h-3 w-3 mr-1" />
+            <Globe className="h-2.5 w-2.5 mr-1 opacity-70" />
             {message.detectedLanguage.toUpperCase()}
           </Badge>
         )}
 
-        {/* Footer: timestamp + read status + action buttons */}
-        <div className="flex items-center justify-between mt-1 gap-2">
-          <div className="flex items-center gap-1">
-            <p
-              className={cn(
-                "text-xs",
-                isOwnMessage ? "opacity-70" : "text-muted-foreground"
-              )}
-            >
+        {/* --- FOOTER: Timestamp & Actions --- */}
+        <div
+          className={cn(
+            "flex items-center justify-between mt-1.5 gap-3",
+            isOwnMessage ? "text-emerald-100/80" : "text-stone-400"
+          )}
+        >
+          <div className="flex items-center gap-1.5">
+            {/* Timestamp */}
+            <p className="text-[10px] font-medium tracking-wide">
               {format(parseISO(message.createdAt ?? ""), "HH:mm", {
                 locale: vi,
               })}
             </p>
 
-            {/* Read status indicator (only for staff messages) */}
+            {/* Read Receipt (Only for own messages) */}
             {isStaff && isOwnMessage && (
               <div
-                className={cn(
-                  "flex items-center",
-                  isOwnMessage
-                    ? "text-primary-foreground/70"
-                    : "text-muted-foreground"
-                )}
+                className="flex items-center transition-colors"
                 title={
                   message.isRead && message.readAt
                     ? `Đã đọc lúc ${format(parseISO(message.readAt), "HH:mm dd/MM/yyyy", { locale: vi })}`
@@ -128,36 +143,36 @@ export function MessageBubble({
                 }
               >
                 {message.isRead ? (
-                  <CheckCheck className="h-3 w-3" />
+                  <CheckCheck className="h-3 w-3 text-emerald-200" />
                 ) : (
-                  <Check className="h-3 w-3" />
+                  <Check className="h-3 w-3 text-emerald-400/70" />
                 )}
               </div>
             )}
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Translation toggle button */}
+            {/* Translate Button */}
             {!isSystem && onTranslate && (
               <Button
                 size="sm"
                 variant="ghost"
                 className={cn(
-                  "h-6 px-2 py-0",
+                  "h-5 px-1.5 py-0 rounded-full transition-colors",
                   isOwnMessage
-                    ? "hover:bg-primary-foreground/20 text-primary-foreground"
-                    : "hover:bg-muted-foreground/10"
+                    ? "hover:bg-emerald-500/50 text-emerald-100 hover:text-white"
+                    : "hover:bg-stone-100 text-stone-400 hover:text-emerald-700"
                 )}
                 onClick={() => onTranslate(message)}
                 disabled={message.isTranslating}
               >
                 {message.isTranslating ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
                 ) : (
                   <>
                     <Languages className="h-3 w-3 mr-1" />
-                    <span className="text-xs">
-                      {message.showTranslation ? "Bản gốc" : "Dịch"}
+                    <span className="text-[10px] font-medium">
+                      {message.showTranslation ? "Gốc" : "Dịch"}
                     </span>
                   </>
                 )}
@@ -167,10 +182,10 @@ export function MessageBubble({
         </div>
       </div>
 
-      {/* Avatar (right side for own messages) */}
+      {/* --- AVATAR (Right / Own) --- */}
       {isOwnMessage && (
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>
+        <Avatar className="h-8 w-8 border border-white/60 shadow-sm bg-emerald-50">
+          <AvatarFallback className="bg-emerald-100 text-emerald-800 text-xs font-bold">
             {isGuest ? "B" : message.staffName?.[0] || "S"}
           </AvatarFallback>
         </Avatar>
