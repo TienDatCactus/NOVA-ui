@@ -48,6 +48,7 @@ import { InvoicesService } from "~/services/api/invoices";
 import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import type { InvoiceStatusEnum } from "~/services/api/invoices/dto";
 
 interface InvoicesViewLayoutProps {
   children: ReactNode;
@@ -244,9 +245,9 @@ function InvoicesViewLayout({
 
           {/* Status Filter */}
           <Select
-            value={filters.Status || "all"}
-            onValueChange={(val) =>
-              onFilterChange("Status", val === "all" ? undefined : val)
+            value={filters.Status}
+            onValueChange={(val: InvoiceStatusEnum) =>
+              onFilterChange("Status", val)
             }
           >
             <SelectTrigger className="w-[160px] h-9 text-xs border-dashed">

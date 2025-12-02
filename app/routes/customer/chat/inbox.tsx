@@ -316,38 +316,22 @@ export default function ChatInbox({}: Route.ComponentProps) {
 
       {/* QR Scanner Dialog Overlay */}
       <Dialog open={isQRScannerOpen} onOpenChange={setIsQRScannerOpen}>
-        <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden bg-black border-none text-white">
-          <DialogHeader className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/80 to-transparent">
-            <DialogTitle className="text-white">Quét mã QR</DialogTitle>
-            <DialogDescription className="text-white/70">
-              Di chuyển camera đến mã QR
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Quét mã QR</DialogTitle>
+            <DialogDescription>
+              Hướng camera vào mã QR trong phòng của bạn
             </DialogDescription>
           </DialogHeader>
-
-          <div className="aspect-[3/4] relative bg-black">
+          <div>
             <QRScanner
               onScan={handleQRScanned}
               onError={(error) => {
-                console.error("QR Error", error);
-                toast.error("Lỗi camera");
-                setIsQRScannerOpen(false);
+                console.error("QR Scanner error:", error);
+                toast.error("Lỗi quét mã QR. Vui lòng thử lại.");
               }}
             />
-            {/* Scan Overlay UI */}
-            <div className="absolute inset-0 border-2 border-white/20 m-12 rounded-lg pointer-events-none flex items-center justify-center">
-              <div className="w-full h-0.5 bg-red-500/50 absolute animate-pulse top-1/2" />
-            </div>
           </div>
-
-          <DialogFooter className="p-4 bg-black">
-            <Button
-              variant="secondary"
-              className="w-full"
-              onClick={() => setIsQRScannerOpen(false)}
-            >
-              Đóng camera
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
