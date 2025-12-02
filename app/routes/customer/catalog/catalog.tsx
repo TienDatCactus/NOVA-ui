@@ -6,6 +6,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -23,6 +24,7 @@ import ServiceCard from "./components/service-card";
 import type { Route } from "./+types/catalog";
 
 export default function CustomerGuidesPage({}: Route.ComponentProps) {
+  const { t } = useTranslation("catalog");
   const [searchQuery, setSearchQuery] = useState("");
 
   // --- Data Fetching ---
@@ -60,14 +62,13 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-background border shadow-sm text-xs font-medium text-primary mb-2">
               <Sparkles className="w-3 h-3" />
-              Trải nghiệm đẳng cấp
+              {t("subtitle")}
             </div>
             <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-              Khám phá NOVA Resort
+              {t("title")}
             </h1>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Tận hưởng ẩm thực tinh hoa và các dịch vụ thư giãn hàng đầu được
-              tuyển chọn dành riêng cho bạn.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -77,7 +78,7 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
               <Search className="h-5 w-5" />
             </div>
             <Input
-              placeholder="Bạn đang tìm món ăn hay dịch vụ gì?"
+              placeholder={t("search.placeholder")}
               className="h-12 pl-12 pr-10 rounded-full border-transparent bg-background focus-visible:ring-2 focus-visible:ring-primary/20 text-base shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -105,7 +106,7 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
                 className="rounded-full px-6 h-10 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
                 <UtensilsCrossed className="h-4 w-4 mr-2" />
-                Ẩm thực
+                {t("tabs.food")}
                 <Badge
                   variant="secondary"
                   className="ml-2 bg-white/20 text-current border-0 hidden sm:inline-flex"
@@ -118,7 +119,7 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
                 className="rounded-full px-6 h-10 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
                 <Sparkles className="h-4 w-4 mr-2" />
-                Dịch vụ
+                {t("tabs.service")}
                 <Badge
                   variant="secondary"
                   className="ml-2 bg-white/20 text-current border-0 hidden sm:inline-flex"

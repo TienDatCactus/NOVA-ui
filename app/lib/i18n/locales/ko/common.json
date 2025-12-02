@@ -1,0 +1,21 @@
+{
+  "welcome": "환영합니다",
+  "loading": "로딩 중...",
+  "error": "오류",
+  "success": "성공",
+  "cancel": "취소",
+  "confirm": "확인",
+  "save": "저장",
+  "delete": "삭제",
+  "edit": "편집",
+  "close": "닫기",
+  "back": "뒤로",
+  "next": "다음",
+  "previous": "이전",
+  "search": "검색",
+  "filter": "필터",
+  "sort": "정렬",
+  "select": "선택",
+  "submit": "제출",
+  "reset": "재설정"
+}

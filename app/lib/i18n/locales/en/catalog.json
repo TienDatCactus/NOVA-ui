@@ -1,0 +1,22 @@
+{
+  "title": "Explore NOVA Resort",
+  "subtitle": "Experience premium cuisine and services",
+  "search": {
+    "placeholder": "What food or service are you looking for?",
+    "noResults": "No matching results found"
+  },
+  "tabs": {
+    "food": "Cuisine",
+    "service": "Services"
+  },
+  "card": {
+    "outOfStock": "Out of Stock",
+    "suspended": "Suspended",
+    "price": "Price",
+    "available": "{{count}} available"
+  },
+  "empty": {
+    "title": "No items yet",
+    "description": "Try searching with different keywords"
+  }
+}

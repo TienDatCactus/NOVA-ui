@@ -21,23 +21,22 @@ import {
   Wind,
   Shield,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 
 export default function GuidesPage() {
+  const { t } = useTranslation("guides");
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/20 to-background">
       {/* Header */}
       <div className="bg-primary text-primary-foreground py-12 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Thông báo lưu trú tại Eco Palms House
-          </h1>
-          <p className="text-lg opacity-90">
-            Hướng dẫn chi tiết để kỳ nghỉ của bạn thật thoải mái và an toàn
-          </p>
+          <h1 className="text-4xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-lg opacity-90">{t("subtitle")}</p>
         </div>
       </div>
 
@@ -48,7 +47,7 @@ export default function GuidesPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Clock className="h-6 w-6 text-primary" />
-              Thời gian
+              {t("times.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -56,35 +55,37 @@ export default function GuidesPage() {
               <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
                 <Sun className="h-5 w-5 text-orange-500 mt-1" />
                 <div>
-                  <p className="font-semibold">Check-in</p>
+                  <p className="font-semibold">{t("times.checkin")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Từ 13:00 (1 giờ chiều)
+                    {t("times.checkinTime")}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
                 <Moon className="h-5 w-5 text-blue-500 mt-1" />
                 <div>
-                  <p className="font-semibold">Check-out</p>
+                  <p className="font-semibold">{t("times.checkout")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Trước 11:00 sáng
+                    {t("times.checkoutTime")}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
                 <Coffee className="h-5 w-5 text-amber-600 mt-1" />
                 <div>
-                  <p className="font-semibold">Ăn sáng</p>
+                  <p className="font-semibold">{t("times.breakfast")}</p>
                   <p className="text-sm text-muted-foreground">
-                    7:30 – 9:30 sáng tại nhà hàng
+                    {t("times.breakfastTime")}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
                 <UtensilsCrossed className="h-5 w-5 text-green-600 mt-1" />
                 <div>
-                  <p className="font-semibold">Order bữa tối</p>
-                  <p className="text-sm text-muted-foreground">Đến 20:30 tối</p>
+                  <p className="font-semibold">{t("times.dinner")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("times.dinnerTime")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -96,19 +97,21 @@ export default function GuidesPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Wifi className="h-6 w-6 text-primary" />
-              Thông tin Wi-Fi
+              {t("wifi.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                <span className="text-sm font-medium">Tên mạng:</span>
+                <span className="text-sm font-medium">{t("wifi.network")}</span>
                 <Badge variant="secondary" className="font-mono">
                   Eco Palms House
                 </Badge>
               </div>
               <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                <span className="text-sm font-medium">Mật khẩu:</span>
+                <span className="text-sm font-medium">
+                  {t("wifi.password")}
+                </span>
                 <Badge variant="secondary" className="font-mono">
                   loveeco12
                 </Badge>
@@ -122,7 +125,7 @@ export default function GuidesPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Droplet className="h-6 w-6 text-blue-500" />
-              Sử dụng nước nóng
+              {t("hotWater.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -130,18 +133,13 @@ export default function GuidesPage() {
               <div className="mt-1 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
                 1
               </div>
-              <p className="text-sm">
-                Vặn tay cầm vòi về phía trái và chờ khoảng 3–5 phút.
-              </p>
+              <p className="text-sm">{t("hotWater.step1")}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="mt-1 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
                 2
               </div>
-              <p className="text-sm">
-                Vào những ngày lạnh, nước nóng có thể chảy chậm hơn một chút,
-                mong quý khách kiên nhẫn chờ.
-              </p>
+              <p className="text-sm">{t("hotWater.step2")}</p>
             </div>
           </CardContent>
         </Card>
@@ -151,7 +149,7 @@ export default function GuidesPage() {
           <CardHeader className="bg-orange-50">
             <CardTitle className="flex items-center gap-3">
               <Leaf className="h-6 w-6 text-green-600" />
-              Một vài lưu ý quan trọng
+              {t("notes.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
@@ -159,29 +157,21 @@ export default function GuidesPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Bed className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold">Thiết kế & tiện nghi phòng</h4>
+                <h4 className="font-semibold">{t("notes.roomDesign.title")}</h4>
               </div>
               <ul className="space-y-2 ml-7 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>
-                    Eco Palms House được xây dựng theo phong cách du lịch sinh
-                    thái, để quý khách cảm nhận sự yên bình tự nhiên, nên trong
-                    phòng không có TV hay tủ lạnh.
-                  </span>
+                  <span>{t("notes.roomDesign.ecoStyle")}</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-1">•</span>
+                  <span>{t("notes.roomDesign.noLaundry")}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
                   <span>
-                    Vui lòng không giặt giũ hay phơi quần áo trong phòng để
-                    tránh ẩm mốc và bảo vệ nội thất.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>
-                    Xin giữ bean bag luôn khô ráo; nếu bị ướt rất khó làm sạch
-                    và có thể phát sinh phí vệ sinh đặc biệt{" "}
+                    {t("notes.roomDesign.beanBag")}{" "}
                     <strong className="text-destructive">500,000 VND</strong>.
                   </span>
                 </li>
@@ -194,18 +184,14 @@ export default function GuidesPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Bath className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold">Khăn tắm</h4>
+                <h4 className="font-semibold">{t("notes.towels.title")}</h4>
               </div>
               <Alert className="border-yellow-200 bg-yellow-50">
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 <AlertDescription className="text-sm space-y-2">
+                  <p>{t("notes.towels.purpose")}</p>
                   <p>
-                    Khăn trắng được chuẩn bị riêng cho việc tắm rửa, lau người.
-                  </p>
-                  <p>
-                    Nếu dùng cho mục đích khác (lau sàn, giày dép, thú cưng…),
-                    khăn có thể hỏng không thể giặt sạch. Khi đó, chúng tôi buộc
-                    phải thu phí thay thế{" "}
+                    {t("notes.towels.warning")}{" "}
                     <strong className="text-destructive">1,000,000 VND</strong>.
                   </p>
                 </AlertDescription>
@@ -218,22 +204,16 @@ export default function GuidesPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Cable className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold">Thiết bị điện</h4>
+                <h4 className="font-semibold">{t("notes.electrical.title")}</h4>
               </div>
               <ul className="space-y-2 ml-7 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>
-                    Vì lý do an toàn, vui lòng không sử dụng thiết bị điện công
-                    suất lớn (như nồi cơm điện, bếp, máy sấy tóc mang theo…).
-                  </span>
+                  <span>{t("notes.electrical.safety")}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>
-                    Khi ra ngoài, hãy nhớ tắt hết các thiết bị điện để tiết kiệm
-                    năng lượng và giữ an toàn.
-                  </span>
+                  <span>{t("notes.electrical.turnOff")}</span>
                 </li>
               </ul>
             </div>
@@ -245,21 +225,15 @@ export default function GuidesPage() {
               <div className="flex items-center gap-2">
                 <Flame className="h-5 w-5 text-red-500" />
                 <h4 className="font-semibold text-red-600">
-                  An toàn phòng cháy
+                  {t("notes.fire.title")}
                 </h4>
               </div>
               <Alert variant="destructive" className="border-red-200">
                 <Shield className="h-4 w-4" />
                 <AlertDescription className="text-sm space-y-2">
-                  <p>
-                    Các bungalow được làm từ vật liệu tự nhiên nên khá nhạy cảm
-                    với lửa.
-                  </p>
-                  <p className="font-semibold">
-                    Vì vậy, xin vui lòng không hút thuốc, đốt nến hoặc sử dụng
-                    lửa trong phòng.
-                  </p>
-                  <p>Nếu có sự cố khẩn cấp, hãy báo ngay cho nhân viên.</p>
+                  <p>{t("notes.fire.material")}</p>
+                  <p className="font-semibold">{t("notes.fire.warning")}</p>
+                  <p>{t("notes.fire.emergency")}</p>
                 </AlertDescription>
               </Alert>
             </div>
@@ -270,15 +244,10 @@ export default function GuidesPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <UtensilsCrossed className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold">Đồ ăn trong phòng</h4>
+                <h4 className="font-semibold">{t("notes.food.title")}</h4>
               </div>
               <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
-                <p className="text-sm">
-                  Vui lòng không mang đồ ăn vào trong phòng. Vụn đồ ăn sẽ thu
-                  hút "những vị khách không mời" 🐭. Biết đâu một chú chuột sẽ
-                  vào phòng chụp ảnh, trở thành idol, rồi tiếp quản cả thế giới
-                  và thống trị vũ trụ 🌌.
-                </p>
+                <p className="text-sm">{t("notes.food.warning")}</p>
               </div>
             </div>
 
@@ -288,24 +257,16 @@ export default function GuidesPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Bug className="h-5 w-5 text-green-600" />
-                <h4 className="font-semibold">
-                  Côn trùng & môi trường tự nhiên
-                </h4>
+                <h4 className="font-semibold">{t("notes.insects.title")}</h4>
               </div>
               <ul className="space-y-2 ml-7 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>
-                    Ở nơi gần gũi thiên nhiên, thỉnh thoảng có thể xuất hiện côn
-                    trùng nhỏ.
-                  </span>
+                  <span>{t("notes.insects.nature")}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>
-                    Quý khách có thể hạn chế bằng cách đóng cửa và tắt bớt đèn
-                    khi không cần thiết.
-                  </span>
+                  <span>{t("notes.insects.prevention")}</span>
                 </li>
               </ul>
             </div>
@@ -317,7 +278,7 @@ export default function GuidesPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-              Dịch vụ được khách yêu thích tại Eco Palms House
+              {t("services.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -329,11 +290,10 @@ export default function GuidesPage() {
                 </div>
                 <div className="flex-1">
                   <h4 className="font-semibold mb-1">
-                    Đặt vé cáp treo Fansipan
+                    {t("services.cableCar.title")}
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Tránh phải xếp hàng, lễ tân sẽ hỗ trợ đặt vé chính thức
-                    nhanh chóng.
+                    {t("services.cableCar.description")}
                   </p>
                 </div>
               </div>
@@ -344,10 +304,11 @@ export default function GuidesPage() {
                   <Sparkles className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold mb-1">Massage thư giãn</h4>
+                  <h4 className="font-semibold mb-1">
+                    {t("services.massage")}
+                  </h4>
                   <p className="text-sm text-muted-foreground">
-                    Lựa chọn tuyệt vời sau các chuyến trekking, giúp cơ thể hồi
-                    phục nhanh hơn.
+                    {t("services.massageDescription")}
                   </p>
                 </div>
               </div>
@@ -360,21 +321,19 @@ export default function GuidesPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-semibold">
-                      Happy Hour – Cocktail & Beer
+                      {t("services.happyHour.title")}
                     </h4>
                     <Badge variant="secondary" className="text-xs">
-                      15:00 – 18:00
+                      {t("services.happyHour.time")}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Tận hưởng khung cảnh hoàng hôn trên thung lũng cùng ưu đãi
-                    đặc biệt:
+                    {t("services.happyHour.description")}
                   </p>
                   <div className="flex items-center gap-2 px-3 py-2 bg-orange-500/10 rounded-md border border-orange-300">
                     <span className="text-2xl">👉</span>
                     <p className="text-sm font-semibold text-orange-700">
-                      Mua 1 tặng 1 cho cocktail & beer trong danh sách menu của
-                      chúng tôi
+                      {t("services.happyHour.promotion")}
                     </p>
                   </div>
                 </div>
@@ -391,13 +350,9 @@ export default function GuidesPage() {
                 <Leaf className="h-10 w-10 text-green-600" />
               </div>
             </div>
-            <h3 className="text-2xl font-bold">
-              Cảm ơn quý khách đã lựa chọn Eco Palms House!
-            </h3>
+            <h3 className="text-2xl font-bold">{t("thanks.title")}</h3>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Chúng tôi mong rằng kỳ nghỉ tại đây sẽ mang lại cho quý khách
-              những phút giây thư giãn, gần gũi với thiên nhiên và thật nhiều kỷ
-              niệm đáng nhớ 🌿
+              {t("thanks.message")}
             </p>
             <div className="pt-4">
               <Badge variant="outline" className="text-sm px-4 py-2">

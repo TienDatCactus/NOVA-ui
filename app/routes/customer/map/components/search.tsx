@@ -2,6 +2,7 @@ import { Loader2, MapPin, Search } from "lucide-react";
 import mapboxgl from "mapbox-gl";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
+import { useTranslation } from "react-i18next";
 import {
   Command,
   CommandEmpty,
@@ -19,6 +20,7 @@ import { normalizePoiDetail } from "../lib/utils";
 interface SearchBoxProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const SearchBox: React.FC<SearchBoxProps> = ({ className }) => {
+  const { t } = useTranslation("map");
   const { mapRef } = useMap();
   const search = useMapboxSearch();
   const [query, setQuery] = useState("");
@@ -313,13 +315,13 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className }) => {
               <div className="flex items-center justify-center p-4">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 <span className="ml-2 text-sm text-muted-foreground">
-                  Đang tìm kiếm...
+                  {t("search.searching")}
                 </span>
               </div>
             )}
 
             {!loading && query && results.length === 0 && (
-              <CommandEmpty>Không tìm thấy kết quả</CommandEmpty>
+              <CommandEmpty>{t("search.noResults")}</CommandEmpty>
             )}
 
             {!loading && results.length > 0 && (
@@ -347,7 +349,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className }) => {
 
             {!loading && !query && (
               <div className="p-4 text-center text-sm text-muted-foreground">
-                Nhập tên địa điểm để tìm kiếm
+                {t("search.placeholder")}
               </div>
             )}
           </CommandList>

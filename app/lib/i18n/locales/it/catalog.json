@@ -1,0 +1,17 @@
+{
+  "title": "Menu e Servizi",
+  "subtitle": "Esplora tutti i menu e servizi di Eco Palms House",
+  "search": {
+    "placeholder": "Cerca menu o servizi..."
+  },
+  "tabs": {
+    "menu": "Menu",
+    "services": "Servizi"
+  },
+  "status": {
+    "available": "Disponibile",
+    "unavailable": "Non disponibile",
+    "outOfStock": "Esaurito",
+    "suspended": "Sospeso"
+  }
+}

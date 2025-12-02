@@ -1,0 +1,78 @@
+{
+  "title": "Informazioni per gli Ospiti di Eco Palms House",
+  "subtitle": "Guida dettagliata per un soggiorno confortevole e sicuro",
+  "times": {
+    "title": "Orari",
+    "checkin": "Check-in",
+    "checkinTime": "Dalle 13:00",
+    "checkout": "Check-out",
+    "checkoutTime": "Prima delle 11:00",
+    "breakfast": "Colazione",
+    "breakfastTime": "7:30 – 9:30 al ristorante",
+    "dinner": "Ordine Cena",
+    "dinnerTime": "Fino alle 20:30"
+  },
+  "wifi": {
+    "title": "Informazioni Wi-Fi",
+    "network": "Nome Rete:",
+    "password": "Password:"
+  },
+  "hotWater": {
+    "title": "Uso dell'Acqua Calda",
+    "step1": "Ruotare la maniglia del rubinetto verso sinistra e attendere circa 3-5 minuti.",
+    "step2": "Nei giorni freddi, l'acqua calda potrebbe scorrere più lentamente, si prega di essere pazienti."
+  },
+  "notes": {
+    "title": "Note Importanti",
+    "roomDesign": {
+      "title": "Design e Servizi della Camera",
+      "ecoStyle": "Eco Palms House è costruita in stile ecoturistico per aiutarti a sperimentare la tranquillità naturale, quindi non ci sono TV o frigoriferi in camera.",
+      "noLaundry": "Si prega di non lavare o appendere i vestiti in camera per evitare muffe e proteggere i mobili.",
+      "beanBag": "Si prega di mantenere il pouf asciutto; se si bagna, è molto difficile da pulire e potrebbe comportare una tassa di pulizia speciale di"
+    },
+    "towels": {
+      "title": "Asciugamani",
+      "purpose": "Gli asciugamani bianchi sono preparati specificamente per il bagno e l'uso personale.",
+      "warning": "Se utilizzati per altri scopi (pulizia dei pavimenti, scarpe, animali domestici...), gli asciugamani potrebbero danneggiarsi irreparabilmente. In tal caso, dobbiamo addebitare una tassa di sostituzione di"
+    },
+    "electrical": {
+      "title": "Dispositivi Elettrici",
+      "safety": "Per motivi di sicurezza, si prega di non utilizzare dispositivi elettrici ad alta potenza (come cuociriso, fornelli o asciugacapelli portati).",
+      "turnOff": "Quando si esce, si prega di ricordare di spegnere tutti i dispositivi elettrici per risparmiare energia e garantire la sicurezza."
+    },
+    "fire": {
+      "title": "Sicurezza Antincendio",
+      "material": "I bungalow sono realizzati con materiali naturali e sono piuttosto sensibili al fuoco.",
+      "warning": "Pertanto, si prega di non fumare, accendere candele o utilizzare il fuoco in camera.",
+      "emergency": "In caso di emergenza, si prega di notificare immediatamente il personale."
+    },
+    "food": {
+      "title": "Cibo in Camera",
+      "warning": "Si prega di non portare cibo in camera. Le briciole di cibo attireranno \"ospiti non invitati\" 🐭. Chissà, un topo potrebbe venire in camera per un servizio fotografico, diventare un idolo, poi conquistare il mondo e dominare l'universo 🌌."
+    },
+    "insects": {
+      "title": "Insetti e Ambiente Naturale",
+      "nature": "In un luogo vicino alla natura, occasionalmente potrebbero apparire piccoli insetti.",
+      "prevention": "È possibile minimizzare questo chiudendo le porte e spegnendo le luci non necessarie."
+    }
+  },
+  "services": {
+    "title": "Servizi Popolari presso Eco Palms House",
+    "cableCar": {
+      "title": "Biglietti Funivia Fansipan",
+      "description": "Evita la coda – la reception ti aiuterà a prenotare rapidamente i biglietti ufficiali."
+    },
+    "massage": "Massaggio Rilassante",
+    "massageDescription": "Un'ottima scelta dopo le escursioni per aiutare il corpo a recuperare più velocemente.",
+    "happyHour": {
+      "title": "Happy Hour – Cocktail e Birra",
+      "time": "15:00 – 18:00",
+      "description": "Goditi la vista del tramonto sulla valle con offerte speciali:",
+      "promotion": "Compra 1 Prendi 1 Gratis su cocktail e birre del nostro menu"
+    }
+  },
+  "thanks": {
+    "title": "Grazie per aver scelto Eco Palms House!",
+    "message": "Speriamo che il tuo soggiorno qui ti porti momenti di relax, vicinanza alla natura e tante esperienze memorabili 🌿"
+  }
+}

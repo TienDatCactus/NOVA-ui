@@ -1,0 +1,17 @@
+{
+  "title": "메뉴 & 서비스",
+  "subtitle": "Eco Palms House의 모든 메뉴와 서비스를 둘러보세요",
+  "search": {
+    "placeholder": "메뉴 또는 서비스 검색..."
+  },
+  "tabs": {
+    "menu": "메뉴",
+    "services": "서비스"
+  },
+  "status": {
+    "available": "이용 가능",
+    "unavailable": "이용 불가",
+    "outOfStock": "품절",
+    "suspended": "일시 중단"
+  }
+}

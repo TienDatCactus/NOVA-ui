@@ -1,0 +1,24 @@
+{
+  "title": "क्षेत्र का अन्वेषण करें",
+  "search": {
+    "placeholder": "खोजने के लिए स्थान का नाम दर्ज करें",
+    "searching": "खोज रहे हैं...",
+    "noResults": "कोई परिणाम नहीं मिला"
+  },
+  "categories": {
+    "all": "सभी",
+    "restaurant": "रेस्तरां",
+    "cafe": "कैफे",
+    "bar": "बार",
+    "hotel": "होटल",
+    "spa": "स्पा",
+    "shopping": "खरीदारी",
+    "park": "पार्क",
+    "attraction": "आकर्षण",
+    "noCategories": "प्रदर्शित करने के लिए कोई श्रेणी नहीं"
+  },
+  "resort": {
+    "name": "Eco Palms House",
+    "yourLocation": "आपका स्थान"
+  }
+}

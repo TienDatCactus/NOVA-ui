@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -47,6 +48,7 @@ import { CUSTOMER } from "~/lib/fe-url";
 import { cn } from "~/lib/utils";
 
 export default function ChatInbox({}: Route.ComponentProps) {
+  const { t } = useTranslation("chat");
   const navigate = useNavigate();
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
   const [savedToken, setSavedToken] = useState<string | null>(null);
@@ -75,14 +77,10 @@ export default function ChatInbox({}: Route.ComponentProps) {
   }, [isError]);
 
   const handleCloseChat = () => {
-    if (
-      confirm(
-        "Bạn có chắc muốn đóng phiên chat này? Bạn sẽ cần quét mã lại để kết nối."
-      )
-    ) {
+    if (confirm(t("inbox.confirmClose"))) {
       deleteStorage(STORAGE.GUEST_ROOM_TOKEN);
       setSavedToken(null);
-      toast.success("Đã đóng phiên chat");
+      toast.success(t("inbox.closedSuccess"));
     }
   };
 
@@ -109,19 +107,19 @@ export default function ChatInbox({}: Route.ComponentProps) {
       }
 
       if (!token) {
-        toast.error("Mã QR không hợp lệ (Không tìm thấy token)");
+        toast.error(t("inbox.invalidQR"));
         return;
       }
 
       setStorage(STORAGE.GUEST_ROOM_TOKEN, token);
       setSavedToken(token);
       setIsQRScannerOpen(false);
-      toast.success("Kết nối thành công!");
+      toast.success(t("inbox.connectSuccess"));
       // Auto navigate or let user click? Let's navigate for smoother exp
       navigate(CUSTOMER.chat(token));
     } catch (error) {
       console.error("QR scan error:", error);
-      toast.error("Không thể xử lý mã QR");
+      toast.error(t("inbox.qrProcessError"));
     }
   };
 
@@ -140,7 +138,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
         <div className="text-center space-y-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
           <p className="text-sm text-muted-foreground">
-            Đang kiểm tra kết nối...
+            {t("inbox.checkingConnection")}
           </p>
         </div>
       </div>
@@ -154,7 +152,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
         <div className="container max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
           <h1 className="font-bold text-lg flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            Hỗ trợ khách hàng
+            {t("inbox.title")}
           </h1>
         </div>
       </header>
@@ -167,10 +165,9 @@ export default function ChatInbox({}: Route.ComponentProps) {
               <QrCode className="h-10 w-10 text-primary" />
             </div>
             <div className="text-center space-y-2">
-              <h2 className="text-xl font-bold">Kết nối với Lễ tân</h2>
+              <h2 className="text-xl font-bold">{t("inbox.connectTitle")}</h2>
               <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                Quét mã QR được cung cấp trong phòng của bạn để bắt đầu yêu cầu
-                hỗ trợ hoặc trò chuyện.
+                {t("inbox.connectDescription")}
               </p>
             </div>
 
@@ -180,20 +177,21 @@ export default function ChatInbox({}: Route.ComponentProps) {
                 onClick={handleQRScan}
                 className="w-full shadow-lg shadow-primary/20"
               >
-                <Scan className="h-5 w-5 mr-2" /> Quét mã QR ngay
+                <Scan className="h-5 w-5 mr-2" /> {t("inbox.scanQR")}
               </Button>
 
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="w-full">
-                    <Terminal className="h-4 w-4 mr-2" /> Nhập mã thủ công
+                    <Terminal className="h-4 w-4 mr-2" />{" "}
+                    {t("inbox.manualInput")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Nhập mã phòng</DialogTitle>
+                    <DialogTitle>{t("inbox.manualTitle")}</DialogTitle>
                     <DialogDescription>
-                      Nhập mã token được in dưới mã QR hoặc do lễ tân cung cấp.
+                      {t("inbox.manualDescription")}
                     </DialogDescription>
                   </DialogHeader>
                   <form
@@ -201,16 +199,16 @@ export default function ChatInbox({}: Route.ComponentProps) {
                     className="space-y-4 pt-4"
                   >
                     <div className="space-y-2">
-                      <Label htmlFor="roomToken">Mã phòng (Token)</Label>
+                      <Label htmlFor="roomToken">{t("inbox.tokenLabel")}</Label>
                       <Input
                         id="roomToken"
                         name="roomToken"
-                        placeholder="VD: eyJhbGciOiJIUz..."
+                        placeholder={t("inbox.tokenPlaceholder")}
                         required
                       />
                     </div>
                     <DialogFooter>
-                      <Button type="submit">Kết nối</Button>
+                      <Button type="submit">{t("inbox.connect")}</Button>
                     </DialogFooter>
                   </form>
                 </DialogContent>
@@ -230,7 +228,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">
-                      Phòng {entry.roomName || "..."}
+                      {t("inbox.room")} {entry.roomName || "..."}
                     </h3>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span
@@ -240,7 +238,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
                         )}
                       />
                       <span className="text-xs text-muted-foreground">
-                        {entry.canChat ? "Đang hoạt động" : "Đã kết thúc"}
+                        {entry.canChat ? t("inbox.active") : t("inbox.ended")}
                       </span>
                     </div>
                   </div>
@@ -250,7 +248,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
               <div className="p-4 space-y-4">
                 {!entry.canChat && (
                   <div className="bg-muted/50 p-3 rounded-md text-xs text-center text-muted-foreground">
-                    {entry.message || "Phiên chat này đã kết thúc."}
+                    {entry.message || t("inbox.sessionEnded")}
                   </div>
                 )}
 
@@ -262,7 +260,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
                     disabled={!entry.canChat}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
-                    Vào đoạn chat
+                    {t("inbox.openChat")}
                   </Button>
                   <Button
                     variant="outline"
@@ -270,7 +268,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
                     onClick={handleCloseChat}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    Thoát phiên
+                    {t("inbox.exitSession")}
                   </Button>
                 </div>
               </div>
@@ -281,34 +279,26 @@ export default function ChatInbox({}: Route.ComponentProps) {
         {/* --- HELP SECTION --- */}
         <div className="border-t pt-6 mt-8">
           <h3 className="font-semibold text-sm mb-4 text-muted-foreground uppercase tracking-wider">
-            Hướng dẫn nhanh
+            {t("inbox.helpTitle")}
           </h3>
           <div className="grid gap-4 text-sm">
             <div className="flex gap-3">
               <div className="flex-none w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
                 1
               </div>
-              <p className="text-muted-foreground">
-                Tìm mã QR được đặt trong phòng (thường ở bàn làm việc hoặc hướng
-                dẫn phòng).
-              </p>
+              <p className="text-muted-foreground">{t("inbox.helpStep1")}</p>
             </div>
             <div className="flex gap-3">
               <div className="flex-none w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
                 2
               </div>
-              <p className="text-muted-foreground">
-                Nhấn nút "Quét mã QR" ở trên và cấp quyền truy cập camera.
-              </p>
+              <p className="text-muted-foreground">{t("inbox.helpStep2")}</p>
             </div>
             <div className="flex gap-3">
               <div className="flex-none w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
                 3
               </div>
-              <p className="text-muted-foreground">
-                Sau khi kết nối, bạn có thể nhắn tin yêu cầu dọn phòng, gọi đồ
-                ăn hoặc hỏi thông tin.
-              </p>
+              <p className="text-muted-foreground">{t("inbox.helpStep3")}</p>
             </div>
           </div>
         </div>
@@ -318,17 +308,15 @@ export default function ChatInbox({}: Route.ComponentProps) {
       <Dialog open={isQRScannerOpen} onOpenChange={setIsQRScannerOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Quét mã QR</DialogTitle>
-            <DialogDescription>
-              Hướng camera vào mã QR trong phòng của bạn
-            </DialogDescription>
+            <DialogTitle>{t("inbox.scanTitle")}</DialogTitle>
+            <DialogDescription>{t("inbox.scanDescription")}</DialogDescription>
           </DialogHeader>
           <div>
             <QRScanner
               onScan={handleQRScanned}
               onError={(error) => {
                 console.error("QR Scanner error:", error);
-                toast.error("Lỗi quét mã QR. Vui lòng thử lại.");
+                toast.error(t("inbox.scanError"));
               }}
             />
           </div>

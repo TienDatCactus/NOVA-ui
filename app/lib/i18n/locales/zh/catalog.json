@@ -1,0 +1,17 @@
+{
+  "title": "菜单和服务",
+  "subtitle": "探索 Eco Palms House 的所有菜单和服务",
+  "search": {
+    "placeholder": "搜索菜单或服务..."
+  },
+  "tabs": {
+    "menu": "菜单",
+    "services": "服务"
+  },
+  "status": {
+    "available": "可用",
+    "unavailable": "不可用",
+    "outOfStock": "缺货",
+    "suspended": "已暂停"
+  }
+}

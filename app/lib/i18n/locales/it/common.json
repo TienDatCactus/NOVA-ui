@@ -1,0 +1,21 @@
+{
+  "welcome": "Benvenuto",
+  "loading": "Caricamento...",
+  "error": "Errore",
+  "success": "Successo",
+  "cancel": "Annulla",
+  "confirm": "Conferma",
+  "save": "Salva",
+  "delete": "Elimina",
+  "edit": "Modifica",
+  "close": "Chiudi",
+  "back": "Indietro",
+  "next": "Avanti",
+  "previous": "Precedente",
+  "search": "Cerca",
+  "filter": "Filtra",
+  "sort": "Ordina",
+  "select": "Seleziona",
+  "submit": "Invia",
+  "reset": "Reimposta"
+}

@@ -10,6 +10,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,6 +55,7 @@ import {
 } from "~/components/ui/empty";
 
 export default function GuestChat({}: Route.ComponentProps) {
+  const { t } = useTranslation("chat");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const roomToken = searchParams.get("roomToken");
@@ -198,7 +200,7 @@ export default function GuestChat({}: Route.ComponentProps) {
         <div className="flex flex-col items-center  space-y-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary relative z-10" />
           <p className="text-sm font-medium text-muted-foreground animate-pulse">
-            Đang kết nối với lễ tân...
+            {t("chat.connectingReception")}
           </p>
         </div>
       </div>
@@ -213,12 +215,12 @@ export default function GuestChat({}: Route.ComponentProps) {
             <AlertTriangle />
           </EmptyMedia>
           <EmptyTitle className="text-xl font-semibold text-destructive">
-            Lỗi kết nối
+            {t("chat.connectionError")}
           </EmptyTitle>
           <EmptyDescription className="text-sm text-muted-foreground">
             {entryError instanceof Error
               ? entryError.message
-              : "Không thể kết nối đến server. Vui lòng thử lại sau."}
+              : t("chat.serverError")}
           </EmptyDescription>
           <EmptyContent>
             <Button
@@ -226,7 +228,7 @@ export default function GuestChat({}: Route.ComponentProps) {
               onClick={() => window.location.reload()}
               className="mt-4"
             >
-              Thử lại
+              {t("chat.retry")}
             </Button>
           </EmptyContent>
         </EmptyHeader>
@@ -239,12 +241,12 @@ export default function GuestChat({}: Route.ComponentProps) {
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Không thể truy cập</AlertDialogTitle>
+            <AlertDialogTitle>{t("chat.cannotAccess")}</AlertDialogTitle>
             <AlertDialogDescription>{entry.message}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={handleErrorDialogClose}>
-              Đóng
+              {t("chat.close")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -258,7 +260,7 @@ export default function GuestChat({}: Route.ComponentProps) {
         <div className="text-center space-y-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
           <p className="text-sm text-muted-foreground">
-            Đang tải lịch sử trò chuyện...
+            {t("chat.loadingHistory")}
           </p>
         </div>
       </div>
@@ -273,13 +275,11 @@ export default function GuestChat({}: Route.ComponentProps) {
             <MessageSquare className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="text-destructive font-semibold">
-            Không tìm thấy phiên chat
+            {t("chat.sessionNotFound")}
           </p>
-          <p className="text-sm text-muted-foreground">
-            Vui lòng quét lại mã QR hoặc liên hệ lễ tân.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("chat.rescanQR")}</p>
           <Button variant="link" onClick={() => navigate("/")}>
-            Quay về trang chủ
+            {t("chat.backHome")}
           </Button>
         </div>
       </div>
@@ -299,7 +299,7 @@ export default function GuestChat({}: Route.ComponentProps) {
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="font-semibold text-sm">Lễ Tân (Reception)</h1>
+            <h1 className="font-semibold text-sm">{t("chat.reception")}</h1>
             <div className="flex items-center gap-1.5">
               <span
                 className={cn(
@@ -313,11 +313,10 @@ export default function GuestChat({}: Route.ComponentProps) {
               />
               <p className="text-xs text-muted-foreground">
                 {isConnecting
-                  ? "Đang kết nối..."
+                  ? t("chat.connecting")
                   : isConnected
-                    ? "Đang hoạt động"
-                    : "Ngắt kết nối"}
-                {isConnecting ? "Đang kết nối..." : "Trực tuyến"}
+                    ? t("chat.active")
+                    : t("chat.disconnected")}
               </p>
             </div>
           </div>
@@ -344,7 +343,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                   ) : (
                     <ChevronUp className="h-3 w-3 mr-1" />
                   )}
-                  Tải tin nhắn cũ hơn
+                  {t("chat.loadOlder")}
                 </Button>
               </div>
             )}
@@ -354,9 +353,9 @@ export default function GuestChat({}: Route.ComponentProps) {
               <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 opacity-50">
                 <MessageSquare className="h-12 w-12 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground">
-                  Chưa có tin nhắn nào.
+                  {t("chat.noMessages")}
                   <br />
-                  Hãy bắt đầu trò chuyện với lễ tân.
+                  {t("chat.startChat")}
                 </p>
               </div>
             ) : (
@@ -403,7 +402,7 @@ export default function GuestChat({}: Route.ComponentProps) {
         {!canSendMessage ? (
           <div className="p-3 bg-muted/50 rounded-lg text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
             <span className="w-2 h-2 rounded-full bg-gray-400" />
-            Phiên chat đã kết thúc
+            {t("chat.sessionEnded")}
           </div>
         ) : (
           <form
@@ -423,7 +422,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                   variant="ghost"
                   size="icon"
                   className="shrink-0 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10"
-                  title="Tag món ăn/dịch vụ"
+                  title={t("chat.tagItems")}
                 >
                   <Hash className="h-5 w-5" />
                 </Button>
@@ -436,7 +435,7 @@ export default function GuestChat({}: Route.ComponentProps) {
               >
                 <div className="bg-muted/50 px-4 py-2 border-b">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase">
-                    Gắn thẻ nhanh
+                    {t("chat.quickTag")}
                   </h4>
                 </div>
                 <Tabs defaultValue="menu" className="w-full">
@@ -445,13 +444,13 @@ export default function GuestChat({}: Route.ComponentProps) {
                       value="menu"
                       className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
                     >
-                      Món ăn
+                      {t("chat.menu")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="services"
                       className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
                     >
-                      Dịch vụ
+                      {t("chat.services")}
                     </TabsTrigger>
                   </TabsList>
 

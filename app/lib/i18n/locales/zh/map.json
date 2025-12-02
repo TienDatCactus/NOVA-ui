@@ -1,0 +1,24 @@
+{
+  "title": "探索区域",
+  "search": {
+    "placeholder": "输入地点名称进行搜索",
+    "searching": "搜索中...",
+    "noResults": "未找到结果"
+  },
+  "categories": {
+    "all": "全部",
+    "restaurant": "餐厅",
+    "cafe": "咖啡馆",
+    "bar": "酒吧",
+    "hotel": "酒店",
+    "spa": "水疗",
+    "shopping": "购物",
+    "park": "公园",
+    "attraction": "景点",
+    "noCategories": "没有可显示的类别"
+  },
+  "resort": {
+    "name": "Eco Palms House",
+    "yourLocation": "您的位置"
+  }
+}

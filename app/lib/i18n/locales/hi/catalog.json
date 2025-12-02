@@ -1,0 +1,17 @@
+{
+  "title": "मेन्यू और सेवाएं",
+  "subtitle": "Eco Palms House के सभी मेन्यू और सेवाओं का अन्वेषण करें",
+  "search": {
+    "placeholder": "मेन्यू या सेवा खोजें..."
+  },
+  "tabs": {
+    "menu": "मेन्यू",
+    "services": "सेवाएं"
+  },
+  "status": {
+    "available": "उपलब्ध",
+    "unavailable": "अनुपलब्ध",
+    "outOfStock": "स्टॉक में नहीं",
+    "suspended": "निलंबित"
+  }
+}

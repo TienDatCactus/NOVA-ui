@@ -1,6 +1,7 @@
 import { Globe, Menu, User } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -20,17 +21,29 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { CUSTOMER_NAVS, SUPPORTED_LANGUAGES } from "~/lib/constants";
 import { cn } from "~/lib/utils";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
+import { syncI18nWithStore } from "~/lib/i18n/sync-store";
 
 const CustomerLayout: React.FC = () => {
   const isMobile = useIsMobile();
+  const { i18n } = useTranslation();
   const { userLanguage, setUserLanguage } = useChatTranslationStore();
   const location = useLocation();
+
+  // Sync i18n with chat translation store
+  useEffect(() => {
+    const unsubscribe = syncI18nWithStore();
+    return () => unsubscribe();
+  }, []);
 
   const currentLanguage =
     SUPPORTED_LANGUAGES.find((lang) => lang.code === userLanguage) ||
     SUPPORTED_LANGUAGES[0];
 
-  // UX: Helper to determine active state visually
+  const handleLanguageChange = (langCode: string) => {
+    i18n.changeLanguage(langCode);
+    setUserLanguage(langCode);
+  };
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -88,7 +101,7 @@ const CustomerLayout: React.FC = () => {
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <DropdownMenuItem
                       key={lang.code}
-                      onClick={() => setUserLanguage(lang.code)}
+                      onClick={() => handleLanguageChange(lang.code)}
                       className={cn(
                         "justify-between",
                         userLanguage === lang.code &&

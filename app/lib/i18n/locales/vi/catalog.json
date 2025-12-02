@@ -1,0 +1,22 @@
+{
+  "title": "Khám phá NOVA Resort",
+  "subtitle": "Trải nghiệm ẩm thực và dịch vụ cao cấp",
+  "search": {
+    "placeholder": "Bạn đang tìm món ăn hay dịch vụ gì?",
+    "noResults": "Không tìm thấy kết quả phù hợp"
+  },
+  "tabs": {
+    "food": "Ẩm thực",
+    "service": "Dịch vụ"
+  },
+  "card": {
+    "outOfStock": "Hết món",
+    "suspended": "Tạm ngưng",
+    "price": "Giá",
+    "available": "Còn {{count}} phần"
+  },
+  "empty": {
+    "title": "Chưa có món nào",
+    "description": "Hãy thử tìm kiếm từ khóa khác"
+  }
+}
