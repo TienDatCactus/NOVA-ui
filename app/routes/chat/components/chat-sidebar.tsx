@@ -14,6 +14,13 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { useStaffInbox } from "../container/query.hooks";
 import ChatSessionCard from "../fragments/chat-session.cards";
 import { cn } from "~/lib/utils";
+import {
+  Empty,
+  EmptyContent,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
 
 interface ChatSidebarProps {
   activeSessionId: string | null;
@@ -91,19 +98,19 @@ export function ChatSidebar({
           </Button>
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-          <div className="w-20 h-20 rounded-full bg-white/50 border border-white/60 shadow-sm flex items-center justify-center mb-4 relative">
-            {/* Decorative mist */}
-            <div className="absolute inset-0 bg-emerald-100/20 rounded-full blur-xl"></div>
-            <CloudFog className="h-10 w-10 text-stone-400/70" />
-          </div>
-          <p className="font-semibold text-stone-700 mb-1">
-            Thung lũng yên tĩnh
-          </p>
-          <p className="text-sm text-stone-500 max-w-[200px]">
-            Hiện chưa có tin nhắn nào từ khách hàng.
-          </p>
-        </div>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia>
+              <CloudFog className="h-10 w-10 text-stone-400/70" />
+            </EmptyMedia>
+            <EmptyTitle className="font-semibold text-stone-700 mb-1">
+              Danh sách tin nhắn
+            </EmptyTitle>
+            <EmptyContent className="text-sm text-stone-500 max-w-[200px]">
+              Hiện chưa có tin nhắn nào từ khách hàng.
+            </EmptyContent>
+          </EmptyHeader>
+        </Empty>
       </div>
     );
   }

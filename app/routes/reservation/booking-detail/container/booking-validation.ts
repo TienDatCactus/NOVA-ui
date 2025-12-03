@@ -98,8 +98,8 @@ export function getDateUpdateBlockReason(
 
 /**
  * 3. Validate: Add Room
- * Rule:
- * - Allowed for Pending/Confirmed (if unpaid)
+ * Rule (UPDATED per CHANGELOG v2.0):
+ * - Allowed for Pending/Confirmed (EVEN WITH PAYMENT) ✅
  * - ESPECIALLY ALLOWED for CheckedIn/InHouse (Guest wants extra room)
  */
 export function canAddRoom(
@@ -111,19 +111,46 @@ export function canAddRoom(
     return true;
   }
 
-  // Case B: Future booking -> Allow only if no financial lock
+  // Case B: Future booking -> ALWAYS ALLOW (CHANGELOG: remove payment check)
   if (PRE_STAY_STATUSES.includes(bookingStatus)) {
-    return !hasAnyLockedRoomInvoice(invoices);
+    return true; // ✅ Allow even with payment
   }
 
   return false;
 }
 
 /**
- * 4. Validate: Change/Remove Room & Guest Count
- * Rule: Stricter than Add Room.
+ * 4. Validate: Swap/Change Room
+ * Rule (UPDATED per CHANGELOG v2.0 Section 2):
+ * - Allowed for Pending, Confirmed (EVEN WITH PAYMENT), CheckedIn ✅
+ * - NOT allowed for CheckedOut, Cancelled
+ * Reason: Swap same room type (same price) doesn't affect invoice amount
+ */
+export function canSwapRoom(
+  bookingStatus: string,
+  invoices: Invoice[]
+): boolean {
+  // CHANGELOG: Allow swap for Confirmed (even with payment) + CheckedIn
+  const SWAP_ALLOWED_STATUSES = [
+    "Pending",
+    "Confirmed",
+    "CheckedIn",
+    "InHouse",
+  ];
+
+  if (!SWAP_ALLOWED_STATUSES.includes(bookingStatus)) {
+    return false; // Block CheckedOut, Cancelled
+  }
+
+  return true; // ✅ Allow swap regardless of payment status
+}
+
+/**
+ * 5. Validate: Remove Room & Guest Count (Legacy)
+ * Rule: Stricter than Add/Swap.
  * - Only Pending/Confirmed
  * - No financial lock
+ * Note: Remove room still blocked during CheckedIn per CHANGELOG
  */
 export function canModifyExistingStructure(
   bookingStatus: string,
@@ -154,4 +181,18 @@ export function canUpdateGuestCount(
   invoices: Invoice[]
 ): boolean {
   return canModifyExistingStructure(bookingStatus, invoices);
+}
+
+/**
+ * 6. Validate: Upgrade Room (NEW - CHANGELOG v2.0 Section 4)
+ * Rule:
+ * - Only Confirmed or CheckedIn status
+ * - New room must have higher BaseRate than current room (validated on backend)
+ */
+export function canUpgradeRoom(bookingStatus: string): boolean {
+  return (
+    bookingStatus === "Confirmed" ||
+    bookingStatus === "CheckedIn" ||
+    bookingStatus === "InHouse"
+  );
 }

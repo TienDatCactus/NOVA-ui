@@ -46,6 +46,8 @@ const Booking = {
     `/StaffBookings/${bookingId}/add-completed-charges`,
   confirmPayment: (id: string) => `StaffBookings/${id}/confirm-payment`,
   orderableBookings: "StaffBookings/orderable",
+  payForRoom: (id: string) => `StaffBookings/${id}/pay-now-rooms`,
+  upgradeRoom: (id: string) => `StaffBookings/${id}/upgrade-room`,
 };
 
 const OTAInformation = {

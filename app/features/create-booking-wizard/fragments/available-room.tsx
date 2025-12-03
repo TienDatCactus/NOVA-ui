@@ -3,6 +3,7 @@ import { useState } from "react";
 import type z from "zod";
 
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -55,10 +56,8 @@ export function AvailableRoomRow({
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        {/* === TRIGGER ROW === */}
         <CollapsibleTrigger asChild>
           <div className="relative flex cursor-pointer flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between select-none">
-            {/* Left: Indicator & Info */}
             <div className="flex items-start gap-4 min-w-0">
               {/* Status Bar: A clean vertical visual anchor */}
               <div
@@ -152,46 +151,33 @@ export function AvailableRoomRow({
               {roomType.availableRooms.length > 0 ? (
                 roomType.availableRooms.map((room) => {
                   const isSelected = selectedRoomIds.includes(room.roomId);
-                  const isAvailable = room.status === "Ready";
 
                   return (
-                    <button
+                    <Button
                       key={room.roomId}
                       type="button"
-                      disabled={!isAvailable}
-                      onClick={() => isAvailable && onToggleRoom(room.roomId)}
+                      onClick={() => onToggleRoom(room.roomId)}
                       className={cn(
                         "group/chip relative flex items-center justify-between px-3 py-2 rounded-lg border text-xs font-medium transition-all duration-200",
 
-                        // Interaction States
                         isSelected
                           ? "bg-primary border-primary text-primary-foreground shadow-md ring-1 ring-primary"
-                          : "bg-background border-border/60 text-foreground hover:border-primary/50 hover:bg-secondary/50 hover:shadow-sm",
-
-                        // Disabled State
-                        !isAvailable &&
-                          "opacity-40 cursor-not-allowed bg-muted text-muted-foreground border-transparent grayscale"
+                          : "bg-background border-border/60 text-foreground hover:border-primary/50 hover:bg-secondary/50 hover:shadow-sm"
                       )}
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        {/* Door Icon: Only show when not selected to save space, or keep as subtle hint */}
-                        {!isSelected && (
-                          <DoorOpen
-                            className={cn(
-                              "h-3.5 w-3.5 shrink-0 transition-colors",
-                              isAvailable
-                                ? "text-muted-foreground/40 group-hover/chip:text-primary/60"
-                                : "text-transparent"
-                            )}
-                          />
-                        )}
-                        <span className="truncate">{room.roomName}</span>
-                      </div>
+                      {!isSelected && (
+                        <DoorOpen
+                          className={cn(
+                            "h-3.5 w-3.5 shrink-0 transition-colors"
+                          )}
+                        />
+                      )}
+                      <span className="truncate">{room.roomName}</span>
 
                       {isSelected && (
                         <Check className="h-3.5 w-3.5 shrink-0 animate-in zoom-in duration-300" />
                       )}
-                    </button>
+                    </Button>
                   );
                 })
               ) : (

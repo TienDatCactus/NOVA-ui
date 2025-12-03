@@ -58,16 +58,12 @@ import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 interface CheckoutSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  bookingId: string;
-  bookingCode: string;
   bookingDetail?: BookingDetailResponseDto;
 }
 
 export default function CheckoutSheet({
   open,
   onOpenChange,
-  bookingId,
-  bookingCode,
   bookingDetail,
 }: CheckoutSheetProps) {
   const {
@@ -85,16 +81,17 @@ export default function CheckoutSheet({
   } = useCheckoutStore();
 
   const { data: pendingCharges, isPending: isLoadingCharges } =
-    useBookingPendingCharges(bookingId, open);
+    useBookingPendingCharges(bookingDetail?.id!, open);
 
   const { data: existingInvoices, isPending: isLoadingInvoices } =
-    useInvoicesByBooking(bookingId, open);
+    useInvoicesByBooking(bookingDetail?.id!, open);
 
   const { mutate: createInvoice, isPending: isCreatingInvoice } =
-    useCreateCheckoutInvoice(bookingId);
+    useCreateCheckoutInvoice(bookingDetail?.id!);
 
-  const { mutate: finalizeCheckout, isPending: isCheckingOut } =
-    useCheckout(bookingId);
+  const { mutate: finalizeCheckout, isPending: isCheckingOut } = useCheckout(
+    bookingDetail?.id!
+  );
 
   const checkoutEligibility = useCheckoutEligibility(bookingDetail, {
     pendingOrders: pendingCharges?.pendingOrders,
@@ -189,7 +186,7 @@ export default function CheckoutSheet({
                 {isPostCheckout ? (
                   <span>Xem hóa đơn</span>
                 ) : (
-                  <p>Checkout Booking #{bookingCode}</p>
+                  <p>Checkout Booking #{bookingDetail?.bookingCode}</p>
                 )}
               </SheetTitle>
               <SheetDescription>
@@ -633,7 +630,7 @@ export default function CheckoutSheet({
         <InvoiceDetailSheet
           open={showInvoiceDetail}
           onOpenChange={setShowInvoiceDetail}
-          bookingId={bookingId}
+          bookingId={bookingDetail?.id!}
           invoiceId={activeInvoiceId}
           onBack={handleBackFromDetail}
           isNewlyCreatedInvoice={!!createdInvoiceId}

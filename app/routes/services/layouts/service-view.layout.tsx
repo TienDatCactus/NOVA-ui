@@ -10,6 +10,8 @@ import {
 import { Switch } from "~/components/ui/switch";
 import type { ServiceFilters } from "~/services/api/services/service.types";
 import { useServiceTypes } from "../container/service-types/query.hooks";
+import { Button } from "~/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 interface ServicesViewLayoutProps {
   children: ReactNode;
@@ -30,6 +32,7 @@ export default function ServicesViewLayout({
   totalServices,
 }: ServicesViewLayoutProps) {
   const { data: serviceTypes } = useServiceTypes();
+  const hasFilteredType = !!filters.typeCode && filters.typeCode !== "all";
   return (
     <div className="flex gap-6 p-4 ">
       <div className="flex-1 space-y-4">
@@ -76,6 +79,17 @@ export default function ServicesViewLayout({
                     ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              {hasFilteredType && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => updateFilter("typeCode", "all")}
+                >
+                  <RotateCcw />
+                </Button>
+              )}
             </div>
           </div>
         </div>

@@ -109,11 +109,6 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
 
     if (!room) return;
 
-    if (room.status !== "Ready") {
-      toast.error(`Phòng ${room.roomName} không sẵn sàng (${room.status})`);
-      return;
-    }
-
     const current = form.getValues("roomIds") || [];
     const set = new Set(current as string[]);
     if (set.has(roomId)) set.delete(roomId);

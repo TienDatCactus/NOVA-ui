@@ -46,7 +46,7 @@ export default function ServiceTypesViewLayout({
                 id="active-filter"
                 checked={filters.activeFilter === "active"}
                 onCheckedChange={(checked) =>
-                  updateFilter("activeFilter", checked ? "active" : "all")
+                  updateFilter("activeFilter", checked ? "all" : "active")
                 }
               />
             </div>

@@ -1,22 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
-import {
-  AlertTriangle,
-  Check,
-  CreditCard,
-  DoorOpen,
-  FileWarning,
-  Loader2,
-  NotebookPen,
-  Receipt,
-  RotateCcw,
-  Save,
-} from "lucide-react";
+import { Check, FileWarning, NotebookPen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -43,7 +31,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
-import { formatMoney, onError, toYMD, useCalculateNights } from "~/lib/utils";
+import { onError, toYMD, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
@@ -52,34 +40,25 @@ import type { Route } from "./+types/booking-detail";
 
 // Components
 import BookingRoomsBar from "./components/booking-rooms-bar";
-import CheckoutSheet from "./components/checkout/checkout-sheet";
 import CustomerInfoBar from "./components/customer-info-bar";
 import AddCompletedChargesDialog from "./components/operations/add-completed-charges-dialog";
 import PendingChargesSection from "./components/pending-charges-section";
-import RefundButton from "./components/refunds/refund-button";
 import RefundHistory from "./components/refunds/refund-history";
 import StayDetailBar from "./components/stay-detail-bar";
 
-// Hooks
-import { Alert, AlertTitle } from "~/components/ui/alert";
-import { useAddCompletedCharges } from "./container/use-booking-checkout.hooks";
+import { Navigate, useSearchParams } from "react-router";
 import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
+import { BookingActionsBar } from "./fragments/booking-actions.bar";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
-
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  const bookingCode = params.bookingCode;
-  if (!bookingCode) {
-    throw new Response("Booking code is required", { status: 400 });
-  }
-  return { bookingCode };
-};
-
 export default function Component({ loaderData }: Route.ComponentProps) {
-  const { bookingCode } = loaderData;
+  const [searchParams] = useSearchParams();
+  const bookingCode = searchParams.get("bookingCode");
 
-  // --- Queries ---
+  if (!bookingCode) {
+    return <Navigate to="/404" replace />;
+  }
   const {
     data: bookingDetail,
     isPending,
@@ -89,29 +68,18 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     enabled: !!bookingCode,
   });
 
-  // --- Local State ---
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
-  const [isAddingCompletedCharges, setIsAddingCompletedCharges] =
-    useState(false);
 
-  // --- Derived State & Hooks ---
   const permissions = useBookingUpdatePermissions(bookingDetail);
   const financialSummary = useBookingFinancialStatus(bookingDetail?.invoices);
   const { data: OTAList } = useOTAInfo({ selection: true });
 
-  // --- Mutations ---
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
     bookingDetail?.id || ""
   );
 
-  const { mutate: addCompletedCharges } = useAddCompletedCharges(
-    bookingDetail?.id || ""
-  );
-
-  // --- Form Setup ---
   const form = useForm<StaffUpdateBookingRequestDto>({
     resolver: zodResolver(StaffUpdateBookingRequestSchema),
     defaultValues: {
@@ -133,51 +101,8 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     name: "rooms",
   });
 
-  // UX: Track Dirty State
   const { isDirty } = form.formState;
-
-  // --- Effects ---
-  useEffect(() => {
-    if (bookingDetail && bookingDetail.id) {
-      const currentRooms = form.getValues("rooms") || [];
-      const hasPendingRoomChanges = currentRooms.some(
-        (room) =>
-          room.action === "Add" ||
-          room.action === "Remove" ||
-          room.action === "Change"
-      );
-
-      form.reset(
-        {
-          checkinDate: bookingDetail.checkinDate,
-          checkoutDate: bookingDetail.checkoutDate,
-          adultsAmount: bookingDetail.adults,
-          childrenAmount: bookingDetail.children || 0,
-          note: bookingDetail.note || "",
-          otaBookingCode: bookingDetail.source === "OTA" ? "" : "",
-          otaInformationId: bookingDetail.source === "OTA" ? "" : "",
-          customerId: bookingDetail.customer.id,
-          totalAmount: bookingDetail.totalAmount || 0,
-          breakfastDates:
-            bookingDetail.breakfastDates?.map((date) => {
-              return { date: date };
-            }) || [],
-          rooms: hasPendingRoomChanges ? currentRooms : [],
-        },
-        {
-          keepDirty: true, // ✅ Preserve dirty state
-          keepValues: false, // We're providing new values explicitly
-        }
-      );
-    }
-  }, [bookingDetail?.id]); // ✅ Only re-run when ID changes, not whole object
-
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
-    console.log("=== FORM SUBMISSION DEBUG ===");
-    console.log("Raw form data:", data);
-    console.log("Rooms array:", data.rooms);
-
-    // Re-validate rooms before submit to catch any transformation issues
     if (data.rooms && data.rooms.length > 0) {
       try {
         data.rooms.forEach((room, idx) => {
@@ -191,7 +116,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             toDate: room.toDate,
           });
 
-          // Validate each room operation
           const result =
             BookingSchema.UpdateBookingRoomRequestSchema.safeParse(room);
 
@@ -234,7 +158,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     }
 
     const payload: Partial<StaffUpdateBookingRequestDto> = {
-      // ... (Giữ nguyên logic mapping payload) ...
       checkinDate:
         data.checkinDate instanceof Date
           ? toYMD(data.checkinDate)
@@ -253,19 +176,10 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       rooms: data.rooms,
     };
 
-    console.log("Payload to send:", JSON.stringify(payload, null, 2));
-
     updateBooking(payload, {
       onError: (error: any) => {
-        console.error("=== UPDATE BOOKING ERROR ===");
-        console.error("Error object:", error);
-
-        // ✅ Handle Zod validation errors
         if (error.response?.data?.errors) {
           const validationErrors = error.response.data.errors;
-          console.error("Validation errors from API:", validationErrors);
-
-          // Display each validation error
           Object.entries(validationErrors).forEach(([field, messages]) => {
             if (Array.isArray(messages)) {
               messages.forEach((msg) => {
@@ -277,7 +191,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           });
         }
 
-        // ✅ Handle form validation errors
         if (error.errors) {
           console.error("Form validation errors:", error.errors);
           error.errors.forEach((err: any) => {
@@ -286,7 +199,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
           });
         }
 
-        // ✅ Generic error message
         if (!error.response?.data?.errors && !error.errors) {
           toast.error(error.message || "Cập nhật booking thất bại");
         }
@@ -297,18 +209,40 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     });
   };
 
-  const handleAddCompletedCharges = (data: any) => {
-    if (!bookingDetail?.id) return;
-    setIsAddingCompletedCharges(true);
-    try {
-      addCompletedCharges(data);
-      setCompletedChargesDialogOpen(false);
-    } catch (error) {
-      console.error("Failed to add completed charges:", error);
-    } finally {
-      setIsAddingCompletedCharges(false);
+  useEffect(() => {
+    if (bookingDetail && bookingDetail.id) {
+      const currentRooms = form.getValues("rooms") || [];
+      const hasPendingRoomChanges = currentRooms.some(
+        (room) =>
+          room.action === "Add" ||
+          room.action === "Remove" ||
+          room.action === "Change"
+      );
+
+      form.reset(
+        {
+          checkinDate: bookingDetail.checkinDate,
+          checkoutDate: bookingDetail.checkoutDate,
+          adultsAmount: bookingDetail.adults,
+          childrenAmount: bookingDetail.children || 0,
+          note: bookingDetail.note || "",
+          otaBookingCode: bookingDetail.source === "OTA" ? "" : "",
+          otaInformationId: bookingDetail.source === "OTA" ? "" : "",
+          customerId: bookingDetail.customer.id,
+          totalAmount: bookingDetail.totalAmount || 0,
+          breakfastDates:
+            bookingDetail.breakfastDates?.map((date) => {
+              return { date: date };
+            }) || [],
+          rooms: hasPendingRoomChanges ? currentRooms : [],
+        },
+        {
+          keepDirty: true, // ✅ Preserve dirty state
+          keepValues: false, // We're providing new values explicitly
+        }
+      );
     }
-  };
+  }, [bookingDetail?.id]);
 
   const nights = useCalculateNights({
     checkinDate: bookingDetail
@@ -318,13 +252,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       ? parseISO(bookingDetail.checkoutDate)
       : undefined,
   });
-  // --- Render Loading/Error ---
   if (isPending) return <BookingDetailSkeleton />;
   if (error || !bookingDetail) return <BookingDetailError />;
 
   return (
     <div className="flex flex-col h-full bg-muted/10 relative">
-      {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto p-4">
         <Form {...form}>
           <div className="grid gap-4 container mx-auto">
@@ -351,7 +283,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                   permissions={permissions}
                   nights={nights}
                   setNoteModalOpen={setNoteModalOpen}
-                  handleSubmit={handleSubmit} // Keep for internal save if needed
+                  handleSubmit={handleSubmit}
                 />
 
                 <PendingChargesSection
@@ -373,8 +305,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             <AddCompletedChargesDialog
               open={completedChargesDialogOpen}
               onOpenChange={setCompletedChargesDialogOpen}
-              onConfirm={handleAddCompletedCharges}
-              isAdding={isAddingCompletedCharges}
             />
 
             <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
@@ -452,140 +382,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         financialSummary={financialSummary}
         onReset={() => form.reset()}
         onSave={form.handleSubmit(handleSubmit, onError)}
-        onCheckout={() => setCheckoutOpen(true)}
-      />
-
-      <CheckoutSheet
-        open={checkoutOpen}
-        onOpenChange={setCheckoutOpen}
-        bookingId={bookingDetail?.id || ""}
-        bookingCode={bookingDetail?.bookingCode || ""}
-        bookingDetail={bookingDetail}
       />
     </div>
   );
 }
 
-// --- Sub-components for Cleaner File ---
-
-function BookingActionsBar({
-  isDirty,
-  isUpdating,
-  bookingDetail,
-  financialSummary,
-  onReset,
-  onSave,
-  onCheckout,
-}: {
-  isDirty: boolean;
-  isUpdating: boolean;
-  bookingDetail: any;
-  financialSummary: any;
-  onReset: () => void;
-  onSave: () => void;
-  onCheckout: () => void;
-}) {
-  return (
-    <div className="sticky bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 shadow-lg z-10 transition-all duration-200">
-      <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
-        {/* Left: Always Visible Operations (Refund) */}
-        <div className="flex items-center gap-2">
-          <RefundButton
-            bookingId={bookingDetail?.id || ""}
-            bookingNumber={bookingDetail?.bookingCode || ""}
-            bookingStatus={bookingDetail?.status || ""}
-            totalPaidAmount={bookingDetail.paidAmount}
-          />
-        </div>
-
-        {/* Right: Contextual Actions */}
-        <div className="flex items-center gap-3">
-          {isDirty ? (
-            <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">
-              <Alert variant="warning">
-                <AlertTriangle className="w-4 h-4" />
-                <AlertTitle>Thay đổi chưa lưu</AlertTitle>
-              </Alert>
-
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={onReset}
-                disabled={isUpdating}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Hoàn tác
-              </Button>
-
-              <Button
-                onClick={onSave}
-                disabled={isUpdating}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md min-w-[140px]"
-              >
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Lưu...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
-                  </>
-                )}
-              </Button>
-            </div>
-          ) : (
-            // === MODE 2: OPERATIONAL (CLEAN STATE) ===
-            // Shows Checkout/Operations.
-            <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">
-              {/* Checkout Button Logic */}
-              {(bookingDetail?.status === "InHouse" ||
-                bookingDetail?.status === "CheckedIn") && (
-                <Button
-                  variant="success"
-                  onClick={onCheckout}
-                  className="shadow-sm"
-                >
-                  <DoorOpen className="w-4 h-4 mr-2" />
-                  Checkout & Thanh toán
-                </Button>
-              )}
-
-              {/* Post-Checkout Collection */}
-              {bookingDetail?.status === "CheckedOut" &&
-                financialSummary.totalBalance > 0 && (
-                  <Button
-                    onClick={onCheckout}
-                    className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm"
-                  >
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Thu nợ sau checkout
-                    <Badge
-                      variant="secondary"
-                      className="ml-2 bg-white/20 text-white hover:bg-white/30 border-0"
-                    >
-                      {formatMoney(financialSummary.totalBalance).vndFormatted}
-                    </Badge>
-                  </Button>
-                )}
-
-              {/* View Invoices */}
-              {bookingDetail?.status === "CheckedOut" &&
-                financialSummary.totalBalance === 0 && (
-                  <Button variant="outline" onClick={onCheckout}>
-                    <Receipt className="w-4 h-4 mr-2" />
-                    Xem hóa đơn
-                  </Button>
-                )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Skeleton & Error Components (Keep them simple)
 function BookingDetailSkeleton() {
   return (
     <div className="flex gap-4 p-6">

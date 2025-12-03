@@ -116,6 +116,7 @@ const BookingDetailRoomItemSchema = z.object({
   roomTypeName: z.string(),
   fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
   toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  baseRate: z.number().min(0),
 });
 
 // QR Code Response (base64 image or URL)
