@@ -414,7 +414,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 className="text-stone-500 hover:text-emerald-800 hover:bg-emerald-50/50 rounded-full"
               >
                 <Languages className="h-4 w-4 mr-2" />
-                Settings
+                Cài đặt
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -423,7 +423,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
             >
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="cursor-pointer focus:bg-emerald-50">
-                  Translation Language
+                  Ngôn ngữ dịch
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="bg-white/95 backdrop-blur-xl">
@@ -455,7 +455,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                   htmlFor="auto-translate"
                   className="text-sm cursor-pointer text-stone-600"
                 >
-                  Auto-translate
+                  Tự động dịch
                 </Label>
                 <Switch
                   id="auto-translate"
@@ -467,7 +467,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
               <DropdownMenuSeparator className="bg-stone-100" />
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="cursor-pointer focus:bg-emerald-50">
-                  Assign Staff
+                  Giao cho nhân viên
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="bg-white/95 backdrop-blur-xl">
@@ -500,7 +500,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                       ))
                     ) : (
                       <DropdownMenuItem disabled>
-                        No staff available
+                        Không có nhân viên
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuSubContent>
@@ -512,8 +512,8 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 disabled={markAllReadMutation.isPending}
                 className="cursor-pointer focus:bg-emerald-50 focus:text-emerald-800"
               >
-                <CheckCheck className="h-4 w-4 mr-2 text-emerald-600" /> Mark
-                all read
+                <CheckCheck className="h-4 w-4 mr-2 text-emerald-600" /> Đánh
+                dấu tất cả đã đọc
               </DropdownMenuItem>
               {canSendMessage && (
                 <>
@@ -523,7 +523,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                     disabled={closeSessionMutation.isPending}
                     className="text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
                   >
-                    <XCircle className="h-4 w-4 mr-2" /> Close Session
+                    <XCircle className="h-4 w-4 mr-2" /> Đóng phiên
                   </DropdownMenuItem>
                 </>
               )}

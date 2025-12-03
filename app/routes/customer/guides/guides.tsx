@@ -21,10 +21,11 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
+import Image from "~/components/ui/image";
 
 export default function GuidesPage() {
   const { t } = useTranslation("guides");
@@ -34,7 +35,7 @@ export default function GuidesPage() {
       {/* --- HERO SECTION --- */}
       <div className="relative h-[40vh] md:h-[50vh] w-full overflow-hidden">
         {/* Placeholder: Sapa Rice Terraces */}
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1531213203257-16afb0eac5d6?q=80&w=2836&auto=format&fit=crop"
           alt="Sapa Landscape"
           className="w-full h-full object-cover filter brightness-[0.85]"
@@ -138,7 +139,7 @@ export default function GuidesPage() {
             >
               <div className="relative rounded-lg overflow-hidden mb-4 h-32">
                 {/* Placeholder: Bathroom/Water */}
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1584622050111-993a426fbf0a?q=80&w=2940&auto=format&fit=crop"
                   className="w-full h-full object-cover"
                   alt="Bathroom"
@@ -158,11 +159,15 @@ export default function GuidesPage() {
                   <Bath className="h-5 w-5" /> {t("notes.towels.title")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-amber-900/80 space-y-2">
-                <p>{t("notes.towels.purpose")}</p>
-                <p className="font-medium bg-amber-100 p-2 rounded text-amber-800">
-                  ⚠️ {t("notes.towels.warning")} <strong>1,000,000 VND</strong>.
-                </p>
+              <CardContent>
+                <Alert variant={"warning"}>
+                  <AlertTriangle className="h-4 w-4 " />
+                  <AlertTitle>{t("notes.towels.purpose")}</AlertTitle>
+                  <AlertDescription className="font-medium ">
+                    {t("notes.towels.warning")}
+                    <strong className="text-red-600">1,000,000 VND</strong>
+                  </AlertDescription>
+                </Alert>
               </CardContent>
             </Card>
           </div>
@@ -192,7 +197,7 @@ export default function GuidesPage() {
             <Card className="overflow-hidden border-none shadow-md">
               <div className="h-32 bg-stone-200 relative">
                 {/* Placeholder: Cozy room interior */}
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2940&auto=format&fit=crop"
                   className="w-full h-full object-cover"
                   alt="Room Interior"
@@ -205,9 +210,9 @@ export default function GuidesPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Alert className="bg-stone-50 border-stone-200">
+                <Alert className="">
                   <Bug className="h-4 w-4 text-stone-600" />
-                  <AlertDescription className="text-stone-600 text-sm mt-1">
+                  <AlertDescription className="text-stone-600 text-sm">
                     {t("notes.food.warning")}
                   </AlertDescription>
                 </Alert>
@@ -215,19 +220,14 @@ export default function GuidesPage() {
             </Card>
 
             {/* Fire Safety */}
-            <Alert
-              variant="destructive"
-              className="bg-red-50 border-red-200 text-red-900"
-            >
-              <Flame className="h-4 w-4 text-red-600" />
-              <div className="ml-2">
-                <p className="font-bold text-sm mb-1">
-                  {t("notes.fire.title")}
-                </p>
-                <p className="text-xs opacity-90 leading-relaxed">
-                  {t("notes.fire.warning")}
-                </p>
-              </div>
+            <Alert variant="destructive" className="bg-red-50 border-red-200">
+              <Flame className="h-4 w-4" />
+              <AlertTitle className="font-bold text-sm mb-1">
+                {t("notes.fire.title")}
+              </AlertTitle>
+              <AlertDescription className="text-xs opacity-90 leading-relaxed">
+                {t("notes.fire.warning")}
+              </AlertDescription>
             </Alert>
           </div>
 
@@ -239,7 +239,6 @@ export default function GuidesPage() {
                 {t("services.title")}
               </h3>
 
-              {/* Cable Car */}
               <ServiceItem
                 icon={<CableCar className="h-5 w-5 text-white" />}
                 title={t("services.cableCar.title")}
@@ -257,7 +256,7 @@ export default function GuidesPage() {
 
               {/* Happy Hour Banner */}
               <div className="relative rounded-xl overflow-hidden text-white mt-4 group cursor-default">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2940&auto=format&fit=crop"
                   className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
                   alt="Cocktail"
@@ -276,7 +275,7 @@ export default function GuidesPage() {
                   <p className="text-orange-100 text-xs mt-1 leading-snug">
                     {t("services.happyHour.description")}
                   </p>
-                  <div className="mt-3 inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold border border-white/30">
+                  <div className="mt-3 inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-semibold border border-white/30">
                     {t("services.happyHour.promotion")}
                   </div>
                 </div>
