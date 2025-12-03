@@ -1,5 +1,4 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
 import {
   isRouteErrorResponse,
   Link,
@@ -13,22 +12,14 @@ import {
   useRouteError,
 } from "react-router";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 import type { Route } from "./+types/root";
 import "./index.css";
 
+import "~/lib/i18n"; // Initialize i18n
+import "~/lib/i18n/types"; // TypeScript types
 import { Toaster } from "./components/ui/sonner";
 import { SpinnerLoader } from "./features/loading";
 import { MapProvider } from "./routes/customer/map/context/map-context";
-import "~/lib/i18n"; // Initialize i18n
-import "~/lib/i18n/types"; // TypeScript types
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -95,10 +86,9 @@ export default function App() {
   );
 }
 
-type RouteErrorBoundaryProps = {
-  error: any;
-};
-
+export function HydrateFallback() {
+  return <SpinnerLoader fullScreen size="lg" text="Đang tải..." />;
+}
 export function ErrorBoundary() {
   const error = useRouteError();
   const navigate = useNavigate();

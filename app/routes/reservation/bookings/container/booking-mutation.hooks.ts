@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import type z from "zod";
 import { BookingService } from "~/services/api/booking";
@@ -33,6 +34,13 @@ function useUpdateBooking(bookingId: string) {
         refetchType: "active",
       });
       toast.success("Cập nhật đặt phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật đặt phòng thất bại"
+        );
+      }
     },
   });
 }

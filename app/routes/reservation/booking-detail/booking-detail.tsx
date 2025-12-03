@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
-import { Check, FileWarning, NotebookPen } from "lucide-react";
+import { Check, FileWarning, NotebookPen, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -46,19 +46,23 @@ import PendingChargesSection from "./components/pending-charges-section";
 import RefundHistory from "./components/refunds/refund-history";
 import StayDetailBar from "./components/stay-detail-bar";
 
-import { Navigate, useSearchParams } from "react-router";
+import { Navigate, useParams, useSearchParams } from "react-router";
 import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
 import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
 import { BookingActionsBar } from "./fragments/booking-actions.bar";
+import { AxiosError } from "axios";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
-export default function Component({ loaderData }: Route.ComponentProps) {
-  const [searchParams] = useSearchParams();
-  const bookingCode = searchParams.get("bookingCode");
 
+export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
+  const bookingCode = params.bookingCode;
   if (!bookingCode) {
-    return <Navigate to="/404" replace />;
+    throw new Response("Booking code is required", { status: 400 });
   }
+  return { bookingCode };
+};
+export default function Component({ loaderData }: Route.ComponentProps) {
+  const { bookingCode } = loaderData;
   const {
     data: bookingDetail,
     isPending,
@@ -67,7 +71,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     bookingCode,
     enabled: !!bookingCode,
   });
-
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
@@ -104,37 +107,30 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const { isDirty } = form.formState;
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
     if (data.rooms && data.rooms.length > 0) {
-      try {
-        data.rooms.forEach((room, idx) => {
-          console.log(`Room operation ${idx}:`, {
-            action: room.action,
-            actionType: typeof room.action,
-            bookingRoomId: room.bookingRoomId,
-            roomId: room.roomId,
-            newRoomId: room.newRoomId,
-            fromDate: room.fromDate,
-            toDate: room.toDate,
-          });
-
-          const result =
-            BookingSchema.UpdateBookingRoomRequestSchema.safeParse(room);
-
-          if (!result.success) {
-            console.error("Invalid room operation:", room, result.error);
-            const errorMsg = result.error.issues
-              .map((e) => `${e.path.join(".")}: ${e.message}`)
-              .join(", ");
-            throw new Error(
-              `Phòng ${room.roomId || room.bookingRoomId || "unknown"} không hợp lệ: ${errorMsg}`
-            );
-          }
+      data.rooms.forEach((room, idx) => {
+        console.log(`Room operation ${idx}:`, {
+          action: room.action,
+          actionType: typeof room.action,
+          bookingRoomId: room.bookingRoomId,
+          roomId: room.roomId,
+          newRoomId: room.newRoomId,
+          fromDate: room.fromDate,
+          toDate: room.toDate,
         });
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Dữ liệu phòng không hợp lệ"
-        );
-        return; // Stop submission
-      }
+
+        const result =
+          BookingSchema.UpdateBookingRoomRequestSchema.safeParse(room);
+
+        if (!result.success) {
+          console.error("Invalid room operation:", room, result.error);
+          const errorMsg = result.error.issues
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
+            .join(", ");
+          throw new Error(
+            `Phòng ${room.roomId || room.bookingRoomId || "unknown"} không hợp lệ: ${errorMsg}`
+          );
+        }
+      });
     }
 
     const hasDatesChanged =
@@ -176,37 +172,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       rooms: data.rooms,
     };
 
-    updateBooking(payload, {
-      onError: (error: any) => {
-        if (error.response?.data?.errors) {
-          const validationErrors = error.response.data.errors;
-          Object.entries(validationErrors).forEach(([field, messages]) => {
-            if (Array.isArray(messages)) {
-              messages.forEach((msg) => {
-                toast.error(`${field}: ${msg}`);
-              });
-            } else {
-              toast.error(`${field}: ${messages}`);
-            }
-          });
-        }
-
-        if (error.errors) {
-          console.error("Form validation errors:", error.errors);
-          error.errors.forEach((err: any) => {
-            const fieldPath = err.path?.join(".") || "unknown";
-            toast.error(`${fieldPath}: ${err.message}`);
-          });
-        }
-
-        if (!error.response?.data?.errors && !error.errors) {
-          toast.error(error.message || "Cập nhật booking thất bại");
-        }
-      },
-      onSuccess: () => {
-        toast.success("Cập nhật booking thành công");
-      },
-    });
+    updateBooking(payload);
   };
 
   useEffect(() => {
@@ -389,34 +355,63 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
 function BookingDetailSkeleton() {
   return (
-    <div className="flex gap-4 p-6">
-      <div className="w-full space-y-4">
-        <div className="flex gap-4">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-1/3" />
+    <div className="flex flex-col gap-6 p-4 md:p-6 lg:flex-row">
+      {/* Main Content Area */}
+      <div className="flex w-full flex-col space-y-6">
+        {/* Top Summary / Stats Cards */}
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <Skeleton className="h-28 w-full rounded-xl sm:w-2/3" />
+          <Skeleton className="h-28 w-full rounded-xl sm:w-1/3" />
         </div>
-        <div className="flex gap-4">
-          <Skeleton className="h-96 w-2/3" />
-          <Skeleton className="h-96 w-1/3" />
+
+        {/* Detail Sections */}
+        <div className="flex flex-col gap-4 lg:flex-row">
+          {/* Main Info (Customer, Booking Details) */}
+          <Skeleton className="h-[500px] w-full rounded-xl lg:w-2/3" />
+
+          {/* Sidebar Info (Payment, History, Notes) */}
+          <Skeleton className="h-[500px] w-full rounded-xl lg:w-1/3" />
         </div>
       </div>
     </div>
   );
 }
 
-function BookingDetailError() {
+function BookingDetailError({
+  onRetry,
+  errorDetails,
+}: {
+  onRetry?: () => void;
+  errorDetails?: string;
+}) {
   return (
-    <div className="h-full flex items-center justify-center">
+    <div className="flex h-full min-h-[400px] items-center justify-center p-6">
       <Empty>
         <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <FileWarning />
+          <EmptyMedia
+            variant="icon"
+            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500"
+          >
+            <FileWarning className="h-8 w-8" />
           </EmptyMedia>
-          <EmptyTitle>Lỗi</EmptyTitle>
-          <EmptyDescription>
-            Không thể tải thông tin đặt phòng.
+          <EmptyTitle className="text-xl font-semibold text-gray-900">
+            Không thể tải thông tin
+          </EmptyTitle>
+          <EmptyDescription className="mt-2 text-center text-sm text-gray-500">
+            {errorDetails ||
+              "Đã có lỗi xảy ra trong quá trình lấy dữ liệu đặt phòng. Vui lòng kiểm tra kết nối mạng."}
           </EmptyDescription>
         </EmptyHeader>
+
+        {/* Actionable UX: Nút thử lại */}
+        {onRetry && (
+          <div className="mt-6 flex justify-center">
+            <Button variant="outline" onClick={onRetry} className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              Thử lại
+            </Button>
+          </div>
+        )}
       </Empty>
     </div>
   );

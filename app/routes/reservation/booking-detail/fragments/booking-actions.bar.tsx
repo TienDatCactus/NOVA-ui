@@ -17,7 +17,7 @@ import { formatMoney } from "~/lib/utils";
 import { canUpgradeRoom } from "../container/booking-validation";
 import { Badge } from "~/components/ui/badge";
 import CheckoutSheet from "../components/checkout/checkout-sheet";
-import { PayNowRoomsDialog } from "../components/operations/pay-now-rooms-dialog";
+import { PayNowRoomsSheet } from "../components/operations/pay-now-rooms-sheet";
 import { UpgradeRoomDialog } from "../components/operations/upgrade-room-dialog";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
@@ -93,9 +93,8 @@ export function BookingActionsBar({
               {/* Upgrade Room Button (CHANGELOG v2.0) - For Confirmed/CheckedIn */}
               {canUpgradeRoom(bookingDetail?.status) && (
                 <Button
-                  variant="outline"
+                  variant="success-outline"
                   onClick={() => setUpgradeRoomOpen(true)}
-                  className="border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950"
                 >
                   <ArrowUpCircle className="w-4 h-4 mr-2" />
                   Upgrade phòng
@@ -106,9 +105,8 @@ export function BookingActionsBar({
               {(bookingDetail?.status === "InHouse" ||
                 bookingDetail?.status === "CheckedIn") && (
                 <Button
-                  variant="outline"
+                  variant="info-outline"
                   onClick={() => setPayNowRoomsOpen(true)}
-                  className="border-primary/50 text-primary hover:bg-primary/10"
                 >
                   <Wallet className="w-4 h-4 mr-2" />
                   Thanh toán phòng ngay
@@ -167,7 +165,7 @@ export function BookingActionsBar({
         bookingDetail={bookingDetail}
       />
 
-      <PayNowRoomsDialog
+      <PayNowRoomsSheet
         open={payNowRoomsOpen}
         onOpenChange={setPayNowRoomsOpen}
         bookingDetail={bookingDetail}
