@@ -42,14 +42,14 @@ export default function StaffRolesListView({
             <EmptyMedia variant="icon">
               <UserCog />
             </EmptyMedia>
-            <EmptyTitle>Chưa có vai trò nhân sự nào.</EmptyTitle>
+            <EmptyTitle>Chưa có Chức vụ nhân sự nào.</EmptyTitle>
             <EmptyDescription>
-              Tạo vai trò đầu tiên để bắt đầu quản lý nhân sự
+              Tạo Chức vụ đầu tiên để bắt đầu quản lý nhân sự
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button onClick={() => setOpenCreateDialog(true)}>
-              Thêm vai trò
+              Thêm Chức vụ
             </Button>
           </EmptyContent>
         </Empty>

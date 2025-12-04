@@ -41,15 +41,7 @@ export default function Component() {
   const toDateStr = date.to ? format(date.to, "yyyy-MM-dd") : "";
 
   // Fetch reports data
-  const {
-    data: reportsData,
-    isLoading,
-    refetch,
-  } = useReports(fromDateStr, toDateStr);
-
-  const handleApplyFilter = () => {
-    refetch();
-  };
+  const { data: reportsData, isLoading } = useReports(fromDateStr, toDateStr);
 
   const handleResetToToday = () => {
     const today = new Date();
@@ -138,7 +130,6 @@ export default function Component() {
               </PopoverContent>
             </Popover>
           </div>
-          <Button onClick={handleApplyFilter}>Áp dụng</Button>
           <Button variant="outline" onClick={handleResetToToday}>
             Hiện tại
           </Button>

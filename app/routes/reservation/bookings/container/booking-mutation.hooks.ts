@@ -10,30 +10,35 @@ import type {
   StaffChangeRoomRequestDto,
 } from "~/services/api/booking/dto";
 
-function useUpdateBooking(bookingId: string) {
+function useUpdateBooking(bookingId: string, bookingCode?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: StaffUpdateBookingRequestDto) =>
       await BookingService.staffUpdateBookingDetail(bookingId, data),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (response) => {
+      if (bookingCode) {
+        queryClient.setQueryData(
+          ["bookings-detail", bookingCode, response.bookingId],
+          response
+        );
+      }
+      (queryClient.invalidateQueries({
         queryKey: ["bookings"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["orderable-bookings"],
-        refetchType: "active",
-      });
-      toast.success("Cập nhật đặt phòng thành công");
+      }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+        toast.success("Cập nhật đặt phòng thành công"));
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
@@ -51,27 +56,25 @@ function useChangeRoom(bookingId: string) {
   return useMutation({
     mutationFn: async (data: StaffChangeRoomRequestDto) =>
       await BookingService.staffChangeRoom(bookingId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms-for-change"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-        refetchType: "active",
-      });
+    onSuccess: async () => {
+      // Invalidate all related queries
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms-for-change"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+      ]);
       toast.success("Đổi phòng thành công");
     },
   });
@@ -84,27 +87,25 @@ function useCancelBooking(bookingId: string) {
     mutationFn: async () => {
       return await BookingService.staffCancelBooking(bookingId);
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["orderable-bookings"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-        refetchType: "active",
-      });
+    onSuccess: async (data) => {
+      // Invalidate all related queries
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+      ]);
       toast.success("Hủy đặt phòng thành công");
     },
   });
@@ -121,33 +122,26 @@ function useUpdateBookingStatus(bookingId: string) {
         newStatus: status,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Invalidate all related queries
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+      ]);
       toast.success("Cập nhật trạng thái thành công");
-
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-        refetchType: "active",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-        refetchType: "active",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-        refetchType: "active",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["orderable-bookings"],
-        refetchType: "active",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-        refetchType: "active",
-      });
     },
   });
 }

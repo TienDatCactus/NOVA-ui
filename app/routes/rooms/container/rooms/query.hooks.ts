@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { RoomsService } from "~/services/api/rooms";
+import type { RoomDetailResponseDto } from "~/services/api/rooms/dto";
 import type {
-  GetAvailableRoomsInternalParams,
+  InternalAvailableRoomListParams,
   RoomBookingHistoryParams,
   RoomDetailParams,
   RoomListParams,
 } from "~/services/api/rooms/room.types";
-import type { RoomDetailResponseDto } from "~/services/api/rooms/dto";
 
 function useRooms(params?: RoomListParams) {
   return useQuery({
@@ -51,7 +51,7 @@ function useRoomBookingHistory({
 }
 
 function useAvailableRoomsInternal(
-  params: GetAvailableRoomsInternalParams,
+  params: InternalAvailableRoomListParams,
   enabled: boolean = true
 ) {
   return useQuery({
@@ -99,10 +99,10 @@ function useGetRoomQrCode(roomId: string, options?: { enabled?: boolean }) {
   });
 }
 export {
-  useRooms,
-  useRoomDetail,
-  useRoomBookingHistory,
   useAvailableRoomsInternal,
-  useRoomsDetailsByIds,
   useGetRoomQrCode,
+  useRoomBookingHistory,
+  useRoomDetail,
+  useRooms,
+  useRoomsDetailsByIds,
 };

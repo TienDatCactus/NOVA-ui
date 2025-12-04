@@ -125,6 +125,7 @@ export function useCheckoutPayment(bookingId: string) {
     mutationFn: (data: StaffCheckoutPaymentRequestDto) =>
       BookingService.staffCheckoutPayment(bookingId, data),
     onSuccess: () => {
+      toast.success("Thanh toán checkout thành công");
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", bookingId],
@@ -147,6 +148,84 @@ export function useCheckoutPayment(bookingId: string) {
 }
 
 /**
+ * Hook to process payment for non-checkout invoices
+ */
+export function useInvoicePayment(invoiceId: string, bookingId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { method: string; amount: number; note?: string }) =>
+      InvoicesService.proceedInvoicePayment(invoiceId, {
+        method: data.method,
+        amount: data.amount,
+        note: data.note || "",
+      }),
+    onSuccess: () => {
+      toast.success("Thanh toán hóa đơn thành công");
+      // Invalidate specific invoice detail
+      queryClient.invalidateQueries({
+        queryKey: ["invoice-detail", invoiceId],
+      });
+      // Invalidate booking-specific invoice list (matches useInvoicesByBooking)
+      queryClient.invalidateQueries({
+        queryKey: ["booking-invoices", bookingId],
+      });
+      // Invalidate all booking details
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+      });
+      // Invalidate pending charges to refresh UI
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", bookingId],
+      });
+    },
+    onError: (error: any) => {
+      console.error("Invoice payment failed:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          "Thanh toán hóa đơn thất bại. Vui lòng thử lại."
+      );
+    },
+  });
+}
+
+/**
+ * Hook to sync invoice with pending orders
+ */
+export function useSyncInvoiceWithOrders(invoiceId: string, bookingId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => InvoicesService.syncInvoiceWithOrders(invoiceId),
+    onSuccess: () => {
+      // Invalidate specific invoice detail
+      queryClient.invalidateQueries({
+        queryKey: ["invoice-detail", invoiceId],
+      });
+      // Invalidate booking-specific invoice list
+      queryClient.invalidateQueries({
+        queryKey: ["booking-invoices", bookingId],
+      });
+      // Invalidate booking-specific pending charges
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", bookingId],
+      });
+      // Invalidate all booking details
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+      });
+    },
+    onError: (error: any) => {
+      console.error("Sync invoice failed:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          "Đồng bộ hóa đơn thất bại. Vui lòng thử lại."
+      );
+    },
+  });
+}
+
+/**
  * Hook to finalize checkout
  */
 export function useCheckout(bookingId: string) {
@@ -156,14 +235,22 @@ export function useCheckout(bookingId: string) {
     mutationFn: (data: StaffCheckoutRequestDto) =>
       BookingService.staffCheckout(bookingId, data),
     onSuccess: () => {
+      toast.success("Checkout hoàn tất thành công");
+      // Invalidate all booking lists
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
       });
+      // Invalidate all booking details
       queryClient.invalidateQueries({
         queryKey: ["bookings-detail"],
       });
+      // Invalidate booking-specific invoice list
       queryClient.invalidateQueries({
         queryKey: ["booking-invoices", bookingId],
+      });
+      // Invalidate rooms week view
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-rooms-week"],
       });
     },
   });

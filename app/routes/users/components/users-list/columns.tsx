@@ -13,9 +13,9 @@ import { UserDetailDialog } from "../user-detail-dialog";
 
 export const columns: ColumnDef<UserItem>[] = [
   {
-    accessorKey: "fullName",
+    accessorKey: "userName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Họ và tên" />
+      <DataTableColumnHeader column={column} title="Tên tài khoản" />
     ),
     cell: ({ row }) => {
       const [openDetailDialog, setOpenDetailDialog] = useState(false);
@@ -36,6 +36,17 @@ export const columns: ColumnDef<UserItem>[] = [
         </>
       );
     },
+  },
+  {
+    accessorKey: "fullName",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Họ và tên" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <span className="text-sm">{row.getValue("fullName")}</span>
+      </div>
+    ),
   },
   {
     accessorKey: "email",

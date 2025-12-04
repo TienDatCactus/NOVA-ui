@@ -40,16 +40,13 @@ interface RoomSelectionSectionProps {
 }
 
 export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
-  // --- 1. DATA WATCHERS ---
   const dateRange = form.watch("dateRange");
   const selectedRoomIds = form.watch("roomIds") || [];
   const adultsAmount = form.watch("adultsAmount") || 1;
   const childrenAmount = form.watch("childrenAmount") || 0;
 
-  // Control when to fetch to prevent spamming API on mount if dates empty
   const [shouldFetch, setShouldFetch] = useState(false);
 
-  // --- 2. COMPUTED VALUES ---
   const nights = useCalculateNights({
     checkinDate: dateRange?.from,
     checkoutDate: dateRange?.to,

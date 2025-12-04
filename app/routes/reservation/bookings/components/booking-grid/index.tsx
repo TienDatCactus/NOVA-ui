@@ -33,7 +33,6 @@ function BookingGrid({
   isLoading = false,
   refetch,
 }: BookingGridProps) {
-  // --- LOADING STATE ---
   if (isLoading) {
     return (
       <div className="space-y-10">
@@ -59,39 +58,25 @@ function BookingGrid({
   // --- EMPTY STATE ---
   if (rooms.length === 0) {
     return (
-      <div className="py-12 border-2 border-dashed rounded-xl bg-muted/10">
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia
-              variant="icon"
-              className="bg-muted text-muted-foreground"
-            >
-              <FolderOpen className="h-6 w-6" />
-            </EmptyMedia>
-            <EmptyTitle className="text-lg">
-              Không tìm thấy phòng trống
-            </EmptyTitle>
-            <EmptyDescription>
-              Thử thay đổi ngày check-in/check-out hoặc điều chỉnh bộ lọc tìm
-              kiếm.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent className="mt-4">
-            <div className="flex flex-col items-center gap-3">
-              <Button
-                onClick={refetch}
-                variant="default"
-                className="rounded-full px-6"
-              >
-                Tải lại danh sách
-              </Button>
-              <Button variant="link" className="text-muted-foreground text-xs">
-                Kiểm tra lịch phòng <ArrowUpRight className="ml-1 h-3 w-3" />
-              </Button>
-            </div>
-          </EmptyContent>
-        </Empty>
-      </div>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FolderOpen className="h-6 w-6" />
+          </EmptyMedia>
+          <EmptyTitle className="text-lg">
+            Không tìm thấy phòng trống
+          </EmptyTitle>
+          <EmptyDescription>
+            Thử thay đổi ngày check-in/check-out hoặc điều chỉnh bộ lọc tìm
+            kiếm.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={refetch} variant="default">
+            Tải lại danh sách
+          </Button>
+        </EmptyContent>
+      </Empty>
     );
   }
 

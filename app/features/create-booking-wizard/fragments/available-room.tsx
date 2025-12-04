@@ -28,10 +28,10 @@ export function AvailableRoomRow({
   onToggleRoom,
   nights,
 }: AvailableRoomRowProps) {
-  // Logic: Auto-expand if user has already selected a room in this category
   const selectedInThisType = roomType.availableRooms.filter((r) =>
     selectedRoomIds.includes(r.roomId)
   );
+
   const selectedCount = selectedInThisType.length;
   const hasSelection = selectedCount > 0;
 
@@ -41,7 +41,6 @@ export function AvailableRoomRow({
   const totalPrice = roomType.baseRatePerNight * nights;
   const hasAvailableRooms = roomType.availableCount > 0;
 
-  // Status Color Logic
   const statusColor = hasSelection
     ? "bg-primary" // Active/Selected
     : hasAvailableRooms
@@ -151,9 +150,10 @@ export function AvailableRoomRow({
               {roomType.availableRooms.length > 0 ? (
                 roomType.availableRooms.map((room) => {
                   const isSelected = selectedRoomIds.includes(room.roomId);
-
+                  const isReady = room.status === "Ready";
                   return (
                     <Button
+                      disabled={!isReady}
                       key={room.roomId}
                       type="button"
                       onClick={() => onToggleRoom(room.roomId)}

@@ -4,7 +4,10 @@ import { format } from "date-fns";
 import { BookingService } from "~/services/api/booking";
 import type { BookingListParams } from "~/services/api/booking/booking.types";
 import { RoomsService } from "~/services/api/rooms";
-import type { GetAvailableRoomsInternalParams } from "~/services/api/rooms/room.types";
+import type {
+  AvailableRoomListParams,
+  InternalAvailableRoomListParams,
+} from "~/services/api/rooms/room.types";
 
 function useBookingDetail({
   bookingCode,
@@ -16,11 +19,7 @@ function useBookingDetail({
   enabled?: boolean;
 }) {
   return useQuery({
-    queryKey: [
-      "bookings-detail",
-      bookingCode && bookingCode,
-      bookingId && bookingId,
-    ],
+    queryKey: ["bookings-detail", bookingCode, bookingId],
     queryFn: async () =>
       await BookingService.getBookingDetail({
         code: bookingCode,
@@ -58,28 +57,12 @@ function useBookings(params?: BookingListParams) {
 }
 
 function useAvailableRooms({
-  checkinDate,
-  checkoutDate,
-  guests = 1,
+  params,
   enabled = false,
 }: {
-  checkinDate: Date | string;
-  checkoutDate: Date | string;
-  guests?: number;
+  params: InternalAvailableRoomListParams;
   enabled?: boolean;
 }) {
-  const params: GetAvailableRoomsInternalParams = {
-    CheckInDate:
-      checkinDate instanceof Date
-        ? format(checkinDate, "yyyy-MM-dd")
-        : checkinDate,
-    CheckOutDate:
-      checkoutDate instanceof Date
-        ? format(checkoutDate, "yyyy-MM-dd")
-        : checkoutDate,
-    Guests: guests,
-  };
-
   return useQuery({
     queryKey: ["available-rooms", params],
     queryFn: async () => await RoomsService.getAvailableRoomsInternal(params),

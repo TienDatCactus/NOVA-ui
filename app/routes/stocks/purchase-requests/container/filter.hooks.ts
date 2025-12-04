@@ -5,14 +5,15 @@ export type PurchaseRequestStatus =
   | "Approved"
   | "Rejected"
   | "Fulfilled"
-  | "Cancelled";
+  | "Cancelled"
+  | undefined;
 
 export type PurchaseRequestFilters = {
   status: PurchaseRequestStatus;
 };
 
 const initialFilters: PurchaseRequestFilters = {
-  status: "Draft",
+  status: undefined,
 };
 
 /**

@@ -34,8 +34,6 @@ export function BreakfastSelection({
   checkoutDate,
   nights,
 }: BreakfastSelectionProps) {
-  // 1. Generate Valid Breakfast Days
-  // Logic: Usually breakfast is available from the morning AFTER checkin, up to checkout day.
   // (Adjust start/end logic based on your specific hotel policy)
   const availableDates = useMemo(() => {
     if (!checkinDate || !checkoutDate || nights <= 0) return [];

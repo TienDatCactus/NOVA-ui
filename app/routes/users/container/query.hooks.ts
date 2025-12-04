@@ -188,3 +188,17 @@ export function useChangePassword() {
     },
   });
 }
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => await UserService.deleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+        refetchType: "active",
+      });
+      toast.success("Xóa người dùng thành công");
+    },
+  });
+}

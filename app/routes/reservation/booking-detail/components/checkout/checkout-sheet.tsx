@@ -50,7 +50,7 @@ import {
   useInvoicePreview,
   useInvoicesByBooking,
 } from "../../container/use-booking-checkout.hooks";
-import { useCheckoutEligibility } from "../../container/use-booking-financial-status.hooks";
+import { useCheckoutEligibility } from "../../container/use-booking-state.hooks";
 import InvoiceDetailSheet from "./invoice-detail-sheet";
 
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
@@ -210,27 +210,6 @@ export default function CheckoutSheet({
                 <ScrollArea className="flex-1 border-r bg-background">
                   <div className="p-6 space-y-6">
                     {/* Section: Room Info Quick View (ReadOnly) */}
-                    {pendingCharges.roomInvoice &&
-                      (pendingCharges.roomInvoice.balance || 0) > 0 && (
-                        <Alert className="border-orange-200 bg-orange-50">
-                          <Wallet className="h-4 w-4 text-orange-600" />
-                          <AlertTitle className="text-orange-800">
-                            Tiền phòng chưa thanh toán
-                          </AlertTitle>
-                          <AlertDescription className="flex justify-between items-center mt-2">
-                            <span className="text-orange-800/80">
-                              Hóa đơn phòng:
-                            </span>
-                            <span className="font-bold font-mono text-lg text-orange-700">
-                              {
-                                formatMoney(
-                                  pendingCharges.roomInvoice.balance || 0
-                                ).vndFormatted
-                              }
-                            </span>
-                          </AlertDescription>
-                        </Alert>
-                      )}
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">

@@ -7,7 +7,7 @@ export const columns: ColumnDef<StaffRoleItem>[] = [
   {
     accessorKey: "code",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Mã vai trò" />
+      <DataTableColumnHeader column={column} title="Mã Chức vụ" />
     ),
     cell: ({ row }) => {
       const code = row.getValue("code") as string;
@@ -17,7 +17,7 @@ export const columns: ColumnDef<StaffRoleItem>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Tên vai trò" />
+      <DataTableColumnHeader column={column} title="Tên Chức vụ" />
     ),
     cell: ({ row }) => {
       const name = row.getValue("name") as string;

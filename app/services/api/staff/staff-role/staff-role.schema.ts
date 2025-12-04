@@ -16,15 +16,15 @@ const StaffRoleDetailSchema = StaffRoleItemSchema;
 
 // Create Staff Role Schema (for API requests)
 const CreateStaffRoleSchema = z.object({
-  name: z.string().min(1, "Tên vai trò là bắt buộc"),
-  code: z.string().min(1, "Mã vai trò là bắt buộc"),
+  name: z.string().min(1, "Tên Chức vụ là bắt buộc"),
+  code: z.string().min(1, "Mã Chức vụ là bắt buộc"),
   description: z.string().optional(),
 });
 
 // Update Staff Role Schema (for API requests)
 const UpdateStaffRoleSchema = z.object({
-  name: z.string().min(1, "Tên vai trò là bắt buộc"),
-  code: z.string().min(1, "Mã vai trò là bắt buộc"),
+  name: z.string().min(1, "Tên Chức vụ là bắt buộc"),
+  code: z.string().min(1, "Mã Chức vụ là bắt buộc"),
   description: z.string().optional(),
 });
 

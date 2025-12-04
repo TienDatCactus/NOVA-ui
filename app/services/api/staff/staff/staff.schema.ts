@@ -46,7 +46,7 @@ const CreateStaffSchema = z.object({
   citizenId: z.string().optional(),
   startDate: z.date().optional(),
   note: z.string().optional(),
-  staffRoleId: z.string().min(1, "Vai trò là bắt buộc"),
+  staffRoleId: z.string().min(1, "Chức vụ là bắt buộc"),
 });
 
 // Update Staff Schema (for API requests)
@@ -59,7 +59,7 @@ const UpdateStaffSchema = z.object({
   citizenId: z.string().optional(),
   startDate: z.date().optional(),
   note: z.string().optional(),
-  staffRoleId: z.string().min(1, "Vai trò là bắt buộc"),
+  staffRoleId: z.string().min(1, "Chức vụ là bắt buộc"),
 });
 
 const TerminateStaffSchema = z.object({

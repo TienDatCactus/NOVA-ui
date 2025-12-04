@@ -67,7 +67,7 @@ export default function CreatePurchaseRequestDialog({
 
   const form = useForm<CreatePurchaseRequestDto>({
     resolver: zodResolver(PurchaseRequestsSchemas.CreatePurchaseRequestSchema),
-    mode: "all",
+    mode: "onSubmit",
     defaultValues: {
       notes: undefined,
       items: [

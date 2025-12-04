@@ -2,18 +2,20 @@ import { type ReactNode } from "react";
 import { Grid3x3, List, LayoutGrid } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import SearchRoom, { type BookingSearchFilters } from "../components/search";
 import { Separator } from "~/components/ui/separator";
+import type { BookingSearchFilters } from "../container/booking-filter.hooks";
+import SearchRoom from "../components/search";
 
 type ViewMode = "grid" | "list";
 
 interface BookingViewLayoutProps {
   children: ReactNode;
   filters: BookingSearchFilters;
-  onFiltersChange: (filters: BookingSearchFilters) => void;
-  onResetFilters: () => void;
-  date?: Date | string;
-  onDateChange?: (date: Date | undefined) => void;
+  updateFilters: <K extends keyof BookingSearchFilters>(
+    key: K,
+    value: BookingSearchFilters[K]
+  ) => void;
+  resetFilters: () => void;
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
 }
@@ -21,23 +23,19 @@ interface BookingViewLayoutProps {
 function BookingViewLayout({
   children,
   filters,
-  onFiltersChange,
-  onResetFilters,
-  date,
-  onDateChange,
+  updateFilters,
+  resetFilters,
   viewMode = "grid",
   onViewModeChange,
 }: BookingViewLayoutProps) {
   return (
     <div className="flex flex-col h-full bg-muted/5 min-h-screen">
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-3 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between transition-all">
+      <div className="border-b px-6 py-3 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between transition-all">
         <div className="flex-1 w-full sm:w-auto min-w-0">
           <SearchRoom
-            date={date}
-            onDateChange={onDateChange}
             filters={filters}
-            onFiltersChange={onFiltersChange}
-            onReset={onResetFilters}
+            updateFilters={updateFilters}
+            resetFilters={resetFilters}
           />
         </div>
 
@@ -45,8 +43,6 @@ function BookingViewLayout({
         {onViewModeChange && (
           <div className="flex items-center gap-3 shrink-0">
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
-
-            {/* Segmented Control Design */}
             <div className="flex items-center p-1 rounded-lg bg-muted/50 border shadow-sm">
               <Button
                 variant="ghost"
@@ -84,9 +80,8 @@ function BookingViewLayout({
         )}
       </div>
 
-      {/* === MAIN CONTENT AREA === */}
-      <main className="flex-1 p-6 overflow-y-auto scroll-smooth">
-        <div className="max-w-[1920px] mx-auto">{children}</div>
+      <main className="flex-1 p-6 overflow-y-auto ">
+        <div className="container mx-auto">{children}</div>
       </main>
     </div>
   );

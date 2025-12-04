@@ -52,7 +52,7 @@ Triết lý này dựa trên 4 trụ cột:
   - **Đây là quy tắc quan trọng nhất:** **Hãy làm cho thông tin phụ trở nên "phụ"**.
   - Sử dụng `text-muted-foreground` (màu xám nhạt) cho các nhãn (label), mô tả (description), và các dữ liệu không quan trọng.
   - Việc này làm cho thông tin chính _tự động_ nổi bật mà không cần phải làm cho nó "to" hoặc "ồn ào" hơn.
-    Vai trò: **Design System Architect & Frontend Engineer**
+    Chức vụ: **Design System Architect & Frontend Engineer**
 
 Dưới đây là **NOVA-UI Project Guide** đã được mở rộng — tích hợp phân tích & hướng dẫn sử dụng **shadcn/ui** vào trong tiêu chuẩn của dự án. Mọi phần mới đều nằm trong phần **Shadcn: cách dùng trong NOVA-UI** để dễ tìm.
 

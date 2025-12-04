@@ -397,7 +397,7 @@ const BookingDetailItemSchema = z.object({
   id: z.string(),
   bookingCode: z.string(),
   source: z.string(),
-  status: z.string(),
+  status: BookingStatusEnum,
   checkinDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
   checkoutDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
   adults: z.number().int().nonnegative(),

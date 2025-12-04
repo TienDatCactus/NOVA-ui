@@ -36,7 +36,6 @@ import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
-import type { Route } from "./+types/booking-detail";
 
 // Components
 import BookingRoomsBar from "./components/booking-rooms-bar";
@@ -46,23 +45,19 @@ import PendingChargesSection from "./components/pending-charges-section";
 import RefundHistory from "./components/refunds/refund-history";
 import StayDetailBar from "./components/stay-detail-bar";
 
-import { Navigate, useParams, useSearchParams } from "react-router";
-import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
-import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
+import { useParams } from "react-router";
+import { useBookingState } from "./container/use-booking-state.hooks";
 import { BookingActionsBar } from "./fragments/booking-actions.bar";
-import { AxiosError } from "axios";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  const bookingCode = params.bookingCode;
+export default function Component() {
+  const { bookingCode } = useParams<{ bookingCode: string }>();
+
   if (!bookingCode) {
-    throw new Response("Booking code is required", { status: 400 });
+    return <BookingDetailError errorDetails="Mã booking không hợp lệ" />;
   }
-  return { bookingCode };
-};
-export default function Component({ loaderData }: Route.ComponentProps) {
-  const { bookingCode } = loaderData;
+
   const {
     data: bookingDetail,
     isPending,
@@ -75,12 +70,12 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
 
-  const permissions = useBookingUpdatePermissions(bookingDetail);
-  const financialSummary = useBookingFinancialStatus(bookingDetail?.invoices);
+  const bookingState = useBookingState(bookingDetail);
   const { data: OTAList } = useOTAInfo({ selection: true });
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
-    bookingDetail?.id || ""
+    bookingDetail?.id || "",
+    bookingCode
   );
 
   const form = useForm<StaffUpdateBookingRequestDto>({
@@ -138,15 +133,15 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       data.checkoutDate !== bookingDetail?.checkoutDate;
     const hasRoomChanges = data.rooms && data.rooms.length > 0;
 
-    if (hasDatesChanged && !permissions.canUpdateDates) {
+    if (hasDatesChanged && !bookingState.permissions.canEditDates) {
       toast.error(
-        permissions.dateChangeBlockReason ||
+        bookingState.permissions.dateChangeBlockReason ||
           "Không thể thay đổi ngày check-in/check-out"
       );
       return;
     }
 
-    if (hasRoomChanges && !permissions.canModifyRooms) {
+    if (hasRoomChanges && !bookingState.permissions.canEditRooms) {
       toast.error(
         "Không thể thay đổi phòng khi đã có thanh toán hoặc booking đã kết thúc"
       );
@@ -172,19 +167,15 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       rooms: data.rooms,
     };
 
-    updateBooking(payload);
+    updateBooking(payload, {
+      onSuccess: () => {
+        form.setValue("rooms", [], { shouldDirty: false });
+      },
+    });
   };
 
   useEffect(() => {
     if (bookingDetail && bookingDetail.id) {
-      const currentRooms = form.getValues("rooms") || [];
-      const hasPendingRoomChanges = currentRooms.some(
-        (room) =>
-          room.action === "Add" ||
-          room.action === "Remove" ||
-          room.action === "Change"
-      );
-
       form.reset(
         {
           checkinDate: bookingDetail.checkinDate,
@@ -200,11 +191,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             bookingDetail.breakfastDates?.map((date) => {
               return { date: date };
             }) || [],
-          rooms: hasPendingRoomChanges ? currentRooms : [],
+          rooms: [], // Always clear pending operations when data refreshes
         },
         {
-          keepDirty: true, // ✅ Preserve dirty state
-          keepValues: false, // We're providing new values explicitly
+          keepDirty: false, // Don't preserve dirty state on data refresh
+          keepValues: false,
         }
       );
     }
@@ -230,7 +221,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               bookingDetail={bookingDetail}
               form={form}
               OTAList={OTAList || []}
-              permissions={permissions}
+              bookingState={bookingState}
             />
 
             <div className="flex  items-start gap-4">
@@ -238,7 +229,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 bookingDetail={bookingDetail}
                 form={form}
                 roomsFieldArray={roomsFieldArray}
-                permissions={permissions}
+                bookingState={bookingState}
               />
 
               <div className="flex-1  space-y-4">
@@ -246,7 +237,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                   bookingCode={bookingCode}
                   bookingDetail={bookingDetail}
                   form={form}
-                  permissions={permissions}
+                  bookingState={bookingState}
                   nights={nights}
                   setNoteModalOpen={setNoteModalOpen}
                   handleSubmit={handleSubmit}
@@ -299,7 +290,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                         <FormControl>
                           <Textarea
                             {...field}
-                            disabled={!permissions.canDoSoftUpdate}
+                            disabled={!bookingState.permissions.canEdit}
                             placeholder="Nhập các lưu ý quan trọng về khách hàng hoặc đơn đặt phòng này..."
                             className="min-h-[200px] resize-none bg-muted/30 focus:bg-background transition-colors border-dashed focus:border-solid"
                           />
@@ -345,7 +336,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         isDirty={isDirty}
         isUpdating={isUpdating}
         bookingDetail={bookingDetail}
-        financialSummary={financialSummary}
+        bookingState={bookingState}
         onReset={() => form.reset()}
         onSave={form.handleSubmit(handleSubmit, onError)}
       />

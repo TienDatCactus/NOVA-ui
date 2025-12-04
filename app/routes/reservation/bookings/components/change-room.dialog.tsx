@@ -1,6 +1,12 @@
 import { format } from "date-fns";
-import { ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  ArrowRightLeft,
+  BedDouble,
+  AlertTriangle,
+  Check,
+  ArrowRight,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -18,38 +24,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { Label } from "~/components/ui/label";
+import { Badge } from "~/components/ui/badge";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { cn, formatMoney } from "~/lib/utils";
 
 import { CHECK_IN_TIME, CHECK_OUT_TIME } from "~/lib/constants";
-import {
-  RoomAvailabilityStatus,
-  RoomAvailabilityStatusColor,
-  RoomAvailabilityStatusLabel,
-} from "~/services/api/rooms/room.types";
 import { createChangeRoomOperation } from "~/services/api/booking/booking.helpers";
 import { useUpdateBooking } from "../container/booking-mutation.hooks";
 import {
   useAvailableRoomsForChange,
   useBookingDetail,
 } from "../container/booking-query.hooks";
+import { RoomAvailabilityStatus } from "~/services/api/rooms/room.types";
 
-export function getRoomAvailabilityLabel(status: string): string {
-  return (
-    RoomAvailabilityStatusLabel[status as RoomAvailabilityStatus] || status
-  );
-}
-
-export function getRoomAvailabilityColor(status: string): {
-  bg: string;
-  text: string;
-} {
-  return (
-    RoomAvailabilityStatusColor[status as RoomAvailabilityStatus] || {
-      bg: "bg-gray-100",
-      text: "text-gray-600",
-    }
-  );
-}
+const getStatusBadgeVariant = (status: string) => {
+  switch (status as RoomAvailabilityStatus) {
+    case "Available":
+      return "default";
+    case "SwapPossible":
+      return "warning";
+    default:
+      return "secondary";
+  }
+};
 
 interface ChangeRoomDialogProps {
   open: boolean;
@@ -66,57 +65,60 @@ export default function ChangeRoomDialog({
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string | null>(
     null
   );
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<string>("");
+
   const { data: bookingDetail } = useBookingDetail({
     bookingCode,
     enabled: open,
   });
 
   const bookingId = bookingDetail?.id || "";
-  const hasMultipleRooms = (bookingDetail?.rooms.length || 0) > 1;
   const currentRoom = bookingDetail?.rooms[currentRoomIndex];
+  const hasMultipleRooms = (bookingDetail?.rooms.length || 0) > 1;
+
   const { mutate: updateBooking, isPending } = useUpdateBooking(bookingId);
 
   const { data: availableRoomsData, isLoading: loadingRooms } =
     useAvailableRoomsForChange({
       bookingId,
       bookingRoomId: currentRoom?.bookingRoomId || "",
-      enabled: open && !!currentRoom && !!currentRoom.bookingRoomId,
+      enabled: open && !!currentRoom?.bookingRoomId,
     });
 
   const availableRooms = availableRoomsData || [];
 
-  // Reset selection when dialog opens or room changes
+  // Reset state
   useEffect(() => {
     if (open) {
       setSelectedRoomTypeId(null);
-      setSelectedRoomId(null);
+      setSelectedRoomId("");
     }
   }, [open, currentRoomIndex]);
 
-  // Group rooms by room type
-  const groupedRooms = availableRooms.reduce(
-    (acc, room) => {
-      const existing = acc.find((g) => g.roomTypeId === room.roomTypeId);
-      if (existing) {
-        existing.rooms.push(room);
-      } else {
-        acc.push({
-          roomTypeId: room.roomTypeId,
-          roomTypeName: room.roomTypeName,
-          rooms: [room],
-        });
-      }
-      return acc;
-    },
-    [] as Array<{
-      roomTypeId: string;
-      roomTypeName: string;
-      rooms: typeof availableRooms;
-    }>
-  );
+  const groupedRooms = useMemo(() => {
+    return availableRooms.reduce(
+      (acc, room) => {
+        const existing = acc.find((g) => g.roomTypeId === room.roomTypeId);
+        if (existing) {
+          existing.rooms.push(room);
+        } else {
+          acc.push({
+            roomTypeId: room.roomTypeId,
+            roomTypeName: room.roomTypeName,
+            rooms: [room],
+          });
+        }
+        return acc;
+      },
+      [] as Array<{
+        roomTypeId: string;
+        roomTypeName: string;
+        rooms: typeof availableRooms;
+      }>
+    );
+  }, [availableRooms]);
 
-  // Auto-select first room type when data loads
+  // Auto-select first type
   useEffect(() => {
     if (groupedRooms.length > 0 && !selectedRoomTypeId) {
       setSelectedRoomTypeId(groupedRooms[0].roomTypeId);
@@ -125,8 +127,6 @@ export default function ChangeRoomDialog({
 
   const handleConfirm = () => {
     if (!currentRoom || !selectedRoomId) return;
-
-    // Use createChangeRoomOperation helper to build proper payload
     const changeOperation = createChangeRoomOperation(
       currentRoom.bookingRoomId,
       selectedRoomId
@@ -145,13 +145,10 @@ export default function ChangeRoomDialog({
 
   if (!bookingDetail || !currentRoom) return null;
 
-  // Get selected room type details
   const selectedRoomType = groupedRooms.find(
     (g) => g.roomTypeId === selectedRoomTypeId
   );
 
-  // Get rooms for selected room type
-  // Show Available and SwapPossible, hide Occupied
   const roomsForSelectedType =
     selectedRoomType?.rooms.filter(
       (r) =>
@@ -159,236 +156,254 @@ export default function ChangeRoomDialog({
         r.availabilityStatus === "SwapPossible"
     ) || [];
 
-  // Get selected room details
   const selectedRoom = availableRooms.find((r) => r.roomId === selectedRoomId);
-
   const hasChanges = selectedRoomId && selectedRoomId !== currentRoom.roomId;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <DialogTitle className="text-xl font-semibold">
-              Đổi phòng
-            </DialogTitle>
-            {hasMultipleRooms ? (
-              <Select
-                value={currentRoomIndex.toString()}
-                onValueChange={(value) => setCurrentRoomIndex(Number(value))}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {bookingDetail?.rooms.map((room, index) => (
-                    <SelectItem key={room.roomId} value={index.toString()}>
-                      {room.roomName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <span className="text-xl font-semibold">
-                {currentRoom.roomName}
-              </span>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+        {/* HEADER */}
+        <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-primary/10 rounded-full text-primary">
+                <ArrowRightLeft className="w-5 h-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-semibold">
+                  Đổi phòng (Change Room)
+                </DialogTitle>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                  <span>
+                    {format(new Date(bookingDetail.checkinDate), "dd/MM")} -{" "}
+                    {format(new Date(bookingDetail.checkoutDate), "dd/MM")}
+                  </span>
+                  <span>•</span>
+                  <span className="font-medium text-foreground">
+                    {currentRoom.roomName} ({currentRoom.roomTypeName})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {hasMultipleRooms && (
+              <div className="flex items-center gap-2 bg-background p-1 rounded-lg border shadow-sm">
+                <span className="text-xs font-medium pl-2 text-muted-foreground">
+                  Chọn phòng nguồn:
+                </span>
+                <Select
+                  value={currentRoomIndex.toString()}
+                  onValueChange={(value) => setCurrentRoomIndex(Number(value))}
+                >
+                  <SelectTrigger className="w-[140px] h-8 border-none focus:ring-0 shadow-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bookingDetail.rooms.map((room, index) => (
+                      <SelectItem key={room.roomId} value={index.toString()}>
+                        {room.roomName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-4 py-2">
-          {/* Date Range Section */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">Chọn phòng mới</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>
-                {format(new Date(bookingDetail.checkinDate), "dd 'Thg' MM")},{" "}
-                {CHECK_IN_TIME}
-              </span>
-              <span>đến</span>
-              <span>
-                {format(new Date(bookingDetail.checkoutDate), "dd 'Thg' MM")},{" "}
-                {CHECK_OUT_TIME}
-              </span>
+        {/* BODY LAYOUT - MASTER DETAIL */}
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden bg-muted/5">
+          {/* LEFT SIDEBAR: ROOM TYPES */}
+          <div className="w-full md:w-1/3 border-r bg-background flex flex-col">
+            <div className="p-3 bg-muted/20 border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Hạng phòng khả dụng
             </div>
-          </div>
-
-          {loadingRooms ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Đang tải...
-            </div>
-          ) : groupedRooms.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Không có phòng trống
-            </div>
-          ) : (
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-              {/* Column 1: HẠNG PHÒNG & GIÁ PHÒNG - No scroll */}
-              <div>
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  <h3 className="text-xs font-semibold text-muted-foreground">
-                    HẠNG PHÒNG
-                  </h3>
-                  <h3 className="text-xs font-semibold text-muted-foreground text-right">
-                    GIÁ PHÒNG
-                  </h3>
-                </div>
-                <div className="space-y-2">
-                  {groupedRooms.map((roomType) => (
-                    <Card
-                      key={roomType.roomTypeId}
-                      className={cn(
-                        "p-3 cursor-pointer transition-all hover:border-primary",
-                        selectedRoomTypeId === roomType.roomTypeId &&
-                          "border-primary bg-primary/5"
-                      )}
-                      onClick={() => {
-                        setSelectedRoomTypeId(roomType.roomTypeId);
-                        setSelectedRoomId(null); // Reset room selection
-                      }}
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="font-medium text-sm">
-                          {roomType.roomTypeName}
-                        </span>
-                        <span className="font-semibold text-sm whitespace-nowrap">
-                          {formatMoney(
-                            roomType.rooms[0]?.baseRate || 0
-                          ).vndFormatted.replace(" ₫", "")}
-                        </span>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Separator Icon */}
-              <div className="flex items-center justify-center">
-                <div className="flex gap-0.5">
-                  <ChevronRight
-                    className="w-5 h-5 text-primary"
-                    strokeWidth={3}
-                  />
-                  <ChevronRight
-                    className="w-5 h-5 text-primary -ml-3"
-                    strokeWidth={3}
-                  />
-                  <ChevronRight
-                    className="w-5 h-5 text-primary -ml-3"
-                    strokeWidth={3}
-                  />
-                </div>
-              </div>
-
-              {/* Column 2: PHÒNG - With independent scroll */}
-              <div className="flex flex-col max-h-[400px]">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-3 flex-shrink-0">
-                  PHÒNG
-                </h3>
-                {!selectedRoomTypeId ? (
-                  <div className="text-center py-8 text-sm text-muted-foreground">
-                    Chọn hạng phòng
+            <ScrollArea className="flex-1">
+              <div className="p-2 space-y-1">
+                {loadingRooms ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    Đang tải dữ liệu...
                   </div>
-                ) : roomsForSelectedType.length === 0 ? (
-                  <div className="text-center py-8 text-sm text-muted-foreground">
+                ) : groupedRooms.length === 0 ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
                     Không có phòng trống
                   </div>
                 ) : (
-                  <div className="space-y-2 overflow-y-auto pr-2">
-                    {roomsForSelectedType.map((room) => {
-                      const statusColor = getRoomAvailabilityColor(
-                        room.availabilityStatus
-                      );
-                      const statusLabel = getRoomAvailabilityLabel(
-                        room.availabilityStatus
-                      );
-                      const hasConflict = room.conflictInfo !== null;
-                      const isSwapPossible =
-                        room.availabilityStatus === "SwapPossible";
-
-                      return (
-                        <Card
-                          key={room.roomId}
-                          className={cn(
-                            "p-3 cursor-pointer transition-all hover:border-primary",
-                            selectedRoomId === room.roomId &&
-                              "border-primary bg-primary/5",
-                            isSwapPossible && "border-orange-200"
-                          )}
-                          onClick={() => setSelectedRoomId(room.roomId)}
-                        >
-                          <div className="space-y-2">
-                            {/* Room name and status */}
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium text-sm">
-                                {room.roomName}
-                              </span>
-                              <span
-                                className={cn(
-                                  "text-xs px-2 py-0.5 rounded",
-                                  statusColor.bg,
-                                  statusColor.text
-                                )}
-                              >
-                                {statusLabel}
-                              </span>
-                            </div>
-
-                            {/* Conflict info warning */}
-                            {hasConflict &&
-                              isSwapPossible &&
-                              room.conflictInfo && (
-                                <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-200">
-                                  <div className="font-semibold mb-1">
-                                    ⚠️ Cần hoán đổi với booking khác
-                                  </div>
-                                  <div className="space-y-0.5 text-muted-foreground">
-                                    <div>
-                                      Booking:{" "}
-                                      <span className="font-mono">
-                                        {room.conflictInfo.bookingCode}
-                                      </span>
-                                    </div>
-                                    {room.conflictInfo.customerName && (
-                                      <div>
-                                        Khách:{" "}
-                                        <span className="font-medium">
-                                          {room.conflictInfo.customerName}
-                                        </span>
-                                      </div>
-                                    )}
-                                    <div className="text-xs italic mt-1">
-                                      {room.conflictInfo.message}
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
+                  groupedRooms.map((type) => {
+                    const isSelected = selectedRoomTypeId === type.roomTypeId;
+                    return (
+                      <button
+                        key={type.roomTypeId}
+                        onClick={() => {
+                          setSelectedRoomTypeId(type.roomTypeId);
+                          setSelectedRoomId("");
+                        }}
+                        className={cn(
+                          "w-full flex items-center justify-between p-3 rounded-lg text-left text-sm transition-all border",
+                          isSelected
+                            ? "bg-primary/5 border-primary shadow-sm"
+                            : "bg-transparent border-transparent hover:bg-muted"
+                        )}
+                      >
+                        <div className="space-y-1">
+                          <div
+                            className={cn(
+                              "font-medium",
+                              isSelected ? "text-primary" : "text-foreground"
+                            )}
+                          >
+                            {type.roomTypeName}
                           </div>
-                        </Card>
-                      );
-                    })}
-                  </div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <BedDouble className="w-3 h-3" />
+                            {type.rooms.length} phòng trống
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-mono font-semibold text-xs">
+                            {
+                              formatMoney(type.rooms[0]?.baseRate || 0)
+                                .vndFormatted
+                            }
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })
                 )}
               </div>
+            </ScrollArea>
+          </div>
+
+          {/* RIGHT CONTENT: ROOMS LIST */}
+          <div className="w-full md:w-2/3 flex flex-col bg-muted/5">
+            <div className="p-3 bg-muted/20 border-b flex justify-between items-center">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Danh sách phòng
+              </span>
+              {selectedRoomTypeId && (
+                <span className="text-xs text-muted-foreground">
+                  Đang chọn:{" "}
+                  <span className="font-medium text-foreground">
+                    {roomsForSelectedType.length}
+                  </span>{" "}
+                  phòng
+                </span>
+              )}
             </div>
-          )}
+
+            <ScrollArea className="flex-1 p-4">
+              {!selectedRoomTypeId ? (
+                <div className="h-full flex flex-col items-center justify-center text-muted-foreground opacity-50">
+                  <BedDouble className="w-12 h-12 mb-2" />
+                  <p>Vui lòng chọn hạng phòng bên trái</p>
+                </div>
+              ) : (
+                <RadioGroup
+                  value={selectedRoomId}
+                  onValueChange={setSelectedRoomId}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                >
+                  {roomsForSelectedType.map((room) => {
+                    const isSelected = selectedRoomId === room.roomId;
+                    const isSwap = room.availabilityStatus === "SwapPossible";
+                    const conflict = room.conflictInfo;
+
+                    return (
+                      <div key={room.roomId} className="relative">
+                        <RadioGroupItem
+                          value={room.roomId}
+                          id={room.roomId}
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor={room.roomId}
+                          className={cn(
+                            "relative group cursor-pointer rounded-xl border  bg-background block ",
+                            isSelected
+                              ? "border-primary  "
+                              : "border-transparent hover:border-primary/50 shadow-sm",
+                            isSwap &&
+                              !isSelected &&
+                              "border-orange-200 bg-orange-50/10"
+                          )}
+                        >
+                          {/* Header Card */}
+                          <div className="p-4 flex items-start justify-between">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg font-bold text-foreground">
+                                  {room.roomName}
+                                </span>
+                                {isSelected && (
+                                  <Check className="w-4 h-4 text-primary" />
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {room.roomTypeName}
+                              </div>
+                            </div>
+
+                            {isSwap ? (
+                              <Badge
+                                variant="outline"
+                                className="border-orange-200 text-orange-600 bg-orange-50 text-[10px] h-5 px-1.5 gap-1"
+                              >
+                                <AlertTriangle className="w-3 h-3" /> Swap
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="secondary"
+                                className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 text-[10px] h-5"
+                              >
+                                Available
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Conflict Context */}
+                          {isSwap && conflict && (
+                            <div className="px-4 py-2 bg-orange-50/50 border-t border-orange-100 text-xs text-orange-700">
+                              <div className="flex items-center gap-1.5 font-medium mb-1">
+                                <ArrowRight className="w-3 h-3" />
+                                Đổi với: {conflict.bookingCode}
+                              </div>
+                              <div
+                                className="opacity-80 pl-4 truncate"
+                                title={conflict.message}
+                              >
+                                {conflict.customerName
+                                  ? `Khách: ${conflict.customerName}`
+                                  : conflict.message}
+                              </div>
+                            </div>
+                          )}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </RadioGroup>
+              )}
+            </ScrollArea>
+          </div>
         </div>
 
-        <DialogFooter className="flex-shrink-0 gap-2">
+        {/* FOOTER */}
+        <DialogFooter className="p-4 border-t bg-background gap-2">
           <Button
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            Bỏ qua
+            Hủy bỏ
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={isPending || !hasChanges}
-            className="bg-primary hover:bg-primary/90 text-white"
+            className="min-w-[120px]"
           >
-            {isPending ? "Đang lưu..." : "Lưu"}
+            {isPending ? "Đang xử lý..." : "Xác nhận đổi"}
           </Button>
         </DialogFooter>
       </DialogContent>
