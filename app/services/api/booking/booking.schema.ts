@@ -618,6 +618,38 @@ const OrderableBookingResponseSchema = z.object({
   ),
 });
 
+const BookingPayForRoomRequestSchema = z.object({
+  bookingRoomIds: z
+    .array(z.string())
+    .min(1, "Phải chọn ít nhất 1 phòng để thanh toán"),
+  paymentMethod: PaymentSchema.PaymentMethodEnum,
+  paidAmount: z.number().min(0.01, "Số tiền thanh toán không hợp lệ"),
+  transactionReference: z.string().optional(),
+});
+
+const BookingUpgradeRoomRequestSchema = z
+  .object({
+    bookingRoomId: z.string().min(1, "Vui lòng chọn phòng hiện tại"),
+    newRoomId: z.string().min(1, "Vui lòng chọn phòng mới"),
+    isFree: z.boolean(),
+    reason: z.string().optional(),
+    paymentMethod: PaymentSchema.PaymentMethodEnum.optional(),
+    paidAmount: z.number().min(0).optional(),
+    transactionReference: z.string().optional().nullable(),
+  })
+  .refine(
+    (data) => {
+      if (data.isFree && (!data.reason || data.reason.trim().length === 0)) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Vui lòng nhập lý do upgrade miễn phí",
+      path: ["reason"],
+    }
+  );
+
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -641,6 +673,8 @@ export const BookingSchema = {
   StaffChangeRoomRequestSchema,
   StaffChangeRoomResponseSchema,
   AvailableRoomsForChangeResponseSchema,
+  BookingPayForRoomRequestSchema,
+  BookingUpgradeRoomRequestSchema,
 
   //! checkout booking
   StaffCheckoutRequestSchema,

@@ -39,21 +39,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useAddCompletedCharges } from "../../container/use-booking-checkout.hooks";
 
 interface AddCompletedChargesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (data: any) => void;
-  isAdding?: boolean;
   bookingRoomId?: string;
+  bookingId?: string;
 }
 
 export default function AddCompletedChargesDialog({
   open,
   onOpenChange,
-  onConfirm,
-  isAdding,
   bookingRoomId,
+  bookingId,
 }: AddCompletedChargesDialogProps) {
   const [activeTab, setActiveTab] = useState<"pos" | "service">("pos");
   const [selectedCategoryCode, setSelectedCategoryCode] = useState<
@@ -80,8 +79,17 @@ export default function AddCompletedChargesDialog({
   const { data: serviceItems = [] } = useServices({
     typeCode: selectedServiceType || undefined,
   });
-
-  // Filtering Logic
+  const { mutate: addCompletedCharges, isPending } = useAddCompletedCharges(
+    bookingId || ""
+  );
+  const handleAddCompletedCharges = (data: any) => {
+    if (!bookingId) return;
+    try {
+      addCompletedCharges(data);
+    } catch (error) {
+      console.error("Failed to add completed charges:", error);
+    }
+  };
   const filterItems = (items: any[]) => {
     if (!searchText) return items;
     const lower = searchText.toLowerCase();
@@ -165,7 +173,7 @@ export default function AddCompletedChargesDialog({
 
   const handleConfirm = () => {
     if (totalItemsCount === 0) return;
-    onConfirm({
+    handleAddCompletedCharges({
       posItems: Array.from(selectedPOSItems.values()).map(
         ({ item, quantity }) => ({ menuItemId: item.itemId, quantity })
       ),
@@ -509,10 +517,10 @@ export default function AddCompletedChargesDialog({
                 </Button>
                 <Button
                   onClick={handleConfirm}
-                  disabled={totalItemsCount === 0 || isAdding}
+                  disabled={totalItemsCount === 0 || isPending}
                   className="shadow-md"
                 >
-                  {isAdding ? "Đang xử lý..." : "Xác nhận"}
+                  {isPending ? "Đang xử lý..." : "Xác nhận"}
                 </Button>
               </div>
             </div>

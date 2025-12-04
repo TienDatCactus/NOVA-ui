@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ArrowLeftRight, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form";
@@ -138,13 +138,26 @@ export default function BookingRoomsBar({
         return;
       }
 
-      // Normalize dates BEFORE passing to helper
-      const fromDate =
-        checkinDate instanceof Date
-          ? format(checkinDate, "yyyy-MM-dd")
-          : typeof checkinDate === "string"
-            ? checkinDate
-            : null;
+      // CHANGELOG v2.0 Section 3: Auto date logic based on booking status
+      // - If CheckedIn (InHouse): Use TODAY as fromDate
+      // - Otherwise: Use booking's checkinDate
+      const isCheckIn =
+        bookingDetail.status === "CheckedIn" ||
+        bookingDetail.status === "InHouse";
+
+      let fromDate: string | null;
+      if (isCheckIn) {
+        // When InHouse, new room starts from TODAY
+        fromDate = format(new Date(), "yyyy-MM-dd");
+      } else {
+        // For Pending/Confirmed: use booking's checkin date
+        fromDate =
+          checkinDate instanceof Date
+            ? format(checkinDate, "yyyy-MM-dd")
+            : typeof checkinDate === "string"
+              ? checkinDate
+              : null;
+      }
 
       const toDate =
         checkoutDate instanceof Date
@@ -156,6 +169,19 @@ export default function BookingRoomsBar({
       if (!fromDate || !toDate) {
         toast.error("Định dạng ngày không hợp lệ");
         return;
+      }
+
+      // Validate: If CheckedIn, today must be before checkout (at least 1 night)
+      if (isCheckIn) {
+        const today = new Date();
+        const checkout =
+          checkoutDate instanceof Date ? checkoutDate : parseISO(checkoutDate);
+        if (today >= checkout) {
+          toast.error(
+            "Không thể thêm phòng: Booking sắp checkout (không còn đêm nào)"
+          );
+          return;
+        }
       }
 
       // Use helper function with built-in validation

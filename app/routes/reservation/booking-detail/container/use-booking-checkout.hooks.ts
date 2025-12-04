@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { BookingService } from "~/services/api/booking";
 import type {
+  BookingPayForRoomRequestDto,
+  BookingUpgradeRoomRequestDto,
   ConfirmBookingPaymentRequestDto,
   StaffAddCompletedChargesRequestDto,
   StaffCheckoutPaymentRequestDto,
@@ -236,6 +238,74 @@ export function useAddCompletedCharges(bookingId: string) {
     },
     onError: (error: any) => {
       toast.error(error?.message || "Lỗi khi thêm completed charges");
+    },
+  });
+}
+
+export function usePayNowRooms(bookingId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: BookingPayForRoomRequestDto) => {
+      return await BookingService.payForRooms(bookingId, data);
+    },
+    onSuccess: () => {
+      toast.success("Thanh toán phòng thành công", {
+        description: "Invoice đã được tạo và thanh toán.",
+      });
+
+      // Invalidate booking detail to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["booking-detail", bookingId],
+      });
+
+      // Invalidate booking list if present
+      queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+      });
+    },
+    onError: (error: any) => {
+      console.error("Pay-now-rooms error:", error);
+      toast.error("Lỗi thanh toán phòng", {
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Vui lòng thử lại sau.",
+      });
+    },
+  });
+}
+
+export function useUpgradeRoom(bookingId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: BookingUpgradeRoomRequestDto) => {
+      return await BookingService.upgradeRoom(bookingId, data);
+    },
+    onSuccess: () => {
+      toast.success("Upgrade phòng thành công", {
+        description: "Phòng đã được nâng cấp.",
+      });
+
+      // Invalidate booking detail to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["booking-detail", bookingId],
+      });
+
+      // Invalidate booking list if present
+      queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+      });
+    },
+    onError: (error: any) => {
+      console.error("Upgrade room error:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Vui lòng thử lại sau.";
+
+      toast.error("Lỗi upgrade phòng", {
+        description: errorMessage,
+      });
     },
   });
 }

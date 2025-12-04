@@ -28,6 +28,8 @@ const {
   ConfirmBookingPaymentRequestSchema,
   ConfirmBookingPaymentResponseSchema,
   OrderableBookingResponseSchema,
+  BookingPayForRoomRequestSchema,
+  BookingUpgradeRoomRequestSchema,
 } = BookingSchema;
 
 export type StaffBookingPricePreviewRequestDto = z.infer<
@@ -107,4 +109,11 @@ export type ConfirmBookingPaymentResponseDto = z.infer<
 
 export type OrderableBookingResponseDto = z.infer<
   typeof OrderableBookingResponseSchema
+>;
+
+export type BookingPayForRoomRequestDto = z.infer<
+  typeof BookingPayForRoomRequestSchema
+>;
+export type BookingUpgradeRoomRequestDto = z.infer<
+  typeof BookingUpgradeRoomRequestSchema
 >;

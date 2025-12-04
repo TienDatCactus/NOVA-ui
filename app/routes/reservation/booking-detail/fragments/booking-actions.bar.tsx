@@ -1,0 +1,183 @@
+import { Button } from "~/components/ui/button";
+import RefundButton from "../components/refunds/refund-button";
+import { Alert, AlertTitle } from "~/components/ui/alert";
+import {
+  AlertTriangle,
+  RotateCcw,
+  Loader2,
+  Save,
+  ArrowUpCircle,
+  Wallet,
+  DoorOpen,
+  CreditCard,
+  Receipt,
+} from "lucide-react";
+import { useState } from "react";
+import { formatMoney } from "~/lib/utils";
+import { canUpgradeRoom } from "../container/booking-validation";
+import { Badge } from "~/components/ui/badge";
+import CheckoutSheet from "../components/checkout/checkout-sheet";
+import { PayNowRoomsDialog } from "../components/operations/pay-now-rooms-dialog";
+import { UpgradeRoomDialog } from "../components/operations/upgrade-room-dialog";
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+
+export function BookingActionsBar({
+  isDirty,
+  isUpdating,
+  bookingDetail,
+  financialSummary,
+  onReset,
+  onSave,
+}: {
+  isDirty: boolean;
+  isUpdating: boolean;
+  bookingDetail: BookingDetailResponseDto;
+  financialSummary: any;
+  onReset: () => void;
+  onSave: () => void;
+}) {
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [payNowRoomsOpen, setPayNowRoomsOpen] = useState(false);
+  const [upgradeRoomOpen, setUpgradeRoomOpen] = useState(false);
+  return (
+    <div className="sticky bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 shadow-lg z-10 transition-all duration-200">
+      <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
+        {/* Left: Always Visible Operations (Refund) */}
+        <div className="flex items-center gap-2">
+          <RefundButton
+            bookingId={bookingDetail?.id || ""}
+            bookingNumber={bookingDetail?.bookingCode || ""}
+            bookingStatus={bookingDetail?.status || ""}
+            totalPaidAmount={bookingDetail.paidAmount}
+          />
+        </div>
+
+        {/* Right: Contextual Actions */}
+        <div className="flex items-center gap-3">
+          {isDirty ? (
+            <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">
+              <Alert variant="warning">
+                <AlertTriangle className="w-4 h-4" />
+                <AlertTitle>Thay đổi chưa lưu</AlertTitle>
+              </Alert>
+
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onReset}
+                disabled={isUpdating}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Hoàn tác
+              </Button>
+
+              <Button
+                onClick={onSave}
+                disabled={isUpdating}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md min-w-[140px]"
+              >
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Lưu...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">
+              {/* Upgrade Room Button (CHANGELOG v2.0) - For Confirmed/CheckedIn */}
+              {canUpgradeRoom(bookingDetail?.status) && (
+                <Button
+                  variant="outline"
+                  onClick={() => setUpgradeRoomOpen(true)}
+                  className="border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950"
+                >
+                  <ArrowUpCircle className="w-4 h-4 mr-2" />
+                  Upgrade phòng
+                </Button>
+              )}
+
+              {/* Pay Now Button (CHANGELOG v2.0) - Only for CheckedIn/InHouse */}
+              {(bookingDetail?.status === "InHouse" ||
+                bookingDetail?.status === "CheckedIn") && (
+                <Button
+                  variant="outline"
+                  onClick={() => setPayNowRoomsOpen(true)}
+                  className="border-primary/50 text-primary hover:bg-primary/10"
+                >
+                  <Wallet className="w-4 h-4 mr-2" />
+                  Thanh toán phòng ngay
+                </Button>
+              )}
+
+              {/* Checkout Button Logic */}
+              {(bookingDetail?.status === "InHouse" ||
+                bookingDetail?.status === "CheckedIn") && (
+                <Button
+                  variant="success"
+                  onClick={() => setCheckoutOpen(true)}
+                  className="shadow-sm"
+                >
+                  <DoorOpen className="w-4 h-4 mr-2" />
+                  Checkout & Thanh toán
+                </Button>
+              )}
+
+              {/* Post-Checkout Collection */}
+              {bookingDetail?.status === "CheckedOut" &&
+                financialSummary.totalBalance > 0 && (
+                  <Button
+                    onClick={() => setCheckoutOpen(true)}
+                    className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm"
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Thu nợ sau checkout
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 bg-white/20 text-white hover:bg-white/30 border-0"
+                    >
+                      {formatMoney(financialSummary.totalBalance).vndFormatted}
+                    </Badge>
+                  </Button>
+                )}
+
+              {/* View Invoices */}
+              {bookingDetail?.status === "CheckedOut" &&
+                financialSummary.totalBalance === 0 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setCheckoutOpen(true)}
+                  >
+                    <Receipt className="w-4 h-4 mr-2" />
+                    Xem hóa đơn
+                  </Button>
+                )}
+            </div>
+          )}
+        </div>
+      </div>
+      <CheckoutSheet
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        bookingDetail={bookingDetail}
+      />
+
+      <PayNowRoomsDialog
+        open={payNowRoomsOpen}
+        onOpenChange={setPayNowRoomsOpen}
+        bookingDetail={bookingDetail}
+      />
+
+      <UpgradeRoomDialog
+        open={upgradeRoomOpen}
+        onOpenChange={setUpgradeRoomOpen}
+        bookingDetail={bookingDetail}
+      />
+    </div>
+  );
+}
