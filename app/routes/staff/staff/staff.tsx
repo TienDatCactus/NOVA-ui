@@ -6,7 +6,10 @@ import StaffDataTable from "./components/staff-list";
 
 export default function StaffPage() {
   const { filters, updateFilter, resetFilter } = useStaffFilters();
-  const { data: staffs, isPending } = useStaffList();
+  const { data: staffs, isPending } = useStaffList({
+    gender: filters.gender,
+    role: filters.role,
+  });
 
   return (
     <StaffViewLayout

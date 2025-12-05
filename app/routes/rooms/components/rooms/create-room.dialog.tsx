@@ -38,6 +38,7 @@ import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useCreateRoom } from "../../container/rooms/mutation.hooks";
 import { useRoomTypes } from "../../container/room-types/query.hooks";
 import { cn } from "~/lib/utils";
+import { ROOM_STATUS_CONFIG } from "../../fragments/rooms/status.cell";
 
 const { CreateRoomRequestSchema } = RoomSchema;
 
@@ -191,7 +192,7 @@ function CreateRoomDialog({ open, onClose }: CreateRoomDialogProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(RoomStatusEnum).map(
+                            {Object.entries(ROOM_STATUS_CONFIG).map(
                               ([key, value]) => {
                                 return (
                                   <SelectItem
@@ -203,7 +204,7 @@ function CreateRoomDialog({ open, onClose }: CreateRoomDialogProps) {
                                       <span
                                         className={cn("h-2 w-2 rounded-full")}
                                       />
-                                      <span>{value}</span>
+                                      <span>{value.label}</span>
                                     </div>
                                   </SelectItem>
                                 );

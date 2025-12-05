@@ -4,7 +4,6 @@ import {
   RotateCcw,
   SearchIcon,
   ShoppingBasket,
-  Receipt,
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -22,32 +21,11 @@ import { useMenuList } from "../menu/container/menu/query.hooks";
 import BookingSelectionDialog from "./components/booking-selection.dialog";
 import CartItem from "./components/cart-item";
 import CartSummary from "./components/cart-summary";
-import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
 import CustomItemDialog from "./components/menu-pos/custom-item.dialog";
 import MenuItemCard from "./components/menu-pos/menu-item-card";
 import OrderConfirmationDialog from "./components/order-confirmation.dialog";
 
 import { Link } from "react-router";
-import { DASHBOARD } from "~/lib/fe-url";
-import { useMenuPosOrderStore } from "~/store/menu-pos-order.store";
-import useMenuFilters from "../menu/container/menu/filter.hooks";
-import type { Route } from "./+types/menu-pos";
-import ScheduledTimeDialog from "./components/scheduled-time.dialog";
-import { useCreatePOSOrderWithItems } from "./container/pos-orders/mutation.hooks";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "~/components/ui/tooltip";
 import {
   Empty,
   EmptyDescription,
@@ -55,6 +33,27 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { DASHBOARD } from "~/lib/fe-url";
+import { useMenuPosOrderStore } from "~/store/menu-pos-order.store";
+import useMenuFilters from "../menu/container/menu/filter.hooks";
+import type { Route } from "./+types/menu-pos";
+import OrderConfirmDialog from "./components/order-confirm.dialog";
+import ScheduledTimeDialog from "./components/scheduled-time.dialog";
+import { useCreatePOSOrderWithItems } from "./container/pos-orders/mutation.hooks";
 
 type MenuItem = z.infer<typeof MenuListItemSchema>;
 
@@ -478,7 +477,7 @@ export default function Component({
         </aside>
       </div>
 
-      <CheckoutConfirmDialog
+      <OrderConfirmDialog
         open={checkoutDialog}
         onOpenChange={setCheckoutDialog}
         subtotal={subtotal}

@@ -1,13 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image as ImageIcon, Layers, Package, Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -140,17 +139,35 @@ export default function EditMenuSheet({
     onClose();
   };
 
-  const toggleRemoveExisting = (id: string) => {
+  const toggleRemoveExisting = useCallback((id: string) => {
     setRemoveMediaIds((prev) =>
       prev.includes(id) ? prev.filter((mid) => mid !== id) : [...prev, id]
     );
-  };
+  }, []);
+  const handleRemoveNew = useCallback(
+    (index: number) => {
+      URL.revokeObjectURL(newPreviews[index]);
+      setNewFiles((prev) => prev.filter((_, i) => i !== index));
+    },
+    [newPreviews]
+  );
 
-  const handleRemoveNew = (index: number) => {
-    URL.revokeObjectURL(newPreviews[index]);
-    setNewFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
+  const handleDrop = useCallback((acceptedFiles: File[]) => {
+    const currentTotal =
+      (menuItemDetail?.images?.length || 0) +
+      newFiles.length -
+      removeMediaIds.length;
+    const totalAfter = currentTotal + acceptedFiles.length;
+    if (totalAfter > 10) {
+      form.setError("NewImages", {
+        type: "manual",
+        message: "Chỉ được tải lên tối đa 10 ảnh",
+      });
+      return;
+    }
+    form.clearErrors("NewImages");
+    setNewFiles((prev) => [...prev, ...acceptedFiles]);
+  }, []);
   // --- Render Loading ---
   if (isLoadingDetail || isLoadingCategories || isLoadingUnits) {
     return (
@@ -221,52 +238,33 @@ export default function EditMenuSheet({
                 </TabsTrigger>
               </TabsList>
 
-              <ScrollArea className="flex-1">
-                <div className="p-6">
-                  <GeneralTab
-                    form={form}
-                    menuCategories={menuCategories}
-                    units={units}
-                  />
+              <div className="p-6">
+                <GeneralTab
+                  form={form}
+                  menuCategories={menuCategories}
+                  units={units}
+                />
 
-                  <MediaTab
-                    menuItemDetail={menuItemDetail}
-                    newFiles={newFiles}
-                    newPreviews={newPreviews}
-                    removeMediaIds={removeMediaIds}
-                    toggleRemoveExisting={toggleRemoveExisting}
-                    handleRemoveNew={handleRemoveNew}
-                    formErrors={form.formState.errors.NewImages}
-                    onDrop={(acceptedFiles) => {
-                      const currentTotal =
-                        (menuItemDetail?.images?.length || 0) +
-                        newFiles.length -
-                        removeMediaIds.length;
-                      const totalAfter = currentTotal + acceptedFiles.length;
-                      if (totalAfter > 10) {
-                        form.setError("NewImages", {
-                          type: "manual",
-                          message: "Chỉ được tải lên tối đa 10 ảnh",
-                        });
-                        return;
-                      }
-                      form.clearErrors("NewImages");
-                      setNewFiles((prev) => [...prev, ...acceptedFiles]);
-                    }}
-                  />
+                <MediaTab
+                  menuItemDetail={menuItemDetail}
+                  newFiles={newFiles}
+                  newPreviews={newPreviews}
+                  removeMediaIds={removeMediaIds}
+                  toggleRemoveExisting={toggleRemoveExisting}
+                  handleRemoveNew={handleRemoveNew}
+                  formErrors={form.formState.errors.NewImages}
+                  onDrop={handleDrop}
+                />
 
-                  <ComponentsTab
-                    form={form}
-                    fields={fields}
-                    append={append}
-                    remove={remove}
-                    stockItems={stockItems}
-                  />
-                </div>
-              </ScrollArea>
+                <ComponentsTab
+                  form={form}
+                  fields={fields}
+                  append={append}
+                  remove={remove}
+                  stockItems={stockItems}
+                />
+              </div>
             </Tabs>
-
-            {/* === FOOTER === */}
           </form>
         </Form>
         <SheetFooter className="p-6 pt-4 border-t shrink-0 bg-background">

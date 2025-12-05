@@ -69,16 +69,10 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="success" size={"sm"}>
-            <Download className="h-4 w-4" />
-            Xuất CSV
-          </Button>
-          <Button onClick={() => setCreateDialogOpen(true)} size={"sm"}>
-            <Plus className="h-4 w-4" />
-            Thêm hạng phòng
-          </Button>
-        </div>
+        <Button onClick={() => setCreateDialogOpen(true)} size={"sm"}>
+          <Plus className="h-4 w-4" />
+          Thêm hạng phòng
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

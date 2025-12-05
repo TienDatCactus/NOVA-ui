@@ -13,7 +13,7 @@ import { Switch } from "~/components/ui/switch";
 import type { MenuFilters } from "~/services/api/menu/menu.types";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
 import { Button } from "~/components/ui/button";
-import { CheckCircle2, UtensilsCrossed } from "lucide-react";
+import { CheckCircle2, RotateCcw, UtensilsCrossed } from "lucide-react";
 import { Separator } from "~/components/ui/separator";
 
 interface MenuViewLayoutProps {
@@ -53,12 +53,9 @@ export default function MenuViewLayout({
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-1">
-            {/* 1. Category Filter (Primary Dimension) */}
             <div className="w-full sm:w-auto">
               <Select
-                value={filters.categoryCode || "ALL"} // Dùng giá trị giả "ALL" để handle việc reset
                 onValueChange={(value) => {
-                  // Logic: Nếu chọn "ALL" thì set về null/empty
                   updateFilter("categoryCode", value === "ALL" ? "" : value);
                 }}
               >
@@ -70,13 +67,6 @@ export default function MenuViewLayout({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Lọc theo nhóm</SelectLabel>
-                    {/* Option mặc định để xem tất cả */}
-                    <SelectItem value="ALL">
-                      <span className="text-muted-foreground">
-                        Tất cả danh mục
-                      </span>
-                    </SelectItem>
                     {menuCategories?.map((category) => (
                       <SelectItem key={category.id} value={category.code}>
                         {category.name}
@@ -86,28 +76,27 @@ export default function MenuViewLayout({
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="flex items-center space-x-3 bg-muted/40 px-3 py-2 rounded-md border border-transparent hover:border-border transition-colors cursor-pointer">
+            <div className="flex items-center gap-2 flex-1">
+              <Label htmlFor="active-filter" className="cursor-pointer ">
+                Tất cả món ăn
+              </Label>
               <Switch
-                id="active-mode"
-                checked={filters.activeFilter == "active"}
+                id="active-filter"
+                checked={filters.activeFilter === "all"}
                 onCheckedChange={(checked) =>
-                  updateFilter("activeFilter", checked ? "active" : "all")
+                  updateFilter("activeFilter", checked ? "all" : "active")
                 }
               />
-              <Label
-                htmlFor="active-mode"
-                className="text-sm font-medium cursor-pointer flex items-center gap-2"
+            </div>
+            <div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-dashed"
+                onClick={resetFilters}
               >
-                {filters.activeFilter == "active" ? (
-                  <>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                    <span className="text-foreground">Đang mở bán</span>
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">Hiện tất cả</span>
-                )}
-              </Label>
+                <RotateCcw />
+              </Button>
             </div>
 
             {/* 3. Reset Button (Conditional) */}

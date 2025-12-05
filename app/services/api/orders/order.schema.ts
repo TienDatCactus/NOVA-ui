@@ -64,6 +64,7 @@ const POSOrderDetailSchema = z.object({
   serviceChargeAmount: z.number().min(0),
   totalAmount: z.number().min(0),
   customerId: z.string().optional().nullable(),
+  customerName: z.string().optional().nullable(),
   invoiceId: z.string().optional().nullable(),
   scheduledAt: z.string().optional().nullable(),
   note: z.string().optional().nullable(),

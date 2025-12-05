@@ -18,7 +18,6 @@ const {
 } = StaffSchema;
 
 /**
- * GET /api/Staffs - Lấy danh sách nhân sự
  */
 async function getStaffList(params?: StaffListParams): Promise<StaffListDto> {
   try {

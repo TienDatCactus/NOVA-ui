@@ -64,9 +64,8 @@ export default function EditServiceSheet({
   onClose,
   service,
 }: EditServiceSheetProps) {
-  // --- Queries & Mutations ---
   const { data: serviceItemDetail } = useServiceDetail(service.serviceItemId, {
-    enabled: open,
+    enabled: open && !!service.serviceItemId,
   });
   const { mutate: updateService, isPending } = useUpdateService();
   const { data: units } = useUnits();
@@ -82,11 +81,9 @@ export default function EditServiceSheet({
       name: "",
       description: "",
       basePrice: 0,
-      active: true,
     },
   });
 
-  // Sync Data
   useEffect(() => {
     if (serviceItemDetail) {
       form.reset({
@@ -117,232 +114,240 @@ export default function EditServiceSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="sm:max-w-[600px] p-0 flex flex-col gap-0 bg-background">
+      <SheetContent className="sm:max-w-2xl bg-card overflow-y-auto p-0 flex flex-col gap-0 ">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
             className="flex flex-col h-full"
           >
             {/* === HEADER === */}
-            <SheetHeader className="px-6 py-4 border-b shrink-0 bg-muted/5 flex flex-row items-start justify-between space-y-0">
-              <div className="space-y-1">
-                <SheetTitle className="text-xl flex items-center gap-2">
-                  Chỉnh sửa dịch vụ
-                </SheetTitle>
-                <SheetDescription>
-                  Cập nhật thông tin dịch vụ spa, tour, hoặc tiện ích khác.
-                </SheetDescription>
-              </div>
-
-              {/* Status Toggle (Header Position) */}
-              <FormField
-                control={form.control}
-                name="active"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-y-0 gap-2 bg-background border px-3 py-1.5 rounded-full shadow-sm">
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="scale-75 data-[state=checked]:bg-green-600"
-                      />
-                    </FormControl>
-                    <FormLabel className="text-xs font-medium cursor-pointer mb-0 pb-0 text-foreground">
-                      {field.value ? "Hoạt động" : "Đã ẩn"}
-                    </FormLabel>
-                  </FormItem>
-                )}
-              />
+            <SheetHeader className="px-6 py-4 border-b shrink-0 ">
+              <SheetTitle className="text-xl flex items-center gap-2">
+                Chỉnh sửa dịch vụ
+              </SheetTitle>
+              <SheetDescription>
+                Cập nhật thông tin cho{" "}
+                <span className="font-semibold text-foreground">
+                  {service?.name}
+                </span>
+                .
+              </SheetDescription>
             </SheetHeader>
 
             {/* === BODY === */}
-            <div className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="p-6 space-y-8">
-                  {/* Section 1: Identity */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      <Tag className="w-3.5 h-3.5" /> Định danh
-                    </div>
+            <div className="p-6 space-y-8">
+              {/* Section 1: Identity */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <Tag className="w-3.5 h-3.5" /> Định danh
+                </div>
 
-                    <div className="grid gap-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Tên dịch vụ{" "}
-                              <span className="text-destructive">*</span>
-                            </FormLabel>
-                            <FormControl>
+                <div className="grid gap-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Tên dịch vụ{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            className="text-lg font-medium"
+                            placeholder="VD: Massage Body 60p"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="code"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mã dịch vụ</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Hash className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                               <Input
-                                className="text-lg font-medium"
-                                placeholder="VD: Massage Body 60p"
+                                className="pl-9 font-mono"
+                                placeholder="SPA-001"
                                 {...field}
                               />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="code"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Mã dịch vụ</FormLabel>
-                              <FormControl>
-                                <div className="relative">
-                                  <Hash className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                  <Input
-                                    className="pl-9 font-mono"
-                                    placeholder="SPA-001"
-                                    {...field}
-                                  />
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="serviceTypeId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Loại dịch vụ{" "}
-                                <span className="text-destructive">*</span>
-                              </FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger className="pl-9 w-40 relative">
-                                    <Layers className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                    <SelectValue placeholder="Chọn loại" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {serviceTypesData?.map((type) => (
-                                    <SelectItem key={type.id} value={type.id}>
-                                      {type.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Section 2: Pricing & Unit */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      <DollarSign className="w-3.5 h-3.5" /> Định giá
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="basePrice"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Đơn giá{" "}
-                              <span className="text-destructive">*</span>
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Input
-                                  type="number"
-                                  className="pr-12 font-semibold text-right"
-                                  {...field}
-                                  onChange={(e) =>
-                                    field.onChange(Number(e.target.value))
-                                  }
-                                />
-                                <span className="absolute right-3 top-2.5 text-xs font-bold text-muted-foreground">
-                                  VND
-                                </span>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="unitId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Đơn vị tính{" "}
-                              <span className="text-destructive">*</span>
-                            </FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              value={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="pl-9 w-40 relative">
-                                  <Package className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                  <SelectValue placeholder="Chọn ĐVT" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {units?.map((unit) => (
-                                  <SelectItem key={unit.id} value={unit.id}>
-                                    {unit.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Section 3: Details */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      <AlignLeft className="w-3.5 h-3.5" /> Chi tiết
-                    </div>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}
-                      name="description"
+                      name="serviceTypeId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Mô tả chi tiết về dịch vụ (quy trình, lưu ý...)"
-                              className="resize-none min-h-[120px]"
-                              {...field}
-                            />
-                          </FormControl>
+                          <FormLabel>
+                            Loại dịch vụ{" "}
+                            <span className="text-destructive">*</span>
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full relative">
+                                <SelectValue placeholder="Chọn loại" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {serviceTypesData?.map((type) => (
+                                <SelectItem key={type.id} value={type.id}>
+                                  {type.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <DollarSign className="w-3.5 h-3.5" /> Định giá
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="basePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Đơn giá <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="font-semibold text-right"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                            endAddon={
+                              <span className="text-xs font-bold text-muted-foreground">
+                                VND
+                              </span>
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="unitId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Đơn vị tính{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full ">
+                              <SelectValue placeholder="Chọn ĐVT" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {units?.map((unit) => (
+                              <SelectItem key={unit.id} value={unit.id}>
+                                {unit.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Section 3: Details */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <AlignLeft className="w-3.5 h-3.5" /> Chi tiết
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Mô tả chi tiết về dịch vụ (quy trình, lưu ý...)"
+                          className="resize-none min-h-[120px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="active"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="border-input has-data-[state=checked]:border-primary/50 relative flex w-full items-start gap-2 rounded-md border p-4 shadow-xs outline-none">
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="scale-75"
+                          id="service-type-active-switch"
+                        />
+                        <div className="grid grow gap-2">
+                          <FormLabel
+                            className="text-xs font-medium cursor-pointer flex-col items-start mb-0 pb-0"
+                            htmlFor="service-type-active-switch"
+                          >
+                            <p>
+                              {field.value
+                                ? "Đang hoạt động"
+                                : "Ngưng hoạt động"}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              Chọn "Ngưng hoạt động" để ẩn dịch vụ này khỏi hệ
+                              thống.
+                            </p>
+                          </FormLabel>
+                        </div>
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* === FOOTER === */}

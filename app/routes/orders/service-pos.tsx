@@ -1,41 +1,23 @@
-import { useState, useMemo } from "react";
+import { ArrowLeft, Plus, RotateCcw, SearchIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Badge } from "~/components/ui/badge";
-import {
-  ArrowLeft,
-  RotateCcw,
-  SearchIcon,
-  SquareMenu,
-  Plus,
-} from "lucide-react";
-import { toast } from "sonner";
 
-import type { ServiceItem } from "~/services/api/services/dto";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
+import type { ServiceItem } from "~/services/api/services/dto";
 import { useServiceTypes } from "../services/container/service-types/query.hooks";
 import { useServices } from "../services/container/services/query.hooks";
 import BookingSelectionDialog from "./components/booking-selection.dialog";
-import CartSummary from "./components/cart-summary";
-import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
-import ServiceItemCard from "./components/service-pos/service-item-card";
 import OrderConfirmationDialog from "./components/order-confirmation.dialog";
 import ServedTimeDialog from "./components/scheduled-time.dialog";
 import CustomServiceDialog from "./components/service-pos/custom-service.dialog";
+import ServiceItemCard from "./components/service-pos/service-item-card";
 
-import useServiceFilters from "../services/container/services/filter.hooks";
-import { Link } from "react-router";
-import { DASHBOARD } from "~/lib/fe-url";
-import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
-import type { Route } from "./+types/service-pos";
-import { useServicePosOrderStore } from "~/store/service-pos-order.store";
 import { Image as ImageIcon } from "lucide-react";
-import { Textarea } from "~/components/ui/textarea";
-import { Label } from "~/components/ui/label";
-import { formatMoney } from "~/lib/utils";
-import Image from "~/components/ui/image";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Link } from "react-router";
 import { Card } from "~/components/ui/card";
 import {
   Empty,
@@ -44,6 +26,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
+import Image from "~/components/ui/image";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -51,6 +35,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Textarea } from "~/components/ui/textarea";
+import { DASHBOARD } from "~/lib/fe-url";
+import { formatMoney } from "~/lib/utils";
+import { useServicePosOrderStore } from "~/store/service-pos-order.store";
+import useServiceFilters from "../services/container/services/filter.hooks";
+import type { Route } from "./+types/service-pos";
+import OrderConfirmDialog from "./components/order-confirm.dialog";
+import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
 
 export default function Component({
   loaderData,
@@ -365,10 +358,12 @@ export default function Component({
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant={"icon"}>
-                  <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
+                  <ImageIcon />
                 </EmptyMedia>
-                <EmptyTitle>Chưa chọn dịch vụ</EmptyTitle>
-                <EmptyDescription>Chọn dịch vụ để bắt đầu</EmptyDescription>
+                <EmptyTitle>Giỏ hàng trống</EmptyTitle>
+                <EmptyDescription>
+                  Lựa chọn 1 dịch vụ để bắt đầu
+                </EmptyDescription>
               </EmptyHeader>
             </Empty>
           )}
@@ -458,7 +453,7 @@ export default function Component({
         </aside>
       </div>
 
-      <CheckoutConfirmDialog
+      <OrderConfirmDialog
         open={checkoutDialog}
         onOpenChange={setCheckoutDialog}
         subtotal={subtotal}

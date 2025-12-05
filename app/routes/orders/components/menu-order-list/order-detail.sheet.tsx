@@ -126,7 +126,7 @@ export default function OrderDetailSheet({
                 </div>
                 <div className="font-medium text-sm pl-6">
                   {isCustomerInHouse
-                    ? `Khách lưu trú ${orderDetail.roomName || `#${orderDetail.bookingCode}`}`
+                    ? `Khách lưu trú ${orderDetail.customerName || orderDetail.roomName || `#${orderDetail.bookingCode}`}`
                     : "Khách lẻ"}
                   {orderDetail.customerId && (
                     <span className="block text-xs text-muted-foreground font-mono mt-0.5">

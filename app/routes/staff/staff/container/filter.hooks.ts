@@ -1,21 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
+import type { StaffListParams } from "~/services/api/staff/staff/staff.types";
 
-export interface StaffFilters {
-  code: "";
-  fullName: "";
-}
-
-const DEFAULT_FILTERS: StaffFilters = {
-  code: "",
-  fullName: "",
+const DEFAULT_FILTERS: StaffListParams = {
+  role: "",
+  gender: undefined,
 };
 
 export function useStaffFilters() {
-  const [filters, setFilters] = useState<StaffFilters>(DEFAULT_FILTERS);
-
-  const updateFilter = <K extends keyof StaffFilters>(
+  const [filters, setFilters] = useState<StaffListParams>(DEFAULT_FILTERS);
+  const updateFilter = <K extends keyof StaffListParams>(
     key: K,
-    value: StaffFilters[K]
+    value: StaffListParams[K]
   ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };

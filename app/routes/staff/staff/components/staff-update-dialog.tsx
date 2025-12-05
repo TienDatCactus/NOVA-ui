@@ -161,7 +161,7 @@ export default function EditStaffDialog({
               <div className="p-6 space-y-8">
                 {/* 1. THÔNG TIN ĐỊNH DANH */}
                 <section className="space-y-4">
-                  <h1 className="font-bold">Thông tin cơ bản</h1>
+                  <h1 className="font-bold">Thông tin định danh</h1>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {/* Full Name (Trái) */}

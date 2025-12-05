@@ -19,26 +19,26 @@ import {
 } from "~/components/ui/dialog";
 import { cn, formatMoney } from "~/lib/utils";
 
-type CheckoutMode = "walk-in" | "booking";
+type OrderConfirmDialogMode = "walk-in" | "booking";
 
-type CheckoutConfirmDialogProps = {
+type OrderConfirmDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   subtotal: number;
   itemCount: number;
-  onConfirm: (mode: CheckoutMode) => void;
+  onConfirm: (mode: OrderConfirmDialogMode) => void;
   isSubmitting?: boolean;
 };
 
-export default function CheckoutConfirmDialog({
+export default function OrderConfirmDialog({
   open,
   onOpenChange,
   subtotal,
   itemCount,
   onConfirm,
   isSubmitting = false,
-}: CheckoutConfirmDialogProps) {
-  const [mode, setMode] = useState<CheckoutMode>("booking");
+}: OrderConfirmDialogProps) {
+  const [mode, setMode] = useState<OrderConfirmDialogMode>("booking");
   const { pathname } = useLocation();
 
   // Logic: Disable walk-in for specific routes if needed
