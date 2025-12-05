@@ -28,15 +28,9 @@ interface UserEditDialogProps {
   user: UserItem;
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
 }
 
-export function UserEditDialog({
-  user,
-  open,
-  onClose,
-  onSuccess,
-}: UserEditDialogProps) {
+export function UserEditDialog({ user, open, onClose }: UserEditDialogProps) {
   const { UpdateUserSchema } = UserSchema;
   const { mutate: updateUser, isPending } = useUpdateUser();
 
@@ -68,14 +62,8 @@ export function UserEditDialog({
     updateUser(
       { id: user.id, data: updatePayload as any },
       {
-        onSuccess: (response) => {
-          // Toast already shown by http interceptor
-          onSuccess(); // Just close dialog and refresh
-        },
-        onError: (error: any) => {
-          // Error toast already shown by http interceptor
-          // Just log for debugging
-          console.error("Update failed:", error);
+        onSuccess: () => {
+          onClose();
         },
       }
     );

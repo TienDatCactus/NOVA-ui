@@ -34,6 +34,7 @@ import {
 import { usePurchaseRequestDetail } from "../container/query.hooks";
 import { getStatusBadge } from "./purchase-requests-list/columns";
 import { Button } from "~/components/ui/button";
+import { formatMoney } from "~/lib/utils";
 
 interface PurchaseRequestDetailDialogProps {
   open: boolean;
@@ -55,13 +56,6 @@ export default function PurchaseRequestDetailDialog({
       (sum: number, item: any) => sum + item.quantity * item.unitCost,
       0
     ) || 0;
-
-  // Helper for currency format
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -249,7 +243,7 @@ export default function PurchaseRequestDetailDialog({
                       </TableCell>
                       <TableCell className="text-right">
                         <span className="text-lg font-bold text-primary">
-                          {formatCurrency(totalCost)}
+                          {formatMoney(totalCost).vndFormatted}
                         </span>
                       </TableCell>
                     </TableRow>

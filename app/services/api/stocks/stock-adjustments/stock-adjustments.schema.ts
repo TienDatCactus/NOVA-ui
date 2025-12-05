@@ -5,6 +5,8 @@ const StockAdjustmentItemSchema = z.object({
   itemId: z.string(),
   itemCode: z.string(),
   itemName: z.string(),
+  unitCode: z.string(),
+  unitName: z.string(),
   quantityDiff: z.number(),
   note: z.string(),
 });

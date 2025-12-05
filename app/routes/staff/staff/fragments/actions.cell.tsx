@@ -21,6 +21,7 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [terminateDialogOpen, setTerminateDialogOpen] = useState(false);
+  const canDelete = staff.status === "Terminated";
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -36,21 +37,27 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
           <Pencil className="mr-2 h-4 w-4" />
           Chỉnh sửa
         </DropdownMenuItem>
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={() => setTerminateDialogOpen(true)}
-        >
-          <UserX className="mr-2 h-4 w-4" />
-          Kết thúc hợp đồng
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={() => setDeleteDialogOpen(true)}
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Xóa nhân sự
-        </DropdownMenuItem>
+        {!canDelete && (
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => setTerminateDialogOpen(true)}
+          >
+            <UserX className="mr-2 h-4 w-4" />
+            Kết thúc hợp đồng
+          </DropdownMenuItem>
+        )}
+        {canDelete && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Xóa nhân sự
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
       <StaffDeleteDialog
         staff={staff}

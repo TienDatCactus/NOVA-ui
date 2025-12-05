@@ -23,7 +23,7 @@ import type { RefundInvoiceRequestDto } from "~/services/api/invoices/dto";
 import { InvoiceSchema } from "~/services/api/invoices/invoice.schema";
 import { Undo2, Banknote, AlertCircle } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 
 type RefundDialogProps = {
   open: boolean;
@@ -58,14 +58,6 @@ export function RefundDialog({
     form.setValue("refundAmount", maxRefundAmount, { shouldValidate: true });
   };
 
-  // Format currency helper
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
-  };
-
   const currentAmount = form.watch("refundAmount");
   const isOverLimit = currentAmount > maxRefundAmount;
 
@@ -95,7 +87,7 @@ export function RefundDialog({
                   <span className="font-semibold block mb-0.5">Lưu ý:</span>
                   Số tiền hoàn tối đa cho hóa đơn này là{" "}
                   <span className="font-mono font-bold">
-                    {formatCurrency(maxRefundAmount)}
+                    {formatMoney(maxRefundAmount).vndFormatted}
                   </span>
                   .
                 </div>
@@ -114,7 +106,7 @@ export function RefundDialog({
                         className="cursor-pointer hover:bg-primary/20 hover:text-primary active:scale-95 transition-all"
                         onClick={handleSetMaxAmount}
                       >
-                        Hoàn tất cả: {formatCurrency(maxRefundAmount)}
+                        Hoàn tất cả: {formatMoney(maxRefundAmount).vndFormatted}
                       </Badge>
                     </div>
                     <FormControl>
@@ -144,7 +136,7 @@ export function RefundDialog({
                     {isOverLimit && (
                       <p className="text-xs text-destructive font-medium mt-1 animate-in slide-in-from-top-1">
                         Số tiền hoàn không được vượt quá{" "}
-                        {formatCurrency(maxRefundAmount)}
+                        {formatMoney(maxRefundAmount).vndFormatted}
                       </p>
                     )}
                     <FormMessage />

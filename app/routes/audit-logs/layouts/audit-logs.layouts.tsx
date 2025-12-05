@@ -87,7 +87,6 @@ const AuditLogsLayout = ({
   const [openCleanupDialog, setOpenCleanupDialog] = useState(false);
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const { data: users } = useUsers();
-  // Đếm số lượng filter đang active
   const activeFiltersCount = [
     filters.Keyword,
     filters.FromDate,

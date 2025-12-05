@@ -10,6 +10,7 @@ import type {
   AuditStats,
 } from "./dto";
 import type { AuditListParams } from "./audit.types";
+import { toast } from "sonner";
 
 const { AuditListResponseSchema, AuditDetailSchema, AuditStatsSchema } =
   AuditSchema;
@@ -36,13 +37,18 @@ async function getAuditDetail(id: string): Promise<AuditDetail> {
   }
 }
 
-async function exportAuditLogs(params: ExportAuditRequest): Promise<Blob> {
+async function exportAuditLogs(params: ExportAuditRequest) {
   try {
-    const resp = await http.post(AuditLogs.export, {
-      params,
-      responseType: "blob",
-    });
-    return resp.data;
+    const resp = await http.post(
+      AuditLogs.export,
+      {
+        params,
+      },
+      {
+        responseType: "blob",
+      }
+    );
+    return resp;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -61,10 +67,11 @@ async function archiveAuditLogs(
   }
 }
 
-async function getCleanupCount(): Promise<string> {
+async function getCleanupCount() {
   try {
-    const resp = await http.get(AuditLogs.cleanUpCount);
-    return resp.data.message;
+    const resp: any = await http.get(AuditLogs.cleanUpCount);
+    toast.info(resp.message);
+    return resp.message;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

@@ -73,7 +73,7 @@ export default function EditStaffDialog({
 
   const { data: staffDetail, isLoading: isLoadingDetail } = useStaffDetail(
     staff?.id || "",
-    { enabled: open && !!staff?.id }
+    { enabled: open }
   );
 
   const { mutateAsync: updateStaff, isPending } = useUpdateStaff();
@@ -96,7 +96,7 @@ export default function EditStaffDialog({
   // Effect: Reset form khi có dữ liệu chi tiết từ API
   useEffect(() => {
     if (staffDetail && open) {
-      form.reset({
+      const formData = {
         fullName: staffDetail.fullName || "",
         phoneNumber: staffDetail.phoneNumber || "",
         email: staffDetail.email || "",
@@ -114,9 +114,29 @@ export default function EditStaffDialog({
             ? parseISO(staffDetail.startDate)
             : staffDetail.startDate
           : undefined,
+      };
+
+      console.log("Populating form with staff detail:", formData);
+      form.reset(formData);
+    }
+  }, [staffDetail, open]);
+
+  // Effect: Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      form.reset({
+        fullName: "",
+        phoneNumber: "",
+        email: "",
+        gender: "",
+        dateOfBirth: undefined,
+        citizenId: "",
+        startDate: undefined,
+        note: "",
+        staffRoleId: "",
       });
     }
-  }, [staffDetail, open, form]); // FIX: Thêm staffDetail vào dependency
+  }, [open]);
 
   const onSubmit = async (data: UpdateStaffDto) => {
     if (!staff?.id) return;

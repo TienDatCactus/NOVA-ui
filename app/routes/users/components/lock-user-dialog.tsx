@@ -48,7 +48,6 @@ interface LockUserDialogProps {
   open: boolean;
   onClose: () => void;
   mode: "lock" | "unlock";
-  onSuccess?: () => void;
 }
 
 const LockUserSchema = z.object({
@@ -57,7 +56,6 @@ const LockUserSchema = z.object({
 
 type LockUserForm = z.infer<typeof LockUserSchema>;
 
-// Quick options configuration
 const PRESET_OPTIONS = [
   { label: "1 Ngày", duration: "24h", getValue: () => addDays(new Date(), 1) },
   { label: "3 Ngày", duration: "72h", getValue: () => addDays(new Date(), 3) },
@@ -83,7 +81,6 @@ export function LockUserDialog({
   open,
   onClose,
   mode,
-  onSuccess,
 }: LockUserDialogProps) {
   const { mutate: lockUser, isPending: isLocking } = useLockUser();
   const { mutate: unlockUser, isPending: isUnlocking } = useUnlockUser();
@@ -125,7 +122,6 @@ export function LockUserDialog({
       {
         onSuccess: () => {
           onClose();
-          onSuccess?.();
         },
       }
     );
@@ -135,7 +131,6 @@ export function LockUserDialog({
     unlockUser(user.id, {
       onSuccess: () => {
         onClose();
-        onSuccess?.();
       },
     });
   };
