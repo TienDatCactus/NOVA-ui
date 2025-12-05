@@ -57,25 +57,23 @@ const MediaTab: React.FC<MediaTabProps> = ({
           {/* 2. Previews */}
           {imagePreview.map((url, index) => (
             <div
-              key={index}
+              key={`new-${index}`}
               className="group relative aspect-square rounded-xl overflow-hidden border bg-background shadow-sm animate-in fade-in zoom-in duration-300"
             >
               <Image
                 src={url}
-                alt={`Preview ${index}`}
+                alt="Preview"
                 className="w-full h-full object-cover"
               />
-              <Button
-                size="icon"
-                variant={"destructive-ghost"}
+              <button
                 type="button"
                 onClick={() => handleRemoveImage(index)}
-                className="h-6 w-6 absolute top-1.5 right-1.5 p-1.5 rounded-full bg-black/50 text-white hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-black/50 text-white hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100 backdrop-blur-sm"
               >
                 <X className="w-3.5 h-3.5" />
-              </Button>
-              <Badge className="absolute bottom-1.5 left-1.5 h-5 px-1.5 text-[10px] bg-white/90 text-foreground hover:bg-white">
-                {index + 1}
+              </button>
+              <Badge className="absolute bottom-1.5 left-1.5 h-5 px-1.5 text-[10px] bg-blue-600 text-white hover:bg-blue-700 border-none">
+                Mới
               </Badge>
             </div>
           ))}

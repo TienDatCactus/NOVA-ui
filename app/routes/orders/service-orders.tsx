@@ -90,7 +90,7 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
       <div className="flex-shrink-0 bg-background border-b z-10 shadow-sm">
         {/* Top Row: Title & Date Nav */}
         <div className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
+          <div className="grid gap-2">
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               Quản lý Đơn Dịch Vụ
             </h1>
@@ -101,7 +101,7 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
                 {formatMoney(dailySummary.total).vndFormatted}
               </span>
               <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-              <span>doanh thu</span>
+              <span>doanh thu ước tính</span>
             </div>
           </div>
 
@@ -199,7 +199,7 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
                 <Empty>
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
-                      <HandPlatter className="h-8 w-8" />
+                      <HandPlatter />
                     </EmptyMedia>
                     <EmptyTitle>Không có đơn dịch vụ</EmptyTitle>
                     <EmptyDescription>

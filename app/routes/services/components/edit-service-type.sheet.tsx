@@ -158,10 +158,7 @@ export default function EditServiceTypeSheet({
         {/* === HEADER === */}
         <SheetHeader className="px-6 py-4 border-b shrink-0 flex flex-row items-start justify-between space-y-0">
           <div className="space-y-1">
-            <SheetTitle className="text-xl flex items-center gap-2">
-              <Layers className="w-5 h-5 text-primary" />
-              Chỉnh sửa loại dịch vụ
-            </SheetTitle>
+            <SheetTitle className="text-xl ">Chỉnh sửa loại dịch vụ</SheetTitle>
             <SheetDescription>
               Cập nhật thông tin cho{" "}
               <span className="font-semibold text-foreground">

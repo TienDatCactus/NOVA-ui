@@ -20,11 +20,19 @@ const HolidayDetailResponseSchema = z.object({
 });
 
 const CreateHolidayRequestSchema = z.object({
-  name: z.string("").min(1, "Tên ngày nghỉ là bắt buộc"),
-  startDate: z.string().min(1, "Ngày bắt đầu là bắt buộc"),
-  endDate: z.string().min(1, "Ngày kết thúc là bắt buộc"),
+  name: z
+    .string("Tên ngày nghỉ không hợp lệ")
+    .min(1, "Tên ngày nghỉ là bắt buộc"),
+  startDate: z
+    .string("Ngày bắt đầu không hợp lệ")
+    .min(1, "Ngày bắt đầu là bắt buộc"),
+  endDate: z
+    .string("Ngày kết thúc không hợp lệ")
+    .min(1, "Ngày kết thúc là bắt buộc"),
   isPublicHoliday: z.boolean(),
-  bonusAmount: z.number().min(0, "Số tiền thưởng phải >= 0"),
+  bonusAmount: z
+    .number("Số tiền thưởng không hợp lệ")
+    .min(0, "Số tiền thưởng phải >= 0"),
 });
 
 const UpdateHolidayRequestSchema = z.object({

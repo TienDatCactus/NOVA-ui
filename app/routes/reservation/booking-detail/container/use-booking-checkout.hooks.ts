@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { BookingService } from "~/services/api/booking";
 import type {
@@ -111,6 +112,11 @@ export function useCreateCheckoutInvoice(bookingId: string) {
       queryClient.invalidateQueries({
         queryKey: ["bookings-detail"],
       });
+      toast.success("Tạo hóa đơn checkout thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -140,9 +146,9 @@ export function useCheckoutPayment(bookingId: string) {
         queryKey: ["invoice-detail"],
       });
     },
-    onError: (error: any) => {
-      console.error("Checkout payment failed:", error);
-      toast.error("Thanh toán thất bại. Điều chỉnh số tiền và thử lại.");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -179,12 +185,9 @@ export function useInvoicePayment(invoiceId: string, bookingId: string) {
         queryKey: ["checkout", "pending-charges", bookingId],
       });
     },
-    onError: (error: any) => {
-      console.error("Invoice payment failed:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          "Thanh toán hóa đơn thất bại. Vui lòng thử lại."
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -214,13 +217,11 @@ export function useSyncInvoiceWithOrders(invoiceId: string, bookingId: string) {
       queryClient.invalidateQueries({
         queryKey: ["bookings-detail"],
       });
+      toast.success("Đồng bộ hóa đơn với các đơn hàng thành công");
     },
-    onError: (error: any) => {
-      console.error("Sync invoice failed:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          "Đồng bộ hóa đơn thất bại. Vui lòng thử lại."
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -235,7 +236,7 @@ export function useCheckout(bookingId: string) {
     mutationFn: (data: StaffCheckoutRequestDto) =>
       BookingService.staffCheckout(bookingId, data),
     onSuccess: () => {
-      toast.success("Checkout hoàn tất thành công");
+      toast.success("Checkout thành công");
       // Invalidate all booking lists
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
@@ -252,6 +253,10 @@ export function useCheckout(bookingId: string) {
       queryClient.invalidateQueries({
         queryKey: ["bookings-rooms-week"],
       });
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -277,11 +282,9 @@ export function useUpdateInvoice(invoiceId: string) {
         queryKey: ["booking-invoices"],
       });
     },
-    onError: (error: any) => {
-      console.error("Update invoice failed:", error);
-      toast.error(
-        error?.message || "Cập nhật invoice thất bại. Vui lòng thử lại."
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -299,6 +302,10 @@ export function useConfirmBookingPayment(bookingId: string) {
       queryClient.invalidateQueries({
         queryKey: ["booking-invoices", bookingId],
       });
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -323,8 +330,9 @@ export function useAddCompletedCharges(bookingId: string) {
         queryKey: ["booking-invoices", bookingId],
       });
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi thêm completed charges");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -350,14 +358,9 @@ export function usePayNowRooms(bookingId: string) {
         queryKey: ["bookings"],
       });
     },
-    onError: (error: any) => {
-      console.error("Pay-now-rooms error:", error);
-      toast.error("Lỗi thanh toán phòng", {
-        description:
-          error?.response?.data?.message ||
-          error?.message ||
-          "Vui lòng thử lại sau.",
-      });
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -383,16 +386,9 @@ export function useUpgradeRoom(bookingId: string) {
         queryKey: ["bookings"],
       });
     },
-    onError: (error: any) => {
-      console.error("Upgrade room error:", error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Vui lòng thử lại sau.";
-
-      toast.error("Lỗi upgrade phòng", {
-        description: errorMessage,
-      });
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }

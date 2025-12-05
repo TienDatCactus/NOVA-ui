@@ -51,11 +51,30 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
     ["Unpaid", "DepositOnly", "PartiallyPaid"].includes(invoice.status);
   const canRefund = ["Paid", "Overpaid"].includes(invoice.status);
   const canVoid = ["Unpaid", "DepositOnly"].includes(invoice.status);
-  const handleAddItem = (data: AddCustomItemsRequestDto) => addCustomItem(data);
+  const handleAddItem = (data: AddCustomItemsRequestDto) =>
+    addCustomItem(data, {
+      onSuccess: () => {
+        setDialog(null);
+      },
+    });
   const handleInvoicePayment = (data: InvoicePaymentRequestDto) =>
-    invoicePayment(data);
-  const handleRefund = (data: RefundInvoiceRequestDto) => refund(data);
-  const handleVoid = () => voidInvoice();
+    invoicePayment(data, {
+      onSuccess: () => {
+        setDialog(null);
+      },
+    });
+  const handleRefund = (data: RefundInvoiceRequestDto) =>
+    refund(data, {
+      onSuccess: () => {
+        setDialog(null);
+      },
+    });
+  const handleVoid = () =>
+    voidInvoice(undefined, {
+      onSuccess: () => {
+        setDialog(null);
+      },
+    });
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -132,6 +151,7 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
         open={dialog === "refund"}
         onClose={() => setDialog(null)}
         onSubmit={handleRefund}
+        maxRefundAmount={invoice.paidAmount || 0}
       />
     </div>
   );

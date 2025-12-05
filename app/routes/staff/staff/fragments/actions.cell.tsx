@@ -37,7 +37,7 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
           Chỉnh sửa
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="text-destructive focus:text-destructive"
+          variant="destructive"
           onClick={() => setTerminateDialogOpen(true)}
         >
           <UserX className="mr-2 h-4 w-4" />
@@ -45,7 +45,7 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-destructive focus:text-destructive"
+          variant="destructive"
           onClick={() => setDeleteDialogOpen(true)}
         >
           <Trash2 className="mr-2 h-4 w-4" />

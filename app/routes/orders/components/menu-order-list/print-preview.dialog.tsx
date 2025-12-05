@@ -1,6 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Barcode, Hotel, MapPin, Printer, Receipt, X } from "lucide-react";
+import { Barcode, Cog, Hotel, MapPin, Printer, Receipt, X } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -170,25 +170,13 @@ export default function PrintPreviewDialog({
 
         {/* === ACTION FOOTER === */}
         <DialogFooter className="p-4 bg-white border-t sm:justify-between items-center gap-4">
-          <div className="text-xs text-muted-foreground hidden sm:block">
-            System: Thermal Printer (80mm)
-          </div>
-          <div className="flex w-full sm:w-auto gap-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1 sm:flex-none"
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={handlePrint}
-              className="flex-1 sm:flex-none min-w-[120px] shadow-lg"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              In
-            </Button>
-          </div>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Hủy
+          </Button>
+          <Button onClick={handlePrint}>
+            <Printer className="h-4 w-4 mr-2" />
+            In
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

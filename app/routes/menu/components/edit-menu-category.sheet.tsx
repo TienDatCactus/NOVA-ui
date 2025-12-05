@@ -128,133 +128,107 @@ export default function EditMenuCategorySheet({
             {/* === HEADER === */}
             <SheetHeader className="px-6 py-5 border-b shrink-0 bg-muted/5 flex flex-row items-start justify-between space-y-0">
               <div className="space-y-1.5">
-                <SheetTitle className="text-xl flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-primary" />
+                <SheetTitle className="text-xl gap-2">
                   Chỉnh sửa danh mục
                 </SheetTitle>
                 <SheetDescription>
-                  Cập nhật thông tin phân loại cho thực đơn.
+                  Cập nhật thông tin chi tiết cho{" "}
+                  <span className="font-semibold text-foreground">
+                    {category?.name}
+                  </span>
                 </SheetDescription>
               </div>
+            </SheetHeader>
 
-              {/* Status Switch in Header */}
+            {/* === BODY === */}
+            <div className="flex-1 overflow-y-auto space-y-6 p-6">
+              {/* Identity Section */}
+              <div className="space-y-5">
+                <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  <FileText className="w-4 h-4" /> Thông tin chung
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Tên danh mục <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="VD: Món Khai Vị"
+                          className="h-11 text-lg font-medium"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Mã định danh (Code){" "}
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="VD: APPETIZER"
+                            className="pl-9 font-mono uppercase"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Mã duy nhất dùng để quản lý hệ thống.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Separator />
+
               <FormField
                 control={form.control}
                 name="active"
                 render={({ field }) => (
-                  <FormItem className="flex items-center space-y-0 gap-2.5 bg-background border px-3 py-1.5 rounded-full shadow-sm">
+                  <FormItem>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="scale-75 data-[state=checked]:bg-green-600"
-                      />
+                      <div className="border-input has-data-[state=checked]:border-primary/50 relative flex w-full items-start gap-2 rounded-md border p-4 shadow-xs outline-none">
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="scale-75"
+                          id="menu-item-active-switch"
+                        />
+                        <div className="grid grow gap-2">
+                          <FormLabel
+                            className="text-xs font-medium cursor-pointer flex-col items-start mb-0 pb-0"
+                            htmlFor="menu-item-active-switch"
+                          >
+                            <p>{field.value ? "Đang bán" : "Tạm ngưng"}</p>
+                            <p className="text-muted-foreground text-xs">
+                              Chọn "Tạm ngưng" để ẩn danh mục món ăn này khỏi
+                              thực đơn POS.
+                            </p>
+                          </FormLabel>
+                        </div>
+                      </div>
                     </FormControl>
-                    <FormLabel className="text-xs font-medium cursor-pointer mb-0 pb-0 text-foreground">
-                      {field.value ? "Đang hoạt động" : "Đã ẩn"}
-                    </FormLabel>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-            </SheetHeader>
-
-            {/* === BODY === */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-8 max-w-lg">
-                {/* Identity Section */}
-                <div className="space-y-5">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                    <FileText className="w-4 h-4" /> Thông tin chung
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Tên danh mục{" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="VD: Món Khai Vị"
-                            className="h-11 text-lg font-medium"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="code"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Mã định danh (Code){" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              placeholder="VD: APPETIZER"
-                              className="pl-9 font-mono uppercase"
-                              {...field}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription className="text-xs">
-                          Mã duy nhất dùng để quản lý hệ thống.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <Separator />
-
-                {/* Metadata Section (Read-only) */}
-                {category && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                      <Archive className="w-4 h-4" /> Thống kê & Lịch sử
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-muted/10 border rounded-lg p-4 flex flex-col gap-1">
-                        <span className="text-xs text-muted-foreground font-medium">
-                          Số lượng món ăn
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Tag className="w-4 h-4 text-primary" />
-                          <span className="text-xl font-bold font-mono text-foreground">
-                            {category.menuItemCount}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="bg-muted/10 border rounded-lg p-4 flex flex-col gap-1">
-                        <span className="text-xs text-muted-foreground font-medium">
-                          Ngày tạo
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <CalendarDays className="w-4 h-4 text-primary" />
-                          <span className="text-sm font-medium text-foreground">
-                            {category.createdAt
-                              ? toYMD(category.createdAt)
-                              : "N/A"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* === FOOTER === */}

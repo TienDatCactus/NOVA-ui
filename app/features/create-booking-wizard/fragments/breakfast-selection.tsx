@@ -34,7 +34,6 @@ export function BreakfastSelection({
   checkoutDate,
   nights,
 }: BreakfastSelectionProps) {
-  // (Adjust start/end logic based on your specific hotel policy)
   const availableDates = useMemo(() => {
     if (!checkinDate || !checkoutDate || nights <= 0) return [];
     try {
@@ -47,8 +46,6 @@ export function BreakfastSelection({
     }
   }, [checkinDate, checkoutDate, nights]);
 
-  // UX Decision: If stay is too long (> 14 days), show Calendar Popover.
-  // If short, show Direct Selection Grid.
   const isLongStay = availableDates.length > 14;
 
   const handleToggleDate = (date: Date) => {

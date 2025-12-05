@@ -143,7 +143,6 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
     isPending: isCalculating,
   } = usePreviewBookingPrice(previewRequest);
 
-  // Trigger price calculation when dependencies change
   useEffect(() => {
     if (
       roomIds.length > 0 &&
@@ -154,7 +153,6 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
     ) {
       previewBookingPrice();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     checkinDate,
     checkoutDate,
@@ -477,7 +475,9 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                 <Loader2 className="h-5 w-5 animate-spin text-primary ml-auto" />
               ) : (
                 <span className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-500">
-                  {formatMoney(finalTotal).vndFormatted}
+                  {bookingType !== "RoomBlock"
+                    ? formatMoney(finalTotal).vndFormatted
+                    : formatMoney(0).vndFormatted}
                 </span>
               )}
             </div>

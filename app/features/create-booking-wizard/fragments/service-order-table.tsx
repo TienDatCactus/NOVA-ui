@@ -86,17 +86,21 @@ function ServiceOrderItemRow({
     if (service.scheduledDate) {
       const date = parseISO(service.scheduledDate);
       if (checkinDate && checkoutDate) {
-        // Check if date is within range
+        // Check if date is within range (from checkin to day before checkout)
         if (date >= checkinDate && date < checkoutDate) {
           return date;
         }
+        // If out of range, reset to default
+        return checkinDate
+          ? new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000)
+          : undefined;
       } else {
         // No range validation, use the date
         return date;
       }
     }
 
-    // Fallback: checkinDate + 1 day, or undefined
+    // Fallback: checkinDate + 1 day (first day of stay), or undefined
     return checkinDate
       ? new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000)
       : undefined;

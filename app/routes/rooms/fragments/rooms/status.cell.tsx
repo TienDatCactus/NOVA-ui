@@ -19,7 +19,7 @@ interface RoomStatusCellProps {
 
 // 1. Định nghĩa cấu hình màu sắc chặt chẽ theo Enum
 // Việc này đảm bảo nếu bạn thêm status mới vào Enum, TS sẽ báo lỗi nếu thiếu màu
-const STATUS_CONFIG: Record<
+export const ROOM_STATUS_CONFIG: Record<
   keyof typeof RoomStatusEnum,
   {
     label: string;
@@ -97,7 +97,8 @@ function RoomStatusCell({ room }: RoomStatusCellProps) {
 
   // Ép kiểu an toàn cho status hiện tại
   const currentStatusKey = room.status as keyof typeof RoomStatusEnum;
-  const config = STATUS_CONFIG[currentStatusKey] || STATUS_CONFIG.Ready;
+  const config =
+    ROOM_STATUS_CONFIG[currentStatusKey] || ROOM_STATUS_CONFIG.Ready;
 
   const handleStatusChange = (newStatus: string) => {
     // Chỉ gọi API nếu status thực sự thay đổi
@@ -145,7 +146,7 @@ function RoomStatusCell({ room }: RoomStatusCellProps) {
             </SelectLabel>
             {Object.entries(RoomStatusEnum).map(([key, _val]) => {
               const statusKey = key as keyof typeof RoomStatusEnum;
-              const itemConfig = STATUS_CONFIG[statusKey];
+              const itemConfig = ROOM_STATUS_CONFIG[statusKey];
 
               // Skip nếu không có config (an toàn)
               if (!itemConfig) return null;

@@ -122,7 +122,7 @@ export default function Component({
       <div className="flex-shrink-0 bg-background border-b z-10">
         {/* Top Row: Title & Date Nav */}
         <div className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
+          <div className="grid gap-2">
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               Quản lý Đơn F&B
             </h1>
@@ -227,11 +227,8 @@ export default function Component({
               <div className="flex h-[50vh] flex-col items-center justify-center">
                 <Empty>
                   <EmptyHeader>
-                    <EmptyMedia
-                      variant="icon"
-                      className="bg-muted/50 rounded-full p-4"
-                    >
-                      <PackageOpen className="h-8 w-8 text-muted-foreground/50" />
+                    <EmptyMedia variant="icon">
+                      <PackageOpen className="h-8 w-8 " />
                     </EmptyMedia>
                     <EmptyTitle>Không có đơn hàng</EmptyTitle>
                     <EmptyDescription>

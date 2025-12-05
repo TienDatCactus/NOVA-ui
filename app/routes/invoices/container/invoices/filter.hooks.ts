@@ -8,13 +8,13 @@ const DEFAULT_FILTERS: InvoiceListParams = {
   BookingId: undefined,
   InvoiceType: undefined,
   Page: 1,
-  PageSize: 10,
+  PageSize: 20,
   IssuedFrom: undefined,
   IssuedTo: undefined,
   Keyword: undefined,
   PaymentMethod: undefined,
-  SortBy: undefined,
-  SortDirection: undefined,
+  SortBy: "issuedAt",
+  SortDirection: "desc",
   Status: undefined,
 };
 

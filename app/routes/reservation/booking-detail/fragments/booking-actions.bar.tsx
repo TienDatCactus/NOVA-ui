@@ -14,6 +14,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { formatMoney } from "~/lib/utils";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import CheckoutSheet from "../components/checkout/checkout-sheet";
 import { PayNowRoomsSheet } from "../components/operations/pay-now-rooms-sheet";
 import RefundButton from "../components/refunds/refund-button";
@@ -36,6 +37,20 @@ export function BookingActionsBar({
 }) {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [payNowRoomsOpen, setPayNowRoomsOpen] = useState(false);
+
+  const { mutateAsync: updateStatus, isPending: isUpdatingStatus } =
+    useUpdateBookingStatus(bookingDetail?.id || "");
+
+  const handleQuickCheckout = async () => {
+    if (bookingDetail?.source === "RoomBlock") {
+      try {
+        await updateStatus("CheckedOut");
+      } catch (error) {
+        // Error already handled by mutation
+      }
+    }
+  };
+
   return (
     <div className="sticky bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 shadow-lg z-10 transition-all duration-200">
       <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
@@ -99,8 +114,29 @@ export function BookingActionsBar({
               )}
 
               {/* Checkout Button Logic */}
-              {(bookingDetail?.status === "InHouse" ||
-                bookingDetail?.status === "CheckedIn") && (
+              {bookingDetail?.source === "RoomBlock" &&
+              (bookingDetail?.status === "InHouse" ||
+                bookingDetail?.status === "CheckedIn") ? (
+                <Button
+                  variant="success"
+                  onClick={handleQuickCheckout}
+                  disabled={isUpdatingStatus}
+                  className="shadow-sm"
+                >
+                  {isUpdatingStatus ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang xử
+                      lý...
+                    </>
+                  ) : (
+                    <>
+                      <DoorOpen className="w-4 h-4 mr-2" />
+                      Kết thúc bảo trì
+                    </>
+                  )}
+                </Button>
+              ) : bookingDetail?.status === "InHouse" ||
+                bookingDetail?.status === "CheckedIn" ? (
                 <Button
                   variant="success"
                   onClick={() => setCheckoutOpen(true)}
@@ -109,7 +145,7 @@ export function BookingActionsBar({
                   <DoorOpen className="w-4 h-4 mr-2" />
                   Checkout & Thanh toán
                 </Button>
-              )}
+              ) : null}
 
               {/* Post-Checkout Collection */}
               {bookingDetail?.status === "CheckedOut" &&

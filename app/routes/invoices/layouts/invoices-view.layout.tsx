@@ -47,7 +47,10 @@ import {
 import { InvoicesService } from "~/services/api/invoices";
 import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import {
+  INVOICE_STATUSES,
+  INVOICE_TYPES,
+} from "~/services/api/invoices/invoice.types";
 import type { InvoiceStatusEnum } from "~/services/api/invoices/dto";
 
 interface InvoicesViewLayoutProps {
@@ -89,7 +92,7 @@ function InvoicesViewLayout({
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages || page === currentPage) return;
-    onFilterChange("page" as keyof InvoiceListParams, page as any);
+    onFilterChange("Page", page);
   };
 
   const handleExport = async () => {
@@ -124,7 +127,8 @@ function InvoicesViewLayout({
     filters.IssuedFrom ||
     filters.IssuedTo ||
     filters.Status ||
-    filters.PaymentMethod;
+    filters.PaymentMethod ||
+    filters.InvoiceType;
 
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
@@ -201,18 +205,15 @@ function InvoicesViewLayout({
 
       {/* === LEVEL 2: FILTER TOOLBAR === */}
       <div className="px-6 py-3 bg-background border-b flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between shrink-0">
-        {/* Filter Groups */}
-        <div className="flex flex-wrap items-center gap-3 w-full">
+        <div className="flex flex-wrap items-center gap-2 w-full">
           {/* Search */}
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm theo mã, khách hàng..."
-              value={filters.Keyword || ""}
-              onChange={(e) => onFilterChange("Keyword", e.target.value)}
-              className="pl-9 h-9 text-sm bg-background"
-            />
-          </div>
+          <Input
+            startAddon={<Search className="w-4 h-4 text-muted-foreground " />}
+            placeholder="Tìm theo mã, khách hàng..."
+            value={filters.Keyword || ""}
+            onChange={(e) => onFilterChange("Keyword", e.target.value)}
+            className="max-w-xs"
+          />
 
           <Separator orientation="vertical" className="h-6 hidden sm:block" />
 
@@ -257,7 +258,6 @@ function InvoicesViewLayout({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả trạng thái</SelectItem>
               {INVOICE_STATUSES?.map((s) => (
                 <SelectItem key={s.value} value={s.value}>
                   {s.label}
@@ -266,9 +266,8 @@ function InvoicesViewLayout({
             </SelectContent>
           </Select>
 
-          {/* Payment Method Filter */}
           <Select
-            value={filters.PaymentMethod || "all"} // Changed "Unknown" to "all" for consistency
+            value={filters.PaymentMethod}
             onValueChange={(val) =>
               onFilterChange(
                 "PaymentMethod",
@@ -283,10 +282,34 @@ function InvoicesViewLayout({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả phương thức</SelectItem>
               {PAYMENT_METHODS.map((pm) => (
                 <SelectItem key={pm.value} value={pm.value}>
                   {pm.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Invoice Type Filter */}
+          <Select
+            value={filters.InvoiceType}
+            onValueChange={(val) =>
+              onFilterChange(
+                "InvoiceType",
+                val === "all" ? undefined : (val as any)
+              )
+            }
+          >
+            <SelectTrigger className="w-[160px] h-9 text-xs border-dashed">
+              <div className="flex items-center gap-2 truncate">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                <SelectValue placeholder="Loại hóa đơn" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {INVOICE_TYPES.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -309,9 +332,7 @@ function InvoicesViewLayout({
 
       {/* === LEVEL 3: CONTENT AREA === */}
       <main className="flex-1 p-6 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto bg-background rounded-lg border shadow-sm">
-          {children}
-        </div>
+        <div className="flex-1 overflow-auto bg-background">{children}</div>
 
         {/* Pagination Footer */}
         {totalPages > 1 && (

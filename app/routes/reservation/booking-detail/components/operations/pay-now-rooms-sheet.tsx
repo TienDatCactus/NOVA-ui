@@ -362,7 +362,7 @@ export function PayNowRoomsSheet({
                                 className="data-[state=checked]:bg-blue-600"
                               />
                               <span className="text-sm text-muted-foreground">
-                                VAT (8%)
+                                VAT
                               </span>
                             </div>
                             <span className="font-mono text-sm">
@@ -382,7 +382,7 @@ export function PayNowRoomsSheet({
                                 className="data-[state=checked]:bg-blue-600"
                               />
                               <span className="text-sm text-muted-foreground">
-                                Service Charge (5%)
+                                Phí dịch vụ
                               </span>
                             </div>
                             <span className="font-mono text-sm">

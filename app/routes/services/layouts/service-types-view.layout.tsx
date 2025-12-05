@@ -44,7 +44,7 @@ export default function ServiceTypesViewLayout({
               </Label>
               <Switch
                 id="active-filter"
-                checked={filters.activeFilter === "active"}
+                checked={filters.activeFilter === "all"}
                 onCheckedChange={(checked) =>
                   updateFilter("activeFilter", checked ? "all" : "active")
                 }

@@ -396,7 +396,7 @@ export default function PaymentOrderSheet({
                             htmlFor="apply-vat"
                             className="text-sm font-medium cursor-pointer select-none"
                           >
-                            VAT (8%)
+                            VAT
                           </label>
                         </div>
                         <span
@@ -425,7 +425,7 @@ export default function PaymentOrderSheet({
                             htmlFor="apply-service"
                             className="text-sm font-medium cursor-pointer select-none"
                           >
-                            Phí dịch vụ (5%)
+                            Phí dịch vụ
                           </label>
                         </div>
                         <span
@@ -513,7 +513,7 @@ export default function PaymentOrderSheet({
                       />
 
                       {/* Method & Ref */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-4">
                         <FormField
                           control={paymentForm.control}
                           name="paymentMethod"
@@ -548,13 +548,14 @@ export default function PaymentOrderSheet({
                           control={paymentForm.control}
                           name="transactionReference"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex-1">
                               <FormControl>
                                 <div className="relative">
-                                  <Hash className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                                   <Input
+                                    startAddon={
+                                      <Hash className="h-4 w-4 text-muted-foreground" />
+                                    }
                                     placeholder="Mã giao dịch (Optional)"
-                                    className="pl-9 h-11"
                                     {...field}
                                     value={field.value || ""}
                                   />

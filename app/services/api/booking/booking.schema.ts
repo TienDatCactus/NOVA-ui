@@ -88,14 +88,13 @@ const StaffCreateBookingSchema = z
       const checkoutDate = new Date(data.checkoutDate);
 
       return data.serviceOrder.services.every((service) => {
-        if (!service.scheduledDate) return true; // Optional field
+        if (!service.scheduledDate) return false; // Required field - must have a date
         const scheduledDate = new Date(service.scheduledDate);
-        return scheduledDate >= checkinDate && scheduledDate <= checkoutDate;
+        return scheduledDate >= checkinDate && scheduledDate < checkoutDate;
       });
     },
     {
-      message:
-        "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú (từ ngày nhận phòng đến ngày trả phòng)",
+      message: "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú",
       path: ["serviceOrder"],
     }
   )
@@ -396,7 +395,7 @@ const BookingListByWeekResponseSchema = z.array(BookingItemByWeekSchema);
 const BookingDetailItemSchema = z.object({
   id: z.string(),
   bookingCode: z.string(),
-  source: z.string(),
+  source: BookingSourceEnum,
   status: BookingStatusEnum,
   checkinDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
   checkoutDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
@@ -555,7 +554,7 @@ const UpdateBookingStatusResponseSchema = z.object({
 
 const ConfirmBookingPaymentRequestSchema = z.object({
   paymentMethod: PaymentSchema.PaymentMethodEnum,
-  paidAmount: z.number().min(0.01, "Số tiền thanh toán không hợp lệ"),
+  paidAmount: z.number().min(0, "Số tiền thanh toán không hợp lệ"),
 });
 const ConfirmBookingPaymentResponseSchema = z.object({
   bookingId: z.string().optional(),

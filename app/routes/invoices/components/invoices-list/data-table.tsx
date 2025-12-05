@@ -54,7 +54,7 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
 
   return (
     <div className="grid gap-2">
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-hidden rounded-md">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
