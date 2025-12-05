@@ -14,6 +14,8 @@ import { DataTableColumnHeader } from "~/components/table/table-header";
 import { formatMoney } from "~/lib/utils";
 import type { ExpenseListItemDto } from "~/services/api/expenses/dto";
 import ExpensesActionCell from "../../fragments/expenses-action.cell";
+import StatusBadge from "../../fragments/status-badge";
+import SourceTypeBadge from "../../fragments/source-type-badge";
 
 // Category icon mapping
 const CATEGORY_ICONS: Record<
@@ -120,6 +122,24 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
           {row.original.receiptNumber}
         </span>
       );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
+    cell: ({ row }) => {
+      return <StatusBadge status={row.original.status} />;
+    },
+  },
+  {
+    accessorKey: "sourceType",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Nguồn gốc" />
+    ),
+    cell: ({ row }) => {
+      return <SourceTypeBadge sourceType={row.original.sourceType} />;
     },
   },
   {

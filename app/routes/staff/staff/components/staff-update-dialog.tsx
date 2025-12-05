@@ -339,7 +339,7 @@ export default function EditStaffDialog({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Vai trò / Chức vụ{" "}
+                            Chức vụ / Chức vụ{" "}
                             <span className="text-destructive">*</span>
                           </FormLabel>
                           <Select
@@ -348,7 +348,7 @@ export default function EditStaffDialog({
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Chọn vai trò" />
+                                <SelectValue placeholder="Chọn Chức vụ" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>

@@ -134,8 +134,6 @@ http.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
-    } else if (status && status !== 401) {
-      toast.error("Đã có lỗi xảy ra. Vui lòng thử lại.");
     }
 
     return Promise.reject(error);

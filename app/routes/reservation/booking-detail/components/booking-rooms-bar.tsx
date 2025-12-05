@@ -1,5 +1,11 @@
 import { format, parseISO } from "date-fns";
-import { ArrowLeftRight, Plus, RotateCcw, Trash2 } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ArrowUpCircle,
+  Plus,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -35,6 +41,11 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import ChangeRoomDialog from "../../bookings/components/change-room.dialog";
+import {
+  canUpgradeRoom,
+  type BookingState,
+} from "../container/use-booking-state.hooks";
+import { UpgradeRoomDialog } from "./operations/upgrade-room-dialog";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -44,22 +55,19 @@ interface BookingRoomsBarProps {
     "rooms",
     "id"
   >;
-  permissions: {
-    canAddRooms: boolean;
-    canRemoveRooms: boolean;
-    blockReason?: string | null;
-  };
+  bookingState: BookingState;
 }
 
 export default function BookingRoomsBar({
   bookingDetail,
   form,
   roomsFieldArray,
-  permissions,
+  bookingState,
 }: BookingRoomsBarProps) {
   const { fields, remove, append } = roomsFieldArray;
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
   const [changeRoomModalOpen, setChangeRoomModalOpen] = useState(false);
+  const [upgradeRoomOpen, setUpgradeRoomOpen] = useState(false);
   const [removeRoomConfirmOpen, setRemoveRoomConfirmOpen] = useState(false);
   const [roomToRemove, setRoomToRemove] = useState<{
     bookingRoomId: string;
@@ -138,9 +146,6 @@ export default function BookingRoomsBar({
         return;
       }
 
-      // CHANGELOG v2.0 Section 3: Auto date logic based on booking status
-      // - If CheckedIn (InHouse): Use TODAY as fromDate
-      // - Otherwise: Use booking's checkinDate
       const isCheckIn =
         bookingDetail.status === "CheckedIn" ||
         bookingDetail.status === "InHouse";
@@ -211,22 +216,28 @@ export default function BookingRoomsBar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  disabled={!permissions.canAddRooms}
+                  disabled={!bookingState.permissions.canEditRooms}
                 >
                   <Plus className="h-4 w-4 mr-1" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                {canUpgradeRoom(bookingDetail?.status) && (
+                  <DropdownMenuItem onClick={() => setUpgradeRoomOpen(true)}>
+                    <ArrowUpCircle className="w-4 h-4 " />
+                    Upgrade phòng
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={() => setAddRoomModalOpen(true)}
-                  disabled={!permissions.canAddRooms}
+                  disabled={!bookingState.permissions.canEditRooms}
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Thêm phòng
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setChangeRoomModalOpen(true)}
-                  disabled={!permissions.canAddRooms}
+                  disabled={!bookingState.permissions.canEditRooms}
                 >
                   <ArrowLeftRight className="h-4 w-4 mr-1" />
                   Đổi phòng
@@ -236,7 +247,6 @@ export default function BookingRoomsBar({
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
-          {/* Existing Rooms */}
           {bookingDetail.rooms.map((room) => (
             <ExistingRoomItemWrapper
               key={room.roomId}
@@ -248,10 +258,11 @@ export default function BookingRoomsBar({
               onRemove={() =>
                 handleRemoveRoom(room.bookingRoomId, room.roomName)
               }
-              canRemove={permissions.canRemoveRooms}
+              canRemove={bookingState.permissions.canEditRooms}
               removeTooltip={
-                !permissions.canRemoveRooms
-                  ? permissions.blockReason || "Không thể xóa phòng"
+                !bookingState.permissions.canEditRooms
+                  ? bookingState.permissions.blockReason ||
+                    "Không thể xóa phòng"
                   : undefined
               }
             />
@@ -295,12 +306,10 @@ export default function BookingRoomsBar({
               </div>
             </>
           )}
-          {/* Rooms Being Removed */}
           {fields.filter(
             (_, index) => form.watch(`rooms.${index}.action`) === "Remove"
           ).length > 0 && (
             <div className="mt-4 space-y-3">
-              {/* Header nhỏ gọn, không chiếm diện tích */}
               <div className="flex items-center gap-2 px-1">
                 <div className="h-1 w-1 rounded-full bg-destructive" />
                 <span className="text-xs font-semibold text-destructive uppercase tracking-wider">
@@ -380,6 +389,11 @@ export default function BookingRoomsBar({
         open={changeRoomModalOpen}
         onOpenChange={setChangeRoomModalOpen}
         bookingCode={bookingDetail.bookingCode}
+      />{" "}
+      <UpgradeRoomDialog
+        open={upgradeRoomOpen}
+        onOpenChange={setUpgradeRoomOpen}
+        bookingDetail={bookingDetail}
       />
       <AlertDialog
         open={removeRoomConfirmOpen}

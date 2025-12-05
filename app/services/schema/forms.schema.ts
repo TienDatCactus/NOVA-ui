@@ -110,7 +110,7 @@ export const UpdateItemFormSchema = z
  */
 
 /**
- * Schema cho form tạo vai trò nhân sự
+ * Schema cho form tạo Chức vụ nhân sự
  */
 
 /**

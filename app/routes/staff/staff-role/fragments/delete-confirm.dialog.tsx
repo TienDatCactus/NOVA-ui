@@ -36,9 +36,9 @@ export default function DeleteConfirmDialog({
     <AlertDialog open={open} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Xác nhận xóa vai trò</AlertDialogTitle>
+          <AlertDialogTitle>Xác nhận xóa Chức vụ</AlertDialogTitle>
           <AlertDialogDescription>
-            Bạn có chắc chắn muốn xóa vai trò <strong>{role.name}</strong>?
+            Bạn có chắc chắn muốn xóa Chức vụ <strong>{role.name}</strong>?
             <br />
             Hành động này không thể hoàn tác.
           </AlertDialogDescription>

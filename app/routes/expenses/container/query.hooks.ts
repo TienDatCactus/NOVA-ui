@@ -88,7 +88,18 @@ export function useUpdateExpense() {
       toast.success("Cập nhật chi phí thành công");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi cập nhật chi phí");
+      const errorCode = error?.response?.data?.errorCode;
+      const errorMessages: Record<string, string> = {
+        CANNOT_EDIT_PAYROLL_EXPENSE:
+          "Chi phí từ module khác không được chỉnh sửa từ đây",
+        CANNOT_EDIT_POSTED_EXPENSE: "Chi phí đã chốt, vui lòng hủy trước",
+        CANNOT_EDIT_VOIDED_EXPENSE: "Chi phí đã hủy, không thể chỉnh sửa",
+        INVALID_AMOUNT: "Số tiền phải lớn hơn 0",
+        INVALID_EXPENSE_DATE: "Ngày chi phí không được ở tương lai",
+      };
+      toast.error(
+        errorMessages[errorCode] || error?.message || "Lỗi khi cập nhật chi phí"
+      );
     },
   });
 }
@@ -107,7 +118,69 @@ export function useDeleteExpense() {
       toast.success("Xóa chi phí thành công");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi xóa chi phí");
+      const errorCode = error?.response?.data?.errorCode;
+      const errorMessages: Record<string, string> = {
+        CANNOT_DELETE_PAYROLL_EXPENSE:
+          "Chi phí từ module khác không được xóa từ đây",
+        CANNOT_DELETE_POSTED_EXPENSE:
+          "Chi phí đã chốt, vui lòng hủy thay vì xóa",
+        CANNOT_DELETE_VOIDED_EXPENSE: "Không thể xóa chi phí đã hủy",
+      };
+      toast.error(
+        errorMessages[errorCode] || error?.message || "Lỗi khi xóa chi phí"
+      );
+    },
+  });
+}
+
+/**
+ * Post expense mutation (Draft → Posted)
+ */
+export function usePostExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => await ExpensesService.postExpense(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses-summary"] });
+      toast.success("Chốt chi phí thành công");
+    },
+    onError: (error: any) => {
+      const errorCode = error?.response?.data?.errorCode;
+      const errorMessages: Record<string, string> = {
+        INVALID_STATUS_TRANSITION: "Chỉ chi phí nháp mới có thể chốt",
+      };
+      toast.error(
+        errorMessages[errorCode] || error?.message || "Lỗi khi chốt chi phí"
+      );
+    },
+  });
+}
+
+/**
+ * Void expense mutation (Posted → Voided)
+ */
+export function useVoidExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => await ExpensesService.voidExpense(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses-summary"] });
+      toast.success("Hủy chi phí thành công");
+    },
+    onError: (error: any) => {
+      const errorCode = error?.response?.data?.errorCode;
+      const errorMessages: Record<string, string> = {
+        CANNOT_VOID_PAYROLL_EXPENSE:
+          "Chi phí từ module khác không được hủy từ đây",
+        INVALID_STATUS_TRANSITION: "Chỉ chi phí đã chốt mới có thể hủy",
+      };
+      toast.error(
+        errorMessages[errorCode] || error?.message || "Lỗi khi hủy chi phí"
+      );
     },
   });
 }

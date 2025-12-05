@@ -7,7 +7,7 @@ import type {
 } from "~/services/api/staff/staff-role/dto";
 
 /**
- * Hook để lấy danh sách vai trò nhân sự
+ * Hook để lấy danh sách Chức vụ nhân sự
  */
 export function useStaffRoleList() {
   return useQuery({
@@ -18,7 +18,7 @@ export function useStaffRoleList() {
 }
 
 /**
- * Hook để lấy chi tiết vai trò nhân sự
+ * Hook để lấy chi tiết Chức vụ nhân sự
  */
 export function useStaffRoleDetail(id: string) {
   return useQuery({
@@ -30,7 +30,7 @@ export function useStaffRoleDetail(id: string) {
 }
 
 /**
- * Hook để tạo vai trò nhân sự mới
+ * Hook để tạo Chức vụ nhân sự mới
  */
 export function useCreateStaffRole() {
   const queryClient = useQueryClient();
@@ -40,17 +40,17 @@ export function useCreateStaffRole() {
       await StaffRoleService.createStaffRole(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff-roles"] });
-      toast.success("Tạo vai trò nhân sự thành công");
+      toast.success("Tạo Chức vụ nhân sự thành công");
     },
     onError: (error) => {
       console.error("Create staff role error:", error);
-      toast.error("Không thể tạo vai trò nhân sự");
+      toast.error("Không thể tạo Chức vụ nhân sự");
     },
   });
 }
 
 /**
- * Hook để cập nhật vai trò nhân sự
+ * Hook để cập nhật Chức vụ nhân sự
  */
 export function useUpdateStaffRole() {
   const queryClient = useQueryClient();
@@ -66,17 +66,17 @@ export function useUpdateStaffRole() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["staff-roles"] });
       queryClient.invalidateQueries({ queryKey: ["staff-role", variables.id] });
-      toast.success("Cập nhật vai trò nhân sự thành công");
+      toast.success("Cập nhật Chức vụ nhân sự thành công");
     },
     onError: (error) => {
       console.error("Update staff role error:", error);
-      toast.error("Không thể cập nhật vai trò nhân sự");
+      toast.error("Không thể cập nhật Chức vụ nhân sự");
     },
   });
 }
 
 /**
- * Hook để xóa vai trò nhân sự
+ * Hook để xóa Chức vụ nhân sự
  */
 export function useDeleteStaffRole() {
   const queryClient = useQueryClient();
@@ -86,11 +86,11 @@ export function useDeleteStaffRole() {
       await StaffRoleService.deleteStaffRole(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff-roles"] });
-      toast.success("Xóa vai trò nhân sự thành công");
+      toast.success("Xóa Chức vụ nhân sự thành công");
     },
     onError: (error) => {
       console.error("Delete staff role error:", error);
-      toast.error("Không thể xóa vai trò nhân sự");
+      toast.error("Không thể xóa Chức vụ nhân sự");
     },
   });
 }

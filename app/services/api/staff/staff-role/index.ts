@@ -16,7 +16,7 @@ const {
 } = StaffRoleSchema;
 
 /**
- * GET /api/StaffRoles - Lấy danh sách vai trò nhân sự
+ * GET /api/StaffRoles - Lấy danh sách Chức vụ nhân sự
  */
 async function getStaffRoleList(): Promise<StaffRoleListDto> {
   try {
@@ -29,7 +29,7 @@ async function getStaffRoleList(): Promise<StaffRoleListDto> {
 }
 
 /**
- * POST /api/StaffRoles - Tạo mới vai trò nhân sự
+ * POST /api/StaffRoles - Tạo mới Chức vụ nhân sự
  */
 async function createStaffRole(
   data: CreateStaffRoleDto
@@ -45,7 +45,7 @@ async function createStaffRole(
 }
 
 /**
- * GET /api/StaffRoles/{id} - Lấy thông tin chi tiết vai trò nhân sự
+ * GET /api/StaffRoles/{id} - Lấy thông tin chi tiết Chức vụ nhân sự
  */
 async function getStaffRoleById(id: string): Promise<StaffRoleDetailDto> {
   try {
@@ -58,7 +58,7 @@ async function getStaffRoleById(id: string): Promise<StaffRoleDetailDto> {
 }
 
 /**
- * PUT /api/StaffRoles/{id} - Cập nhật thông tin vai trò nhân sự
+ * PUT /api/StaffRoles/{id} - Cập nhật thông tin Chức vụ nhân sự
  */
 async function updateStaffRole(
   id: string,
@@ -75,7 +75,7 @@ async function updateStaffRole(
 }
 
 /**
- * DELETE /api/StaffRoles/{id} - Xóa vai trò nhân sự
+ * DELETE /api/StaffRoles/{id} - Xóa Chức vụ nhân sự
  */
 async function deleteStaffRole(id: string): Promise<void> {
   try {

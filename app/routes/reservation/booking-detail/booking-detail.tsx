@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
-import { Check, FileWarning, NotebookPen } from "lucide-react";
+import { Check, FileWarning, NotebookPen, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -36,7 +36,6 @@ import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
-import type { Route } from "./+types/booking-detail";
 
 // Components
 import BookingRoomsBar from "./components/booking-rooms-bar";
@@ -46,19 +45,19 @@ import PendingChargesSection from "./components/pending-charges-section";
 import RefundHistory from "./components/refunds/refund-history";
 import StayDetailBar from "./components/stay-detail-bar";
 
-import { Navigate, useSearchParams } from "react-router";
-import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
-import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
+import { useParams } from "react-router";
+import { useBookingState } from "./container/use-booking-state.hooks";
 import { BookingActionsBar } from "./fragments/booking-actions.bar";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
-export default function Component({ loaderData }: Route.ComponentProps) {
-  const [searchParams] = useSearchParams();
-  const bookingCode = searchParams.get("bookingCode");
+
+export default function Component() {
+  const { bookingCode } = useParams<{ bookingCode: string }>();
 
   if (!bookingCode) {
-    return <Navigate to="/404" replace />;
+    return <BookingDetailError errorDetails="Mã booking không hợp lệ" />;
   }
+
   const {
     data: bookingDetail,
     isPending,
@@ -67,17 +66,16 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     bookingCode,
     enabled: !!bookingCode,
   });
-
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
 
-  const permissions = useBookingUpdatePermissions(bookingDetail);
-  const financialSummary = useBookingFinancialStatus(bookingDetail?.invoices);
+  const bookingState = useBookingState(bookingDetail);
   const { data: OTAList } = useOTAInfo({ selection: true });
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
-    bookingDetail?.id || ""
+    bookingDetail?.id || "",
+    bookingCode
   );
 
   const form = useForm<StaffUpdateBookingRequestDto>({
@@ -104,37 +102,30 @@ export default function Component({ loaderData }: Route.ComponentProps) {
   const { isDirty } = form.formState;
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
     if (data.rooms && data.rooms.length > 0) {
-      try {
-        data.rooms.forEach((room, idx) => {
-          console.log(`Room operation ${idx}:`, {
-            action: room.action,
-            actionType: typeof room.action,
-            bookingRoomId: room.bookingRoomId,
-            roomId: room.roomId,
-            newRoomId: room.newRoomId,
-            fromDate: room.fromDate,
-            toDate: room.toDate,
-          });
-
-          const result =
-            BookingSchema.UpdateBookingRoomRequestSchema.safeParse(room);
-
-          if (!result.success) {
-            console.error("Invalid room operation:", room, result.error);
-            const errorMsg = result.error.issues
-              .map((e) => `${e.path.join(".")}: ${e.message}`)
-              .join(", ");
-            throw new Error(
-              `Phòng ${room.roomId || room.bookingRoomId || "unknown"} không hợp lệ: ${errorMsg}`
-            );
-          }
+      data.rooms.forEach((room, idx) => {
+        console.log(`Room operation ${idx}:`, {
+          action: room.action,
+          actionType: typeof room.action,
+          bookingRoomId: room.bookingRoomId,
+          roomId: room.roomId,
+          newRoomId: room.newRoomId,
+          fromDate: room.fromDate,
+          toDate: room.toDate,
         });
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Dữ liệu phòng không hợp lệ"
-        );
-        return; // Stop submission
-      }
+
+        const result =
+          BookingSchema.UpdateBookingRoomRequestSchema.safeParse(room);
+
+        if (!result.success) {
+          console.error("Invalid room operation:", room, result.error);
+          const errorMsg = result.error.issues
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
+            .join(", ");
+          throw new Error(
+            `Phòng ${room.roomId || room.bookingRoomId || "unknown"} không hợp lệ: ${errorMsg}`
+          );
+        }
+      });
     }
 
     const hasDatesChanged =
@@ -142,15 +133,15 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       data.checkoutDate !== bookingDetail?.checkoutDate;
     const hasRoomChanges = data.rooms && data.rooms.length > 0;
 
-    if (hasDatesChanged && !permissions.canUpdateDates) {
+    if (hasDatesChanged && !bookingState.permissions.canEditDates) {
       toast.error(
-        permissions.dateChangeBlockReason ||
+        bookingState.permissions.dateChangeBlockReason ||
           "Không thể thay đổi ngày check-in/check-out"
       );
       return;
     }
 
-    if (hasRoomChanges && !permissions.canModifyRooms) {
+    if (hasRoomChanges && !bookingState.permissions.canEditRooms) {
       toast.error(
         "Không thể thay đổi phòng khi đã có thanh toán hoặc booking đã kết thúc"
       );
@@ -177,48 +168,14 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     };
 
     updateBooking(payload, {
-      onError: (error: any) => {
-        if (error.response?.data?.errors) {
-          const validationErrors = error.response.data.errors;
-          Object.entries(validationErrors).forEach(([field, messages]) => {
-            if (Array.isArray(messages)) {
-              messages.forEach((msg) => {
-                toast.error(`${field}: ${msg}`);
-              });
-            } else {
-              toast.error(`${field}: ${messages}`);
-            }
-          });
-        }
-
-        if (error.errors) {
-          console.error("Form validation errors:", error.errors);
-          error.errors.forEach((err: any) => {
-            const fieldPath = err.path?.join(".") || "unknown";
-            toast.error(`${fieldPath}: ${err.message}`);
-          });
-        }
-
-        if (!error.response?.data?.errors && !error.errors) {
-          toast.error(error.message || "Cập nhật booking thất bại");
-        }
-      },
       onSuccess: () => {
-        toast.success("Cập nhật booking thành công");
+        form.setValue("rooms", [], { shouldDirty: false });
       },
     });
   };
 
   useEffect(() => {
     if (bookingDetail && bookingDetail.id) {
-      const currentRooms = form.getValues("rooms") || [];
-      const hasPendingRoomChanges = currentRooms.some(
-        (room) =>
-          room.action === "Add" ||
-          room.action === "Remove" ||
-          room.action === "Change"
-      );
-
       form.reset(
         {
           checkinDate: bookingDetail.checkinDate,
@@ -234,11 +191,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             bookingDetail.breakfastDates?.map((date) => {
               return { date: date };
             }) || [],
-          rooms: hasPendingRoomChanges ? currentRooms : [],
+          rooms: [], // Always clear pending operations when data refreshes
         },
         {
-          keepDirty: true, // ✅ Preserve dirty state
-          keepValues: false, // We're providing new values explicitly
+          keepDirty: false, // Don't preserve dirty state on data refresh
+          keepValues: false,
         }
       );
     }
@@ -264,7 +221,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               bookingDetail={bookingDetail}
               form={form}
               OTAList={OTAList || []}
-              permissions={permissions}
+              bookingState={bookingState}
             />
 
             <div className="flex  items-start gap-4">
@@ -272,7 +229,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 bookingDetail={bookingDetail}
                 form={form}
                 roomsFieldArray={roomsFieldArray}
-                permissions={permissions}
+                bookingState={bookingState}
               />
 
               <div className="flex-1  space-y-4">
@@ -280,7 +237,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                   bookingCode={bookingCode}
                   bookingDetail={bookingDetail}
                   form={form}
-                  permissions={permissions}
+                  bookingState={bookingState}
                   nights={nights}
                   setNoteModalOpen={setNoteModalOpen}
                   handleSubmit={handleSubmit}
@@ -333,7 +290,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                         <FormControl>
                           <Textarea
                             {...field}
-                            disabled={!permissions.canDoSoftUpdate}
+                            disabled={!bookingState.permissions.canEdit}
                             placeholder="Nhập các lưu ý quan trọng về khách hàng hoặc đơn đặt phòng này..."
                             className="min-h-[200px] resize-none bg-muted/30 focus:bg-background transition-colors border-dashed focus:border-solid"
                           />
@@ -379,7 +336,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         isDirty={isDirty}
         isUpdating={isUpdating}
         bookingDetail={bookingDetail}
-        financialSummary={financialSummary}
+        bookingState={bookingState}
         onReset={() => form.reset()}
         onSave={form.handleSubmit(handleSubmit, onError)}
       />
@@ -389,34 +346,63 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 
 function BookingDetailSkeleton() {
   return (
-    <div className="flex gap-4 p-6">
-      <div className="w-full space-y-4">
-        <div className="flex gap-4">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-1/3" />
+    <div className="flex flex-col gap-6 p-4 md:p-6 lg:flex-row">
+      {/* Main Content Area */}
+      <div className="flex w-full flex-col space-y-6">
+        {/* Top Summary / Stats Cards */}
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <Skeleton className="h-28 w-full rounded-xl sm:w-2/3" />
+          <Skeleton className="h-28 w-full rounded-xl sm:w-1/3" />
         </div>
-        <div className="flex gap-4">
-          <Skeleton className="h-96 w-2/3" />
-          <Skeleton className="h-96 w-1/3" />
+
+        {/* Detail Sections */}
+        <div className="flex flex-col gap-4 lg:flex-row">
+          {/* Main Info (Customer, Booking Details) */}
+          <Skeleton className="h-[500px] w-full rounded-xl lg:w-2/3" />
+
+          {/* Sidebar Info (Payment, History, Notes) */}
+          <Skeleton className="h-[500px] w-full rounded-xl lg:w-1/3" />
         </div>
       </div>
     </div>
   );
 }
 
-function BookingDetailError() {
+function BookingDetailError({
+  onRetry,
+  errorDetails,
+}: {
+  onRetry?: () => void;
+  errorDetails?: string;
+}) {
   return (
-    <div className="h-full flex items-center justify-center">
+    <div className="flex h-full min-h-[400px] items-center justify-center p-6">
       <Empty>
         <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <FileWarning />
+          <EmptyMedia
+            variant="icon"
+            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500"
+          >
+            <FileWarning className="h-8 w-8" />
           </EmptyMedia>
-          <EmptyTitle>Lỗi</EmptyTitle>
-          <EmptyDescription>
-            Không thể tải thông tin đặt phòng.
+          <EmptyTitle className="text-xl font-semibold text-gray-900">
+            Không thể tải thông tin
+          </EmptyTitle>
+          <EmptyDescription className="mt-2 text-center text-sm text-gray-500">
+            {errorDetails ||
+              "Đã có lỗi xảy ra trong quá trình lấy dữ liệu đặt phòng. Vui lòng kiểm tra kết nối mạng."}
           </EmptyDescription>
         </EmptyHeader>
+
+        {/* Actionable UX: Nút thử lại */}
+        {onRetry && (
+          <div className="mt-6 flex justify-center">
+            <Button variant="outline" onClick={onRetry} className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              Thử lại
+            </Button>
+          </div>
+        )}
       </Empty>
     </div>
   );

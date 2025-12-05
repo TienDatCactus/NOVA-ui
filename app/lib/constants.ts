@@ -146,7 +146,7 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.staff.list,
       },
       {
-        title: "Vai trò",
+        title: "Chức vụ",
         url: FE_URL.dashboard.staff.roles,
       },
 

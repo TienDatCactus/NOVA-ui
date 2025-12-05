@@ -75,16 +75,13 @@ import type {
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
+import type { BookingState } from "../container/use-booking-state.hooks";
 
 interface StayDetailBarProps {
   bookingCode: string;
   bookingDetail: BookingDetailResponseDto;
   form: UseFormReturn<StaffUpdateBookingRequestDto>;
-  permissions: {
-    canEditDates: boolean;
-    blockReason?: string | null;
-    dateChangeBlockReason?: string | null;
-  };
+  bookingState: BookingState;
   nights: number;
   setNoteModalOpen: (open: boolean) => void;
   handleSubmit: (data: StaffUpdateBookingRequestDto) => void;
@@ -94,7 +91,7 @@ export default function StayDetailBar({
   bookingCode,
   bookingDetail,
   form,
-  permissions,
+  bookingState,
   nights,
   setNoteModalOpen,
   handleSubmit,
@@ -189,7 +186,7 @@ export default function StayDetailBar({
                 }
               </Badge>
               {/* Permission Alert (Inline) */}
-              {!permissions.canEditDates && (
+              {!bookingState.permissions.canEditDates && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -198,7 +195,7 @@ export default function StayDetailBar({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom">
-                      <p>{permissions.dateChangeBlockReason}</p>
+                      <p>{bookingState.permissions.dateChangeBlockReason}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -423,7 +420,7 @@ export default function StayDetailBar({
                   <FormControl>
                     <DatePicker
                       {...field}
-                      disabled={!permissions.canEditDates}
+                      disabled={!bookingState.permissions.canEditDates}
                       className="w-full"
                     />
                   </FormControl>
@@ -458,7 +455,7 @@ export default function StayDetailBar({
                   <FormControl>
                     <DatePicker
                       {...field}
-                      disabled={!permissions.canEditDates}
+                      disabled={!bookingState.permissions.canEditDates}
                       className="w-full"
                     />
                   </FormControl>

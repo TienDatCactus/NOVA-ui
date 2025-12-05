@@ -11,6 +11,17 @@ const ExpenseCategoryEnum = z.enum([
   "Other",
 ]);
 
+const ExpenseStatusEnum = z.enum(["Draft", "Posted", "Voided"]);
+
+const ExpenseSourceTypeEnum = z.enum([
+  "Manual",
+  "StaffPayroll",
+  "Procurement",
+  "OtherModule",
+]);
+
+//*-------------------------------------
+
 const ExpenseListItemSchema = z.object({
   id: z.string(),
   category: ExpenseCategoryEnum,
@@ -23,6 +34,8 @@ const ExpenseListItemSchema = z.object({
   receiptNumber: z.string(),
   createdAt: z.string(),
   createdBy: z.string().nullable(),
+  status: ExpenseStatusEnum,
+  sourceType: ExpenseSourceTypeEnum,
 });
 
 const ExpenseListResponseSchema = z.array(ExpenseListItemSchema);

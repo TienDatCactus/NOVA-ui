@@ -32,7 +32,15 @@ export interface RoomBookingHistoryParams {
 
 export const ROOM_TYPE = ["Traditional", "Romantic", "Unique", "Chalet"];
 
-export interface GetAvailableRoomsInternalParams {
+export interface AvailableRoomListParams {
+  CheckInDate: string;
+  CheckOutDate: string;
+  Adults: number;
+  ChildrenUnder6: number;
+  RoomCount: number;
+}
+
+export interface InternalAvailableRoomListParams {
   CheckInDate: string;
   CheckOutDate: string;
   Guests: number;

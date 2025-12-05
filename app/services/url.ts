@@ -21,6 +21,7 @@ const User = {
   removeRoles: (id: string) => `Users/${id}/roles`,
   changePassword: (id: string) => `Users/${id}/change-password`,
   chatStaff: "Users/chat-staff",
+  delete: (id: string) => `Users/${id}`,
 };
 
 const Booking = {
@@ -54,6 +55,7 @@ const OTAInformation = {
   list: "OTAInformation/list",
 };
 const Rooms = {
+  availables: "Rooms/available",
   detail: (id: string) => `Rooms/${id}/details`,
   bookingHistory: (id: string) => `Rooms/${id}/booking-history`,
   updateStatus: "Rooms/update-status",
@@ -334,6 +336,8 @@ const Expenses = {
   update: (id: string) => `Expenses/${id}`,
   delete: (id: string) => `Expenses/${id}`,
   summary: "Expenses/summary",
+  post: (id: string) => `Expenses/${id}/post`,
+  void: (id: string) => `Expenses/${id}/void`,
 };
 
 const AuditLogs = {

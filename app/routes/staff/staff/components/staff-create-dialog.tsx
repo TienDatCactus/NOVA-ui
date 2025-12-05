@@ -97,7 +97,7 @@ export default function CreateStaffDialog({
         <DialogHeader className="px-6 py-4 border-b bg-muted/5 shrink-0">
           <DialogTitle className="text-lg">Thêm nhân sự mới</DialogTitle>
           <DialogDescription>
-            Tạo hồ sơ và thiết lập vai trò cho nhân viên.
+            Tạo hồ sơ và thiết lập Chức vụ cho nhân viên.
           </DialogDescription>
         </DialogHeader>
 
@@ -301,7 +301,7 @@ export default function CreateStaffDialog({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Vai trò / Chức vụ{" "}
+                          Chức vụ / Chức vụ{" "}
                           <span className="text-destructive">*</span>
                         </FormLabel>
                         <Select
@@ -310,7 +310,7 @@ export default function CreateStaffDialog({
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Chọn vai trò" />
+                              <SelectValue placeholder="Chọn Chức vụ" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

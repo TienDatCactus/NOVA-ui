@@ -1,14 +1,19 @@
-import { Calendar as CalendarIcon, Download, Search, X } from "lucide-react";
-import { useState } from "react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import { format, parseISO } from "date-fns";
+import { vi } from "date-fns/locale";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+  BookOpenCheck,
+  Calendar as CalendarIcon,
+  CheckCircle2,
+  Download,
+  RotateCcw,
+  Search,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -17,94 +22,56 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Calendar } from "~/components/ui/calendar";
-import {
-  BOOKING_SOURCES,
-  BOOKING_STATUSES,
-} from "~/services/api/booking/booking.types";
+import { Input } from "~/components/ui/input";
 import { BookingService } from "~/services/api/booking";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { DatePicker } from "~/components/ui/date-picker";
 
-export interface BookingSearchFilters {
-  searchText: string;
-  status: string;
-  source: string;
-  date?: string;
-  onDateChange?: (date: Date | undefined) => void;
-}
+// Giả lập data type nếu chưa import được
+import type { BookingSearchFilters } from "../container/booking-filter.hooks";
 
 interface SearchRoomProps {
   filters: BookingSearchFilters;
-  onFiltersChange: (filters: BookingSearchFilters) => void;
-  onReset: () => void;
-  date?: Date | string;
-  onDateChange?: (date: Date | undefined) => void;
+  updateFilters: <K extends keyof BookingSearchFilters>(
+    key: K,
+    value: BookingSearchFilters[K]
+  ) => void;
+  resetFilters: () => void;
 }
 
-function SearchRoom({
-  filters,
-  onFiltersChange,
-  onReset,
-  date,
-  onDateChange,
-}: SearchRoomProps) {
+function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
   const [isExporting, setIsExporting] = useState(false);
-  const [exportDate, setExportDate] = useState<Date>(new Date()); // Mặc định ngày hiện tại
+  const [exportDate, setExportDate] = useState<Date>(new Date());
   const [openExportDialog, setOpenExportDialog] = useState(false);
-
-  const handleSearchTextChange = (value: string) => {
-    onFiltersChange({ ...filters, searchText: value });
-  };
-
-  const handleStatusChange = (value: string) => {
-    onFiltersChange({ ...filters, status: value });
-  };
-
-  const handleSourceChange = (value: string) => {
-    onFiltersChange({ ...filters, source: value });
-  };
-
-  const handleOpenExportDialog = () => {
-    setExportDate(new Date()); // Reset về ngày hiện tại
-    setOpenExportDialog(true);
-  };
 
   const handleConfirmExport = async () => {
     if (isExporting) return;
 
     try {
       setIsExporting(true);
-      setOpenExportDialog(false);
-      toast.loading("Đang xuất file...", { id: "export-bookings" });
+      toast.loading("Đang chuẩn bị file xuất...", { id: "export-bookings" });
 
       const dateParam = format(exportDate, "yyyy-MM-dd");
       const blob = await BookingService.exportBookings(dateParam);
 
-      // Ensure blob is valid
       if (!blob || !(blob instanceof Blob)) {
-        throw new Error("Dữ liệu không hợp lệ");
+        throw new Error("Dữ liệu blob không hợp lệ");
       }
 
-      // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `danh-sach-booking-${format(exportDate, "yyyy-MM-dd")}.xlsx`;
+      link.download = `Booking_List_${dateParam}.xlsx`;
       document.body.appendChild(link);
       link.click();
 
-      // Cleanup
       setTimeout(() => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }, 100);
 
+      setOpenExportDialog(false);
       toast.success("Xuất file thành công", { id: "export-bookings" });
     } catch (error: any) {
-      toast.error(error?.message || "Xuất file thất bại. Vui lòng thử lại", {
+      toast.error(error?.message || "Xuất file thất bại", {
         id: "export-bookings",
       });
     } finally {
@@ -112,118 +79,91 @@ function SearchRoom({
     }
   };
 
-  const hasActiveFilters =
-    filters.searchText ||
-    (filters.status && filters.status !== "all") ||
-    (filters.source && filters.source !== "all");
-
   return (
-    <div className="flex justify-between items-center gap-2">
-      <div className="flex-1 flex items-center gap-2">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10" />
-          <Input
-            className="h-9 pl-9 bg-white shadow-sm"
-            placeholder="Tìm mã booking, tên khách, SĐT..."
-            value={filters.searchText}
-            onChange={(e) => handleSearchTextChange(e.target.value)}
-          />
-        </div>
-
-        {/* <Select value={filters.status} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-[180px] h-9 bg-white shadow-sm">
-            <SelectValue placeholder="Trạng thái" />
-          </SelectTrigger>
-          <SelectContent>
-            {BOOKING_STATUSES.map((status) => (
-              <SelectItem key={status.value} value={status.value}>
-                {status.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={filters.source} onValueChange={handleSourceChange}>
-          <SelectTrigger className="w-[180px] h-9 bg-white shadow-sm">
-            <SelectValue placeholder="Kênh đặt" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả kênh</SelectItem>
-            {BOOKING_SOURCES.map((channel) => (
-              <SelectItem key={channel.key} value={channel.value + ""}>
-                {channel.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select> */}
-        <DatePicker
-          value={date ? date : new Date()}
-          onChange={onDateChange}
-          className="w-[180px] h-9 shadow-sm"
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-1 bg-white rounded-lg">
+      <div className="flex flex-1 items-center gap-2 w-full sm:w-auto">
+        <Input
+          startAddon={<Search className="h-4 w-4 text-muted-foreground " />}
+          className="w-64"
+          placeholder="Tìm theo tên, mã booking..."
+          value={filters.searchText}
+          onChange={(e) => updateFilters("searchText", e.target.value)}
         />
+
+        <DatePicker
+          mode="single"
+          value={filters.date}
+          onChange={(date) => updateFilters("date", date)}
+          locale={vi}
+          className="w-[140px] h-10 hidden sm:flex"
+          placeholder="Chọn ngày"
+        />
+        <Button onClick={() => updateFilters("date", undefined)}>
+          <BookOpenCheck />
+          Tất cả booking
+        </Button>
       </div>
 
-      <Button
-        variant="success"
-        size="sm"
-        onClick={handleOpenExportDialog}
-        disabled={isExporting}
-        className="h-9 gap-1"
-      >
-        <Download className="h-4 w-4" />
-        Xuất File
-      </Button>
+      <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <Button variant="ghost" size="sm" onClick={resetFilters}>
+          <RotateCcw />
+        </Button>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onReset}
-        className="h-9 gap-1"
-      >
-        Tất cả đặt phòng
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onReset}
-        className="h-9 gap-1 text-muted-foreground hover:text-foreground"
-      >
-        <X className="h-4 w-4" />
-        Xóa bộ lọc
-      </Button>
+        <Button
+          variant="success"
+          size="sm"
+          onClick={() => setOpenExportDialog(true)}
+          disabled={isExporting}
+        >
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">Xuất Excel</span>
+        </Button>
+      </div>
 
       {/* Export Dialog */}
       <Dialog open={openExportDialog} onOpenChange={setOpenExportDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Xuất danh sách booking</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              Xuất danh sách booking
+            </DialogTitle>
             <DialogDescription>
-              Chọn ngày để xuất danh sách booking. Mặc định là ngày hiện tại.
+              Hệ thống sẽ xuất danh sách booking dựa trên ngày được chọn dưới
+              đây.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-center py-4">
+
+          <div className="flex justify-center bg-muted/20 rounded-lg my-2">
             <Calendar
               mode="single"
               selected={exportDate}
-              onSelect={(date) => {
-                if (date) setExportDate(date);
-              }}
+              onSelect={(date) => date && setExportDate(date)}
               locale={vi}
-              className="rounded-md border"
+              className="bg-white  w-full rounded-md border shadow-sm"
             />
           </div>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setOpenExportDialog(false)}
-              disabled={isExporting}
-            >
-              Hủy
-            </Button>
-            <Button onClick={handleConfirmExport} disabled={isExporting}>
-              <Download className="h-4 w-4 mr-2" />
-              Xuất file ({format(exportDate, "dd/MM/yyyy", { locale: vi })})
-            </Button>
+
+          <DialogFooter className="sm:justify-between gap-2">
+            <div className="text-xs text-muted-foreground flex items-center">
+              *Định dạng file: .xlsx
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setOpenExportDialog(false)}
+                disabled={isExporting}
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleConfirmExport}
+                disabled={isExporting}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {isExporting ? "Đang xuất..." : "Tải xuống"}
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

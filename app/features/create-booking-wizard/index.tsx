@@ -41,6 +41,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { isDirty } from "zod/v3";
+import { AxiosError } from "axios";
 
 const BookingMasterSchema = z
   .object({
@@ -106,8 +107,6 @@ export default function CreateBookingPage() {
 
   const { mutateAsync: createBooking, isPending: isSubmitting } =
     useCreateBookingMutation();
-
-  // Khởi tạo default dates
   const defaultCheckin = storeData.checkinDate
     ? new Date(storeData.checkinDate)
     : new Date();
@@ -115,11 +114,9 @@ export default function CreateBookingPage() {
     ? new Date(storeData.checkoutDate)
     : addDays(new Date(), 1);
 
-  // 1. SETUP MASTER FORM
   const form = useForm({
     resolver: zodResolver(BookingMasterSchema),
     defaultValues: {
-      // UI Fields
       bookingType: storeData.bookingType || "Direct",
       dateRange: {
         from: defaultCheckin,
@@ -241,9 +238,6 @@ export default function CreateBookingPage() {
           toast.success("Tạo đặt phòng thành công!");
           resetStore();
           navigate(DASHBOARD.bookings.list);
-        },
-        onError: () => {
-          toast.error("Thất bại. Vui lòng kiểm tra lại thông tin.");
         },
       });
     } catch (e) {}

@@ -66,7 +66,7 @@ export default function CreateRoleDialog({
         <DialogHeader>
           <DialogTitle>Tạo vai trò mới</DialogTitle>
           <DialogDescription>
-            Tạo vai trò nhân sự mới trong hệ thống
+            Tạo vai nhân sự mới trong hệ thống
           </DialogDescription>
         </DialogHeader>
 

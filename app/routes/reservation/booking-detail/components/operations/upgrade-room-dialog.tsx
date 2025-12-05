@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, parseISO } from "date-fns";
 import {
   ArrowUpCircle,
   Check,
@@ -7,15 +6,14 @@ import {
   Gift,
   Loader2,
   TrendingUp,
+  AlertCircle, // Icon mới cho warning
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -45,12 +43,12 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
+import { Skeleton } from "~/components/ui/skeleton"; // Cần component này
 import { cn, formatMoney } from "~/lib/utils";
 import type {
   BookingDetailResponseDto,
   BookingUpgradeRoomRequestDto,
 } from "~/services/api/booking/dto";
-import { PaymentSchema } from "~/services/schema/payment.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import {
   calculateRemainingNights,
@@ -82,77 +80,95 @@ export function UpgradeRoomDialog({
       paidAmount: 0,
       transactionReference: "",
     },
+    mode: "onChange", // Validate realtime
   });
 
-  const { mutate: upgradeRoom, isPending: isUpgrading } = useUpgradeRoom(
-    bookingDetail?.id || ""
-  );
-  const { data: availableRooms } = useAvailableRoomsForChange({
-    bookingId: bookingDetail?.id || "",
-    bookingRoomId: form.watch("bookingRoomId") || "",
-  });
   const selectedBookingRoomId = form.watch("bookingRoomId");
   const selectedNewRoomId = form.watch("newRoomId");
   const isFree = form.watch("isFree");
   const paymentMethod = form.watch("paymentMethod");
 
-  const selectedBookingRoom = bookingDetail.rooms.find(
-    (r) => r.bookingRoomId === selectedBookingRoomId
+  const { mutate: upgradeRoom, isPending: isUpgrading } = useUpgradeRoom(
+    bookingDetail?.id || ""
   );
 
-  const selectedNewRoom = availableRooms?.find(
-    (r) => r.roomId === selectedNewRoomId
+  // Thêm isLoading từ hook để xử lý UI
+  const { data: availableRooms, isLoading: isLoadingRooms } =
+    useAvailableRoomsForChange({
+      bookingId: bookingDetail?.id || "",
+      bookingRoomId: selectedBookingRoomId || "",
+      enabled: open && !!selectedBookingRoomId,
+    });
+
+  const selectedBookingRoom = useMemo(
+    () =>
+      bookingDetail.rooms.find(
+        (r) => r.bookingRoomId === selectedBookingRoomId
+      ),
+    [bookingDetail.rooms, selectedBookingRoomId]
   );
 
-  const remainingNights =
-    selectedBookingRoom && selectedNewRoom
+  const selectedNewRoom = useMemo(
+    () => availableRooms?.find((r) => r.roomId === selectedNewRoomId),
+    [availableRooms, selectedNewRoomId]
+  );
+
+  const remainingNights = useMemo(() => {
+    return selectedBookingRoom && selectedNewRoom
       ? calculateRemainingNights(
           bookingDetail.status,
           selectedBookingRoom.fromDate,
           selectedBookingRoom.toDate
         )
       : 0;
+  }, [selectedBookingRoom, selectedNewRoom, bookingDetail.status]);
 
-  const surcharge =
-    selectedBookingRoom && selectedNewRoom && !isFree
+  const surcharge = useMemo(() => {
+    return selectedBookingRoom && selectedNewRoom && !isFree
       ? calculateUpgradeSurcharge(
           selectedBookingRoom.baseRate || 0,
           selectedNewRoom.baseRate || 0,
           remainingNights
         )
       : 0;
+  }, [selectedBookingRoom, selectedNewRoom, isFree, remainingNights]);
 
-  // Validation message
-  const validationMessage =
-    selectedBookingRoom && selectedNewRoom
+  const validationMessage = useMemo(() => {
+    return selectedBookingRoom && selectedNewRoom
       ? getUpgradeValidationMessage(
           selectedBookingRoom.baseRate || 0,
           selectedNewRoom.baseRate || 0,
           remainingNights
         )
       : null;
+  }, [selectedBookingRoom, selectedNewRoom, remainingNights]);
 
-  // Reset form when dialog closes
   useEffect(() => {
     if (!open) {
       form.reset();
     }
   }, [open, form]);
 
-  const handleSubmit = form.handleSubmit(async (data) => {
+  const handleSubmit = form.handleSubmit((data) => {
     if (validationMessage) {
       toast.error(validationMessage);
       return;
     }
 
-    const wantsToPayNow = !data.isFree && data.paymentMethod && data.paidAmount;
+    const wantsToPayNow = !data.isFree && data.paymentMethod;
+
+    // UX Improvement: Set Error vào field thay vì Toast
     if (wantsToPayNow && data.paidAmount && data.paidAmount > surcharge) {
-      toast.error("Số tiền thanh toán không được vượt quá phí upgrade");
+      form.setError("paidAmount", {
+        type: "manual",
+        message: "Số tiền không được lớn hơn phí upgrade",
+      });
+      // Scroll tới lỗi (optional nếu form quá dài)
       return;
     }
 
-    try {
-      await upgradeRoom({
+    upgradeRoom(
+      {
         bookingRoomId: data.bookingRoomId,
         newRoomId: data.newRoomId,
         isFree: data.isFree,
@@ -163,49 +179,65 @@ export function UpgradeRoomDialog({
           wantsToPayNow && data.transactionReference
             ? data.transactionReference
             : undefined,
-      });
-
-      onOpenChange(false);
-    } catch (error) {
-      // Error handled by parent
-    }
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          toast.success("Nâng cấp phòng thành công!");
+        },
+      }
+    );
   });
 
   const handleQuickAmount = (percentage: number) => {
     const amount = Math.round(surcharge * percentage);
-    form.setValue("paidAmount", amount);
+    form.setValue("paidAmount", amount, { shouldValidate: true });
+    if (amount <= surcharge) {
+      form.clearErrors("paidAmount");
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 py-4 border-b bg-muted/10">
           <DialogTitle className="text-lg font-semibold flex items-center gap-2">
             <ArrowUpCircle className="h-5 w-5 text-primary" />
             Nâng cấp phòng (Room Upgrade)
           </DialogTitle>
           <DialogDescription className="text-sm">
-            Nâng cấp lên hạng phòng cao hơn. Có thể miễn phí (complimentary)
-            hoặc thu phí bổ sung.
+            Nâng cấp lên hạng phòng cao hơn.
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4">
+        <div className="flex-1 px-6 py-4">
           <Form {...form}>
-            <div className="space-y-6">
+            <div className="space-y-8 pb-4">
               {/* STEP 1: SELECT CURRENT ROOM */}
               <FormField
                 control={form.control}
                 name="bookingRoomId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-semibold">
-                      1. Chọn phòng hiện tại cần upgrade
+                    <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="h-6 w-6 rounded-full p-0 flex items-center justify-center border-primary text-primary"
+                      >
+                        1
+                      </Badge>
+                      Chọn phòng hiện tại
                     </FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        form.setValue("newRoomId", ""); // Reset new room selection
+                      }}
+                    >
                       <FormControl>
-                        <SelectTrigger className="h-10">
-                          <SelectValue placeholder="Chọn phòng hiện tại..." />
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Chọn phòng cần upgrade..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -214,17 +246,22 @@ export function UpgradeRoomDialog({
                             key={room.bookingRoomId}
                             value={room.bookingRoomId}
                           >
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-left">
                               <span className="font-medium">
                                 {room.roomName}
+                              </span>
+                              <span className="text-xs text-muted-foreground hidden sm:inline">
+                                •
                               </span>
                               <span className="text-xs text-muted-foreground">
                                 {room.roomTypeName}
                               </span>
-                              <span className="text-xs font-mono">
+                              <Badge
+                                variant="secondary"
+                                className="ml-auto sm:ml-2 font-mono text-xs"
+                              >
                                 {formatMoney(room.baseRate || 0).vndFormatted}
-                                /đêm
-                              </span>
+                              </Badge>
                             </div>
                           </SelectItem>
                         ))}
@@ -241,19 +278,34 @@ export function UpgradeRoomDialog({
                   control={form.control}
                   name="newRoomId"
                   render={({ field }) => (
-                    <FormItem className="animate-in slide-in-from-top-2 fade-in">
-                      <FormLabel className="text-sm font-semibold">
-                        2. Chọn phòng mới (hạng cao hơn)
+                    <FormItem className="animate-in slide-in-from-top-2 fade-in duration-300">
+                      <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className="h-6 w-6 rounded-full p-0 flex items-center justify-center border-primary text-primary"
+                        >
+                          2
+                        </Badge>
+                        Chọn hạng phòng mới
                       </FormLabel>
-                      {availableRooms?.length === 0 ? (
-                        <Card className="p-6 text-center bg-muted/30">
+
+                      {isLoadingRooms ? (
+                        // Skeleton Loading State
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <Skeleton className="h-24 w-full rounded-xl" />
+                          <Skeleton className="h-24 w-full rounded-xl" />
+                          <Skeleton className="h-24 w-full rounded-xl" />
+                          <Skeleton className="h-24 w-full rounded-xl" />
+                        </div>
+                      ) : availableRooms?.length === 0 ? (
+                        <Card className="p-8 text-center bg-muted/30 border-dashed">
                           <p className="text-sm text-muted-foreground">
-                            Không có phòng hạng cao hơn khả dụng trong khoảng
-                            thời gian này.
+                            Không tìm thấy phòng hạng cao hơn khả dụng cho{" "}
+                            {remainingNights} đêm còn lại.
                           </p>
                         </Card>
                       ) : (
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {availableRooms?.map((room) => {
                             const isSelected = field.value === room.roomId;
                             const isHigher =
@@ -265,28 +317,37 @@ export function UpgradeRoomDialog({
                               <Card
                                 key={room.roomId}
                                 className={cn(
-                                  "p-4 cursor-pointer transition-all hover:border-primary/50",
-                                  isSelected && "border-primary bg-primary/5",
-                                  !isHigher && "opacity-50 cursor-not-allowed"
+                                  "p-4 cursor-pointer transition-all border-2 relative overflow-hidden",
+                                  isSelected
+                                    ? "border-primary bg-primary/5 shadow-md"
+                                    : "border-transparent bg-muted/20 hover:border-primary/30",
+                                  !isHigher &&
+                                    "opacity-50 cursor-not-allowed grayscale"
                                 )}
                                 onClick={() =>
                                   isHigher && field.onChange(room.roomId)
                                 }
                               >
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <span className="font-medium text-foreground">
+                                {isSelected && (
+                                  <div className="absolute top-0 right-0 p-1 bg-primary text-primary-foreground rounded-bl-lg">
+                                    <Check className="h-3 w-3" />
+                                  </div>
+                                )}
+                                <div className="space-y-3">
+                                  <div className="flex items-start justify-between">
+                                    <div className="font-medium text-foreground text-sm">
                                       {room.roomName}
-                                    </span>
+                                      <div className="text-xs text-muted-foreground font-normal mt-0.5">
+                                        {room.roomTypeName}
+                                      </div>
+                                    </div>
                                     {isHigher && (
-                                      <TrendingUp className="h-4 w-4 text-emerald-600" />
+                                      <TrendingUp className="h-4 w-4 text-emerald-600 shrink-0" />
                                     )}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {room.roomTypeName}
-                                  </div>
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-sm font-mono font-semibold text-primary">
+
+                                  <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-300">
+                                    <span className="text-xs font-mono font-medium text-muted-foreground">
                                       {
                                         formatMoney(room.baseRate || 0)
                                           .vndFormatted
@@ -295,10 +356,10 @@ export function UpgradeRoomDialog({
                                     </span>
                                     {selectedBookingRoom && isHigher && (
                                       <Badge
-                                        variant="secondary"
-                                        className="text-xs"
+                                        variant="outline"
+                                        className="text-[10px] border-emerald-200 text-emerald-700 bg-emerald-50 h-5"
                                       >
-                                        +
+                                        +{" "}
                                         {
                                           formatMoney(
                                             room.baseRate -
@@ -321,82 +382,93 @@ export function UpgradeRoomDialog({
                 />
               )}
 
-              {/* STEP 3: UPGRADE TYPE */}
+              {/* STEP 3 & 4: CONFIGURATION */}
               {selectedNewRoomId && !validationMessage && (
-                <div className="space-y-4 animate-in slide-in-from-top-2 fade-in">
+                <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
                   <Separator />
-                  <Label className="text-sm font-semibold">
-                    3. Loại upgrade
-                  </Label>
 
+                  {/* Loại Upgrade */}
                   <FormField
                     control={form.control}
                     name="isFree"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="space-y-3">
+                        <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className="h-6 w-6 rounded-full p-0 flex items-center justify-center border-primary text-primary"
+                          >
+                            3
+                          </Badge>
+                          Hình thức nâng cấp
+                        </FormLabel>
                         <FormControl>
                           <RadioGroup
                             value={field.value ? "free" : "paid"}
-                            onValueChange={(val) =>
-                              field.onChange(val === "free")
-                            }
+                            onValueChange={(val) => {
+                              field.onChange(val === "free");
+                              if (val === "free") {
+                                form.setValue("paidAmount", 0);
+                                form.setValue("paymentMethod", undefined);
+                              }
+                            }}
+                            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                           >
-                            <Card className="p-4">
-                              <div className="flex items-start gap-3">
-                                <RadioGroupItem
-                                  value="free"
-                                  id="free"
-                                  className="mt-1"
-                                />
-                                <Label
-                                  htmlFor="free"
-                                  className="flex-1 cursor-pointer space-y-1"
-                                >
-                                  <div className="flex items-center gap-2 font-medium">
-                                    <Gift className="h-4 w-4 text-emerald-600" />
-                                    Complimentary Upgrade (Miễn phí)
-                                  </div>
-                                  <p className="text-xs text-muted-foreground font-normal">
-                                    Không tạo invoice. Thường dùng cho khách VIP
-                                    hoặc service recovery.
-                                  </p>
-                                </Label>
-                              </div>
+                            <Card
+                              className={cn(
+                                "p-4 cursor-pointer border-2 transition-all",
+                                field.value
+                                  ? "border-emerald-500 bg-emerald-50/30"
+                                  : "border-transparent"
+                              )}
+                            >
+                              <RadioGroupItem
+                                value="free"
+                                id="free"
+                                className="sr-only"
+                              />
+                              <Label
+                                htmlFor="free"
+                                className="cursor-pointer block"
+                              >
+                                <div className="flex items-center gap-2 font-semibold text-emerald-700">
+                                  <Gift className="h-4 w-4" /> Complimentary
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Miễn phí, không tạo invoice.
+                                </div>
+                              </Label>
                             </Card>
 
-                            <Card className="p-4">
-                              <div className="flex items-start gap-3">
-                                <RadioGroupItem
-                                  value="paid"
-                                  id="paid"
-                                  className="mt-1"
-                                />
-                                <Label
-                                  htmlFor="paid"
-                                  className="flex-1 cursor-pointer space-y-1"
-                                >
-                                  <div className="flex items-center gap-2 font-medium">
-                                    <CreditCard className="h-4 w-4 text-primary" />
-                                    Paid Upgrade (Thu phí)
-                                  </div>
-                                  <p className="text-xs text-muted-foreground font-normal">
-                                    Tạo invoice surcharge. Có thể thanh toán
-                                    ngay hoặc để checkout.
-                                  </p>
-                                  {!field.value && (
-                                    <div className="mt-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                                      <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">
-                                          Phí upgrade ({remainingNights} đêm):
-                                        </span>
-                                        <span className="font-mono font-bold text-primary">
-                                          {formatMoney(surcharge).vndFormatted}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Label>
-                              </div>
+                            <Card
+                              className={cn(
+                                "p-4 cursor-pointer border-2 transition-all",
+                                !field.value
+                                  ? "border-primary bg-primary/5"
+                                  : "border-transparent"
+                              )}
+                            >
+                              {/* COMPONENT PAID GIỮ NGUYÊN */}
+                              <RadioGroupItem
+                                value="paid"
+                                id="paid"
+                                className="sr-only"
+                              />
+                              <Label
+                                htmlFor="paid"
+                                className="cursor-pointer block"
+                              >
+                                <div className="flex items-center gap-2 font-semibold text-primary">
+                                  <CreditCard className="h-4 w-4" /> Paid
+                                  Upgrade
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Thu phí chênh lệch:{" "}
+                                  <span className="font-mono font-bold text-foreground">
+                                    {formatMoney(surcharge).vndFormatted}
+                                  </span>
+                                </div>
+                              </Label>
                             </Card>
                           </RadioGroup>
                         </FormControl>
@@ -404,176 +476,129 @@ export function UpgradeRoomDialog({
                     )}
                   />
 
-                  {/* Free Upgrade: Reason Required */}
-                  {isFree && (
-                    <FormField
-                      control={form.control}
-                      name="reason"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">
-                            Lý do upgrade miễn phí{" "}
-                            <span className="text-destructive">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="VD: Khách VIP, Service recovery, Oversold..."
-                              {...field}
-                              className="min-h-[80px] resize-none"
-                              maxLength={500}
-                            />
-                          </FormControl>
-                          <p className="text-xs text-muted-foreground">
-                            {(field.value || "").length}/500 ký tự
-                          </p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {/* Paid Upgrade: Optional Payment Now */}
-                  {!isFree && (
-                    <div className="space-y-4">
-                      <Separator />
-                      <Label className="text-sm font-semibold">
-                        4. Thanh toán ngay (tùy chọn)
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        Để trống nếu muốn thanh toán khi checkout
-                      </p>
-
+                  {/* Logic Form Fields Dynamic */}
+                  <div className="pl-8 border-l-2 border-muted ml-3 space-y-4">
+                    {isFree ? (
                       <FormField
                         control={form.control}
-                        name="paymentMethod"
+                        name="reason"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs">
-                              Phương thức thanh toán
+                            <FormLabel className="text-xs font-semibold">
+                              Lý do miễn phí{" "}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="h-10">
-                                  <SelectValue placeholder="Chọn phương thức..." />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {PAYMENT_METHODS.map((method) => (
-                                  <SelectItem
-                                    key={method.value}
-                                    value={method.value}
-                                  >
-                                    {method.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Nhập lý do (bắt buộc)..."
+                                {...field}
+                                className="resize-none"
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-
-                      {paymentMethod && (
-                        <>
+                    ) : (
+                      <>
+                        {/* Payment Methods - Giữ nguyên logic */}
+                        <div className="flex flex-col gap-4">
                           <FormField
                             control={form.control}
-                            name="paidAmount"
-                            render={({ field }) => (
-                              <FormItem className="animate-in slide-in-from-top-2">
-                                <div className="flex items-center justify-between">
-                                  <FormLabel className="text-xs">
-                                    Số tiền thanh toán
-                                  </FormLabel>
-                                  <div className="flex gap-1.5">
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleQuickAmount(0.5)}
-                                      className="h-6 px-2 text-xs"
-                                    >
-                                      50%
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleQuickAmount(1)}
-                                      className="h-6 px-2 text-xs"
-                                    >
-                                      100%
-                                    </Button>
-                                  </div>
-                                </div>
-                                <div className="relative">
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="0"
-                                      {...field}
-                                      className="pl-3 pr-12 h-10 font-mono"
-                                      max={surcharge}
-                                    />
-                                  </FormControl>
-                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium pointer-events-none">
-                                    VND
-                                  </span>
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="transactionReference"
+                            name="paymentMethod"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-xs">
-                                  Mã giao dịch (tùy chọn)
+                                <FormLabel className="text-xs font-semibold">
+                                  Thanh toán ngay (Tùy chọn)
                                 </FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="text"
-                                    placeholder="VD: TXN123456"
-                                    {...field}
-                                    value={field.value || ""}
-                                    className="h-10"
-                                  />
-                                </FormControl>
+                                <Select
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Chọn phương thức thanh toán..." />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {PAYMENT_METHODS.map((m) => (
+                                      <SelectItem key={m.value} value={m.value}>
+                                        {m.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                        </>
-                      )}
-                    </div>
-                  )}
+                          {paymentMethod && (
+                            <FormField
+                              control={form.control}
+                              name="paidAmount"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <div className="flex justify-between items-center mb-1.5">
+                                    <FormLabel className="text-xs font-semibold">
+                                      Số tiền thu
+                                    </FormLabel>
+                                    <div className="flex gap-1">
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-5 text-[10px] px-2"
+                                        onClick={() => handleQuickAmount(1)}
+                                      >
+                                        Max
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="relative">
+                                    <Input
+                                      type="number"
+                                      {...field}
+                                      max={surcharge}
+                                      className={cn(
+                                        "pr-12 font-mono",
+                                        form.formState.errors.paidAmount &&
+                                          "border-destructive focus-visible:ring-destructive"
+                                      )}
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                                      VND
+                                    </span>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {/* VALIDATION ERROR */}
+              {/* Validation Alert */}
               {validationMessage && (
-                <Card className="p-4 bg-destructive/10 border-destructive">
-                  <p className="text-sm text-destructive">
-                    {validationMessage}
-                  </p>
-                </Card>
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-red-50 text-red-700 border border-red-200">
+                  <AlertCircle className="h-5 w-5 shrink-0" />
+                  <p className="text-sm font-medium">{validationMessage}</p>
+                </div>
               )}
             </div>
           </Form>
-        </ScrollArea>
+        </div>
 
-        <DialogFooter className="px-6 py-4 bg-muted/5 border-t">
+        <DialogFooter className="px-6 py-4 bg-muted/5 border-t gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={form.formState.isSubmitting}
+            disabled={isUpgrading}
           >
-            Hủy
+            Đóng
           </Button>
           <Button
             onClick={handleSubmit}
@@ -581,21 +606,16 @@ export function UpgradeRoomDialog({
               !selectedBookingRoomId ||
               !selectedNewRoomId ||
               !!validationMessage ||
-              form.formState.isSubmitting
+              isUpgrading
             }
-            className="min-w-[120px]"
+            className="min-w-[140px]"
           >
-            {form.formState.isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang xử lý...
-              </>
+            {isUpgrading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <>
-                <Check className="mr-2 h-4 w-4" />
-                Xác nhận upgrade
-              </>
+              <ArrowUpCircle className="mr-2 h-4 w-4" />
             )}
+            {isUpgrading ? "Đang xử lý..." : "Xác nhận Upgrade"}
           </Button>
         </DialogFooter>
       </DialogContent>

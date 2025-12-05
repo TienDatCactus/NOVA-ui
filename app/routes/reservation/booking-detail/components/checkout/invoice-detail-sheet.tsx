@@ -63,12 +63,10 @@ import {
   useCalculateInvoiceFees,
   useCheckoutPayment,
   useInvoiceDetail,
-  useUpdateInvoice,
-} from "../../container/use-booking-checkout.hooks";
-import {
   useInvoicePayment,
   useSyncInvoiceWithOrders,
-} from "~/routes/invoices/container/invoices/mutation.hooks";
+  useUpdateInvoice,
+} from "../../container/use-booking-checkout.hooks";
 import {
   INVOICE_STATUSES,
   INVOICE_TYPES,
@@ -76,7 +74,7 @@ import {
 import {
   canInvoiceAcceptPayment,
   validatePaymentAmount,
-} from "../../container/payment-validation";
+} from "../../container/use-booking-state.hooks";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { cn } from "~/lib/utils";
 
@@ -157,9 +155,9 @@ export default function InvoiceDetailSheet({
   const { mutate: checkoutPayment, isPending: isProcessingCheckoutPayment } =
     useCheckoutPayment(bookingId);
   const { mutate: invoicePayment, isPending: isProcessingInvoicePayment } =
-    useInvoicePayment(invoiceId);
+    useInvoicePayment(invoiceId, bookingId);
   const { mutate: syncInvoice, isPending: isSyncingInvoice } =
-    useSyncInvoiceWithOrders(invoiceId);
+    useSyncInvoiceWithOrders(invoiceId, bookingId);
 
   const isProcessing =
     isUpdatingInvoice ||
@@ -224,8 +222,6 @@ export default function InvoiceDetailSheet({
       return;
     }
 
-    const onSuccess = () => onBack();
-
     if (isCheckoutInvoice) {
       checkoutPayment(
         {
@@ -233,7 +229,7 @@ export default function InvoiceDetailSheet({
           amount: data.amount,
           transactionReference: data.transactionReference || undefined,
         },
-        { onSuccess }
+        { onSuccess: () => onBack() }
       );
     } else {
       invoicePayment(
@@ -242,7 +238,7 @@ export default function InvoiceDetailSheet({
           amount: data.amount,
           note: data.transactionReference || "",
         },
-        { onSuccess }
+        { onSuccess: () => onBack() }
       );
     }
   };

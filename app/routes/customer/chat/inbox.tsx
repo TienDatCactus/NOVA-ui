@@ -9,6 +9,7 @@ import {
   ChevronRight,
   HelpCircle,
   TreePine,
+  Cog,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -249,9 +250,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
                       />
                     </h3>
                     <p className="text-sm text-stone-500 font-medium mt-1">
-                      {entry.canChat
-                        ? t("inbox.activeStatus")
-                        : t("inbox.endedStatus")}
+                      {entry.canChat ? t("inbox.active") : t("inbox.ended")}
                     </p>
                   </div>
                 </div>
@@ -266,7 +265,7 @@ export default function ChatInbox({}: Route.ComponentProps) {
                 onClick={(e) => e.stopPropagation()}
               >
                 <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
-                  {t("inbox.actions")}
+                  <Cog />
                 </span>
                 <Button
                   variant="ghost"

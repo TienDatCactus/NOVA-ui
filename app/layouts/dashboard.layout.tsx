@@ -70,7 +70,7 @@ const DashboardLayout: React.FC = () => {
           </header>
           <div
             className={cn(
-              "rounded-md w-full mx-auto bg-background flex-1 overflow-y-auto min-h-0"
+              "rounded-md w-full mx-auto bg-background flex-1 overflow-y-auto min-h-0 container"
             )}
           >
             <Outlet />

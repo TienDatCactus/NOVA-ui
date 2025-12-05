@@ -82,11 +82,7 @@ export default function ServicesViewLayout({
             </div>
             <div>
               {hasFilteredType && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => updateFilter("typeCode", "all")}
-                >
+                <Button variant="ghost" size="icon" onClick={resetFilters}>
                   <RotateCcw />
                 </Button>
               )}

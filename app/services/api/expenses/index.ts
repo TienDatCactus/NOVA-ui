@@ -90,7 +90,25 @@ async function getExpenseSummary(
   }
 }
 
+async function postExpense(id: string) {
+  try {
+    await http.post(Expenses.post(id));
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+async function voidExpense(id: string) {
+  try {
+    await http.post(Expenses.void(id));
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const ExpensesService = {
+  postExpense,
+  voidExpense,
   getExpenses,
   getExpenseDetail,
   createExpense,

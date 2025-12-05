@@ -162,6 +162,15 @@ async function getChatStaff(): Promise<ChatStaffListDto> {
     return Promise.reject(error);
   }
 }
+
+async function deleteUser(userId: string) {
+  try {
+    await http.delete(User.delete(userId));
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const UserService = {
   getUserList,
   getUserDetail,
@@ -174,4 +183,5 @@ export const UserService = {
   removeRoles,
   changePassword,
   getChatStaff,
+  deleteUser,
 };

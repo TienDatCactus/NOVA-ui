@@ -1,23 +1,23 @@
+import http from "~/lib/http";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 import type {
-  GetAvailableRoomsInternalParams,
+  InternalAvailableRoomListParams,
   RoomBookingHistoryParams,
   RoomDetailParams,
   RoomListParams,
 } from "~/services/api/rooms/room.types";
-import type {
-  RoomDetailResponseDto,
-  UpdateRoomStatusResponseDto,
-  RoomListResponseDto,
-  RoomBookingHistoryResponseDto,
-  CreateRoomResponseDto,
-  UpdateRoomDetailResponseDto,
-  AvailableRoomsInternalResponseDto,
-  UpdateRoomDetailRequestDto,
-  CreateRoomRequestDto,
-} from "./dto";
-import http from "~/lib/http";
 import { Rooms } from "~/services/url";
-import { RoomSchema } from "~/services/api/rooms/room.schema";
+import type {
+  AvailableRoomsInternalResponseDto,
+  CreateRoomRequestDto,
+  CreateRoomResponseDto,
+  RoomBookingHistoryResponseDto,
+  RoomDetailResponseDto,
+  RoomListResponseDto,
+  UpdateRoomDetailRequestDto,
+  UpdateRoomDetailResponseDto,
+  UpdateRoomStatusResponseDto,
+} from "./dto";
 
 const {
   RoomDetailSchema,
@@ -118,7 +118,7 @@ async function updateRoomDetail(
 }
 
 async function getAvailableRoomsInternal(
-  params: GetAvailableRoomsInternalParams
+  params: InternalAvailableRoomListParams
 ): Promise<AvailableRoomsInternalResponseDto> {
   try {
     const resp = await http.get(Rooms.getAvailableRoomsInternal, { params });

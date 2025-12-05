@@ -17,7 +17,7 @@ export default function Component({
   } = useServiceFilters();
   const { data: servicesData, isPending } = useServices({
     includeInactive,
-    typeCode: filters.typeCode,
+    typeCode: filters.typeCode || undefined,
   });
 
   const filteredServices = servicesData ? filterServices(servicesData) : [];

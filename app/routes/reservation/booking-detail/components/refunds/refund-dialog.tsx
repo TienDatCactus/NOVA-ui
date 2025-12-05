@@ -159,7 +159,6 @@ export default function RefundDialog({
                         type="number"
                         placeholder="Nhập số tiền cần hoàn"
                         min={0}
-                        step={1000}
                         {...field}
                         onChange={(e) =>
                           field.onChange(parseFloat(e.target.value) || 0)

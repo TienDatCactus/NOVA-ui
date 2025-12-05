@@ -1,11 +1,14 @@
+import { format } from "date-fns";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import {
   Table,
   TableBody,
@@ -14,22 +17,16 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { format } from "date-fns";
-import type {
-  InvoiceDetailDto,
-  InvoiceDetailItemDto,
-} from "~/services/api/invoices/dto";
-import { useInvoiceDetail } from "../../container/invoices/query.hooks";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
 import { InvoicesService } from "~/services/api/invoices";
-import { toast } from "sonner";
-import { Download, Printer } from "lucide-react";
+import type { InvoiceDetailItemDto } from "~/services/api/invoices/dto";
+import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { useInvoiceDetail } from "../../container/invoices/query.hooks";
 
 type InvoiceDetailDialogProps = {
   open: boolean;
