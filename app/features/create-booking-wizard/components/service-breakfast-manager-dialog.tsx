@@ -67,15 +67,16 @@ export default function ServiceBreakfastManagerDialog({
     );
 
     if (exists) {
-      // Logic: Toggle off if exists (optional, or just ignore)
       const updated = services.filter(
         (s: ServiceOrderItem) => s.itemId !== serviceId
       );
       form.setValue("serviceOrder.services", updated, { shouldValidate: true });
     } else {
-      // Logic: Add new
       const defaultDate = checkinDate
-        ? format(checkoutDate, "yyyy-MM-dd")
+        ? format(
+            new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000),
+            "yyyy-MM-dd"
+          )
         : format(new Date(), "yyyy-MM-dd");
 
       const newService: ServiceOrderItem = {

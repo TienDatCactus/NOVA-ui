@@ -9,7 +9,7 @@ const ServiceOrderItemSchema = z.object({
   itemType: z.enum(["ServiceItem", "MenuItem"]),
   itemId: z.string().min(1),
   quantity: z.number().int().min(0),
-  scheduledDate: z.string().length(10).optional().nullable(),
+  scheduledDate: z.string().length(10, "Ngày thực hiện dịch vụ là bắt buộc"),
   note: z.string().max(500).optional().nullable(),
 });
 

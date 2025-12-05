@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
+import type { FieldErrors } from "react-hook-form";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -40,10 +41,9 @@ export function formatMoney(amount: number | bigint | string) {
   }
   const numericAmount =
     typeof amount === "string" ? parseFloat(amount) : Number(amount);
-  const fixedAmount = numericAmount.toFixed(2);
+  const fixedAmount = numericAmount.toFixed(0);
   const formattedBase = fixedAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-  // Append currency symbols manually
   const usdFormatted = `$${formattedBase}`;
   const vndFormatted = `${formattedBase} ₫`;
 
@@ -73,9 +73,34 @@ export function useCalculateNights({
   return differenceInDays(checkoutDate, checkinDate);
 }
 
-export const onError = (errors: any) => {
-  toast.error("Vui lòng kiểm tra lại thông tin đã nhập", errors);
-  console.log("Validation errors:", errors);
+export const onError = (errors: FieldErrors) => {
+  // Get all error messages
+  const errorEntries = Object.entries(errors);
+
+  if (errorEntries.length === 0) {
+    console.log("No validation errors");
+    return;
+  }
+
+  // Get first error for toast display
+  const [firstField, firstError] = errorEntries[0];
+  const message =
+    (firstError?.message as string) ||
+    "Vui lòng kiểm tra lại thông tin đã nhập";
+
+  // Show error toast
+  toast.error(message, {
+    description: `Trường: ${firstField}`,
+    duration: 5000,
+  });
+
+  // Log all errors for debugging
+  console.group("🔴 React Hook Form Validation Errors:");
+  errorEntries.forEach(([field, error]) => {
+    console.log(`• ${field}:`, error?.message || error);
+  });
+  console.groupEnd();
+  console.log("Full error object:", errors);
 };
 
 export const toYMD = (d: unknown) => {

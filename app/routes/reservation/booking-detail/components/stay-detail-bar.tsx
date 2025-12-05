@@ -177,7 +177,7 @@ export default function StayDetailBar({
   };
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="flex-1">
+    <div className="flex-1">
       <Card className="shadow-sm overflow-hidden h-full gap-0  flex flex-col">
         {/* === HEADER === */}
         <CardHeader className="bg-muted/10 py-0 px-6 border-b shrink-0">
@@ -561,6 +561,6 @@ export default function StayDetailBar({
           {/* Notes Trigger */}
         </CardContent>
       </Card>
-    </form>
+    </div>
   );
 }

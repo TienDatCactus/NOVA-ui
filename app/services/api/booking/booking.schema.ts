@@ -88,14 +88,13 @@ const StaffCreateBookingSchema = z
       const checkoutDate = new Date(data.checkoutDate);
 
       return data.serviceOrder.services.every((service) => {
-        if (!service.scheduledDate) return true; // Optional field
+        if (!service.scheduledDate) return false; // Required field - must have a date
         const scheduledDate = new Date(service.scheduledDate);
-        return scheduledDate >= checkinDate && scheduledDate <= checkoutDate;
+        return scheduledDate >= checkinDate && scheduledDate < checkoutDate;
       });
     },
     {
-      message:
-        "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú (từ ngày nhận phòng đến ngày trả phòng)",
+      message: "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú",
       path: ["serviceOrder"],
     }
   )

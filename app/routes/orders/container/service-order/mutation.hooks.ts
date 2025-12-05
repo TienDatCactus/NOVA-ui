@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { OrderService } from "~/services/api/orders";
 import type {
   CreateServiceOrderRequestDto,
   ServiceOrderDetailDto,
   ServiceOrderPayNowRequestDto,
-  SetScheduledServiceOrderRequestDto,
   UpdateServiceOrderRequestDto,
 } from "~/services/api/orders/dto";
 
@@ -32,6 +32,11 @@ export function useCreateServiceOrder() {
         refetchType: "active",
       });
       toast.success("Đã tạo service order thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 }
@@ -60,6 +65,11 @@ export function useUpdateServiceOrder() {
       });
       toast.success("Đã cập nhật service order");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
+    },
   });
 }
 
@@ -86,6 +96,11 @@ export function useCompleteServiceOrder() {
         queryKey: ["checkout", "pending-charges"],
       });
       toast.success("Đã hoàn thành service order");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 }
@@ -114,6 +129,11 @@ export function useCancelServiceOrder() {
       });
       toast.success("Đã hủy service order");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
+    },
   });
 }
 
@@ -140,6 +160,11 @@ export function usePayServiceOrderNow() {
         queryKey: ["checkout", "pending-charges"],
       });
       toast.success("Đã thanh toán service order");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 }
@@ -176,6 +201,11 @@ export function useUpdateServiceOrderSchedule() {
       });
       queryClient.invalidateQueries({ queryKey: ["service-order-list"] });
       toast.success("Đã cập nhật thời gian phục vụ");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 }
