@@ -57,10 +57,12 @@ import {
   BOOKING_SOURCES,
   BOOKING_STATUSES,
 } from "~/services/api/booking/booking.types";
+import { useBookingDetail } from "../container/booking-query.hooks";
 import {
   useCancelBooking,
   useUpdateBookingStatus,
 } from "../container/booking-mutation.hooks";
+import { useBookingState } from "../../booking-detail/container/use-booking-state.hooks";
 import BookingDetailSheet from "./booking-detail.sheet";
 
 const { BookingListItemSchema } = BookingSchema;
@@ -74,6 +76,16 @@ interface BookingCardProps {
 export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+
+  // Fetch full booking detail for validation
+  const { data: bookingDetail } = useBookingDetail({
+    bookingId: booking.bookingId,
+    enabled: true,
+  });
+
+  // Get business logic permissions and financial status
+  const bookingState = useBookingState(bookingDetail);
+
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
   const { mutateAsync: cancelBooking } = useCancelBooking(
@@ -92,18 +104,29 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
   const isArrivingToday = !!(checkinDate && isToday(checkinDate));
 
+  // Business logic validation using booking state
   const canConfirmPayment = booking.status === "Pending";
+
   const canCheckIn =
     booking.status === "Confirmed" &&
     !!checkinDate &&
     !isBefore(startOfDay(new Date()), startOfDay(checkinDate));
 
   const canCheckOut =
-    booking.status === "InHouse" || booking.status === "CheckedIn";
+    (booking.status === "InHouse" || booking.status === "CheckedIn") &&
+    bookingState.financial.totalBalance === 0; // Must be fully paid
+
   const canCancel =
-    booking.status === "Pending" || booking.status === "Confirmed";
+    (booking.status === "Pending" || booking.status === "Confirmed") &&
+    bookingState.permissions.canEdit && // Check general edit permission
+    !bookingState.permissions.blockReason; // No blocking reasons
 
   const handleCheckIn = async () => {
+    if (!canCheckIn) {
+      toast.error("Không thể check-in booking này");
+      return;
+    }
+
     try {
       await updateStatus("CheckedIn");
       await updateStatus("InHouse");
@@ -115,7 +138,35 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     }
   };
 
+  const handleCheckOut = () => {
+    if (!canCheckOut) {
+      if (bookingState.financial.totalBalance > 0) {
+        toast.error(
+          `Không thể checkout. Còn ${bookingState.financial.unpaidInvoiceCount} hóa đơn chưa thanh toán (${new Intl.NumberFormat(
+            "vi-VN",
+            { style: "currency", currency: "VND" }
+          ).format(bookingState.financial.totalBalance)})`
+        );
+      } else {
+        toast.error("Không thể checkout booking này");
+      }
+      return;
+    }
+
+    // Navigate to detail page for full checkout flow
+    navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
+  };
+
   const handleCancel = async () => {
+    if (!canCancel) {
+      if (bookingState.permissions.blockReason) {
+        toast.error(bookingState.permissions.blockReason);
+      } else {
+        toast.error("Không thể hủy booking này");
+      }
+      return;
+    }
+
     try {
       await cancelBooking();
       toast.success("Hủy đặt phòng thành công");
@@ -195,7 +246,8 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         <Button
           size="sm"
           className={cn(btnClass, "bg-amber-500 hover:bg-amber-600 text-white")}
-          onClick={handleViewDetail}
+          onClick={handleCheckOut}
+          disabled={isProcessing}
         >
           <LogOut className="mr-2 h-4 w-4" /> Checkout
         </Button>
@@ -262,12 +314,16 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               <DropdownMenuItem onClick={handleViewDetail}>
                 <DoorOpen className="mr-2 h-4 w-4" /> Xem chi tiết
               </DropdownMenuItem>
-              {canCancel && (
+              {canCancel ? (
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => setCancelDialogOpen(true)}
                 >
                   <XCircle className="mr-2 h-4 w-4" /> Hủy đặt phòng
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem disabled className="text-muted-foreground">
+                  <XCircle className="mr-2 h-4 w-4" /> Không thể hủy
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>

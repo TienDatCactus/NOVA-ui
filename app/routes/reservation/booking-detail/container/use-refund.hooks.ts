@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 import { RefundsService } from "~/services/api/refunds";
 import type { CreateRefundForBookingRequestDto } from "~/services/api/refunds/dto";
 
@@ -32,6 +34,11 @@ export function useCreateRefund(bookingId: string) {
         queryKey: ["checkout-pending-charges"],
         refetchType: "active",
       });
+      toast.success("Hoàn tiền đặt phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
