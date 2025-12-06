@@ -1,31 +1,33 @@
 import {
-  Clock,
-  Wifi,
-  Droplet,
-  Leaf,
   AlertTriangle,
-  Flame,
-  Bug,
-  Star,
-  Cable,
-  Sparkles,
-  Wine,
-  UtensilsCrossed,
-  Bed,
-  Sun,
-  Moon,
-  Coffee,
   Bath,
+  Bubbles,
+  Bug,
+  Cable,
   CableCar,
-  Shield,
+  Clock,
+  Coffee,
+  Droplet,
+  Flame,
+  Leaf,
+  Moon,
+  Star,
+  Sun,
+  UtensilsCrossed,
+  Wifi,
+  Wine,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import bathroom from "~/assets/img/260845633.jpg";
+import dine from "~/assets/img/261032734.jpg";
+import room from "~/assets/img/287209567.jpg";
+import sapaBg from "~/assets/img/pexels-son-hoa-nguyen-2155579462-33908278.jpg";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import Image from "~/components/ui/image";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
-import Image from "~/components/ui/image";
 
 export default function GuidesPage() {
   const { t } = useTranslation("guides");
@@ -36,7 +38,7 @@ export default function GuidesPage() {
       <div className="relative h-[40vh] md:h-[50vh] w-full overflow-hidden">
         {/* Placeholder: Sapa Rice Terraces */}
         <Image
-          src="https://images.unsplash.com/photo-1531213203257-16afb0eac5d6?q=80&w=2836&auto=format&fit=crop"
+          src={sapaBg}
           alt="Sapa Landscape"
           className="w-full h-full object-cover filter brightness-[0.85]"
         />
@@ -140,7 +142,7 @@ export default function GuidesPage() {
               <div className="relative rounded-lg overflow-hidden mb-4 h-32">
                 {/* Placeholder: Bathroom/Water */}
                 <Image
-                  src="https://images.unsplash.com/photo-1584622050111-993a426fbf0a?q=80&w=2940&auto=format&fit=crop"
+                  src={bathroom}
                   className="w-full h-full object-cover"
                   alt="Bathroom"
                 />
@@ -154,7 +156,7 @@ export default function GuidesPage() {
 
             {/* Towels (Warning) */}
             <Card className="border-amber-200 bg-amber-50/50 shadow-none">
-              <CardHeader className="pb-2">
+              <CardHeader>
                 <CardTitle className="text-amber-800 flex items-center gap-2 text-base">
                   <Bath className="h-5 w-5" /> {t("notes.towels.title")}
                 </CardTitle>
@@ -194,16 +196,16 @@ export default function GuidesPage() {
             </InfoCard>
 
             {/* Food Rule with Image */}
-            <Card className="overflow-hidden border-none shadow-md">
+            <Card className="overflow-hidden pt-0 border-none shadow-md">
               <div className="h-32 bg-stone-200 relative">
                 {/* Placeholder: Cozy room interior */}
                 <Image
-                  src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2940&auto=format&fit=crop"
+                  src={room}
                   className="w-full h-full object-cover"
                   alt="Room Interior"
                 />
               </div>
-              <CardHeader className="pb-2">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <UtensilsCrossed className="h-5 w-5 text-stone-500" />
                   {t("notes.food.title")}
@@ -248,7 +250,7 @@ export default function GuidesPage() {
 
               {/* Massage */}
               <ServiceItem
-                icon={<Sparkles className="h-5 w-5 text-white" />}
+                icon={<Bubbles className="h-5 w-5 text-white" />}
                 title={t("services.massage")}
                 desc={t("services.massageDescription")}
                 color="bg-purple-500"
@@ -257,7 +259,7 @@ export default function GuidesPage() {
               {/* Happy Hour Banner */}
               <div className="relative rounded-xl overflow-hidden text-white mt-4 group cursor-default">
                 <Image
-                  src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2940&auto=format&fit=crop"
+                  src={dine}
                   className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
                   alt="Cocktail"
                 />

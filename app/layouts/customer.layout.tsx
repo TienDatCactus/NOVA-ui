@@ -176,7 +176,6 @@ const CustomerLayout: React.FC = () => {
                       : "text-stone-400 hover:text-stone-600"
                   )}
                 >
-                  {/* Visual Indicator for Active State */}
                   <div
                     className={cn(
                       "absolute top-0 w-8 h-1 rounded-b-full transition-all duration-300 bg-emerald-500 shadow-emerald-200 shadow-sm",
@@ -191,9 +190,7 @@ const CustomerLayout: React.FC = () => {
                       active ? "bg-emerald-100/50" : "bg-transparent"
                     )}
                   >
-                    {/* Assuming nav might have an icon property, strictly using Menu as fallback per original code, but styled nicely */}
-                    {/* Ideally replace Menu with dynamic icons (e.g. nav.icon) if available */}
-                    <Menu
+                    <nav.icon
                       className={cn(
                         "h-5 w-5",
                         active && "fill-emerald-700/20 stroke-emerald-700"

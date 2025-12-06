@@ -2,13 +2,17 @@ import {
   type LucideIcon,
   BarChart3,
   Bath,
+  BookImage,
   Calendar,
   FileText,
   Grid3x3,
+  HandHelping,
   HelpCircle,
   HousePlus,
+  Inbox,
   List,
   ListOrdered,
+  MapIcon,
   MessageSquareDot,
   Package,
   PackageSearch,
@@ -339,10 +343,14 @@ const COMMAND_BAR_ROUTES: Array<{
 ];
 
 const CUSTOMER_NAVS = [
-  { name: "nav.inbox", icon: Settings, href: FE_URL.customer.inbox },
-  { name: "nav.catalog", icon: Settings, href: FE_URL.customer.catalog },
-  { name: "nav.guidelines", icon: Settings, href: FE_URL.customer.guidelines },
-  { name: "nav.map", icon: Settings, href: FE_URL.customer.map },
+  { name: "nav.inbox", icon: Inbox, href: FE_URL.customer.inbox },
+  { name: "nav.catalog", icon: BookImage, href: FE_URL.customer.catalog },
+  {
+    name: "nav.guidelines",
+    icon: HandHelping,
+    href: FE_URL.customer.guidelines,
+  },
+  { name: "nav.map", icon: MapIcon, href: FE_URL.customer.map },
 ];
 
 const TOP_NAV_CONFIG = {};

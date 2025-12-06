@@ -77,7 +77,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
-  // Fetch full booking detail for validation
   const { data: bookingDetail } = useBookingDetail({
     bookingId: booking.bookingId,
     enabled: true,
@@ -103,6 +102,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     : null;
 
   const isArrivingToday = !!(checkinDate && isToday(checkinDate));
+  const isRoomBlock = bookingDetail?.source === "RoomBlock";
 
   // Business logic validation using booking state
   const canConfirmPayment = booking.status === "Pending";
@@ -122,17 +122,24 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     !bookingState.permissions.blockReason; // No blocking reasons
 
   const handleCheckIn = async () => {
-    if (!canCheckIn) {
+    if (!canCheckIn && !isRoomBlock) {
       toast.error("Không thể check-in booking này");
       return;
     }
 
     try {
-      await updateStatus("CheckedIn");
-      await updateStatus("InHouse");
-
-      toast.success("Check-in thành công");
-      refetch?.();
+      if (isRoomBlock) {
+        await updateStatus("Confirmed");
+        await updateStatus("CheckedIn");
+        await updateStatus("InHouse");
+        toast.success("Check-in thành công");
+        refetch?.();
+      } else {
+        await updateStatus("CheckedIn");
+        await updateStatus("InHouse");
+        toast.success("Check-in thành công");
+        refetch?.();
+      }
     } catch {
       toast.error("Check-in thất bại");
     }
@@ -153,7 +160,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       return;
     }
 
-    // Navigate to detail page for full checkout flow
     navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
   };
 
@@ -207,10 +213,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         bgClass = "bg-destructive";
         icon = <XCircle className="mr-1 h-3 w-3" />;
         break;
-      case "NoShow":
-        bgClass = "bg-orange-600";
-        icon = <UserX className="mr-1 h-3 w-3" />;
-        break;
     }
 
     return (
@@ -229,11 +231,12 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const renderPrimaryAction = () => {
     const btnClass = "w-full shadow-sm font-semibold transition-all";
 
-    if (canCheckIn) {
+    if (canCheckIn || isRoomBlock) {
       return (
         <Button
           size="sm"
-          className={cn(btnClass, "bg-green-600 hover:bg-green-700 text-white")}
+          variant={"success"}
+          className={cn(btnClass)}
           onClick={handleCheckIn}
           disabled={isProcessing}
         >
@@ -245,7 +248,8 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       return (
         <Button
           size="sm"
-          className={cn(btnClass, "bg-amber-500 hover:bg-amber-600 text-white")}
+          variant={"warning"}
+          className={cn(btnClass)}
           onClick={handleCheckOut}
           disabled={isProcessing}
         >
@@ -253,7 +257,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         </Button>
       );
     }
-    if (canConfirmPayment) {
+    if (canConfirmPayment && !isRoomBlock) {
       return (
         <Button
           size="sm"

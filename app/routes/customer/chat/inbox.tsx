@@ -35,7 +35,7 @@ import { QRScanner } from "~/components/qr-scanner";
 import type { Route } from "./+types/inbox";
 import { Badge } from "~/components/ui/badge";
 import Image from "~/components/ui/image";
-
+import sapaBg from "~/assets/img/pexels-son-hoa-nguyen-2155579462-33908286.jpg";
 export default function ChatInbox({}: Route.ComponentProps) {
   const { t } = useTranslation("chat");
   const navigate = useNavigate();
@@ -119,9 +119,9 @@ export default function ChatInbox({}: Route.ComponentProps) {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans flex flex-col">
       {/* --- HERO HEADER (Matches GuidesPage) --- */}
-      <div className="relative h-[35vh] w-full overflow-hidden shrink-0">
+      <div className="relative h-[40vh] w-full overflow-hidden shrink-0">
         <Image
-          src="https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2940&auto=format&fit=crop"
+          src={sapaBg}
           alt="Misty Sapa"
           className="w-full h-full object-cover filter brightness-[0.8]"
         />
