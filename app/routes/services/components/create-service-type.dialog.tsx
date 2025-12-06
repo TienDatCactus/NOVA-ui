@@ -332,7 +332,7 @@ export default function CreateServiceTypeDialog({
                           <X className="w-3.5 h-3.5" />
                         </button>
 
-                        <Badge className="absolute bottom-1.5 left-1.5 h-5 px-1.5 text-[10px] bg-white/90 text-foreground hover:bg-white">
+                        <Badge className="absolute bottom-1.5 left-1.5 h-5 px-1.5 text-[10px] bg-background/90 text-foreground hover:bg-background">
                           {index + 1}
                         </Badge>
                       </div>

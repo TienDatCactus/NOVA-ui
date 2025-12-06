@@ -331,7 +331,7 @@ export function PayNowRoomsSheet({
                       <h3 className="text-sm font-semibold">
                         Tổng kết thanh toán
                       </h3>
-                      <div className="border rounded-lg overflow-hidden bg-white">
+                      <div className="border rounded-lg overflow-hidden bg-background">
                         <div className="divide-y text-sm">
                           <div className="flex justify-between p-4">
                             <span className="text-muted-foreground">

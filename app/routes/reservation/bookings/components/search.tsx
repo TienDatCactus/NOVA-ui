@@ -80,7 +80,7 @@ function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-1 bg-white rounded-lg">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-1 bg-background rounded-lg">
       <div className="flex flex-1 items-center gap-2 w-full sm:w-auto">
         <Input
           startAddon={<Search className="h-4 w-4 text-muted-foreground " />}
@@ -140,7 +140,7 @@ function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
               selected={exportDate}
               onSelect={(date) => date && setExportDate(date)}
               locale={vi}
-              className="bg-white  w-full rounded-md border shadow-sm"
+              className="bg-background  w-full rounded-md border shadow-sm"
             />
           </div>
 

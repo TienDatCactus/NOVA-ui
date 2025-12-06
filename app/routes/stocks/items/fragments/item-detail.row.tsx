@@ -22,9 +22,9 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
   const isHighStock = maxStock > 0 && currentStock > maxStock;
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md">
+    <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-background shadow-sm transition-all hover:shadow-md">
       {/* Header: Title & Actions */}
-      <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-3">
+      <div className="flex items-center justify-between border-b border-gray-100 bg-background px-6 py-3">
         <div className="flex items-center gap-2">
           <h3 className="text-base font-bold text-gray-900">
             {item.name || "Chi tiết sản phẩm"}{" "}
@@ -56,7 +56,7 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
       {/* Main Grid Layout - 3 Columns with Vertical Dividers */}
       <div className="grid grid-cols-1 divide-y divide-gray-100 text-sm lg:grid-cols-3 lg:divide-x lg:divide-y-0">
         {/* Column 1: Pricing Info */}
-        <div className="bg-white p-5">
+        <div className="bg-background p-5">
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">
             Thông tin giá
           </h4>
@@ -78,7 +78,7 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
         </div>
 
         {/* Column 2: Inventory Config */}
-        <div className="bg-white p-5">
+        <div className="bg-background p-5">
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">
             Cấu hình tồn kho
           </h4>
@@ -129,7 +129,7 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
         </div>
 
         {/* Column 3: General Info */}
-        <div className="bg-white p-5">
+        <div className="bg-background p-5">
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">
             Thông tin khác
           </h4>

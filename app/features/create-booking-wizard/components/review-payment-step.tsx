@@ -638,7 +638,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                 </div>
               </div>
 
-              <DialogFooter className="px-6 py-4 bg-muted/5 border-t">
+              <DialogFooter className="px-6 py-4 bg-muted border-t">
                 <DialogTrigger asChild>
                   <Button className="w-full font-semibold" size="lg">
                     <Check className="mr-2 h-4 w-4" />

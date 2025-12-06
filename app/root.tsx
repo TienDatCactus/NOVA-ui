@@ -20,6 +20,7 @@ import "~/lib/i18n/types"; // TypeScript types
 import { Toaster } from "./components/ui/sonner";
 import { SpinnerLoader } from "./features/loading";
 import { MapProvider } from "./routes/customer/map/context/map-context";
+import { ThemeProvider } from "./context/theme.context";
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -43,7 +44,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <MapProvider>{children}</MapProvider>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <MapProvider>{children}</MapProvider>
+        </ThemeProvider>
         <Toaster
           position="top-right"
           richColors // <--- This does the heavy lifting

@@ -255,7 +255,7 @@ export default function Component({
                 handleTypeSelect(value === "all" ? null : value)
               }
             >
-              <SelectTrigger className="w-[200px] border-primary/50 bg-white shadow-md">
+              <SelectTrigger className="w-[200px] border-primary/50 bg-background shadow-md">
                 <SelectValue placeholder="Chọn loại dịch vụ" />
               </SelectTrigger>
               <SelectContent>

@@ -1,7 +1,7 @@
-import { Globe, Menu, Mountain, TreePalm, User } from "lucide-react";
+import { Globe, TreePalm, User } from "lucide-react";
 import React, { useEffect } from "react";
-import { Link, Outlet, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
+import { Link, Outlet, useLocation } from "react-router";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -17,11 +17,12 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "~/components/ui/navigation-menu";
+import { ModeToggle } from "~/features/theme/toggler";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { CUSTOMER_NAVS, SUPPORTED_LANGUAGES } from "~/lib/constants";
+import { syncI18nWithStore } from "~/lib/i18n/sync-store";
 import { cn } from "~/lib/utils";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
-import { syncI18nWithStore } from "~/lib/i18n/sync-store";
 
 const CustomerLayout: React.FC = () => {
   const isMobile = useIsMobile();
@@ -68,7 +69,7 @@ const CustomerLayout: React.FC = () => {
       <BackgroundLayer />
 
       {!isMobile && (
-        <header className="sticky top-0 z-50 w-full border-b border-white/20 bg-white/60 backdrop-blur-xl supports-[backdrop-filter]:bg-white/40 shadow-sm shadow-stone-900/5">
+        <header className="sticky top-0 z-50 w-full border-b border-white/20 bg-sidebar backdrop-blur-xl supports-[backdrop-filter]:bg-background/40 shadow-sm shadow-stone-900/5">
           <div className="container mx-auto flex h-16 items-center justify-between px-4">
             <div className="flex items-center gap-2 cursor-pointer group">
               <Avatar className="transition-transform group-hover:scale-105">
@@ -76,7 +77,7 @@ const CustomerLayout: React.FC = () => {
                   <TreePalm className="h-5 w-5" />
                 </AvatarFallback>
               </Avatar>
-              <span className="font-serif font-bold text-xl tracking-tight text-stone-800 group-hover:text-emerald-800 transition-colors">
+              <span className="font-serif font-bold text-xl tracking-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 transition-colors">
                 Eco Palm Sapa
               </span>
             </div>
@@ -92,8 +93,8 @@ const CustomerLayout: React.FC = () => {
                         navigationMenuTriggerStyle(),
                         "bg-transparent h-9 px-4 rounded-full transition-all duration-300",
                         isActive(nav.href)
-                          ? "bg-emerald-100/50 text-emerald-800 font-medium shadow-sm"
-                          : "text-stone-600 hover:bg-white/50 hover:text-emerald-700"
+                          ? "bg-emerald-100/50 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 font-medium shadow-sm"
+                          : "text-muted-foreground hover:bg-background/50 hover:text-emerald-700 dark:hover:text-emerald-300"
                       )}
                     >
                       <Link to={nav.href}>{t(nav.name)}</Link>
@@ -105,12 +106,13 @@ const CustomerLayout: React.FC = () => {
 
             {/* Actions: Language & User */}
             <div className="flex items-center gap-3">
+              <ModeToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-2 text-stone-500 hover:text-emerald-800 hover:bg-emerald-50/50 rounded-full px-3 transition-all"
+                    className="gap-2 text-muted-foreground hover:text-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/50 dark:hover:text-emerald-200 rounded-full px-3 transition-all"
                   >
                     <Globe className="h-4 w-4" />
                     <span className="text-xs font-medium">
@@ -120,7 +122,7 @@ const CustomerLayout: React.FC = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-[150px] bg-white/90 backdrop-blur-xl border-white/40 shadow-lg shadow-stone-500/10"
+                  className="w-[150px] bg-background/90 border-background/40 shadow-lg shadow-stone-500/10"
                 >
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <DropdownMenuItem
@@ -145,7 +147,7 @@ const CustomerLayout: React.FC = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-full border-stone-200 bg-white/50 hover:bg-white hover:text-emerald-700 hover:border-emerald-200 shadow-sm transition-all"
+                className="rounded-full border-stone-200 bg-background/50 hover:bg-background hover:text-emerald-700  dark:hover:text-emerald-200 dark:hover:bg-emerald-900/50 dark:hover:border-emerald-200 shadow-sm transition-all"
               >
                 <User className="h-4 w-4" />
               </Button>
@@ -154,14 +156,12 @@ const CustomerLayout: React.FC = () => {
         </header>
       )}
 
-      {/* --- MAIN CONTENT --- */}
-      {/* Flex-1 ensures it pushes the footer down */}
       <main className="flex-1 w-full relative flex flex-col z-10">
         <Outlet />
       </main>
 
       {isMobile && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/20 bg-white/80 backdrop-blur-xl pb-safe-area shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/20 bg-background/80 backdrop-blur-xl pb-safe-area shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
           <div className="flex h-16 items-center justify-around px-2">
             {CUSTOMER_NAVS.map((nav) => {
               const active = isActive(nav.href);

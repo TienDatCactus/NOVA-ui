@@ -256,7 +256,7 @@ export function LockUserDialog({
                           Tài khoản sẽ bị vô hiệu hóa ngay lập tức và tự động mở
                           khóa vào lúc:
                         </p>
-                        <div className="flex items-center gap-2 mt-2 bg-white/60 w-fit px-3 py-1 rounded-md border border-red-100">
+                        <div className="flex items-center gap-2 mt-2 bg-background/60 w-fit px-3 py-1 rounded-md border border-red-100">
                           <Clock className="h-3.5 w-3.5 text-red-600" />
                           <span className="text-sm font-bold text-red-700 font-mono">
                             {field.value

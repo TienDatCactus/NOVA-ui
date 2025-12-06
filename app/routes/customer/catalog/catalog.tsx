@@ -66,7 +66,7 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
   }, [services, debouncedSearch]);
 
   return (
-    <div className="min-h-screen bg-stone-50 selection:bg-emerald-200 selection:text-emerald-900 font-sans">
+    <div className="min-h-screen bg-background selection:bg-emerald-200 selection:text-emerald-900 font-sans">
       {/* === HERO SECTION === */}
       <div className="relative pt-24 pb-28 md:pt-32 md:pb-40 overflow-hidden">
         {/* Background Parallax Layer */}
@@ -76,13 +76,13 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
             alt="Misty Sapa Landscape"
             className="w-full h-full object-cover filter brightness-[0.75] scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-stone-50/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-foreground/30 via-transparent to-background/70" />
         </div>
 
         <div className="container relative z-10 mx-auto px-4 flex flex-col items-center text-center max-w-3xl space-y-8">
           {/* Badge */}
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50/90 border border-emerald-100 text-sm font-medium text-emerald-800 shadow-sm backdrop-blur-md">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background/90 border border-emerald-50 dark:border-emerald-700 text-sm font-medium text-emerald-800 dark:text-emerald-200 shadow-sm backdrop-blur-md">
               <TreePalm className="w-3.5 h-3.5" />
               {t("subtitle")}
             </span>
@@ -90,11 +90,11 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
 
           {/* Titles */}
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold tracking-tight text-white drop-shadow-md">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold tracking-tight text-foreground drop-shadow-md">
               {t("title")}
             </h1>
-            <p className="text-stone-100 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto flex items-center justify-center gap-2 font-light">
-              <CloudFog className="w-5 h-5 text-stone-200" />
+            <p className="text-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto flex items-center justify-center gap-2 font-light">
+              <CloudFog className="w-5 h-5 text-muted-foreground" />
               {t("description")}
             </p>
           </div>
@@ -103,9 +103,9 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
           <div className="w-full max-w-lg animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
             <div className="relative group">
               {/* Glow Effect */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-300 to-teal-300 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500" />
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-300 dark:from-emerald-700 to-teal-300 dark:to-teal-700 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500" />
 
-              <div className="relative bg-white/90 backdrop-blur-xl rounded-full shadow-2xl flex items-center p-1.5 transition-all ring-1 ring-black/5 focus-within:ring-4 focus-within:ring-emerald-500/20">
+              <div className="relative bg-background/90 backdrop-blur-xl rounded-full shadow-2xl flex items-center p-1.5 transition-all ring-1 ring-black/5 focus-within:ring-4 focus-within:ring-emerald-500/20">
                 <div className="pl-4 text-stone-400">
                   <Search className="h-5 w-5" />
                 </div>
@@ -135,7 +135,7 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
         <Tabs defaultValue="menu" className="w-full space-y-8">
           {/* Sticky Tab Navigation */}
           <div className="flex justify-center sticky top-6 z-40">
-            <TabsList className="h-16 p-2 bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl shadow-stone-500/10 rounded-full inline-flex items-center gap-2 ring-1 ring-black/5">
+            <TabsList className="h-16 p-2 bg-background/80 backdrop-blur-xl border border-white/50 shadow-xl shadow-stone-500/10 rounded-full inline-flex items-center gap-2 ring-1 ring-black/5">
               <NatureTabTrigger
                 value="menu"
                 icon={UtensilsCrossed}
@@ -227,9 +227,9 @@ function NatureTabTrigger({ value, icon: Icon, label, count = 0 }: any) {
   return (
     <TabsTrigger
       value={value}
-      className="rounded-full px-6 h-full text-base font-medium text-stone-500 
-      data-[state=active]:bg-emerald-800 data-[state=active]:text-white data-[state=active]:shadow-lg
-      hover:text-emerald-800 transition-all duration-300 gap-2"
+      className="rounded-full px-6 h-full text-base font-medium text-muted-foreground 
+      data-[state=active]:bg-emerald-800 dark:data-[state=active]:bg-emerald-700 data-[state=active]:text-background data-[state=active]:shadow-lg
+      hover:text-emerald-800 dark:hover:text-emerald-300 transition-all duration-300 gap-2"
     >
       <Icon className="h-4 w-4" />
       {label}
@@ -237,7 +237,7 @@ function NatureTabTrigger({ value, icon: Icon, label, count = 0 }: any) {
         <Badge
           variant="secondary"
           className="ml-1 bg-stone-100 text-stone-600 
-          data-[state=active]:bg-white/20 data-[state=active]:text-white
+          data-[state=active]:bg-background/20 data-[state=active]:text-white
           border-0 h-5 px-1.5 min-w-[1.25rem] hidden sm:inline-flex items-center justify-center pointer-events-none transition-colors"
         >
           {count}
@@ -250,7 +250,7 @@ function NatureTabTrigger({ value, icon: Icon, label, count = 0 }: any) {
 function LoadingNature() {
   const { t } = useTranslation("catalog");
   return (
-    <div className="flex flex-col items-center justify-center py-32 text-stone-400">
+    <div className="flex flex-col items-center justify-center py-32 text-muted-foreground ">
       <div className="relative">
         <div className="absolute inset-0 bg-emerald-200/40 rounded-full blur-xl animate-pulse"></div>
         <CloudFog className="relative h-14 w-14 animate-bounce text-emerald-600/70 duration-[3000ms]" />
@@ -273,8 +273,8 @@ function EmptyState({
 }) {
   const { t } = useTranslation("catalog");
   return (
-    <div className="flex flex-col items-center justify-center py-24 px-4 text-center border border-dashed border-emerald-900/10 rounded-3xl bg-white/40 backdrop-blur-sm">
-      <div className="w-20 h-20 bg-white/80 rounded-full flex items-center justify-center mb-6 shadow-sm border border-white">
+    <div className="flex flex-col items-center justify-center py-24 px-4 text-center border border-dashed border-emerald-900/10 rounded-3xl bg-background/40 backdrop-blur-sm">
+      <div className="w-20 h-20 bg-background/80 rounded-full flex items-center justify-center mb-6 shadow-sm border border-white">
         {type === "menu" ? (
           <UtensilsCrossed className="h-9 w-9 text-emerald-800/40" />
         ) : (

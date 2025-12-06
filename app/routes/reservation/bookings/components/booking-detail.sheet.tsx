@@ -165,7 +165,7 @@ export default function BookingDetailSheet({
                   </h3>
                 </div>
 
-                <div className="bg-white rounded-lg border shadow-sm p-4">
+                <div className="bg-background rounded-lg border shadow-sm p-4">
                   <div className="flex flex-col md:flex-row gap-6">
                     {/* Contact Info */}
                     <div className="flex-1 space-y-3">
@@ -235,7 +235,7 @@ export default function BookingDetailSheet({
                   </h3>
                 </div>
 
-                <div className="bg-white rounded-lg border shadow-sm p-0 overflow-hidden">
+                <div className="bg-background rounded-lg border shadow-sm p-0 overflow-hidden">
                   <div className="grid grid-cols-2 divide-x">
                     <div className="p-4">
                       <p className="text-xs text-gray-500 mb-1">Nhận phòng</p>
@@ -325,7 +325,7 @@ export default function BookingDetailSheet({
                   {data.rooms.map((room, index) => (
                     <div
                       key={room.roomId}
-                      className="group flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3 rounded-lg border border-dashed border-gray-300 hover:border-primary/50 hover:bg-blue-50/30 transition-all"
+                      className="group flex flex-col sm:flex-row sm:items-center justify-between bg-background p-3 rounded-lg border border-dashed border-gray-300 hover:border-primary/50 hover:bg-blue-50/30 transition-all"
                     >
                       <div className="flex items-start gap-3">
                         <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100 text-gray-500 text-xs font-bold shrink-0 mt-0.5">
@@ -362,7 +362,7 @@ export default function BookingDetailSheet({
                   </h3>
                 </div>
 
-                <div className="bg-white rounded-lg border shadow-sm p-5 space-y-3">
+                <div className="bg-background rounded-lg border shadow-sm p-5 space-y-3">
                   <div className="flex justify-between items-baseline">
                     <span className="text-sm text-gray-500">Tổng tiền</span>
                     <span className="text-base font-semibold text-gray-900">
@@ -413,7 +413,7 @@ export default function BookingDetailSheet({
           )}
         </div>
 
-        <SheetFooter className="p-4 border-t bg-white shrink-0 sm:justify-between sm:space-x-0">
+        <SheetFooter className="p-4 border-t bg-background shrink-0 sm:justify-between sm:space-x-0">
           <div className="hidden sm:flex items-center text-xs text-gray-400">
             ID: {bookingCode}
           </div>

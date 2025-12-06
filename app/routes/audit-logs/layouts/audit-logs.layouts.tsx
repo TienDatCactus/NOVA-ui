@@ -362,7 +362,7 @@ const AuditLogsLayout = ({
               className={cn(
                 "w-40 flex items-center justify-between px-3 h-9 rounded-md border cursor-pointer transition-all select-none",
                 filters.Success !== false
-                  ? "bg-green-50/50 border-green-200"
+                  ? "bg-green-50/50 dark:bg-green-300/20   border-green-200 dark:border-green-600"
                   : "bg-background border-muted-foreground/20 hover:bg-muted"
               )}
               onClick={() =>
@@ -384,7 +384,7 @@ const AuditLogsLayout = ({
                 <span
                   className={
                     filters.Success !== false
-                      ? "text-green-700"
+                      ? "text-green-700 dark:text-green-600"
                       : "text-muted-foreground"
                   }
                 >
@@ -393,7 +393,7 @@ const AuditLogsLayout = ({
               </div>
               <Switch
                 checked={filters.Success ?? true}
-                className="scale-75 data-[state=checked]:bg-green-600"
+                className="scale-75 data-[state=checked]:bg-green-600 dark:data-[state=checked]:bg-green-600"
               />
             </div>
 

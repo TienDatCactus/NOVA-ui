@@ -187,7 +187,7 @@ export default function OrderConfirmationDialog({
                 <Link to={backLink} className="flex-1">
                   <Button
                     variant="outline"
-                    className="w-full gap-2 border-dashed hover:border-solid hover:bg-white transition-all"
+                    className="w-full gap-2 border-dashed hover:border-solid hover:bg-background transition-all"
                   >
                     <ArrowRight className="h-4 w-4 rotate-180" /> Quay lại danh
                     sách đơn hàng

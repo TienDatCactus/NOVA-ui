@@ -136,7 +136,7 @@ export default function ArchiveAuditDialog({
           {/* 2. IMPACT PREVIEW CARD */}
           <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex flex-col gap-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-white rounded-full shadow-sm text-primary">
+              <div className="p-2 bg-background rounded-full shadow-sm text-primary">
                 <CalendarClock className="w-5 h-5" />
               </div>
               <div className="space-y-1">

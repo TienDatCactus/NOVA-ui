@@ -63,7 +63,7 @@ export function DashboardFilters({
             value={filters.PeriodType || "Today"}
             onValueChange={handlePeriodChange}
           >
-            <SelectTrigger className="h-9 bg-white shadow-sm border-gray-200">
+            <SelectTrigger className="h-9 bg-background shadow-sm border-gray-200">
               <div className="flex items-center gap-2">
                 <CalendarRange className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="truncate">
@@ -88,7 +88,7 @@ export function DashboardFilters({
             value={filters.ComparisonType || "PreviousPeriod"}
             onValueChange={handleComparisonChange}
           >
-            <SelectTrigger className="h-9 bg-white shadow-sm border-gray-200">
+            <SelectTrigger className="h-9 bg-background shadow-sm border-gray-200">
               <span className="text-muted-foreground text-xs mr-1 font-normal">
                 So sánh:
               </span>
@@ -115,7 +115,7 @@ export function DashboardFilters({
                 variant="outline"
                 size="icon"
                 onClick={onRefresh}
-                className="h-9 w-9 shrink-0 bg-white hover:bg-gray-50 border-gray-200 shadow-sm"
+                className="h-9 w-9 shrink-0 bg-background hover:bg-gray-50 border-gray-200 shadow-sm"
               >
                 <RefreshCw className="h-4 w-4 text-muted-foreground" />
               </Button>

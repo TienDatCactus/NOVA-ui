@@ -33,7 +33,7 @@ const ChatSessionCard = ({
         // Active State: Soft Emerald Glow
         isActive
           ? "bg-emerald-50/60 ring-1 ring-emerald-100 shadow-sm"
-          : "hover:bg-white/40 hover:border-white/40 hover:shadow-sm"
+          : "hover:bg-background/40 hover:border-white/40 hover:shadow-sm"
       )}
       onClick={() => onClick(id)}
     >
@@ -48,7 +48,7 @@ const ChatSessionCard = ({
             "text-sm font-medium transition-colors",
             isActive
               ? "bg-emerald-100 text-emerald-800"
-              : "bg-stone-200/50 text-stone-500 group-hover:bg-white group-hover:text-emerald-700"
+              : "bg-stone-200/50 text-stone-500 group-hover:bg-background group-hover:text-emerald-700"
           )}
         >
           {customerName.charAt(0)}
@@ -106,7 +106,7 @@ const ChatSessionCard = ({
               className={cn(
                 "text-[10px] px-1.5 py-0 h-5 border font-normal rounded-md",
                 isActive
-                  ? "bg-white/60 border-emerald-200 text-emerald-800"
+                  ? "bg-background/60 border-emerald-200 text-emerald-800"
                   : "bg-stone-100/50 border-stone-200 text-stone-500"
               )}
             >

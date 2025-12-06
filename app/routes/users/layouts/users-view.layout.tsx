@@ -49,7 +49,7 @@ export default function UsersViewLayout({
               value={filters.roleFilter}
               onValueChange={(value) => updateFilter("roleFilter", value)}
             >
-              <SelectTrigger className="shadow-md bg-white w-full">
+              <SelectTrigger className="shadow-md bg-background w-full">
                 <SelectValue placeholder="Chọn vai trò" />
               </SelectTrigger>
               <SelectContent>

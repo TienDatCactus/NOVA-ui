@@ -10,6 +10,7 @@ import type {
 } from "~/services/api/staff/staff-shift/dto";
 import type { MarkAbsentRequest } from "~/services/api/staff/staff-attendance/dto";
 import { DeleteScope } from "~/services/api/staff/staff-shift/staff-shift.type";
+import { AxiosError } from "axios";
 
 export function useStaffShiftList(params?: StaffShiftListParams) {
   return useQuery({
@@ -47,6 +48,10 @@ export function useCreateShiftSchedule() {
       });
       toast.success("Tạo lịch làm việc thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
+    },
   });
 }
 
@@ -75,6 +80,10 @@ export function useUpdateShiftSchedule() {
       });
       toast.success("Cập nhật lịch làm việc thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
+    },
   });
 }
 
@@ -94,6 +103,10 @@ export function useDeleteStaffShift() {
       });
       toast.success("Xóa lịch làm việc thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
+    },
   });
 }
 
@@ -101,6 +114,10 @@ export function useExportWeeklyMatrix() {
   return useMutation({
     mutationFn: async (params?: { from?: string; to?: string }) =>
       await StaffShiftService.exportWeeklyMatrix(params),
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
+    },
   });
 }
 
@@ -108,6 +125,10 @@ export function useExportWeeklyForm2() {
   return useMutation({
     mutationFn: async (params: { from: string; to: string }) =>
       await StaffShiftService.exportWeeklyForm2(params),
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
+    },
   });
 }
 
@@ -144,6 +165,10 @@ export function useMarkAbsent() {
       });
       toast.success("Đánh dấu vắng mặt thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
+    },
   });
 }
 
@@ -162,6 +187,10 @@ export function useMarkPresent() {
         refetchType: "active",
       });
       toast.success("Đánh dấu có mặt thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
