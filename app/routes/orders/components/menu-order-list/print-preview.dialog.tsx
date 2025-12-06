@@ -38,7 +38,7 @@ export default function PrintPreviewDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[400px] p-0 gap-0 overflow-hidden bg-zinc-100/50 border-none shadow-2xl">
-        <DialogHeader className="px-4 py-3 bg-white border-b flex flex-row items-center justify-between space-y-0">
+        <DialogHeader className="px-4 py-3 bg-background border-b flex flex-row items-center justify-between space-y-0">
           <DialogTitle className="text-sm font-semibold flex items-center gap-2">
             <Printer className="h-4 w-4 text-muted-foreground" />
             Xem trước bản in
@@ -46,7 +46,7 @@ export default function PrintPreviewDialog({
         </DialogHeader>
 
         <ScrollArea className="max-h-[70vh] w-full px-4 py-6">
-          <div className="mx-auto w-full max-w-[320px] bg-white shadow-sm border border-zinc-200 text-zinc-900 text-[13px] leading-relaxed relative">
+          <div className="mx-auto w-full max-w-[320px] bg-background shadow-sm border border-zinc-200 text-zinc-900 text-[13px] leading-relaxed relative">
             <div className="h-1 w-full bg-zinc-50 border-b border-dashed border-zinc-200" />
 
             <div className="p-5 space-y-4">
@@ -169,7 +169,7 @@ export default function PrintPreviewDialog({
         </ScrollArea>
 
         {/* === ACTION FOOTER === */}
-        <DialogFooter className="p-4 bg-white border-t sm:justify-between items-center gap-4">
+        <DialogFooter className="p-4 bg-background border-t sm:justify-between items-center gap-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Hủy
           </Button>

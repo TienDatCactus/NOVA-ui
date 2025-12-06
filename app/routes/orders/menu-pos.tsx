@@ -294,7 +294,7 @@ export default function Component({
                 handleCategorySelect(value === "all" ? null : value)
               }
             >
-              <SelectTrigger className="w-[200px] border-primary/50 bg-white shadow-md">
+              <SelectTrigger className="w-[200px] border-primary/50 bg-background shadow-md">
                 <SelectValue placeholder="Chọn danh mục" />
               </SelectTrigger>
               <SelectContent>

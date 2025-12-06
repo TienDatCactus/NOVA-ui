@@ -261,7 +261,7 @@ export default function CheckoutSheet({
                       </div>
 
                       {/* Bill Metaphor Container */}
-                      <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
+                      <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
                         {invoicePreview &&
                         (invoicePreview.posOrderItems?.length > 0 ||
                           invoicePreview.serviceOrderItems?.length > 0) ? (
@@ -458,8 +458,8 @@ export default function CheckoutSheet({
                               className={cn(
                                 "cursor-pointer transition-all duration-200 group relative overflow-hidden p-0 ",
                                 isPaid
-                                  ? "bg-white shadow-sm hover:border-green-500 border-transparent "
-                                  : "bg-white shadow-sm hover:shadow-md "
+                                  ? "bg-background shadow-sm hover:border-green-500 border-transparent "
+                                  : "bg-background shadow-sm hover:shadow-md "
                               )}
                               onClick={() => handleSelectInvoice(invoice.id!)}
                             >
@@ -516,13 +516,13 @@ export default function CheckoutSheet({
                         })}
                       </div>
                     ) : (
-                      <div className="text-center py-12 px-4 text-sm text-muted-foreground bg-white/50 rounded-lg border border-dashed">
+                      <div className="text-center py-12 px-4 text-sm text-muted-foreground bg-background/50 rounded-lg border border-dashed">
                         Chưa có hóa đơn nào được tạo.
                       </div>
                     )}
                   </div>
 
-                  <div className="p-4 bg-white border-t space-y-3 shadow-md z-10">
+                  <div className="p-4 bg-background border-t space-y-3 shadow-md z-10">
                     {shouldShowCreateInvoice && !isPostCheckout ? (
                       <Button
                         className="w-full h-12 text-base shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99]"

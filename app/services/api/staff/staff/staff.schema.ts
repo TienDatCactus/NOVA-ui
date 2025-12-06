@@ -49,7 +49,7 @@ const CreateStaffSchema = z.object({
   gender: z.string("Giới tính không hợp lệ").optional(),
   dateOfBirth: z.date().optional(),
   citizenId: z.string().optional(),
-  startDate: z.date("Ngày bắt đầu không hợp lệ").optional(),
+  startDate: z.date("Ngày bắt đầu không hợp lệ"),
   note: z.string().optional(),
   staffRoleId: z.string("Chức vụ không hợp lệ").min(1, "Chức vụ là bắt buộc"),
 });

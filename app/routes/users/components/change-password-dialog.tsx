@@ -22,6 +22,7 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { UserSchema } from "~/services/api/user/user.schema";
 import { useChangePassword } from "../container/query.hooks";
+import type { UserItem } from "~/services/api/user/dto";
 
 const { ChangePasswordSchema } = UserSchema;
 
@@ -38,17 +39,13 @@ type ChangePasswordFormData = z.infer<typeof ChangePasswordFormSchema>;
 interface ChangePasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  UserId: string;
-  UserName: string;
-  onSuccess?: () => void;
+  user: UserItem;
 }
 
 export default function ChangePasswordDialog({
   open,
   onOpenChange,
-  UserId,
-  UserName,
-  onSuccess,
+  user,
 }: ChangePasswordDialogProps) {
   const { mutate: changePassword, isPending } = useChangePassword();
 
@@ -63,14 +60,13 @@ export default function ChangePasswordDialog({
   const handleSubmit = (data: ChangePasswordFormData) => {
     changePassword(
       {
-        id: UserId,
+        id: user.id,
         data: { newPassword: data.newPassword },
       },
       {
         onSuccess: () => {
           form.reset();
           onOpenChange(false);
-          onSuccess?.();
         },
       }
     );
@@ -92,7 +88,9 @@ export default function ChangePasswordDialog({
           </DialogTitle>
           <DialogDescription>
             Đổi mật khẩu cho tài khoản:{" "}
-            <span className="font-semibold">{UserName}</span>
+            <span className="font-semibold">
+              {user.fullName} - {user.userName}
+            </span>
           </DialogDescription>
         </DialogHeader>
 

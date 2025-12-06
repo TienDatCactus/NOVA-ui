@@ -133,19 +133,18 @@ export default function ExpensesLayout({
             </div>
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
             <Select
-              value={filters.categoryId || "all"}
+              value={filters.categoryId}
               onValueChange={(value) =>
                 updateFilter("categoryId", value === "all" ? undefined : value)
               }
             >
-              <SelectTrigger className="w-40 h-9 text-xs">
+              <SelectTrigger className="w-60 h-9 text-xs">
                 <div className="flex items-center gap-2 truncate">
                   <Tags className="w-3.5 h-3.5 text-muted-foreground" />
                   <SelectValue placeholder="Tất cả danh mục" />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả danh mục</SelectItem>
                 {ExpenseCategories.map((cat) => (
                   <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}

@@ -45,12 +45,19 @@ export default function CreateWorkShiftDialog({
   const { mutateAsync: createWorkShift, isPending } = useCreateWorkShift();
   const handleSubmit = async (data: CreateWorkShiftRequest) => {
     try {
-      await createWorkShift(data, {
-        onSuccess: () => {
-          form.reset();
-          onOpenChange(false);
+      await createWorkShift(
+        {
+          name: data.name,
+          endTime: data.endTime,
+          startTime: data.startTime,
         },
-      });
+        {
+          onSuccess: () => {
+            form.reset();
+            onOpenChange(false);
+          },
+        }
+      );
     } catch (error) {
       console.log(error);
     }

@@ -1,18 +1,6 @@
-import {
-  format,
-  isAfter,
-  isBefore,
-  isToday,
-  parseISO,
-  startOfDay,
-} from "date-fns";
-import { vi } from "date-fns/locale";
+import { format, isBefore, isToday, parseISO, startOfDay } from "date-fns";
 import {
   ArrowRight,
-  BookCopy,
-  CalendarCheck,
-  CalendarX,
-  CheckCircle,
   CheckCircle2,
   Clock,
   DoorOpen,
@@ -21,11 +9,10 @@ import {
   LogOut,
   MoreVertical,
   User,
-  UserX,
   XCircle,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import type z from "zod";
 import {
@@ -40,7 +27,6 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,7 +35,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Separator } from "~/components/ui/separator";
 import { DASHBOARD } from "~/lib/fe-url";
 import { cn, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
@@ -57,12 +42,12 @@ import {
   BOOKING_SOURCES,
   BOOKING_STATUSES,
 } from "~/services/api/booking/booking.types";
-import { useBookingDetail } from "../container/booking-query.hooks";
+import { useBookingState } from "../../booking-detail/container/use-booking-state.hooks";
 import {
   useCancelBooking,
   useUpdateBookingStatus,
 } from "../container/booking-mutation.hooks";
-import { useBookingState } from "../../booking-detail/container/use-booking-state.hooks";
+import { useBookingDetail } from "../container/booking-query.hooks";
 import BookingDetailSheet from "./booking-detail.sheet";
 
 const { BookingListItemSchema } = BookingSchema;
@@ -77,7 +62,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
-  // Fetch full booking detail for validation
   const { data: bookingDetail } = useBookingDetail({
     bookingId: booking.bookingId,
     enabled: true,
@@ -103,6 +87,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     : null;
 
   const isArrivingToday = !!(checkinDate && isToday(checkinDate));
+  const isRoomBlock = bookingDetail?.source === "RoomBlock";
 
   // Business logic validation using booking state
   const canConfirmPayment = booking.status === "Pending";
@@ -122,17 +107,24 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     !bookingState.permissions.blockReason; // No blocking reasons
 
   const handleCheckIn = async () => {
-    if (!canCheckIn) {
+    if (!canCheckIn && !isRoomBlock) {
       toast.error("Không thể check-in booking này");
       return;
     }
 
     try {
-      await updateStatus("CheckedIn");
-      await updateStatus("InHouse");
-
-      toast.success("Check-in thành công");
-      refetch?.();
+      if (isRoomBlock) {
+        await updateStatus("Confirmed");
+        await updateStatus("CheckedIn");
+        await updateStatus("InHouse");
+        toast.success("Check-in thành công");
+        refetch?.();
+      } else {
+        await updateStatus("CheckedIn");
+        await updateStatus("InHouse");
+        toast.success("Check-in thành công");
+        refetch?.();
+      }
     } catch {
       toast.error("Check-in thất bại");
     }
@@ -153,7 +145,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       return;
     }
 
-    // Navigate to detail page for full checkout flow
     navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
   };
 
@@ -207,10 +198,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         bgClass = "bg-destructive";
         icon = <XCircle className="mr-1 h-3 w-3" />;
         break;
-      case "NoShow":
-        bgClass = "bg-orange-600";
-        icon = <UserX className="mr-1 h-3 w-3" />;
-        break;
     }
 
     return (
@@ -229,11 +216,12 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const renderPrimaryAction = () => {
     const btnClass = "w-full shadow-sm font-semibold transition-all";
 
-    if (canCheckIn) {
+    if (canCheckIn || isRoomBlock) {
       return (
         <Button
           size="sm"
-          className={cn(btnClass, "bg-green-600 hover:bg-green-700 text-white")}
+          variant={"success"}
+          className={cn(btnClass)}
           onClick={handleCheckIn}
           disabled={isProcessing}
         >
@@ -245,7 +233,8 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       return (
         <Button
           size="sm"
-          className={cn(btnClass, "bg-amber-500 hover:bg-amber-600 text-white")}
+          variant={"warning"}
+          className={cn(btnClass)}
           onClick={handleCheckOut}
           disabled={isProcessing}
         >
@@ -253,7 +242,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         </Button>
       );
     }
-    if (canConfirmPayment) {
+    if (canConfirmPayment && !isRoomBlock) {
       return (
         <Button
           size="sm"
@@ -269,7 +258,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       <Button
         size="sm"
         variant="outline"
-        className={cn(btnClass, "bg-white hover:bg-gray-50")}
+        className={cn(btnClass, "bg-background hover:bg-accent")}
         onClick={handleViewDetail}
       >
         Xem chi tiết
@@ -278,16 +267,16 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   };
   return (
     <>
-      <div className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-primary/20 hover:shadow-lg">
+      <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:border-primary/20 hover:shadow-lg">
         {/* HEADER SECTION: System Info */}
-        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-2.5">
+        <div className="flex items-center justify-between border-b border-border bg-muted/50 px-4 py-2.5">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-bold text-gray-500">
+            <span className="font-mono text-xs font-bold text-muted-foreground">
               #{booking.bookingCode}
             </span>
-            <div className="h-4 w-[1px] bg-gray-300"></div>
+            <div className="h-4 w-[1px] bg-border"></div>
             {/* Source Pill */}
-            <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
+            <div className="flex items-center gap-1 text-xs font-medium text-foreground">
               {booking.source === "OTA" ? (
                 <Globe className="h-3 w-3" />
               ) : (
@@ -337,9 +326,8 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               <Button
                 variant="link"
                 onClick={() => setDetailSheetOpen(true)}
-                className="p-0 h-auto font-bold text-lg text-gray-900 hover:text-primary hover:no-underline"
+                className="p-0 h-auto font-bold text-lg text-foreground hover:text-primary hover:no-underline"
               >
-                {/* Removed <h3> inside button for better semantics */}
                 <span className="line-clamp-1 text-left">
                   {booking.customerName || "Khách vãng lai"}
                 </span>
@@ -354,16 +342,18 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
           </div>
 
           {/* Timeline Visual */}
-          <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
             <div className="flex items-center justify-between text-sm">
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold uppercase text-gray-400">
+                <span className="text-[10px] font-semibold uppercase text-muted-foreground">
                   Check-in
                 </span>
                 <span
                   className={cn(
                     "font-bold",
-                    isArrivingToday ? "text-green-600" : "text-gray-700"
+                    isArrivingToday
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-foreground"
                   )}
                 >
                   {checkinDate ? format(checkinDate, "dd/MM") : "--/--"}
@@ -372,20 +362,20 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
               {/* Arrow / Duration */}
               <div className="flex flex-col items-center px-4">
-                <span className="mb-1 text-[10px] font-medium text-gray-400">
+                <span className="mb-1 text-[10px] font-medium text-muted-foreground">
                   {nights} đêm
                 </span>
                 <div className="relative flex w-full items-center">
-                  <div className="h-[1px] w-12 bg-gray-300"></div>
-                  <ArrowRight className="absolute right-0 -mr-1 h-3 w-3 text-gray-400" />
+                  <div className="h-[1px] w-12 bg-border"></div>
+                  <ArrowRight className="absolute right-0 -mr-1 h-3 w-3 text-muted-foreground" />
                 </div>
               </div>
 
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-semibold uppercase text-gray-400">
+                <span className="text-[10px] font-semibold uppercase text-muted-foreground">
                   Check-out
                 </span>
-                <span className="font-bold text-gray-700">
+                <span className="font-bold text-foreground">
                   {checkoutDate ? format(checkoutDate, "dd/MM") : "--/--"}
                 </span>
               </div>
@@ -394,7 +384,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         </div>
 
         {/* FOOTER SECTION: Actions */}
-        <div className="border-t border-gray-100 p-3">
+        <div className="border-t border-border p-3">
           {renderPrimaryAction()}
         </div>
       </div>
@@ -422,8 +412,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* No Show Confirmation Dialog */}
     </>
   );
 }

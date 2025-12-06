@@ -244,10 +244,12 @@ export default function CreateBookingPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 overflow-y-auto">
-      <header className="h-14 shrink-0 bg-white border-b px-4 flex items-center justify-between z-30 shadow-sm">
+    <div className="flex flex-col h-full overflow-y-auto">
+      <header className="h-14 shrink-0 bg-background border-b px-4 flex items-center justify-between z-30 shadow-sm">
         <div className="flex items-center gap-3">
-          <h1 className="font-bold text-lg text-gray-900">Tạo Đặt Phòng</h1>
+          <h1 className="font-bold text-lg text-accent-foreground">
+            Tạo Đặt Phòng
+          </h1>
         </div>
         <div className="flex items-center gap-2">
           <AlertDialog>
@@ -311,25 +313,25 @@ export default function CreateBookingPage() {
           className="flex-1 grid grid-cols-12 gap-0 overflow-hidden"
         >
           {/* LEFT: Guest Info */}
-          <aside className="col-span-12 md:col-span-3 bg-white border-r overflow-y-auto">
+          <aside className="col-span-12 md:col-span-3 bg-background border-r overflow-y-auto">
             <div className="p-5">
               <CustomerInfoSection form={form} />
             </div>
           </aside>
 
           {/* CENTER: Room Selection */}
-          <main className="col-span-12 md:col-span-5 flex flex-col overflow-hidden bg-gray-50/50">
+          <main className="col-span-12 md:col-span-5 flex flex-col overflow-hidden bg-muted">
             <div className="flex-1 overflow-hidden flex flex-col p-4 gap-4">
               <RoomSelectionSection form={form} />
             </div>
           </main>
 
           {/* RIGHT: Cart & Payment */}
-          <aside className="col-span-12 md:col-span-4 bg-white border-l flex flex-col  h-full">
+          <aside className="col-span-12 md:col-span-4 bg-background border-l flex flex-col  h-full">
             <div className="flex-1 overflow-hidden flex flex-col">
               <BookingCartWidget form={form} />
             </div>
-            <div className="p-4 border-t bg-gray-50">
+            <div className="p-4 border-t ">
               <Button
                 type="submit"
                 size="lg"

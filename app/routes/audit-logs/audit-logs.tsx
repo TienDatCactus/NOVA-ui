@@ -11,7 +11,6 @@ export default function AuditLogs() {
     ...filters,
     Keyword: debouncedKeyword,
   });
-  console.log(filters);
   return (
     <AuditLogsLayout
       filters={filters}

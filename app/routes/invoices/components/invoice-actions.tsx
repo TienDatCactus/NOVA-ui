@@ -126,7 +126,6 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
         </Button>
       )}
 
-      {/* ----- Dialogs ----- */}
       <AddItemDialog
         open={dialog === "add-item"}
         onClose={() => setDialog(null)}

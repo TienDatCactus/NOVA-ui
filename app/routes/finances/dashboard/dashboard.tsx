@@ -44,18 +44,18 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-8">
+    <div className="min-h-screen bg-muted pb-8">
       {/* 1. Sticky Header Wrapper */}
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 py-4 md:px-8 shadow-sm">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-muted px-4 py-4 md:px-8 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-accent-foreground">
               Báo cáo tài chính
             </h1>
             {data && (
               <p className="text-sm text-muted-foreground mt-1">
                 {data.periodDescription} • Cập nhật:{" "}
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-accent-foreground">
                   {new Date(data.generatedAt).toLocaleString("vi-VN")}
                 </span>
               </p>
@@ -102,8 +102,8 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
 
         {/* 4. Dashboard Content */}
         {!isPending && data && (
-          <div className="space-y-8">
-            {/* KPI Section */}
+          <div className="space-y-6">
+            {/* 1. KPI Cards - Top Priority */}
             <section>
               <KpiCardsSection
                 todayKpis={data.todayKpis}
@@ -112,17 +112,18 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
               />
             </section>
 
-            {/* Charts Grid */}
-            <div className="grid gap-6 lg:grid-cols-7">
-              <div className="lg:col-span-4">
-                <RevenueTrendSection data={data.revenueTrend} />
-              </div>
-              <div className="lg:col-span-3">
-                <BookingMetricsSection metrics={data.bookingMetrics} />
-              </div>
-            </div>
+            {/* 2. Revenue Trend - Full Width for Better Visualization */}
+            <section>
+              <RevenueTrendSection data={data.revenueTrend} />
+            </section>
 
-            <div className="grid gap-6 lg:grid-cols-2">
+            {/* 3. Booking Operations - New Visual Design */}
+            <section>
+              <BookingMetricsSection metrics={data.bookingMetrics} />
+            </section>
+
+            {/* 4. Revenue Analysis - Side by Side */}
+            <section className="grid gap-6 lg:grid-cols-2">
               <RevenueBreakdownSection
                 revenueBreakdown={data.revenueBreakdown}
                 revenueByChannel={data.revenueByChannel}
@@ -134,7 +135,7 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
                   otaReceivable={data.otaReceivable}
                 />
               </div>
-            </div>
+            </section>
           </div>
         )}
 

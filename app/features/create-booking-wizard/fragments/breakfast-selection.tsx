@@ -67,7 +67,7 @@ export function BreakfastSelection({
       {/* === CONTROL ROW === */}
       <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary shadow-sm dark:bg-primary/10">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-background text-primary shadow-sm dark:bg-primary/10">
             <Coffee className="h-4 w-4" />
           </div>
           <div className="space-y-0.5">

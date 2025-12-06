@@ -147,12 +147,6 @@ export default function ServiceOrderDetails({
 
         <div className="my-1 h-px bg-gray-100" />
 
-        {/* Subtotal */}
-        <Row
-          label="Thành tiền"
-          value={formatMoney(serviceOrderDetail.subtotalAmount).vndFormatted}
-        />
-
         {/* Surcharges & Discounts */}
         {serviceOrderDetail.discountAmount > 0 && (
           <Row

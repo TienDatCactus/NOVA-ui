@@ -15,13 +15,13 @@ const SOURCE_TYPE_CONFIG: Record<
   ExpenseSourceType,
   {
     label: string;
-    variant: "default" | "secondary" | "info" | "outline";
+    variant: "success" | "secondary" | "info" | "outline";
     icon: React.ComponentType<{ className?: string }>;
   }
 > = {
   Manual: {
     label: "Nhập tay",
-    variant: "default",
+    variant: "success",
     icon: Hand,
   },
   StaffPayroll: {

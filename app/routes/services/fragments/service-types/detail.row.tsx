@@ -89,10 +89,10 @@ export default function ServiceTypeDetailRow({
                   {detailData.images!.length > 1 && (
                     <>
                       <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10">
-                        <CarouselPrevious className="h-8 w-8 bg-white/80 hover:bg-white border-none shadow-md" />
+                        <CarouselPrevious className="h-8 w-8 bg-background/80 hover:bg-background border-none shadow-md" />
                       </div>
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
-                        <CarouselNext className="h-8 w-8 bg-white/80 hover:bg-white border-none shadow-md" />
+                        <CarouselNext className="h-8 w-8 bg-background/80 hover:bg-background border-none shadow-md" />
                       </div>
                     </>
                   )}
@@ -197,7 +197,7 @@ export default function ServiceTypeDetailRow({
 
             <div
               className={cn(
-                "flex-1 rounded-xl shadow-sm bg-white border p-4 text-sm leading-relaxed",
+                "flex-1 rounded-xl shadow-sm bg-background border p-4 text-sm leading-relaxed",
                 detailData.description
                   ? "bg-muted/20 text-foreground"
                   : "bg-muted/10 text-muted-foreground italic flex items-center justify-center"

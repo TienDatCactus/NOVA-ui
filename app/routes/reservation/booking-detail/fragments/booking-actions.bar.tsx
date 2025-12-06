@@ -158,7 +158,7 @@ export function BookingActionsBar({
                     Thu nợ sau checkout
                     <Badge
                       variant="secondary"
-                      className="ml-2 bg-white/20 text-white hover:bg-white/30 border-0"
+                      className="ml-2 bg-background/20 text-white hover:bg-background/30 border-0"
                     >
                       {
                         formatMoney(bookingState.financial.totalBalance)

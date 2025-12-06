@@ -51,13 +51,13 @@ export function ChatSidebar({
 
   // Shared container style for the sidebar (Glass pane)
   const containerClasses =
-    "flex w-80 flex-col border-r border-white/40 bg-white/60 backdrop-blur-xl h-full shadow-[5px_0_15px_-5px_rgba(0,0,0,0.03)]";
+    "flex w-80 flex-col border-r border-white/40 bg-background/60 backdrop-blur-xl h-full shadow-[5px_0_15px_-5px_rgba(0,0,0,0.03)]";
 
   if (isLoading) {
     return (
       <div className={cn(containerClasses, "p-4")}>
         <div className="mb-6 space-y-1">
-          <h1 className="text-2xl font-bold text-stone-800 tracking-tight ">
+          <h1 className="text-2xl font-bold text-accent-foreground tracking-tight ">
             Hộp thư đến
           </h1>
           <p className="text-sm text-stone-500">Đang tải danh sách...</p>
@@ -82,8 +82,10 @@ export function ChatSidebar({
       <div className={cn(containerClasses, "p-4")}>
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-stone-800 ">Hộp thư đến</h1>
-            <p className="text-sm text-stone-500">Danh sách tin nhắn</p>
+            <h1 className="text-2xl font-bold text-accent-foreground ">
+              Hộp thư đến
+            </h1>
+            <p className="text-sm text-muted-foreground">Danh sách tin nhắn</p>
           </div>
           <Button
             size="icon"
@@ -101,12 +103,12 @@ export function ChatSidebar({
         <Empty>
           <EmptyHeader>
             <EmptyMedia>
-              <CloudFog className="h-10 w-10 text-stone-400/70" />
+              <CloudFog className="h-10 w-10 text-muted-foreground" />
             </EmptyMedia>
-            <EmptyTitle className="font-semibold text-stone-700 mb-1">
+            <EmptyTitle className="font-semibold text-muted-foreground mb-1">
               Danh sách tin nhắn
             </EmptyTitle>
-            <EmptyContent className="text-sm text-stone-500 max-w-[200px]">
+            <EmptyContent className="text-sm text-muted-foreground max-w-[200px]">
               Hiện chưa có tin nhắn nào từ khách hàng.
             </EmptyContent>
           </EmptyHeader>
@@ -146,7 +148,7 @@ export function ChatSidebar({
           </div>
           <Input
             placeholder="Tìm theo tên, phòng..."
-            className="w-full rounded-full bg-white/50 border-white/60 pl-9 pr-8 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-300 placeholder:text-stone-400 text-stone-700 shadow-sm"
+            className="w-full rounded-full bg-background/50 border-white/60 pl-9 pr-8 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-300 placeholder:text-stone-400 text-stone-700 shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

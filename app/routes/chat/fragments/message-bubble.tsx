@@ -71,7 +71,7 @@ export function MessageBubble({
           "rounded-2xl",
           isOwnMessage
             ? "bg-emerald-600 text-white rounded-br-sm shadow-emerald-900/10" // Own: Deep Forest Green
-            : "bg-white/80 backdrop-blur-md border border-white/50 text-stone-800 rounded-bl-sm shadow-stone-900/5" // Incoming: Misty Glass
+            : "bg-background/80 backdrop-blur-md border border-white/50 text-stone-800 rounded-bl-sm shadow-stone-900/5" // Incoming: Misty Glass
         )}
       >
         {/* Staff name (for group chats context) */}

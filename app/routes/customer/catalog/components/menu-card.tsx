@@ -15,12 +15,11 @@ export default function MenuCard({ item }: MenuCardProps) {
     <Card
       className={cn(
         "group relative overflow-hidden border-0 p-0 shadow-sm transition-all duration-500",
-        // Glassy/Misty Background
-        "bg-white/40 backdrop-blur-md hover:bg-white/80 hover:shadow-lg hover:shadow-stone-900/5 hover:-translate-y-1"
+        "hover:bg-background/80 hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-1"
       )}
     >
       {/* === 1. VISUAL FRAME === */}
-      <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-xl bg-stone-200/50 shadow-inner ring-1 ring-black/5">
+      <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-xl bg-card/50 shadow-inner ring-1 ring-foreground/5">
         {item.imageUrls && item.imageUrls.length > 0 ? (
           <img
             src={item.imageUrls[0]}
@@ -31,15 +30,15 @@ export default function MenuCard({ item }: MenuCardProps) {
             )}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-stone-100">
-            <UtensilsCrossed className="h-10 w-10 text-stone-300" />
+          <div className="flex h-full w-full items-center justify-center bg-muted">
+            <UtensilsCrossed className="h-10 w-10 text-muted-foreground" />
           </div>
         )}
 
         {/* "Sold Out" Mist Overlay */}
         {!item.active && (
           <div className="absolute inset-0 flex items-center justify-center bg-stone-100/60 backdrop-blur-[2px] z-10">
-            <div className="rotate-[-12deg] rounded-lg border-2 border-stone-500 px-4 py-1 text-sm font-bold uppercase tracking-widest text-stone-600 mix-blend-multiply bg-white/50 shadow-sm">
+            <div className="rotate-[-12deg] rounded-lg border-2 border-stone-500 px-4 py-1 text-sm font-bold uppercase tracking-widest text-stone-600 mix-blend-multiply bg-background/50 shadow-sm">
               Hết món
             </div>
           </div>
@@ -54,17 +53,17 @@ export default function MenuCard({ item }: MenuCardProps) {
         <div className="flex flex-col gap-2">
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3">
-            <h3 className="font-serif text-lg font-bold leading-tight text-stone-800 group-hover:text-emerald-800 transition-colors">
+            <h3 className="font-serif text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 transition-colors">
               {item.name}
             </h3>
 
             {/* Price Tag */}
             <div className="flex flex-col items-end shrink-0">
-              <span className="text-base font-semibold text-emerald-700 font-serif tracking-wide whitespace-nowrap">
+              <span className="text-base font-semibold text-emerald-700 dark:text-emerald-300   font-serif tracking-wide whitespace-nowrap">
                 {vndFormatted}
               </span>
               {item.unitName && (
-                <span className="text-[10px] uppercase tracking-wider text-stone-400 font-medium">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                   /{item.unitName}
                 </span>
               )}
@@ -73,7 +72,7 @@ export default function MenuCard({ item }: MenuCardProps) {
 
           {/* Description */}
           {item.description && (
-            <p className="line-clamp-2 text-xs leading-relaxed text-stone-500 font-sans">
+            <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground font-sans">
               {item.description}
             </p>
           )}

@@ -144,7 +144,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                               variant="outline"
                               role="combobox"
                               className={cn(
-                                "w-full justify-between bg-white h-9 px-3 font-normal",
+                                "w-full justify-between bg-background h-9 px-3 font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -200,7 +200,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                         <Input
                           {...field}
                           placeholder="#123456789"
-                          className="bg-white h-9 font-mono"
+                          className="bg-background h-9 font-mono"
                         />
                       </FormControl>
                       <FormMessage />
@@ -222,7 +222,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                       <Input
                         {...field}
                         placeholder="Nhập mã đại lý..."
-                        className="bg-white h-9"
+                        className="bg-background h-9"
                       />
                     </FormControl>
                     <FormMessage />
@@ -261,7 +261,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                           ? "VD: Bảo trì máy lạnh, Sơn tường..."
                           : "VD: Nguyễn Văn A"
                       }
-                      className="bg-white h-10 text-base" // Slightly larger for main input
+                      className="bg-background h-10 text-base" // Slightly larger for main input
                     />
                   </FormControl>
                   <FormMessage />
@@ -330,7 +330,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
         <Separator />
 
         {/* C. OCCUPANCY */}
-        <div className="p-4 bg-gray-50/50">
+        <div className="p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -354,7 +354,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                       {...field}
                       minValue={1}
                       maxValue={10}
-                      className="w-full bg-white h-9 border-gray-200"
+                      className="w-full bg-background h-9 border-gray-200"
                     />
                   </FormControl>
                   <FormMessage />
@@ -377,7 +377,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                       {...field}
                       minValue={0}
                       maxValue={5}
-                      className="w-full bg-white h-9 border-gray-200"
+                      className="w-full bg-background h-9 border-gray-200"
                     />
                   </FormControl>
                   <FormMessage />

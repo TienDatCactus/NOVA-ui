@@ -166,8 +166,8 @@ export function ManageRolesDialog({
                               className={cn(
                                 "flex items-center justify-between p-3 rounded-lg border transition-all duration-200",
                                 isSelected
-                                  ? "bg-white border-primary/20 shadow-sm"
-                                  : "bg-white/50 border-transparent hover:border-gray-200 hover:bg-white"
+                                  ? "bg-background border-primary/20 shadow-sm"
+                                  : "bg-background/50 border-transparent hover:border-gray-200 hover:bg-background"
                               )}
                             >
                               <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ export function ManageRolesDialog({
               </div>
             )}
 
-            <DialogFooter className="px-6 py-4 bg-white shrink-0 border-t">
+            <DialogFooter className="px-6 py-4 bg-background shrink-0 border-t">
               <Button
                 type="button"
                 variant="outline"

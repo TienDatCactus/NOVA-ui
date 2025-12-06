@@ -250,7 +250,7 @@ export default function GuestChat({}: Route.ComponentProps) {
   if (showErrorDialog && entry) {
     return (
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent className="bg-white/90 backdrop-blur-md border-stone-200">
+        <AlertDialogContent className="bg-background/90 backdrop-blur-md border-stone-200">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-stone-800">
               {t("chat.cannotAccess")}
@@ -315,7 +315,7 @@ export default function GuestChat({}: Route.ComponentProps) {
       <BackgroundLayer />
 
       {/* Header - Glassmorphic */}
-      <header className="h-16 border-b border-white/20 bg-white/60 backdrop-blur-xl flex items-center px-4 justify-between sticky top-0 z-20 shadow-sm shadow-stone-900/5">
+      <header className="h-16 border-b border-white/20 bg-background/60 backdrop-blur-xl flex items-center px-4 justify-between sticky top-0 z-20 shadow-sm shadow-stone-900/5">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border border-white/50 shadow-sm">
             <AvatarFallback className="bg-emerald-100 text-emerald-800 font-medium font-serif">
@@ -376,7 +376,7 @@ export default function GuestChat({}: Route.ComponentProps) {
             {/* Messages List */}
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 opacity-70">
-                <div className="w-16 h-16 bg-white/40 rounded-full flex items-center justify-center border border-white/60">
+                <div className="w-16 h-16 bg-background/40 rounded-full flex items-center justify-center border border-white/60">
                   <Leaf className="h-8 w-8 text-emerald-800/30" />
                 </div>
                 <p className="text-sm text-stone-500 font-medium">
@@ -401,7 +401,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                   <div key={msg.id}>
                     {isNewDay && msg.createdAt && (
                       <div className="flex justify-center my-6">
-                        <span className="text-[10px] bg-white/40 backdrop-blur-sm border border-white/30 text-stone-500 px-3 py-1 rounded-full shadow-sm">
+                        <span className="text-[10px] bg-background/40 backdrop-blur-sm border border-white/30 text-stone-500 px-3 py-1 rounded-full shadow-sm">
                           {new Date(msg.createdAt).toLocaleDateString("vi-VN", {
                             weekday: "short",
                             day: "numeric",
@@ -425,7 +425,7 @@ export default function GuestChat({}: Route.ComponentProps) {
       </div>
 
       {/* Input Area - Floating Glass */}
-      <div className="bg-white/60 backdrop-blur-xl border-t border-white/40 p-3 pb-safe-area sticky bottom-0 z-20 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.02)]">
+      <div className="bg-background/60 backdrop-blur-xl border-t border-white/40 p-3 pb-safe-area sticky bottom-0 z-20 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.02)]">
         {!canSendMessage ? (
           <div className="p-3 bg-stone-100/50 border border-stone-200/50 rounded-lg text-center text-sm text-stone-500 flex items-center justify-center gap-2">
             <span className="w-2 h-2 rounded-full bg-stone-400" />
@@ -457,7 +457,7 @@ export default function GuestChat({}: Route.ComponentProps) {
               <PopoverContent
                 align="start"
                 side="top"
-                className="w-80 p-0 overflow-hidden border-stone-200/60 bg-white/90 backdrop-blur-xl shadow-xl shadow-stone-900/5"
+                className="w-80 p-0 overflow-hidden border-stone-200/60 bg-background/90 backdrop-blur-xl shadow-xl shadow-stone-900/5"
                 sideOffset={10}
               >
                 <div className="bg-emerald-50/50 px-4 py-2 border-b border-emerald-100/50">
@@ -474,7 +474,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                     </TabsTrigger>
                   </TabsList>
 
-                  <div className="h-64 bg-white/40">
+                  <div className="h-64 bg-background/40">
                     <TabsContent value="menu" className="h-full mt-0">
                       {isLoadingItems ? (
                         <div className="flex h-full items-center justify-center">
@@ -561,7 +561,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Message reception..."
                 disabled={isConnecting}
-                className="pr-10 rounded-full bg-stone-100/50 border-transparent focus-visible:bg-white focus-visible:ring-emerald-500/20 focus-visible:border-emerald-200 transition-all text-stone-800 placeholder:text-stone-400"
+                className="pr-10 rounded-full bg-stone-100/50 border-transparent focus-visible:bg-background focus-visible:ring-emerald-500/20 focus-visible:border-emerald-200 transition-all text-stone-800 placeholder:text-stone-400"
                 autoComplete="off"
               />
             </div>

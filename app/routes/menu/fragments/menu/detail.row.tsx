@@ -155,7 +155,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
               </div>
 
               {/* Metadata Footer (Timestamps) */}
-              <div className="flex flex-col gap-2 text-xs text-muted-foreground bg-white/50 p-3 rounded border">
+              <div className="flex flex-col gap-2 text-xs text-muted-foreground bg-background/50 p-3 rounded border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CalendarDays className="w-3.5 h-3.5" />

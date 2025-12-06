@@ -52,7 +52,7 @@ export default function WorkShiftsFilterSidebar({
           <Input
             placeholder="Mã, tên ca làm việc..."
             value={filters.searchQuery}
-            className="bg-white"
+            className="bg-background"
             onChange={(e) => onFilterChange("searchQuery", e.target.value)}
             startAddon={<Search className="text-muted-foreground" />}
           />

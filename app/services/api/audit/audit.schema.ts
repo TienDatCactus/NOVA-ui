@@ -86,14 +86,14 @@ const AuditDetailSchema = z.object({
 
 // Export Request Schema
 const ExportAuditRequestSchema = z.object({
-  fromDate: z.string().optional(),
-  toDate: z.string().optional(),
-  userId: z.string().optional(),
-  username: z.string().optional(),
+  fromDate: z.date("Ngày bắt đầu không hợp lệ").optional(),
+  toDate: z.date("Ngày kết thúc không hợp lệ").optional(),
+  userId: z.string("ID người dùng không hợp lệ").optional(),
+  username: z.string("Tên người dùng không hợp lệ").optional(),
   module: AuditModuleEnum.optional(),
   action: AuditActionEnum.optional(),
-  keyword: z.string().optional(),
-  success: z.boolean().optional(),
+  keyword: z.string("Từ khóa không hợp lệ").optional(),
+  success: z.boolean("Trạng thái thành công không hợp lệ").optional(),
 });
 
 // Archive Request Schema
