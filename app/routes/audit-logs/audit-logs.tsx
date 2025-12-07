@@ -3,6 +3,10 @@ import AuditLogsDataTable from "./components/audit-logs-list";
 import { useAuditFilters } from "./container/filter.hooks";
 import { useAuditLogs } from "./container/query.hooks";
 import AuditLogsLayout from "./layouts/audit-logs.layouts";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { RouteModule, Permission } from "~/lib/auth/roles";
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.AuditLogs, Permission.Read);
 
 export default function AuditLogs() {
   const { filters, resetFilters, updateFilter } = useAuditFilters();

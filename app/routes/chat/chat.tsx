@@ -2,6 +2,9 @@ import { useState } from "react";
 import type { Route } from "./+types/chat";
 import { ChatMain } from "./components/chat-main";
 import { ChatSidebar } from "./components/chat-sidebar";
+import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Chat, Permission.Read);
 
 export default function Component({
   loaderData,

@@ -88,7 +88,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
   const isArrivingToday = !!(checkinDate && isToday(checkinDate));
   const isRoomBlock = bookingDetail?.source === "RoomBlock";
-
+  const isConfirmed = booking.status === "Confirmed";
   // Business logic validation using booking state
   const canConfirmPayment = booking.status === "Pending";
 
@@ -112,21 +112,19 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       return;
     }
 
-    try {
-      if (isRoomBlock) {
-        await updateStatus("Confirmed");
-        await updateStatus("CheckedIn");
-        await updateStatus("InHouse");
-        toast.success("Check-in thành công");
-        refetch?.();
-      } else {
-        await updateStatus("CheckedIn");
-        await updateStatus("InHouse");
-        toast.success("Check-in thành công");
-        refetch?.();
-      }
-    } catch {
-      toast.error("Check-in thất bại");
+    if (isConfirmed) {
+      await updateStatus("CheckedIn");
+      await updateStatus("InHouse");
+      refetch?.();
+    } else if (isRoomBlock) {
+      await updateStatus("Confirmed");
+      await updateStatus("CheckedIn");
+      await updateStatus("InHouse");
+      refetch?.();
+    } else {
+      await updateStatus("CheckedIn");
+      await updateStatus("InHouse");
+      refetch?.();
     }
   };
 

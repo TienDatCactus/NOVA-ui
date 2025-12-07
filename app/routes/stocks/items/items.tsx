@@ -2,6 +2,10 @@ import ItemsListView from "./components/items-list-view";
 import useItemsFilters from "./container/filter.hooks";
 import { useStockItemList } from "./container/query.hooks";
 import ItemsLayout from "./layouts/items.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Stock, Permission.Read);
 
 export default function ItemsRoute() {
   const { filters, updateFilter, resetFilters } = useItemsFilters();

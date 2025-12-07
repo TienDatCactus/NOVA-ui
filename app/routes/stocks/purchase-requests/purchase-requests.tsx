@@ -2,6 +2,10 @@ import PurchaseRequestsListView from "./components/purchase-requests-list-view";
 import usePurchaseRequestFilters from "./container/filter.hooks";
 import { usePurchaseRequestList } from "./container/query.hooks";
 import PurchaseRequestsLayout from "./layouts/purchase-requests.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Stock, Permission.Read);
 
 export default function PurchaseRequestsRoute() {
   const { filters, updateFilter, resetFilters } = usePurchaseRequestFilters();

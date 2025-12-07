@@ -3,9 +3,7 @@ import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   ArrowRight,
-  Banknote,
   Calendar,
-  Check,
   CreditCard,
   Hash,
   Loader2,
@@ -21,14 +19,13 @@ import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -53,10 +50,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { formatMoney } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import type { StaffCheckoutPaymentRequestDto } from "~/services/api/booking/dto";
-import type { UpdateInvoiceRequestDto } from "~/services/api/invoices/dto";
+import {
+  INVOICE_STATUSES,
+  INVOICE_TYPES,
+} from "~/services/api/invoices/invoice.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useCheckoutStore } from "~/store/checkout.store";
 import {
@@ -68,15 +67,9 @@ import {
   useUpdateInvoice,
 } from "../../container/use-booking-checkout.hooks";
 import {
-  INVOICE_STATUSES,
-  INVOICE_TYPES,
-} from "~/services/api/invoices/invoice.types";
-import {
   canInvoiceAcceptPayment,
   validatePaymentAmount,
 } from "../../container/use-booking-state.hooks";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { cn } from "~/lib/utils";
 
 const { StaffCheckoutPaymentRequestSchema } = BookingSchema;
 

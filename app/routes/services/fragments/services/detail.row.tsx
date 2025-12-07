@@ -35,7 +35,7 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
 
   if (isPending) {
     return (
-      <div className="p-6 bg-muted/10 border-t animate-pulse">
+      <div className="p-6 bg-muted border-t animate-pulse">
         <div className="flex gap-6">
           <Skeleton className="h-40 w-40 rounded-xl" />
           <div className="flex-1 space-y-3">
@@ -49,7 +49,7 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
   }
 
   return (
-    <div className="bg-slate-50/50 border-t p-6 animate-in fade-in slide-in-from-top-1 duration-200">
+    <div className="bg-muted border-t p-6 animate-in fade-in slide-in-from-top-1 duration-200">
       <div className="flex flex-col lg:flex-row gap-8">
         {/* === LEFT: VISUAL GALLERY === */}
         <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">

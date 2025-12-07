@@ -227,7 +227,7 @@ export default function PaymentOrderSheet({
               <div className="p-8 space-y-8 max-w-3xl mx-auto lg:mx-0">
                 {/* 1. Meta Info Cards */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl border bg-card/50 flex flex-col gap-1">
+                  <div className="p-4 rounded-xl border bg-card flex flex-col gap-1">
                     <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider flex items-center gap-1.5">
                       <CalendarClock className="w-3 h-3" /> Thời gian tạo
                     </span>
@@ -242,11 +242,14 @@ export default function PaymentOrderSheet({
                     </span>
                   </div>
                   {orderDetail.scheduledAt && (
-                    <div className="p-4 rounded-xl border bg-amber-50/50 border-amber-100 flex flex-col gap-1">
-                      <span className="text-[10px] uppercase font-bold text-amber-700 tracking-wider flex items-center gap-1.5">
+                    <div
+                      className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-900/30
+                     border-amber-100 dark:border-amber-700 flex flex-col gap-1"
+                    >
+                      <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-300 tracking-wider flex items-center gap-1.5">
                         <CalendarClock className="w-3 h-3" /> Lịch hẹn
                       </span>
-                      <span className="font-medium text-sm text-amber-900">
+                      <span className="font-medium text-sm text-amber-900 dark:text-amber-200">
                         {format(
                           parseISO(orderDetail.scheduledAt),
                           "HH:mm - dd/MM/yyyy",
@@ -272,7 +275,7 @@ export default function PaymentOrderSheet({
                     </Badge>
                   </div>
 
-                  <div className="rounded-lg border shadow-sm overflow-hidden bg-card">
+                  <div className="rounded-md overflow-hidden">
                     <Table>
                       <TableHeader className="bg-muted/30">
                         <TableRow className="hover:bg-transparent">

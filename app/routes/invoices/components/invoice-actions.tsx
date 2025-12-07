@@ -24,9 +24,7 @@ type DialogType = "add-item" | "add-payment" | "refund" | "void" | null;
 
 export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
   const [dialog, setDialog] = useState<DialogType>(null);
-
   const canAddItem = ["Unpaid", "DepositOnly"].includes(invoice.status);
-
   const { mutate: addCustomItem, isPending: isAddingItem } = useAddCustomItem(
     invoice?.invoiceId || ""
   );

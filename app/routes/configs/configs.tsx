@@ -19,6 +19,10 @@ import { Skeleton } from "~/components/ui/skeleton";
 import ModuleCard from "./components/module-card";
 import { useGroupedConfigs } from "./container/query.hooks";
 import ConfigsLayout from "./layouts/configs.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Configs, Permission.Read);
 
 export default function ConfigsPage() {
   const { data: configData, isPending } = useGroupedConfigs();

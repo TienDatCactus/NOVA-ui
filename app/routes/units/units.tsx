@@ -2,6 +2,10 @@ import UnitsDataTable from "./components/units-list";
 import useUnitFilters from "./container/filter.hooks";
 import { useUnits } from "./container/unit-query.hooks";
 import UnitsViewLayout from "./layouts/units-view.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Units, Permission.Read);
 
 export default function Units() {
   const { refetch } = useUnits();

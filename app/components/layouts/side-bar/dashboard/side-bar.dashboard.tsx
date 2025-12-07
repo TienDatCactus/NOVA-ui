@@ -17,9 +17,40 @@ import { NavMain } from "./components/nav-main";
 import { NavProjects } from "./components/nav-projects";
 import { NavUser } from "./components/nav-user";
 import { TeamSwitcher } from "./components/switcher";
+import { useAuth } from "~/lib/auth/components";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuthStore();
+  const { canAccess } = useAuth();
+
+  // Filter navigation items based on user permissions
+  const filteredNavMain = React.useMemo(() => {
+    return SIDEBAR_NAV_MAIN.filter((item) => {
+      // If no module specified, show item
+      if (!item.module) return true;
+      // Check if user can access the module
+      return canAccess(item.module);
+    }).map((item) => {
+      // Filter sub-items if they exist
+      if (item.items) {
+        return {
+          ...item,
+          items: item.items.filter((subItem) => {
+            if (!subItem.module) return true;
+            return canAccess(subItem.module);
+          }),
+        };
+      }
+      return item;
+    });
+  }, [canAccess]);
+
+  const filteredProjects = React.useMemo(() => {
+    return SIDEBAR_PROJECTS.filter((project) => {
+      if (!project.module) return true;
+      return canAccess(project.module);
+    });
+  }, [canAccess]);
 
   const data = {
     user: user
@@ -34,8 +65,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           avatar: "/avatars/default.jpg",
         },
     teams: SIDEBAR_TEAMS,
-    navMain: SIDEBAR_NAV_MAIN,
-    projects: SIDEBAR_PROJECTS,
+    navMain: filteredNavMain,
+    projects: filteredProjects,
   };
 
   return (

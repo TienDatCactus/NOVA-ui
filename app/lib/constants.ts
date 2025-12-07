@@ -30,6 +30,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import FE_URL from "~/lib/fe-url";
+import { RouteModule } from "~/lib/auth/roles";
 
 // Translation supported languages
 const SUPPORTED_LANGUAGES = [
@@ -50,32 +51,39 @@ const SIDEBAR_NAV_MAIN: Array<{
   title: string;
   url: string;
   icon: LucideIcon;
+  module?: RouteModule;
   items?: Array<{
     title: string;
     url: string;
+    module?: RouteModule;
   }>;
 }> = [
   {
     title: "Đặt phòng",
     url: FE_URL.dashboard.bookings.list,
     icon: HousePlus,
+    module: RouteModule.Bookings,
     items: [
       {
         title: "Báo cáo",
         url: FE_URL.dashboard.bookings.reports,
+        module: RouteModule.Reports,
       },
       {
         title: "Kiểm tra phòng trống",
         url: FE_URL.dashboard.bookings.grid,
+        module: RouteModule.Bookings,
       },
       {
         title: "Danh sách đặt phòng",
         url: FE_URL.dashboard.bookings.list,
+        module: RouteModule.Bookings,
       },
 
       {
         title: "Đặt phòng mới",
         url: FE_URL.dashboard.bookings.newBooking,
+        module: RouteModule.Bookings,
       },
     ],
   },
@@ -83,14 +91,17 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Buồng phòng",
     url: FE_URL.dashboard.rooms.list,
     icon: Bath,
+    module: RouteModule.Rooms,
     items: [
       {
         title: "Danh sách phòng",
         url: FE_URL.dashboard.rooms.list,
+        module: RouteModule.Rooms,
       },
       {
         title: "Loại phòng",
         url: FE_URL.dashboard.rooms.types,
+        module: RouteModule.RoomTypes,
       },
     ],
   },
@@ -98,22 +109,27 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: " Dịch vụ & F&B",
     url: FE_URL.dashboard.services.list,
     icon: Utensils,
+    module: RouteModule.Services,
     items: [
       {
         title: "Danh sách dịch vụ",
         url: FE_URL.dashboard.services.list,
+        module: RouteModule.Services,
       },
       {
         title: "Loại dịch vụ",
         url: FE_URL.dashboard.services.types,
+        module: RouteModule.ServiceTypes,
       },
       {
         title: "Thực đơn",
         url: FE_URL.dashboard.services.menu,
+        module: RouteModule.Menu,
       },
       {
         title: "Danh mục món ăn",
         url: FE_URL.dashboard.services.menuCategories,
+        module: RouteModule.MenuCategories,
       },
     ],
   },
@@ -121,22 +137,27 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Đơn hàng",
     url: FE_URL.dashboard.orders.menuOrders,
     icon: ListOrdered,
+    module: RouteModule.Orders,
     items: [
       {
         title: "Đơn món ăn",
         url: FE_URL.dashboard.orders.menuOrders,
+        module: RouteModule.Orders,
       },
       {
         title: "Đơn dịch vụ",
         url: FE_URL.dashboard.orders.serviceOrders,
+        module: RouteModule.Orders,
       },
       {
         title: "POS Món ăn",
         url: FE_URL.dashboard.orders.menuPos,
+        module: RouteModule.Orders,
       },
       {
         title: "POS Dịch vụ",
         url: FE_URL.dashboard.orders.servicePos,
+        module: RouteModule.Orders,
       },
     ],
   },
@@ -144,27 +165,33 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Nhân viên",
     url: FE_URL.dashboard.staff.list,
     icon: UserCog,
+    module: RouteModule.Staff,
     items: [
       {
         title: "Nhân sự",
         url: FE_URL.dashboard.staff.list,
+        module: RouteModule.Staff,
       },
       {
         title: "Chức vụ",
         url: FE_URL.dashboard.staff.roles,
+        module: RouteModule.StaffRoles,
       },
 
       {
         title: "Ngày nghỉ",
         url: FE_URL.dashboard.staff.holidays,
+        module: RouteModule.Holidays,
       },
       {
         title: "Lịch làm việc của nhân viên",
         url: FE_URL.dashboard.staff.shifts,
+        module: RouteModule.StaffShifts,
       },
       {
         title: "Bảng lương",
         url: "/dashboard/staff/payrolls",
+        module: RouteModule.Payroll,
       },
     ],
   },
@@ -172,22 +199,27 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Quản lý kho",
     url: FE_URL.dashboard.stocks.items,
     icon: Package,
+    module: RouteModule.Stock,
     items: [
       {
         title: "Hàng hóa",
         url: FE_URL.dashboard.stocks.items,
+        module: RouteModule.Stock,
       },
       {
         title: "Danh mục hàng",
         url: FE_URL.dashboard.stocks.itemCategories,
+        module: RouteModule.Stock,
       },
       {
         title: "Yêu cầu mua hàng",
         url: FE_URL.dashboard.stocks.purchaseRequests,
+        module: RouteModule.Stock,
       },
       {
         title: "Điều chỉnh kho",
         url: FE_URL.dashboard.stocks.adjustments,
+        module: RouteModule.Stock,
       },
     ],
   },
@@ -195,22 +227,26 @@ const SIDEBAR_NAV_MAIN: Array<{
     title: "Tài khoản",
     url: FE_URL.dashboard.users,
     icon: Users,
+    module: RouteModule.Users,
   },
 
   {
     title: "Hóa đơn",
     url: FE_URL.dashboard.invoices,
     icon: ReceiptText,
+    module: RouteModule.Invoices,
   },
   {
     title: "Chi phí",
     url: FE_URL.dashboard.expenses,
     icon: Receipt,
+    module: RouteModule.Expenses,
   },
   {
     title: "Báo cáo tài chính",
     url: FE_URL.dashboard.finances.dashboard,
     icon: TrendingUp,
+    module: RouteModule.FinancialReports,
   },
 ];
 
@@ -218,31 +254,37 @@ const SIDEBAR_PROJECTS: Array<{
   name: string;
   url: string;
   icon: LucideIcon;
+  module?: RouteModule;
 }> = [
   {
     name: "Ca làm việc",
     url: FE_URL.dashboard.workShifts,
     icon: Calendar,
+    module: RouteModule.WorkShifts,
   },
   {
     name: "Chat",
     url: FE_URL.dashboard.chat,
     icon: MessageSquareDot,
+    module: RouteModule.Chat,
   },
   {
     name: "Lịch sử truy vấn",
     url: FE_URL.dashboard.auditLogs,
     icon: ScrollText,
+    module: RouteModule.AuditLogs,
   },
   {
     name: "Đơn vị tính",
     url: FE_URL.dashboard.units,
     icon: PackageSearch,
+    module: RouteModule.Units,
   },
   {
     name: "Cài đặt",
     url: FE_URL.dashboard.configs,
     icon: Settings,
+    module: RouteModule.Configs,
   },
   {
     name: "Trợ giúp",

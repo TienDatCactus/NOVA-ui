@@ -57,11 +57,9 @@ function useChangeRoom(bookingId: string) {
     mutationFn: async (data: StaffChangeRoomRequestDto) =>
       await BookingService.staffChangeRoom(bookingId, data),
     onSuccess: async () => {
-      // Invalidate all related queries
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["bookings"],
-        }),
+      (queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+      }),
         queryClient.invalidateQueries({
           queryKey: ["bookings-detail"],
         }),
@@ -74,8 +72,14 @@ function useChangeRoom(bookingId: string) {
         queryClient.invalidateQueries({
           queryKey: ["bookings-rooms-week"],
         }),
-      ]);
-      toast.success("Đổi phòng thành công");
+        toast.success("Đổi phòng thành công"));
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật trạng thái thất bại"
+        );
+      }
     },
   });
 }
@@ -88,11 +92,9 @@ function useCancelBooking(bookingId: string) {
       return await BookingService.staffCancelBooking(bookingId);
     },
     onSuccess: async (data) => {
-      // Invalidate all related queries
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["bookings"],
-        }),
+      (queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+      }),
         queryClient.invalidateQueries({
           queryKey: ["bookings-detail"],
         }),
@@ -105,8 +107,14 @@ function useCancelBooking(bookingId: string) {
         queryClient.invalidateQueries({
           queryKey: ["available-rooms"],
         }),
-      ]);
-      toast.success("Hủy đặt phòng thành công");
+        toast.success("Hủy đặt phòng thành công"));
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật trạng thái thất bại"
+        );
+      }
     },
   });
 }
@@ -124,10 +132,9 @@ function useUpdateBookingStatus(bookingId: string) {
     },
     onSuccess: async () => {
       // Invalidate all related queries
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["bookings-detail"],
-        }),
+      (queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
+      }),
         queryClient.invalidateQueries({
           queryKey: ["bookings"],
         }),
@@ -140,8 +147,14 @@ function useUpdateBookingStatus(bookingId: string) {
         queryClient.invalidateQueries({
           queryKey: ["available-rooms"],
         }),
-      ]);
-      toast.success("Cập nhật trạng thái thành công");
+        toast.success("Cập nhật trạng thái thành công"));
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật trạng thái thất bại"
+        );
+      }
     },
   });
 }
