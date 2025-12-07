@@ -176,7 +176,6 @@ export default function ExpensesLayout({
         </div>
       )}
 
-      {/* === LEVEL 3: CONTENT AREA === */}
       <main className="flex-1 p-6 overflow-y-auto">{children}</main>
     </div>
   );

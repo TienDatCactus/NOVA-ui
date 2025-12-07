@@ -26,6 +26,8 @@ export function useAuthHooks() {
         navigate(DASHBOARD.finances.dashboard);
       } else if (response.user.roles.includes("ServiceStaff")) {
         navigate(DASHBOARD.rooms.list);
+      } else if (response.user.roles.includes("Accountant")) {
+        navigate(DASHBOARD.expenses);
       } else {
         navigate(DASHBOARD.bookings.list);
       }

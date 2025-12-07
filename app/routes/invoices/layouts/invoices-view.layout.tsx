@@ -132,7 +132,6 @@ function InvoicesViewLayout({
 
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
-      {/* === LEVEL 1: GLOBAL HEADER === */}
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between shrink-0">
         {/* Left: Title */}
         <div className="flex items-center gap-4">
