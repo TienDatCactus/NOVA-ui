@@ -3,6 +3,10 @@ import ServicesDataTable from "./components/service-list";
 import useServiceFilters from "./container/services/filter.hooks";
 import { useServices } from "./container/services/query.hooks";
 import ServicesViewLayout from "./layouts/service-view.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Services, Permission.Read);
 
 export default function Component({
   loaderData,

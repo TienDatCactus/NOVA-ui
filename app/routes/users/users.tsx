@@ -2,6 +2,10 @@ import UsersDataTable from "./components/users-list";
 import useUserFilters from "./container/filter.hooks";
 import { useUsers } from "./container/query.hooks";
 import UsersViewLayout from "./layouts/users-view.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Users, Permission.Read);
 
 export default function Component() {
   const { filters, updateFilter, resetFilters } = useUserFilters();

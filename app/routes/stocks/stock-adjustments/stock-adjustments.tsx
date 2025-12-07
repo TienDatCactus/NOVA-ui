@@ -2,6 +2,10 @@ import StockAdjustmentsListView from "./components/stock-adjustments-list-view";
 import useStockAdjustmentFilters from "./container/filter.hooks";
 import { useStockAdjustmentList } from "./container/query.hooks";
 import StockAdjustmentsLayout from "./layouts/stock-adjustments.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Stock, Permission.Read);
 
 export default function StockAdjustmentsRoute() {
   // Filter state

@@ -13,6 +13,10 @@ import { Button } from "~/components/ui/button"; // Import Button
 import { AlertCircle, Download, RefreshCcw } from "lucide-react"; // Import Icons
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"; // Import Alert
 import type { FinancialReportsListParams } from "~/services/api/finances/finances.types";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.FinancialReports, Permission.Read);
 import type { Route } from "./+types/dashboard";
 import {
   Empty,

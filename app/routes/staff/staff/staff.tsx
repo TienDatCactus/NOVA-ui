@@ -3,6 +3,10 @@ import StaffViewLayout from "./layouts/staff-view.layout";
 import { useStaffFilters } from "./container/filter.hooks";
 import { useStaffList } from "./container/query.hooks";
 import StaffDataTable from "./components/staff-list";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Staff, Permission.Read);
 
 export default function StaffPage() {
   const { filters, updateFilter, resetFilter } = useStaffFilters();

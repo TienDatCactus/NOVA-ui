@@ -3,6 +3,10 @@ import ExpensesListView from "./components/expenses-list-view";
 import useExpensesFilters from "./container/filter.hooks";
 import { useExpenses } from "./container/query.hooks";
 import ExpensesLayout from "./layouts/expenses.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Expenses, Permission.Read);
 
 export default function ExpensesRoute() {
   const { filters, updateFilter, resetFilters } = useExpensesFilters();

@@ -11,6 +11,10 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Orders, Permission.Read);
 
 import { Button } from "~/components/ui/button";
 import { DatePicker } from "~/components/ui/date-picker";

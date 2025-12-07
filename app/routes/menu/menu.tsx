@@ -5,6 +5,10 @@ import MenuDataTable from "./components/menu-list";
 import useMenuFilters from "./container/menu/filter.hooks";
 import { useMenuList } from "./container/menu/query.hooks";
 import MenuViewLayout from "./layouts/menu-view.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Menu, Permission.Read);
 
 export default function Component({
   loaderData,

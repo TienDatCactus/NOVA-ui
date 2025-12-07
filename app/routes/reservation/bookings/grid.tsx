@@ -5,6 +5,10 @@ import { useAvailableRoomsFilter } from "./container/available-booking-filter.ho
 import useBookingFilters from "./container/booking-filter.hooks";
 import { useAvailableRooms } from "./container/booking-query.hooks";
 import BookingGridFilters from "./fragments/booking-grid.filters";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Bookings, Permission.Read);
 
 export default function Component({
   loaderData,

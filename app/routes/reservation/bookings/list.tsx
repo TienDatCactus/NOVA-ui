@@ -7,6 +7,10 @@ import { useBookings } from "./container/booking-query.hooks";
 import BookingViewLayout from "./layouts/booking-view.layout";
 import type { Route } from "./+types/list";
 import useBookingFilters from "./container/booking-filter.hooks";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Bookings, Permission.Read);
 
 type ViewMode = "grid" | "list";
 

@@ -1,10 +1,15 @@
 import z from "zod";
 
+const UserRolesEnum = z.enum(
+  ["Admin", "HotelManager", "Receptionist", "Accountant", "ServiceStaff"],
+  "Quyền người dùng không hợp lệ"
+);
+
 const UserSchema = z.object({
   id: z.string(),
   userName: z.string(),
   fullName: z.string().optional(),
-  roles: z.array(z.string()).optional(),
+  roles: z.array(UserRolesEnum),
 });
 const LoginSchema = z.object({
   userNameOrEmail: z.union([
@@ -50,4 +55,5 @@ export const AuthSchema = {
   LoginResponseSchema,
   ResetPasswordSchema,
   ForgotPasswordSchema,
+  UserRolesEnum,
 };

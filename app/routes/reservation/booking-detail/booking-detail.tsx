@@ -4,6 +4,10 @@ import { Check, FileWarning, NotebookPen, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Bookings, Permission.Read);
 
 import { Button } from "~/components/ui/button";
 import {

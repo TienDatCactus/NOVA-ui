@@ -2,6 +2,10 @@ import type { Route } from "./+types/invoices";
 import InvoicesDataTable from "./components/invoices-list";
 import useInvoicesContainer from "./container/invoices/container.hooks";
 import InvoicesViewLayout from "./layouts/invoices-view.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Invoices, Permission.Read);
 
 export default function Component({
   loaderData,

@@ -61,7 +61,7 @@ export function InvoiceDetailDialog({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.success("Xuất báo cáo thành công");
+      toast.success("Xuất hóa đơn thành công");
     } catch (e) {
       console.error(e);
       toast.error("Xuất báo cáo thất bại");
