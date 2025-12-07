@@ -286,11 +286,6 @@ const SIDEBAR_PROJECTS: Array<{
     icon: Settings,
     module: RouteModule.Configs,
   },
-  {
-    name: "Trợ giúp",
-    url: FE_URL.dashboard.help,
-    icon: HelpCircle,
-  },
 ];
 
 const SIDEBAR_TEAMS = [
@@ -346,8 +341,6 @@ const COMMAND_BAR_ROUTES: Array<{
     icon: List,
     href: FE_URL.dashboard.services.menuCategories,
   },
-
-  // Orders
   {
     name: "Đơn món ăn",
     icon: ListOrdered,
@@ -381,7 +374,6 @@ const COMMAND_BAR_ROUTES: Array<{
   { name: "Chat", icon: MessageSquareDot, href: FE_URL.dashboard.chat },
   { name: "Đơn vị tính", icon: PackageSearch, href: FE_URL.dashboard.units },
   { name: "Cài đặt", icon: Settings, href: FE_URL.dashboard.configs },
-  { name: "Trợ giúp", icon: HelpCircle, href: FE_URL.dashboard.help },
 ];
 
 const CUSTOMER_NAVS = [

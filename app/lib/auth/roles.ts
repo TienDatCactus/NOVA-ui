@@ -65,7 +65,7 @@ export enum Permission {
   Create = "create",
   Update = "update",
   Delete = "delete",
-  Execute = "execute", // For special operations (approve, refund, etc.)
+  Execute = "execute",
 }
 
 // Module permissions mapping (dựa trên phân tích url.ts)
@@ -73,13 +73,12 @@ export const MODULE_PERMISSIONS: Record<
   RouteModule,
   Partial<Record<UserRole, Permission[]>>
 > = {
-  // Auth - All users can login/logout
   [RouteModule.Auth]: {
     [UserRole.Admin]: [Permission.Read, Permission.Execute],
     [UserRole.HotelManager]: [Permission.Read, Permission.Execute],
     [UserRole.Accountant]: [Permission.Read, Permission.Execute],
-    [UserRole.Receptionist]: [Permission.Read],
-    [UserRole.ServiceStaff]: [Permission.Read],
+    [UserRole.Receptionist]: [Permission.Read, Permission.Execute],
+    [UserRole.ServiceStaff]: [Permission.Read, Permission.Execute],
   },
 
   // Users - Admin ONLY
@@ -137,8 +136,6 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
     ],
     [UserRole.Receptionist]: [Permission.Read],
-    [UserRole.ServiceStaff]: [Permission.Read],
-    [UserRole.Accountant]: [Permission.Read],
   },
 
   // Menu Categories - ServiceStaff can create, HotelManager full
@@ -149,21 +146,9 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Update,
       Permission.Delete,
     ],
-    [UserRole.ServiceStaff]: [
-      Permission.Read,
-      Permission.Create,
-      Permission.Update,
-      Permission.Delete,
-    ],
-    [UserRole.Receptionist]: [
-      Permission.Read,
-      Permission.Create,
-      Permission.Update,
-      Permission.Delete,
-    ],
+    [UserRole.Receptionist]: [Permission.Read],
   },
 
-  // Services - HotelManager full, others read
   [RouteModule.Services]: {
     [UserRole.HotelManager]: [
       Permission.Read,
@@ -172,8 +157,6 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
     ],
     [UserRole.Receptionist]: [Permission.Read],
-    [UserRole.ServiceStaff]: [Permission.Read],
-    [UserRole.Accountant]: [Permission.Read],
   },
 
   // Service Types - Same as Services
@@ -208,7 +191,6 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
       Permission.Execute,
     ],
-    [UserRole.Receptionist]: [Permission.Read, Permission.Update], // Preview, sync
     [UserRole.HotelManager]: [Permission.Read], // View only
   },
 
@@ -257,9 +239,6 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Update,
       Permission.Delete,
     ],
-    [UserRole.Receptionist]: [Permission.Read],
-    [UserRole.ServiceStaff]: [Permission.Read],
-    [UserRole.Accountant]: [Permission.Read],
   },
 
   // Holidays - HotelManager ONLY
@@ -345,13 +324,18 @@ export const MODULE_PERMISSIONS: Record<
 
   // Audit Logs - Admin ONLY
   [RouteModule.AuditLogs]: {
-    [UserRole.Admin]: [Permission.Read, Permission.Execute, Permission.Delete],
+    [UserRole.Admin]: [
+      Permission.Read,
+      Permission.Execute,
+      Permission.Delete,
+      Permission.Update,
+    ],
   },
 
   // Configs - Admin full, HotelManager limited
   [RouteModule.Configs]: {
     [UserRole.Admin]: [Permission.Read, Permission.Update, Permission.Delete],
-    [UserRole.HotelManager]: [Permission.Read, Permission.Update], // Business configs only
+    [UserRole.HotelManager]: [Permission.Read, Permission.Update],
   },
 
   // Units - HotelManager full, others read

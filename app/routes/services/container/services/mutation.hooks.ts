@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { ServicesService } from "~/services/api/services";
 import type {
@@ -14,6 +15,10 @@ export function useCreateService() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
       toast.success("Tạo dịch vụ thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -33,6 +38,10 @@ export function useUpdateService() {
       queryClient.invalidateQueries({ queryKey: ["services"] });
       toast.success("Cập nhật dịch vụ thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
+    },
   });
 }
 
@@ -43,6 +52,10 @@ export function useDeleteService() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
       toast.success("Xóa dịch vụ thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }

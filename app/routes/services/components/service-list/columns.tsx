@@ -7,6 +7,9 @@ import type { ServiceItem } from "~/services/api/services/dto";
 import ServiceActionsCell from "../../fragments/services/actions.cell";
 import { Button } from "~/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { Can } from "~/lib/auth/bouncer";
+import { RouteModule } from "~/lib/auth/roles";
+import { useAuth } from "~/lib/auth/components";
 
 export const columns: ColumnDef<ServiceItem>[] = [
   {
@@ -118,7 +121,9 @@ export const columns: ColumnDef<ServiceItem>[] = [
     id: "actions",
     header: () => null,
     cell: ({ row }) => {
-      return <ServiceActionsCell service={row.original} />;
+      const { can } = useAuth();
+      if (can.update(RouteModule.Services))
+        return <ServiceActionsCell service={row.original} />;
     },
     enableSorting: false,
     enableHiding: false,

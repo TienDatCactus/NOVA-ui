@@ -20,6 +20,7 @@ import {
 import { ModeToggle } from "~/features/theme/toggler";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { CUSTOMER_NAVS, SUPPORTED_LANGUAGES } from "~/lib/constants";
+import { AUTH, DASHBOARD } from "~/lib/fe-url";
 import { syncI18nWithStore } from "~/lib/i18n/sync-store";
 import { cn } from "~/lib/utils";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
@@ -144,13 +145,25 @@ const CustomerLayout: React.FC = () => {
               </DropdownMenu>
 
               {/* User Profile Trigger */}
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full border-stone-200 bg-background/50 hover:bg-background hover:text-emerald-700  dark:hover:text-emerald-200 dark:hover:bg-emerald-900/50 dark:hover:border-emerald-200 shadow-sm transition-all"
-              >
-                <User className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full border-stone-200 bg-background/50 hover:bg-background hover:text-emerald-700  dark:hover:text-emerald-200 dark:hover:bg-emerald-900/50 dark:hover:border-emerald-200 shadow-sm transition-all"
+                  >
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    asChild
+                    className="focus:bg-emerald-50 focus:text-emerald-800 cursor-pointer"
+                  >
+                    <Link to={AUTH.login}>Đăng nhập</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>

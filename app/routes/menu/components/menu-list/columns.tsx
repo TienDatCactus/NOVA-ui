@@ -8,6 +8,8 @@ import MenuActionsCell from "../../fragments/menu/actions.cell";
 import { ChevronDown, ImageIcon } from "lucide-react";
 import Image from "~/components/ui/image";
 import { Button } from "~/components/ui/button";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<MenuListItemDto>[] = [
   {
@@ -126,13 +128,15 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
   },
   {
     id: "actions",
-    header: () => <p className="text-center">Thao tác</p>,
+    header: () => null,
     cell: ({ row }) => {
-      return (
-        <div className="flex justify-center">
-          <MenuActionsCell menuItem={row.original} />
-        </div>
-      );
+      const { can } = useAuth();
+      if (can.update(RouteModule.Menu))
+        return (
+          <div className="flex justify-center">
+            <MenuActionsCell menuItem={row.original} />
+          </div>
+        );
     },
     enableSorting: false,
     enableHiding: false,
