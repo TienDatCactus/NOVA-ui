@@ -15,6 +15,8 @@ import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 import { useState } from "react";
 import { RoomTypeActionsCell } from "~/routes/rooms/fragments/room-types/action.cell";
 import RoomTypesDetailDialog from "../room-types-detail.dialog";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   {
@@ -97,8 +99,12 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   },
   {
     id: "actions",
-    header: "Thao tác",
-    cell: ({ row }) => <RoomTypeActionsCell roomType={row.original} />,
+    header: () => null,
+    cell: ({ row }) => {
+      const { can } = useAuth();
+      if (can.update(RouteModule.RoomTypes))
+        return <RoomTypeActionsCell roomType={row.original} />;
+    },
     enableSorting: false,
     enableHiding: false,
   },

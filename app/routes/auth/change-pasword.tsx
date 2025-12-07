@@ -23,7 +23,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { ChangePasswordDto } from "~/services/api/auth/dto";
-import { useAuth } from "./container/auth.hooks";
+import { useAuthHooks } from "./container/auth.hooks";
 
 const { ChangePasswordSchema } = AuthSchema;
 
@@ -36,7 +36,7 @@ export function ChangePasswordDialog({
   open,
   onOpenChange,
 }: ChangePasswordDialogProps) {
-  const { isLoading, changePassword } = useAuth();
+  const { isLoading, changePassword } = useAuthHooks();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

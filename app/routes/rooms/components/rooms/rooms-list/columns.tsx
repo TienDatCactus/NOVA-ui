@@ -10,6 +10,8 @@ import RoomStatusCell from "../../../fragments/rooms/status.cell";
 import RoomDetailDialog from "../rooms-detail.dialog";
 import { QrDialog } from "../qr.dialog";
 import { QrCode, ScanLine } from "lucide-react";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 const { RoomListItemSchema } = RoomSchema;
 type RoomListItem = z.infer<typeof RoomListItemSchema>;
@@ -129,11 +131,15 @@ export const columns: ColumnDef<RoomListItem>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <RoomActionsCell room={row.original} />
-      </div>
-    ),
+    cell: ({ row }) => {
+      const { can } = useAuth();
+      if (can.update(RouteModule.Rooms))
+        return (
+          <div className="flex justify-center">
+            <RoomActionsCell room={row.original} />
+          </div>
+        );
+    },
     size: 50,
     enableSorting: false,
     enableHiding: false,

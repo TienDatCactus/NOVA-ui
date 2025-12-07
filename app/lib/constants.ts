@@ -79,12 +79,6 @@ const SIDEBAR_NAV_MAIN: Array<{
         url: FE_URL.dashboard.bookings.list,
         module: RouteModule.Bookings,
       },
-
-      {
-        title: "Đặt phòng mới",
-        url: FE_URL.dashboard.bookings.newBooking,
-        module: RouteModule.Bookings,
-      },
     ],
   },
   {

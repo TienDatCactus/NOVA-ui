@@ -74,14 +74,13 @@ export const MODULE_PERMISSIONS: Record<
   Partial<Record<UserRole, Permission[]>>
 > = {
   [RouteModule.Auth]: {
-    [UserRole.Admin]: [Permission.Read, Permission.Execute],
+    [UserRole.Admin]: [Permission.Read, Permission.Execute, Permission.Update],
     [UserRole.HotelManager]: [Permission.Read, Permission.Execute],
     [UserRole.Accountant]: [Permission.Read, Permission.Execute],
     [UserRole.Receptionist]: [Permission.Read, Permission.Execute],
     [UserRole.ServiceStaff]: [Permission.Read, Permission.Execute],
   },
 
-  // Users - Admin ONLY
   [RouteModule.Users]: {
     [UserRole.Admin]: [
       Permission.Read,
@@ -101,7 +100,7 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
       Permission.Execute,
     ],
-    [UserRole.HotelManager]: [Permission.Read], // Can view bookings
+    [UserRole.HotelManager]: [Permission.Read],
   },
 
   // Rooms - Receptionist read, HotelManager full
@@ -113,7 +112,7 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
       Permission.Execute,
     ],
-    [UserRole.Receptionist]: [Permission.Read, Permission.Update], // Can update status
+    [UserRole.Receptionist]: [Permission.Read], // Can update status
   },
 
   // Room Types - Same as Rooms
@@ -123,11 +122,11 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Create,
       Permission.Update,
       Permission.Delete,
+      Permission.Execute,
     ],
     [UserRole.Receptionist]: [Permission.Read],
   },
 
-  // Menu - HotelManager full, others read
   [RouteModule.Menu]: {
     [UserRole.HotelManager]: [
       Permission.Read,
@@ -191,7 +190,6 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
       Permission.Execute,
     ],
-    [UserRole.HotelManager]: [Permission.Read], // View only
   },
 
   // Chat - ServiceStaff + Receptionist + HotelManager

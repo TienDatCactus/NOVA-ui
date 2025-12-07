@@ -25,14 +25,16 @@ import {
   useSidebar,
 } from "~/components/ui/sidebar";
 import { Can, hasRole } from "~/lib/auth/bouncer";
+import { useAuth } from "~/lib/auth/components";
 import { RouteModule, UserRole } from "~/lib/auth/roles";
 import { ChangePasswordDialog } from "~/routes/auth/change-pasword";
-import { useAuth } from "~/routes/auth/container/auth.hooks";
+import { useAuthHooks } from "~/routes/auth/container/auth.hooks";
 import { useAuthStore } from "~/store/auth.store";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  const { logout } = useAuth();
+  const { logout } = useAuthHooks();
+  const { can } = useAuth();
   const { user } = useAuthStore();
   const [showChangePassword, setShowChangePassword] = useState(false);
   return (
@@ -78,14 +80,16 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
 
-            <DropdownMenuSeparator />
-            {Can.execute(user, RouteModule.Auth) && (
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
-                  <KeyRound />
-                  Đổi mật khẩu
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
+            {can.update(RouteModule.Auth) && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
+                    <KeyRound />
+                    Đổi mật khẩu
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </>
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>

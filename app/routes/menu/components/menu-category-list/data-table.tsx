@@ -23,6 +23,8 @@ import {
 } from "~/components/ui/table";
 import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
 import CreateMenuCategoryDialog from "../create-menu-category.dialog";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,6 +38,7 @@ export function DataTable<TData extends MenuCategoryItemDto, TValue>({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const { can } = useAuth();
   const table = useReactTable({
     data,
     columns,
@@ -62,11 +65,13 @@ export function DataTable<TData extends MenuCategoryItemDto, TValue>({
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
-        />
-        <Button onClick={() => setCreateDialogOpen(true)} size="sm">
-          <Plus className="h-4 w-4 " />
-          Thêm danh mục
-        </Button>
+        />{" "}
+        {can.create(RouteModule.Menu) && (
+          <Button onClick={() => setCreateDialogOpen(true)} size="sm">
+            <Plus className="h-4 w-4 " />
+            Thêm danh mục
+          </Button>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

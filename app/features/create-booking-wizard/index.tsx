@@ -17,9 +17,6 @@ import { Form } from "~/components/ui/form";
 import { DASHBOARD } from "~/lib/fe-url";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 
-// --- IMPORTS CÁC WIDGET MỚI ---
-
-// --- IMPORTS API & UTILS ---
 import useCreateBookingMutation from "./container/create-booking-mutation.hooks";
 
 import z from "zod";
@@ -235,7 +232,6 @@ export default function CreateBookingPage() {
 
       await createBooking(finalPayload, {
         onSuccess: () => {
-          toast.success("Tạo đặt phòng thành công!");
           resetStore();
           navigate(DASHBOARD.bookings.list);
         },

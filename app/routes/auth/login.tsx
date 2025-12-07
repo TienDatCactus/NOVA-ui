@@ -21,12 +21,12 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import type { LoginDto } from "~/services/api/auth/dto";
-import { useAuth } from "./container/auth.hooks";
+import { useAuthHooks } from "./container/auth.hooks";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import PasswordInput from "~/components/ui/password-input";
 
 export default function Login() {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading } = useAuthHooks();
   const { LoginSchema } = AuthSchema;
   const loginForm = useForm({
     resolver: zodResolver(LoginSchema),

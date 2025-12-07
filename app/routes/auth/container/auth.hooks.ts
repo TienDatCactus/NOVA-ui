@@ -9,7 +9,7 @@ import type {
 } from "~/services/api/auth/dto";
 import { useAuthStore } from "~/store/auth.store";
 
-export function useAuth() {
+export function useAuthHooks() {
   const navigate = useNavigate();
   const { setUser, clearUser } = useAuthStore();
 

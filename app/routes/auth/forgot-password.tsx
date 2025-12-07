@@ -23,11 +23,10 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
-import type { Route } from "./+types/forgot-password";
-import { useAuth } from "./container/auth.hooks";
+import { useAuthHooks } from "./container/auth.hooks";
 
 export default function ForgotPassword() {
-  const { forgotPassword, isLoading } = useAuth();
+  const { forgotPassword, isLoading } = useAuthHooks();
 
   const { ForgotPasswordSchema } = AuthSchema;
   const forgotPasswordForm = useForm({

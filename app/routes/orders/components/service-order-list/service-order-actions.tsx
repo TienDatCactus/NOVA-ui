@@ -172,7 +172,7 @@ export function ServiceFooterActions({ orderId, status }: ActionProps) {
 
   if (status === "Completed") {
     return (
-      <div className="flex items-center justify-center w-full py-2 bg-green-50 text-green-700 text-sm font-medium rounded border border-green-200">
+      <div className="flex items-center justify-center w-full py-2 bg-green-50 text-green-700 dark:bg-green-900/50 text-sm font-medium rounded border border-green-200 dark:border-green-700">
         <CheckCircle2 className="mr-2 h-4 w-4" /> Đã hoàn thành
       </div>
     );
@@ -180,7 +180,7 @@ export function ServiceFooterActions({ orderId, status }: ActionProps) {
 
   if (status === "Cancelled" || status === "NoShow") {
     return (
-      <div className="flex items-center justify-center w-full py-2 bg-gray-100 text-gray-500 text-sm font-medium rounded border border-gray-200">
+      <div className="flex items-center justify-center w-full py-2 bg-gray-100 text-gray-500 dark:bg-gray-900/50 text-sm font-medium rounded border border-gray-200 dark:border-gray-700">
         <XCircle className="mr-2 h-4 w-4" /> Đã hủy / Không đến
       </div>
     );
