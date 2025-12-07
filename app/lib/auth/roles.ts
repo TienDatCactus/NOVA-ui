@@ -112,7 +112,8 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
       Permission.Execute,
     ],
-    [UserRole.Receptionist]: [Permission.Read], // Can update status
+    [UserRole.Receptionist]: [Permission.Read],
+    [UserRole.ServiceStaff]: [Permission.Read],
   },
 
   // Room Types - Same as Rooms
@@ -125,6 +126,7 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Execute,
     ],
     [UserRole.Receptionist]: [Permission.Read],
+    [UserRole.ServiceStaff]: [Permission.Read],
   },
 
   [RouteModule.Menu]: {
@@ -156,6 +158,7 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
     ],
     [UserRole.Receptionist]: [Permission.Read],
+    [UserRole.ServiceStaff]: [Permission.Read],
   },
 
   // Service Types - Same as Services
@@ -179,6 +182,7 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
       Permission.Execute,
     ],
+    [UserRole.ServiceStaff]: [Permission.Read],
   },
 
   // Invoices - Accountant full, Receptionist limited

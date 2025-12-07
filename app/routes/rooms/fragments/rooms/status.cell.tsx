@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react"; // Icon loading
 import {
   Select,
   SelectContent,
@@ -7,11 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { cn } from "~/lib/utils";
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useUpdateRoomStatus } from "../../container/rooms/mutation.hooks";
-import { cn } from "~/lib/utils";
-import { Loader2 } from "lucide-react"; // Icon loading
 
 interface RoomStatusCellProps {
   room: RoomListItemDto;
@@ -118,6 +120,12 @@ function RoomStatusCell({ room }: RoomStatusCellProps) {
         onValueChange={handleStatusChange}
       >
         <SelectTrigger
+          disabled={
+            !hasAnyRole(AuthLoader.getUser(), [
+              UserRole.HotelManager,
+              UserRole.Receptionist,
+            ])
+          }
           className={cn(
             "h-8 w-[140px] px-2 text-xs font-medium transition-colors", // Compact size cho bảng dữ liệu
             "border shadow-sm",

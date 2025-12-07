@@ -59,6 +59,8 @@ import { OrderSchema } from "~/services/api/orders/order.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { usePOSOrderDetailByOrder } from "../container/pos-orders/query.hooks";
 import { useServiceOrderDetail } from "../container/service-order/query.hooks";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 const { OrderPayNowRequestSchema } = OrderSchema;
 type PaymentFormData = z.infer<typeof OrderPayNowRequestSchema>;
@@ -594,19 +596,21 @@ export default function PaymentOrderSheet({
 
               {/* Action Footer */}
               <div className="p-6 border-t bg-background">
-                <Button
-                  size="lg"
-                  className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
-                  onClick={paymentForm.handleSubmit(handleSubmit)}
-                  disabled={isPaying || !isPaymentValid}
-                >
-                  {isPaying ? (
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  ) : (
-                    <CheckCircle2 className="w-5 h-5 mr-2" />
-                  )}
-                  {isPaying ? "Đang xử lý..." : "Xác nhận thanh toán"}
-                </Button>
+                {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) && (
+                  <Button
+                    size="lg"
+                    className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+                    onClick={paymentForm.handleSubmit(handleSubmit)}
+                    disabled={isPaying || !isPaymentValid}
+                  >
+                    {isPaying ? (
+                      <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                    ) : (
+                      <CheckCircle2 className="w-5 h-5 mr-2" />
+                    )}
+                    {isPaying ? "Đang xử lý..." : "Xác nhận thanh toán"}
+                  </Button>
+                )}
               </div>
             </div>
           </div>

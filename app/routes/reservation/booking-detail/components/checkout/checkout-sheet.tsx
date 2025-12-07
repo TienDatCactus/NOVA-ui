@@ -54,6 +54,9 @@ import { useCheckoutEligibility } from "../../container/use-booking-state.hooks"
 import InvoiceDetailSheet from "./invoice-detail-sheet";
 
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { toast } from "sonner";
 
 interface CheckoutSheetProps {
   open: boolean;
@@ -150,8 +153,17 @@ export default function CheckoutSheet({
   };
 
   const handleSelectInvoice = (invoiceId: string) => {
-    setSelectedInvoiceId(invoiceId);
-    setShowInvoiceDetail(true);
+    if (
+      hasAnyRole(AuthLoader.getUser(), [
+        UserRole.Accountant,
+        UserRole.Receptionist,
+      ])
+    ) {
+      setSelectedInvoiceId(invoiceId);
+      setShowInvoiceDetail(true);
+    } else {
+      toast.info("Chức năng chỉ dành cho nhân viên lễ tân.");
+    }
   };
 
   const handleFinalCheckout = () => {
@@ -177,7 +189,7 @@ export default function CheckoutSheet({
       <Sheet open={open} onOpenChange={handleSheetClose}>
         <SheetContent
           side="right"
-          className="w-full sm:max-w-[100vw] lg:max-w-6xl gap-0 p-0 flex flex-col bg-slate-50"
+          className="w-full sm:max-w-[100vw] lg:max-w-6xl gap-0 p-0 flex flex-col bg-background"
         >
           {/* HEADER */}
           <SheetHeader className="px-6 py-4 border-b bg-background shrink-0">
@@ -419,7 +431,7 @@ export default function CheckoutSheet({
                 </ScrollArea>
 
                 {/* RIGHT COL: INVOICE LIST & PAYMENT */}
-                <div className="w-full lg:w-[420px] bg-slate-50 border-l flex flex-col h-full shadow-inner">
+                <div className="w-full lg:w-[420px] bg-background border-l flex flex-col h-full shadow-inner">
                   <div className="p-6 flex-1 overflow-y-auto">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm font-semibold uppercase text-muted-foreground flex items-center gap-2">
@@ -538,7 +550,7 @@ export default function CheckoutSheet({
                         Tạo Invoice thanh toán
                       </Button>
                     ) : (
-                      <div className="p-3 bg-green-50 text-green-700 text-sm rounded-md text-center border border-green-100 flex items-center justify-center gap-2 font-medium">
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm rounded-md text-center border border-green-100 dark:border-green-800 flex items-center justify-center gap-2 font-medium">
                         <CheckCircle2 className="w-4 h-4" />
                         Sẵn sàng hoàn tất
                       </div>
@@ -584,7 +596,7 @@ export default function CheckoutSheet({
                 className={cn(
                   "w-full sm:w-auto min-w-[200px] h-12 text-base font-semibold",
                   canCheckout
-                    ? "shadow-lg shadow-green-200 hover:shadow-green-300"
+                    ? "shadow-lg shadow-green-200 dark:shadow-green-800 hover:shadow-green-300 dark:hover:shadow-green-700"
                     : "opacity-50"
                 )}
               >

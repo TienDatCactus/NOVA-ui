@@ -318,9 +318,6 @@ export function useAddCompletedCharges(bookingId: string) {
     onSuccess: () => {
       toast.success("Đã thêm completed charges thành công");
       queryClient.invalidateQueries({
-        queryKey: ["booking-pending-charges", bookingId],
-      });
-      queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", bookingId],
       });
       queryClient.invalidateQueries({
@@ -348,14 +345,17 @@ export function usePayNowRooms(bookingId: string) {
         description: "Invoice đã được tạo và thanh toán.",
       });
 
-      // Invalidate booking detail to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["booking-detail", bookingId],
+        queryKey: ["bookings-detail"],
       });
-
-      // Invalidate booking list if present
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["booking-invoices", bookingId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", bookingId],
       });
     },
     onError: (error) => {
@@ -376,14 +376,17 @@ export function useUpgradeRoom(bookingId: string) {
         description: "Phòng đã được nâng cấp.",
       });
 
-      // Invalidate booking detail to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["booking-detail", bookingId],
+        queryKey: ["bookings-detail"],
       });
-
-      // Invalidate booking list if present
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-rooms-week"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-rooms"],
       });
     },
     onError: (error) => {

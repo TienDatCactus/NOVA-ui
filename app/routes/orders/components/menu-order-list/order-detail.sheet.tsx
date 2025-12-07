@@ -30,6 +30,8 @@ import {
 } from "./order-actions";
 import OrderItemsList from "./order-items-list";
 import { usePOSOrderDetail } from "../../container/pos-orders/query.hooks";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface OrderDetailSheetProps {
   order: POSOrderDetailDto | null;
@@ -206,7 +208,7 @@ export default function OrderDetailSheet({
         </ScrollArea>
 
         {/* === 3. FOOTER: FINANCIALS === */}
-        <div className="flex-none bg-background border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
+        <div className="flex-none bg-background border-t z-20">
           <div className="p-6 space-y-4">
             {/* Breakdown */}
             <div className="space-y-1.5">
@@ -267,11 +269,13 @@ export default function OrderDetailSheet({
 
             {/* Main Action */}
             <div className="pt-2">
-              <OrderFooterActions
-                orderId={orderDetail.id}
-                status={orderDetail.status}
-                invoiceId={orderDetail.invoiceId}
-              />
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) && (
+                <OrderFooterActions
+                  orderId={orderDetail.id}
+                  status={orderDetail.status}
+                  invoiceId={orderDetail.invoiceId}
+                />
+              )}
             </div>
           </div>
         </div>

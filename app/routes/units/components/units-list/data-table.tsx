@@ -24,6 +24,8 @@ import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import CreateUnitDialog from "../create-unit.dialog";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -69,10 +71,12 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
-        <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Thêm đơn vị tính
-        </Button>
+        {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) && (
+          <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Thêm đơn vị tính
+          </Button>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

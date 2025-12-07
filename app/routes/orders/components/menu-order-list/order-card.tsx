@@ -20,6 +20,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
+import { AuthLoader } from "~/lib/auth/auth.loader";
 
 interface OrderCardProps {
   order: POSOrderDetailDto;
@@ -118,13 +121,15 @@ export default function OrderCard({ order, onClick }: OrderCardProps) {
         </div>
 
         {/* Action Menu Trigger (Invisible until hover or specific click) */}
-        <div onClick={(e) => e.stopPropagation()}>
-          <OrderActionMenu
-            orderId={order.id}
-            status={order.status}
-            currentScheduledTime={order.scheduledAt}
-          />
-        </div>
+        {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <OrderActionMenu
+              orderId={order.id}
+              status={order.status}
+              currentScheduledTime={order.scheduledAt}
+            />
+          </div>
+        )}
       </div>
 
       {/* === BODY: ITEM PREVIEW (The "Summary" Part) === */}

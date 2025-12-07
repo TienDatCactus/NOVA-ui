@@ -19,6 +19,8 @@ import {
   SidebarTrigger,
 } from "~/components/ui/sidebar";
 import { ModeToggle } from "~/features/theme/toggler";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import { COMMAND_BAR_ROUTES } from "~/lib/constants";
 import { DASHBOARD } from "~/lib/fe-url";
 import { cn } from "~/lib/utils";
@@ -48,11 +50,13 @@ const DashboardLayout: React.FC = () => {
               </Button>
             </div>
             <div className="flex gap-2 items-center">
-              <Button asChild size={"sm"} variant={"info-outline"}>
-                <Link to={DASHBOARD.bookings.newBooking}>
-                  Đặt phòng <BookDown />
-                </Link>
-              </Button>
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) && (
+                <Button asChild size={"sm"} variant={"info-outline"}>
+                  <Link to={DASHBOARD.bookings.newBooking}>
+                    Đặt phòng <BookDown />
+                  </Link>
+                </Button>
+              )}
               <ModeToggle />
               <Input
                 placeholder="Tìm kiếm..."

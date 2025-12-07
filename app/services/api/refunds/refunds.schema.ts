@@ -29,7 +29,7 @@ const BookingRefundHistoryItemSchema = z.object({
   refundMethod: PaymentSchema.PaymentMethodEnum,
   refundedAt: z.string(),
   note: z.string().optional().nullable(),
-  originalPaymentId: z.string(),
+  originalPaymentId: z.string().optional().nullable(),
 });
 
 const BookingRefundHistorySchema = z.object({

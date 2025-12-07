@@ -73,18 +73,44 @@ import { cn } from "~/lib/utils";
 interface ChatMainProps {
   sessionId: string | null;
 }
-export const BackgroundLayer = () => (
-  <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-muted/50">
-    <div
-      className="absolute inset-0 opacity-[0.03]"
-      style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 C 20 10 40 10 50 0 C 60 10 80 10 100 0' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3Cpath d='M0 20 C 20 30 40 30 50 20 C 60 30 80 30 100 20' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3Cpath d='M0 40 C 20 50 40 50 50 40 C 60 50 80 50 100 40' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3C/svg%3E")`,
-        backgroundSize: "400px 400px",
-      }}
-    ></div>
-    <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/20 via-transparent to-muted/60"></div>
-  </div>
-);
+export const BackgroundLayer = () => {
+  const terracePattern = `data:image/svg+xml,%3Csvg width='100' height='60' viewBox='0 0 100 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30 Q 25 10 50 30 T 100 30' fill='none' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E`;
+
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+      {/* 1. Base Background Color 
+        Sử dụng màu Stone (Đá) để tạo cảm giác núi rừng, tự nhiên hơn màu Gray mặc định 
+      */}
+      <div className="absolute inset-0 bg-stone-50 dark:bg-zinc-950 transition-colors duration-500" />
+
+      {/* 2. Terrace Pattern Layer (Ruộng bậc thang)
+        Sử dụng mask-image để áp dụng màu Tailwind linh hoạt cho Light/Dark mode
+      */}
+      <div
+        className="absolute inset-0 opacity-40"
+        style={{
+          maskImage: `url("${terracePattern}")`,
+          WebkitMaskImage: `url("${terracePattern}")`,
+          maskSize: "200px 120px",
+          WebkitMaskSize: "200px 120px",
+        }}
+      >
+        {/* Màu của vân ruộng: Xanh đậm ở Light mode, Xanh sáng mờ ở Dark mode */}
+        <div className="absolute inset-0 bg-emerald-800/10 dark:bg-emerald-400/10" />
+      </div>
+
+      {/* 3. The "Mist" Gradient (Sương mù Sapa)
+        Tạo hiệu ứng mờ ảo từ trên xuống và dưới lên
+      */}
+      <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 via-transparent to-stone-100/80 dark:from-emerald-950/20 dark:to-zinc-950/90" />
+
+      {/* 4. Subtle Ambient Light (Optional)
+        Điểm nhấn ánh sáng nhẹ ở góc để tạo chiều sâu
+      */}
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-400/20 dark:bg-emerald-500/10 rounded-full blur-3xl opacity-50" />
+    </div>
+  );
+};
 export function ChatMain({ sessionId }: ChatMainProps) {
   // --- Refs & State ---
   const user = useAuthStore((s) => s.user);
@@ -354,7 +380,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         <BackgroundLayer />
         <div className="relative z-10 flex flex-col items-center">
           <Loader2 className="h-10 w-10 animate-spin text-emerald-600 mb-4" />
-          <p className="text-stone-500 font-medium">Loading session...</p>
+          <p className="text-stone-500 font-medium">Đang tải...</p>
         </div>
       </div>
     );
@@ -365,7 +391,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
       <div className="flex-1 flex items-center justify-center text-stone-500 bg-stone-50 relative">
         <BackgroundLayer />
         <div className="z-10 bg-background/80 p-6 rounded-2xl shadow-sm">
-          Session not found
+          Không tìm thấy phiên trò chuyện.
         </div>
       </div>
     );
@@ -377,8 +403,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-stone-50 relative font-sans">
       <BackgroundLayer />
 
-      {/* 1. Header (Glassmorphic) */}
-      <div className="flex items-center justify-between border-b border-white/20 p-4 bg-background/70 backdrop-blur-xl shadow-sm shadow-stone-900/5 shrink-0 z-20">
+      <header className="flex items-center justify-between border-b border-white/20 p-4 bg-background/70 backdrop-blur-xl shadow-sm shadow-stone-900/5 shrink-0 z-20">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border border-white/50 shadow-sm">
             <AvatarFallback className="bg-emerald-100 text-emerald-800  font-bold">
@@ -389,7 +414,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
             <h2 className="font-bold text-stone-800">{session.customerName}</h2>
             <p className="text-xs text-stone-500 flex items-center gap-1">
               <TreePalm className="w-3 h-3 text-stone-400" />
-              Room {session.roomName}
+              Phòng {session.roomName}
             </p>
           </div>
         </div>
@@ -530,10 +555,8 @@ export function ChatMain({ sessionId }: ChatMainProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
+      </header>
 
-      {/* 2. Messages Area */}
-      {/* Background is transparent to show the topographic pattern */}
       <div className="flex-1 overflow-hidden relative z-10">
         <ScrollArea className="h-full px-4 py-4" ref={scrollContainerRef}>
           <div className="space-y-4 pb-4">
@@ -549,7 +572,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                   <Leaf className="h-8 w-8 text-emerald-800/40" />
                 </div>
                 <p className="text-sm text-stone-500 font-medium">
-                  Quiet in the valley. <br /> No messages yet.
+                  Chưa có tin nhắn nào.
                 </p>
               </div>
             ) : (
@@ -571,17 +594,16 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         {!canSendMessage ? (
           <div className="text-center text-sm text-stone-500 py-2 flex items-center justify-center gap-2 bg-stone-100/50 rounded-lg">
             <span className="w-2 h-2 rounded-full bg-stone-400"></span>
-            Session Closed
+            Phiên đã đóng. Không thể gửi tin nhắn.
           </div>
         ) : (
           <div className="space-y-3">
-            {/* Translation Preview - "Parchment Note" Style */}
             {translationState.translatedText && (
               <div className="bg-amber-50/80 backdrop-blur-sm rounded-xl p-3 border border-amber-100 shadow-sm animate-in fade-in slide-in-from-bottom-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
                     <p className="text-[10px] uppercase tracking-wider font-bold text-amber-800/60 mb-1">
-                      Translating ({translationState.sourceLang?.toUpperCase()}
+                      Đang dịch ({translationState.sourceLang?.toUpperCase()}
                       ):
                     </p>
                     <p className="text-xs text-stone-500 line-clamp-1 italic mb-1">
@@ -671,7 +693,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                           </div>
                         ) : (
                           <div className="text-center py-8 text-sm text-stone-400">
-                            No menu items found
+                            Không tìm thấy món ăn
                           </div>
                         )}
                       </ScrollArea>
@@ -692,7 +714,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                           </div>
                         ) : (
                           <div className="text-center py-8 text-sm text-stone-400">
-                            No services found
+                            Không tìm thấy dịch vụ
                           </div>
                         )}
                       </ScrollArea>

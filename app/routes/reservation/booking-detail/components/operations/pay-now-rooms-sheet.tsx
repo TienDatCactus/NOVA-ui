@@ -96,12 +96,11 @@ export function PayNowRoomsSheet({
     });
   }, [bookingDetail.rooms]);
 
-  // Calculate selected rooms total
   const selectedRoomsData = useMemo(() => {
     const selected = availableRooms.filter((room) =>
       selectedRoomIds.includes(room.bookingRoomId)
     );
-    const subtotal = selected.length * 100000; // TODO: Calculate from actual room charges
+    const subtotal = selected.reduce((sum, room) => sum + room.baseRate, 0); // TODO: Calculate from actual room charges
     return { rooms: selected, subtotal };
   }, [availableRooms, selectedRoomIds]);
 
@@ -214,7 +213,7 @@ export function PayNowRoomsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[100vw] lg:max-w-5xl gap-0 p-0 flex flex-col bg-slate-50"
+        className="w-full sm:max-w-[100vw] lg:max-w-5xl gap-0 p-0 flex flex-col bg-background"
       >
         {/* HEADER */}
         <SheetHeader className="px-6 py-4 border-b bg-background shrink-0">
@@ -293,7 +292,7 @@ export function PayNowRoomsSheet({
                                     {room.roomName}
                                   </span>
                                   <span className="font-mono font-semibold text-primary">
-                                    {formatMoney(100000).vndFormatted}
+                                    {formatMoney(room.baseRate).vndFormatted}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -394,11 +393,11 @@ export function PayNowRoomsSheet({
                             </span>
                           </div>
 
-                          <div className="flex justify-between p-4 bg-emerald-50/50">
-                            <span className="font-semibold text-emerald-700">
+                          <div className="flex justify-between items-center p-4 bg-emerald-50/50 dark:bg-emerald-900/20">
+                            <span className="font-semibold text-emerald-700 dark:text-emerald-400">
                               Tổng tiền
                             </span>
-                            <span className="text-xl font-bold text-emerald-600 font-mono">
+                            <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                               {formatMoney(totalWithFees).vndFormatted}
                             </span>
                           </div>
@@ -412,7 +411,7 @@ export function PayNowRoomsSheet({
           </ScrollArea>
 
           {/* RIGHT COLUMN: PAYMENT FORM */}
-          <div className="w-full lg:w-[420px] bg-slate-50 border-l flex flex-col h-full">
+          <div className="w-full lg:w-[420px] bg-background border-l flex flex-col h-full">
             <div className="p-6 flex-1 overflow-y-auto">
               <Form {...form}>
                 <div className="space-y-6">

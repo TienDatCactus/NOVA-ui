@@ -13,6 +13,9 @@ import EditItemDialog from "../components/edit-item.dialog";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
 import { QuickAdjustDialog } from "./quick-adjust.dialog";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 
 interface ItemsActionCellProps {
   item: StockItemsListItemDto;
@@ -36,10 +39,12 @@ const ItemsActionCell: React.FC<ItemsActionCellProps> = ({ item }) => {
             <Pencil className="mr-2 h-4 w-4" />
             Chỉnh sửa
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setOpenQuickAdjustDialog(true)}>
-            <PackageCheck className="mr-2 h-4 w-4" />
-            Điều chỉnh kho
-          </DropdownMenuItem>
+          {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) && (
+            <DropdownMenuItem onClick={() => setOpenQuickAdjustDialog(true)}>
+              <PackageCheck className="mr-2 h-4 w-4" />
+              Điều chỉnh kho
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-destructive"

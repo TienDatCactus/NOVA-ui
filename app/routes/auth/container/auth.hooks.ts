@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import { UserRole } from "~/lib/auth/roles";
 import { DASHBOARD, AUTH } from "~/lib/fe-url";
 import { AuthService } from "~/services/api/auth";
 import type {
@@ -20,13 +21,13 @@ export function useAuthHooks() {
     },
     onSuccess: (response) => {
       setUser(response.user);
-      if (response.user.roles.includes("Admin")) {
+      if (response.user.roles.includes(UserRole.Admin)) {
         navigate(DASHBOARD.auditLogs);
-      } else if (response.user.roles.includes("HotelManager")) {
+      } else if (response.user.roles.includes(UserRole.HotelManager)) {
         navigate(DASHBOARD.finances.dashboard);
-      } else if (response.user.roles.includes("ServiceStaff")) {
+      } else if (response.user.roles.includes(UserRole.ServiceStaff)) {
         navigate(DASHBOARD.rooms.list);
-      } else if (response.user.roles.includes("Accountant")) {
+      } else if (response.user.roles.includes(UserRole.Accountant)) {
         navigate(DASHBOARD.expenses);
       } else {
         navigate(DASHBOARD.bookings.list);

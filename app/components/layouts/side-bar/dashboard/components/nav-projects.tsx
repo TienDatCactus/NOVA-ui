@@ -41,9 +41,11 @@ export function NavProjects({
   };
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider px-4 mb-2">
-        Cài đặt hệ thống
-      </SidebarGroupLabel>
+      {projects.length > 0 && (
+        <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider px-4 mb-2">
+          Cài đặt hệ thống
+        </SidebarGroupLabel>
+      )}
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
