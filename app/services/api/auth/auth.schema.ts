@@ -49,6 +49,23 @@ const LoginResponseSchema = z.object({
   user: UserSchema,
 });
 
+const ChangePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string("Mật khẩu hiện tại không hợp lệ")
+      .min(6, "Mật khẩu hiện tại phải có ít nhất 6 ký tự"),
+    newPassword: z
+      .string("Mật khẩu mới không hợp lệ")
+      .min(6, "Mật khẩu mới phải có ít nhất 6 ký tự"),
+    confirmPassword: z
+      .string("Xác nhận mật khẩu mới không hợp lệ")
+      .min(6, "Xác nhận mật khẩu mới phải có ít nhất 6 ký tự"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Mật khẩu mới và xác nhận mật khẩu mới không khớp",
+    path: ["confirmPassword"],
+  });
+
 export const AuthSchema = {
   UserSchema,
   LoginSchema,
@@ -56,4 +73,5 @@ export const AuthSchema = {
   ResetPasswordSchema,
   ForgotPasswordSchema,
   UserRolesEnum,
+  ChangePasswordSchema,
 };

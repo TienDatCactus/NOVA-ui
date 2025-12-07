@@ -106,7 +106,7 @@ export function ServiceActionMenu({
   status,
   currentScheduledTime,
 }: ActionProps) {
-  const { dialogs, toggle, handlers, loading } = useServiceOrderLogic({
+  const { dialogs, toggle, handlers } = useServiceOrderLogic({
     orderId,
   });
   const isEditable = status === "Scheduled";

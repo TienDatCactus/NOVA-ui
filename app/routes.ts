@@ -88,6 +88,6 @@ export default [
     route("guides", "routes/customer/guides/guides.tsx"),
     route("catalog", "routes/customer/catalog/catalog.tsx"),
   ]),
-
+  route("unauthorized", "routes/unauthorized.tsx"),
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;
