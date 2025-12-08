@@ -25,6 +25,8 @@ import { FE_URL } from "~/lib/fe-url";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import type { ExpensesFilter } from "../container/filter.hooks";
 import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
+import { useAuth } from "~/lib/auth/components";
+import { UserRole } from "~/lib/auth/roles";
 
 // --- PROPS ---
 interface ExpensesLayoutProps {
@@ -50,7 +52,7 @@ export default function ExpensesLayout({
   const hasActiveFilters = Boolean(
     filters.fromDate || filters.toDate || filters.categoryId
   );
-
+  const { hasRole } = useAuth();
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between">
@@ -60,7 +62,12 @@ export default function ExpensesLayout({
 
           <Tabs value={currentTab} className="w-auto">
             <TabsList className="grid w-full grid-cols-2 h-9">
-              <TabsTrigger value="list" asChild className="text-xs px-4">
+              <TabsTrigger
+                value="list"
+                asChild
+                className="text-xs px-4"
+                disabled={hasRole(UserRole.HotelManager)}
+              >
                 <Link
                   to={FE_URL.dashboard.expenses}
                   className="flex items-center gap-2"
@@ -169,7 +176,6 @@ export default function ExpensesLayout({
         </div>
       )}
 
-      {/* === LEVEL 3: CONTENT AREA === */}
       <main className="flex-1 p-6 overflow-y-auto">{children}</main>
     </div>
   );

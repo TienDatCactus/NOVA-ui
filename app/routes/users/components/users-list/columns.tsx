@@ -108,16 +108,10 @@ export const columns: ColumnDef<UserItem>[] = [
     header: () => <div className="text-center">Thao tác</div>,
     cell: ({ row, table }) => {
       const user = row.original;
-      const onViewDetail = (table.options.meta as any)?.onViewDetail;
-      const onSuccess = (table.options.meta as any)?.onSuccess;
 
       return (
         <div className="flex justify-center">
-          <ActionsMenuCell
-            user={user}
-            onViewDetail={onViewDetail}
-            onSuccess={onSuccess}
-          />
+          <ActionsMenuCell user={user} />
         </div>
       );
     },

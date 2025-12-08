@@ -92,7 +92,9 @@ export function useUpdateStockItem() {
     },
     onError: (error) => {
       if (error instanceof AxiosError)
-        toast.error(error?.response?.data.message || "Lỗi khi tạo hàng hóa");
+        toast.error(
+          error?.response?.data.message || "Lỗi khi cập nhật hàng hóa"
+        );
     },
   });
 }
@@ -112,7 +114,7 @@ export function useDeleteStockItem() {
     },
     onError: (error) => {
       if (error instanceof AxiosError)
-        toast.error(error?.response?.data.message || "Lỗi khi tạo hàng hóa");
+        toast.error(error?.response?.data.message || "Lỗi khi xóa hàng hóa");
     },
   });
 }
@@ -143,7 +145,7 @@ export function useAdjustStock() {
     },
     onError: (error) => {
       if (error instanceof AxiosError)
-        toast.error(error?.response?.data.message || "Lỗi khi tạo hàng hóa");
+        toast.error(error?.response?.data.message || "Lỗi khi điều chỉnh kho");
     },
   });
 }

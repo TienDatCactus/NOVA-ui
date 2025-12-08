@@ -1,32 +1,38 @@
-import { Search, SlidersHorizontal, XCircle } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Button } from "~/components/ui/button";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
+import {
+  AuthLoader,
+  hasAnyRole,
+  Permission,
+  RouteModule,
+  UserRole,
+} from "~/lib/auth/auth.loader";
 import ModuleCard from "./components/module-card";
 import { useGroupedConfigs } from "./container/query.hooks";
 import ConfigsLayout from "./layouts/configs.layout";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import { useMemo } from "react";
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Configs, Permission.Read);
 
 export default function ConfigsPage() {
-  const { data: configData, isPending } = useGroupedConfigs();
-
+  const { data, isPending } = useGroupedConfigs();
+  const configData = useMemo(() => {
+    if (hasAnyRole(AuthLoader.getUser(), [UserRole.Admin])) {
+      return data?.filter(
+        (item) => item.module == "System" || item.module == "AuditLog"
+      );
+    } else {
+      return data?.filter(
+        (item) => item.module !== "System" && item.module !== "AuditLog"
+      );
+    }
+  }, [data]);
   return (
     <ConfigsLayout>
       <div className="flex flex-col">

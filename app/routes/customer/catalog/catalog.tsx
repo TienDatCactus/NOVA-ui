@@ -90,10 +90,10 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
 
           {/* Titles */}
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold tracking-tight text-foreground drop-shadow-md">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold tracking-tight text-white drop-shadow-md">
               {t("title")}
             </h1>
-            <p className="text-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto flex items-center justify-center gap-2 font-light">
+            <p className="text-white text-lg md:text-xl leading-relaxed max-w-2xl mx-auto flex items-center justify-center gap-2 font-light">
               <CloudFog className="w-5 h-5 text-muted-foreground" />
               {t("description")}
             </p>

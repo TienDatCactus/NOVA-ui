@@ -49,6 +49,8 @@ import {
 } from "../container/booking-mutation.hooks";
 import { useBookingDetail } from "../container/booking-query.hooks";
 import BookingDetailSheet from "./booking-detail.sheet";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
@@ -213,44 +215,45 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
   const renderPrimaryAction = () => {
     const btnClass = "w-full shadow-sm font-semibold transition-all";
-
-    if (canCheckIn || isRoomBlock) {
-      return (
-        <Button
-          size="sm"
-          variant={"success"}
-          className={cn(btnClass)}
-          onClick={handleCheckIn}
-          disabled={isProcessing}
-        >
-          <LogIn className="mr-2 h-4 w-4" /> Check-in ngay
-        </Button>
-      );
-    }
-    if (canCheckOut) {
-      return (
-        <Button
-          size="sm"
-          variant={"warning"}
-          className={cn(btnClass)}
-          onClick={handleCheckOut}
-          disabled={isProcessing}
-        >
-          <LogOut className="mr-2 h-4 w-4" /> Checkout
-        </Button>
-      );
-    }
-    if (canConfirmPayment && !isRoomBlock) {
-      return (
-        <Button
-          size="sm"
-          variant="default"
-          className={btnClass}
-          onClick={handleViewDetail}
-        >
-          <CheckCircle2 className="mr-2 h-4 w-4" /> Xác nhận cọc
-        </Button>
-      );
+    if (hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist])) {
+      if (canCheckIn || isRoomBlock) {
+        return (
+          <Button
+            size="sm"
+            variant={"success"}
+            className={cn(btnClass)}
+            onClick={handleCheckIn}
+            disabled={isProcessing}
+          >
+            <LogIn className="mr-2 h-4 w-4" /> Check-in ngay
+          </Button>
+        );
+      }
+      if (canCheckOut) {
+        return (
+          <Button
+            size="sm"
+            variant={"warning"}
+            className={cn(btnClass)}
+            onClick={handleCheckOut}
+            disabled={isProcessing}
+          >
+            <LogOut className="mr-2 h-4 w-4" /> Checkout
+          </Button>
+        );
+      }
+      if (canConfirmPayment && !isRoomBlock) {
+        return (
+          <Button
+            size="sm"
+            variant="default"
+            className={btnClass}
+            onClick={handleViewDetail}
+          >
+            <CheckCircle2 className="mr-2 h-4 w-4" /> Xác nhận cọc
+          </Button>
+        );
+      }
     }
     return (
       <Button

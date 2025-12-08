@@ -1,6 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useNavigate } from "react-router";
-import { DASHBOARD, AUTH } from "~/lib/fe-url";
+import { toast } from "sonner";
+import { UserRole } from "~/lib/auth/roles";
+import { AUTH, DASHBOARD } from "~/lib/fe-url";
 import { AuthService } from "~/services/api/auth";
 import type {
   ChangePasswordDto,
@@ -9,7 +12,7 @@ import type {
 } from "~/services/api/auth/dto";
 import { useAuthStore } from "~/store/auth.store";
 
-export function useAuth() {
+export function useAuthHooks() {
   const navigate = useNavigate();
   const { setUser, clearUser } = useAuthStore();
 
@@ -20,12 +23,14 @@ export function useAuth() {
     },
     onSuccess: (response) => {
       setUser(response.user);
-      if (response.user.roles.includes("Admin")) {
+      if (response.user.roles.includes(UserRole.Admin)) {
         navigate(DASHBOARD.auditLogs);
-      } else if (response.user.roles.includes("HotelManager")) {
+      } else if (response.user.roles.includes(UserRole.HotelManager)) {
         navigate(DASHBOARD.finances.dashboard);
-      } else if (response.user.roles.includes("ServiceStaff")) {
+      } else if (response.user.roles.includes(UserRole.ServiceStaff)) {
         navigate(DASHBOARD.rooms.list);
+      } else if (response.user.roles.includes(UserRole.Accountant)) {
+        navigate(DASHBOARD.expenses);
       } else {
         navigate(DASHBOARD.bookings.list);
       }
@@ -60,6 +65,17 @@ export function useAuth() {
     mutationFn: async (data: ChangePasswordDto) => {
       const response = await AuthService.changePassword(data);
       return { response };
+    },
+    onSuccess: () => {
+      AuthService.logout();
+      navigate(AUTH.login);
+      clearUser();
+      toast.success("Vui lòng đăng nhập lại với mật khẩu mới.");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 

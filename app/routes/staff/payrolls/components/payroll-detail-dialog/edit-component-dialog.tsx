@@ -91,7 +91,7 @@ export default function EditComponentDialog({
   const onSubmit = (data: FormValues) => {
     if (!component) return;
     mutation.mutate(
-      { componentId: component.componentId, data },
+      { componentId: component.componentId, data, payrollId },
       {
         onSuccess: () => {
           onOpenChange(false);

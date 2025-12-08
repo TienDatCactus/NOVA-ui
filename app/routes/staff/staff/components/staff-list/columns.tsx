@@ -6,6 +6,9 @@ import { Button } from "~/components/ui/button";
 import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
 import StaffActionsCell from "../../fragments/actions.cell";
 import StaffDetailDialog from "../staff-detail-dialog";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
+import { AuthLoader } from "~/lib/auth/auth.loader";
 
 const getGenderLabel = (gender?: string | null) => {
   if (!gender) return "-";
@@ -114,18 +117,16 @@ export const columns: ColumnDef<StaffListItemDto>[] = [
   },
   {
     id: "actions",
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Thao tác"
-        className="text-center"
-      />
-    ),
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <StaffActionsCell staff={row.original} />
-      </div>
-    ),
+    header: () => null,
+    cell: ({ row }) => {
+      if (hasRole(AuthLoader.getUser(), UserRole.HotelManager)) {
+        return (
+          <div className="flex justify-center">
+            <StaffActionsCell staff={row.original} />
+          </div>
+        );
+      }
+    },
     enableSorting: false,
     enableHiding: false,
   },

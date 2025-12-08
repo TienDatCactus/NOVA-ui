@@ -26,6 +26,9 @@ import { Plus, Search } from "lucide-react";
 import { DataTableViewOptions } from "~/components/table/colum-toggle";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import GeneratePayrollDialog from "../generate-payroll-dialog";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -91,10 +94,12 @@ export function DataTable<TData, TValue>({
         />
 
         <div className="flex items-center gap-2">
-          <Button onClick={() => setGenerateDialogOpen(true)} size="sm">
-            <Plus />
-            Thêm bảng lương
-          </Button>
+          {hasAnyRole(AuthLoader.getUser(), [UserRole.Accountant]) && (
+            <Button onClick={() => setGenerateDialogOpen(true)} size="sm">
+              <Plus />
+              Thêm bảng lương
+            </Button>
+          )}
           <DataTableViewOptions table={table} />
           <GeneratePayrollDialog
             open={generateDialogOpen}

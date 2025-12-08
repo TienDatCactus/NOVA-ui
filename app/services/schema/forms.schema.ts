@@ -57,6 +57,9 @@ export const CreateItemFormSchema = z
     maxStock: z
       .number({ message: "Tồn kho tối đa phải là số" })
       .nonnegative("Tồn kho tối đa phải lớn hơn hoặc bằng 0"),
+    initialQuantity: z
+      .number({ message: "Số lượng ban đầu phải là số" })
+      .nonnegative("Số lượng ban đầu phải lớn hơn hoặc bằng 0"),
   })
   .refine((data) => data.minStock <= data.maxStock, {
     message: "Tồn kho tối thiểu phải nhỏ hơn hoặc bằng tồn kho tối đa",

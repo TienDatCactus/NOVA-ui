@@ -3,6 +3,7 @@ import { vi } from "date-fns/locale";
 import {
   CalendarDays,
   CreditCard,
+  Download,
   FileText,
   Loader2,
   Package,
@@ -19,7 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import {
   Table,
@@ -31,10 +31,12 @@ import {
   TableRow,
 } from "~/components/ui/table";
 
-import { usePurchaseRequestDetail } from "../container/query.hooks";
-import { getStatusBadge } from "./purchase-requests-list/columns";
 import { Button } from "~/components/ui/button";
 import { formatMoney } from "~/lib/utils";
+import { usePurchaseRequestDetail } from "../container/query.hooks";
+import { getStatusBadge } from "./purchase-requests-list/columns";
+import { toast } from "sonner";
+import { PurchaseRequestsService } from "~/services/api/stocks/purchase-requests";
 
 interface PurchaseRequestDetailDialogProps {
   open: boolean;
@@ -57,6 +59,29 @@ export default function PurchaseRequestDetailDialog({
       0
     ) || 0;
 
+  const handleExport = async () => {
+    try {
+      const blob = await PurchaseRequestsService.exportPurchaseRequest(
+        purchaseRequest.id
+      );
+      console.log("Blob received:", blob);
+
+      const url = window.URL.createObjectURL(blob as any);
+      const a = document.createElement("a");
+      a.href = url;
+      const filename = `purchase-request-${purchaseRequest.id}.xlsx`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Xuất báo cáo thành công");
+    } catch (e) {
+      console.error(e);
+      toast.error("Xuất báo cáo thất bại");
+    }
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh]  p-0 gap-0 flex flex-col overflow-y-auto">
@@ -258,6 +283,10 @@ export default function PurchaseRequestDetailDialog({
           </div>
         )}
         <DialogFooter className="p-6 pt-4 border-t shrink-0">
+          <Button onClick={handleExport} variant={"success"}>
+            <Download className="h-4 w-4 " />
+            Xuất phiếu
+          </Button>
           <DialogClose>
             <Button variant={"outline"}>Đóng</Button>
           </DialogClose>

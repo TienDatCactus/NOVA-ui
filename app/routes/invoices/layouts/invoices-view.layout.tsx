@@ -132,25 +132,12 @@ function InvoicesViewLayout({
 
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
-      {/* === LEVEL 1: GLOBAL HEADER === */}
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between shrink-0">
         {/* Left: Title */}
         <div className="flex items-center gap-4">
-          <div className="p-2 bg-primary/10 rounded-lg text-primary">
-            <FileText className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight gap-2">
-              Quản lý hóa đơn
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Tổng{" "}
-              <span className="font-medium text-foreground">
-                {totalInvoices}
-              </span>{" "}
-              hóa đơn trong hệ thống
-            </p>
-          </div>
+          <h1 className="text-xl font-bold tracking-tight gap-2">
+            Quản lý hóa đơn
+          </h1>
         </div>
 
         {/* Right: Primary Action */}

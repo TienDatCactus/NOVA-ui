@@ -27,6 +27,9 @@ import {
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import CreateItemDialog from "../create-item.dialog";
 import { ItemDetailRow } from "../../fragments/item-detail.row";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -82,10 +85,12 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        <Button size={"sm"} onClick={() => setOpenCreateDialog(true)}>
-          <Plus />
-          Tạo hàng hóa
-        </Button>
+        {hasAnyRole(AuthLoader.getUser(), [UserRole.ServiceStaff]) && (
+          <Button size={"sm"} onClick={() => setOpenCreateDialog(true)}>
+            <Plus />
+            Tạo hàng hóa
+          </Button>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

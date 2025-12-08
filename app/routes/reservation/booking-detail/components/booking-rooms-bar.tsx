@@ -46,6 +46,8 @@ import {
   type BookingState,
 } from "../container/use-booking-state.hooks";
 import { UpgradeRoomDialog } from "./operations/upgrade-room-dialog";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -206,9 +208,9 @@ export default function BookingRoomsBar({
   return (
     <>
       <Card className="shadow-sm flex flex-col w-96">
-        <CardHeader className="text-card-foreground">
+        <CardHeader className="text-card-foreground ">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-medium uppercase">
+            <CardTitle className="text-base  font-medium uppercase">
               Danh sách phòng
             </CardTitle>
             <DropdownMenu>
@@ -216,7 +218,10 @@ export default function BookingRoomsBar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  disabled={!bookingState.permissions.canEditRooms}
+                  disabled={
+                    hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+                    !bookingState.permissions.canEditRooms
+                  }
                 >
                   <Plus className="h-4 w-4 mr-1" />
                 </Button>
@@ -258,7 +263,10 @@ export default function BookingRoomsBar({
               onRemove={() =>
                 handleRemoveRoom(room.bookingRoomId, room.roomName)
               }
-              canRemove={bookingState.permissions.canEditRooms}
+              canRemove={
+                bookingDetail.status == "Pending" &&
+                bookingState.permissions.canEditRooms
+              }
               removeTooltip={
                 !bookingState.permissions.canEditRooms
                   ? bookingState.permissions.blockReason ||

@@ -35,6 +35,7 @@ import type z from "zod";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { useItemCategories } from "../../item-categories/container/query.hooks";
 import { useCreateStockItem } from "../container/query.hooks";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 export type CreateItemFormData = z.infer<
   typeof FormSchema.CreateItemFormSchema
@@ -68,6 +69,7 @@ export default function CreateItemDialog({
       unitPrice: 0,
       minStock: 0,
       maxStock: 0,
+      initialQuantity: 0,
     },
   });
 
@@ -79,89 +81,97 @@ export default function CreateItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-4">
-        <DialogHeader className="px-4 pt-4">
-          <DialogTitle>Tạo hàng hóa mới</DialogTitle>
-          <DialogDescription>
-            Điền thông tin để tạo hàng hóa mới trong hệ thống
-          </DialogDescription>
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
+        {/* Header Compact */}
+        <DialogHeader className="p-4 border-b bg-muted/10">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <DialogTitle>Thêm hàng hóa mới</DialogTitle>
+              <DialogDescription>
+                Nhập thông tin chi tiết cho sản phẩm
+              </DialogDescription>
+            </div>
+            {/* Close button handled by Dialog primitive usually, but explicit looks nice */}
+          </div>
         </DialogHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6 px-4 pb-4"
+            className="flex flex-col md:flex-row"
           >
-            <div className="space-y-4">
-              <h3 className="font-semibold text-sm">Thông tin cơ bản</h3>
-              <div className="grid gap-4 md:grid-cols-2 items-start">
-                {/* Code */}
-                <FormField
-                  control={form.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Mã hàng hóa
-                        <span className="text-destructive ml-1">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="VD: MILK-001"
-                          {...field}
-                          className="uppercase"
-                        />
-                      </FormControl>
-                      <FormDescription className="text-xs">
-                        Mã duy nhất, chữ in hoa, số và dấu gạch ngang
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {/* LEFT COLUMN: Thông tin định danh (Chiếm không gian lớn hơn) */}
+            <div className="flex-1 p-4 space-y-4">
+              <div className="grid grid-cols-12 gap-4">
+                {/* Code: 4 cols */}
+                <div className="col-span-12 md:col-span-4">
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Mã hàng <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Mã tự động"
+                            className="uppercase font-mono"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                {/* Name */}
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Tên hàng hóa
-                        <span className="text-destructive ml-1">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="VD: Sữa tươi Vinamilk" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Name: 8 cols */}
+                <div className="col-span-12 md:col-span-8">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Tên hàng hóa <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Nhập tên sản phẩm..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
 
-                {/* Category */}
-                <div className="flex items-center gap-2">
+              <div className="grid md:grid-cols-3 grid-cols-1 gap-4 items-start">
+                <div>
                   <FormField
                     control={form.control}
                     name="categoryId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Danh mục
-                          <span className="text-destructive">*</span>
+                          Danh mục <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="w-[150px]">
-                              <SelectValue placeholder="Chọn danh mục" />
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Danh mục" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {categories.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.id}>
-                                {cat.name}
+                            {categories.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -170,30 +180,29 @@ export default function CreateItemDialog({
                       </FormItem>
                     )}
                   />
-
-                  {/* Unit */}
+                </div>
+                <div>
                   <FormField
                     control={form.control}
                     name="unitId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Đơn vị tính
-                          <span className="text-destructive ml-1">*</span>
+                          Đơn vị <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Chọn đơn vị" />
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Chọn ĐVT" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {units.map((unit) => (
-                              <SelectItem key={unit.id} value={unit.id}>
-                                {unit.name}
+                            {units.map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                {u.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -203,84 +212,18 @@ export default function CreateItemDialog({
                     )}
                   />
                 </div>
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mô tả</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Mô tả chi tiết về hàng hóa..."
-                          className="resize-none"
-                          rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex items-center gap-2">
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm">Thông tin giá</h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {/* Unit Cost */}
+                <div>
                   <FormField
                     control={form.control}
-                    name="unitCost"
+                    name="initialQuantity"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Giá nhập (đơn vị)
-                          <span className="text-destructive ml-1">*</span>
+                          Số lượng <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
-                          />
+                          <Counter {...field} />
                         </FormControl>
-                        <FormDescription className="text-xs">
-                          Giá nhập vào của một đơn vị hàng
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Unit Price */}
-                  <FormField
-                    control={form.control}
-                    name="unitPrice"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Giá bán (đơn vị)
-                          <span className="text-destructive ml-1">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
-                          />
-                        </FormControl>
-                        <FormDescription className="text-xs">
-                          Giá bán ra của một đơn vị hàng
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -288,56 +231,126 @@ export default function CreateItemDialog({
                 </div>
               </div>
 
-              <Separator orientation="vertical" />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ghi chú</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Mô tả thêm..."
+                        className="resize-none min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm">Cấu hình tồn kho</h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {/* Min Stock */}
+            {/* RIGHT COLUMN: Các con số (Giá & Kho) - Nền xám nhẹ để tách biệt */}
+            <div className="w-full md:w-[280px] bg-muted/10 border-l p-4 space-y-5">
+              {/* Pricing Section */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
+                  Thiết lập giá
+                </h4>
+                <FormField
+                  control={form.control}
+                  name="unitCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Giá vốn</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                          endAddon={
+                            <span className=" text-xs text-muted-foreground">
+                              đ
+                            </span>
+                          }
+                        />
+                      </FormControl>{" "}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="unitPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Giá bán</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                          endAddon={
+                            <span className=" text-xs text-muted-foreground">
+                              đ
+                            </span>
+                          }
+                        />
+                      </FormControl>{" "}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Separator className="my-2" />
+
+              {/* Stock Section */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
+                  Định mức tồn
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
                   <FormField
                     control={form.control}
                     name="minStock"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tồn kho tối thiểu</FormLabel>
+                        <FormLabel className="text-xs">Tối thiểu</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="0"
+                            className="text-center "
                             {...field}
                             onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
+                              field.onChange(Number(e.target.value))
                             }
                           />
-                        </FormControl>
-                        <FormDescription className="text-xs">
-                          Ngưỡng cảnh báo tồn kho thấp
-                        </FormDescription>
+                        </FormControl>{" "}
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  {/* Max Stock */}
                   <FormField
                     control={form.control}
                     name="maxStock"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tồn kho tối đa</FormLabel>
+                        <FormLabel className="text-xs">Tối đa</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            placeholder="0"
                             {...field}
+                            type="number"
+                            className="text-center "
                             onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
+                              field.onChange(Number(e.target.value))
                             }
                           />
-                        </FormControl>
-                        <FormDescription className="text-xs">
-                          Ngưỡng cảnh báo tồn kho cao
-                        </FormDescription>
+                        </FormControl>{" "}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -348,31 +361,25 @@ export default function CreateItemDialog({
           </form>
         </Form>
 
-        <DialogFooter>
+        <DialogFooter className="p-4 border-t bg-muted/10">
           <Button
-            type="button"
-            variant="outline"
+            variant="ghost"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
-            Hủy
+            Hủy bỏ
           </Button>
           <Button
-            type="submit"
             onClick={form.handleSubmit(handleSubmit)}
             disabled={isSubmitting}
+            className="min-w-[100px]"
           >
             {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang lưu...
-              </>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Tạo mới
-              </>
+              <Save className="mr-2 h-4 w-4" />
             )}
+            Lưu
           </Button>
         </DialogFooter>
       </DialogContent>

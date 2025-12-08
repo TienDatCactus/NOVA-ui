@@ -30,6 +30,8 @@ const {
   OrderableBookingResponseSchema,
   BookingPayForRoomRequestSchema,
   BookingUpgradeRoomRequestSchema,
+  UnpaidRoomsForBookingSchema,
+  UnpaidRoomSchema,
 } = BookingSchema;
 
 export type StaffBookingPricePreviewRequestDto = z.infer<
@@ -116,4 +118,9 @@ export type BookingPayForRoomRequestDto = z.infer<
 >;
 export type BookingUpgradeRoomRequestDto = z.infer<
   typeof BookingUpgradeRoomRequestSchema
+>;
+
+export type UnpaidRoomDto = z.infer<typeof UnpaidRoomSchema>;
+export type UnpaidRoomsForBookingDto = z.infer<
+  typeof UnpaidRoomsForBookingSchema
 >;

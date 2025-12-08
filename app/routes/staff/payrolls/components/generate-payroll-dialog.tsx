@@ -376,6 +376,9 @@ export default function GeneratePayrollDialog({
                                     <span className="truncate">
                                       {selectedStaff.fullName}
                                     </span>
+                                    <span className="truncate">
+                                      {selectedStaff.staffRoleName}
+                                    </span>
                                   </div>
                                 ) : (
                                   "Tìm kiếm nhân viên..."
@@ -416,7 +419,8 @@ export default function GeneratePayrollDialog({
                                         />
                                         <div className="flex flex-col">
                                           <span className="font-medium">
-                                            {staff.fullName}
+                                            {staff.fullName} -{" "}
+                                            {staff.staffRoleName}
                                           </span>
                                           <span className="text-xs text-muted-foreground">
                                             {staff.code}

@@ -141,6 +141,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
     data: pricePreview,
     mutate: previewBookingPrice,
     isPending: isCalculating,
+    reset,
   } = usePreviewBookingPrice(previewRequest);
 
   useEffect(() => {
@@ -153,6 +154,9 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
     ) {
       previewBookingPrice();
     }
+    return () => {
+      reset();
+    };
   }, [
     checkinDate,
     checkoutDate,
@@ -507,12 +511,16 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
 
               <div className="p-6 space-y-6">
                 {/* 1. AMOUNT DISPLAY CARD */}
-                <div className="flex flex-col items-center justify-center space-y-1 py-4 bg-emerald-50/50 border border-emerald-100 rounded-xl border-dashed">
+                <div className="flex flex-col items-center justify-center space-y-1 py-4 bg-emerald-50/50 dark:bg-emerald-900/50   border border-emerald-100 dark:border-emerald-700 rounded-xl border-dashed">
                   <span className="text-xs font-medium text-emerald-600 uppercase tracking-wider">
                     Tổng tiền cần thu
                   </span>
-                  <span className="text-3xl font-bold text-emerald-600 tracking-tight font-mono">
-                    {formatMoney(finalTotal).vndFormatted}
+                  <span className="text-3xl font-bold text-emerald-600 tracking-tight font-mono flex items-center gap-2">
+                    <span className="text-sm">Tiền phòng: </span>
+                    {
+                      formatMoney(pricePreview?.roomsSubtotal ?? finalTotal)
+                        .vndFormatted
+                    }
                   </span>
                 </div>
 
@@ -557,7 +565,8 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                       name="roomPayment.paidAmount"
                       render={({ field }) => {
                         const paid = field.value || 0;
-                        const balance = finalTotal - paid;
+                        const balance =
+                          (pricePreview?.roomsSubtotal ?? finalTotal) - paid;
 
                         return (
                           <FormItem className="space-y-3 animate-in slide-in-from-top-2 fade-in duration-300">
@@ -573,7 +582,10 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                     type="button"
                                     onClick={() =>
                                       field.onChange(
-                                        Math.round(finalTotal * 0.5)
+                                        Math.round(
+                                          (pricePreview?.roomsSubtotal ??
+                                            finalTotal) * 0.5
+                                        )
                                       )
                                     }
                                   >
@@ -582,7 +594,12 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                   <Button
                                     variant={"outline"}
                                     type="button"
-                                    onClick={() => field.onChange(finalTotal)}
+                                    onClick={() =>
+                                      field.onChange(
+                                        pricePreview?.roomsSubtotal ??
+                                          finalTotal
+                                      )
+                                    }
                                   >
                                     100%
                                   </Button>
@@ -594,8 +611,15 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                   <Input
                                     type="number"
                                     placeholder="0"
-                                    className="pl-3 pr-12 h-10 font-mono text-sm"
-                                    max={finalTotal}
+                                    className="font-mono text-sm"
+                                    max={
+                                      pricePreview?.roomsSubtotal ?? finalTotal
+                                    }
+                                    endAddon={
+                                      <span className="text-sm text-muted-foreground">
+                                        VND
+                                      </span>
+                                    }
                                     {...field}
                                     onChange={(e) =>
                                       field.onChange(
@@ -605,9 +629,6 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                       )
                                     }
                                   />
-                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium pointer-events-none">
-                                    VND
-                                  </span>
                                 </div>
                               </FormControl>
                             </div>
@@ -642,7 +663,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                 <DialogTrigger asChild>
                   <Button className="w-full font-semibold" size="lg">
                     <Check className="mr-2 h-4 w-4" />
-                    Xác nhận Tạo đơn
+                    Lưu
                   </Button>
                 </DialogTrigger>
               </DialogFooter>

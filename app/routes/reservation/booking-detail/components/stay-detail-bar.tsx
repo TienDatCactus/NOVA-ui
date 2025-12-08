@@ -78,6 +78,7 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
 import type { BookingState } from "../container/use-booking-state.hooks";
+import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
 
 interface StayDetailBarProps {
   bookingCode: string;
@@ -225,7 +226,8 @@ export default function StayDetailBar({
             {/* Actions Area */}
             <div className="flex items-center gap-2">
               {/* Primary Action: Check In */}
-              {buttonStates.canCheckIn &&
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+                buttonStates.canCheckIn &&
                 bookingDetail.status === "Confirmed" && (
                   <Button
                     disabled={isUpdatingStatus}
@@ -247,7 +249,8 @@ export default function StayDetailBar({
                 Ghi chú
               </Button>
               {/* Primary Action: Payment (Pending) */}
-              {bookingDetail.source === "RoomBlock" &&
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+              bookingDetail.source === "RoomBlock" &&
               bookingDetail.status === "Pending" ? (
                 <Button
                   disabled={isUpdatingStatus}
@@ -395,9 +398,9 @@ export default function StayDetailBar({
                                       <FormLabel>Số tiền thu</FormLabel>
                                       {/* UX: Quick Fill Buttons */}
                                       <div className="flex gap-2">
-                                        <Badge
+                                        <Button
+                                          size={"sm"}
                                           variant="outline"
-                                          className="cursor-pointer hover:bg-muted font-normal"
                                           onClick={() =>
                                             paymentForm.setValue(
                                               "paidAmount",
@@ -408,19 +411,19 @@ export default function StayDetailBar({
                                           }
                                         >
                                           50%
-                                        </Badge>
-                                        <Badge
-                                          variant="secondary"
-                                          className="cursor-pointer hover:bg-primary/20 text-primary font-normal"
+                                        </Button>
+                                        <Button
+                                          size={"sm"}
+                                          variant="outline"
                                           onClick={() =>
                                             paymentForm.setValue(
                                               "paidAmount",
-                                              paymentSummary.remaining
+                                              paymentSummary.totalAmount
                                             )
                                           }
                                         >
                                           Tất cả
-                                        </Badge>
+                                        </Button>
                                       </div>
                                     </div>
                                     <FormControl>
@@ -486,8 +489,8 @@ export default function StayDetailBar({
                     <DropdownMenuLabel>Thao tác khác</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
+                      variant="destructive"
                       onClick={() => handleUpdateBookingStatus("Cancelled")}
-                      className="text-destructive focus:text-destructive"
                     >
                       <XCircle className="w-4 h-4 mr-2" /> Hủy đặt phòng
                     </DropdownMenuItem>

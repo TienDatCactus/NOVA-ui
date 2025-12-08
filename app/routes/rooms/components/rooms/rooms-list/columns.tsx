@@ -10,6 +10,10 @@ import RoomStatusCell from "../../../fragments/rooms/status.cell";
 import RoomDetailDialog from "../rooms-detail.dialog";
 import { QrDialog } from "../qr.dialog";
 import { QrCode, ScanLine } from "lucide-react";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule, UserRole } from "~/lib/auth/roles";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
 
 const { RoomListItemSchema } = RoomSchema;
 type RoomListItem = z.infer<typeof RoomListItemSchema>;
@@ -39,16 +43,20 @@ export const columns: ColumnDef<RoomListItem>[] = [
 
       return (
         <div className="flex items-center gap-3">
-          {/* Quick QR Trigger */}
-          <Button
-            onClick={() => setQrOpen(true)}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-            title="Lấy mã QR"
-          >
-            <QrCode className="h-4 w-4" />
-          </Button>
+          {hasAnyRole(AuthLoader.getUser(), [
+            UserRole.HotelManager,
+            UserRole.Receptionist,
+          ]) && (
+            <Button
+              onClick={() => setQrOpen(true)}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+              title="Lấy mã QR"
+            >
+              <QrCode className="h-4 w-4" />
+            </Button>
+          )}
 
           {/* Room Name Link */}
           <Button
@@ -129,11 +137,15 @@ export const columns: ColumnDef<RoomListItem>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <RoomActionsCell room={row.original} />
-      </div>
-    ),
+    cell: ({ row }) => {
+      const { can } = useAuth();
+      if (can.update(RouteModule.Rooms))
+        return (
+          <div className="flex justify-center">
+            <RoomActionsCell room={row.original} />
+          </div>
+        );
+    },
     size: 50,
     enableSorting: false,
     enableHiding: false,

@@ -30,6 +30,7 @@ import type {
   StaffCreateCheckoutInvoiceResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
+  UnpaidRoomsForBookingDto,
   UpdateBookingStatusRequestDto,
   UpdateBookingStatusResponseDto,
 } from "./dto";
@@ -61,6 +62,7 @@ const {
   OrderableBookingResponseSchema,
   UpdateBookingStatusRequestSchema,
   UpdateBookingStatusResponseSchema,
+  UnpaidRoomsForBookingSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -464,6 +466,18 @@ async function upgradeRoom(
     return Promise.reject(error);
   }
 }
+
+async function unpaidRooms(
+  bookingId: string
+): Promise<UnpaidRoomsForBookingDto> {
+  try {
+    const resp = await http.get(Booking.unpaidRooms(bookingId));
+    return UnpaidRoomsForBookingSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
@@ -489,4 +503,5 @@ export const BookingService = {
 
   payForRooms,
   upgradeRoom,
+  unpaidRooms,
 };

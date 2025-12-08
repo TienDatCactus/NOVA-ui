@@ -345,7 +345,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <div className="flex justify-between mb-1.5">
-                    <FormLabel className="text-xs font-medium text-gray-700">
+                    <FormLabel className="text-xs font-medium text-accent-foreground">
                       Người lớn
                     </FormLabel>
                   </div>
@@ -354,7 +354,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                       {...field}
                       minValue={1}
                       maxValue={10}
-                      className="w-full bg-background h-9 border-gray-200"
+                      className="w-full bg-background h-9 border-muted"
                     />
                   </FormControl>
                   <FormMessage />
@@ -368,7 +368,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <div className="flex justify-between mb-1.5">
-                    <FormLabel className="text-xs font-medium text-gray-700">
+                    <FormLabel className="text-xs font-medium text-accent-foreground">
                       Trẻ em
                     </FormLabel>
                   </div>

@@ -21,7 +21,7 @@ import { useAuth } from "~/lib/auth/components";
 import { useLocation } from "react-router";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { canAccess } = useAuth();
+  const { canAccess, hasRole } = useAuth();
 
   const filteredNavMain = React.useMemo(() => {
     return SIDEBAR_NAV_MAIN.filter((item) => {

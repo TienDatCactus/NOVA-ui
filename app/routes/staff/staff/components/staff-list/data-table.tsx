@@ -21,6 +21,8 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import CreateStaffDialog from "../staff-create-dialog";
+import { hasAnyRole, hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -59,10 +61,12 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
-        <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
-          <Plus />
-          Thêm nhân sự
-        </Button>
+        {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+          <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
+            <Plus />
+            Thêm nhân sự
+          </Button>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

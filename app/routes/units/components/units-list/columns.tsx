@@ -4,6 +4,7 @@ import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
 import { Checkbox } from "~/components/ui/checkbox";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import ActionsMenuCell from "../../fragments/actions.cell";
+import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
 
 export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
   {
@@ -81,16 +82,16 @@ export const columns: ColumnDef<UnitItemDetailResponseDto>[] = [
   },
   {
     id: "actions",
-    header: () => <div className="text-center">Thao tác</div>,
+    header: () => null,
     cell: ({ row, table }) => {
       const unit = row.original;
       const onSuccess = (table.options.meta as any)?.onSuccess;
-
-      return (
-        <div className="flex justify-center">
-          <ActionsMenuCell unit={unit} onSuccess={onSuccess} />
-        </div>
-      );
+      if (hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]))
+        return (
+          <div className="flex justify-center">
+            <ActionsMenuCell unit={unit} onSuccess={onSuccess} />
+          </div>
+        );
     },
     enableSorting: false,
     enableHiding: false,

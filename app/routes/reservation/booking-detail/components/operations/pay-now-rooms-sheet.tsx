@@ -52,6 +52,7 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import {
   useCalculateInvoiceFees,
   usePayNowRooms,
+  useUnpaidRooms,
 } from "../../container/use-booking-checkout.hooks";
 
 interface PayNowRoomsSheetProps {
@@ -71,6 +72,7 @@ export function PayNowRoomsSheet({
   const { mutate: payNowRooms, isPending: isPaying } = usePayNowRooms(
     bookingDetail?.id || ""
   );
+  const { data: unpaidRoomsData } = useUnpaidRooms(bookingDetail?.id || "");
 
   const form = useForm<BookingPayForRoomRequestDto>({
     resolver: zodResolver(BookingSchema.BookingPayForRoomRequestSchema),
@@ -86,57 +88,38 @@ export function PayNowRoomsSheet({
   const paymentMethod = form.watch("paymentMethod");
   const paidAmount = form.watch("paidAmount");
 
-  // Filter available rooms (currently active)
-  const availableRooms = useMemo(() => {
-    return bookingDetail.rooms.filter((room) => {
-      const roomCheckinDate = new Date(room.fromDate);
-      const roomCheckoutDate = new Date(room.toDate);
-      const now = new Date();
-      return roomCheckinDate <= now && now < roomCheckoutDate;
-    });
-  }, [bookingDetail.rooms]);
-
-  // Calculate selected rooms total
-  const selectedRoomsData = useMemo(() => {
-    const selected = availableRooms.filter((room) =>
-      selectedRoomIds.includes(room.bookingRoomId)
-    );
-    const subtotal = selected.length * 100000; // TODO: Calculate from actual room charges
-    return { rooms: selected, subtotal };
-  }, [availableRooms, selectedRoomIds]);
-
   // Calculate fees (VAT + Service Charge)
   const { data: calculatedFees, refetch: refetchFees } =
     useCalculateInvoiceFees(
       {
-        subtotalAmount: selectedRoomsData.subtotal,
+        subtotalAmount: unpaidRoomsData?.totalUnpaidAmount || 0,
         applyVat,
         applyServiceCharge,
       },
-      open && selectedRoomsData.subtotal > 0
+      open && (unpaidRoomsData?.totalUnpaidAmount ?? 0) > 0
     );
 
   // Recalculate when toggles change
   useEffect(() => {
-    if (selectedRoomsData.subtotal > 0 && open) {
+    if ((unpaidRoomsData?.totalUnpaidAmount ?? 0) > 0 && open) {
       refetchFees();
     }
   }, [
     applyVat,
     applyServiceCharge,
-    selectedRoomsData.subtotal,
+    unpaidRoomsData?.totalUnpaidAmount || 0,
     open,
     refetchFees,
   ]);
   const totalWithFees = useMemo(() => {
-    return calculatedFees?.totalAmount || selectedRoomsData.subtotal;
-  }, [calculatedFees, selectedRoomsData.subtotal]);
+    return calculatedFees?.totalAmount || unpaidRoomsData?.totalUnpaidAmount;
+  }, [calculatedFees, unpaidRoomsData?.totalUnpaidAmount]);
 
   const paymentValidation = useMemo(() => {
     if (!paidAmount || paidAmount <= 0) {
       return { isValid: false, error: "Số tiền phải lớn hơn 0" };
     }
-    if (paidAmount > totalWithFees) {
+    if (paidAmount > (totalWithFees ?? 0)) {
       return { isValid: false, error: "Số tiền vượt quá tổng phòng đã chọn" };
     }
     return { isValid: true, error: null };
@@ -151,18 +134,18 @@ export function PayNowRoomsSheet({
   };
 
   const toggleSelectAll = () => {
-    if (selectedRoomIds.length === availableRooms.length) {
+    if (selectedRoomIds.length === unpaidRoomsData?.unpaidRooms.length) {
       form.setValue("bookingRoomIds", []);
     } else {
       form.setValue(
         "bookingRoomIds",
-        availableRooms.map((room) => room.bookingRoomId)
+        unpaidRoomsData?.unpaidRooms.map((room) => room.bookingRoomId) || []
       );
     }
   };
 
   const handleQuickAmount = (percentage: number) => {
-    const amount = Math.round(totalWithFees * percentage);
+    const amount = Math.round((totalWithFees ?? 0) * percentage);
     form.setValue("paidAmount", amount);
   };
 
@@ -214,7 +197,7 @@ export function PayNowRoomsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[100vw] lg:max-w-5xl gap-0 p-0 flex flex-col bg-slate-50"
+        className="w-full sm:max-w-[100vw] lg:max-w-5xl gap-0 p-0 flex flex-col bg-background"
       >
         {/* HEADER */}
         <SheetHeader className="px-6 py-4 border-b bg-background shrink-0">
@@ -240,21 +223,23 @@ export function PayNowRoomsSheet({
                     <Label className="text-sm font-semibold">
                       Chọn phòng cần thanh toán
                     </Label>
-                    {availableRooms.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={toggleSelectAll}
-                        className="h-7 text-xs"
-                      >
-                        {selectedRoomIds.length === availableRooms.length
-                          ? "Bỏ chọn tất cả"
-                          : "Chọn tất cả"}
-                      </Button>
-                    )}
+                    {unpaidRoomsData?.unpaidRooms &&
+                      unpaidRoomsData?.unpaidRooms.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={toggleSelectAll}
+                          className="h-7 text-xs"
+                        >
+                          {selectedRoomIds.length ===
+                          unpaidRoomsData?.unpaidRooms.length
+                            ? "Bỏ chọn tất cả"
+                            : "Chọn tất cả"}
+                        </Button>
+                      )}
                   </div>
 
-                  {availableRooms.length === 0 ? (
+                  {unpaidRoomsData?.unpaidRooms.length === 0 ? (
                     <Card className="p-6 text-center bg-muted/30">
                       <p className="text-sm text-muted-foreground">
                         Không có phòng nào khả dụng để thanh toán ngay.
@@ -264,7 +249,7 @@ export function PayNowRoomsSheet({
                     </Card>
                   ) : (
                     <div className="space-y-2">
-                      {availableRooms.map((room) => {
+                      {unpaidRoomsData?.unpaidRooms.map((room) => {
                         const isSelected = selectedRoomIds.includes(
                           room.bookingRoomId
                         );
@@ -293,7 +278,7 @@ export function PayNowRoomsSheet({
                                     {room.roomName}
                                   </span>
                                   <span className="font-mono font-semibold text-primary">
-                                    {formatMoney(100000).vndFormatted}
+                                    {formatMoney(room.roomCharge).vndFormatted}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -304,12 +289,12 @@ export function PayNowRoomsSheet({
                                   />
                                   <span>
                                     {format(
-                                      new Date(room.fromDate),
+                                      new Date(room.checkinDate),
                                       "dd/MM/yyyy"
                                     )}{" "}
                                     →{" "}
                                     {format(
-                                      new Date(room.toDate),
+                                      new Date(room.checkoutDate),
                                       "dd/MM/yyyy"
                                     )}
                                   </span>
@@ -347,8 +332,9 @@ export function PayNowRoomsSheet({
                             </span>
                             <span className="font-mono">
                               {
-                                formatMoney(selectedRoomsData.subtotal)
-                                  .vndFormatted
+                                formatMoney(
+                                  unpaidRoomsData?.totalUnpaidAmount ?? 0
+                                ).vndFormatted
                               }
                             </span>
                           </div>
@@ -394,12 +380,12 @@ export function PayNowRoomsSheet({
                             </span>
                           </div>
 
-                          <div className="flex justify-between p-4 bg-emerald-50/50">
-                            <span className="font-semibold text-emerald-700">
+                          <div className="flex justify-between items-center p-4 bg-emerald-50/50 dark:bg-emerald-900/20">
+                            <span className="font-semibold text-emerald-700 dark:text-emerald-400">
                               Tổng tiền
                             </span>
-                            <span className="text-xl font-bold text-emerald-600 font-mono">
-                              {formatMoney(totalWithFees).vndFormatted}
+                            <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                              {formatMoney(totalWithFees ?? 0).vndFormatted}
                             </span>
                           </div>
                         </div>
@@ -412,7 +398,7 @@ export function PayNowRoomsSheet({
           </ScrollArea>
 
           {/* RIGHT COLUMN: PAYMENT FORM */}
-          <div className="w-full lg:w-[420px] bg-slate-50 border-l flex flex-col h-full">
+          <div className="w-full lg:w-[420px] bg-background border-l flex flex-col h-full">
             <div className="p-6 flex-1 overflow-y-auto">
               <Form {...form}>
                 <div className="space-y-6">
@@ -516,15 +502,17 @@ export function PayNowRoomsSheet({
                                 VND
                               </span>
                             </div>
-                            {field.value && field.value < totalWithFees && (
-                              <p className="text-xs text-orange-600">
-                                Còn thiếu:{" "}
-                                {
-                                  formatMoney(totalWithFees - field.value)
-                                    .vndFormatted
-                                }
-                              </p>
-                            )}
+                            {field.value &&
+                              field.value < (totalWithFees ?? 0) && (
+                                <p className="text-xs text-orange-600">
+                                  Còn thiếu:{" "}
+                                  {
+                                    formatMoney(
+                                      (totalWithFees ?? 0) - field.value
+                                    ).vndFormatted
+                                  }
+                                </p>
+                              )}
                             {!paymentValidation.isValid &&
                               paymentValidation.error && (
                                 <p className="text-xs text-destructive">

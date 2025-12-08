@@ -46,11 +46,12 @@ const Booking = {
   Export: `Bookings/export`,
   updateStatus: "Bookings/update-status",
   addToCompletedRoomOrder: (bookingId: string) =>
-    `/StaffBookings/${bookingId}/add-completed-charges`,
+    `StaffBookings/${bookingId}/add-completed-charges`,
   confirmPayment: (id: string) => `StaffBookings/${id}/confirm-payment`,
   orderableBookings: "StaffBookings/orderable",
   payForRoom: (id: string) => `StaffBookings/${id}/pay-now-rooms`,
   upgradeRoom: (id: string) => `StaffBookings/${id}/upgrade-room`,
+  unpaidRooms: (bookingId: string) => `StaffBookings/${bookingId}/unpaid-rooms`,
 };
 
 const OTAInformation = {

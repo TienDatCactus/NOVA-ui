@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import RefundDialog from "./refund-dialog";
+import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 
 interface RefundButtonProps {
   bookingId: string;
@@ -59,14 +60,16 @@ export default function RefundButton({
 
   return (
     <>
-      <Button
-        variant={"destructive-ghost"}
-        onClick={() => setDialogOpen(true)}
-        className={className}
-      >
-        <RotateCcw className="w-4 h-4" />
-        {showLabel && <span className="ml-2">Hoàn tiền</span>}
-      </Button>
+      {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+        <Button
+          variant={"destructive-ghost"}
+          onClick={() => setDialogOpen(true)}
+          className={className}
+        >
+          <RotateCcw className="w-4 h-4" />
+          {showLabel && <span className="ml-2">Hoàn tiền</span>}
+        </Button>
+      )}
 
       <RefundDialog
         open={dialogOpen}

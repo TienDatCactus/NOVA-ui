@@ -84,7 +84,6 @@ export default function CreateMenuDialog({
 
   const handleSubmit = (data: CreateMenuFormData) => {
     if (data.Components.length <= 0) {
-      onError("Vui lòng thêm định lượng cho món ăn.");
       setActiveTab("components");
       return;
     }

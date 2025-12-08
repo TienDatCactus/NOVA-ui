@@ -26,10 +26,7 @@ const UserDetailResponseSchema = UserItemSchema;
 // POST /api/Users - Create request body
 const CreateUserSchema = z.object({
   userName: z.string().min(1, "Tên đăng nhập không được để trống").trim(),
-  email: z
-    .string()
-    .min(1, "Email không được để trống")
-    .email("Email không hợp lệ"),
+  email: z.email("Email không hợp lệ").min(1, "Email không được để trống"),
   fullName: z
     .string()
     .min(1, "Họ tên không được để trống")

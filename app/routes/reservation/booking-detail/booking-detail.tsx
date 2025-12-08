@@ -4,7 +4,13 @@ import { Check, FileWarning, NotebookPen, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import {
+  AuthLoader,
+  RouteModule,
+  Permission,
+  hasAnyRole,
+  UserRole,
+} from "~/lib/auth/auth.loader";
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Bookings, Permission.Read);
@@ -229,12 +235,15 @@ export default function Component() {
             />
 
             <div className="flex  items-start gap-4">
-              <BookingRoomsBar
-                bookingDetail={bookingDetail}
-                form={form}
-                roomsFieldArray={roomsFieldArray}
-                bookingState={bookingState}
-              />
+              <div className="grid gap-2">
+                <BookingRoomsBar
+                  bookingDetail={bookingDetail}
+                  form={form}
+                  roomsFieldArray={roomsFieldArray}
+                  bookingState={bookingState}
+                />
+                <RefundHistory bookingId={bookingDetail.id} />
+              </div>
 
               <div className="flex-1  space-y-4">
                 <StayDetailBar
@@ -257,8 +266,6 @@ export default function Component() {
                     bookingDetail.status !== "Cancelled"
                   }
                 />
-
-                <RefundHistory bookingId={bookingDetail.id} />
               </div>
             </div>
 
@@ -266,6 +273,7 @@ export default function Component() {
             <AddCompletedChargesDialog
               open={completedChargesDialogOpen}
               onOpenChange={setCompletedChargesDialogOpen}
+              booking={bookingDetail}
             />
 
             <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
@@ -336,14 +344,19 @@ export default function Component() {
         </Form>
       </div>
 
-      <BookingActionsBar
-        isDirty={isDirty}
-        isUpdating={isUpdating}
-        bookingDetail={bookingDetail}
-        bookingState={bookingState}
-        onReset={() => form.reset()}
-        onSave={form.handleSubmit(handleSubmit, onError)}
-      />
+      {hasAnyRole(AuthLoader.getUser(), [
+        UserRole.HotelManager,
+        UserRole.Receptionist,
+      ]) && (
+        <BookingActionsBar
+          isDirty={isDirty}
+          isUpdating={isUpdating}
+          bookingDetail={bookingDetail}
+          bookingState={bookingState}
+          onReset={() => form.reset()}
+          onSave={form.handleSubmit(handleSubmit, onError)}
+        />
+      )}
     </div>
   );
 }

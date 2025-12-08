@@ -393,7 +393,7 @@ const AuditLogsLayout = ({
               </div>
               <Switch
                 checked={filters.Success ?? true}
-                className="scale-75 data-[state=checked]:bg-green-600 dark:data-[state=checked]:bg-green-600"
+                className=" data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 dark:data-[state=checked]:bg-green-600"
               />
             </div>
 
