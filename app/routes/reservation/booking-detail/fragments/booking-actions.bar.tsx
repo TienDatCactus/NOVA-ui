@@ -40,7 +40,9 @@ export function BookingActionsBar({
 
   const { mutateAsync: updateStatus, isPending: isUpdatingStatus } =
     useUpdateBookingStatus(bookingDetail?.id || "");
-
+  const canRefund =
+    bookingDetail?.status === "CheckedOut" ||
+    bookingDetail?.status === "Confirmed";
   const handleQuickCheckout = async () => {
     if (bookingDetail?.source === "RoomBlock") {
       try {
@@ -56,12 +58,14 @@ export function BookingActionsBar({
       <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
         {/* Left: Always Visible Operations (Refund) */}
         <div className="flex items-center gap-2">
-          <RefundButton
-            bookingId={bookingDetail?.id || ""}
-            bookingNumber={bookingDetail?.bookingCode || ""}
-            bookingStatus={bookingDetail?.status || ""}
-            totalPaidAmount={bookingDetail.paidAmount}
-          />
+          {canRefund && (
+            <RefundButton
+              bookingId={bookingDetail?.id || ""}
+              bookingNumber={bookingDetail?.bookingCode || ""}
+              bookingStatus={bookingDetail?.status || ""}
+              totalPaidAmount={bookingDetail.paidAmount}
+            />
+          )}
         </div>
 
         {/* Right: Contextual Actions */}

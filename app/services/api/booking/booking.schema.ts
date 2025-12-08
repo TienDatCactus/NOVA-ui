@@ -649,6 +649,26 @@ const BookingUpgradeRoomRequestSchema = z
     }
   );
 
+const UnpaidRoomSchema = z.object({
+  bookingRoomId: z.uuid(),
+  roomId: z.uuid(),
+  roomName: z.string(),
+  roomTypeName: z.string(),
+  totalCharge: z.number(),
+  roomCharge: z.number(),
+  breakfastCharge: z.number(),
+  nights: z.number(),
+  checkinDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  checkoutDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+});
+
+const UnpaidRoomsForBookingSchema = z.object({
+  bookingId: z.uuid(),
+  bookingCode: z.string(),
+  unpaidRooms: z.array(UnpaidRoomSchema),
+  totalUnpaidAmount: z.number().min(0),
+});
+
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -692,4 +712,7 @@ export const BookingSchema = {
 
   //! orderable bookings (for POS/Service order creation)
   OrderableBookingResponseSchema,
+
+  UnpaidRoomsForBookingSchema,
+  UnpaidRoomSchema,
 };

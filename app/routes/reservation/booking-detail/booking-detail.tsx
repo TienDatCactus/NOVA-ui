@@ -4,7 +4,13 @@ import { Check, FileWarning, NotebookPen, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import {
+  AuthLoader,
+  RouteModule,
+  Permission,
+  hasAnyRole,
+  UserRole,
+} from "~/lib/auth/auth.loader";
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Bookings, Permission.Read);
@@ -336,14 +342,19 @@ export default function Component() {
         </Form>
       </div>
 
-      <BookingActionsBar
-        isDirty={isDirty}
-        isUpdating={isUpdating}
-        bookingDetail={bookingDetail}
-        bookingState={bookingState}
-        onReset={() => form.reset()}
-        onSave={form.handleSubmit(handleSubmit, onError)}
-      />
+      {hasAnyRole(AuthLoader.getUser(), [
+        UserRole.HotelManager,
+        UserRole.Receptionist,
+      ]) && (
+        <BookingActionsBar
+          isDirty={isDirty}
+          isUpdating={isUpdating}
+          bookingDetail={bookingDetail}
+          bookingState={bookingState}
+          onReset={() => form.reset()}
+          onSave={form.handleSubmit(handleSubmit, onError)}
+        />
+      )}
     </div>
   );
 }

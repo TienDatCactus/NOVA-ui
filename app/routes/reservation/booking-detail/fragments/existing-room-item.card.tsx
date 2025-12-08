@@ -49,7 +49,8 @@ export default function ExistingRoomItemCard({
     }
     return format(date, "dd/MM");
   };
-
+  const canDelete =
+    roomDetail?.status === "Reserved" || roomDetail?.status === "CheckedIn";
   return (
     <div
       onClick={onSelect}

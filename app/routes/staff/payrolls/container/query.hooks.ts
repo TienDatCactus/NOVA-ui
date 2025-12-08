@@ -246,14 +246,22 @@ export function useUpdatePayrollComponent() {
   return useMutation({
     mutationFn: async ({
       componentId,
+      payrollId,
       data,
     }: {
       componentId: string;
+      payrollId: string;
       data: PayrollComponentInputDto;
     }) => await StaffPayrollService.updateComponent(componentId, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
-      toast.success("Cập nhật component bảng lương thành công");
+      queryClient.invalidateQueries({
+        queryKey: ["payroll-detail", variables.payrollId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["payroll-components", variables.payrollId],
+      });
+      toast.success("Đã cập nhật component bảng lương thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError)
@@ -272,10 +280,22 @@ export function useDeletePayrollComponent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ componentId }: { componentId: string }) =>
-      await StaffPayrollService.deleteComponent(componentId),
-    onSuccess: () => {
+    mutationFn: async ({
+      componentId,
+      payrollId,
+    }: {
+      componentId: string;
+      payrollId: string;
+    }) => await StaffPayrollService.deleteComponent(componentId),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
+      queryClient.invalidateQueries({
+        queryKey: ["payroll-detail", variables.payrollId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["payroll-components", variables.payrollId],
+      });
+      toast.success("Đã xóa component bảng lương thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError)
@@ -299,6 +319,7 @@ export function useRefreshPayrollDays() {
       queryClient.invalidateQueries({
         queryKey: ["payrolls", variables.year, variables.month],
       });
+      toast.success("Đã làm mới số ngày công thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError)
@@ -321,6 +342,7 @@ export function useRefreshSinglePayroll() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
       queryClient.invalidateQueries({ queryKey: ["payroll-detail", id] });
+      toast.success("Đã làm mới số ngày công bảng lương thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError)

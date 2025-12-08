@@ -395,3 +395,12 @@ export function useUpgradeRoom(bookingId: string) {
     },
   });
 }
+
+export function useUnpaidRooms(bookingId: string) {
+  return useQuery({
+    queryKey: ["unpaid-rooms", bookingId],
+    queryFn: () => BookingService.unpaidRooms(bookingId),
+    enabled: !!bookingId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
