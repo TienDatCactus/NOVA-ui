@@ -136,7 +136,7 @@ export const transactionColumns: ColumnDef<StockTransactionsItemDto>[] = [
       <DataTableColumnHeader column={column} title="Mã tham chiếu" />
     ),
     cell: ({ row }) => {
-      const { sourceType, sourceId, reference } = row.original;
+      const { sourceId, reference } = row.original;
 
       if (!sourceId) {
         return (
@@ -146,25 +146,7 @@ export const transactionColumns: ColumnDef<StockTransactionsItemDto>[] = [
         );
       }
 
-      const baseUrls: Record<string, string> = {
-        PurchaseRequest: FE_URL.dashboard.stocks.purchaseRequests,
-        StockAdjustment: FE_URL.dashboard.stocks.adjustments,
-        PosOrder: "/dashboard/orders",
-      };
-
-      const url = baseUrls[sourceType];
-
-      return url ? (
-        <a
-          href={url}
-          className="inline-flex items-center gap-1 text-primary hover:underline font-mono text-sm"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {reference}
-          <ExternalLink className="h-3 w-3" />
-        </a>
-      ) : (
+      return (
         <span className="text-muted-foreground font-mono text-sm">
           {reference}
         </span>

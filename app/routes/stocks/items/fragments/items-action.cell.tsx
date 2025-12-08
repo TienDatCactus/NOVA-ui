@@ -47,7 +47,7 @@ const ItemsActionCell: React.FC<ItemsActionCellProps> = ({ item }) => {
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className="text-destructive"
+            variant="destructive"
             onClick={() => setOpenDeleteDialog(true)}
           >
             <Trash2 className="mr-2 h-4 w-4" />

@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronsUpDown, Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -27,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { cn } from "~/lib/utils";
 import type { CreateUserDto } from "~/services/api/user/dto";
 import { UserSchema } from "~/services/api/user/user.schema";
 import { useCreateUser, useRoles } from "../container/query.hooks";
@@ -67,7 +65,7 @@ export function CreateUserDialog({ open, onClose }: UserFormDialogProps) {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-3">
-            Thêm khách hàng mới
+            Tạo tài khoản mới
           </DialogTitle>
         </DialogHeader>
 
