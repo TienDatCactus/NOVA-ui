@@ -53,7 +53,7 @@ export function CreateUserDialog({ open, onClose }: UserFormDialogProps) {
 
   const handleSubmit = (data: CreateUserDto) => {
     createUser(data as CreateUserDto, {
-      onSuccess: (response) => {
+      onSuccess: () => {
         form.reset();
         onClose();
       },
