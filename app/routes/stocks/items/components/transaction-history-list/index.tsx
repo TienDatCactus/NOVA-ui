@@ -23,5 +23,9 @@ export function TransactionHistoryDataTable({
       </div>
     );
   }
-  return <DataTable columns={transactionColumns} data={transactions} />;
+  return (
+    <div className="mx-auto container">
+      <DataTable columns={transactionColumns} data={transactions} />
+    </div>
+  );
 }

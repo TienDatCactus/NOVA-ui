@@ -49,7 +49,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "~/components/ui/pagination";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 
 import type { AuditListParams } from "~/services/api/audit/audit.types";
 import {
@@ -166,7 +166,7 @@ const AuditLogsLayout = ({
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Database className="w-3.5 h-3.5" />
               <span>
-                Tổng <strong>{totalItems.toLocaleString("vi-VN")}</strong> bản
+                Tổng <strong>{formatMoney(totalItems).vndFormatted}</strong> bản
                 ghi
               </span>
             </div>

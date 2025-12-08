@@ -43,7 +43,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import {
   useChatEntry,
   useChatMessages,
@@ -499,7 +499,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                                       {item.description || "Không có mô tả"}
                                     </span>
                                     <span className="text-xs font-mono text-emerald-700 font-medium">
-                                      {item.price?.toLocaleString()}đ
+                                      {formatMoney(item.price).vndFormatted}
                                     </span>
                                   </div>
                                 </button>
@@ -535,7 +535,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                                     {item.description || "Không có mô tả"}
                                   </span>
                                   <span className="text-xs font-mono text-emerald-700 font-medium">
-                                    {item.basePrice?.toLocaleString()}đ
+                                    {formatMoney(item.basePrice).vndFormatted}
                                   </span>
                                 </div>
                               </button>

@@ -130,10 +130,46 @@ export default function CreateBookingPage() {
   const dateRange = form.watch("dateRange");
   useEffect(() => {
     if (dateRange?.from) {
-      form.setValue("checkinDate", dateRange.from, { shouldValidate: true });
+      const prevCheckin = new Date(form.getValues("checkinDate"));
+      const newCheckin = dateRange.from;
+
+      form.setValue("checkinDate", newCheckin, { shouldValidate: true });
+
+      // If checkin changed, reset dependent data to prevent inconsistency
+      if (prevCheckin && prevCheckin.getTime() !== newCheckin.getTime()) {
+        toast.info(
+          "Ngày lưu trú đã thay đổi. Vui lòng chọn lại phòng và dịch vụ.",
+          {
+            duration: 4000,
+          }
+        );
+
+        form.setValue("roomIds", []);
+        form.setValue("breakfastDates", []);
+        form.setValue("isBreakfastAll", false);
+        form.setValue("serviceOrder.services", []);
+      }
     }
+
     if (dateRange?.to) {
-      form.setValue("checkoutDate", dateRange.to, { shouldValidate: true });
+      const prevCheckout = new Date(form.getValues("checkoutDate"));
+      const newCheckout = dateRange.to;
+
+      form.setValue("checkoutDate", newCheckout, { shouldValidate: true });
+
+      if (prevCheckout && prevCheckout.getTime() !== newCheckout.getTime()) {
+        toast.info(
+          "Ngày lưu trú đã thay đổi. Vui lòng chọn lại phòng và dịch vụ.",
+          {
+            duration: 4000,
+          }
+        );
+
+        form.setValue("roomIds", []);
+        form.setValue("breakfastDates", []);
+        form.setValue("isBreakfastAll", false);
+        form.setValue("serviceOrder.services", []);
+      }
     }
   }, [dateRange?.from, dateRange?.to, form]);
 

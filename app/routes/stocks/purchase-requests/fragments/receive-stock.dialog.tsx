@@ -223,9 +223,9 @@ export default function ReceiveStockDialog({
                               <FormControl>
                                 <Input
                                   type="number"
-                                  placeholder={estimatedCost.toLocaleString(
-                                    "vi-VN"
-                                  )}
+                                  placeholder={
+                                    formatMoney(estimatedCost).vndFormatted
+                                  }
                                   value={field.value || ""}
                                   onChange={(e) =>
                                     field.onChange(

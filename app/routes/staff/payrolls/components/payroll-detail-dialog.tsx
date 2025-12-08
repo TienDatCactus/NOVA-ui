@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import { usePayrollDetail } from "../container/query.hooks";
 import ComponentsList from "./payroll-detail-dialog/components-list";
+import { formatMoney } from "~/lib/utils";
 
 interface PayrollDetailDialogProps {
   payrollId: string;
@@ -248,9 +249,10 @@ export default function PayrollDetailDialog({
                             Lương cơ bản (Tháng đủ)
                           </span>
                           <span className="font-mono text-sm">
-                            {payroll.baseSalaryFullMonth?.toLocaleString(
-                              "vi-VN"
-                            )}{" "}
+                            {
+                              formatMoney(payroll.baseSalaryFullMonth)
+                                .vndFormatted
+                            }{" "}
                             VNĐ
                           </span>
                         </div>
@@ -259,9 +261,10 @@ export default function PayrollDetailDialog({
                             Lương cơ bản (Tính thực tế)
                           </span>
                           <span className="font-mono text-sm font-medium">
-                            {payroll.baseSalaryCalculated?.toLocaleString(
-                              "vi-VN"
-                            )}{" "}
+                            {
+                              formatMoney(payroll.baseSalaryCalculated)
+                                .vndFormatted
+                            }{" "}
                             VNĐ
                           </span>
                         </div>
@@ -277,9 +280,10 @@ export default function PayrollDetailDialog({
                             }`}
                           >
                             {(payroll.componentsTotal || 0) >= 0 ? "+" : ""}
-                            {(payroll.componentsTotal || 0).toLocaleString(
-                              "vi-VN"
-                            )}{" "}
+                            {
+                              formatMoney(payroll.componentsTotal || 0)
+                                .vndFormatted
+                            }{" "}
                             VNĐ
                           </span>
                         </div>
@@ -293,7 +297,7 @@ export default function PayrollDetailDialog({
                             Tổng lương
                           </span>
                           <span className="font-mono font-bold">
-                            {payroll.totalAmount?.toLocaleString("vi-VN")} VNĐ
+                            {formatMoney(payroll.totalAmount || 0).vndFormatted}
                           </span>
                         </div>
                         <div className="flex justify-between py-1">
@@ -301,7 +305,7 @@ export default function PayrollDetailDialog({
                             Đã trả
                           </span>
                           <span className="font-mono text-sm">
-                            {payroll.paidAmount?.toLocaleString("vi-VN")} VNĐ
+                            {formatMoney(payroll.paidAmount || 0).vndFormatted}
                           </span>
                         </div>
                         <div className="flex justify-between py-1">
@@ -309,8 +313,10 @@ export default function PayrollDetailDialog({
                             Còn lại
                           </span>
                           <span className="font-mono text-sm font-medium text-orange-600">
-                            {payroll.remainingAmount?.toLocaleString("vi-VN")}{" "}
-                            VNĐ
+                            {
+                              formatMoney(payroll.remainingAmount || 0)
+                                .vndFormatted
+                            }
                           </span>
                         </div>
                       </div>

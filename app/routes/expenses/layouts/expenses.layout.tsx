@@ -27,6 +27,7 @@ import type { ExpensesFilter } from "../container/filter.hooks";
 import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
 import { useAuth } from "~/lib/auth/components";
 import { UserRole } from "~/lib/auth/roles";
+import { formatMoney } from "~/lib/utils";
 
 // --- PROPS ---
 interface ExpensesLayoutProps {
@@ -102,7 +103,7 @@ export default function ExpensesLayout({
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Tổng chi:</span>
                 <span className="font-mono font-bold text-primary">
-                  {totalAmount.toLocaleString("vi-VN")}
+                  {formatMoney(totalAmount).vndFormatted}
                 </span>
               </div>
             </div>

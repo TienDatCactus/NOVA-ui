@@ -44,14 +44,28 @@ const CreateShiftScheduleRequestSchema = z.object({
 });
 
 // PUT /api/StaffShifts/{id}/schedule - Update schedule request
-const UpdateShiftScheduleRequestSchema = z.object({
-  workShiftIds: z.array(z.string()).min(1, "Chọn ít nhất 1 ca làm việc"),
-  repeatWeekly: z.boolean(),
-  weekDays: z.array(z.number()).optional().nullable(), // 1=Monday, 7=Sunday
-  endDate: z.string().optional().nullable(), // "yyyy-MM-dd", null = mặc định +1 tháng
-  excludeHolidays: z.boolean(),
-  applyScope: z.enum(["ThisOnly", "Forward", "All"]), // Required, no default
-});
+const UpdateShiftScheduleRequestSchema = z
+  .object({
+    workShiftIds: z.array(z.string()).min(1, "Chọn ít nhất 1 ca làm việc"),
+    repeatWeekly: z.boolean(),
+    weekDays: z.array(z.number()).optional().nullable(), // 1=Monday, 7=Sunday
+    endDate: z.string().optional().nullable(), // "yyyy-MM-dd", null = mặc định +1 tháng
+    excludeHolidays: z.boolean(),
+    applyScope: z.enum(["ThisOnly", "Forward", "All"]), // Required, no default
+  })
+  .refine(
+    (data) => {
+      // When applyScope is not "ThisOnly", weekDays must be provided
+      if (data.applyScope !== "ThisOnly") {
+        return data.weekDays && data.weekDays.length > 0;
+      }
+      return true;
+    },
+    {
+      message: "Phải chọn ít nhất 1 ngày trong tuần khi áp dụng Forward/All",
+      path: ["weekDays"],
+    }
+  );
 
 export const StaffShiftSchema = {
   StaffShiftListItemSchema,

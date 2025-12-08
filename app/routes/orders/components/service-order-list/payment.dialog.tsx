@@ -19,6 +19,7 @@ import {
 } from "~/components/ui/select";
 import { CreditCard, DollarSign } from "lucide-react";
 import { usePayServiceOrderNow } from "../../container/service-order/mutation.hooks";
+import { formatMoney } from "~/lib/utils";
 
 interface PaymentDialogProps {
   orderId: string;
@@ -92,7 +93,7 @@ export default function PaymentDialog({
             <p className="text-sm text-muted-foreground mb-1">Tổng tiền</p>
             <p className="text-2xl font-bold text-primary flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              {totalAmount.toLocaleString("vi-VN")} ₫
+              {formatMoney(totalAmount).vndFormatted}
             </p>
           </div>
 
@@ -127,7 +128,7 @@ export default function PaymentDialog({
               }
             />
             <p className="text-xs text-muted-foreground">
-              Thanh toán đầy đủ: {totalAmount.toLocaleString("vi-VN")} ₫
+              Thanh toán đầy đủ: {formatMoney(totalAmount).vndFormatted}
             </p>
           </div>
 

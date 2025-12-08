@@ -150,7 +150,9 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
       checkinDate &&
       checkoutDate &&
       previewRequest.checkinDate &&
-      previewRequest.checkoutDate
+      previewRequest.checkoutDate &&
+      !isLoadingRooms && // Wait for rooms to load
+      previewRequest.roomTypes.length > 0 // Ensure roomTypes are mapped
     ) {
       previewBookingPrice();
     }
@@ -158,6 +160,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
       reset();
     };
   }, [
+    roomIds.length, // Add explicit dependency
     checkinDate,
     checkoutDate,
     JSON.stringify(previewRequest.roomTypes),
@@ -166,6 +169,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
     JSON.stringify(previewRequest.services),
     previewRequest.adultsAmount,
     previewRequest.childrenAmount,
+    isLoadingRooms, // Add loading state dependency
   ]);
 
   const serverTotal = pricePreview?.total ?? 0;
@@ -518,8 +522,10 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                   <span className="text-3xl font-bold text-emerald-600 tracking-tight font-mono flex items-center gap-2">
                     <span className="text-sm">Tiền phòng: </span>
                     {
-                      formatMoney(pricePreview?.roomsSubtotal ?? finalTotal)
-                        .vndFormatted
+                      formatMoney(
+                        (pricePreview?.roomsSubtotal ?? 0) +
+                          (pricePreview?.breakfastSubtotal ?? 0)
+                      ).vndFormatted
                     }
                   </span>
                 </div>

@@ -21,9 +21,17 @@ export const getStatusBadge = (status?: string) => {
       showLabel: true, // Always show badge for present status
     };
   }
-  if (status.toLowerCase() === "absent") {
+  if (status.toLowerCase() === "plannedabsence") {
     return {
       variant: "destructive" as const,
+      label: "Vắng mặt",
+      icon: UserX as LucideIcon,
+      showLabel: true,
+    };
+  }
+  if (status.toLowerCase() === "unplannedabsence") {
+    return {
+      variant: "warning" as const,
       label: "Vắng mặt",
       icon: UserX as LucideIcon,
       showLabel: true,

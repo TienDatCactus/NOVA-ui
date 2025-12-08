@@ -15,6 +15,8 @@ import {
   AlertCircle,
   FileText,
   Wallet,
+  Toilet,
+  Soup,
 } from "lucide-react";
 import { useMemo } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
@@ -79,6 +81,7 @@ import { useUpdateBookingStatus } from "../../bookings/container/booking-mutatio
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
 import type { BookingState } from "../container/use-booking-state.hooks";
 import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
+import { formatMoney } from "~/lib/utils";
 
 interface StayDetailBarProps {
   bookingCode: string;
@@ -119,7 +122,8 @@ export default function StayDetailBar({
   const paidAmount = paymentForm.watch("paidAmount");
 
   const paymentSummary = useMemo(() => {
-    const totalAmount = bookingDetail?.totalAmount || 0;
+    const totalAmount =
+      bookingDetail?.totalBreakfast + bookingDetail?.totalRoomCharge || 0;
     const previouslyPaid = bookingDetail?.paidAmount || 0;
     const currentPaid = paidAmount || 0;
     const remaining = totalAmount - previouslyPaid - currentPaid;
@@ -143,7 +147,7 @@ export default function StayDetailBar({
     if (paidAmount > maxAllowed) {
       return {
         isValid: false,
-        error: `Số tiền không được vượt quá số tiền còn lại (${maxAllowed.toLocaleString("vi-VN")} VND)`,
+        error: `Số tiền không được vượt quá số tiền còn lại (${formatMoney(maxAllowed).vndFormatted})`,
       };
     }
 
@@ -297,9 +301,32 @@ export default function StayDetailBar({
                                 booking
                               </span>
                               <span className="font-mono font-medium">
-                                {paymentSummary.totalAmount.toLocaleString(
-                                  "vi-VN"
-                                )}
+                                {
+                                  formatMoney(paymentSummary.totalAmount)
+                                    .vndFormatted
+                                }
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground flex items-center gap-2">
+                                <Toilet className="w-4 h-4" /> Chi phí Phòng
+                              </span>
+                              <span className="font-mono font-medium">
+                                {
+                                  formatMoney(bookingDetail.totalRoomCharge)
+                                    .vndFormatted
+                                }
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground flex items-center gap-2">
+                                <Soup className="w-4 h-4" /> Ăn sáng
+                              </span>
+                              <span className="font-mono font-medium">
+                                {
+                                  formatMoney(bookingDetail.totalBreakfast)
+                                    .vndFormatted
+                                }
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
@@ -307,9 +334,10 @@ export default function StayDetailBar({
                                 <CreditCard className="w-4 h-4" /> Đã thanh toán
                               </span>
                               <span className="font-mono font-medium text-muted-foreground">
-                                {paymentSummary.previouslyPaid.toLocaleString(
-                                  "vi-VN"
-                                )}
+                                {
+                                  formatMoney(paymentSummary.previouslyPaid)
+                                    .vndFormatted
+                                }
                               </span>
                             </div>
                           </div>
@@ -324,9 +352,10 @@ export default function StayDetailBar({
                               <span
                                 className={`font-mono font-bold text-xl ${paymentSummary.remaining < 0 ? "text-orange-600" : "text-primary"}`}
                               >
-                                {paymentSummary.remaining.toLocaleString(
-                                  "vi-VN"
-                                )}
+                                {
+                                  formatMoney(paymentSummary.remaining)
+                                    .vndFormatted
+                                }
                               </span>
                               <span className="text-xs text-muted-foreground ml-1">
                                 VND

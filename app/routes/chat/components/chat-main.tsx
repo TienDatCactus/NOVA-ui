@@ -68,7 +68,7 @@ import { useChatConnection } from "../container/use-chat-connection.hooks";
 // 5. Utils & Types
 import { SUPPORTED_LANGUAGES } from "~/lib/constants";
 import type { ChatMessage } from "~/lib/signalr";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 
 interface ChatMainProps {
   sessionId: string | null;
@@ -806,7 +806,7 @@ const TagItemButton = ({
         </span>
       )}
       <span className="text-xs text-emerald-600 font-mono mt-0.5">
-        {price?.toLocaleString("vi-VN")} VNĐ
+        {formatMoney(price || 0).vndFormatted}
       </span>
     </div>
   </Button>

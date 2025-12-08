@@ -185,11 +185,10 @@ export default function ExportAuditDialog({
                         >
                           <FormControl>
                             <SelectTrigger className="h-9 text-sm">
-                              <SelectValue placeholder="Tất cả Module" />
+                              <SelectValue placeholder="Module" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="all">Tất cả</SelectItem>
                             {MODULE_OPTIONS.map((opt) => (
                               <SelectItem key={opt.value} value={opt.value}>
                                 {opt.label}
@@ -211,11 +210,10 @@ export default function ExportAuditDialog({
                         >
                           <FormControl>
                             <SelectTrigger className="h-9 text-sm">
-                              <SelectValue placeholder="Tất cả Hành động" />
+                              <SelectValue placeholder="Loại hành động" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="all">Tất cả</SelectItem>
                             {ACTION_OPTIONS.map((opt) => (
                               <SelectItem key={opt.value} value={opt.value}>
                                 {opt.label}

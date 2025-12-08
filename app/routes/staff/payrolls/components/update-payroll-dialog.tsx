@@ -24,6 +24,7 @@ import {
 import { Input } from "~/components/ui/input";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import { useUpdatePayroll } from "../container/query.hooks";
+import { formatMoney } from "~/lib/utils";
 
 const updatePayrollSchema = z.object({
   baseSalaryFullMonth: z.string().optional(),
@@ -155,7 +156,8 @@ export default function UpdatePayrollDialog({
                   </FormControl>
                   {payroll && payroll.baseSalaryFullMonth !== undefined && (
                     <p className="text-xs text-muted-foreground">
-                      Hiện tại: {payroll.baseSalaryFullMonth.toLocaleString()}{" "}
+                      Hiện tại:{" "}
+                      {formatMoney(payroll.baseSalaryFullMonth).vndFormatted}{" "}
                       VNĐ
                     </p>
                   )}
@@ -186,7 +188,8 @@ export default function UpdatePayrollDialog({
                   </FormControl>
                   {payroll && (
                     <p className="text-xs text-muted-foreground">
-                      Hiện tại: {payroll.paidAmount.toLocaleString()} VNĐ
+                      Hiện tại: {formatMoney(payroll.paidAmount).vndFormatted}{" "}
+                      VNĐ
                     </p>
                   )}
                   <FormMessage />
@@ -200,13 +203,13 @@ export default function UpdatePayrollDialog({
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tổng lương:</span>
                   <span className="font-mono font-semibold">
-                    {payroll.totalAmount?.toLocaleString() || "0"} VNĐ
+                    {formatMoney(payroll.totalAmount || 0).vndFormatted}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Còn lại:</span>
                   <span className="font-mono font-semibold text-orange-600">
-                    {payroll.remainingAmount?.toLocaleString() || "0"} VNĐ
+                    {formatMoney(payroll.remainingAmount || 0).vndFormatted}
                   </span>
                 </div>
               </div>

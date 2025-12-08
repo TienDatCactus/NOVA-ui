@@ -401,6 +401,8 @@ const BookingDetailItemSchema = z.object({
   children: z.number().int().optional(),
   note: z.string().optional().nullable(),
   totalAmount: z.number(),
+  totalRoomCharge: z.number().optional().default(0),
+  totalBreakfast: z.number().optional().default(0),
   paidAmount: z.number().optional().default(0),
   invoiceStatus: InvoiceSchema.InvoiceStatusEnum.optional().nullable(),
   paymentMethod: PaymentSchema.PaymentMethodEnum.optional().nullable(),

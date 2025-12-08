@@ -28,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { formatMoney } from "~/lib/utils";
 
 interface ComponentsListProps {
   payrollId: string;
@@ -164,7 +165,7 @@ export default function ComponentsList({
                           }`}
                         >
                           {displayAmount >= 0 ? "+" : ""}
-                          {displayAmount.toLocaleString("vi-VN")}
+                          {formatMoney(displayAmount).vndFormatted}
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5">
                           VNĐ
@@ -224,7 +225,7 @@ export default function ComponentsList({
                     }`}
                   >
                     {componentsTotal >= 0 ? "+" : ""}
-                    {componentsTotal.toLocaleString("vi-VN")}
+                    {formatMoney(componentsTotal).vndFormatted}
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
                     VNĐ

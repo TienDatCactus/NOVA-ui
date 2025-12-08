@@ -41,7 +41,7 @@ export function KpiCard({
       ? formatMoney(value).vndFormatted
       : format === "percent"
         ? `${value}%`
-        : value.toLocaleString("vi-VN");
+        : formatMoney(value).vndFormatted;
 
   return (
     <Card className={cn("shadow-none border-border/60", className)}>

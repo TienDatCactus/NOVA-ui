@@ -250,10 +250,10 @@ export default function PurchaseRequestDetailDialog({
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-mono text-muted-foreground">
-                          {item.unitCost.toLocaleString()}
+                          {formatMoney(item.unitCost).vndFormatted}
                         </TableCell>
                         <TableCell className="text-right font-mono font-medium">
-                          {(item.quantity * item.unitCost).toLocaleString()}
+                          {formatMoney(item.quantity * item.unitCost).vndFormatted}
                         </TableCell>
                       </TableRow>
                     ))}

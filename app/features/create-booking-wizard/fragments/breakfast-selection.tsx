@@ -1,11 +1,10 @@
 import { addDays, eachDayOfInterval, format, isSameDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Calendar as CalendarIcon, Check, Coffee } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
-import { DatePicker } from "~/components/ui/date-picker";
 import { Label } from "~/components/ui/label";
 import {
   Popover,
@@ -49,7 +48,7 @@ export function BreakfastSelection({
   const isLongStay = availableDates.length > 14;
 
   const handleToggleDate = (date: Date) => {
-    if (isBreakfastAll) return; // Disable manual toggle if "All" is active
+    if (isBreakfastAll) return;
 
     const exists = breakfastDates.find((d) => isSameDay(d, date));
     let newDates: Date[];
@@ -88,8 +87,6 @@ export function BreakfastSelection({
           checked={isBreakfastAll}
           onCheckedChange={(checked) => {
             onToggleAll(checked);
-            // Optional: If turning ON, we might want to visually select all dates for feedback
-            // If turning OFF, we clear or keep last selection.
             if (!checked) onSelectDates([]);
           }}
         />
@@ -117,14 +114,33 @@ export function BreakfastSelection({
         </div>
 
         {isLongStay ? (
-          /* FALLBACK: CALENDAR POPOVER FOR LONG STAYS */
-          <DatePicker
-            mode="multiple"
-            selected={breakfastDates}
-            onSelect={(dates) => onSelectDates(dates || [])}
-            disabled={(date) => date <= checkinDate || date > checkoutDate}
-            locale={vi}
-          />
+          /* CALENDAR POPOVER FOR LONG STAYS */
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !breakfastDates.length && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {breakfastDates.length > 0
+                  ? `${breakfastDates.length} ngày đã chọn`
+                  : "Chọn ngày có bữa sáng"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="multiple"
+                selected={breakfastDates}
+                onSelect={(dates) => onSelectDates(dates || [])}
+                disabled={(date) => date <= checkinDate || date > checkoutDate}
+                locale={vi}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
         ) : (
           /* MODERN: DIRECT SELECTION GRID */
           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-2">
