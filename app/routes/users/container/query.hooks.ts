@@ -10,6 +10,7 @@ import type {
   RemoveRolesDto,
   ChangePasswordDto,
 } from "~/services/api/user/dto";
+import { AxiosError } from "axios";
 
 export function useUsers(params?: UserListParams) {
   return useQuery({
@@ -60,7 +61,8 @@ export function useCreateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateUserDto) => UserService.createUser(data),
+    mutationFn: async (data: CreateUserDto) =>
+      await UserService.createUser(data),
     onSuccess: () => {
       // Invalidate users list to refetch with new user
       queryClient.invalidateQueries({
@@ -69,6 +71,14 @@ export function useCreateUser() {
       });
       toast.success("Tạo người dùng thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error?.response?.data?.message ||
+            "Đã có lỗi xảy ra khi tạo người dùng"
+        );
+      }
+    },
   });
 }
 
@@ -76,8 +86,8 @@ export function useUpdateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateUserDto }) =>
-      UserService.updateUser(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: UpdateUserDto }) =>
+      await UserService.updateUser(id, data),
     onSuccess: (_, variables) => {
       // Invalidate both list and specific user detail
       queryClient.invalidateQueries({
@@ -90,6 +100,14 @@ export function useUpdateUser() {
       });
       toast.success("Cập nhật người dùng thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error?.response?.data?.message ||
+            "Đã có lỗi xảy ra khi tạo người dùng"
+        );
+      }
+    },
   });
 }
 
@@ -97,8 +115,8 @@ export function useLockUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: LockUserDto }) =>
-      UserService.lockUser(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: LockUserDto }) =>
+      await UserService.lockUser(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -110,6 +128,14 @@ export function useLockUser() {
       });
       toast.success("Khóa người dùng thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error?.response?.data?.message ||
+            "Đã có lỗi xảy ra khi tạo người dùng"
+        );
+      }
+    },
   });
 }
 
@@ -117,7 +143,7 @@ export function useUnlockUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => UserService.unlockUser(id),
+    mutationFn: async (id: string) => await UserService.unlockUser(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -129,6 +155,14 @@ export function useUnlockUser() {
       });
       toast.success("Mở khóa người dùng thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error?.response?.data?.message ||
+            "Đã có lỗi xảy ra khi tạo người dùng"
+        );
+      }
+    },
   });
 }
 
@@ -136,8 +170,8 @@ export function useAssignRoles() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: AssignRolesDto }) =>
-      UserService.assignRoles(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: AssignRolesDto }) =>
+      await UserService.assignRoles(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -149,6 +183,14 @@ export function useAssignRoles() {
       });
       toast.success("Gán quyền thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error?.response?.data?.message ||
+            "Đã có lỗi xảy ra khi tạo người dùng"
+        );
+      }
+    },
   });
 }
 
@@ -156,8 +198,8 @@ export function useRemoveRoles() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: RemoveRolesDto }) =>
-      UserService.removeRoles(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: RemoveRolesDto }) =>
+      await UserService.removeRoles(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -169,6 +211,14 @@ export function useRemoveRoles() {
       });
       toast.success("Xóa quyền thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error?.response?.data?.message ||
+            "Đã có lỗi xảy ra khi tạo người dùng"
+        );
+      }
+    },
   });
 }
 
@@ -176,15 +226,22 @@ export function useChangePassword() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: ChangePasswordDto }) =>
-      UserService.changePassword(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: ChangePasswordDto }) =>
+      await UserService.changePassword(id, data),
     onSuccess: (_, variables) => {
-      // Password change doesn't affect user data, but invalidate detail in case
       queryClient.invalidateQueries({
         queryKey: ["users", variables.id],
         refetchType: "active",
       });
       toast.success("Đổi mật khẩu thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error?.response?.data?.message ||
+            "Đã có lỗi xảy ra khi tạo người dùng"
+        );
+      }
     },
   });
 }

@@ -94,7 +94,7 @@ export default function ArchiveAuditDialog({
                   <Input
                     type="number"
                     min={1}
-                    max={60}
+                    max={24}
                     value={olderThanMonths}
                     onChange={(e) => setOlderThanMonths(Number(e.target.value))}
                     className="w-16 h-8 text-center pr-1"
@@ -107,7 +107,7 @@ export default function ArchiveAuditDialog({
             <Slider
               value={[olderThanMonths]}
               min={1}
-              max={36}
+              max={24}
               step={1}
               onValueChange={(vals) => setOlderThanMonths(vals[0])}
               className="py-2"

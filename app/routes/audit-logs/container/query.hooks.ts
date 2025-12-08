@@ -1,4 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 import { AuditService } from "~/services/api/audit";
 import type { AuditListParams } from "~/services/api/audit/audit.types";
 import type {
@@ -45,6 +47,13 @@ export function useExportAuditLogs() {
   return useMutation({
     mutationFn: (params: ExportAuditRequest) =>
       AuditService.exportAuditLogs(params),
+    onSuccess: () => {
+      toast.success("Xuất logs thành công.");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message || "Xuất logs thất bại.");
+    },
   });
 }
 
@@ -63,6 +72,11 @@ export function useArchiveAuditLogs() {
         queryKey: ["audit-stats"],
         refetchType: "active",
       });
+      toast.success("Đã lưu trữ logs thành công.");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message || "Lưu trữ logs thất bại.");
     },
   });
 }
@@ -82,6 +96,11 @@ export function useCleanupAuditLogs() {
         queryKey: ["audit-stats"],
         refetchType: "active",
       });
+      toast.success("Đã dọn dẹp logs thành công.");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message || "Dọn dẹp logs thất bại.");
     },
   });
 }

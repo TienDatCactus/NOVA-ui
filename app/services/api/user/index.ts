@@ -22,27 +22,14 @@ import type {
 } from "./dto";
 import type { UserListParams } from "./user.types";
 
-const {
-  UserListResponseSchema,
-  UserDetailResponseSchema,
-  CreateUserResponseSchema,
-  UpdateUserResponseSchema,
-  RoleListResponseSchema,
-  LockUserResponseSchema,
-  UnlockUserResponseSchema,
-  AssignRolesResponseSchema,
-  RemoveRolesResponseSchema,
-  ChangePasswordSchema,
-  ChangePasswordResponseSchema,
-  ChatStaffListResponseSchema,
-} = UserSchema;
+const { ChangePasswordSchema } = UserSchema;
 
 async function getUserList(
   params: UserListParams
 ): Promise<UserListResponseDto> {
   try {
     const resp = await http.get(User.list, { params });
-    return UserListResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -52,7 +39,7 @@ async function getUserList(
 async function getUserDetail(id: string): Promise<UserDetailResponseDto> {
   try {
     const resp = await http.get(User.detail(id));
-    return UserDetailResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -62,7 +49,7 @@ async function getUserDetail(id: string): Promise<UserDetailResponseDto> {
 async function createUser(data: CreateUserDto): Promise<CreateUserResponseDto> {
   try {
     const resp = await http.post(User.create, data);
-    return CreateUserResponseSchema.parse(resp);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -75,7 +62,7 @@ async function updateUser(
 ): Promise<UpdateUserResponseDto> {
   try {
     const resp = await http.put(User.update(id), data);
-    return UpdateUserResponseSchema.parse(resp);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -85,7 +72,7 @@ async function updateUser(
 async function getRoleList(): Promise<RoleListResponseDto> {
   try {
     const resp = await http.get(User.roles);
-    return RoleListResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -98,7 +85,7 @@ async function lockUser(
 ): Promise<LockUserResponseDto> {
   try {
     const resp = await http.post(User.lock(id), data);
-    return LockUserResponseSchema.parse(resp);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -108,7 +95,7 @@ async function lockUser(
 async function unlockUser(id: string): Promise<UnlockUserResponseDto> {
   try {
     const resp = await http.post(User.unlock(id));
-    return UnlockUserResponseSchema.parse(resp);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -121,7 +108,7 @@ async function assignRoles(
 ): Promise<AssignRolesResponseDto> {
   try {
     const resp = await http.post(User.assignRoles(id), data);
-    return AssignRolesResponseSchema.parse(resp);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -134,7 +121,7 @@ async function removeRoles(
 ): Promise<RemoveRolesResponseDto> {
   try {
     const resp = await http.delete(User.removeRoles(id), { data });
-    return RemoveRolesResponseSchema.parse(resp);
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }
@@ -147,7 +134,7 @@ async function changePassword(
   try {
     const validatedData = ChangePasswordSchema.parse(data);
     const resp = await http.post(User.changePassword(id), validatedData);
-    return ChangePasswordResponseSchema.parse(resp);
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }
@@ -156,7 +143,7 @@ async function changePassword(
 async function getChatStaff(): Promise<ChatStaffListDto> {
   try {
     const resp = await http.get(User.chatStaff);
-    return ChatStaffListResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

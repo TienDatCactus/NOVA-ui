@@ -109,8 +109,8 @@ export default function CleanupAuditDialog({
             <div className="flex items-center gap-4">
               <Slider
                 value={[olderThanMonths]}
-                min={3}
-                max={60}
+                min={1}
+                max={24}
                 step={1}
                 onValueChange={(vals) => setOlderThanMonths(vals[0])}
                 className="flex-1 "
