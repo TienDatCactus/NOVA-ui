@@ -81,16 +81,15 @@ const StaffCreateBookingSchema = z
   })
   .refine(
     (data) => {
-      // Validate service order scheduledDates are within checkin-checkout range
       if (!data.serviceOrder?.services) return true;
 
       const checkinDate = new Date(data.checkinDate);
       const checkoutDate = new Date(data.checkoutDate);
 
       return data.serviceOrder.services.every((service) => {
-        if (!service.scheduledDate) return false; // Required field - must have a date
+        if (!service.scheduledDate) return false;
         const scheduledDate = new Date(service.scheduledDate);
-        return scheduledDate >= checkinDate && scheduledDate < checkoutDate;
+        return scheduledDate >= checkinDate && scheduledDate <= checkoutDate;
       });
     },
     {
@@ -113,7 +112,6 @@ const StaffCreateBookingSchema = z
   )
   .refine(
     (data) => {
-      // OTA booking requires guest email for confirmation
       if (data.source === "OTA") {
         return !!data.guestEmail && data.guestEmail.length > 0;
       }

@@ -235,12 +235,15 @@ export default function Component() {
             />
 
             <div className="flex  items-start gap-4">
-              <BookingRoomsBar
-                bookingDetail={bookingDetail}
-                form={form}
-                roomsFieldArray={roomsFieldArray}
-                bookingState={bookingState}
-              />
+              <div className="grid gap-2">
+                <BookingRoomsBar
+                  bookingDetail={bookingDetail}
+                  form={form}
+                  roomsFieldArray={roomsFieldArray}
+                  bookingState={bookingState}
+                />
+                <RefundHistory bookingId={bookingDetail.id} />
+              </div>
 
               <div className="flex-1  space-y-4">
                 <StayDetailBar
@@ -263,8 +266,6 @@ export default function Component() {
                     bookingDetail.status !== "Cancelled"
                   }
                 />
-
-                <RefundHistory bookingId={bookingDetail.id} />
               </div>
             </div>
 

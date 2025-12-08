@@ -28,6 +28,7 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 
 import { formatMoney, cn } from "~/lib/utils";
 import { useBookingPendingCharges } from "../container/use-booking-checkout.hooks";
+import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
 
 interface PendingChargesSectionProps {
   bookingId: string;
@@ -100,16 +101,17 @@ export default function PendingChargesSection({
           <Wallet className="w-4 h-4 text-primary" />
           Chi phí chưa thanh toán
         </CardTitle>
-        {canAddCharges && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onAddCompletedCharges}
-            className="h-8 text-xs hover:bg-primary/10 hover:text-primary transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1.5" /> Thêm phí
-          </Button>
-        )}
+        {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+          canAddCharges && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onAddCompletedCharges}
+              className="h-8 text-xs hover:bg-primary/10 hover:text-primary transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" /> Thêm phí
+            </Button>
+          )}
       </CardHeader>
 
       <CardContent className="p-0 flex-1 flex flex-col bg-muted/5">

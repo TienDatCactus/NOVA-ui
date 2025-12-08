@@ -285,7 +285,7 @@ export function useDeletePayrollComponent() {
       payrollId,
     }: {
       componentId: string;
-      payrollId: string;
+      payrollId?: string;
     }) => await StaffPayrollService.deleteComponent(componentId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });

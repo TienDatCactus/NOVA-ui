@@ -208,9 +208,9 @@ export default function BookingRoomsBar({
   return (
     <>
       <Card className="shadow-sm flex flex-col w-96">
-        <CardHeader className="text-card-foreground">
+        <CardHeader className="text-card-foreground ">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-medium uppercase">
+            <CardTitle className="text-base  font-medium uppercase">
               Danh sách phòng
             </CardTitle>
             <DropdownMenu>

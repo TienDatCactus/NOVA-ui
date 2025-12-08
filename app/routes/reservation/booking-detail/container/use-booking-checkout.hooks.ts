@@ -316,7 +316,6 @@ export function useAddCompletedCharges(bookingId: string) {
     mutationFn: async (data: StaffAddCompletedChargesRequestDto) =>
       await BookingService.staffAddCompletedCharges(bookingId, data),
     onSuccess: () => {
-      toast.success("Đã thêm completed charges thành công");
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", bookingId],
       });
@@ -326,6 +325,7 @@ export function useAddCompletedCharges(bookingId: string) {
       queryClient.invalidateQueries({
         queryKey: ["booking-invoices", bookingId],
       });
+      toast.success("Đã thêm completed charges thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError)

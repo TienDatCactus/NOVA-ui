@@ -8,11 +8,8 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Search } from "lucide-react";
 import React, { useState } from "react";
 import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
-import { Card } from "~/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,6 +22,14 @@ import { formatMoney } from "~/lib/utils";
 import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { InvoiceActions } from "../invoice-actions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { Button } from "~/components/ui/button";
+import { BadgeInfo } from "lucide-react";
+import PaymentsHistoryDialog from "../../fragments/invoice-actions/payments-history.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,7 +41,8 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  const [paymentsHistoryDialogOpen, setPaymentsHistoryDialogOpen] =
+    useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -96,7 +102,6 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
                           className="p-0 border-b"
                         >
                           <div className="flex flex-col md:flex-row gap-6 p-6 bg-muted/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
-                            {/* SECTION 1: CONTEXT (Left Side) */}
                             <div className="flex-1 space-y-4">
                               <div>
                                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
@@ -121,6 +126,29 @@ export function DataTable<TData extends InvoiceListItemDto, TValue>({
                                     (m) =>
                                       m.value === row.original.paymentMethod
                                   )?.label || row.original.paymentMethod}
+                                </span>
+                                <span>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant={"outline"}
+                                        size={"icon"}
+                                        onClick={() =>
+                                          setPaymentsHistoryDialogOpen(true)
+                                        }
+                                      >
+                                        <BadgeInfo />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      Xem lịch sử thanh toán
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  <PaymentsHistoryDialog
+                                    open={paymentsHistoryDialogOpen}
+                                    onClose={setPaymentsHistoryDialogOpen}
+                                    invoiceId={row.original.invoiceId || ""}
+                                  />
                                 </span>
                               </div>
 

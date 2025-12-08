@@ -9,6 +9,7 @@ import {
   Loader2,
   RefreshCw,
   Tag,
+  Upload,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -70,6 +71,7 @@ import {
   canInvoiceAcceptPayment,
   validatePaymentAmount,
 } from "../../container/use-booking-state.hooks";
+import { InvoicesService } from "~/services/api/invoices";
 
 const { StaffCheckoutPaymentRequestSchema } = BookingSchema;
 
@@ -207,6 +209,27 @@ export default function InvoiceDetailSheet({
     });
   };
 
+  const handleExportInvoice = async () => {
+    try {
+      const blob = await InvoicesService.exportInvoiceById(invoiceId);
+
+      const url = window.URL.createObjectURL(blob as any);
+      const a = document.createElement("a");
+      a.href = url;
+      const filename = `invoice-${invoiceId}.xlsx`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Xuất hóa đơn thành công");
+    } catch (e) {
+      console.error(e);
+      toast.error("Xuất báo cáo thất bại");
+    }
+  };
+
   const handlePayment = (data: CheckoutPaymentFormData) => {
     if (!paymentValidation.isValid) {
       paymentForm.setError("amount", {
@@ -275,6 +298,12 @@ export default function InvoiceDetailSheet({
 
           {/* Actions Header */}
           <div className="flex items-center gap-2">
+            {invoiceDetail?.status === "Paid" && (
+              <Button variant={"success"} onClick={handleExportInvoice}>
+                <Upload />
+                Xuất hóa đơn
+              </Button>
+            )}
             {isCheckoutInvoice &&
               invoiceDetail?.status !== "Paid" &&
               invoiceDetail?.status !== "Voided" && (

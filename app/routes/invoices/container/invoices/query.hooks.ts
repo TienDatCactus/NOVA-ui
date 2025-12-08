@@ -39,3 +39,14 @@ export function useInvoicesByBooking(
     enabled: options?.open && !!bookingId,
   });
 }
+
+export function useInvoicePaymentsHistory(
+  invoiceId: string,
+  options?: { enabled?: boolean }
+) {
+  return useQuery({
+    queryKey: ["invoice-payments-history", invoiceId],
+    queryFn: () => InvoicesService.getInvoicePayments(invoiceId),
+    enabled: options?.enabled && !!invoiceId,
+  });
+}

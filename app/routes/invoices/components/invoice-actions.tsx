@@ -1,25 +1,24 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ban, CreditCard, Plus, RotateCcw } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
-import { InvoicesService } from "~/services/api/invoices";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole, hasRole } from "~/lib/auth/bouncer";
 import type {
   AddCustomItemsRequestDto,
   InvoiceListItemDto,
   InvoicePaymentRequestDto,
   RefundInvoiceRequestDto,
 } from "~/services/api/invoices/dto";
-import AddItemDialog from "../fragments/invoice-actions/add-custom-items.dialog";
-import { InvoicePaymentDialog } from "../fragments/invoice-actions/payment.dialog";
-import { RefundDialog } from "../fragments/invoice-actions/refund.dialog";
-import { UnifiedConfirmDialog } from "../fragments/invoice-actions/unified-confirm.dialog";
 import {
   useAddCustomItem,
   useInvoicePayment,
   useRefund,
   useVoidInvoice,
 } from "../container/invoices/mutation.hooks";
+import AddItemDialog from "../fragments/invoice-actions/add-custom-items.dialog";
+import { InvoicePaymentDialog } from "../fragments/invoice-actions/payment.dialog";
+import { RefundDialog } from "../fragments/invoice-actions/refund.dialog";
+import { UnifiedConfirmDialog } from "../fragments/invoice-actions/unified-confirm.dialog";
 type DialogType = "add-item" | "add-payment" | "refund" | "void" | null;
 
 export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
@@ -100,7 +99,7 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
         </Button>
       )}
 
-      {canRefund && (
+      {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && canRefund && (
         <Button
           variant="warning"
           size={"sm"}

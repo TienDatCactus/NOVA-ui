@@ -19,6 +19,8 @@ import CheckoutSheet from "../components/checkout/checkout-sheet";
 import { PayNowRoomsSheet } from "../components/operations/pay-now-rooms-sheet";
 import RefundButton from "../components/refunds/refund-button";
 import type { BookingState } from "../container/use-booking-state.hooks";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 export function BookingActionsBar({
   isDirty,
@@ -87,22 +89,23 @@ export function BookingActionsBar({
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Hoàn tác
               </Button>
-
-              <Button
-                onClick={onSave}
-                disabled={isUpdating}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md min-w-[140px]"
-              >
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Lưu...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
-                  </>
-                )}
-              </Button>
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) && (
+                <Button
+                  onClick={onSave}
+                  disabled={isUpdating}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md min-w-[140px]"
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Lưu...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">

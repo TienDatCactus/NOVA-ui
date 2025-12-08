@@ -35,6 +35,7 @@ import type z from "zod";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { useItemCategories } from "../../item-categories/container/query.hooks";
 import { useCreateStockItem } from "../container/query.hooks";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 
 export type CreateItemFormData = z.infer<
   typeof FormSchema.CreateItemFormSchema
@@ -68,6 +69,7 @@ export default function CreateItemDialog({
       unitPrice: 0,
       minStock: 0,
       maxStock: 0,
+      initialQuantity: 0,
     },
   });
 
@@ -79,7 +81,7 @@ export default function CreateItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
         {/* Header Compact */}
         <DialogHeader className="p-4 border-b bg-muted/10">
           <div className="flex items-center justify-between">
@@ -147,66 +149,86 @@ export default function CreateItemDialog({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="categoryId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Danh mục <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+              <div className="grid md:grid-cols-3 grid-cols-1 gap-4 items-start">
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Danh mục <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Danh mục" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="unitId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Đơn vị <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Chọn ĐVT" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {units.map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                {u.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="initialQuantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Số lượng <span className="text-red-500">*</span>
+                        </FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn nhóm" />
-                          </SelectTrigger>
+                          <Counter {...field} />
                         </FormControl>
-                        <SelectContent>
-                          {categories.map((c) => (
-                            <SelectItem key={c.id} value={c.id}>
-                              {c.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="unitId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Đơn vị <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn ĐVT" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {units.map((u) => (
-                            <SelectItem key={u.id} value={u.id}>
-                              {u.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <FormField
@@ -242,17 +264,20 @@ export default function CreateItemDialog({
                     <FormItem>
                       <FormLabel className="text-xs">Giá vốn</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            className="pr-8 text-right font-mono"
-                            {...field}
-                          />
-                          <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
-                            đ
-                          </span>
-                        </div>
-                      </FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                          endAddon={
+                            <span className=" text-xs text-muted-foreground">
+                              đ
+                            </span>
+                          }
+                        />
+                      </FormControl>{" "}
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -263,23 +288,26 @@ export default function CreateItemDialog({
                     <FormItem>
                       <FormLabel className="text-xs">Giá bán</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            className="pr-8 text-right font-mono font-semibold text-emerald-600"
-                            {...field}
-                          />
-                          <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
-                            đ
-                          </span>
-                        </div>
-                      </FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                          endAddon={
+                            <span className=" text-xs text-muted-foreground">
+                              đ
+                            </span>
+                          }
+                        />
+                      </FormControl>{" "}
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
 
-              <div className="h-px bg-border/50 w-full" />
+              <Separator className="my-2" />
 
               {/* Stock Section */}
               <div className="space-y-3">
@@ -296,10 +324,14 @@ export default function CreateItemDialog({
                         <FormControl>
                           <Input
                             type="number"
-                            className="text-center h-8"
+                            className="text-center "
                             {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
-                        </FormControl>
+                        </FormControl>{" "}
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -311,11 +343,15 @@ export default function CreateItemDialog({
                         <FormLabel className="text-xs">Tối đa</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="text-center h-8"
                             {...field}
+                            type="number"
+                            className="text-center "
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
-                        </FormControl>
+                        </FormControl>{" "}
+                        <FormMessage />
                       </FormItem>
                     )}
                   />

@@ -38,7 +38,6 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { isDirty } from "zod/v3";
-import { AxiosError } from "axios";
 
 const BookingMasterSchema = z
   .object({
@@ -73,26 +72,8 @@ const BookingMasterSchema = z
       message: "Phải chọn ít nhất 1 phòng",
       path: ["roomIds"],
     }
-  )
-  .refine(
-    (data) => {
-      // Validate service order scheduledDates (Logic gốc của bạn)
-      if (!data.serviceOrder?.services) return true;
-
-      const checkinDate = new Date(data.checkinDate);
-      const checkoutDate = new Date(data.checkoutDate);
-
-      return data.serviceOrder.services.every((service) => {
-        if (!service.scheduledDate) return true;
-        const scheduledDate = new Date(service.scheduledDate);
-        return scheduledDate >= checkinDate && scheduledDate <= checkoutDate;
-      });
-    },
-    {
-      message: "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú",
-      path: ["serviceOrder"],
-    }
   );
+
 //*------------------------------------------------------------
 export default function CreateBookingPage() {
   const navigate = useNavigate();
@@ -209,7 +190,7 @@ export default function CreateBookingPage() {
                 itemType: s.itemType,
                 itemId: s.itemId,
                 quantity: s.quantity,
-                scheduledDate: s.scheduledDate, // Schema String date
+                scheduledDate: s.scheduledDate,
                 note: s.note,
               })),
             },
@@ -229,7 +210,6 @@ export default function CreateBookingPage() {
                 BOOKING_SOURCES.find((bs) => bs.key === "DirectStaff")?.key) ||
           "DirectStaff",
       };
-
       await createBooking(finalPayload, {
         onSuccess: () => {
           resetStore();
@@ -308,21 +288,18 @@ export default function CreateBookingPage() {
           onSubmit={form.handleSubmit(onSubmit, onError)}
           className="flex-1 grid grid-cols-12 gap-0 overflow-hidden"
         >
-          {/* LEFT: Guest Info */}
           <aside className="col-span-12 md:col-span-3 bg-background border-r overflow-y-auto">
             <div className="p-5">
               <CustomerInfoSection form={form} />
             </div>
           </aside>
 
-          {/* CENTER: Room Selection */}
           <main className="col-span-12 md:col-span-5 flex flex-col overflow-hidden bg-muted">
             <div className="flex-1 overflow-hidden flex flex-col p-4 gap-4">
               <RoomSelectionSection form={form} />
             </div>
           </main>
 
-          {/* RIGHT: Cart & Payment */}
           <aside className="col-span-12 md:col-span-4 bg-background border-l flex flex-col  h-full">
             <div className="flex-1 overflow-hidden flex flex-col">
               <BookingCartWidget form={form} />

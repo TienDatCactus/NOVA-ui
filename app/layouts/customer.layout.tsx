@@ -19,6 +19,8 @@ import {
 } from "~/components/ui/navigation-menu";
 import { ModeToggle } from "~/features/theme/toggler";
 import { useIsMobile } from "~/hooks/use-mobile";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAllRoles } from "~/lib/auth/bouncer";
 import { CUSTOMER_NAVS, SUPPORTED_LANGUAGES } from "~/lib/constants";
 import { AUTH, DASHBOARD } from "~/lib/fe-url";
 import { syncI18nWithStore } from "~/lib/i18n/sync-store";
@@ -155,14 +157,27 @@ const CustomerLayout: React.FC = () => {
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    asChild
-                    className="focus:bg-emerald-50 focus:text-emerald-800 cursor-pointer"
-                  >
-                    <Link to={AUTH.login}>Đăng nhập</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
+                {hasAllRoles(AuthLoader.getUser(), [
+                  ...Object.values(UserRole),
+                ]) ? (
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      asChild
+                      className="focus:bg-emerald-50 focus:text-emerald-800 cursor-pointer"
+                    >
+                      <Link to={AUTH.login}>Đăng nhập</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                ) : (
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      asChild
+                      className="focus:bg-emerald-50 focus:text-emerald-800 cursor-pointer"
+                    >
+                      <Link to={AUTH.login}>Đăng nhập</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                )}
               </DropdownMenu>
             </div>
           </div>

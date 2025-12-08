@@ -1,37 +1,25 @@
 import {
+  Minus,
+  Plus,
   Search,
+  ShoppingBasketIcon,
+  ShoppingCart,
   Utensils,
   Wrench,
-  ShoppingCart,
-  Plus,
-  Minus,
-  X,
-  Trash2,
-  ShoppingBasketIcon,
 } from "lucide-react";
-import { toast } from "sonner";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { cn, formatMoney } from "~/lib/utils";
-import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
-import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
-import { useServices } from "~/routes/services/container/services/query.hooks";
-import { useServiceTypes } from "~/routes/services/container/service-types/query.hooks";
-import type { MenuListItemDto } from "~/services/api/menu/dto";
-import type { ServiceItem } from "~/services/api/services/dto";
 import {
   Select,
   SelectContent,
@@ -39,6 +27,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { cn, formatMoney } from "~/lib/utils";
+import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
+import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
+import { useServiceTypes } from "~/routes/services/container/service-types/query.hooks";
+import { useServices } from "~/routes/services/container/services/query.hooks";
+import type { MenuListItemDto } from "~/services/api/menu/dto";
+import type { ServiceItem } from "~/services/api/services/dto";
 import { useAddCompletedCharges } from "../../container/use-booking-checkout.hooks";
 
 interface AddCompletedChargesDialogProps {
@@ -82,14 +79,7 @@ export default function AddCompletedChargesDialog({
   const { mutate: addCompletedCharges, isPending } = useAddCompletedCharges(
     bookingId || ""
   );
-  const handleAddCompletedCharges = (data: any) => {
-    if (!bookingId) return;
-    try {
-      addCompletedCharges(data);
-    } catch (error) {
-      console.error("Failed to add completed charges:", error);
-    }
-  };
+
   const filterItems = (items: any[]) => {
     if (!searchText) return items;
     const lower = searchText.toLowerCase();
@@ -159,7 +149,6 @@ export default function AddCompletedChargesDialog({
       if (newQty <= 0) newMap.delete(id);
       else newMap.set(id, { ...existing, quantity: newQty });
     } else if (delta > 0 && itemData) {
-      // Check availability for new menu item
       if (isMenuType) {
         if (itemData.maxQuantityAvailable === 0) {
           toast.error(`${itemData.name} hiện đã hết hàng`);
@@ -173,7 +162,7 @@ export default function AddCompletedChargesDialog({
 
   const handleConfirm = () => {
     if (totalItemsCount === 0) return;
-    handleAddCompletedCharges({
+    addCompletedCharges({
       posItems: Array.from(selectedPOSItems.values()).map(
         ({ item, quantity }) => ({ menuItemId: item.itemId, quantity })
       ),

@@ -70,7 +70,7 @@ export default function ComponentsList({
   const confirmDelete = () => {
     if (componentToDelete) {
       deleteComponent(
-        { componentId: componentToDelete.componentId },
+        { componentId: componentToDelete.componentId, payrollId: payrollId },
         {
           onSuccess: () => {
             toast.success("Xóa component thành công");
