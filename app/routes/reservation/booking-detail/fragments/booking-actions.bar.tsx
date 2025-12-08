@@ -109,19 +109,21 @@ export function BookingActionsBar({
             </div>
           ) : (
             <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">
-              {(bookingDetail?.status === "InHouse" ||
-                bookingDetail?.status === "CheckedIn") && (
-                <Button
-                  variant="info-outline"
-                  onClick={() => setPayNowRoomsOpen(true)}
-                >
-                  <Wallet className="w-4 h-4 mr-2" />
-                  Thanh toán phòng
-                </Button>
-              )}
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+                (bookingDetail?.status === "InHouse" ||
+                  bookingDetail?.status === "CheckedIn") && (
+                  <Button
+                    variant="info-outline"
+                    onClick={() => setPayNowRoomsOpen(true)}
+                  >
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Thanh toán phòng
+                  </Button>
+                )}
 
               {/* Checkout Button Logic */}
-              {bookingDetail?.source === "RoomBlock" &&
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+              bookingDetail?.source === "RoomBlock" &&
               (bookingDetail?.status === "InHouse" ||
                 bookingDetail?.status === "CheckedIn") ? (
                 <Button
@@ -142,8 +144,9 @@ export function BookingActionsBar({
                     </>
                   )}
                 </Button>
-              ) : bookingDetail?.status === "InHouse" ||
-                bookingDetail?.status === "CheckedIn" ? (
+              ) : hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+                (bookingDetail?.status === "InHouse" ||
+                  bookingDetail?.status === "CheckedIn") ? (
                 <Button
                   variant="success"
                   onClick={() => setCheckoutOpen(true)}
@@ -175,7 +178,6 @@ export function BookingActionsBar({
                   </Button>
                 )}
 
-              {/* View Invoices */}
               {bookingDetail?.status === "CheckedOut" &&
                 bookingState.financial.totalBalance === 0 && (
                   <Button

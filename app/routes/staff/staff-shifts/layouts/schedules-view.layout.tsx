@@ -43,6 +43,7 @@ import {
 import { cn } from "~/lib/utils";
 import { Tabs, TabsTrigger } from "~/components/ui/tabs";
 import { ButtonGroup } from "~/components/ui/button-group";
+import { DateRangePicker } from "~/components/ui/date-range-picker";
 
 interface SchedulesViewLayoutProps {
   filters: StaffShiftFilters;
@@ -69,15 +70,14 @@ export default function SchedulesViewLayout({
   const { data: staffList } = useStaffList();
   const [isExporting, setIsExporting] = useState(false);
   const [staffSearch, setStaffSearch] = useState("");
-
+  const [exportDate, setExportDate] = useState<{ from: Date; to: Date } | null>(
+    {
+      from: new Date(),
+      to: new Date(),
+    }
+  );
   const exportWeeklyMatrix = useExportWeeklyMatrix();
   const exportWeeklyForm2 = useExportWeeklyForm2();
-
-  // Helper: Capitalize first letter for date formatting
-  const formatDateCapitalized = (date: Date, formatStr: string) => {
-    const str = format(date, formatStr, { locale: vi });
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  };
 
   const activeFiltersCount =
     (filters.selectedStaffId ? 1 : 0) +
@@ -96,17 +96,20 @@ export default function SchedulesViewLayout({
   };
 
   const handleExportMatrix = async () => {
-    if (!filters.fromDate || !filters.toDate) {
+    if (!exportDate?.from || !exportDate?.to) {
       toast.error("Vui lòng chọn khoảng thời gian");
       return;
     }
     setIsExporting(true);
     try {
       const blob = await exportWeeklyMatrix.mutateAsync({
-        from: filters.fromDate,
-        to: filters.toDate,
+        from: format(exportDate.from, "yyyy-MM-dd"),
+        to: format(exportDate.to, "yyyy-MM-dd"),
       });
-      downloadFile(blob, `lich-lam-viec-kiem-cu-${filters.fromDate}.xlsx`);
+      downloadFile(
+        blob,
+        `lich-lam-viec-kiem-cu-${format(exportDate.from, "yyyy-MM-dd")}.xlsx`
+      );
       toast.success("Xuất file kiểm cũ thành công");
     } catch (error) {
       toast.error("Xuất file thất bại");
@@ -116,17 +119,20 @@ export default function SchedulesViewLayout({
   };
 
   const handleExportForm2 = async () => {
-    if (!filters.fromDate || !filters.toDate) {
+    if (!exportDate?.from || !exportDate?.to) {
       toast.error("Vui lòng chọn khoảng thời gian");
       return;
     }
     setIsExporting(true);
     try {
       const blob = await exportWeeklyForm2.mutateAsync({
-        from: filters.fromDate,
-        to: filters.toDate,
+        from: format(exportDate.from, "yyyy-MM-dd"),
+        to: format(exportDate.to, "yyyy-MM-dd"),
       });
-      downloadFile(blob, `lich-lam-viec-kiem-moi-${filters.fromDate}.xlsx`);
+      downloadFile(
+        blob,
+        `lich-lam-viec-kiem-moi-${format(exportDate.from, "yyyy-MM-dd")}.xlsx`
+      );
       toast.success("Xuất file kiểm mới thành công");
     } catch (error) {
       toast.error("Xuất file thất bại");
@@ -180,10 +186,7 @@ export default function SchedulesViewLayout({
         {/* Top Row: Title & Main Actions */}
 
         <div className="flex items-center gap-4">
-          <div className="p-2 bg-primary/10 rounded-lg text-primary">
-            <CalendarRange className="w-5 h-5" />
-          </div>
-          <div>
+          <div className="grid gap-1">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               Lịch làm việc
             </h1>
@@ -201,7 +204,7 @@ export default function SchedulesViewLayout({
             <PopoverTrigger asChild>
               <Button
                 disabled={isExporting}
-                variant="outline"
+                variant="success"
                 size="sm"
                 className="h-9 gap-2 shadow-sm"
               >
@@ -213,21 +216,60 @@ export default function SchedulesViewLayout({
                 <span className="hidden sm:inline">Xuất Excel</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 p-1" align="end">
-              <Button
-                variant="ghost"
-                className="w-full justify-start h-8 text-sm"
-                onClick={handleExportMatrix}
-              >
-                Mẫu kiểm cũ
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start h-8 text-sm"
-                onClick={handleExportForm2}
-              >
-                Mẫu kiểm mới
-              </Button>
+            <PopoverContent className="w-auto p-4" align="end">
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">
+                    Chọn khoảng thời gian
+                  </Label>
+                  <DateRangePicker
+                    from={exportDate?.from}
+                    to={exportDate?.to}
+                    onRangeChange={(range) =>
+                      setExportDate(
+                        range.from && range.to
+                          ? { from: range.from, to: range.to }
+                          : null
+                      )
+                    }
+                    placeholder="Chọn thời gian xuất"
+                    className="w-full"
+                  />
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-9 text-sm"
+                    onClick={handleExportMatrix}
+                    disabled={
+                      !exportDate?.from || !exportDate?.to || isExporting
+                    }
+                  >
+                    {isExporting ? (
+                      <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5 mr-2" />
+                    )}
+                    Mẫu kiểm cũ
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-9 text-sm"
+                    onClick={handleExportForm2}
+                    disabled={
+                      !exportDate?.from || !exportDate?.to || isExporting
+                    }
+                  >
+                    {isExporting ? (
+                      <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5 mr-2" />
+                    )}
+                    Mẫu kiểm mới
+                  </Button>
+                </div>
+              </div>
             </PopoverContent>
           </Popover>
         </div>

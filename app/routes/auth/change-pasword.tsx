@@ -51,14 +51,11 @@ export function ChangePasswordDialog({
   });
 
   const onSubmit = async (data: ChangePasswordDto) => {
-    try {
-      await changePassword(data);
-      toast.success("Đổi mật khẩu thành công!");
-      onOpenChange(false);
-      form.reset();
-    } catch (error: any) {
-      toast.error(error?.message || "Đổi mật khẩu thất bại");
-    }
+    await changePassword(data, {
+      onSuccess: () => {
+        onOpenChange(false);
+      },
+    });
   };
 
   const handleCancel = () => {

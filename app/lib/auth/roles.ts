@@ -75,8 +75,16 @@ export const MODULE_PERMISSIONS: Record<
 > = {
   [RouteModule.Auth]: {
     [UserRole.Admin]: [Permission.Read, Permission.Execute, Permission.Update],
-    [UserRole.HotelManager]: [Permission.Read, Permission.Execute],
-    [UserRole.Accountant]: [Permission.Read, Permission.Execute],
+    [UserRole.HotelManager]: [
+      Permission.Read,
+      Permission.Execute,
+      Permission.Update,
+    ],
+    [UserRole.Accountant]: [
+      Permission.Read,
+      Permission.Execute,
+      Permission.Update,
+    ],
     [UserRole.Receptionist]: [Permission.Read, Permission.Execute],
     [UserRole.ServiceStaff]: [Permission.Read, Permission.Execute],
   },
@@ -348,7 +356,6 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Update,
       Permission.Delete,
     ],
-    [UserRole.Receptionist]: [Permission.Read],
     [UserRole.ServiceStaff]: [Permission.Read],
   },
 

@@ -73,7 +73,7 @@ export function DashboardToolbar({
   };
 
   return (
-    <header className="bg-background/80 border-b shadow-sm h-16">
+    <header className="bg-background/80 border-b shadow-sm border-x">
       <div className="px-4 sm:px-6 py-4">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div className="space-y-1">

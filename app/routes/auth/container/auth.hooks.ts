@@ -1,7 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { UserRole } from "~/lib/auth/roles";
-import { DASHBOARD, AUTH } from "~/lib/fe-url";
+import { AUTH, DASHBOARD } from "~/lib/fe-url";
 import { AuthService } from "~/services/api/auth";
 import type {
   ChangePasswordDto,
@@ -63,6 +65,17 @@ export function useAuthHooks() {
     mutationFn: async (data: ChangePasswordDto) => {
       const response = await AuthService.changePassword(data);
       return { response };
+    },
+    onSuccess: () => {
+      AuthService.logout();
+      navigate(AUTH.login);
+      clearUser();
+      toast.success("Vui lòng đăng nhập lại với mật khẩu mới.");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 

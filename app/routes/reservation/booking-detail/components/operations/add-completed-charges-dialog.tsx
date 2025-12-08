@@ -37,19 +37,18 @@ import { useServices } from "~/routes/services/container/services/query.hooks";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import type { ServiceItem } from "~/services/api/services/dto";
 import { useAddCompletedCharges } from "../../container/use-booking-checkout.hooks";
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
 interface AddCompletedChargesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  bookingRoomId?: string;
-  bookingId?: string;
+  booking: BookingDetailResponseDto;
 }
 
 export default function AddCompletedChargesDialog({
   open,
   onOpenChange,
-  bookingRoomId,
-  bookingId,
+  booking,
 }: AddCompletedChargesDialogProps) {
   const [activeTab, setActiveTab] = useState<"pos" | "service">("pos");
   const [selectedCategoryCode, setSelectedCategoryCode] = useState<
@@ -59,7 +58,9 @@ export default function AddCompletedChargesDialog({
     null
   );
   const [searchText, setSearchText] = useState("");
-
+  const [selectedBookingRoom, setSelectedBookingRoom] = useState<string | null>(
+    null
+  );
   const [selectedPOSItems, setSelectedPOSItems] = useState<
     Map<string, { item: MenuListItemDto; quantity: number }>
   >(new Map());
@@ -77,7 +78,7 @@ export default function AddCompletedChargesDialog({
     typeCode: selectedServiceType || undefined,
   });
   const { mutate: addCompletedCharges, isPending } = useAddCompletedCharges(
-    bookingId || ""
+    booking.id
   );
 
   const filterItems = (items: any[]) => {
@@ -172,7 +173,8 @@ export default function AddCompletedChargesDialog({
           quantity,
         })
       ),
-      bookingRoomId,
+      bookingRoomId:
+        selectedBookingRoom == "booking" ? "" : selectedBookingRoom || "",
       source: "Staff",
     });
     handleCancel();
@@ -187,7 +189,7 @@ export default function AddCompletedChargesDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0 gap-0 overflow-y-auto">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b flex flex-row items-center justify-between space-y-0 bg-muted/10">
           <div className="flex items-center gap-3">
@@ -213,7 +215,7 @@ export default function AddCompletedChargesDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 ">
           {/* LEFT: Main Content (Tabs & Grid) */}
           <div className="flex-1 flex flex-col border-r bg-muted/5">
             <div className="p-4 pb-0">
@@ -233,15 +235,14 @@ export default function AddCompletedChargesDialog({
               </Tabs>
 
               <div className="mt-4 flex gap-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Tìm kiếm nhanh..."
-                    className="pl-9 bg-background"
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                  />
-                </div>
+                <Input
+                  startAddon={
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                  }
+                  placeholder="Tìm kiếm nhanh..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                />
                 <Select
                   value={
                     activeTab === "pos"
@@ -278,151 +279,162 @@ export default function AddCompletedChargesDialog({
               </div>
             </div>
 
-            <ScrollArea className="flex-1 p-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {(activeTab === "pos"
-                  ? filteredMenuItems
-                  : filteredServiceItems
-                ).map((item: any) => {
-                  const id =
-                    activeTab === "pos" ? item.itemId : item.serviceItemId;
-                  const price =
-                    activeTab === "pos" ? item.price : item.basePrice;
-                  const map =
-                    activeTab === "pos"
-                      ? selectedPOSItems
-                      : selectedServiceItems;
-                  const qty = map.get(id)?.quantity || 0;
-                  const isOutOfStock =
-                    activeTab === "pos" && item.maxQuantityAvailable === 0;
-                  const maxAvailable =
-                    activeTab === "pos" ? item.maxQuantityAvailable : undefined;
+            <div className="grid grid-cols-2 md:grid-cols-3 p-2 gap-4">
+              {(activeTab === "pos"
+                ? filteredMenuItems
+                : filteredServiceItems
+              ).map((item: any) => {
+                const id =
+                  activeTab === "pos" ? item.itemId : item.serviceItemId;
+                const price = activeTab === "pos" ? item.price : item.basePrice;
+                const map =
+                  activeTab === "pos" ? selectedPOSItems : selectedServiceItems;
+                const qty = map.get(id)?.quantity || 0;
+                const isOutOfStock =
+                  activeTab === "pos" && item.maxQuantityAvailable === 0;
+                const maxAvailable =
+                  activeTab === "pos" ? item.maxQuantityAvailable : undefined;
 
-                  return (
-                    <Card
-                      key={id}
-                      className={cn(
-                        "group relative flex flex-col justify-between overflow-hidden transition-all hover:shadow-md cursor-pointer border-2",
-                        isOutOfStock
-                          ? "opacity-50 cursor-not-allowed border-muted"
-                          : qty > 0
-                            ? "border-primary bg-primary/5"
-                            : "border-transparent hover:border-muted"
-                      )}
-                      onClick={() => {
-                        if (isOutOfStock) return;
-                        updateQuantity(
-                          map,
-                          activeTab === "pos"
-                            ? setSelectedPOSItems
-                            : setSelectedServiceItems,
-                          id,
-                          1,
-                          item,
-                          activeTab === "pos"
-                        );
-                      }}
-                    >
-                      <div className="p-4 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-semibold line-clamp-2 text-sm min-h-[2.5em]">
-                            {item.name}
-                          </h4>
-                          {isOutOfStock ? (
+                return (
+                  <Card
+                    key={id}
+                    className={cn(
+                      "group relative flex flex-col justify-between transition-all hover:shadow-md cursor-pointer border-2",
+                      isOutOfStock
+                        ? "opacity-50 cursor-not-allowed border-muted"
+                        : qty > 0
+                          ? "border-primary bg-primary/5"
+                          : "border-transparent hover:border-muted"
+                    )}
+                    onClick={() => {
+                      if (isOutOfStock) return;
+                      updateQuantity(
+                        map,
+                        activeTab === "pos"
+                          ? setSelectedPOSItems
+                          : setSelectedServiceItems,
+                        id,
+                        1,
+                        item,
+                        activeTab === "pos"
+                      );
+                    }}
+                  >
+                    <div className="p-4 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold line-clamp-2 text-sm min-h-[2.5em]">
+                          {item.name}
+                        </h4>
+                        {isOutOfStock ? (
+                          <Badge
+                            variant="destructive"
+                            className="ml-2 shrink-0 text-[10px]"
+                          >
+                            Hết hàng
+                          </Badge>
+                        ) : qty > 0 ? (
+                          <Badge className="ml-2 shrink-0">{qty}</Badge>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-primary font-bold">
+                          {formatMoney(price).vndFormatted}
+                        </p>
+                        {!isOutOfStock &&
+                          maxAvailable !== undefined &&
+                          maxAvailable !== null && (
                             <Badge
-                              variant="destructive"
-                              className="ml-2 shrink-0 text-[10px]"
+                              variant="outline"
+                              className="text-[10px] text-muted-foreground"
                             >
-                              Hết hàng
+                              Còn {maxAvailable}
                             </Badge>
-                          ) : qty > 0 ? (
-                            <Badge className="ml-2 shrink-0">{qty}</Badge>
-                          ) : null}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-primary font-bold">
-                            {formatMoney(price).vndFormatted}
-                          </p>
-                          {!isOutOfStock &&
-                            maxAvailable !== undefined &&
-                            maxAvailable !== null && (
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] text-muted-foreground"
-                              >
-                                Còn {maxAvailable}
-                              </Badge>
-                            )}
-                        </div>
+                          )}
                       </div>
-                      {/* Hover Actions (Desktop) or Always Visible if Qty > 0 */}
-                      <div
-                        className={cn(
-                          "flex items-center justify-between p-2 bg-background/80 backdrop-blur-sm border-t transition-opacity",
-                          qty > 0
-                            ? "opacity-100"
-                            : "opacity-0 group-hover:opacity-100"
-                        )}
+                    </div>
+                    {/* Hover Actions (Desktop) or Always Visible if Qty > 0 */}
+                    <div
+                      className={cn(
+                        "flex items-center justify-between p-2 bg-background/80 backdrop-blur-sm border-t transition-opacity",
+                        qty > 0
+                          ? "opacity-100"
+                          : "opacity-0 group-hover:opacity-100"
+                      )}
+                    >
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateQuantity(
+                            map,
+                            activeTab === "pos"
+                              ? setSelectedPOSItems
+                              : setSelectedServiceItems,
+                            id,
+                            -1,
+                            undefined,
+                            activeTab === "pos"
+                          );
+                        }}
                       >
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            updateQuantity(
-                              map,
-                              activeTab === "pos"
-                                ? setSelectedPOSItems
-                                : setSelectedServiceItems,
-                              id,
-                              -1,
-                              undefined,
-                              activeTab === "pos"
-                            );
-                          }}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <span className="text-sm font-medium w-8 text-center">
-                          {qty}
-                        </span>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-primary hover:bg-primary/10"
-                          disabled={isOutOfStock}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            updateQuantity(
-                              map,
-                              activeTab === "pos"
-                                ? setSelectedPOSItems
-                                : setSelectedServiceItems,
-                              id,
-                              1,
-                              item,
-                              activeTab === "pos"
-                            );
-                          }}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </ScrollArea>
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm font-medium w-8 text-center">
+                        {qty}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-primary hover:bg-primary/10"
+                        disabled={isOutOfStock}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateQuantity(
+                            map,
+                            activeTab === "pos"
+                              ? setSelectedPOSItems
+                              : setSelectedServiceItems,
+                            id,
+                            1,
+                            item,
+                            activeTab === "pos"
+                          );
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
 
           {/* RIGHT: Cart Summary */}
           <div className="w-[350px] overflow-y-auto flex flex-col bg-card border-l shadow-xl z-2 px-2">
-            <div className="p-4 border-b bg-muted/10">
-              <h3 className="font-semibold flex items-center gap-2">
+            <div className="p-4 border-b">
+              <h3 className="flex items-center gap-2">
                 <ShoppingBasketIcon className="h-4 w-4" />
                 Đã chọn ({totalItemsCount})
               </h3>
+              <Select
+                value={selectedBookingRoom || ""}
+                onValueChange={(val) => setSelectedBookingRoom(val)}
+              >
+                <SelectTrigger className="w-full mt-2">
+                  <SelectValue placeholder="Chọn phòng để tính phí" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={"booking"}>Tính vào booking</SelectItem>
+                  {booking.rooms.map((br) => (
+                    <SelectItem key={br.bookingRoomId} value={br.bookingRoomId}>
+                      {br.roomName} ({br.roomTypeName})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {totalItemsCount === 0 ? (
@@ -433,10 +445,10 @@ export default function AddCompletedChargesDialog({
                 <p>Chưa có mục nào được chọn</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 flex flex-col h-full">
                 {/* POS Group */}
                 {selectedPOSItems.size > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 h-full">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
                       Đồ ăn & Uống
                     </p>
@@ -464,7 +476,7 @@ export default function AddCompletedChargesDialog({
                 )}
                 {/* Service Group */}
                 {selectedServiceItems.size > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 h-full">
                     {selectedPOSItems.size > 0 && <Separator />}
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 mt-2">
                       Dịch vụ

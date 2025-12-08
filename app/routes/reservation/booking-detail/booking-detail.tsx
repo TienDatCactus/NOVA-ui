@@ -273,6 +273,7 @@ export default function Component() {
             <AddCompletedChargesDialog
               open={completedChargesDialogOpen}
               onOpenChange={setCompletedChargesDialogOpen}
+              booking={bookingDetail}
             />
 
             <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>

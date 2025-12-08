@@ -9,6 +9,9 @@ import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import StatusSelectCell from "../../fragments/status-select.cell";
 import PayrollDetailDialog from "../payroll-detail-dialog";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<PayrollItemDto>[] = [
   {
@@ -340,12 +343,13 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
     cell: ({ row, table }) => {
       const payroll = row.original;
       const onSuccess = (table.options.meta as any)?.onSuccess;
-
-      return (
-        <div className="flex ">
-          <ActionsMenuCell payroll={payroll} onSuccess={onSuccess} />
-        </div>
-      );
+      if (hasAnyRole(AuthLoader.getUser(), [UserRole.Accountant]))
+        return (
+          <div className="flex ">
+            <ActionsMenuCell payroll={payroll} onSuccess={onSuccess} />
+          </div>
+        );
+      return null;
     },
     size: 40,
     enableHiding: false,

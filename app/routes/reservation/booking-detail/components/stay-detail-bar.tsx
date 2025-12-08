@@ -398,9 +398,9 @@ export default function StayDetailBar({
                                       <FormLabel>Số tiền thu</FormLabel>
                                       {/* UX: Quick Fill Buttons */}
                                       <div className="flex gap-2">
-                                        <Badge
+                                        <Button
+                                          size={"sm"}
                                           variant="outline"
-                                          className="cursor-pointer hover:bg-muted font-normal"
                                           onClick={() =>
                                             paymentForm.setValue(
                                               "paidAmount",
@@ -411,19 +411,19 @@ export default function StayDetailBar({
                                           }
                                         >
                                           50%
-                                        </Badge>
-                                        <Badge
-                                          variant="secondary"
-                                          className="cursor-pointer hover:bg-primary/20 text-primary font-normal"
+                                        </Button>
+                                        <Button
+                                          size={"sm"}
+                                          variant="outline"
                                           onClick={() =>
                                             paymentForm.setValue(
                                               "paidAmount",
-                                              paymentSummary.remaining
+                                              paymentSummary.totalAmount
                                             )
                                           }
                                         >
                                           Tất cả
-                                        </Badge>
+                                        </Button>
                                       </div>
                                     </div>
                                     <FormControl>
