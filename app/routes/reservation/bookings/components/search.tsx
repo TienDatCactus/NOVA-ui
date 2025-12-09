@@ -27,6 +27,8 @@ import { BookingService } from "~/services/api/booking";
 
 // Giả lập data type nếu chưa import được
 import type { BookingSearchFilters } from "../container/booking-filter.hooks";
+import { AxiosError } from "axios";
+import { useExportBookings } from "../container/booking-mutation.hooks";
 
 interface SearchRoomProps {
   filters: BookingSearchFilters;
@@ -41,7 +43,7 @@ function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportDate, setExportDate] = useState<Date>(new Date());
   const [openExportDialog, setOpenExportDialog] = useState(false);
-
+  const { mutateAsync } = useExportBookings(format(exportDate, "yyyy-MM-dd"));
   const handleConfirmExport = async () => {
     if (isExporting) return;
 
@@ -49,8 +51,7 @@ function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
       setIsExporting(true);
       toast.loading("Đang chuẩn bị file xuất...", { id: "export-bookings" });
 
-      const dateParam = format(exportDate, "yyyy-MM-dd");
-      const blob = await BookingService.exportBookings(dateParam);
+      const blob = await mutateAsync();
 
       if (!blob || !(blob instanceof Blob)) {
         throw new Error("Dữ liệu blob không hợp lệ");
@@ -59,7 +60,7 @@ function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Booking_List_${dateParam}.xlsx`;
+      link.download = `Booking_List_${format(exportDate, "yyyy-MM-dd")}.xlsx`;
       document.body.appendChild(link);
       link.click();
 
@@ -70,10 +71,8 @@ function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
 
       setOpenExportDialog(false);
       toast.success("Xuất file thành công", { id: "export-bookings" });
-    } catch (error: any) {
-      toast.error(error?.message || "Xuất file thất bại", {
-        id: "export-bookings",
-      });
+    } catch (error) {
+      toast.error("Lỗi khi xuất báo cáo");
     } finally {
       setIsExporting(false);
     }

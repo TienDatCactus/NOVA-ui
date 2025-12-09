@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import type z from "zod";
+import { onError } from "~/lib/utils";
 import { BookingService } from "~/services/api/booking";
 import type { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
@@ -158,9 +159,23 @@ function useUpdateBookingStatus(bookingId: string) {
     },
   });
 }
+
+function useExportBookings(date?: string) {
+  return useMutation({
+    mutationFn: async () => await BookingService.exportBookings(date),
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật trạng thái thất bại"
+        );
+      }
+    },
+  });
+}
 export {
   useCancelBooking,
   useUpdateBooking,
   useChangeRoom,
   useUpdateBookingStatus,
+  useExportBookings,
 };

@@ -37,6 +37,7 @@ import { usePurchaseRequestDetail } from "../container/query.hooks";
 import { getStatusBadge } from "./purchase-requests-list/columns";
 import { toast } from "sonner";
 import { PurchaseRequestsService } from "~/services/api/stocks/purchase-requests";
+import { AxiosError } from "axios";
 
 interface PurchaseRequestDetailDialogProps {
   open: boolean;
@@ -77,9 +78,10 @@ export default function PurchaseRequestDetailDialog({
       window.URL.revokeObjectURL(url);
 
       toast.success("Xuất báo cáo thành công");
-    } catch (e) {
-      console.error(e);
-      toast.error("Xuất báo cáo thất bại");
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Lỗi khi xuất báo cáo");
+      }
     }
   };
   return (
@@ -253,7 +255,10 @@ export default function PurchaseRequestDetailDialog({
                           {formatMoney(item.unitCost).vndFormatted}
                         </TableCell>
                         <TableCell className="text-right font-mono font-medium">
-                          {formatMoney(item.quantity * item.unitCost).vndFormatted}
+                          {
+                            formatMoney(item.quantity * item.unitCost)
+                              .vndFormatted
+                          }
                         </TableCell>
                       </TableRow>
                     ))}

@@ -121,16 +121,15 @@ export default function StayDetailBar({
 
   const paymentSummary = useMemo(() => {
     const totalAmount =
-      bookingDetail?.totalBreakfast + bookingDetail?.totalRoomCharge || 0;
+      (bookingDetail?.totalBreakfast || 0) +
+      (bookingDetail?.totalRoomCharge || 0);
     const previouslyPaid = bookingDetail?.paidAmount || 0;
     const currentPaid = paidAmount || 0;
-    const remaining = totalAmount - previouslyPaid - currentPaid;
 
     return {
       totalAmount,
       previouslyPaid,
       currentPaid,
-      remaining,
     };
   }, [bookingDetail, paidAmount]);
 
@@ -295,18 +294,6 @@ export default function StayDetailBar({
                           <div className="p-4 space-y-3 bg-muted/30">
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground flex items-center gap-2">
-                                <FileText className="w-4 h-4" /> Tổng giá trị
-                                booking
-                              </span>
-                              <span className="font-mono font-medium">
-                                {
-                                  formatMoney(paymentSummary.totalAmount)
-                                    .vndFormatted
-                                }
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground flex items-center gap-2">
                                 <Toilet className="w-4 h-4" /> Chi phí Phòng
                               </span>
                               <span className="font-mono font-medium">
@@ -342,16 +329,16 @@ export default function StayDetailBar({
 
                           <Separator />
 
-                          <div className="p-4 flex justify-between items-center bg-primary/5">
+                          <div className="p-4 flex justify-between items-center bg-card">
                             <span className="text-sm font-semibold text-foreground uppercase tracking-wide">
-                              Số tiền còn lại
+                              Tổng
                             </span>
                             <div className="text-right">
                               <span
-                                className={`font-mono font-bold text-xl ${paymentSummary.remaining < 0 ? "text-orange-600" : "text-primary"}`}
+                                className={`font-mono font-bold text-xl ${paymentSummary.totalAmount < 0 ? "text-orange-600" : "text-primary"}`}
                               >
                                 {
-                                  formatMoney(paymentSummary.remaining)
+                                  formatMoney(paymentSummary.totalAmount)
                                     .vndFormatted
                                 }
                               </span>

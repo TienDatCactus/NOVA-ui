@@ -41,6 +41,7 @@ import { cn, onError } from "~/lib/utils";
 import { AuditSchema } from "~/services/api/audit/audit.schema";
 import type { ExportAuditRequest } from "~/services/api/audit/dto";
 import { DatePicker } from "~/components/ui/date-picker";
+import { AxiosError } from "axios";
 
 interface ExportAuditDialogProps {
   open: boolean;
@@ -102,8 +103,7 @@ export default function ExportAuditDialog({
       toast.success("Xuất dữ liệu thành công");
       onOpenChange(false);
     } catch (error) {
-      console.error("Export error:", error);
-      toast.error("Có lỗi xảy ra khi xuất dữ liệu");
+      toast.error("Lỗi khi xuất báo cáo");
     }
   };
 

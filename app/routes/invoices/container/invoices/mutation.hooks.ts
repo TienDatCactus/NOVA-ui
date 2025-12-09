@@ -114,10 +114,22 @@ const useSyncInvoiceWithOrders = (invoiceId: string) => {
     },
   });
 };
+
+const useExportInvoice = (invoiceId: string) => {
+  return useMutation({
+    mutationFn: async () => await InvoicesService.exportInvoiceById(invoiceId),
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Lỗi khi xuất báo cáo");
+      }
+    },
+  });
+};
 export {
   useAddCustomItem,
   useInvoicePayment,
   useRefund,
   useVoidInvoice,
   useSyncInvoiceWithOrders,
+  useExportInvoice,
 };

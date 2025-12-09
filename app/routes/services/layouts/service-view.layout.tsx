@@ -32,7 +32,6 @@ export default function ServicesViewLayout({
   totalServices,
 }: ServicesViewLayoutProps) {
   const { data: serviceTypes } = useServiceTypes();
-  const hasFilteredType = !!filters.typeCode && filters.typeCode !== "all";
   return (
     <div className="flex gap-6 p-4 ">
       <div className="flex-1 space-y-4">
@@ -81,11 +80,9 @@ export default function ServicesViewLayout({
               </Select>
             </div>
             <div>
-              {hasFilteredType && (
-                <Button variant="ghost" size="icon" onClick={resetFilters}>
-                  <RotateCcw />
-                </Button>
-              )}
+              <Button variant="ghost" size="icon" onClick={resetFilters}>
+                <RotateCcw />
+              </Button>
             </div>
           </div>
         </div>

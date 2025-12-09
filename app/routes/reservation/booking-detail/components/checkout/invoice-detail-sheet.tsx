@@ -72,6 +72,7 @@ import {
   validatePaymentAmount,
 } from "../../container/use-booking-state.hooks";
 import { InvoicesService } from "~/services/api/invoices";
+import { AxiosError } from "axios";
 
 const { StaffCheckoutPaymentRequestSchema } = BookingSchema;
 
@@ -224,9 +225,10 @@ export default function InvoiceDetailSheet({
       document.body.removeChild(a);
 
       toast.success("Xuất hóa đơn thành công");
-    } catch (e) {
-      console.error(e);
-      toast.error("Xuất báo cáo thất bại");
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Lỗi khi xuất báo cáo");
+      }
     }
   };
 

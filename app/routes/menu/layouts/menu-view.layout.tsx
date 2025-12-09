@@ -53,10 +53,23 @@ export default function MenuViewLayout({
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-1">
+            <div className="flex items-center gap-2 flex-1">
+              <Label htmlFor="active-filter" className="cursor-pointer ">
+                Tất cả món ăn
+              </Label>
+              <Switch
+                id="active-filter"
+                checked={filters.activeFilter === "all"}
+                onCheckedChange={(checked) =>
+                  updateFilter("activeFilter", checked ? "all" : "active")
+                }
+              />
+            </div>
             <div className="w-full sm:w-auto">
               <Select
+                value={filters.categoryCode || ""}
                 onValueChange={(value) => {
-                  updateFilter("categoryCode", value === "ALL" ? "" : value);
+                  updateFilter("categoryCode", value);
                 }}
               >
                 <SelectTrigger className="h-10 w-full sm:w-[200px] border-dashed shadow-sm bg-background">
@@ -76,18 +89,7 @@ export default function MenuViewLayout({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2 flex-1">
-              <Label htmlFor="active-filter" className="cursor-pointer ">
-                Tất cả món ăn
-              </Label>
-              <Switch
-                id="active-filter"
-                checked={filters.activeFilter === "all"}
-                onCheckedChange={(checked) =>
-                  updateFilter("activeFilter", checked ? "all" : "active")
-                }
-              />
-            </div>
+
             <div>
               <Button
                 variant="outline"

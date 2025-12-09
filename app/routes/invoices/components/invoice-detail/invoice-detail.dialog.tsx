@@ -28,6 +28,9 @@ import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useInvoiceDetail } from "../../container/invoices/query.hooks";
 import { formatMoney } from "~/lib/utils";
+import { AxiosError } from "axios";
+import type { error } from "console";
+import { useExportInvoice } from "../../container/invoices/mutation.hooks";
 
 type InvoiceDetailDialogProps = {
   open: boolean;
@@ -43,12 +46,12 @@ export function InvoiceDetailDialog({
   const { data: invoice } = useInvoiceDetail(invoiceId, {
     enabled: open,
   });
-
+  const { mutateAsync } = useExportInvoice(invoiceId);
   if (!invoice) return null;
 
   const handleExport = async () => {
     try {
-      const blob = await InvoicesService.exportInvoiceById(invoiceId);
+      const blob = await mutateAsync();
       console.log("Blob received:", blob);
 
       const url = window.URL.createObjectURL(blob as any);
@@ -62,9 +65,8 @@ export function InvoiceDetailDialog({
       document.body.removeChild(a);
 
       toast.success("Xuất hóa đơn thành công");
-    } catch (e) {
-      console.error(e);
-      toast.error("Xuất báo cáo thất bại");
+    } catch (error) {
+      toast.error("Lỗi khi xuất báo cáo");
     }
   };
 

@@ -52,6 +52,8 @@ import {
   INVOICE_TYPES,
 } from "~/services/api/invoices/invoice.types";
 import type { InvoiceStatusEnum } from "~/services/api/invoices/dto";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface InvoicesViewLayoutProps {
   children: ReactNode;
@@ -141,53 +143,57 @@ function InvoicesViewLayout({
         </div>
 
         {/* Right: Primary Action */}
-        <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant={"success"}>
-              <Download className="w-4 h-4 mr-2" />
-              Xuất báo cáo
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Download className="w-5 h-5 text-green-700" />
-                Xuất dữ liệu hóa đơn
-              </DialogTitle>
-            </DialogHeader>
-            <div className="py-4 space-y-4">
-              <div className="p-4 bg-green-50 text-green-700 rounded-md text-sm border border-green-100">
-                Chọn ngày cụ thể để xuất báo cáo ngày, hoặc để trống để xuất
-                toàn bộ lịch sử.
-              </div>
-              <div className="space-y-2">
-                <Label>Ngày xuất báo cáo</Label>
-                <DatePicker
-                  value={exportDate}
-                  onChange={(date) =>
-                    setExportDate(date ? format(date, "yyyy-MM-dd") : undefined)
-                  }
-                  placeholder="Chọn ngày (Tùy chọn)"
-                  className="w-full"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setExportDialogOpen(false);
-                  setExportDate(undefined);
-                }}
-              >
-                Hủy bỏ
+        {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) && (
+          <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant={"success"}>
+                <Download className="w-4 h-4 mr-2" />
+                Xuất báo cáo
               </Button>
-              <Button onClick={handleExport} variant="success">
-                Xác nhận{" "}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Download className="w-5 h-5 text-green-700" />
+                  Xuất dữ liệu hóa đơn
+                </DialogTitle>
+              </DialogHeader>
+              <div className="py-4 space-y-4">
+                <div className="p-4 bg-green-50 text-green-700 rounded-md text-sm border border-green-100">
+                  Chọn ngày cụ thể để xuất báo cáo ngày, hoặc để trống để xuất
+                  toàn bộ lịch sử.
+                </div>
+                <div className="space-y-2">
+                  <Label>Ngày xuất báo cáo</Label>
+                  <DatePicker
+                    value={exportDate}
+                    onChange={(date) =>
+                      setExportDate(
+                        date ? format(date, "yyyy-MM-dd") : undefined
+                      )
+                    }
+                    placeholder="Chọn ngày (Tùy chọn)"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setExportDialogOpen(false);
+                    setExportDate(undefined);
+                  }}
+                >
+                  Hủy bỏ
+                </Button>
+                <Button onClick={handleExport} variant="success">
+                  Xác nhận{" "}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </header>
 
       {/* === LEVEL 2: FILTER TOOLBAR === */}

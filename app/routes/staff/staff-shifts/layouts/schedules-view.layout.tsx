@@ -44,6 +44,7 @@ import { cn } from "~/lib/utils";
 import { Tabs, TabsTrigger } from "~/components/ui/tabs";
 import { ButtonGroup } from "~/components/ui/button-group";
 import { DateRangePicker } from "~/components/ui/date-range-picker";
+import { AxiosError } from "axios";
 
 interface SchedulesViewLayoutProps {
   filters: StaffShiftFilters;
@@ -85,14 +86,20 @@ export default function SchedulesViewLayout({
     (filters.toDate ? 1 : 0);
 
   const downloadFile = (blob: Blob, filename: string) => {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    try {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Lỗi khi xuất báo cáo");
+      }
+    }
   };
 
   const handleExportMatrix = async () => {

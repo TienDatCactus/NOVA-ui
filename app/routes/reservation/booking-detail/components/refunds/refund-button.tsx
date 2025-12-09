@@ -34,8 +34,7 @@ export default function RefundButton({
 }: RefundButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const canRefund =
-    (bookingStatus === "CheckedOut" ||
-      (bookingStatus === "Pending" && totalPaidAmount > 0)) &&
+    (bookingStatus === "CheckedOut" || bookingStatus === "Pending") &&
     hasRole(AuthLoader.getUser(), UserRole.HotelManager) &&
     totalPaidAmount > 0;
   if (!canRefund) {

@@ -17,9 +17,13 @@ import {
 } from "~/components/ui/select";
 import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import type { PayrollFilterState } from "../container/filter.hooks";
-import { useRefreshPayrollDays } from "../container/query.hooks";
+import {
+  useExportMonthlyPayroll,
+  useRefreshPayrollDays,
+} from "../container/query.hooks";
 import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
+import { AxiosError } from "axios";
 
 interface HeaderLayoutProps {
   filterState: PayrollFilterState;
@@ -36,23 +40,22 @@ export default function PayrollsLayout({
 }: HeaderLayoutProps) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  const [isExporting, setIsExporting] = useState(false);
 
   const { mutate: refreshDays, isPending: isRefreshing } =
     useRefreshPayrollDays();
-
+  const { mutateAsync: exportMonthly, isPending: isExporting } =
+    useExportMonthlyPayroll(
+      filterState.year || currentYear,
+      filterState.month || 0
+    );
   const handleExportMonthly = async () => {
     if (!filterState.year) {
       toast.error("Vui lòng chọn năm để xuất báo cáo");
       return;
     }
 
-    setIsExporting(true);
     try {
-      const blob = await StaffPayrollService.exportMonthly({
-        year: filterState.year,
-        month: filterState.month || currentDate.getMonth() + 1,
-      });
+      const blob = await exportMonthly();
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -66,8 +69,6 @@ export default function PayrollsLayout({
       toast.success("Xuất báo cáo thành công");
     } catch (error) {
       toast.error("Lỗi khi xuất báo cáo");
-    } finally {
-      setIsExporting(false);
     }
   };
 

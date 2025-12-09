@@ -198,7 +198,9 @@ export function useUnlockPayroll() {
     },
     onError: (error) => {
       if (error instanceof AxiosError)
-        toast.error(error.response?.data?.message || "Lỗi khi khóa bảng lương");
+        toast.error(
+          error.response?.data?.message || "Lỗi khi mở khóa bảng lương"
+        );
     },
   });
 }
@@ -378,6 +380,36 @@ export function useCreateSalaryExpense() {
         queryKey: ["expenses"],
       });
     },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error.response?.data?.message ||
+            "Không thể tạo phiếu chi lương. Vui lòng thử lại."
+        );
+    },
+  });
+}
+
+export function useExportPayslips(payrollId: string) {
+  return useMutation({
+    mutationFn: async () => await StaffPayrollService.exportPayslip(payrollId),
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error.response?.data?.message ||
+            "Không thể tạo phiếu chi lương. Vui lòng thử lại."
+        );
+    },
+  });
+}
+
+export function useExportMonthlyPayroll(year: number, month: number) {
+  return useMutation({
+    mutationFn: async () =>
+      await StaffPayrollService.exportMonthly({
+        year: year,
+        month: month || new Date().getMonth() + 1,
+      }),
     onError: (error) => {
       if (error instanceof AxiosError)
         toast.error(
