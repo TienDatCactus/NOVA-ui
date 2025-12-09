@@ -46,7 +46,6 @@ import {
   ORDER_STATUSES,
   type OrderStatus,
 } from "~/services/api/orders/order.types";
-import type { Route } from "./+types/menu-orders";
 import OrderCard from "./components/menu-order-list/order-card";
 import OrderDetailSheet from "./components/menu-order-list/order-detail.sheet";
 import { usePOSOrderList } from "./container/pos-orders/query.hooks";

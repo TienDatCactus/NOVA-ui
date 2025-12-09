@@ -40,7 +40,6 @@ import {
 import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceOrderDetailDto } from "~/services/api/orders/dto";
 import { STATUS_OPTIONS } from "~/services/api/services/service.types";
-import type { Route } from "./+types/service-orders";
 import ServiceOrderCard from "./components/service-order-list/service-order-card";
 import { useServiceOrderList } from "./container/service-order/query.hooks";
 

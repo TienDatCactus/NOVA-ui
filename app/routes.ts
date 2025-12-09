@@ -21,6 +21,7 @@ export default [
   ]),
   layout("layouts/dashboard.layout.tsx", [
     ...prefix("dashboard", [
+      route("/", "routes/fall.tsx"),
       ...prefix("services", [
         index("routes/services/services.tsx"),
         route("types", "routes/services/types.tsx"),

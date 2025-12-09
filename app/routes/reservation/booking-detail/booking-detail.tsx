@@ -16,7 +16,10 @@ import type { Route } from "./+types/booking-detail";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Chi Tiết Đặt Phòng - NOVA Hotel Management" },
-    { name: "description", content: "Thông tin chi tiết đặt phòng và quản lý thanh toán" },
+    {
+      name: "description",
+      content: "Thông tin chi tiết đặt phòng và quản lý thanh toán",
+    },
   ];
 }
 

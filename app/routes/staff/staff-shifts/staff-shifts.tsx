@@ -13,7 +13,10 @@ import { addDays, startOfWeek } from "date-fns";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Lịch Làm Việc - NOVA Hotel Management" },
-    { name: "description", content: "Quản lý lịch làm việc và chấm công nhân viên" },
+    {
+      name: "description",
+      content: "Quản lý lịch làm việc và chấm công nhân viên",
+    },
   ];
 }
 

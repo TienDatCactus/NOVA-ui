@@ -22,7 +22,7 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 import { hasAllRoles } from "~/lib/auth/bouncer";
 import { CUSTOMER_NAVS, SUPPORTED_LANGUAGES } from "~/lib/constants";
-import { AUTH } from "~/lib/fe-url";
+import { AUTH, DASHBOARD } from "~/lib/fe-url";
 import { syncI18nWithStore } from "~/lib/i18n/sync-store";
 import { cn } from "~/lib/utils";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
@@ -137,15 +137,13 @@ const CustomerLayout: React.FC = () => {
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                {hasAllRoles(AuthLoader.getUser(), [
-                  ...Object.values(UserRole),
-                ]) ? (
+                {!!AuthLoader.getUser() ? (
                   <DropdownMenuContent>
                     <DropdownMenuItem
                       asChild
                       className="focus:bg-emerald-50 focus:text-emerald-800 cursor-pointer"
                     >
-                      <Link to={AUTH.login}>Đăng nhập</Link>
+                      <Link to={DASHBOARD.fall}>Truy cập trang quản lý</Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 ) : (

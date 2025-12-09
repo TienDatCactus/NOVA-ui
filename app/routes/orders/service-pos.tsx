@@ -53,7 +53,6 @@ import { DASHBOARD } from "~/lib/fe-url";
 import { formatMoney } from "~/lib/utils";
 import { useServicePosOrderStore } from "~/store/service-pos-order.store";
 import useServiceFilters from "../services/container/services/filter.hooks";
-import type { Route } from "./+types/service-pos";
 import OrderConfirmDialog from "./components/order-confirm.dialog";
 import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
 

@@ -7,7 +7,6 @@ import {
   FileText,
   Loader2,
   MessageSquare,
-  Receipt,
   ShieldAlert,
   Sparkles,
   Wallet,
@@ -27,6 +26,7 @@ import {
 } from "~/components/ui/card";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -38,7 +38,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
@@ -65,6 +64,7 @@ import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks
 import { OrderSchema } from "~/services/api/orders/order.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
+import type { BookingMasterSchema } from "..";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItem = z.infer<typeof ServiceOrderItemSchema>;
@@ -98,7 +98,6 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
   const nights = useCalculateNights({ checkinDate, checkoutDate });
   const { data: roomsDetails, isLoading: isLoadingRooms } =
     useRoomsDetailsByIds(roomIds);
-
   const previewRequest = useMemo(() => {
     const roomTypeMap = new Map<string, number>();
     roomsDetails?.forEach((room) => {
@@ -186,6 +185,11 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
       shouldDirty: true,
     });
   };
+
+  const handleAbortDeposit = () => {
+    form.setValue("roomPayment.paymentMethod", undefined);
+    form.setValue("roomPayment.paidAmount", null);
+  };
   return (
     <Card className="flex h-full gap-0 flex-col overflow-y-auto">
       {/* === HEADER === */}
@@ -255,9 +259,10 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                           </FormLabel>
                           <FormControl>
                             <Textarea
+                              {...field}
                               placeholder="VD: Cần đặt cọc gấp, khách VIP..."
                               className="min-h-[80px] text-sm resize-none bg-yellow-50/50 border-yellow-200 focus-visible:ring-yellow-400/50 dark:bg-yellow-950/10 dark:border-yellow-800"
-                              {...field}
+                              value={field.value || ""}
                             />
                           </FormControl>
                         </FormItem>
@@ -508,7 +513,6 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
             <DialogContent className="max-w-sm gap-0 p-0 outline-none overflow-hidden">
               <DialogHeader className="px-6 py-4 border-b">
                 <DialogTitle className="text-base font-semibold flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-primary" />
                   Xác nhận thanh toán
                 </DialogTitle>
               </DialogHeader>
@@ -545,7 +549,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="h-9">
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Chọn phương thức..." />
                             </SelectTrigger>
                           </FormControl>
@@ -640,7 +644,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                             </div>
 
                             {/* BALANCE INDICATOR */}
-                            <div className="flex items-center justify-between text-xs px-1">
+                            <div className="flex items-center justify-between text-xs">
                               <span className="text-muted-foreground">
                                 Công nợ còn lại:
                               </span>
@@ -666,12 +670,20 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
               </div>
 
               <DialogFooter className="px-6 py-4 bg-muted border-t">
-                <DialogTrigger asChild>
-                  <Button className="w-full font-semibold" size="lg">
+                <Button
+                  variant={"destructive-ghost"}
+                  type="button"
+                  onClick={handleAbortDeposit}
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Hủy cọc
+                </Button>
+                <DialogClose asChild>
+                  <Button variant={"success"}>
                     <Check className="mr-2 h-4 w-4" />
                     Lưu
                   </Button>
-                </DialogTrigger>
+                </DialogClose>
               </DialogFooter>
             </DialogContent>
           </Dialog>

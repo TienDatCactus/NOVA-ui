@@ -7,7 +7,10 @@ import type { Route } from "./+types/unauthorized";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Truy Cập Bị Từ Chối - NOVA Hotel Management" },
-    { name: "description", content: "Bạn không có quyền truy cập tài nguyên này" },
+    {
+      name: "description",
+      content: "Bạn không có quyền truy cập tài nguyên này",
+    },
   ];
 }
 

@@ -34,6 +34,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
+import type { BookingMasterSchema } from "..";
+import type z from "zod";
 
 interface RoomSelectionSectionProps {
   form: UseFormReturn<any>;

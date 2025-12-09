@@ -39,10 +39,9 @@ import {
 } from "~/components/ui/alert-dialog";
 import { isDirty } from "zod/v3";
 
-const BookingMasterSchema = z
+export const BookingMasterSchema = z
   .object({
     ...BookingSchema.StaffCreateBookingSchema.shape,
-
     bookingType: z.enum(["Direct", "OTA", "RoomBlock"]),
     dateRange: z
       .object({

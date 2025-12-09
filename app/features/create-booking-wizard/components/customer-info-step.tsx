@@ -10,6 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { type UseFormReturn } from "react-hook-form";
+import type z from "zod";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -43,6 +44,7 @@ import { Separator } from "~/components/ui/separator";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { cn } from "~/lib/utils";
 import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
+import type { BookingMasterSchema } from "..";
 import { useOTAInfo } from "../container/create-booking-query.hooks";
 
 interface CustomerInfoSectionProps {
@@ -59,7 +61,10 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
 
   // --- HANDLERS ---
   const handleTypeChange = (val: string) => {
-    form.setValue("bookingType", val);
+    form.setValue(
+      "bookingType",
+      val as z.infer<typeof BookingMasterSchema>["bookingType"]
+    );
     if (val === "RoomBlock") {
       form.setValue("source", "RoomBlock"); // Assuming key matches value for simplicity in example
       form.setValue("guestFullName", "");
@@ -375,6 +380,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                   <FormControl>
                     <Counter
                       {...field}
+                      value={field.value || 0}
                       minValue={0}
                       maxValue={5}
                       className="w-full bg-background h-9 border-gray-200"

@@ -21,7 +21,10 @@ import { KpiRow } from "./fragments/kpi-row";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Báo Cáo Tài Chính - NOVA Hotel Management" },
-    { name: "description", content: "Báo cáo tài chính và doanh thu khách sạn" },
+    {
+      name: "description",
+      content: "Báo cáo tài chính và doanh thu khách sạn",
+    },
   ];
 }
 

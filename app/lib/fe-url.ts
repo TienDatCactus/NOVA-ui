@@ -5,6 +5,7 @@ const AUTH = {
 };
 
 const DASHBOARD = {
+  fall: "/dashboard",
   bookings: {
     reports: "/dashboard/bookings/reports",
     grid: "/dashboard/bookings/grid",

@@ -62,7 +62,6 @@ import {
 import { DASHBOARD } from "~/lib/fe-url";
 import { useMenuPosOrderStore } from "~/store/menu-pos-order.store";
 import useMenuFilters from "../menu/container/menu/filter.hooks";
-import type { Route } from "./+types/menu-pos";
 import OrderConfirmDialog from "./components/order-confirm.dialog";
 import ScheduledTimeDialog from "./components/scheduled-time.dialog";
 import { useCreatePOSOrderWithItems } from "./container/pos-orders/mutation.hooks";
