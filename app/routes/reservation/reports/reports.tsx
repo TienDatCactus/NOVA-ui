@@ -14,6 +14,14 @@ import { Calendar } from "~/components/ui/calendar";
 import { vi } from "react-day-picker/locale";
 import { useState } from "react";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/reports";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Báo Cáo - NOVA Hotel Management" },
+    { name: "description", content: "Báo cáo và thống kê đặt phòng" },
+  ];
+}
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Reports, Permission.Read);

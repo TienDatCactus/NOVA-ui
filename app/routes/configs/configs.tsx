@@ -16,6 +16,14 @@ import ModuleCard from "./components/module-card";
 import { useGroupedConfigs } from "./container/query.hooks";
 import ConfigsLayout from "./layouts/configs.layout";
 import { useMemo } from "react";
+import type { Route } from "./+types/configs";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Cấu Hình Hệ Thống - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý cấu hình và thiết lập hệ thống" },
+  ];
+}
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Configs, Permission.Read);

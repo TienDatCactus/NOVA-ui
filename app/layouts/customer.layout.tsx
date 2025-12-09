@@ -22,7 +22,7 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 import { hasAllRoles } from "~/lib/auth/bouncer";
 import { CUSTOMER_NAVS, SUPPORTED_LANGUAGES } from "~/lib/constants";
-import { AUTH, DASHBOARD } from "~/lib/fe-url";
+import { AUTH } from "~/lib/fe-url";
 import { syncI18nWithStore } from "~/lib/i18n/sync-store";
 import { cn } from "~/lib/utils";
 import { useChatTranslationStore } from "~/store/chat-translation.store";
@@ -33,7 +33,6 @@ const CustomerLayout: React.FC = () => {
   const { userLanguage, setUserLanguage } = useChatTranslationStore();
   const location = useLocation();
 
-  // Sync i18n with chat translation store
   useEffect(() => {
     const unsubscribe = syncI18nWithStore();
     return () => unsubscribe();
@@ -50,27 +49,8 @@ const CustomerLayout: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // --- Background Layer (Sapa Terrain & Mist) ---
-  const BackgroundLayer = () => (
-    <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-stone-50">
-      {/* Topographic Lines Pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 C 20 10 40 10 50 0 C 60 10 80 10 100 0' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3Cpath d='M0 20 C 20 30 40 30 50 20 C 60 30 80 30 100 20' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3Cpath d='M0 40 C 20 50 40 50 50 40 C 60 50 80 50 100 40' fill='none' stroke='%23064e3b' stroke-width='2'/%3E%3C/svg%3E")`,
-          backgroundSize: "400px 400px",
-        }}
-      ></div>
-      {/* Mist Gradients */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-emerald-50/40 via-white/30 to-transparent"></div>
-      <div className="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-teal-100/20 rounded-full blur-3xl"></div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex flex-col w-full relative font-sans selection:bg-emerald-200 selection:text-emerald-900">
-      <BackgroundLayer />
-
       {!isMobile && (
         <header className="sticky top-0 z-50 w-full border-b border-white/20 bg-sidebar backdrop-blur-xl supports-[backdrop-filter]:bg-background/40 shadow-sm shadow-stone-900/5">
           <div className="container mx-auto flex h-16 items-center justify-between px-4">

@@ -7,6 +7,13 @@ import { useMenuList } from "./container/menu/query.hooks";
 import MenuViewLayout from "./layouts/menu-view.layout";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Thực Đơn - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý thực đơn và món ăn" },
+  ];
+}
+
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Menu, Permission.Read);
 

@@ -28,6 +28,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import Image from "~/components/ui/image";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
+import type { Route } from "./+types/guides";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Hướng Dẫn - NOVA Hotel" },
+    { name: "description", content: "Hướng dẫn sử dụng dịch vụ khách sạn" },
+  ];
+}
 
 export default function GuidesPage() {
   const { t } = useTranslation("guides");

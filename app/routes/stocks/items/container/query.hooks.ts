@@ -19,6 +19,13 @@ export function useStockItemList(params: ItemListParams) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
+export function useLowStockItems() {
+  return useQuery({
+    queryKey: ["low-stock-items"],
+    queryFn: async () => await StockItemsService.getLowStockItems(),
+    staleTime: 5 * 60 * 1000,
+  });
+}
 
 /**
  * Hook lấy chi tiết 1 item

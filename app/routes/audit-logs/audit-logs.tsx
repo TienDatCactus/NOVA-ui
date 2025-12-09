@@ -5,6 +5,15 @@ import { useAuditLogs } from "./container/query.hooks";
 import AuditLogsLayout from "./layouts/audit-logs.layouts";
 import { AuthLoader } from "~/lib/auth/auth.loader";
 import { RouteModule, Permission } from "~/lib/auth/roles";
+import type { Route } from "./+types/audit-logs";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Nhật Ký Hoạt Động - NOVA Hotel Management" },
+    { name: "description", content: "Theo dõi nhật ký hoạt động hệ thống" },
+  ];
+}
+
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.AuditLogs, Permission.Read);
 

@@ -32,7 +32,7 @@ export const getStatusBadge = (status?: string) => {
   if (status.toLowerCase() === "unplannedabsence") {
     return {
       variant: "warning" as const,
-      label: "Vắng mặt",
+      label: "Vắng không lý do",
       icon: UserX as LucideIcon,
       showLabel: true,
     };

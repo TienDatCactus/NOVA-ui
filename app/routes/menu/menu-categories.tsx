@@ -4,6 +4,14 @@ import { useMenuCategoryFilters } from "./container/menu-categories/filter.hooks
 import { useMenuCategories } from "./container/menu-categories/query.hooks";
 import MenuCategoryViewLayout from "./layouts/menu-category-view.layout";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/menu-categories";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Danh Mục Thực Đơn - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý danh mục thực đơn" },
+  ];
+}
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.MenuCategories, Permission.Read);

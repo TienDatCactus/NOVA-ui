@@ -2,6 +2,13 @@ import { Button } from "~/components/ui/button";
 import type { Route } from "./+types/not-found";
 import { useNavigate } from "react-router";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Không Tìm Thấy Trang - NOVA Hotel Management" },
+    { name: "description", content: "Trang bạn tìm kiếm không tồn tại" },
+  ];
+}
+
 export default function Component({
   loaderData,
   actionData,

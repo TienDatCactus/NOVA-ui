@@ -33,6 +33,13 @@ import type { ResetPasswordDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/reset-password";
 import { useAuthHooks } from "./container/auth.hooks";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Đặt Lại Mật Khẩu - NOVA Hotel Management" },
+    { name: "description", content: "Xác thực OTP và đặt lại mật khẩu mới" },
+  ];
+}
+
 export default function VerifyOTP({
   loaderData,
   actionData,

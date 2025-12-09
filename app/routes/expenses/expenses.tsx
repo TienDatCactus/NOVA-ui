@@ -12,6 +12,14 @@ import {
 } from "~/lib/auth/auth.loader";
 import { redirect } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
+import type { Route } from "./+types/expenses";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Chi Phí - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý chi phí và phiếu chi" },
+  ];
+}
 
 export const clientLoader = () => {
   const user = AuthLoader.getUser();

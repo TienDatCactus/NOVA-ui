@@ -7,6 +7,13 @@ import { useAvailableRooms } from "./container/booking-query.hooks";
 import BookingGridFilters from "./fragments/booking-grid.filters";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Sơ Đồ Phòng - NOVA Hotel Management" },
+    { name: "description", content: "Sơ đồ trạng thái phòng và đặt phòng" },
+  ];
+}
+
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Bookings, Permission.Read);
 

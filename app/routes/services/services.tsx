@@ -5,6 +5,13 @@ import { useServices } from "./container/services/query.hooks";
 import ServicesViewLayout from "./layouts/service-view.layout";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Dịch Vụ - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý dịch vụ khách sạn" },
+  ];
+}
+
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Services, Permission.Read);
 

@@ -9,6 +9,13 @@ import type { Route } from "./+types/list";
 import useBookingFilters from "./container/booking-filter.hooks";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Đặt Phòng - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý đặt phòng và phòng trống" },
+  ];
+}
+
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Bookings, Permission.Read);
 

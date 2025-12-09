@@ -115,6 +115,15 @@ async function adjustStock(
     return Promise.reject(error);
   }
 }
+async function getLowStockItems(): Promise<StockItemsListDto> {
+  try {
+    const resp = await http.get(Stock.Items.lowStock);
+    return StockItemsListSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 
 export const StockItemsService = {
   getStockItemList,
@@ -124,4 +133,5 @@ export const StockItemsService = {
   deleteStockItem,
   getStockItemsTransactions,
   adjustStock,
+  getLowStockItems,
 };

@@ -18,6 +18,13 @@ import { useFinancialDashboard } from "./container/query.hooks";
 import { DashboardToolbar } from "./fragments/dashboard-toolbar";
 import { KpiRow } from "./fragments/kpi-row";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Báo Cáo Tài Chính - NOVA Hotel Management" },
+    { name: "description", content: "Báo cáo tài chính và doanh thu khách sạn" },
+  ];
+}
+
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.FinancialReports, Permission.Read);
 

@@ -4,6 +4,14 @@ import { usePayrollFilter } from "./container/filter.hooks";
 import { usePayrolls } from "./container/query.hooks";
 import PayrollsLayout from "./layouts/payrolls.layout";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/payrolls";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bảng Lương - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý bảng lương nhân viên" },
+  ];
+}
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Payroll, Permission.Read);

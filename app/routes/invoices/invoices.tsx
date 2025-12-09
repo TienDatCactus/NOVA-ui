@@ -4,6 +4,13 @@ import useInvoicesContainer from "./container/invoices/container.hooks";
 import InvoicesViewLayout from "./layouts/invoices-view.layout";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Hóa Đơn - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý hóa đơn khách sạn" },
+  ];
+}
+
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Invoices, Permission.Read);
 

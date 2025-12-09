@@ -8,6 +8,14 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/service-orders";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Đơn Hàng Dịch Vụ - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý đơn hàng dịch vụ" },
+  ];
+}
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Orders, Permission.Read);

@@ -25,6 +25,13 @@ import {
 } from "./container/query.hooks";
 import type { Route } from "./+types/catalog";
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Dịch Vụ - NOVA Hotel" },
+    { name: "description", content: "Danh sách dịch vụ và thực đơn" },
+  ];
+}
+
 // --- Custom Hook: Debounce ---
 // Giúp tối ưu hiệu năng khi search, tránh filter liên tục mỗi khi gõ phím
 function useDebounce<T>(value: T, delay: number): T {

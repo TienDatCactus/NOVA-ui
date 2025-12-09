@@ -5,6 +5,14 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/service-pos";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bán Hàng Dịch Vụ - NOVA Hotel Management" },
+    { name: "description", content: "Điểm bán POS dịch vụ" },
+  ];
+}
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Orders, Permission.Create);
