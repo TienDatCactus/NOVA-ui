@@ -7,7 +7,7 @@ const { StaffCreateBookingSchema } = BookingSchema;
 type CreateBookingInput = z.infer<typeof StaffCreateBookingSchema>;
 
 // Extended type to include bookingType for UI flow
-type CreateBookingData = Partial<CreateBookingInput> & {
+export type CreateBookingData = Partial<CreateBookingInput> & {
   bookingType?: "Direct" | "OTA" | "RoomBlock";
 };
 

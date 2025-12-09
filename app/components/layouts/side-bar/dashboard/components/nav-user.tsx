@@ -1,11 +1,4 @@
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  KeyRound,
-} from "lucide-react";
+import { ChevronsUpDown, KeyRound, LogOut } from "lucide-react";
 import { useState } from "react";
 
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -24,9 +17,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/sidebar";
-import { Can, hasRole } from "~/lib/auth/bouncer";
 import { useAuth } from "~/lib/auth/components";
-import { RouteModule, UserRole } from "~/lib/auth/roles";
+import { RouteModule } from "~/lib/auth/roles";
 import { ChangePasswordDialog } from "~/routes/auth/change-pasword";
 import { useAuthHooks } from "~/routes/auth/container/auth.hooks";
 import { useAuthStore } from "~/store/auth.store";
@@ -72,9 +64,7 @@ export function NavUser() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {user?.roles.map((role) => role).join(", ")}
-                  </span>
+                  <span className="truncate font-medium">{user?.roles[0]}</span>
                   <span className="truncate text-xs">{user?.userName}</span>
                 </div>
               </div>

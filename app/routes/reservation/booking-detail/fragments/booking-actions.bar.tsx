@@ -47,18 +47,13 @@ export function BookingActionsBar({
     bookingDetail?.status === "Confirmed";
   const handleQuickCheckout = async () => {
     if (bookingDetail?.source === "RoomBlock") {
-      try {
-        await updateStatus("CheckedOut");
-      } catch (error) {
-        // Error already handled by mutation
-      }
+      await updateStatus("CheckedOut");
     }
   };
 
   return (
     <div className="sticky bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 shadow-lg z-10 transition-all duration-200">
       <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
-        {/* Left: Always Visible Operations (Refund) */}
         <div className="flex items-center gap-2">
           {canRefund && (
             <RefundButton
@@ -70,7 +65,6 @@ export function BookingActionsBar({
           )}
         </div>
 
-        {/* Right: Contextual Actions */}
         <div className="flex items-center gap-3">
           {isDirty ? (
             <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">

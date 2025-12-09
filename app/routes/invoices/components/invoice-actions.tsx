@@ -99,17 +99,18 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
         </Button>
       )}
 
-      {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && canRefund && (
-        <Button
-          variant="warning"
-          size={"sm"}
-          onClick={() => setDialog("refund")}
-          disabled={isRefunding}
-        >
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Hoàn tiền
-        </Button>
-      )}
+      {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) &&
+        canRefund && (
+          <Button
+            variant="warning"
+            size={"sm"}
+            onClick={() => setDialog("refund")}
+            disabled={isRefunding}
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Hoàn tiền
+          </Button>
+        )}
 
       {canVoid && (
         <Button

@@ -264,7 +264,6 @@ export default function Component() {
                   bookingState={bookingState}
                   nights={nights}
                   setNoteModalOpen={setNoteModalOpen}
-                  handleSubmit={handleSubmit}
                 />
 
                 <PendingChargesSection

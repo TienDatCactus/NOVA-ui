@@ -77,7 +77,7 @@ const StaffCreateBookingSchema = z
       .nullable(),
     internalNote: z.string().optional().nullable(),
     serviceOrder: OrderSchema.ServiceOrderSchema.optional(),
-    roomPayment: PaymentSchema.RoomPaymentSchema.optional().nullable(),
+    roomPayment: PaymentSchema.RoomPaymentSchema.nullable().optional(),
   })
   .refine(
     (data) => {

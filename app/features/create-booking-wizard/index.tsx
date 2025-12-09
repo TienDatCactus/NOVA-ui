@@ -99,8 +99,6 @@ export default function CreateBookingPage() {
         from: defaultCheckin,
         to: defaultCheckout,
       },
-
-      // API Fields (Mapped from Store)
       source: storeData.source,
       checkinDate: defaultCheckin,
       checkoutDate: defaultCheckout,
@@ -122,10 +120,14 @@ export default function CreateBookingPage() {
       roomPayment: storeData.roomPayment,
       otaInformationId: storeData.otaInformationId,
       otaBookingCode: storeData.otaBookingCode,
+      serviceOrder: {
+        services: storeData.serviceOrder?.services?.map((s) => ({
+          ...s,
+        })),
+      },
     },
     mode: "all",
   });
-
   const dateRange = form.watch("dateRange");
   useEffect(() => {
     if (dateRange?.from) {
@@ -134,7 +136,6 @@ export default function CreateBookingPage() {
 
       form.setValue("checkinDate", newCheckin, { shouldValidate: true });
 
-      // If checkin changed, reset dependent data to prevent inconsistency
       if (prevCheckin && prevCheckin.getTime() !== newCheckin.getTime()) {
         toast.info(
           "Ngày lưu trú đã thay đổi. Vui lòng chọn lại phòng và dịch vụ.",

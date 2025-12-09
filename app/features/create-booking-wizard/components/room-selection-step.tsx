@@ -213,12 +213,9 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
               variant="outline"
               className="h-11 w-11 shrink-0"
               onClick={() => refetch()}
-              disabled={isPending || !shouldFetch}
               title="Refresh availability"
             >
-              <RotateCcw
-                className={cn("h-4 w-4", isPending && "animate-spin")}
-              />
+              <RotateCcw className={cn("h-4 w-4")} />
             </Button>
           </div>
         </div>

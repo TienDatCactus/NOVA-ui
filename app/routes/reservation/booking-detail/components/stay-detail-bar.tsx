@@ -90,7 +90,6 @@ interface StayDetailBarProps {
   bookingState: BookingState;
   nights: number;
   setNoteModalOpen: (open: boolean) => void;
-  handleSubmit: (data: StaffUpdateBookingRequestDto) => void;
 }
 
 export default function StayDetailBar({
@@ -100,7 +99,6 @@ export default function StayDetailBar({
   bookingState,
   nights,
   setNoteModalOpen,
-  handleSubmit,
 }: StayDetailBarProps) {
   // --- Hooks ---
   const { mutateAsync: updateBookingStatus, isPending: isUpdatingStatus } =
@@ -456,21 +454,22 @@ export default function StayDetailBar({
                                       </div>
                                     </div>
                                     <FormControl>
-                                      <div className="relative">
-                                        <Input
-                                          type="number"
-                                          {...field}
-                                          className="pl-3 pr-12 h-11 font-mono font-bold text-lg"
-                                          onChange={(e) =>
-                                            field.onChange(
-                                              parseFloat(e.target.value) || 0
-                                            )
-                                          }
-                                        />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
-                                          VND
-                                        </span>
-                                      </div>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        {...field}
+                                        className="font-mono font-bold text-lg"
+                                        onChange={(e) =>
+                                          field.onChange(
+                                            parseFloat(e.target.value) || 0
+                                          )
+                                        }
+                                        endAddon={
+                                          <span className="text-sm text-muted-foreground font-medium">
+                                            VND
+                                          </span>
+                                        }
+                                      />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>

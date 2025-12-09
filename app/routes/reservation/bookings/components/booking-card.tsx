@@ -304,7 +304,8 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               <DropdownMenuItem onClick={handleViewDetail}>
                 <DoorOpen className="mr-2 h-4 w-4" /> Xem chi tiết
               </DropdownMenuItem>
-              {canCancel ? (
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+              canCancel ? (
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => setCancelDialogOpen(true)}

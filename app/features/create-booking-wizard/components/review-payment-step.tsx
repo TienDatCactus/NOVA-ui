@@ -65,6 +65,10 @@ import { OrderSchema } from "~/services/api/orders/order.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
 import type { BookingMasterSchema } from "..";
+import {
+  useCreateBookingStore,
+  type CreateBookingData,
+} from "~/store/create-booking.store";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItem = z.infer<typeof ServiceOrderItemSchema>;
@@ -76,6 +80,7 @@ interface BookingCartWidgetProps {
 export function BookingCartWidget({ form }: BookingCartWidgetProps) {
   const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
+  const { setData } = useCreateBookingStore();
 
   // --- 1. DATA WATCHERS ---
   const roomIds = form.watch("roomIds") || [];
@@ -187,9 +192,13 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
   };
 
   const handleAbortDeposit = () => {
-    form.setValue("roomPayment.paymentMethod", undefined);
-    form.setValue("roomPayment.paidAmount", null);
+    form.unregister("roomPayment");
+    form.clearErrors("roomPayment");
+    setData({
+      roomPayment: undefined,
+    });
   };
+
   return (
     <Card className="flex h-full gap-0 flex-col overflow-y-auto">
       {/* === HEADER === */}
@@ -670,14 +679,16 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
               </div>
 
               <DialogFooter className="px-6 py-4 bg-muted border-t">
-                <Button
-                  variant={"destructive-ghost"}
-                  type="button"
-                  onClick={handleAbortDeposit}
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Hủy cọc
-                </Button>
+                <DialogClose asChild>
+                  <Button
+                    variant={"destructive-ghost"}
+                    type="button"
+                    onClick={handleAbortDeposit}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Hủy cọc
+                  </Button>
+                </DialogClose>
                 <DialogClose asChild>
                   <Button variant={"success"}>
                     <Check className="mr-2 h-4 w-4" />

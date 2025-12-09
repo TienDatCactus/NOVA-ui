@@ -2,14 +2,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import type { UserItem } from "~/services/api/user/dto";
-import {
-  getRoleBadgeColors,
-  getRoleDisplayName,
-} from "~/services/types/users.types";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import { UserDetailDialog } from "../user-detail-dialog";
+import { ROLE_HIERARCHY, ROLE_LABELS } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<UserItem>[] = [
   {
@@ -70,14 +67,9 @@ export const columns: ColumnDef<UserItem>[] = [
       return (
         <div className="flex gap-1 flex-wrap">
           {roles.map((role) => {
-            const colors = getRoleBadgeColors(role);
             return (
-              <Badge
-                key={role}
-                variant="outline"
-                className={`text-xs ${colors.bg} ${colors.text} ${colors.border} shadow-sm`}
-              >
-                {getRoleDisplayName(role)}
+              <Badge key={role} variant="outline">
+                {ROLE_LABELS[role as keyof typeof ROLE_LABELS] || role}
               </Badge>
             );
           })}
