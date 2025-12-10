@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { StaffListParams } from "~/services/api/staff/staff/staff.types";
 
 const DEFAULT_FILTERS: StaffListParams = {
-  role: "",
+  role: undefined,
   gender: undefined,
 };
 

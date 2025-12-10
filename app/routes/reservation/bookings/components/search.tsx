@@ -72,7 +72,6 @@ function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
       setOpenExportDialog(false);
       toast.success("Xuất file thành công", { id: "export-bookings" });
     } catch (error) {
-      toast.error("Lỗi khi xuất báo cáo");
     } finally {
       setIsExporting(false);
     }

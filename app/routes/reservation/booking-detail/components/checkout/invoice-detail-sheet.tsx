@@ -314,7 +314,6 @@ export default function InvoiceDetailSheet({
                   size="sm"
                   onClick={handleSyncInvoice}
                   disabled={isSyncingInvoice}
-                  className="h-8 text-xs text-muted-foreground hover:text-primary"
                 >
                   <RefreshCw
                     className={cn(

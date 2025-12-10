@@ -19,8 +19,8 @@ export const clientLoader = () =>
 export default function StaffPage() {
   const { filters, updateFilter, resetFilter } = useStaffFilters();
   const { data: staffs, isPending } = useStaffList({
-    gender: filters.gender,
-    role: filters.role,
+    gender: filters.gender ?? undefined,
+    role: filters.role ?? undefined,
   });
 
   return (

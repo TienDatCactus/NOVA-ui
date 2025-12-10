@@ -52,6 +52,7 @@ const UpdateShiftScheduleRequestSchema = z
     endDate: z.string().optional().nullable(), // "yyyy-MM-dd", null = mặc định +1 tháng
     excludeHolidays: z.boolean(),
     applyScope: z.enum(["ThisOnly", "Forward", "All"]), // Required, no default
+    newDate: z.string("Ngày được chọn không hợp lệ").optional(),
   })
   .refine(
     (data) => {

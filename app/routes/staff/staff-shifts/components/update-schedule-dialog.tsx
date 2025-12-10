@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Repeat,
   Check,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
@@ -60,6 +61,7 @@ import { cn } from "~/lib/utils";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Separator } from "~/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { DatePicker } from "~/components/ui/date-picker";
 
 const { UpdateShiftScheduleRequestSchema } = StaffShiftSchema;
 
@@ -86,7 +88,7 @@ export default function UpdateScheduleDialog({
     defaultValues: {
       workShiftIds: [],
       repeatWeekly: false,
-      weekDays: [1, 2, 3, 4, 5],
+      weekDays: shiftDetail?.weekDays || [1, 2, 3, 4, 5],
       endDate: null,
       excludeHolidays: true,
       applyScope: "ThisOnly",
@@ -115,8 +117,6 @@ export default function UpdateScheduleDialog({
   const repeatWeekly = form.watch("repeatWeekly");
   const applyScope = form.watch("applyScope");
   const updateShiftSchedule = useUpdateShiftSchedule();
-
-  // Auto-clear repeat settings when ThisOnly is selected
   useEffect(() => {
     if (applyScope === "ThisOnly") {
       form.setValue("repeatWeekly", false);
@@ -125,11 +125,9 @@ export default function UpdateScheduleDialog({
     }
   }, [applyScope, form]);
 
-  // Auto-enable repeatWeekly when Forward/All is selected
   useEffect(() => {
     if (applyScope !== "ThisOnly" && !repeatWeekly) {
       form.setValue("repeatWeekly", true);
-      // Set default weekdays if empty
       const currentWeekDays = form.getValues("weekDays");
       if (!currentWeekDays || currentWeekDays.length === 0) {
         form.setValue("weekDays", [1, 2, 3, 4, 5]);
@@ -142,10 +140,25 @@ export default function UpdateScheduleDialog({
       toast.error("Không tìm thấy thông tin");
       return;
     }
+
     try {
-      await updateShiftSchedule.mutateAsync({ id: shift.id, data });
-      form.reset();
-      onOpenChange(false);
+      // Format newDate if it exists
+      const formattedData = {
+        ...data,
+        newDate: data.newDate
+          ? format(new Date(data.newDate), "yyyy-MM-dd")
+          : data.newDate,
+      };
+
+      await updateShiftSchedule.mutateAsync(
+        { id: shift.id, data: formattedData },
+        {
+          onSuccess: () => {
+            form.reset();
+            onOpenChange(false);
+          },
+        }
+      );
     } catch (error) {
       console.error(error);
     }
@@ -156,7 +169,6 @@ export default function UpdateScheduleDialog({
   const workDate = shift.workDate ? parseISO(shift.workDate) : new Date();
   const formattedDate = format(workDate, "dd/MM/yyyy");
 
-  // UX: Hiển thị tên & ca rõ ràng để user không sửa nhầm
   const staffName = shiftDetail?.staffName || shift.staffName || "...";
   const currentShiftName = shiftDetail?.shiftName || shift.shiftName || "...";
 
@@ -319,14 +331,7 @@ export default function UpdateScheduleDialog({
                     </span>
                   </div>
                 )}
-                <div
-                  className={cn(
-                    "transition-all",
-                    applyScope === "ThisOnly"
-                      ? "opacity-50 pointer-events-none grayscale"
-                      : "opacity-100"
-                  )}
-                >
+                <div className={cn("transition-all")}>
                   <div className="flex flex-col gap-4 p-4 border rounded-lg bg-muted/5">
                     <FormField
                       control={form.control}
@@ -337,9 +342,9 @@ export default function UpdateScheduleDialog({
                             <FormLabel className="text-sm font-medium">
                               Lặp lại hàng tuần
                             </FormLabel>
-                            <DialogDescription className="text-xs">
+                            <p className="text-xs">
                               Tự động tạo lịch vào các ngày cố định
-                            </DialogDescription>
+                            </p>
                           </div>
                           <FormControl>
                             <Switch
@@ -350,7 +355,7 @@ export default function UpdateScheduleDialog({
                         </FormItem>
                       )}
                     />
-
+                    <Separator />
                     {repeatWeekly && (
                       <FormField
                         control={form.control}
@@ -403,46 +408,19 @@ export default function UpdateScheduleDialog({
                               <FormLabel className="text-xs">
                                 Ngày kết thúc
                               </FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "pl-3 text-left font-normal h-9",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                    >
-                                      {field.value
-                                        ? format(
-                                            parseISO(field.value),
-                                            "dd/MM/yyyy"
-                                          )
-                                        : "Mặc định 1 tháng"}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
-                                >
-                                  <Calendar
-                                    mode="single"
-                                    selected={
-                                      field.value
-                                        ? parseISO(field.value)
-                                        : undefined
-                                    }
-                                    onSelect={(date) =>
-                                      field.onChange(
-                                        date ? format(date, "yyyy-MM-dd") : null
-                                      )
-                                    }
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
+                              <DatePicker
+                                {...field}
+                                value={
+                                  field.value
+                                    ? parseISO(field.value)
+                                    : undefined
+                                }
+                                onChange={(date) =>
+                                  field.onChange(
+                                    date ? format(date, "yyyy-MM-dd") : null
+                                  )
+                                }
+                              />
                             </FormItem>
                           )}
                         />
@@ -464,6 +442,40 @@ export default function UpdateScheduleDialog({
                           )}
                         />
                       </div>
+                    )}
+                    {applyScope === "ThisOnly" && !repeatWeekly && (
+                      <FormField
+                        control={form.control}
+                        name="newDate"
+                        render={({ field }) => (
+                          <FormItem className="">
+                            <FormLabel className="text-xs">
+                              Chọn ngày mới ( optional )
+                            </FormLabel>
+                            <FormControl>
+                              <div className="flex items-center gap-2">
+                                <DatePicker
+                                  className="w-40"
+                                  {...field}
+                                  onChange={(date) =>
+                                    field.onChange(
+                                      format(date + "", "yyyy-MM-dd")
+                                    )
+                                  }
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size={"icon"}
+                                  onClick={() => form.resetField("newDate")}
+                                >
+                                  <X />
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     )}
                   </div>
                 </div>

@@ -24,6 +24,7 @@ import {
 import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
 import { AxiosError } from "axios";
+import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 
 interface HeaderLayoutProps {
   filterState: PayrollFilterState;
@@ -67,9 +68,7 @@ export default function PayrollsLayout({
       document.body.removeChild(a);
 
       toast.success("Xuất báo cáo thành công");
-    } catch (error) {
-      toast.error("Lỗi khi xuất báo cáo");
-    }
+    } catch (error) {}
   };
 
   const handleRefreshDays = () => {
@@ -177,19 +176,21 @@ export default function PayrollsLayout({
 
           <Separator orientation="vertical" className="h-6 hidden md:block" />
 
-          <Button
-            onClick={handleExportMonthly}
-            disabled={isExporting}
-            size="sm"
-            variant={"success"}
-          >
-            {isExporting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="mr-2 h-4 w-4" />
-            )}
-            Xuất Excel
-          </Button>
+          {hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
+            <Button
+              onClick={handleExportMonthly}
+              disabled={isExporting}
+              size="sm"
+              variant={"success"}
+            >
+              {isExporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Xuất Excel
+            </Button>
+          )}
         </div>
       </div>
     </div>
