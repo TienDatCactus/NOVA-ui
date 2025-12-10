@@ -414,7 +414,7 @@ export function useExportMonthlyPayroll(year: number, month: number) {
       if (error instanceof AxiosError)
         toast.error(
           error.response?.data?.message ||
-            "Không thể tạo phiếu chi lương. Vui lòng thử lại."
+            "Không thể xuất phiếu chi lương. Vui lòng thử lại."
         );
     },
   });

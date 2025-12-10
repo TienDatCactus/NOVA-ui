@@ -1,5 +1,13 @@
-import { Check, ImageOff, Search, Sparkles, Utensils } from "lucide-react";
+import {
+  Check,
+  ImageOff,
+  Search,
+  Sparkles,
+  Utensils,
+  AlertCircle,
+} from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -11,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import {
@@ -50,7 +59,6 @@ export default function AddServiceDialog({
 }: AddServiceDialogProps) {
   const [activeTab, setActiveTab] = useState<"services" | "menu">("services");
   const [searchText, setSearchText] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
 
   // Services data
   const { filters, updateFilter, filterServices } = useServiceFilters();
@@ -62,9 +70,7 @@ export default function AddServiceDialog({
     }
   );
 
-  const { data: menuItems = [], isPending: isMenuLoading } = useMenuList({
-    categoryCode: categoryFilter,
-  });
+  const { data: menuItems = [], isPending: isMenuLoading } = useMenuList();
 
   // Client-side search filtering
   const filteredServices = filterServices(serviceItems);
@@ -144,7 +150,6 @@ export default function AddServiceDialog({
                     );
                     const hasImage =
                       service.imageUrls && service.imageUrls.length > 0;
-
                     return (
                       <button
                         key={service.serviceItemId}
@@ -162,7 +167,7 @@ export default function AddServiceDialog({
                         {/* Thumbnail Image */}
                         <div className="shrink-0 relative h-20 w-20 rounded-lg overflow-hidden border bg-muted">
                           {hasImage ? (
-                            <img
+                            <Image
                               src={service.imageUrls![0]}
                               alt={service.name}
                               className="h-full w-full object-cover transition-transform group-hover:scale-105"
@@ -252,11 +257,12 @@ export default function AddServiceDialog({
                     );
                     const hasImage =
                       menuItem.imageUrls && menuItem.imageUrls.length > 0;
-
+                    const isAvailable = menuItem.maxQuantityAvailable! > 0;
                     return (
                       <button
                         key={menuItem.itemId}
                         type="button"
+                        disabled={!isAvailable}
                         onClick={() =>
                           onAddService(menuItem.itemId, "MenuItem")
                         }
@@ -264,13 +270,13 @@ export default function AddServiceDialog({
                           "group relative flex items-start gap-4 rounded-xl border p-3 text-left transition-all duration-200 outline-none",
                           isSelected
                             ? "border-primary bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary))]"
-                            : "border-border bg-card hover:bg-muted/40 hover:border-primary/30"
+                            : "border-border bg-card hover:bg-muted/40 hover:border-primary/30",
+                          !isAvailable ? "opacity-50 cursor-not-allowed" : ""
                         )}
                       >
-                        {/* Thumbnail Image */}
                         <div className="shrink-0 relative h-20 w-20 rounded-lg overflow-hidden border bg-muted">
                           {hasImage ? (
-                            <img
+                            <Image
                               src={menuItem.imageUrls![0]}
                               alt={menuItem.name}
                               className="h-full w-full object-cover transition-transform group-hover:scale-105"

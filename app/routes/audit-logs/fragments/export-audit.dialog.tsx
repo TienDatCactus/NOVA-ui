@@ -102,9 +102,7 @@ export default function ExportAuditDialog({
 
       toast.success("Xuất dữ liệu thành công");
       onOpenChange(false);
-    } catch (error) {
-      toast.error("Lỗi khi xuất báo cáo");
-    }
+    } catch (error) {}
   };
 
   return (

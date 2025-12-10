@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
   Tooltip,
@@ -229,6 +230,12 @@ function ServiceOrderItemRow({
           }
           className="h-7 border-transparent bg-transparent text-xs shadow-none placeholder:text-muted-foreground/50 focus-visible:bg-background "
         />
+        {service.itemType === "MenuItem" && (
+          <Counter
+            value={service.quantity}
+            onChange={(value) => onUpdate({ quantity: value })}
+          />
+        )}
       </div>
     </div>
   );

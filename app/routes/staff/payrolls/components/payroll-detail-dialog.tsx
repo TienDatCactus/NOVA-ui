@@ -49,7 +49,6 @@ export default function PayrollDetailDialog({
 
       toast.success("Xuất phiếu lương thành công");
     } catch (error) {
-      toast.error("Lỗi khi xuất báo cáo");
     } finally {
       setIsExporting(false);
     }
