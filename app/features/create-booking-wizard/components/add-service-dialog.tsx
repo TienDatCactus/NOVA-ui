@@ -1,13 +1,5 @@
-import {
-  Check,
-  ImageOff,
-  Search,
-  Sparkles,
-  Utensils,
-  AlertCircle,
-} from "lucide-react";
+import { Check, ImageOff, Search, Sparkles, Utensils } from "lucide-react";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -21,20 +13,10 @@ import {
 } from "~/components/ui/dialog";
 import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn, formatMoney } from "~/lib/utils";
-import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
-import { useServiceTypes } from "~/routes/services/container/service-types/query.hooks";
 import useServiceFilters from "~/routes/services/container/services/filter.hooks";
 
 import { useServices } from "~/routes/services/container/services/query.hooks";
