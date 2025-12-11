@@ -2,18 +2,18 @@ import { useState } from "react";
 
 export type PurchaseRequestStatus =
   | "Draft"
-  | "PendingApproval"
   | "Approved"
   | "Rejected"
   | "Fulfilled"
-  | "Cancelled";
+  | "Cancelled"
+  | undefined;
 
 export type PurchaseRequestFilters = {
-  status: PurchaseRequestStatus | null;
+  status: PurchaseRequestStatus;
 };
 
 const initialFilters: PurchaseRequestFilters = {
-  status: null,
+  status: undefined,
 };
 
 /**

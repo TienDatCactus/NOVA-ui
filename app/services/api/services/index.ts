@@ -82,7 +82,8 @@ async function updateService(
 
 async function deleteService(id: string) {
   try {
-    await http.delete(Service.delete(id));
+    const resp = await http.delete(Service.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

@@ -50,24 +50,23 @@ import {
   useInvoicePreview,
   useInvoicesByBooking,
 } from "../../container/use-booking-checkout.hooks";
-import { useCheckoutEligibility } from "../../container/use-booking-financial-status.hooks";
+import { useCheckoutEligibility } from "../../container/use-booking-state.hooks";
 import InvoiceDetailSheet from "./invoice-detail-sheet";
 
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { toast } from "sonner";
 
 interface CheckoutSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  bookingId: string;
-  bookingCode: string;
   bookingDetail?: BookingDetailResponseDto;
 }
 
 export default function CheckoutSheet({
   open,
   onOpenChange,
-  bookingId,
-  bookingCode,
   bookingDetail,
 }: CheckoutSheetProps) {
   const {
@@ -85,16 +84,17 @@ export default function CheckoutSheet({
   } = useCheckoutStore();
 
   const { data: pendingCharges, isPending: isLoadingCharges } =
-    useBookingPendingCharges(bookingId, open);
+    useBookingPendingCharges(bookingDetail?.id!, open);
 
   const { data: existingInvoices, isPending: isLoadingInvoices } =
-    useInvoicesByBooking(bookingId, open);
+    useInvoicesByBooking(bookingDetail?.id!, open);
 
   const { mutate: createInvoice, isPending: isCreatingInvoice } =
-    useCreateCheckoutInvoice(bookingId);
+    useCreateCheckoutInvoice(bookingDetail?.id!);
 
-  const { mutate: finalizeCheckout, isPending: isCheckingOut } =
-    useCheckout(bookingId);
+  const { mutate: finalizeCheckout, isPending: isCheckingOut } = useCheckout(
+    bookingDetail?.id!
+  );
 
   const checkoutEligibility = useCheckoutEligibility(bookingDetail, {
     pendingOrders: pendingCharges?.pendingOrders,
@@ -128,21 +128,19 @@ export default function CheckoutSheet({
 
   const activeInvoiceId = selectedInvoiceId || createdInvoiceId;
 
-  const totalDebt = useMemo(() => {
-    const pendingPreview = invoicePreview?.totalAmount || 0;
-    const otherInvoicesBalance =
-      existingInvoices?.reduce((acc, inv) => acc + (inv.balance || 0), 0) || 0;
-
-    return pendingPreview + otherInvoicesBalance;
-  }, [pendingCharges, invoicePreview, existingInvoices]);
-
   const shouldShowCreateInvoice = useMemo(() => {
-    const hasPendingItems = (invoicePreview?.totalAmount || 0) > 0;
-    if (hasPendingItems) return true;
-    if (!existingInvoices || existingInvoices.length === 0) return true;
-    return false;
-  }, [invoicePreview, existingInvoices]);
+    const hasCheckoutInvoice = existingInvoices?.some(
+      (inv) => inv.invoiceType === "Checkout" && inv.status !== "Voided"
+    );
 
+    if (hasCheckoutInvoice) return false;
+
+    const hasPendingOrders =
+      (pendingCharges?.pendingOrders?.posOrders?.length || 0) > 0 ||
+      (pendingCharges?.pendingOrders?.serviceOrders?.length || 0) > 0;
+
+    return hasPendingOrders;
+  }, [existingInvoices, pendingCharges]);
   const handleCreateInvoice = () => {
     createInvoice(undefined, {
       onSuccess: (data) => {
@@ -155,8 +153,17 @@ export default function CheckoutSheet({
   };
 
   const handleSelectInvoice = (invoiceId: string) => {
-    setSelectedInvoiceId(invoiceId);
-    setShowInvoiceDetail(true);
+    if (
+      hasAnyRole(AuthLoader.getUser(), [
+        UserRole.Accountant,
+        UserRole.Receptionist,
+      ])
+    ) {
+      setSelectedInvoiceId(invoiceId);
+      setShowInvoiceDetail(true);
+    } else {
+      toast.info("Chức năng chỉ dành cho nhân viên lễ tân.");
+    }
   };
 
   const handleFinalCheckout = () => {
@@ -177,72 +184,27 @@ export default function CheckoutSheet({
     setCreatedInvoiceId(null);
   };
 
-  const renderDebtStatus = () => {
-    if (isLoadingCharges) return null;
-
-    if (totalDebt === 0) {
-      return (
-        <div className="flex flex-col items-end px-4 py-2 bg-green-50 border border-green-100 rounded-lg">
-          <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" /> Trạng thái
-          </span>
-          <span className="text-lg font-bold text-green-700 font-mono">
-            Đã thanh toán đầy đủ
-          </span>
-        </div>
-      );
-    }
-
-    // Case 2: Debt > 0 (Guest needs to pay)
-    if (totalDebt > 0) {
-      return (
-        <div className="flex flex-col items-end px-4 py-2 bg-red-50 border border-red-100 rounded-lg">
-          <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
-            Khách cần trả
-          </span>
-          <span className="text-xl font-bold text-red-700 font-mono">
-            {formatMoney(totalDebt).vndFormatted}
-          </span>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col items-end px-4 py-2 bg-orange-50 border border-orange-100 rounded-lg">
-        <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
-          Cần hoàn tiền
-        </span>
-        <span className="text-xl font-bold text-orange-700 font-mono">
-          {formatMoney(Math.abs(totalDebt)).vndFormatted}
-        </span>
-      </div>
-    );
-  };
-
   return (
     <>
       <Sheet open={open} onOpenChange={handleSheetClose}>
         <SheetContent
           side="right"
-          className="w-full sm:max-w-[100vw] lg:max-w-6xl gap-0 p-0 flex flex-col bg-slate-50"
+          className="w-full sm:max-w-[100vw] lg:max-w-6xl gap-0 p-0 flex flex-col bg-background"
         >
           {/* HEADER */}
           <SheetHeader className="px-6 py-4 border-b bg-background shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <SheetTitle className="text-xl flex items-center gap-2">
-                  {isPostCheckout ? (
-                    <span>Xem hóa đơn</span>
-                  ) : (
-                    <p>Checkout Booking #{bookingCode}</p>
-                  )}
-                </SheetTitle>
-                <SheetDescription>
-                  Kiểm tra các khoản phí phát sinh, thanh toán hóa đơn và hoàn
-                  tất thủ tục trả phòng.
-                </SheetDescription>
-              </div>
-              {renderDebtStatus()}
+            <div className="space-y-1">
+              <SheetTitle className="text-xl flex items-center gap-2">
+                {isPostCheckout ? (
+                  <span>Xem hóa đơn</span>
+                ) : (
+                  <p>Checkout Booking #{bookingDetail?.bookingCode}</p>
+                )}
+              </SheetTitle>
+              <SheetDescription>
+                Kiểm tra các khoản phí phát sinh, thanh toán hóa đơn và hoàn tất
+                thủ tục trả phòng.
+              </SheetDescription>
             </div>
           </SheetHeader>
 
@@ -260,27 +222,6 @@ export default function CheckoutSheet({
                 <ScrollArea className="flex-1 border-r bg-background">
                   <div className="p-6 space-y-6">
                     {/* Section: Room Info Quick View (ReadOnly) */}
-                    {pendingCharges.roomInvoice &&
-                      (pendingCharges.roomInvoice.balance || 0) > 0 && (
-                        <Alert className="border-orange-200 bg-orange-50">
-                          <Wallet className="h-4 w-4 text-orange-600" />
-                          <AlertTitle className="text-orange-800">
-                            Tiền phòng chưa thanh toán
-                          </AlertTitle>
-                          <AlertDescription className="flex justify-between items-center mt-2">
-                            <span className="text-orange-800/80">
-                              Hóa đơn phòng:
-                            </span>
-                            <span className="font-bold font-mono text-lg text-orange-700">
-                              {
-                                formatMoney(
-                                  pendingCharges.roomInvoice.balance || 0
-                                ).vndFormatted
-                              }
-                            </span>
-                          </AlertDescription>
-                        </Alert>
-                      )}
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -332,7 +273,7 @@ export default function CheckoutSheet({
                       </div>
 
                       {/* Bill Metaphor Container */}
-                      <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
+                      <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
                         {invoicePreview &&
                         (invoicePreview.posOrderItems?.length > 0 ||
                           invoicePreview.serviceOrderItems?.length > 0) ? (
@@ -490,7 +431,7 @@ export default function CheckoutSheet({
                 </ScrollArea>
 
                 {/* RIGHT COL: INVOICE LIST & PAYMENT */}
-                <div className="w-full lg:w-[420px] bg-slate-50 border-l flex flex-col h-full shadow-inner">
+                <div className="w-full lg:w-[420px] bg-background border-l flex flex-col h-full shadow-inner">
                   <div className="p-6 flex-1 overflow-y-auto">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm font-semibold uppercase text-muted-foreground flex items-center gap-2">
@@ -520,14 +461,17 @@ export default function CheckoutSheet({
                       <div className="space-y-3">
                         {existingInvoices.map((invoice) => {
                           const isPaid = invoice.status === "Paid";
+                          if (invoice.status == "Voided") {
+                            return null;
+                          }
                           return (
                             <Card
                               key={invoice.id}
                               className={cn(
                                 "cursor-pointer transition-all duration-200 group relative overflow-hidden p-0 ",
                                 isPaid
-                                  ? "bg-white shadow-sm hover:border-green-500 border-transparent "
-                                  : "bg-white shadow-sm hover:shadow-md "
+                                  ? "bg-background shadow-sm hover:border-green-500 border-transparent "
+                                  : "bg-background shadow-sm hover:shadow-md "
                               )}
                               onClick={() => handleSelectInvoice(invoice.id!)}
                             >
@@ -584,20 +528,19 @@ export default function CheckoutSheet({
                         })}
                       </div>
                     ) : (
-                      <div className="text-center py-12 px-4 text-sm text-muted-foreground bg-white/50 rounded-lg border border-dashed">
+                      <div className="text-center py-12 px-4 text-sm text-muted-foreground bg-background/50 rounded-lg border border-dashed">
                         Chưa có hóa đơn nào được tạo.
                       </div>
                     )}
                   </div>
 
-                  {/* ACTION PANEL IN RIGHT COL */}
-                  <div className="p-4 bg-white border-t space-y-3 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
+                  <div className="p-4 bg-background border-t space-y-3 shadow-md z-10">
                     {shouldShowCreateInvoice && !isPostCheckout ? (
                       <Button
                         className="w-full h-12 text-base shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99]"
                         onClick={handleCreateInvoice}
                         disabled={isCreatingInvoice}
-                        variant="default"
+                        variant="success"
                       >
                         {isCreatingInvoice ? (
                           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -607,7 +550,7 @@ export default function CheckoutSheet({
                         Tạo Invoice thanh toán
                       </Button>
                     ) : (
-                      <div className="p-3 bg-green-50 text-green-700 text-sm rounded-md text-center border border-green-100 flex items-center justify-center gap-2 font-medium">
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm rounded-md text-center border border-green-100 dark:border-green-800 flex items-center justify-center gap-2 font-medium">
                         <CheckCircle2 className="w-4 h-4" />
                         Sẵn sàng hoàn tất
                       </div>
@@ -653,7 +596,7 @@ export default function CheckoutSheet({
                 className={cn(
                   "w-full sm:w-auto min-w-[200px] h-12 text-base font-semibold",
                   canCheckout
-                    ? "shadow-lg shadow-green-200 hover:shadow-green-300"
+                    ? "shadow-lg shadow-green-200 dark:shadow-green-800 hover:shadow-green-300 dark:hover:shadow-green-700"
                     : "opacity-50"
                 )}
               >
@@ -678,7 +621,7 @@ export default function CheckoutSheet({
         <InvoiceDetailSheet
           open={showInvoiceDetail}
           onOpenChange={setShowInvoiceDetail}
-          bookingId={bookingId}
+          bookingId={bookingDetail?.id!}
           invoiceId={activeInvoiceId}
           onBack={handleBackFromDetail}
           isNewlyCreatedInvoice={!!createdInvoiceId}

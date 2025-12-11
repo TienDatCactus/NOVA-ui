@@ -5,6 +5,8 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
 import MenuCategoryActionsCell from "../../fragments/menu-categories/actions.cell";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<MenuCategoryItemDto>[] = [
   {
@@ -98,13 +100,15 @@ export const columns: ColumnDef<MenuCategoryItemDto>[] = [
   },
   {
     id: "actions",
-    header: () => <p className="text-center">Thao tác</p>,
+    header: () => null,
     cell: ({ row }) => {
-      return (
-        <div className="flex justify-center">
-          <MenuCategoryActionsCell category={row.original} />
-        </div>
-      );
+      const { can } = useAuth();
+      if (can.update(RouteModule.MenuCategories))
+        return (
+          <div className="flex justify-center">
+            <MenuCategoryActionsCell category={row.original} />
+          </div>
+        );
     },
     enableSorting: false,
     enableHiding: false,

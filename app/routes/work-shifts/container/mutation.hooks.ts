@@ -1,4 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 import { WorkShiftService } from "~/services/api/work-shift";
 import type {
   CreateWorkShiftRequest,
@@ -14,6 +16,11 @@ export function useCreateWorkShift() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work-shifts"] });
+      toast.success("Tạo ca làm việc thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -27,6 +34,11 @@ export function useDeleteWorkShift() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work-shifts"] });
+      toast.success("Xóa ca làm việc thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -43,6 +55,11 @@ export function useUpdateWorkShift() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work-shifts"] });
+      toast.success("Cập nhật ca làm việc thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }

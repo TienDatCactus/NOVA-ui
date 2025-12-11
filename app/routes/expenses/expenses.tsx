@@ -3,6 +3,33 @@ import ExpensesListView from "./components/expenses-list-view";
 import useExpensesFilters from "./container/filter.hooks";
 import { useExpenses } from "./container/query.hooks";
 import ExpensesLayout from "./layouts/expenses.layout";
+import {
+  AuthLoader,
+  RouteModule,
+  Permission,
+  UserRole,
+  hasRole,
+} from "~/lib/auth/auth.loader";
+import { redirect } from "react-router";
+import { DASHBOARD } from "~/lib/fe-url";
+import type { Route } from "./+types/expenses";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Chi Phí - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý chi phí và phiếu chi" },
+  ];
+}
+
+export const clientLoader = () => {
+  const user = AuthLoader.getUser();
+
+  if (hasRole(user, UserRole.HotelManager)) {
+    throw redirect(DASHBOARD.expensesDashboard);
+  }
+
+  AuthLoader.guard(RouteModule.Expenses, Permission.Read);
+};
 
 export default function ExpensesRoute() {
   const { filters, updateFilter, resetFilters } = useExpensesFilters();

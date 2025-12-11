@@ -1,4 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 import type z from "zod";
 import { BookingService } from "~/services/api/booking";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
@@ -19,6 +21,12 @@ function useCreateBookingMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      toast.success("Tạo đặt phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 }

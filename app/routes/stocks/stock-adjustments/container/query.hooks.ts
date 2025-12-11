@@ -6,6 +6,7 @@ import type {
   UpdateStockAdjustmentDto,
 } from "~/services/api/stocks/stock-adjustments/dto";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 /**
  * Hook lấy danh sách stock adjustments
@@ -45,8 +46,11 @@ export function useCreateStockAdjustment() {
       queryClient.invalidateQueries({ queryKey: ["stock-adjustments"] });
       toast.success("Tạo phiếu điều chỉnh thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi tạo phiếu điều chỉnh");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi tạo phiếu điều chỉnh"
+        );
     },
   });
 }
@@ -72,8 +76,11 @@ export function useUpdateStockAdjustment() {
       });
       toast.success("Cập nhật phiếu điều chỉnh thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi cập nhật phiếu điều chỉnh");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi cập nhật phiếu điều chỉnh"
+        );
     },
   });
 }
@@ -91,8 +98,11 @@ export function useDeleteStockAdjustment() {
       queryClient.invalidateQueries({ queryKey: ["stock-adjustments"] });
       toast.success("Xóa phiếu điều chỉnh thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi xóa phiếu điều chỉnh");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi xóa phiếu điều chỉnh"
+        );
     },
   });
 }
@@ -114,8 +124,11 @@ export function useApplyStockAdjustment() {
       queryClient.invalidateQueries({ queryKey: ["stock-items"] });
       toast.success("Áp dụng phiếu điều chỉnh thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi áp dụng phiếu điều chỉnh");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi áp dụng phiếu điều chỉnh"
+        );
     },
   });
 }

@@ -23,15 +23,18 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
+import { useAuthHooks } from "./container/auth.hooks";
 import type { Route } from "./+types/forgot-password";
-import { useAuth } from "./container/auth.hooks";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Quên Mật Khẩu - NOVA Hotel Management" },
+    { name: "description", content: "Khôi phục mật khẩu tài khoản" },
+  ];
+}
 
 export default function ForgotPassword() {
-  const { forgotPassword, isLoading } = useAuth();
+  const { forgotPassword, isLoading } = useAuthHooks();
 
   const { ForgotPasswordSchema } = AuthSchema;
   const forgotPasswordForm = useForm({

@@ -22,6 +22,8 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { UserSchema } from "~/services/api/user/user.schema";
 import { useChangePassword } from "../container/query.hooks";
+import type { UserItem } from "~/services/api/user/dto";
+import PasswordInput from "~/components/ui/password-input";
 
 const { ChangePasswordSchema } = UserSchema;
 
@@ -38,19 +40,15 @@ type ChangePasswordFormData = z.infer<typeof ChangePasswordFormSchema>;
 interface ChangePasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  UserId: string;
-  UserName: string;
-  onSuccess?: () => void;
+  user: UserItem;
 }
 
 export default function ChangePasswordDialog({
   open,
   onOpenChange,
-  UserId,
-  UserName,
-  onSuccess,
+  user,
 }: ChangePasswordDialogProps) {
-  const { mutate: changePassword, isPending } = useChangePassword();
+  const { mutateAsync: changePassword, isPending } = useChangePassword();
 
   const form = useForm<ChangePasswordFormData>({
     resolver: zodResolver(ChangePasswordFormSchema),
@@ -63,14 +61,13 @@ export default function ChangePasswordDialog({
   const handleSubmit = (data: ChangePasswordFormData) => {
     changePassword(
       {
-        id: UserId,
+        id: user.id,
         data: { newPassword: data.newPassword },
       },
       {
         onSuccess: () => {
           form.reset();
           onOpenChange(false);
-          onSuccess?.();
         },
       }
     );
@@ -92,7 +89,9 @@ export default function ChangePasswordDialog({
           </DialogTitle>
           <DialogDescription>
             Đổi mật khẩu cho tài khoản:{" "}
-            <span className="font-semibold">{UserName}</span>
+            <span className="font-semibold">
+              {user.fullName} - {user.userName}
+            </span>
           </DialogDescription>
         </DialogHeader>
 
@@ -110,8 +109,7 @@ export default function ChangePasswordDialog({
                     Mật khẩu mới <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
+                    <PasswordInput
                       placeholder="Nhập mật khẩu mới"
                       disabled={isPending}
                       {...field}
@@ -132,8 +130,7 @@ export default function ChangePasswordDialog({
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
+                    <PasswordInput
                       placeholder="Nhập lại mật khẩu mới"
                       disabled={isPending}
                       {...field}

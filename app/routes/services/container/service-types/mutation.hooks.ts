@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { ServiceTypesService } from "~/services/api/service-types";
 import type {
@@ -15,6 +16,12 @@ export function useCreateServiceType() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service-types"] });
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      toast.success("Tạo loại dịch vụ thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 }
@@ -27,7 +34,16 @@ export function useUpdateServiceType(id: string) {
       await ServiceTypesService.updateServiceType(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service-types"] });
-      queryClient.invalidateQueries({ queryKey: ["service-types-detail", id] });
+      queryClient.invalidateQueries({
+        queryKey: ["service-types-detail", id],
+        refetchType: "active",
+      });
+      toast.success("Cập nhật loại dịch vụ thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 }
@@ -40,6 +56,12 @@ export function useDeleteServiceType(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service-types"] });
       queryClient.invalidateQueries({ queryKey: ["service-types-detail", id] });
+      toast.success("Xóa loại dịch vụ thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
     },
   });
 }

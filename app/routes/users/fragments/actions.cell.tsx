@@ -1,12 +1,13 @@
-import { useState } from "react";
 import {
+  Delete,
+  KeyRound,
+  Lock,
   MoreHorizontal,
   Pencil,
-  Lock,
-  Unlock,
   Shield,
-  KeyRound,
+  Unlock,
 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -17,52 +18,61 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import type { UserItem } from "~/services/api/user/dto";
-import { UserEditDialog } from "../components/user-edit-dialog";
+import ChangePasswordDialog from "../components/change-password-dialog";
 import { LockUserDialog } from "../components/lock-user-dialog";
 import { ManageRolesDialog } from "../components/manage-roles-dialog";
-import ChangePasswordDialog from "../components/change-password-dialog";
+import { UserEditDialog } from "../components/user-edit-dialog";
+
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
+import { useDeleteUser } from "../container/query.hooks";
 
 interface ActionsMenuCellProps {
   user: UserItem;
-  onViewDetail?: (user: UserItem) => void;
-  onSuccess?: () => void;
 }
 
-function ActionsMenuCell({
-  user,
-  onViewDetail,
-  onSuccess,
-}: ActionsMenuCellProps) {
+function ActionsMenuCell({ user }: ActionsMenuCellProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLockDialogOpen, setIsLockDialogOpen] = useState(false);
   const [lockDialogMode, setLockDialogMode] = useState<"lock" | "unlock">(
     "lock"
   );
+
+  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
   const [isManageRolesOpen, setIsManageRolesOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
+  const { mutate } = useDeleteUser();
   const handleLockUser = (e: React.MouseEvent) => {
-    e.stopPropagation();
     setLockDialogMode("lock");
     setIsLockDialogOpen(true);
   };
 
   const handleUnlockUser = (e: React.MouseEvent) => {
-    e.stopPropagation();
     setLockDialogMode("unlock");
     setIsLockDialogOpen(true);
+  };
+
+  const handleDeleteAccount = (e: React.MouseEvent) => {
+    mutate(user.id, {
+      onSuccess: () => {
+        setIsDeleteAccountOpen(false);
+      },
+    });
   };
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
             <span className="sr-only">Mở menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -73,7 +83,6 @@ function ActionsMenuCell({
 
           <DropdownMenuItem
             onClick={(e) => {
-              e.stopPropagation();
               setIsEditOpen(true);
             }}
           >
@@ -83,7 +92,6 @@ function ActionsMenuCell({
 
           <DropdownMenuItem
             onClick={(e) => {
-              e.stopPropagation();
               setIsManageRolesOpen(true);
             }}
           >
@@ -93,12 +101,20 @@ function ActionsMenuCell({
 
           <DropdownMenuItem
             onClick={(e) => {
-              e.stopPropagation();
               setIsChangePasswordOpen(true);
             }}
           >
             <KeyRound className="h-4 w-4 mr-2" />
             Đổi mật khẩu
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={(e) => {
+              setIsDeleteAccountOpen(true);
+            }}
+          >
+            <Delete className="h-4 w-4 mr-2" />
+            Xóa tài khoản
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
@@ -112,10 +128,7 @@ function ActionsMenuCell({
               Mở khóa tài khoản
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem
-              onClick={handleLockUser}
-              className="text-destructive focus:text-destructive"
-            >
+            <DropdownMenuItem variant="destructive" onClick={handleLockUser}>
               <Lock className="h-4 w-4 mr-2" />
               Khóa tài khoản
             </DropdownMenuItem>
@@ -128,10 +141,6 @@ function ActionsMenuCell({
         user={user}
         open={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        onSuccess={() => {
-          setIsEditOpen(false);
-          onSuccess?.();
-        }}
       />
 
       {/* Lock/Unlock Dialog */}
@@ -140,10 +149,6 @@ function ActionsMenuCell({
         open={isLockDialogOpen}
         onClose={() => setIsLockDialogOpen(false)}
         mode={lockDialogMode}
-        onSuccess={() => {
-          setIsLockDialogOpen(false);
-          onSuccess?.();
-        }}
       />
 
       {/* Manage Roles Dialog */}
@@ -151,23 +156,34 @@ function ActionsMenuCell({
         user={user}
         open={isManageRolesOpen}
         onClose={() => setIsManageRolesOpen(false)}
-        onSuccess={() => {
-          setIsManageRolesOpen(false);
-          onSuccess?.();
-        }}
       />
 
       {/* Change Password Dialog */}
       <ChangePasswordDialog
         open={isChangePasswordOpen}
         onOpenChange={setIsChangePasswordOpen}
-        UserId={user.id}
-        UserName={user.fullName}
-        onSuccess={() => {
-          setIsChangePasswordOpen(false);
-          onSuccess?.();
-        }}
+        user={user}
       />
+      <AlertDialog
+        open={isDeleteAccountOpen}
+        onOpenChange={setIsDeleteAccountOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xóa tài khoản</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể
+              hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <Button variant="destructive" onClick={handleDeleteAccount}>
+              Tiếp tục
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

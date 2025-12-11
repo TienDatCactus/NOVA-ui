@@ -36,7 +36,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
 
   if (isPending) {
     return (
-      <div className="p-6 bg-slate-50/50 border-t">
+      <div className="p-6 bg-muted border-t">
         <div className="flex gap-8">
           <Skeleton className="h-48 w-48 rounded-xl" />
           <div className="flex-1 space-y-4">
@@ -56,7 +56,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
   const subImages = hasImages ? detailData.images!.slice(1, 4) : [];
 
   return (
-    <div className="bg-slate-50/80 border-t shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="bg-muted border-t shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* === LEFT COLUMN: VISUALS === */}
@@ -155,7 +155,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
               </div>
 
               {/* Metadata Footer (Timestamps) */}
-              <div className="flex flex-col gap-2 text-xs text-muted-foreground bg-white/50 p-3 rounded border">
+              <div className="flex flex-col gap-2 text-xs text-muted-foreground bg-background/50 p-3 rounded border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CalendarDays className="w-3.5 h-3.5" />

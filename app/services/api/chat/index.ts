@@ -111,7 +111,8 @@ async function assignChatSession(
   staffUserId: string
 ): Promise<void> {
   try {
-    await http.post(Chat.assign(sessionId), { staffUserId });
+    const resp = await http.post(Chat.assign(sessionId), { staffUserId });
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -133,7 +134,8 @@ async function closeChatSession(sessionId: string): Promise<void> {
 
 async function markRead(messageId: string) {
   try {
-    await http.post(Chat.markRead(messageId));
+    const resp = await http.post(Chat.markRead(messageId));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -141,7 +143,8 @@ async function markRead(messageId: string) {
 }
 async function markAllRead(sessionId: string) {
   try {
-    await http.post(Chat.markAllRead(sessionId));
+    const resp = await http.post(Chat.markAllRead(sessionId));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

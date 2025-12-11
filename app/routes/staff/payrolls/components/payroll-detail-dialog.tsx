@@ -13,8 +13,10 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
-import { usePayrollDetail } from "../container/query.hooks";
+import { useExportPayslips, usePayrollDetail } from "../container/query.hooks";
 import ComponentsList from "./payroll-detail-dialog/components-list";
+import { formatMoney } from "~/lib/utils";
+import { AxiosError } from "axios";
 
 interface PayrollDetailDialogProps {
   payrollId: string;
@@ -29,19 +31,17 @@ export default function PayrollDetailDialog({
 }: PayrollDetailDialogProps) {
   const [isExporting, setIsExporting] = useState(false);
 
-  const { data, isPending, refetch } = usePayrollDetail(payrollId);
-
-  const payroll = (data as any)?.data || data;
-
+  const { data: payroll, isPending, refetch } = usePayrollDetail(payrollId);
+  const { mutateAsync } = useExportPayslips(payrollId);
   const handleExportPayslip = async () => {
     setIsExporting(true);
     try {
-      const blob = await StaffPayrollService.exportPayslip(payrollId);
+      const blob = await mutateAsync();
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `PhieuLuong_${payroll?.staffCode}_${payroll?.month}_${payroll?.year}.xlsx`;
+      a.download = `PhieuLuong_${payroll?.staffCode}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -49,8 +49,6 @@ export default function PayrollDetailDialog({
 
       toast.success("Xuất phiếu lương thành công");
     } catch (error) {
-      toast.error("Không thể xuất phiếu lương");
-      console.error("Export payslip error:", error);
     } finally {
       setIsExporting(false);
     }
@@ -132,22 +130,32 @@ export default function PayrollDetailDialog({
                         </div>
                         <div className="space-y-0.5">
                           <p className="text-[11px] text-muted-foreground">
-                            Kỳ lương
+                            Trạng thái
                           </p>
-                          <p className="text-sm">
-                            Tháng {payroll.month}/{payroll.year}
-                          </p>
+                          <div className="flex gap-2">
+                            <Badge
+                              variant={payroll.locked ? "default" : "secondary"}
+                              className="text-xs h-5"
+                            >
+                              {payroll.locked ? "Đã khóa" : "Tạm tính"}
+                            </Badge>
+                            {payroll.hasExpense && (
+                              <Badge
+                                variant="default"
+                                className="text-xs h-5 bg-green-600"
+                              >
+                                Đã tạo phiếu chi
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                         <div className="space-y-0.5">
                           <p className="text-[11px] text-muted-foreground">
-                            Trạng thái
+                            Mã phiếu chi
                           </p>
-                          <Badge
-                            variant={payroll.locked ? "default" : "secondary"}
-                            className="text-xs h-5"
-                          >
-                            {payroll.locked ? "Đã khóa" : "Tạm tính"}
-                          </Badge>
+                          <p className="text-sm font-mono">
+                            {payroll.expenseId || "—"}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -159,13 +167,21 @@ export default function PayrollDetailDialog({
                       <h3 className="font-semibold text-xs uppercase text-muted-foreground">
                         Thông tin công
                       </h3>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-4 gap-2">
                         <div className="rounded-md border p-2.5 space-y-0.5">
                           <p className="text-[11px] text-muted-foreground">
                             Ngày trong tháng
                           </p>
                           <p className="text-lg font-bold">
-                            {payroll.daysInMonth}
+                            {payroll.daysInMonth || 0}
+                          </p>
+                        </div>
+                        <div className="rounded-md border p-2.5 space-y-0.5">
+                          <p className="text-[11px] text-muted-foreground">
+                            Ngày được giao
+                          </p>
+                          <p className="text-lg font-bold text-purple-600">
+                            {payroll.assignedDays?.toFixed(2) || 0}
                           </p>
                         </div>
                         <div className="rounded-md border p-2.5 space-y-0.5">
@@ -181,7 +197,7 @@ export default function PayrollDetailDialog({
                             Phép không lương
                           </p>
                           <p className="text-lg font-bold text-orange-600">
-                            {payroll.unpaidLeaveDays}
+                            {payroll.unpaidLeaveDays || 0}
                           </p>
                         </div>
                       </div>
@@ -192,7 +208,7 @@ export default function PayrollDetailDialog({
                             Phép có lương (Quota)
                           </p>
                           <p className="text-base font-semibold">
-                            {payroll.paidLeaveQuota}
+                            {payroll.paidLeaveQuota || 0}
                           </p>
                         </div>
                         <div className="rounded-md border p-2.5 space-y-0.5">
@@ -213,7 +229,7 @@ export default function PayrollDetailDialog({
                         </div>
                       </div>
 
-                      {payroll.paidLeaveDaysCarryOver > 0 && (
+                      {(payroll.paidLeaveDaysCarryOver ?? 0) > 0 && (
                         <div className="rounded-md bg-blue-50 dark:bg-blue-900/10 border border-blue-200 p-2.5">
                           <p className="text-[11px] text-muted-foreground">
                             Phép cộng dồn
@@ -221,6 +237,27 @@ export default function PayrollDetailDialog({
                           <p className="text-sm font-semibold text-blue-600">
                             {payroll.paidLeaveDaysCarryOver} ngày
                           </p>
+                        </div>
+                      )}
+
+                      {payroll.unusedLeaveMode && (
+                        <div className="rounded-md bg-amber-50 dark:bg-amber-900/10 border border-amber-200 p-2.5">
+                          <p className="text-[11px] text-muted-foreground">
+                            Xử lý phép dư
+                          </p>
+                          <p className="text-sm font-semibold text-amber-600">
+                            {payroll.unusedLeaveMode === "PayOut"
+                              ? "Thanh toán"
+                              : "Cộng dồn"}
+                          </p>
+                        </div>
+                      )}
+
+                      {payroll.hasUnusedLeavePending && (
+                        <div className="rounded-md bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 p-2.5">
+                          <Badge variant="outline" className="text-xs">
+                            Có phép dư chưa xử lý
+                          </Badge>
                         </div>
                       )}
                     </div>
@@ -238,9 +275,10 @@ export default function PayrollDetailDialog({
                             Lương cơ bản (Tháng đủ)
                           </span>
                           <span className="font-mono text-sm">
-                            {payroll.baseSalaryFullMonth?.toLocaleString(
-                              "vi-VN"
-                            )}{" "}
+                            {
+                              formatMoney(payroll.baseSalaryFullMonth || 0)
+                                .vndFormatted
+                            }{" "}
                             VNĐ
                           </span>
                         </div>
@@ -249,9 +287,10 @@ export default function PayrollDetailDialog({
                             Lương cơ bản (Tính thực tế)
                           </span>
                           <span className="font-mono text-sm font-medium">
-                            {payroll.baseSalaryCalculated?.toLocaleString(
-                              "vi-VN"
-                            )}{" "}
+                            {
+                              formatMoney(payroll.baseSalaryCalculated || 0)
+                                .vndFormatted
+                            }{" "}
                             VNĐ
                           </span>
                         </div>
@@ -267,9 +306,10 @@ export default function PayrollDetailDialog({
                             }`}
                           >
                             {(payroll.componentsTotal || 0) >= 0 ? "+" : ""}
-                            {(payroll.componentsTotal || 0).toLocaleString(
-                              "vi-VN"
-                            )}{" "}
+                            {
+                              formatMoney(payroll.componentsTotal || 0)
+                                .vndFormatted
+                            }{" "}
                             VNĐ
                           </span>
                         </div>
@@ -283,7 +323,7 @@ export default function PayrollDetailDialog({
                             Tổng lương
                           </span>
                           <span className="font-mono font-bold">
-                            {payroll.totalAmount?.toLocaleString("vi-VN")} VNĐ
+                            {formatMoney(payroll.totalAmount || 0).vndFormatted}
                           </span>
                         </div>
                         <div className="flex justify-between py-1">
@@ -291,7 +331,7 @@ export default function PayrollDetailDialog({
                             Đã trả
                           </span>
                           <span className="font-mono text-sm">
-                            {payroll.paidAmount?.toLocaleString("vi-VN")} VNĐ
+                            {formatMoney(payroll.paidAmount || 0).vndFormatted}
                           </span>
                         </div>
                         <div className="flex justify-between py-1">
@@ -299,8 +339,10 @@ export default function PayrollDetailDialog({
                             Còn lại
                           </span>
                           <span className="font-mono text-sm font-medium text-orange-600">
-                            {payroll.remainingAmount?.toLocaleString("vi-VN")}{" "}
-                            VNĐ
+                            {
+                              formatMoney(payroll.remainingAmount || 0)
+                                .vndFormatted
+                            }
                           </span>
                         </div>
                       </div>
@@ -317,6 +359,8 @@ export default function PayrollDetailDialog({
                   payrollId={payrollId}
                   components={payroll.components || []}
                   componentsTotal={payroll.componentsTotal || 0}
+                  hasExpense={payroll.hasExpense}
+                  locked={payroll.locked}
                   onRefresh={refetch}
                 />
               </TabsContent>

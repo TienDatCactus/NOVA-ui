@@ -28,11 +28,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { formatMoney } from "~/lib/utils";
 
 interface ComponentsListProps {
   payrollId: string;
   components: PayrollComponentDto[];
   componentsTotal: number;
+  hasExpense?: boolean;
+  locked?: boolean;
   onRefresh?: () => void;
 }
 
@@ -40,6 +43,8 @@ export default function ComponentsList({
   payrollId,
   components,
   componentsTotal,
+  hasExpense = false,
+  locked = false,
   onRefresh,
 }: ComponentsListProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -66,7 +71,7 @@ export default function ComponentsList({
   const confirmDelete = () => {
     if (componentToDelete) {
       deleteComponent(
-        { componentId: componentToDelete.componentId },
+        { componentId: componentToDelete.componentId, payrollId: payrollId },
         {
           onSuccess: () => {
             toast.success("Xóa component thành công");
@@ -98,7 +103,11 @@ export default function ComponentsList({
             Quản lý các khoản thưởng, phạt, phụ cấp
           </p>
         </div>
-        <Button size="sm" onClick={() => setAddDialogOpen(true)}>
+        <Button
+          size="sm"
+          onClick={() => setAddDialogOpen(true)}
+          disabled={hasExpense}
+        >
           <Plus className="h-4 w-4 mr-1.5" />
           Thêm mới
         </Button>
@@ -156,7 +165,7 @@ export default function ComponentsList({
                           }`}
                         >
                           {displayAmount >= 0 ? "+" : ""}
-                          {displayAmount.toLocaleString("vi-VN")}
+                          {formatMoney(displayAmount).vndFormatted}
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5">
                           VNĐ
@@ -169,6 +178,7 @@ export default function ComponentsList({
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                            disabled={hasExpense}
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
@@ -176,6 +186,7 @@ export default function ComponentsList({
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={() => handleEdit(component)}
+                            disabled={hasExpense}
                           >
                             <Pencil className="h-4 w-4 mr-2" />
                             Chỉnh sửa
@@ -183,6 +194,7 @@ export default function ComponentsList({
                           <DropdownMenuItem
                             onClick={() => handleDelete(component)}
                             className="text-destructive focus:text-destructive"
+                            disabled={hasExpense}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Xóa
@@ -213,7 +225,7 @@ export default function ComponentsList({
                     }`}
                   >
                     {componentsTotal >= 0 ? "+" : ""}
-                    {componentsTotal.toLocaleString("vi-VN")}
+                    {formatMoney(componentsTotal).vndFormatted}
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
                     VNĐ

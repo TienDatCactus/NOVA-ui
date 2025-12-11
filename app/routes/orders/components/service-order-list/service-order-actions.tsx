@@ -106,7 +106,7 @@ export function ServiceActionMenu({
   status,
   currentScheduledTime,
 }: ActionProps) {
-  const { dialogs, toggle, handlers, loading } = useServiceOrderLogic({
+  const { dialogs, toggle, handlers } = useServiceOrderLogic({
     orderId,
   });
   const isEditable = status === "Scheduled";
@@ -134,17 +134,12 @@ export function ServiceActionMenu({
             <CalendarClock className="mr-2 h-4 w-4" /> Đổi lịch hẹn
           </DropdownMenuItem>
 
-          {/* Ví dụ thêm nút In phiếu nếu cần */}
-          <DropdownMenuItem>
-            <Printer className="mr-2 h-4 w-4" /> In phiếu dịch vụ
-          </DropdownMenuItem>
-
           {isEditable && (
             <>
               <DropdownMenuSeparator />
               {/* Trigger Cancel Logic */}
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
+                variant="destructive"
                 onClick={handlers.handleCancel}
               >
                 <Ban className="mr-2 h-4 w-4" /> Hủy dịch vụ
@@ -177,7 +172,7 @@ export function ServiceFooterActions({ orderId, status }: ActionProps) {
 
   if (status === "Completed") {
     return (
-      <div className="flex items-center justify-center w-full py-2 bg-green-50 text-green-700 text-sm font-medium rounded border border-green-200">
+      <div className="flex items-center justify-center w-full py-2 bg-green-50 text-green-700 dark:bg-green-900/50 text-sm font-medium rounded border border-green-200 dark:border-green-700">
         <CheckCircle2 className="mr-2 h-4 w-4" /> Đã hoàn thành
       </div>
     );
@@ -185,7 +180,7 @@ export function ServiceFooterActions({ orderId, status }: ActionProps) {
 
   if (status === "Cancelled" || status === "NoShow") {
     return (
-      <div className="flex items-center justify-center w-full py-2 bg-gray-100 text-gray-500 text-sm font-medium rounded border border-gray-200">
+      <div className="flex items-center justify-center w-full py-2 bg-gray-100 text-gray-500 dark:bg-gray-900/50 text-sm font-medium rounded border border-gray-200 dark:border-gray-700">
         <XCircle className="mr-2 h-4 w-4" /> Đã hủy / Không đến
       </div>
     );
@@ -194,21 +189,14 @@ export function ServiceFooterActions({ orderId, status }: ActionProps) {
   // Status === "Scheduled"
   return (
     <div className="grid grid-cols-2 gap-3 w-full">
-      {/* Nút Thanh toán (Có thể thanh toán trước hoặc sau) */}
-      <Button
-        variant="outline"
-        className="border-blue-200 text-blue-700 hover:bg-blue-50"
-        onClick={() => toggle("pay", true)}
-      >
+      <Button variant="info-outline" onClick={() => toggle("pay", true)}>
         <CreditCard className="mr-2 h-4 w-4" /> Thanh toán
       </Button>
 
-      {/* Nút Hoàn thành (Quan trọng nhất) */}
       <Button
         variant="success"
         onClick={handlers.handleComplete}
         disabled={loading.isCompleting}
-        className="bg-green-600 hover:bg-green-700 text-white shadow-sm"
       >
         <CheckCircle2 className="mr-2 h-4 w-4" /> Hoàn tất
       </Button>

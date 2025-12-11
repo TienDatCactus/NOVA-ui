@@ -1,60 +1,100 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 import {
-  FileDown,
   Download,
-  FileSpreadsheet,
-  FileText,
-  CheckCircle2,
-  CalendarRange,
   Loader2,
+  Search,
+  Check,
+  X,
+  Filter,
+  Upload,
 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "~/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
-import { DateRangePicker } from "~/components/ui/date-range-picker";
+import { Input } from "~/components/ui/input";
 import { toast } from "sonner";
 import { useExportAuditLogs } from "../container/query.hooks";
-import { cn } from "~/lib/utils";
-import { Separator } from "~/components/ui/separator";
+import { cn, onError } from "~/lib/utils";
+import { AuditSchema } from "~/services/api/audit/audit.schema";
+import type { ExportAuditRequest } from "~/services/api/audit/dto";
+import { DatePicker } from "~/components/ui/date-picker";
+import { AxiosError } from "axios";
 
 interface ExportAuditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+const MODULE_OPTIONS = [
+  { value: "UserManagement", label: "Quản lý người dùng" },
+  { value: "Booking", label: "Đặt phòng" },
+  { value: "Room", label: "Phòng" },
+  { value: "FnB", label: "F&B" },
+  { value: "Service", label: "Dịch vụ" },
+  { value: "Financial", label: "Tài chính" },
+  { value: "SystemConfig", label: "Cấu hình" },
+  { value: "Common", label: "Chung" },
+];
+
+const ACTION_OPTIONS = [
+  { value: "Create", label: "Tạo mới" },
+  { value: "Update", label: "Cập nhật" },
+  { value: "Delete", label: "Xóa" },
+  { value: "Login", label: "Đăng nhập" },
+];
+
 export default function ExportAuditDialog({
   open,
   onOpenChange,
 }: ExportAuditDialogProps) {
-  const [fileFormat, setFileFormat] = useState<"Excel" | "CSV">("Excel");
-  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
-
   const exportMutation = useExportAuditLogs();
 
-  const handleExport = async () => {
-    try {
-      const blob = await exportMutation.mutateAsync({
-        fromDate: dateRange?.from
-          ? format(dateRange.from, "yyyy-MM-dd")
-          : undefined,
-        toDate: dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : undefined,
-      });
+  const form = useForm<ExportAuditRequest>({
+    resolver: zodResolver(AuditSchema.ExportAuditRequestSchema),
+    defaultValues: {
+      fromDate: undefined,
+      toDate: undefined,
+      module: undefined,
+      action: undefined,
+      keyword: undefined,
+      success: undefined,
+    },
+  });
 
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
+  useEffect(() => {
+    if (!open) form.reset();
+  }, [open]);
+
+  const onSubmit = async (data: ExportAuditRequest) => {
+    try {
+      const blob = await exportMutation.mutateAsync(data);
+      const url = window.URL.createObjectURL(blob as any);
       const a = document.createElement("a");
       a.href = url;
-      const extension = fileFormat === "Excel" ? "xlsx" : "csv";
-      a.download = `audit-logs-${format(new Date(), "yyyyMMdd-HHmm")}.${extension}`;
+      a.download = `audit-logs-${format(new Date(), "yyyyMMdd-HHmm")}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -62,169 +102,238 @@ export default function ExportAuditDialog({
 
       toast.success("Xuất dữ liệu thành công");
       onOpenChange(false);
-    } catch (error) {
-      console.error("Export error:", error);
-    }
+    } catch (error) {}
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
-        {/* === HEADER === */}
-        <DialogHeader className="px-6 py-4 border-b bg-muted/5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-500/10 rounded-lg text-green-600">
-              <FileDown className="h-5 w-5" />
-            </div>
-            <div>
-              <DialogTitle>Xuất dữ liệu</DialogTitle>
-              <DialogDescription className="mt-0.5">
-                Tải xuống bản ghi nhật ký hoạt động để lưu trữ hoặc báo cáo.
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
+      <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden border-none shadow-xl">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit, onError)}
+            className="flex flex-col"
+          >
+            {/* HEADER: Clean & Title only */}
+            <DialogHeader className="px-6 py-5 border-b border-border/40 bg-background/50 backdrop-blur-sm">
+              <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+                <Download className="w-5 h-5 text-muted-foreground" />
+                Xuất nhật ký hệ thống
+              </DialogTitle>
+            </DialogHeader>
 
-        <div className="p-6 space-y-6">
-          {/* 1. FORMAT SELECTION (Cards) */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold text-foreground">
-              1. Chọn định dạng file
-            </Label>
-            <div className="grid grid-cols-2 gap-4">
-              {/* Option: Excel */}
-              <div
-                onClick={() => setFileFormat("Excel")}
-                className={cn(
-                  "relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-muted/50",
-                  fileFormat === "Excel"
-                    ? "border-green-500 bg-green-50/50"
-                    : "border-muted bg-background"
-                )}
-              >
-                {fileFormat === "Excel" && (
-                  <div className="absolute top-2 right-2 text-green-600">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                )}
-                <div className="p-2 bg-green-100 text-green-700 rounded-full">
-                  <FileSpreadsheet className="w-6 h-6" />
-                </div>
-                <div className="text-center space-y-0.5">
-                  <p className="font-semibold text-sm">Microsoft Excel</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Phù hợp làm báo cáo
-                  </p>
-                </div>
-              </div>
-
-              {/* Option: CSV */}
-              <div
-                onClick={() => setFileFormat("CSV")}
-                className={cn(
-                  "relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-muted/50",
-                  fileFormat === "CSV"
-                    ? "border-blue-500 bg-blue-50/50"
-                    : "border-muted bg-background"
-                )}
-              >
-                {fileFormat === "CSV" && (
-                  <div className="absolute top-2 right-2 text-blue-600">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                )}
-                <div className="p-2 bg-blue-100 text-blue-700 rounded-full">
-                  <FileText className="w-6 h-6" />
-                </div>
-                <div className="text-center space-y-0.5">
-                  <p className="font-semibold text-sm">CSV File</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Dữ liệu thô / Import
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* 2. DATE RANGE */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold text-foreground">
-              2. Phạm vi dữ liệu
-            </Label>
-            <div className="space-y-2">
-              <DateRangePicker
-                from={dateRange?.from}
-                to={dateRange?.to}
-                onRangeChange={(range) =>
-                  setDateRange({ from: range.from, to: range.to })
-                }
-                className="w-full"
-                placeholder="Chọn khoảng thời gian cần xuất"
-              />
-              <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-                <CalendarRange className="w-3 h-3" />
-                {dateRange.from ? (
-                  <span>
-                    Dữ liệu từ{" "}
-                    <span className="font-medium text-foreground">
-                      {format(dateRange.from, "dd/MM/yyyy")}
-                    </span>
-                    {dateRange.to ? (
-                      <>
-                        {" "}
-                        đến{" "}
-                        <span className="font-medium text-foreground">
-                          {format(dateRange.to, "dd/MM/yyyy")}
-                        </span>
-                      </>
-                    ) : (
-                      " trở đi"
+            {/* BODY: Compact Grid */}
+            <div className="p-6 space-y-6">
+              {/* 1. TIMELINE */}
+              <div className="space-y-2">
+                <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  Thời gian
+                </FormLabel>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fromDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <DatePicker
+                            {...field}
+                            mode="single"
+                            selected={new Date(field.value ?? "")}
+                            value={field.value || new Date()}
+                            className="h-9"
+                          />
+                        </FormControl>
+                      </FormItem>
                     )}
-                  </span>
-                ) : (
-                  <span>
-                    Xuất{" "}
-                    <span className="font-medium text-foreground">Toàn bộ</span>{" "}
-                    dữ liệu từ trước đến nay
-                  </span>
-                )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="toDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <DatePicker
+                            {...field}
+                            mode="single"
+                            selected={new Date(field.value ?? "")}
+                            value={field.value || new Date()}
+                            className="h-9"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* 2. SCOPE FILTERS */}
+              <div className="space-y-2">
+                <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  Phạm vi dữ liệu
+                </FormLabel>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="module"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-9 text-sm">
+                              <SelectValue placeholder="Module" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {MODULE_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="action"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-9 text-sm">
+                              <SelectValue placeholder="Loại hành động" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ACTION_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* 3. SEARCH & STATUS (Combined Row for space efficiency) */}
+              <div className="grid grid-cols-12 gap-4">
+                <div className="col-span-8 space-y-2">
+                  <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Từ khóa & User
+                  </FormLabel>
+                  <FormField
+                    control={form.control}
+                    name="keyword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground opacity-50" />
+                            <Input
+                              {...field}
+                              value={field.value || ""}
+                              placeholder="Tìm theo nội dung, user..."
+                              className="h-9 pl-9 text-sm"
+                            />
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="col-span-4 space-y-2">
+                  <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Trạng thái
+                  </FormLabel>
+                  <FormField
+                    control={form.control}
+                    name="success"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex rounded-md shadow-sm">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className={cn(
+                              "w-1/2 rounded-r-none h-9 border-r-0 px-2",
+                              field.value === true &&
+                                "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800"
+                            )}
+                            onClick={() =>
+                              field.onChange(
+                                field.value === true ? undefined : true
+                              )
+                            }
+                            title="Chỉ lấy thành công"
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className={cn(
+                              "w-1/2 rounded-l-none h-9 px-2",
+                              field.value === false &&
+                                "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800"
+                            )}
+                            onClick={() =>
+                              field.onChange(
+                                field.value === false ? undefined : false
+                              )
+                            }
+                            title="Chỉ lấy thất bại"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* === FOOTER === */}
-        <DialogFooter className="px-6 py-4 border-t bg-background">
-          <Button
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
-            disabled={exportMutation.isPending}
-          >
-            Hủy bỏ
-          </Button>
-          <Button
-            onClick={handleExport}
-            disabled={exportMutation.isPending}
-            className={cn(
-              "min-w-[140px]",
-              fileFormat === "Excel"
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-primary"
-            )}
-          >
-            {exportMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Đang xử lý...
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" /> Xuất {fileFormat}
-              </>
-            )}
-          </Button>
-        </DialogFooter>
+            {/* FOOTER */}
+            <DialogFooter className="px-6 py-4 bg-muted/5 border-t border-border/40 gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => onOpenChange(false)}
+                disabled={exportMutation.isPending}
+              >
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                disabled={exportMutation.isPending}
+                variant={"success"}
+              >
+                <Upload />
+                {exportMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Đang xử
+                    lý...
+                  </>
+                ) : (
+                  "Xuất Excel"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

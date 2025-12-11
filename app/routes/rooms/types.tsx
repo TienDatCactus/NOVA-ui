@@ -1,7 +1,19 @@
 import RoomTypesDataTable from "./components/room-types/room-types-list";
-import useRoomTypeFilter from "./container/room-types/filter.hooks";
+import useRoomTypeFilters from "./container/room-types/filter.hooks";
 import { useRoomTypes } from "./container/room-types/query.hooks";
 import RoomTypesViewLayout from "./layouts/room-types-view.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/types";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Loại Phòng - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý loại phòng khách sạn" },
+  ];
+}
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.RoomTypes, Permission.Read);
 
 export default function RoomTypesPage() {
   const {
@@ -10,7 +22,7 @@ export default function RoomTypesPage() {
     resetFilters,
     filterRoomTypes,
     includeInactive,
-  } = useRoomTypeFilter();
+  } = useRoomTypeFilters();
 
   const { data: roomTypes, isPending } = useRoomTypes({
     includeInactive,

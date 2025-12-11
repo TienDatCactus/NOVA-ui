@@ -61,7 +61,8 @@ async function updateUnit(
 
 async function deleteUnit(id: string): Promise<void> {
   try {
-    await http.delete(Units.delete(id));
+    const resp = await http.delete(Units.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

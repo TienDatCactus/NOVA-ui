@@ -31,13 +31,20 @@ import {
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { ResetPasswordDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/reset-password";
-import { useAuth } from "./container/auth.hooks";
+import { useAuthHooks } from "./container/auth.hooks";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Đặt Lại Mật Khẩu - NOVA Hotel Management" },
+    { name: "description", content: "Xác thực OTP và đặt lại mật khẩu mới" },
+  ];
+}
 
 export default function VerifyOTP({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { resetPassword, isLoading, error: apiError } = useAuth();
+  const { resetPassword, isLoading, error: apiError } = useAuthHooks();
   const requestedEmail = useLocation().state.email as string;
   if (!requestedEmail) {
     toast.error(

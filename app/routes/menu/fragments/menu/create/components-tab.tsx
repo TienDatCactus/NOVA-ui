@@ -75,26 +75,21 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
         </Button>
       </div>
 
-      {fields.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed rounded-lg bg-muted/5">
-          <Layers className="w-10 h-10 text-muted-foreground/20 mb-3" />
-          <p className="text-sm text-muted-foreground">
-            Chưa có nguyên liệu nào
+      {(form.formState.errors.Components?.message || fields.length === 0) && (
+        <div className="mb-4 p-3 rounded-md bg-destructive/10 border border-destructive/20">
+          <p className="text-sm text-destructive font-medium">
+            {(form.formState.errors.Components?.message as string) ||
+              "Vui lòng thêm ít nhất 1 nguyên liệu vào công thức định lượng"}
           </p>
-          <Button
-            variant="link"
-            onClick={() =>
-              append({
-                itemId: "",
-                itemCode: "",
-                itemName: "",
-                quantity: 1,
-                notes: "",
-              })
-            }
-          >
-            Thêm nguyên liệu đầu tiên
-          </Button>
+        </div>
+      )}
+
+      {fields.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-lg bg-muted/5">
+          <Layers className="w-10 h-10 text-muted-foreground/20 mb-2" />
+          <p className="text-sm text-muted-foreground">
+            Chưa có thành phần nào
+          </p>
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden">
@@ -232,7 +227,7 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
                               onChange={field.onChange}
                               onBlur={field.onBlur}
                               minValue={0}
-                              step={0.1}
+                              step={1}
                             />
                           </FormControl>
                           <FormMessage />

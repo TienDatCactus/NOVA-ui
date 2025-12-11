@@ -1,0 +1,24 @@
+{
+  "title": "Servicio y Menú de las Tierras Altas",
+  "subtitle": "Sabor de las Tierras Altas",
+  "description": "Experimenta los sabores brumosos y los servicios serenos de las montañas.",
+  "search": {
+    "placeholder": "Buscar platos, caminatas, servicios..."
+  },
+  "tabs": {
+    "food": "Cocina",
+    "service": "Servicios"
+  },
+  "loading": "Recolectando ingredientes del valle...",
+  "empty": {
+    "searching": {
+      "title": "Escondido en la niebla",
+      "description": "No pudimos encontrar nada que coincida con tu búsqueda. Intenta buscar algo más."
+    },
+    "noItems": {
+      "title": "Tranquilidad en el valle",
+      "description": "No hay elementos aquí en este momento. La cosecha llegará pronto."
+    },
+    "clearButton": "Limpiar Niebla"
+  }
+}

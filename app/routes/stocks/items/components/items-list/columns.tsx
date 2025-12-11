@@ -1,25 +1,14 @@
 import { type ColumnDef } from "@tanstack/react-table";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { DataTableColumnHeader } from "~/components/table/table-header";
-import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
-import {
-  ChevronDown,
-  ChevronRight,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from "lucide-react";
 import { formatMoney } from "~/lib/utils";
+import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import ItemsActionCell from "../../fragments/items-action.cell";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<StockItemsListItemDto>[] = [
   {
@@ -136,7 +125,9 @@ export const columns: ColumnDef<StockItemsListItemDto>[] = [
     id: "actions",
     header: () => null,
     cell: ({ row }) => {
-      return <ItemsActionCell item={row.original} />;
+      if (hasAnyRole(AuthLoader.getUser(), [UserRole.ServiceStaff]))
+        return <ItemsActionCell item={row.original} />;
+      return null;
     },
     enableSorting: false,
     enableHiding: false,

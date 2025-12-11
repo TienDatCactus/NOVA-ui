@@ -10,20 +10,26 @@ const PaymentMethodEnum = z.enum([
   "OnAccount",
 ]);
 
-const PaymentStatusEnum = z.enum([
-  "Unpaid",
-  "DepositOnly",
-  "PartiallyPaid",
-  "Paid",
-  "Overpaid",
-  "Refunded",
-  "Chargeback",
-  "Voided",
-]);
+const PaymentStatusEnum = z.enum(
+  [
+    "Unpaid",
+    "DepositOnly",
+    "PartiallyPaid",
+    "Paid",
+    "Overpaid",
+    "Refunded",
+    "Chargeback",
+    "Voided",
+  ],
+  "Phương thức thanh toán không hợp lệ"
+);
 const RoomPaymentSchema = z.object({
-  paymentMethod: PaymentMethodEnum.optional(),
-  paidAmount: z.number().max(9999999999).optional(),
-  paymentNote: z.string().optional(),
+  paymentMethod: PaymentMethodEnum.optional().nullable(),
+  paidAmount: z
+    .number("Số tiền đã thanh toán không hợp lệ")
+    .optional()
+    .nullable(),
+  paymentNote: z.string().optional().nullable(),
 });
 const ServicePaymentSchema = RoomPaymentSchema;
 

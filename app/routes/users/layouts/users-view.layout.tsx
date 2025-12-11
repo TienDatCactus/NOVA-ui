@@ -6,9 +6,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { getRoleDisplayName } from "~/services/types/users.types";
 import type { UserFilters } from "../container/filter.hooks";
 import { useRoles } from "../container/query.hooks";
+import { Button } from "~/components/ui/button";
+import { ROLE_LABELS } from "~/lib/auth/roles";
 
 interface UsersViewLayoutProps {
   children: ReactNode;
@@ -44,23 +45,26 @@ export default function UsersViewLayout({
             </p>
           </div>
 
-          <div>
+          <div className="flex items-center gap-2">
             <Select
               value={filters.roleFilter}
               onValueChange={(value) => updateFilter("roleFilter", value)}
             >
-              <SelectTrigger className="shadow-md bg-white w-full">
+              <SelectTrigger className="shadow-md bg-background w-full">
                 <SelectValue placeholder="Chọn vai trò" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả vai trò</SelectItem>
                 {roles?.map((role) => (
                   <SelectItem key={role} value={role}>
-                    {getRoleDisplayName(role)}
+                    {ROLE_LABELS[role as keyof typeof ROLE_LABELS] || role}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <Button variant="outline" onClick={resetFilters}>
+              Đặt lại bộ lọc
+            </Button>
           </div>
         </div>
         {children}

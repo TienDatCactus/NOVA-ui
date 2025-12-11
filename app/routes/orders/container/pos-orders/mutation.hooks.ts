@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { OrderService } from "~/services/api/orders";
 import type {
@@ -39,6 +40,11 @@ export function useCreatePOSOrder() {
       });
       toast.success("Đã tạo order thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Tạo order thất bại");
+      }
+    },
   });
 }
 export function useCreatePOSOrderWithItems() {
@@ -61,6 +67,12 @@ export function useCreatePOSOrderWithItems() {
         queryKey: ["checkout", "pending-charges", data.bookingId],
         refetchType: "active",
       });
+      toast.success("Đã tạo order thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Tạo order thất bại");
+      }
     },
   });
 }
@@ -94,6 +106,13 @@ export function useAddSingleItemToPOSOrder() {
       });
       toast.success("Đã thêm món vào order");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Thêm món vào order thất bại"
+        );
+      }
+    },
   });
 }
 
@@ -125,6 +144,13 @@ export function useAddBatchItemsToPOSOrder() {
         queryKey: ["checkout", "pending-charges"],
       });
       toast.success("Đã thêm các món vào order");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Thêm các món vào order thất bại"
+        );
+      }
     },
   });
 }
@@ -158,6 +184,13 @@ export function useDeleteItemFromPOSOrder() {
       });
       toast.success("Đã xóa món khỏi order");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Xóa món khỏi order thất bại"
+        );
+      }
+    },
   });
 }
 
@@ -184,6 +217,13 @@ export function useCompletePOSOrder() {
       });
       toast.success("Đã hoàn thành order");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Hoàn thành order thất bại"
+        );
+      }
+    },
   });
 }
 
@@ -209,6 +249,11 @@ export function useCancelPOSOrder() {
         queryKey: ["checkout", "pending-charges"],
       });
       toast.success("Đã hủy order");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Hủy order thất bại");
+      }
     },
   });
 }
@@ -243,6 +288,13 @@ export function usePayPOSOrderNow() {
       });
       toast.success("Đã thanh toán order");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Thanh toán order thất bại"
+        );
+      }
+    },
   });
 }
 
@@ -271,6 +323,13 @@ export function useSetScheduledPOSOrder() {
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
       toast.success("Đã cập nhật thời gian phục vụ");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật thời gian phục vụ thất bại"
+        );
+      }
     },
   });
 }
@@ -306,6 +365,13 @@ export function useSetServedPOSOrderItem() {
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
       toast.success("Đã đánh dấu món đã phục vụ");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Đánh dấu món đã phục vụ thất bại"
+        );
+      }
     },
   });
 }
@@ -344,6 +410,13 @@ export function useUpdateScheduledTime() {
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
       toast.success("Đã cập nhật thời gian phục vụ");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật thời gian phục vụ thất bại"
+        );
+      }
+    },
   });
 }
 
@@ -368,6 +441,14 @@ export function useMarkItemServed() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       qc.invalidateQueries({ queryKey: ["pos-order-list"] });
+      toast.success("Đã đánh dấu món đã phục vụ");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Đánh dấu món đã phục vụ thất bại"
+        );
+      }
     },
   });
 }
@@ -396,6 +477,14 @@ export function useUpdatePOSOrderNote() {
         queryKey: ["pos-order-detail", variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: ["pos-order-list"] });
+      toast.success("Đã cập nhật ghi chú order");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật ghi chú order thất bại"
+        );
+      }
     },
   });
 }

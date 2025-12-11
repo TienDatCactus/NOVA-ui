@@ -1,0 +1,24 @@
+{
+  "title": "Hương vị của Cao Nguyên",
+  "subtitle": "Dịch vụ & Thực đơn",
+  "description": "Đắm mình trong vị lạnh sương sớm và không gian thanh bình.",
+  "search": {
+    "placeholder": "Tìm món ăn, trekking, dịch vụ..."
+  },
+  "tabs": {
+    "food": "Ẩm thực",
+    "service": "Dịch vụ"
+  },
+  "loading": "Đang lấy nguyên liệu từ thung lũng...",
+  "empty": {
+    "searching": {
+      "title": "Ẩn trong sương mù",
+      "description": "Chúng tôi không tìm thấy gì phù hợp với tìm kiếm của bạn. Hãy thử tìm kiếm thứ khác."
+    },
+    "noItems": {
+      "title": "Yên tĩnh trong thung lũng",
+      "description": "Hiện tại chưa có mục nào ở đây. Mùa thu hoạch sắp tới."
+    },
+    "clearButton": "Xóa sương mù"
+  }
+}

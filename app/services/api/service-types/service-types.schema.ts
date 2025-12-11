@@ -2,9 +2,9 @@ import z from "zod";
 
 const ServiceTypeItemSchema = z.object({
   id: z.string(),
-  code: z.string().min(2).max(100),
-  name: z.string().min(2).max(100),
-  description: z.string().min(2).max(500).nullable(),
+  code: z.string().max(100),
+  name: z.string().max(100),
+  description: z.string().max(500).nullable(),
   active: z.boolean(),
   serviceItemCount: z.number().optional(),
   createdAt: z.string().nullable().optional(),
@@ -48,11 +48,23 @@ const UpdateServiceTypeRequestSchema = z.object({
 });
 
 const CreateServiceTypeRequestSchema = z.object({
-  code: z.string(),
-  name: z.string(),
-  description: z.string(),
-  active: z.boolean(),
-  images: z.array(z.instanceof(File).optional()),
+  code: z
+    .string("Mã dịch vụ không hợp lệ")
+    .min(1, "Mã dịch vụ không được để trống"),
+
+  name: z
+    .string("Tên dịch vụ không hợp lệ")
+    .min(1, "Tên dịch vụ không được để trống"),
+
+  description: z.string("Mô tả phải là chuỗi").nullable().optional(),
+
+  active: z.boolean("Trạng thái hoạt động không hợp lệ"),
+  images: z
+    .array(
+      z.instanceof(File, { message: "Tệp tải lên không hợp lệ" }).optional(),
+      "Danh sách hình ảnh không hợp lệ"
+    )
+    .optional(),
 });
 
 const CreateServiceTypeResponseSchema = ServiceTypeItemSchema;

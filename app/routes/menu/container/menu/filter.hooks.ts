@@ -34,13 +34,7 @@ export default function useMenuFilters() {
               .toLowerCase()
               .includes(filters.searchText.toLowerCase()));
 
-        // Filter by active status
-        const matchesActive =
-          filters.activeFilter === "" ||
-          filters.activeFilter === "all" ||
-          (filters.activeFilter === "active" && item.active);
-
-        return matchesSearch && matchesActive;
+        return matchesSearch;
       });
     },
     [filters]

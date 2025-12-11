@@ -1,5 +1,11 @@
-import { format } from "date-fns";
-import { Plus, RotateCcw, Trash2 } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import {
+  ArrowLeftRight,
+  ArrowUpCircle,
+  Plus,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,7 +22,10 @@ import {
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { createRemoveRoomOperation } from "~/services/api/booking/booking.helpers";
+import {
+  createAddRoomOperation,
+  createRemoveRoomOperation,
+} from "~/services/api/booking/booking.helpers";
 import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
@@ -24,6 +33,21 @@ import type {
 import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
 import { AddRoomModal } from "./operations/add-room-modal";
+import { Dropdown } from "react-day-picker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import ChangeRoomDialog from "../../bookings/components/change-room.dialog";
+import {
+  canUpgradeRoom,
+  type BookingState,
+} from "../container/use-booking-state.hooks";
+import { UpgradeRoomDialog } from "./operations/upgrade-room-dialog";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -33,21 +57,19 @@ interface BookingRoomsBarProps {
     "rooms",
     "id"
   >;
-  permissions: {
-    canAddRooms: boolean;
-    canRemoveRooms: boolean;
-    blockReason?: string | null;
-  };
+  bookingState: BookingState;
 }
 
 export default function BookingRoomsBar({
   bookingDetail,
   form,
   roomsFieldArray,
-  permissions,
+  bookingState,
 }: BookingRoomsBarProps) {
   const { fields, remove, append } = roomsFieldArray;
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
+  const [changeRoomModalOpen, setChangeRoomModalOpen] = useState(false);
+  const [upgradeRoomOpen, setUpgradeRoomOpen] = useState(false);
   const [removeRoomConfirmOpen, setRemoveRoomConfirmOpen] = useState(false);
   const [roomToRemove, setRoomToRemove] = useState<{
     bookingRoomId: string;
@@ -97,48 +119,139 @@ export default function BookingRoomsBar({
   };
 
   const handleAddRoom = (roomId: string) => {
-    const checkinDate = form.watch("checkinDate");
-    const checkoutDate = form.watch("checkoutDate");
+    try {
+      // Check if room already exists in booking
+      const roomAlreadyInBooking = bookingDetail.rooms.some(
+        (room) => room.roomId === roomId
+      );
+      if (roomAlreadyInBooking) {
+        toast.warning("Phòng này đã có trong booking");
+        return;
+      }
 
-    append({
-      action: "Add",
-      bookingRoomId: null,
-      roomId,
-      fromDate:
-        checkinDate instanceof Date
-          ? format(checkinDate, "yyyy-MM-dd")
-          : checkinDate?.toString() || format(new Date(), "yyyy-MM-dd"),
-      toDate:
+      // Check if room is already being added (in pending operations)
+      const currentRooms = form.getValues("rooms") || [];
+      const roomAlreadyBeingAdded = currentRooms.some(
+        (room) => room.action === "Add" && room.roomId === roomId
+      );
+      if (roomAlreadyBeingAdded) {
+        toast.warning("Phòng này đã được thêm vào danh sách chờ");
+        return;
+      }
+
+      const checkinDate = form.watch("checkinDate");
+      const checkoutDate = form.watch("checkoutDate");
+
+      // Validate dates exist
+      if (!checkinDate || !checkoutDate) {
+        toast.error("Vui lòng kiểm tra lại ngày checkin/checkout");
+        return;
+      }
+
+      const isCheckIn =
+        bookingDetail.status === "CheckedIn" ||
+        bookingDetail.status === "InHouse";
+
+      let fromDate: string | null;
+      if (isCheckIn) {
+        // When InHouse, new room starts from TODAY
+        fromDate = format(new Date(), "yyyy-MM-dd");
+      } else {
+        // For Pending/Confirmed: use booking's checkin date
+        fromDate =
+          checkinDate instanceof Date
+            ? format(checkinDate, "yyyy-MM-dd")
+            : typeof checkinDate === "string"
+              ? checkinDate
+              : null;
+      }
+
+      const toDate =
         checkoutDate instanceof Date
           ? format(checkoutDate, "yyyy-MM-dd")
-          : checkoutDate?.toString() || format(new Date(), "yyyy-MM-dd"),
-    });
+          : typeof checkoutDate === "string"
+            ? checkoutDate
+            : null;
 
-    toast.success("Đã thêm phòng mới");
+      if (!fromDate || !toDate) {
+        toast.error("Định dạng ngày không hợp lệ");
+        return;
+      }
+
+      // Validate: If CheckedIn, today must be before checkout (at least 1 night)
+      if (isCheckIn) {
+        const today = new Date();
+        const checkout =
+          checkoutDate instanceof Date ? checkoutDate : parseISO(checkoutDate);
+        if (today >= checkout) {
+          toast.error(
+            "Không thể thêm phòng: Booking sắp checkout (không còn đêm nào)"
+          );
+          return;
+        }
+      }
+
+      // Use helper function with built-in validation
+      const operation = createAddRoomOperation(roomId, fromDate, toDate);
+
+      // Append validated operation
+      append(operation);
+      toast.success("Đã thêm phòng mới");
+    } catch (error) {
+      console.error("Add room failed:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Thêm phòng thất bại"
+      );
+    }
   };
 
   return (
     <>
       <Card className="shadow-sm flex flex-col w-96">
-        <CardHeader className="text-card-foreground">
+        <CardHeader className="text-card-foreground ">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-medium uppercase">
+            <CardTitle className="text-base  font-medium uppercase">
               Danh sách phòng
             </CardTitle>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setAddRoomModalOpen(true)}
-              disabled={!permissions.canAddRooms}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Thêm
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={
+                    hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+                    !bookingState.permissions.canEditRooms
+                  }
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {canUpgradeRoom(bookingDetail?.status) && (
+                  <DropdownMenuItem onClick={() => setUpgradeRoomOpen(true)}>
+                    <ArrowUpCircle className="w-4 h-4 " />
+                    Upgrade phòng
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={() => setAddRoomModalOpen(true)}
+                  disabled={!bookingState.permissions.canEditRooms}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Thêm phòng
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setChangeRoomModalOpen(true)}
+                  disabled={!bookingState.permissions.canEditRooms}
+                >
+                  <ArrowLeftRight className="h-4 w-4 mr-1" />
+                  Đổi phòng
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
-          {/* Existing Rooms */}
           {bookingDetail.rooms.map((room) => (
             <ExistingRoomItemWrapper
               key={room.roomId}
@@ -150,10 +263,14 @@ export default function BookingRoomsBar({
               onRemove={() =>
                 handleRemoveRoom(room.bookingRoomId, room.roomName)
               }
-              canRemove={permissions.canRemoveRooms}
+              canRemove={
+                bookingDetail.status == "Pending" &&
+                bookingState.permissions.canEditRooms
+              }
               removeTooltip={
-                !permissions.canRemoveRooms
-                  ? permissions.blockReason || "Không thể xóa phòng"
+                !bookingState.permissions.canEditRooms
+                  ? bookingState.permissions.blockReason ||
+                    "Không thể xóa phòng"
                   : undefined
               }
             />
@@ -197,12 +314,10 @@ export default function BookingRoomsBar({
               </div>
             </>
           )}
-          {/* Rooms Being Removed */}
           {fields.filter(
             (_, index) => form.watch(`rooms.${index}.action`) === "Remove"
           ).length > 0 && (
             <div className="mt-4 space-y-3">
-              {/* Header nhỏ gọn, không chiếm diện tích */}
               <div className="flex items-center gap-2 px-1">
                 <div className="h-1 w-1 rounded-full bg-destructive" />
                 <span className="text-xs font-semibold text-destructive uppercase tracking-wider">
@@ -276,6 +391,16 @@ export default function BookingRoomsBar({
         open={addRoomModalOpen}
         onOpenChange={setAddRoomModalOpen}
         onAddRoom={handleAddRoom}
+        bookingDetail={bookingDetail}
+      />
+      <ChangeRoomDialog
+        open={changeRoomModalOpen}
+        onOpenChange={setChangeRoomModalOpen}
+        bookingCode={bookingDetail.bookingCode}
+      />{" "}
+      <UpgradeRoomDialog
+        open={upgradeRoomOpen}
+        onOpenChange={setUpgradeRoomOpen}
         bookingDetail={bookingDetail}
       />
       <AlertDialog

@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { MenuCategoryService } from "~/services/api/menu-category";
 import type {
@@ -17,6 +18,11 @@ export function useCreateMenuCategory() {
       await MenuCategoryService.createMenuCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-category-list"] });
+      toast.success("Tạo danh mục thực đơn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -36,6 +42,11 @@ export function useUpdateMenuCategory(categoryId: string) {
       queryClient.invalidateQueries({
         queryKey: ["menu-category-detail", categoryId],
       });
+      toast.success("Cập nhật danh mục thực đơn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -51,6 +62,11 @@ export function useDeleteMenuCategory() {
       await MenuCategoryService.deleteMenuCategory(categoryId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-category-list"] });
+      toast.success("Xóa danh mục thực đơn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }

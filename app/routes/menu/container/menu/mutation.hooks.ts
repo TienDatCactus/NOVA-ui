@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { MenuService } from "~/services/api/menu";
 import type {
@@ -24,6 +25,11 @@ export function useCreateMenuItem() {
           queryKey: ["menu-list-by-category", newItem.categoryId],
         });
       }
+      toast.success("Tạo món ăn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -49,6 +55,11 @@ export function useUpdateMenuItem(itemId: string) {
       queryClient.invalidateQueries({
         queryKey: ["menu-item-detail", itemId],
       });
+      toast.success("Cập nhật món ăn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -75,6 +86,11 @@ export function useDeleteMenuItem(itemId: string) {
       queryClient.removeQueries({
         queryKey: ["menu-item-detail", itemId],
       });
+      toast.success("Xóa món ăn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }

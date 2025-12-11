@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Repeat,
   Check,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
@@ -60,6 +61,7 @@ import { cn } from "~/lib/utils";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Separator } from "~/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { DatePicker } from "~/components/ui/date-picker";
 
 const { UpdateShiftScheduleRequestSchema } = StaffShiftSchema;
 
@@ -86,7 +88,7 @@ export default function UpdateScheduleDialog({
     defaultValues: {
       workShiftIds: [],
       repeatWeekly: false,
-      weekDays: [1, 2, 3, 4, 5],
+      weekDays: shiftDetail?.weekDays || [1, 2, 3, 4, 5],
       endDate: null,
       excludeHolidays: true,
       applyScope: "ThisOnly",
@@ -113,17 +115,50 @@ export default function UpdateScheduleDialog({
   }, [shiftDetail, open, form]);
 
   const repeatWeekly = form.watch("repeatWeekly");
+  const applyScope = form.watch("applyScope");
   const updateShiftSchedule = useUpdateShiftSchedule();
+  useEffect(() => {
+    if (applyScope === "ThisOnly") {
+      form.setValue("repeatWeekly", false);
+      form.setValue("weekDays", []);
+      form.setValue("endDate", null);
+    }
+  }, [applyScope, form]);
+
+  useEffect(() => {
+    if (applyScope !== "ThisOnly" && !repeatWeekly) {
+      form.setValue("repeatWeekly", true);
+      const currentWeekDays = form.getValues("weekDays");
+      if (!currentWeekDays || currentWeekDays.length === 0) {
+        form.setValue("weekDays", [1, 2, 3, 4, 5]);
+      }
+    }
+  }, [applyScope, repeatWeekly, form]);
 
   const onSubmit = async (data: UpdateShiftScheduleRequest) => {
     if (!shift?.id) {
       toast.error("Không tìm thấy thông tin");
       return;
     }
+
     try {
-      await updateShiftSchedule.mutateAsync({ id: shift.id, data });
-      form.reset();
-      onOpenChange(false);
+      // Format newDate if it exists
+      const formattedData = {
+        ...data,
+        newDate: data.newDate
+          ? format(new Date(data.newDate), "yyyy-MM-dd")
+          : data.newDate,
+      };
+
+      await updateShiftSchedule.mutateAsync(
+        { id: shift.id, data: formattedData },
+        {
+          onSuccess: () => {
+            form.reset();
+            onOpenChange(false);
+          },
+        }
+      );
     } catch (error) {
       console.error(error);
     }
@@ -134,7 +169,6 @@ export default function UpdateScheduleDialog({
   const workDate = shift.workDate ? parseISO(shift.workDate) : new Date();
   const formattedDate = format(workDate, "dd/MM/yyyy");
 
-  // UX: Hiển thị tên & ca rõ ràng để user không sửa nhầm
   const staffName = shiftDetail?.staffName || shift.staffName || "...";
   const currentShiftName = shiftDetail?.shiftName || shift.shiftName || "...";
 
@@ -254,7 +288,7 @@ export default function UpdateScheduleDialog({
                             Từ hôm nay
                           </div>
                           <p className="text-xs text-muted-foreground pl-4">
-                            Sửa cả các ngày sau
+                            Cập nhật từ {formattedDate} trở đi
                           </p>
                         </label>
                       </FormItem>
@@ -277,7 +311,7 @@ export default function UpdateScheduleDialog({
                             Toàn bộ
                           </div>
                           <p className="text-xs text-muted-foreground pl-4">
-                            Tất cả chuỗi lặp
+                            Toàn bộ chuỗi lặp (kể cả quá khứ)
                           </p>
                         </label>
                       </FormItem>
@@ -286,153 +320,164 @@ export default function UpdateScheduleDialog({
                 )}
               />
 
-              {/* 3. CẤU HÌNH LẶP LẠI (Chỉ hiện khi không chọn ThisOnly để đỡ rối) */}
-              <div
-                className={cn(
-                  "space-y-6 transition-all",
-                  form.watch("applyScope") === "ThisOnly"
-                    ? "opacity-50 pointer-events-none grayscale"
-                    : "opacity-100"
+              {/* 3. CẤU HÌNH LẶP LẠI */}
+              <div className="space-y-2">
+                {applyScope === "ThisOnly" && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 p-2 rounded-md">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    <span>
+                      Chỉ áp dụng cho ngày {formattedDate}, không cần cấu hình
+                      lặp lại
+                    </span>
+                  </div>
                 )}
-              >
-                <div className="flex flex-col gap-4 p-4 border rounded-lg bg-muted/5">
-                  <FormField
-                    control={form.control}
-                    name="repeatWeekly"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-sm font-medium">
-                            Lặp lại hàng tuần
-                          </FormLabel>
-                          <DialogDescription className="text-xs">
-                            Tự động tạo lịch vào các ngày cố định
-                          </DialogDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  {repeatWeekly && (
+                <div className={cn("transition-all")}>
+                  <div className="flex flex-col gap-4 p-4 border rounded-lg bg-muted/5">
                     <FormField
                       control={form.control}
-                      name="weekDays"
+                      name="repeatWeekly"
                       render={({ field }) => (
-                        <FormItem>
-                          <div className="flex flex-wrap gap-2 pt-2">
-                            {WEEKDAYS.map((day) => {
-                              const isSelected = field.value?.includes(
-                                day.value
-                              );
-                              return (
-                                <div
-                                  key={day.value}
-                                  onClick={() => {
-                                    const current = field.value || [];
-                                    if (isSelected)
-                                      field.onChange(
-                                        current.filter((v) => v !== day.value)
-                                      );
-                                    else
-                                      field.onChange([...current, day.value]);
-                                  }}
-                                  className={cn(
-                                    "h-9 w-9 rounded-full flex items-center justify-center text-sm border cursor-pointer select-none transition-all",
-                                    isSelected
-                                      ? "bg-primary text-primary-foreground border-primary"
-                                      : "bg-background hover:bg-muted"
-                                  )}
-                                >
-                                  {day.label
-                                    .replace("Thứ ", "T")
-                                    .replace("Chủ nhật", "CN")}
-                                </div>
-                              );
-                            })}
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">
+                              Lặp lại hàng tuần
+                            </FormLabel>
+                            <p className="text-xs">
+                              Tự động tạo lịch vào các ngày cố định
+                            </p>
                           </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
                         </FormItem>
                       )}
                     />
-                  )}
-
-                  {repeatWeekly && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <Separator />
+                    {repeatWeekly && (
                       <FormField
                         control={form.control}
-                        name="endDate"
+                        name="weekDays"
                         render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel className="text-xs">
-                              Ngày kết thúc (Tùy chọn)
-                            </FormLabel>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant="outline"
+                          <FormItem>
+                            <div className="flex flex-wrap gap-2 pt-2">
+                              {WEEKDAYS.map((day) => {
+                                const isSelected = field.value?.includes(
+                                  day.value
+                                );
+                                return (
+                                  <div
+                                    key={day.value}
+                                    onClick={() => {
+                                      const current = field.value || [];
+                                      if (isSelected)
+                                        field.onChange(
+                                          current.filter((v) => v !== day.value)
+                                        );
+                                      else
+                                        field.onChange([...current, day.value]);
+                                    }}
                                     className={cn(
-                                      "pl-3 text-left font-normal h-9",
-                                      !field.value && "text-muted-foreground"
+                                      "h-9 w-9 rounded-full flex items-center justify-center text-sm border cursor-pointer select-none transition-all",
+                                      isSelected
+                                        ? "bg-primary text-primary-foreground border-primary"
+                                        : "bg-background hover:bg-muted"
                                     )}
                                   >
-                                    {field.value
-                                      ? format(
-                                          parseISO(field.value),
-                                          "dd/MM/yyyy"
-                                        )
-                                      : "Vô thời hạn"}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-auto p-0"
-                                align="start"
-                              >
-                                <Calendar
-                                  mode="single"
-                                  selected={
-                                    field.value
-                                      ? parseISO(field.value)
-                                      : undefined
-                                  }
-                                  onSelect={(date) =>
-                                    field.onChange(
-                                      date ? format(date, "yyyy-MM-dd") : null
-                                    )
-                                  }
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
+                                    {day.label
+                                      .replace("Thứ ", "T")
+                                      .replace("Chủ nhật", "CN")}
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </FormItem>
                         )}
                       />
+                    )}
+
+                    {repeatWeekly && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <FormField
+                          control={form.control}
+                          name="endDate"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel className="text-xs">
+                                Ngày kết thúc
+                              </FormLabel>
+                              <DatePicker
+                                {...field}
+                                value={
+                                  field.value
+                                    ? parseISO(field.value)
+                                    : undefined
+                                }
+                                onChange={(date) =>
+                                  field.onChange(
+                                    date ? format(date, "yyyy-MM-dd") : null
+                                  )
+                                }
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="excludeHolidays"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-end space-x-2 space-y-0 h-full pb-2">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal text-sm text-muted-foreground cursor-pointer">
+                                Trừ ngày Lễ/Tết
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+                    {applyScope === "ThisOnly" && !repeatWeekly && (
                       <FormField
                         control={form.control}
-                        name="excludeHolidays"
+                        name="newDate"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-end space-x-2 space-y-0 h-full pb-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal text-sm text-muted-foreground cursor-pointer">
-                              Trừ ngày Lễ/Tết
+                          <FormItem className="">
+                            <FormLabel className="text-xs">
+                              Chọn ngày mới ( optional )
                             </FormLabel>
+                            <FormControl>
+                              <div className="flex items-center gap-2">
+                                <DatePicker
+                                  className="w-40"
+                                  {...field}
+                                  onChange={(date) =>
+                                    field.onChange(
+                                      format(date + "", "yyyy-MM-dd")
+                                    )
+                                  }
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size={"icon"}
+                                  onClick={() => form.resetField("newDate")}
+                                >
+                                  <X />
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

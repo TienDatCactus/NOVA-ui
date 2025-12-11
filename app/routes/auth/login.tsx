@@ -21,12 +21,20 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import type { LoginDto } from "~/services/api/auth/dto";
-import { useAuth } from "./container/auth.hooks";
+import { useAuthHooks } from "./container/auth.hooks";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import PasswordInput from "~/components/ui/password-input";
+import type { Route } from "./+types/login";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Đăng Nhập - NOVA Hotel Management" },
+    { name: "description", content: "Đăng nhập hệ thống quản lý khách sạn" },
+  ];
+}
 
 export default function Login() {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading } = useAuthHooks();
   const { LoginSchema } = AuthSchema;
   const loginForm = useForm({
     resolver: zodResolver(LoginSchema),

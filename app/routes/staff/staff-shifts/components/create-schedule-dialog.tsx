@@ -50,6 +50,7 @@ import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.s
 import { WEEKDAYS } from "~/services/api/staff/staff-shift/staff-shift.type";
 import { useStaffList } from "../../staff/container/query.hooks";
 import { useCreateShiftSchedule } from "../container/query.hooks";
+import { Input } from "~/components/ui/input";
 
 const { CreateShiftScheduleRequestSchema } = StaffShiftSchema;
 
@@ -65,9 +66,6 @@ export default function CreateScheduleDialog({
   onSuccess,
 }: CreateScheduleDialogProps) {
   const [searchStaff, setSearchStaff] = useState("");
-  const [selectedAdditionalStaff, setSelectedAdditionalStaff] = useState<
-    string[]
-  >([]);
 
   // --- Queries ---
   const { data: staffList = [] } = useStaffList({});
@@ -90,31 +88,20 @@ export default function CreateScheduleDialog({
   });
 
   const primaryStaffId = form.watch("primaryStaffId");
+  const additionalStaffIds = form.watch("additionalStaffIds");
   const repeatWeekly = form.watch("repeatWeekly");
-
-  useEffect(() => {
-    form.setValue("additionalStaffIds", selectedAdditionalStaff);
-  }, [selectedAdditionalStaff, form]);
 
   // --- Handlers ---
   const onSubmit = async (data: CreateShiftScheduleRequest) => {
     try {
-      await createShiftSchedule.mutateAsync(data);
-      toast.success("Đã tạo lịch làm việc thành công");
+      await createShiftSchedule.mutateAsync(data, {});
       form.reset();
-      setSelectedAdditionalStaff([]);
+      setSearchStaff("");
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       console.error(error);
-      toast.error("Lỗi khi tạo lịch");
     }
-  };
-
-  const handleToggleAdditionalStaff = (id: string) => {
-    setSelectedAdditionalStaff((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
   };
 
   // Filter staff logic
@@ -123,7 +110,6 @@ export default function CreateScheduleDialog({
       s.id !== primaryStaffId &&
       s.fullName.toLowerCase().includes(searchStaff.toLowerCase())
   );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
@@ -139,9 +125,7 @@ export default function CreateScheduleDialog({
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex-1 flex flex-col min-h-0"
           >
-            {/* === MAIN CONTENT GRID === */}
             <div className="flex-1 grid grid-cols-1 md:grid-cols-[300px_1fr] divide-y md:divide-y-0 md:divide-x overflow-hidden">
-              {/* --- LEFT COL: STAFF SELECTION --- */}
               <div className="flex flex-col h-full bg-muted/10">
                 <div className="p-4 space-y-4">
                   <FormField
@@ -187,7 +171,10 @@ export default function CreateScheduleDialog({
                                     <CommandItem
                                       value={staff.fullName}
                                       key={staff.id}
-                                      onSelect={() => field.onChange(staff.id)}
+                                      onSelect={() => {
+                                        field.onChange(staff.id);
+                                        form.setValue("additionalStaffIds", []);
+                                      }}
                                     >
                                       <Check
                                         className={cn(
@@ -215,69 +202,83 @@ export default function CreateScheduleDialog({
                       <FormLabel className="text-xs font-semibold uppercase text-muted-foreground">
                         Nhân viên phụ
                       </FormLabel>
-                      {selectedAdditionalStaff.length > 0 && (
+                      {(additionalStaffIds?.length ?? 0) > 0 && (
                         <Badge
                           variant="secondary"
                           className="h-5 px-1 text-[10px]"
                         >
-                          +{selectedAdditionalStaff.length}
+                          +{additionalStaffIds?.length ?? 0}
                         </Badge>
                       )}
                     </div>
 
-                    <div className="relative">
-                      <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                      <input
-                        className="w-full rounded-md border border-input bg-background px-8 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        placeholder="Tìm người..."
-                        value={searchStaff}
-                        onChange={(e) => setSearchStaff(e.target.value)}
-                      />
-                    </div>
+                    <Input
+                      startAddon={
+                        <Search className=" h-4 w-4 text-muted-foreground" />
+                      }
+                      placeholder="Tìm nhân viên phụ..."
+                      value={searchStaff}
+                      onChange={(e) => setSearchStaff(e.target.value)}
+                    />
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-auto px-2 pb-2">
-                  {/* Native Grid instead of complex List Components for performance */}
-                  <div className="space-y-1">
-                    {availableStaffForAdditional.map((staff) => {
-                      const isSelected = selectedAdditionalStaff.includes(
-                        staff.id
-                      );
-                      return (
-                        <div
-                          key={staff.id}
-                          onClick={() => handleToggleAdditionalStaff(staff.id)}
-                          className={cn(
-                            "flex items-center gap-3 p-2 rounded-md cursor-pointer select-none text-sm transition-colors",
-                            isSelected
-                              ? "bg-primary/10 text-primary font-medium"
-                              : "hover:bg-muted"
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "h-4 w-4 border rounded flex items-center justify-center shrink-0",
-                              isSelected
-                                ? "border-primary bg-primary"
-                                : "border-muted-foreground"
-                            )}
-                          >
-                            {isSelected && (
-                              <Check className="h-3 w-3 text-white" />
-                            )}
-                          </div>
-                          <span className="truncate">{staff.fullName}</span>
-                        </div>
-                      );
-                    })}
-                    {availableStaffForAdditional.length === 0 && (
-                      <p className="text-xs text-center text-muted-foreground mt-4">
-                        Không tìm thấy
-                      </p>
-                    )}
-                  </div>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="additionalStaffIds"
+                  render={({ field }) => (
+                    <FormItem className="flex-1 overflow-auto px-2 pb-2">
+                      <div className="space-y-1">
+                        {availableStaffForAdditional.map((staff) => {
+                          const isSelected =
+                            field.value?.includes(staff.id) ?? false;
+                          return (
+                            <FormControl key={staff.id}>
+                              <div
+                                onClick={() => {
+                                  const updatedValue = isSelected
+                                    ? (field.value ?? []).filter(
+                                        (id) => id !== staff.id
+                                      )
+                                    : [...(field.value ?? []), staff.id];
+                                  field.onChange(updatedValue);
+                                }}
+                                className={cn(
+                                  "flex items-center gap-3 p-2 rounded-md cursor-pointer select-none text-sm transition-colors",
+                                  isSelected
+                                    ? "bg-primary/10 text-primary font-medium"
+                                    : "hover:bg-muted"
+                                )}
+                              >
+                                <div
+                                  className={cn(
+                                    "h-4 w-4 border rounded flex items-center justify-center shrink-0",
+                                    isSelected
+                                      ? "border-primary bg-primary"
+                                      : "border-muted-foreground"
+                                  )}
+                                >
+                                  {isSelected && (
+                                    <Check className="h-3 w-3 text-white" />
+                                  )}
+                                </div>
+                                <span className="truncate">
+                                  {staff.fullName}
+                                </span>
+                              </div>
+                            </FormControl>
+                          );
+                        })}
+                        {availableStaffForAdditional.length === 0 && (
+                          <p className="text-xs text-center text-muted-foreground mt-4">
+                            Không tìm thấy
+                          </p>
+                        )}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {/* --- RIGHT COL: CONFIGURATION --- */}
@@ -324,7 +325,7 @@ export default function CreateScheduleDialog({
                                         }}
                                       />
                                     </FormControl>
-                                    <div className="space-y-1 flex-1">
+                                    <FormLabel className="flex items-center gap-2">
                                       <p className="text-sm font-medium leading-none">
                                         {shift.name}
                                       </p>
@@ -332,7 +333,7 @@ export default function CreateScheduleDialog({
                                         {shift.startTime.slice(0, 5)} -{" "}
                                         {shift.endTime.slice(0, 5)}
                                       </p>
-                                    </div>
+                                    </FormLabel>
                                   </FormItem>
                                 );
                               }}

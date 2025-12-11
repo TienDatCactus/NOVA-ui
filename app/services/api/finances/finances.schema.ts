@@ -54,7 +54,7 @@ const BookingMetricsSchema = z.object({
 });
 
 const RevenueTrendSchema = z.object({
-  date: z.string().datetime(),
+  date: z.string(),
   totalRevenue: z.number(),
   roomRevenue: z.number(),
   fnBRevenue: z.number(),
@@ -93,7 +93,7 @@ const FinancesDashboardSchema = z.object({
   financialHealth: FinancialHealthSchema,
   paymentCollection: z.array(PaymentCollectionItemSchema),
   otaReceivable: z.number(),
-  generatedAt: z.string().datetime(),
+  generatedAt: z.string(),
   periodDescription: z.string(),
 });
 

@@ -1,18 +1,6 @@
-import {
-  format,
-  isAfter,
-  isBefore,
-  isToday,
-  parseISO,
-  startOfDay,
-} from "date-fns";
-import { vi } from "date-fns/locale";
+import { format, isBefore, isToday, parseISO, startOfDay } from "date-fns";
 import {
   ArrowRight,
-  BookCopy,
-  CalendarCheck,
-  CalendarX,
-  CheckCircle,
   CheckCircle2,
   Clock,
   DoorOpen,
@@ -21,11 +9,10 @@ import {
   LogOut,
   MoreVertical,
   User,
-  UserX,
   XCircle,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import type z from "zod";
 import {
@@ -40,7 +27,6 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,15 +35,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Separator } from "~/components/ui/separator";
 import { DASHBOARD } from "~/lib/fe-url";
 import { cn, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
+import {
+  BOOKING_SOURCES,
+  BOOKING_STATUSES,
+} from "~/services/api/booking/booking.types";
+import { useBookingState } from "../../booking-detail/container/use-booking-state.hooks";
 import {
   useCancelBooking,
   useUpdateBookingStatus,
 } from "../container/booking-mutation.hooks";
+import { useBookingDetail } from "../container/booking-query.hooks";
+import BookingDetailSheet from "./booking-detail.sheet";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
@@ -69,11 +62,21 @@ interface BookingCardProps {
 
 export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+
+  const { data: bookingDetail } = useBookingDetail({
+    bookingId: booking.bookingId,
+    enabled: true,
+  });
+
+  // Get business logic permissions and financial status
+  const bookingState = useBookingState(bookingDetail);
 
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
-  const { mutateAsync: cancelBooking, isPending: isCancelling } =
-    useCancelBooking(booking.bookingId || "");
+  const { mutateAsync: cancelBooking } = useCancelBooking(
+    booking.bookingId || ""
+  );
   const navigate = useNavigate();
 
   const statusConfig = BOOKING_STATUSES.find((s) => s.value === booking.status);
@@ -86,41 +89,75 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     : null;
 
   const isArrivingToday = !!(checkinDate && isToday(checkinDate));
-  const isPastCheckinDate = !!(checkinDate && isAfter(new Date(), checkinDate));
-
+  const isRoomBlock = bookingDetail?.source === "RoomBlock";
+  const isConfirmed = booking.status === "Confirmed";
+  // Business logic validation using booking state
   const canConfirmPayment = booking.status === "Pending";
+
   const canCheckIn =
     booking.status === "Confirmed" &&
     !!checkinDate &&
     !isBefore(startOfDay(new Date()), startOfDay(checkinDate));
-  const canMarkNoShow = booking.status === "Confirmed" && isPastCheckinDate;
-  const canCheckOut =
-    booking.status === "InHouse" || booking.status === "CheckedIn";
-  const canCancel =
-    booking.status === "Pending" || booking.status === "Confirmed";
-  const isCheckedOut = booking.status === "CheckedOut";
 
-  const handleConfirmPayment = async () => {
-    try {
-      navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
-    } catch (error) {
-      console.error("Xác nhận thất bại");
+  const canCheckOut =
+    (booking.status === "InHouse" || booking.status === "CheckedIn") &&
+    bookingState.financial.totalBalance === 0; // Must be fully paid
+
+  const canCancel =
+    (booking.status === "Pending" || booking.status === "Confirmed") &&
+    bookingState.permissions.canEdit && // Check general edit permission
+    !bookingState.permissions.blockReason; // No blocking reasons
+
+  const handleCheckIn = async () => {
+    if (!canCheckIn && !isRoomBlock) {
+      toast.error("Không thể check-in booking này");
+      return;
+    }
+
+    if (isConfirmed) {
+      await updateStatus("CheckedIn");
+      await updateStatus("InHouse");
+      refetch?.();
+    } else if (isRoomBlock) {
+      await updateStatus("Confirmed");
+      await updateStatus("CheckedIn");
+      await updateStatus("InHouse");
+      refetch?.();
+    } else {
+      await updateStatus("CheckedIn");
+      await updateStatus("InHouse");
+      refetch?.();
     }
   };
 
-  const handleCheckIn = async () => {
-    try {
-      await updateStatus("CheckedIn");
-      await updateStatus("InHouse");
-
-      toast.success("Check-in thành công");
-      refetch?.();
-    } catch {
-      toast.error("Check-in thất bại");
+  const handleCheckOut = () => {
+    if (!canCheckOut) {
+      if (bookingState.financial.totalBalance > 0) {
+        toast.error(
+          `Không thể checkout. Còn ${bookingState.financial.unpaidInvoiceCount} hóa đơn chưa thanh toán (${new Intl.NumberFormat(
+            "vi-VN",
+            { style: "currency", currency: "VND" }
+          ).format(bookingState.financial.totalBalance)})`
+        );
+      } else {
+        toast.error("Không thể checkout booking này");
+      }
+      return;
     }
+
+    navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
   };
 
   const handleCancel = async () => {
+    if (!canCancel) {
+      if (bookingState.permissions.blockReason) {
+        toast.error(bookingState.permissions.blockReason);
+      } else {
+        toast.error("Không thể hủy booking này");
+      }
+      return;
+    }
+
     try {
       await cancelBooking();
       toast.success("Hủy đặt phòng thành công");
@@ -161,10 +198,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         bgClass = "bg-destructive";
         icon = <XCircle className="mr-1 h-3 w-3" />;
         break;
-      case "NoShow":
-        bgClass = "bg-orange-600";
-        icon = <UserX className="mr-1 h-3 w-3" />;
-        break;
     }
 
     return (
@@ -182,47 +215,51 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
   const renderPrimaryAction = () => {
     const btnClass = "w-full shadow-sm font-semibold transition-all";
-
-    if (canCheckIn) {
-      return (
-        <Button
-          size="sm"
-          className={cn(btnClass, "bg-green-600 hover:bg-green-700 text-white")}
-          onClick={handleCheckIn}
-          disabled={isProcessing}
-        >
-          <LogIn className="mr-2 h-4 w-4" /> Check-in ngay
-        </Button>
-      );
-    }
-    if (canCheckOut) {
-      return (
-        <Button
-          size="sm"
-          className={cn(btnClass, "bg-amber-500 hover:bg-amber-600 text-white")}
-          onClick={handleViewDetail}
-        >
-          <LogOut className="mr-2 h-4 w-4" /> Checkout
-        </Button>
-      );
-    }
-    if (canConfirmPayment) {
-      return (
-        <Button
-          size="sm"
-          variant="default"
-          className={btnClass}
-          onClick={handleViewDetail}
-        >
-          <CheckCircle2 className="mr-2 h-4 w-4" /> Xác nhận cọc
-        </Button>
-      );
+    if (hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist])) {
+      if (canCheckIn || isRoomBlock) {
+        return (
+          <Button
+            size="sm"
+            variant={"success"}
+            className={cn(btnClass)}
+            onClick={handleCheckIn}
+            disabled={isProcessing}
+          >
+            <LogIn className="mr-2 h-4 w-4" /> Check-in ngay
+          </Button>
+        );
+      }
+      if (canCheckOut) {
+        return (
+          <Button
+            size="sm"
+            variant={"warning"}
+            className={cn(btnClass)}
+            onClick={handleCheckOut}
+            disabled={isProcessing}
+          >
+            <LogOut className="mr-2 h-4 w-4" /> Checkout
+          </Button>
+        );
+      }
+      if (canConfirmPayment && !isRoomBlock) {
+        return (
+          <Button
+            size="sm"
+            variant="default"
+            className={btnClass}
+            onClick={handleViewDetail}
+          >
+            <CheckCircle2 className="mr-2 h-4 w-4" /> Xác nhận cọc
+          </Button>
+        );
+      }
     }
     return (
       <Button
         size="sm"
         variant="outline"
-        className={cn(btnClass, "bg-white hover:bg-gray-50")}
+        className={cn(btnClass, "bg-background hover:bg-accent")}
         onClick={handleViewDetail}
       >
         Xem chi tiết
@@ -231,23 +268,26 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   };
   return (
     <>
-      <div className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-primary/20 hover:shadow-lg">
+      <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:border-primary/20 hover:shadow-lg">
         {/* HEADER SECTION: System Info */}
-        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-2.5">
+        <div className="flex items-center justify-between border-b border-border bg-muted/50 px-4 py-2.5">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-bold text-gray-500">
+            <span className="font-mono text-xs font-bold text-muted-foreground">
               #{booking.bookingCode}
             </span>
-            <div className="h-4 w-[1px] bg-gray-300"></div>
+            <div className="h-4 w-[1px] bg-border"></div>
             {/* Source Pill */}
-            <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
+            <div className="flex items-center gap-1 text-xs font-medium text-foreground">
               {booking.source === "OTA" ? (
                 <Globe className="h-3 w-3" />
               ) : (
                 <User className="h-3 w-3" />
               )}
               <span className="truncate max-w-[80px]">
-                {booking.source === "OTA" ? booking.otaName : "Khách lẻ"}
+                {booking.source === "OTA"
+                  ? booking.otaName
+                  : BOOKING_SOURCES.find((s) => s.key === booking.source)
+                      ?.label || "Trực tiếp"}
               </span>
             </div>
           </div>
@@ -264,12 +304,17 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               <DropdownMenuItem onClick={handleViewDetail}>
                 <DoorOpen className="mr-2 h-4 w-4" /> Xem chi tiết
               </DropdownMenuItem>
-              {canCancel && (
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+              canCancel ? (
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => setCancelDialogOpen(true)}
                 >
                   <XCircle className="mr-2 h-4 w-4" /> Hủy đặt phòng
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem disabled className="text-muted-foreground">
+                  <XCircle className="mr-2 h-4 w-4" /> Không thể hủy
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -279,25 +324,38 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         {/* BODY SECTION: Main Content */}
         <div className="flex-1 px-4 py-4">
           <div className="mb-4 flex items-start justify-between">
-            <div>
-              <h3 className="line-clamp-1 text-lg font-bold text-gray-900 group-hover:text-primary">
-                {booking.customerName || "Khách vãng lai"}
-              </h3>
+            <div className="flex items-start gap-2">
+              <Button
+                variant="link"
+                onClick={() => setDetailSheetOpen(true)}
+                className="p-0 h-auto font-bold text-lg text-foreground hover:text-primary hover:no-underline"
+              >
+                <span className="line-clamp-1 text-left">
+                  {booking.customerName || "Khách vãng lai"}
+                </span>
+              </Button>
+              <BookingDetailSheet
+                bookingCode={booking.bookingCode!}
+                open={detailSheetOpen}
+                onOpenChange={setDetailSheetOpen}
+              />
               {renderStatusBadge()}
             </div>
           </div>
 
           {/* Timeline Visual */}
-          <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
             <div className="flex items-center justify-between text-sm">
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold uppercase text-gray-400">
+                <span className="text-[10px] font-semibold uppercase text-muted-foreground">
                   Check-in
                 </span>
                 <span
                   className={cn(
                     "font-bold",
-                    isArrivingToday ? "text-green-600" : "text-gray-700"
+                    isArrivingToday
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-foreground"
                   )}
                 >
                   {checkinDate ? format(checkinDate, "dd/MM") : "--/--"}
@@ -306,20 +364,20 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
               {/* Arrow / Duration */}
               <div className="flex flex-col items-center px-4">
-                <span className="mb-1 text-[10px] font-medium text-gray-400">
+                <span className="mb-1 text-[10px] font-medium text-muted-foreground">
                   {nights} đêm
                 </span>
                 <div className="relative flex w-full items-center">
-                  <div className="h-[1px] w-12 bg-gray-300"></div>
-                  <ArrowRight className="absolute right-0 -mr-1 h-3 w-3 text-gray-400" />
+                  <div className="h-[1px] w-12 bg-border"></div>
+                  <ArrowRight className="absolute right-0 -mr-1 h-3 w-3 text-muted-foreground" />
                 </div>
               </div>
 
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-semibold uppercase text-gray-400">
+                <span className="text-[10px] font-semibold uppercase text-muted-foreground">
                   Check-out
                 </span>
-                <span className="font-bold text-gray-700">
+                <span className="font-bold text-foreground">
                   {checkoutDate ? format(checkoutDate, "dd/MM") : "--/--"}
                 </span>
               </div>
@@ -328,7 +386,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         </div>
 
         {/* FOOTER SECTION: Actions */}
-        <div className="border-t border-gray-100 p-3">
+        <div className="border-t border-border p-3">
           {renderPrimaryAction()}
         </div>
       </div>

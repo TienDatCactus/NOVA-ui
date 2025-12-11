@@ -89,12 +89,12 @@ export const CreateMenuItemRequestSchema = z.object({
   UnitId: z.string().min(1, "Vui lòng chọn đơn vị tính"),
   Price: z
     .number("Giá bán phải là số")
-    .min(0, "Giá bán phải lớn hơn hoặc bằng 0")
+    .min(1, "Giá bán phải lớn hơn 0")
     .max(1000000000, "Giá bán không được vượt quá 1 tỷ VNĐ"),
-  Active: z.boolean().default(true),
+  Active: z.boolean(),
   Images: z
     .array(z.instanceof(File))
-    .max(8, "Chỉ được tải lên tối đa 8 ảnh")
+    .max(10, "Chỉ được tải lên tối đa 10 ảnh")
     .optional(),
   Components: z
     .array(
@@ -104,6 +104,7 @@ export const CreateMenuItemRequestSchema = z.object({
           .min(1, "Vui lòng chọn nguyên liệu"),
         quantity: z
           .number("Số lượng phải là số")
+          .min(1, "Số lượng phải lớn hơn hoặc bằng 1")
           .nonnegative("Số lượng phải lớn hơn hoặc bằng 0")
           .max(10000, "Số lượng không được vượt quá 10,000"),
         notes: z
@@ -120,12 +121,15 @@ export const CreateMenuItemResponseSchema = MenuItemDetailSchema;
 export const UpdateMenuItemRequestSchema = CreateMenuItemRequestSchema.extend({
   RemoveMediaIds: z
     .array(z.string())
-    .max(8, "Chỉ được xóa tối đa 8 ảnh")
+    .max(10, "Chỉ được xóa tối đa 10 ảnh")
     .optional(),
   NewImages: z
     .array(z.instanceof(File))
-    .max(8, "Chỉ được tải lên tối đa 8 ảnh")
+    .max(10, "Chỉ được tải lên tối đa 10   ảnh")
     .optional(),
+}).refine((data) => data.Components.length > 0, {
+  message: "Vui lòng thêm ít nhất 1 nguyên liệu vào công thức định lượng",
+  path: ["Components"],
 });
 
 export const UpdateMenuItemResponseSchema = MenuItemDetailSchema;

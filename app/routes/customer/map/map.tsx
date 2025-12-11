@@ -7,6 +7,12 @@ import SearchBox from "./components/search";
 import { useMap } from "./context/map-context";
 import { useMapboxSearch } from "./hooks/use-mapbox-search";
 
+export function meta({ location }: Route.MetaArgs) {
+  return [
+    { title: "Bản Đồ - NOVA Hotel" },
+    { name: "description", content: "Khám phá địa điểm xung quanh khách sạn" },
+  ];
+}
 export default function Component({
   loaderData,
   actionData,
@@ -25,12 +31,12 @@ export default function Component({
       style: "mapbox://styles/mapbox/standard",
       center: [103.844, 22.3402],
       zoom: 13,
+      projection: "globe",
     });
 
     mapRef.current = map;
 
     map.on("load", () => {
-      // Add Sapa boundary layer
       map.addSource("sapa", {
         type: "geojson",
         data: sapaData,
@@ -45,7 +51,29 @@ export default function Component({
           "line-width": 1.6,
         },
       });
+      map.addControl(
+        new mapboxgl.FullscreenControl({
+          container: document.querySelector("body"),
+        })
+      );
+      map.addControl(
+        new mapboxgl.GeolocateControl({
+          positionOptions: {
+            enableHighAccuracy: true,
+          },
+          trackUserLocation: true,
+          showUserHeading: true,
+        })
+      );
+      const nav = new mapboxgl.NavigationControl();
+      map.addControl(nav, "bottom-left");
+      const scale = new mapboxgl.ScaleControl({
+        maxWidth: 80,
+        unit: "imperial",
+      });
+      map.addControl(scale);
 
+      scale.setUnit("metric");
       // Create custom Eco Palm marker
       const el = document.createElement("div");
       el.className = "eco-palm-marker";
@@ -56,7 +84,7 @@ export default function Component({
       el.style.backgroundSize = "100%";
       el.style.cursor = "pointer";
       el.style.borderRadius = "50%";
-      el.style.border = "3px solid #0152cb";
+      el.style.border = "4px solid #0152cb";
       el.style.boxShadow = "0 4px 12px rgba(1, 82, 203, 0.4)";
 
       const ecoPalmPopup = new mapboxgl.Popup({
@@ -213,9 +241,8 @@ export default function Component({
   }, [search]);
 
   return (
-    <div className="relative">
+    <div className="h-screen w-screen relative" ref={mapContainerRef}>
       <SearchBox />
-      <div className="w-screen h-screen" ref={mapContainerRef} />
     </div>
   );
 }

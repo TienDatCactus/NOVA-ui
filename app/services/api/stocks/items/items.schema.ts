@@ -38,15 +38,16 @@ const StockItemsListItemSchema = z.object({
 const StockItemsListSchema = z.array(StockItemsListItemSchema);
 
 const StockCreateItemSchema = z.object({
-  code: z.string(),
-  name: z.string(),
+  code: z.string("Mã item là bắt buộc"),
+  name: z.string("Tên hàng hóa là bắt buộc"),
   description: z.string().optional(),
-  categoryId: z.uuid(),
-  unitId: z.uuid(),
-  unitCost: z.number(),
-  unitPrice: z.number(),
-  minStock: z.number(),
-  maxStock: z.number(),
+  categoryId: z.uuid("Danh mục là bắt buộc"),
+  unitId: z.uuid("Đơn vị tính là bắt buộc"),
+  unitCost: z.number("Giá vốn là bắt buộc"),
+  unitPrice: z.number("Giá bán là bắt buộc"),
+  minStock: z.number("Tồn kho tối thiểu là bắt buộc"),
+  maxStock: z.number("Tồn kho tối đa là bắt buộc"),
+  initialQuantity: z.number("Số lượng ban đầu là bắt buộc"),
 });
 
 const StockUpdateItemSchema = z.object({

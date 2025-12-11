@@ -81,6 +81,15 @@ const ComponentsTab: React.FC<ComponentsTabProps> = ({
         </Button>
       </div>
 
+      {(form.formState.errors.Components?.message || fields.length === 0) && (
+        <div className="mb-4 p-3 rounded-md bg-destructive/10 border border-destructive/20">
+          <p className="text-sm text-destructive font-medium">
+            {(form.formState.errors.Components?.message as string) ||
+              "Vui lòng thêm ít nhất 1 nguyên liệu vào công thức định lượng"}
+          </p>
+        </div>
+      )}
+
       {fields.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-lg bg-muted/5">
           <Layers className="w-10 h-10 text-muted-foreground/20 mb-2" />

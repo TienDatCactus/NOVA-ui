@@ -94,8 +94,8 @@ export function useMapboxSearch(options?: {
     types = DEFAULT_TYPES,
     language = "vi",
   } = options || {};
-
-  const sessionTokenRef = useRef(crypto.randomUUID());
+  const [sessionId] = useState(() => crypto.randomUUID());
+  const sessionTokenRef = useRef(sessionId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -286,7 +286,7 @@ export function useMapboxSearch(options?: {
    * 7. RESET SESSION TOKEN
    * ------------------------------------------------------ */
   const resetSession = useCallback(() => {
-    sessionTokenRef.current = crypto.randomUUID();
+    sessionTokenRef.current = sessionId;
   }, []);
 
   return useMemo(

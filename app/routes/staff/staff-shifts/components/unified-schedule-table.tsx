@@ -29,6 +29,7 @@ import DeleteScheduleDialog from "./delete-schedule-dialog";
 import MarkAbsentDialog from "./mark-absent-dialog";
 import { ShiftCard } from "./shift-card";
 import UpdateScheduleDialog from "./update-schedule-dialog";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 
 interface UnifiedScheduleTableProps {
   viewMode: "shift" | "staff";

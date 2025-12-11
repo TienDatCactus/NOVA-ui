@@ -10,6 +10,8 @@ import {
 import { Switch } from "~/components/ui/switch";
 import type { ServiceFilters } from "~/services/api/services/service.types";
 import { useServiceTypes } from "../container/service-types/query.hooks";
+import { Button } from "~/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 interface ServicesViewLayoutProps {
   children: ReactNode;
@@ -52,9 +54,9 @@ export default function ServicesViewLayout({
               </Label>
               <Switch
                 id="active-filter"
-                checked={filters.activeFilter === "active"}
+                checked={filters.activeFilter === "all"}
                 onCheckedChange={(checked) =>
-                  updateFilter("activeFilter", checked ? "active" : "all")
+                  updateFilter("activeFilter", checked ? "all" : "active")
                 }
               />
             </div>
@@ -63,7 +65,7 @@ export default function ServicesViewLayout({
                 value={filters.typeCode || ""}
                 onValueChange={(value) => updateFilter("typeCode", value)}
               >
-                <SelectTrigger className="shadow-md w-40 bg-white">
+                <SelectTrigger className="shadow-md w-40 bg-background">
                   <SelectValue placeholder="Chọn loại dịch vụ" />
                 </SelectTrigger>
                 <SelectContent>
@@ -76,6 +78,11 @@ export default function ServicesViewLayout({
                     ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Button variant="ghost" size="icon" onClick={resetFilters}>
+                <RotateCcw />
+              </Button>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
   Card,
@@ -18,20 +18,20 @@ import {
 } from "~/components/ui/chart";
 
 export const description =
-  "A radar chart comparing room types across multiple metrics";
+  "A stacked bar chart comparing room availability across types";
 
 const chartConfig = {
   available: {
-    label: "% Phòng trống",
-    color: "#22c55e", // green
+    label: "Phòng trống",
+    color: "var(--chart-1)", // green
   },
   booked: {
-    label: "% Đã đặt",
-    color: "#3b82f6", // blue
+    label: "Đã đặt",
+    color: "var(--chart-2)", // blue
   },
   checkin: {
-    label: "% Check-in",
-    color: "#f59e0b", // amber
+    label: "Đang ở",
+    color: "var(--chart-3)", // amber
   },
 } satisfies ChartConfig;
 
@@ -46,72 +46,81 @@ interface BookingRadarChartProps {
 }
 
 export function BookingRadarChart({ className, data }: BookingRadarChartProps) {
-  // Use provided data or fallback to empty array
   const chartData = data || [];
 
   return (
     <Card className={className}>
       <CardHeader className="items-center pb-4">
-        <CardTitle>So sánh hiệu suất hạng phòng</CardTitle>
+        <CardTitle>Tình trạng phòng theo hạng</CardTitle>
         <CardDescription>
-          Phân tích tỷ lệ phòng trống, đặt phòng và check-in theo từng hạng
-          phòng
+          So sánh số lượng phòng trống, đã đặt và đang ở theo từng hạng phòng
         </CardDescription>
       </CardHeader>
-      <CardContent className="pb-0">
+      <CardContent>
         {chartData.length === 0 ? (
-          <div className="flex items-center justify-center h-[350px] text-muted-foreground">
+          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
             Không có dữ liệu
           </div>
         ) : (
-          <ChartContainer
-            config={chartConfig}
-            className="mx-auto aspect-square max-h-[350px]"
-          >
-            <RadarChart data={chartData}>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent indicator="line" />}
-              />
-              <PolarAngleAxis
+          <ChartContainer config={chartConfig} className="h-[300px] w-full">
+            <BarChart
+              data={chartData}
+              margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis
                 dataKey="type"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
                 tick={{ fill: "var(--foreground)", fontSize: 12 }}
               />
-              <PolarGrid stroke="var(--border)" strokeDasharray="3 3" />
-              <Radar
-                name="% Phòng trống"
-                dataKey="available"
-                stroke="var(--color-available)"
-                fill="var(--color-available)"
-                fillOpacity={0.2}
-                strokeWidth={2}
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                label={{
+                  value: "Số lượng phòng",
+                  angle: -90,
+                  position: "insideLeft",
+                  style: { fontSize: 12, fill: "var(--muted-foreground)" },
+                }}
               />
-              <Radar
-                name="% Đã đặt"
-                dataKey="booked"
-                stroke="var(--color-booked)"
-                fill="var(--color-booked)"
-                fillOpacity={0.2}
-                strokeWidth={2}
-              />
-              <Radar
-                name="% Check-in"
-                dataKey="checkin"
-                stroke="var(--color-checkin)"
-                fill="var(--color-checkin)"
-                fillOpacity={0.2}
-                strokeWidth={2}
+              <ChartTooltip
+                content={<ChartTooltipContent hideLabel />}
+                cursor={{ fill: "var(--muted)", opacity: 0.3 }}
               />
               <ChartLegend content={<ChartLegendContent />} />
-            </RadarChart>
+              <Bar
+                dataKey="available"
+                stackId="a"
+                fill="#10ff33"
+                radius={[0, 0, 0, 0]}
+              />
+              <Bar
+                dataKey="booked"
+                stackId="a"
+                fill="#3341ff"
+                radius={[0, 0, 0, 0]}
+              />
+              <Bar
+                dataKey="checkin"
+                stackId="a"
+                fill="#eeff33"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
           </ChartContainer>
         )}
       </CardContent>
-      <CardFooter>
-        <legend className="text-muted-foreground leading-none text-sm italic">
-          *Biểu đồ hiển thị hiệu suất các hạng phòng dựa trên tỷ lệ phòng trống,
-          đặt phòng và check-in
-        </legend>
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 font-medium leading-none">
+          Tổng quan tình trạng phòng theo hạng
+        </div>
+        <div className="leading-none text-muted-foreground">
+          Biểu đồ cột chồng hiển thị phân bố phòng trống, đã đặt và đang sử dụng
+        </div>
       </CardFooter>
     </Card>
   );

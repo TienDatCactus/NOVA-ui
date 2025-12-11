@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { toast } from "sonner";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 import { InvoicesService } from "~/services/api/invoices";
 import type {
   AddCustomItemsRequestDto,
@@ -16,11 +17,19 @@ const useAddCustomItem = (invoiceId: string) => {
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["invoice-detail", invoiceId] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Thêm mục tùy chỉnh vào hóa đơn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
+        );
+      }
     },
   });
 };
 
-const useInvoicePayment = (invoiceId: string) => {
+const useInvoicePayment = (invoiceId: string, bookingId?: string) => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: InvoicePaymentRequestDto) =>
@@ -28,6 +37,22 @@ const useInvoicePayment = (invoiceId: string) => {
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["invoice-detail", invoiceId] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
+      // If bookingId provided, invalidate booking-specific queries
+      if (bookingId) {
+        qc.invalidateQueries({ queryKey: ["booking-invoices", bookingId] });
+        qc.invalidateQueries({ queryKey: ["bookings-detail"] });
+        qc.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        });
+      }
+      toast.success("Thanh toán hóa đơn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
+        );
+      }
     },
   });
 };
@@ -40,6 +65,14 @@ const useRefund = (invoiceId: string) => {
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["invoice-detail", invoiceId] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Hoàn tiền hóa đơn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
+        );
+      }
     },
   });
 };
@@ -51,6 +84,14 @@ const useVoidInvoice = (invoiceId: string) => {
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["invoice-detail", invoiceId] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Hủy hóa đơn thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
+        );
+      }
     },
   });
 };
@@ -62,6 +103,25 @@ const useSyncInvoiceWithOrders = (invoiceId: string) => {
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["invoice-detail", invoiceId] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Đồng bộ hóa đơn với đơn hàng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
+        );
+      }
+    },
+  });
+};
+
+const useExportInvoice = (invoiceId: string) => {
+  return useMutation({
+    mutationFn: async () => await InvoicesService.exportInvoiceById(invoiceId),
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Lỗi khi xuất báo cáo");
+      }
     },
   });
 };
@@ -71,4 +131,5 @@ export {
   useRefund,
   useVoidInvoice,
   useSyncInvoiceWithOrders,
+  useExportInvoice,
 };

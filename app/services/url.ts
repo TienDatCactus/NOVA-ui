@@ -1,16 +1,18 @@
-import { de } from "date-fns/locale";
+//* admin + hotelmanager + accountant + receptionist + servicestaff
 
 const Auth = {
-  login: "Auth/login",
-  logout: "Auth/logout",
-  forgotPassword: "Auth/forgot-password",
-  resetPassword: "Auth/reset-password",
+  login: "Auth/login", //! all
+  logout: "Auth/logout", //! all
+  forgotPassword: "Auth/forgot-password", //! hotel manager + admin + accountant
+  resetPassword: "Auth/reset-password", //! hotel manager + admin + accountant
   refresh: "Auth/refresh",
   revoke: "Auth/revoke",
+  //? new
+  changePassword: "Auth/change-password", //! admin + manager + accountant
 };
-
+//! admin
 const User = {
-  list: "Users",
+  list: "Users", //
   detail: (id: string) => `Users/${id}`,
   create: "Users",
   update: (id: string) => `Users/${id}`,
@@ -20,9 +22,10 @@ const User = {
   assignRoles: (id: string) => `Users/${id}/roles`,
   removeRoles: (id: string) => `Users/${id}/roles`,
   changePassword: (id: string) => `Users/${id}/change-password`,
-  chatStaff: "Users/chat-staff",
+  chatStaff: "Users/chat-staff", //! service staff + hotel manager + receptionist - admin
+  delete: (id: string) => `Users/${id}`,
 };
-
+//! receptionist
 const Booking = {
   staffCreateBooking: "StaffBookings",
   preview: "StaffBookings/preview",
@@ -43,24 +46,29 @@ const Booking = {
   Export: `Bookings/export`,
   updateStatus: "Bookings/update-status",
   addToCompletedRoomOrder: (bookingId: string) =>
-    `/StaffBookings/${bookingId}/add-completed-charges`,
+    `StaffBookings/${bookingId}/add-completed-charges`,
   confirmPayment: (id: string) => `StaffBookings/${id}/confirm-payment`,
   orderableBookings: "StaffBookings/orderable",
+  payForRoom: (id: string) => `StaffBookings/${id}/pay-now-rooms`,
+  upgradeRoom: (id: string) => `StaffBookings/${id}/upgrade-room`,
+  unpaidRooms: (bookingId: string) => `StaffBookings/${bookingId}/unpaid-rooms`,
 };
 
 const OTAInformation = {
-  list: "OTAInformation/list",
+  list: "OTAInformation/list", //! receptionist
 };
+
+//! receptionist + hotel manager
 const Rooms = {
+  availables: "Rooms/available",
   detail: (id: string) => `Rooms/${id}/details`,
   bookingHistory: (id: string) => `Rooms/${id}/booking-history`,
   updateStatus: "Rooms/update-status",
   list: "Rooms/list",
-  create: "Rooms",
-  update: (id: string) => `Rooms/${id}`,
+  create: "Rooms", //! hotel manager
+  update: (id: string) => `Rooms/${id}`, //! hotel manager
   getAvailableRoomsInternal: "Rooms/available-with-details",
-
-  delete: (id: string) => `Rooms/${id}`,
+  delete: (id: string) => `Rooms/${id}`, //! hotel manager
   generateQRCode: (id: string, baseUrl?: string) =>
     `Rooms/${id}/qr-code?baseUrl=${baseUrl}`,
   regenerateQRCode: (id: string, baseUrl?: string) =>
@@ -68,63 +76,65 @@ const Rooms = {
       ? `Rooms/${id}/qr-code/regenerate?baseUrl=${baseUrl}`
       : `Rooms/${id}/qr-code/regenerate`,
 };
-
+//! receptionist +  hotel manager
 const RoomTypes = {
   list: "RoomTypes/list",
   detail: (id: string) => `RoomTypes/${id}`,
-  update: (id: string) => `RoomTypes/${id}`,
-  create: "RoomTypes",
-  delete: (id: string) => `RoomTypes/${id}`,
+  update: (id: string) => `RoomTypes/${id}`, //! hotel manager
+  create: "RoomTypes", //! hotel manager
+  delete: (id: string) => `RoomTypes/${id}`, //! hotel manager
 };
+
 const MenuCategory = {
-  list: "menu-categories",
-  detail: (id: string) => `menu-categories/${id}`,
-  create: "menu-categories",
-  update: (id: string) => `menu-categories/${id}`,
-  delete: (id: string) => `menu-categories/${id}`,
+  list: "menu-categories", //! all
+  detail: (id: string) => `menu-categories/${id}`, //! service staff + hotel manager + receptionist
+  create: "menu-categories", //! service staff + hotel manager + receptionist
+  update: (id: string) => `menu-categories/${id}`, //! service staff + hotel manager + receptionist
+  delete: (id: string) => `menu-categories/${id}`, //! service staff + hotel manager + receptionist
 };
-
+//!  hotel manager + receptionist
 const Menu = {
-  list: "Menu/list",
+  list: "Menu/list", //! all
   detail: (id: string) => `Menu/items/${id}`,
-  create: "Menu/items",
-  update: (id: string) => `Menu/items/${id}`,
-  delete: (id: string) => `Menu/items/${id}`,
+  create: "Menu/items", //! hotel manager
+  update: (id: string) => `Menu/items/${id}`, //! hotel manager
+  delete: (id: string) => `Menu/items/${id}`, //! hotel manager
   listByCategory: (categoryId: string) =>
-    `Menu/items/by-category/${categoryId}`,
+    `Menu/items/by-category/${categoryId}`, //!all
 };
-
+//! hotel manager + receptionist
 const Service = {
-  list: "/Service/list",
+  list: "/Service/list", //! all
   detail: (id: string) => `Service/items/${id}`,
   byServiceType: (serviceTypeId: string) =>
     `Service/items/by-service-type/${serviceTypeId}`,
-  create: "Service/items",
-  update: (id: string) => `Service/items/${id}`,
-  delete: (id: string) => `Service/items/${id}`,
+  create: "Service/items", //! hotel manager
+  update: (id: string) => `Service/items/${id}`, //! hotel manager
+  delete: (id: string) => `Service/items/${id}`, //! hotel manager
 };
-
+//! hotel manager + receptionist
 const ServiceTypes = {
   list: "ServiceTypes",
-  create: "ServiceTypes",
-  update: (id: string) => `ServiceTypes/${id}`,
   detail: (id: string) => `ServiceTypes/${id}`,
-  delete: (id: string) => `ServiceTypes/${id}`,
+  create: "ServiceTypes", //! hotel manager
+  update: (id: string) => `ServiceTypes/${id}`, //! hotel manager
+  delete: (id: string) => `ServiceTypes/${id}`, //! hotel manager
 };
 
+//! hotel manager
 const Units = {
-  list: "Units",
-  create: "Units",
-  detail: (id: string) => `Units/${id}`,
-  update: (id: string) => `Units/${id}`,
-  delete: (id: string) => `Units/${id}`,
+  list: "Units", //! staff + receptionist
+  create: "Units", //! hotel manager
+  detail: (id: string) => `Units/${id}`, //! staff + receptionist
+  update: (id: string) => `Units/${id}`, //! hotel manager
+  delete: (id: string) => `Units/${id}`, //! hotel manager
 };
-
+//! hotel manager + receptionist
 const Reports = {
-  reservationReports: (fromDate: string, toDate: string) =>
-    `Reports/daily-booking-dashboard?fromDate=${fromDate}&toDate=${toDate}`,
+  reservationReports: `Reports/daily-booking-dashboard`,
 };
 
+//! receptionist
 const Orders = {
   createPosOrder: "PosOrders",
   addItemsToPos: (id: string) => `PosOrders/${id}/items`,
@@ -153,18 +163,19 @@ const Orders = {
     `service-orders/${id}/set-scheduled`,
   createPosOrderWithItems: "PosOrders/with-items",
 };
-
+//! accountant
 const Invoices = {
-  list: "Invoices", //? get list of invoices with pagination and filters
+  list: "Invoices", //! accountant
   create: "Invoices", //? create invoice for a room booking
   addItems: (id: string) => `Invoices/${id}/items`, //? add items to invoice
-  addCustomItems: (id: string) => `Invoices/${id}/custom-items`, //? add custom items to invoice
+  addCustomItems: (id: string) => `Invoices/${id}/custom-items`,
   markPaid: (id: string) => `Invoices/${id}/mark-paid`, //? mark invoice as paid
-  void: (id: string) => `Invoices/${id}/void`, //? void invoice
+  void: (id: string) => `Invoices/${id}/void`, // ! accountant
   detail: (id: string) => `Invoices/${id}`, //? get invoice details
   listByBooking: (bookingId: string) => `Invoices/booking/${bookingId}`, //? list invoices by booking ID
   calculateFees: "invoice-preview/calculate-fees",
-  previewBookingInvoice: "invoice-preview/preview",
+
+  previewBookingInvoice: "invoice-preview/preview", //! receptionist
   payments: (id: string) => `Invoices/${id}/payments`, //? get invoice payments
   refund: (id: string) => `Invoices/${id}/refund`, //? refund invoice
   export: (date?: string) =>
@@ -175,6 +186,8 @@ const Invoices = {
   exportById: (id: string) => `Invoices/${id}/export`, //? export invoice by ID
 };
 // Chat endpoints
+
+//! service staff + hotel manager + receptionist
 const Chat = {
   entry: (roomToken: string) => `chat/entry?roomToken=${roomToken}`,
   messages: (sessionId: string) => `chat/sessions/${sessionId}/messages`,
@@ -187,9 +200,9 @@ const Chat = {
   markAllRead: (sessionId: string) =>
     `chat/sessions/${sessionId}/mark-all-read`,
 };
-
+//! hotel manager
 const Staff = {
-  list: "Staffs",
+  list: "Staffs", //! accountant
   create: "Staffs",
   detail: (id: string) => `Staffs/${id}`,
   update: (id: string) => `Staffs/${id}`,
@@ -197,6 +210,7 @@ const Staff = {
   terminate: (id: string) => `Staffs/${id}/terminate`,
 };
 
+//! hotel manager
 const StaffRole = {
   list: "StaffRoles",
   create: "StaffRoles",
@@ -204,7 +218,7 @@ const StaffRole = {
   update: (id: string) => `StaffRoles/${id}`,
   delete: (id: string) => `StaffRoles/${id}`,
 };
-
+//! hotel manager
 const WorkShift = {
   list: "WorkShifts",
   active: "WorkShifts/active",
@@ -214,6 +228,7 @@ const WorkShift = {
   delete: (id: string) => `WorkShifts/${id}`,
 };
 
+//! hotel manager
 const Holiday = {
   list: "Holidays",
   create: "Holidays",
@@ -222,6 +237,7 @@ const Holiday = {
   delete: (id: string) => `Holidays/${id}`,
 };
 
+//! hotel manager
 const StaffShift = {
   list: "StaffShifts",
   schedule: "StaffShifts/schedule",
@@ -232,21 +248,23 @@ const StaffShift = {
   exportWeeklyForm2: "StaffShifts/export-weekly-form2",
 };
 
+//! hotel manager
 const StaffAttendance = {
   list: "StaffShifts/attendance",
   absent: (assignmentId: string) => `StaffShifts/${assignmentId}/absent`,
   present: (assignmentId: string) => `StaffShifts/${assignmentId}/present`,
 };
 
+//! outscope, dont care
 const Discount = {
   apply: "discount/apply",
   override: "discount/override",
 };
-
+//! accountant
 const StaffPayroll = {
-  grid: "StaffPayrolls/grid",
+  grid: "StaffPayrolls/grid", //! hotel manager
   generate: "StaffPayrolls/generate",
-  detail: (id: string) => `StaffPayrolls/${id}`,
+  detail: (id: string) => `StaffPayrolls/${id}`, //! hotel manager
   update: (id: string) => `StaffPayrolls/${id}`,
   generateSingle: (staffId: string) =>
     `StaffPayrolls/staff/${staffId}/generate`,
@@ -261,16 +279,19 @@ const StaffPayroll = {
     `StaffPayrolls/components/${componentId}`,
   exportMonthly: "StaffPayrolls/export/monthly",
   exportPayslip: (id: string) => `StaffPayrolls/${id}/export-payslip`,
-  refreshDays: "StaffPayrolls/refresh-days",
-  refreshSinglePayroll: (id: string) => `StaffPayrolls/${id}/refresh-days`,
+  refreshDays: "StaffPayrolls/refresh-days", //! hotel manager
+  refreshSinglePayroll: (id: string) => `StaffPayrolls/${id}/refresh-days`, //! hotel manager
+  createSalaryExpense: (payrollId: string) =>
+    `StaffPayrolls/${payrollId}/create-salary-expense`,
 };
-
+//! all
 const Translation = {
   translate: "Translation/translate",
   detect: (text: string) => `Translation/detect-language?text=${text}`,
 };
 
 const Stock = {
+  //! staff + hotel manager
   Items: {
     list: "Items",
     create: "Items",
@@ -280,29 +301,32 @@ const Stock = {
     listByCategory: (categoryId: string) => `Items/by-category/${categoryId}`,
     listByCode: (code: string) => `Items/by-code/${code}`,
     lowStock: "Items/low-stock",
-    transactions: (id: string) => `Items/${id}/transactions`,
-    adjustStock: (id: string) => `Items/${id}/adjust-stock`,
+    transactions: (id: string) => `Items/${id}/transactions`, //! hotel manager
+    adjustStock: (id: string) => `Items/${id}/adjust-stock`, //!hotel manager
   },
+  //! staff + hotel manager
   PurchaseRequests: {
     list: "PurchaseRequests",
     create: "PurchaseRequests",
     detail: (id: string) => `PurchaseRequests/${id}`,
     update: (id: string) => `PurchaseRequests/${id}`,
     delete: (id: string) => `PurchaseRequests/${id}`,
-    approve: (id: string) => `PurchaseRequests/${id}/approve`,
-    reject: (id: string) => `PurchaseRequests/${id}/reject`,
-    cancel: (id: string) => `PurchaseRequests/${id}/cancel`,
+    approve: (id: string) => `PurchaseRequests/${id}/approve`, //! hotel manager
+    reject: (id: string) => `PurchaseRequests/${id}/reject`, //! hotel manager
+    cancel: (id: string) => `PurchaseRequests/${id}/cancel`, //! hotel manager
     receiveStock: (id: string) => `PurchaseRequests/${id}/receive-stock`,
     export: (id: string) => `PurchaseRequests/${id}/export`,
   },
+  //! staff
   StockAdjustments: {
-    list: "StockAdjustments",
+    list: "StockAdjustments", //! hotel manager
     create: "StockAdjustments",
     detail: (id: string) => `StockAdjustments/${id}`,
     update: (id: string) => `StockAdjustments/${id}`,
     delete: (id: string) => `StockAdjustments/${id}`,
-    apply: (id: string) => `StockAdjustments/${id}/apply`,
+    apply: (id: string) => `StockAdjustments/${id}/apply`, //! hotel manager
   },
+  //! staff + hotel manager
   ItemCategories: {
     list: "ItemCategories",
     create: "ItemCategories",
@@ -312,26 +336,30 @@ const Stock = {
   },
 };
 
+//! hotel manager
 const Refunds = {
   createRefundForBooking: (bookingId: string) => `Refunds/booking/${bookingId}`,
   getBookingRefundHistory: (bookingId: string) =>
     `Refunds/booking/${bookingId}/history`,
 };
-
+//! hotel manager
 const FinancialReports = {
   getFinancialReport: "FinancialReports/dashboard",
   getFinancialReportCached: "FinancialReports/dashboard/cached",
 };
-
+//! accountant
 const Expenses = {
   list: "Expenses",
   create: "Expenses",
   detail: (id: string) => `Expenses/${id}`,
   update: (id: string) => `Expenses/${id}`,
   delete: (id: string) => `Expenses/${id}`,
-  summary: "Expenses/summary",
+  summary: "Expenses/summary", //! hotel manager
+  post: (id: string) => `Expenses/${id}/post`,
+  void: (id: string) => `Expenses/${id}/void`,
 };
 
+//! only admin
 const AuditLogs = {
   list: "AuditLogs",
   detail: (id: string) => `AuditLogs/${id}`,
@@ -342,6 +370,8 @@ const AuditLogs = {
   stats: "AuditLogs/stats",
 };
 
+//! admin + hotel manager
+//? if module = system + audit logs -> only admin and <=>
 const Configs = {
   list: "Configs",
   groupedList: "Configs/grouped",

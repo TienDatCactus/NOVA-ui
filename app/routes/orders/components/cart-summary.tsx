@@ -16,37 +16,22 @@ import { formatMoney } from "~/lib/utils";
 type CartSummaryProps = {
   itemCount: number;
   subtotal: number;
-  isEmpty: boolean;
   notes: string | null;
   onNotesChange: (notes: string) => void;
   onConfirm: () => void;
   onClearCart: () => void;
+  isInvalid?: boolean;
 };
 
 export default function CartSummary({
   itemCount,
   subtotal,
-  isEmpty,
   notes,
   onNotesChange,
   onConfirm,
   onClearCart,
+  isInvalid,
 }: CartSummaryProps) {
-  if (isEmpty) {
-    return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <ShoppingCart className="h-6 w-6 text-muted-foreground" />
-          </EmptyMedia>
-          <EmptyTitle className="font-semibold">Giỏ hàng trống</EmptyTitle>
-          <EmptyDescription className="text-sm text-muted-foreground">
-            Vui lòng chọn món từ thực đơn
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
-  }
   return (
     <div className="space-y-2">
       {/* Notes section */}
@@ -95,16 +80,11 @@ export default function CartSummary({
           className="w-full"
           size="lg"
           onClick={onConfirm}
-          disabled={isEmpty}
+          disabled={isInvalid}
         >
           Xác nhận
         </Button>
-        <Button
-          variant="outline"
-          className="w-full "
-          onClick={onClearCart}
-          disabled={isEmpty}
-        >
+        <Button variant="outline" className="w-full " onClick={onClearCart}>
           Xóa đơn hàng
         </Button>
       </div>

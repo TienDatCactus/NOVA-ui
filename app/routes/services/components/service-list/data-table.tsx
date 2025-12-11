@@ -25,6 +25,9 @@ import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import CreateServiceTypeDialog from "../create-service-type.dialog";
+import CreateServiceDialog from "../create-service.dialog";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -39,6 +42,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const table = useReactTable({
     data,
@@ -69,10 +73,12 @@ export function DataTable<TData extends ServiceItem, TValue>({
           }
           className="max-w-sm"
         />
-        <Button onClick={() => setOpen(true)} size={"sm"}>
-          <Plus className="h-4 w-4 " />
-          Thêm loại dịch vụ
-        </Button>
+        {can.create(RouteModule.Services) && (
+          <Button onClick={() => setOpen(true)} size={"sm"}>
+            <Plus className="h-4 w-4 " />
+            Thêm dịch vụ
+          </Button>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -135,7 +141,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
-      <CreateServiceTypeDialog onClose={() => setOpen(false)} open={open} />
+      <CreateServiceDialog onClose={() => setOpen(false)} open={open} />
     </div>
   );
 }

@@ -2,9 +2,21 @@ import axios, { AxiosError } from "axios";
 import STORAGE, { clearStorage, getStorage, setStorage } from "~/lib/storage";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import { Auth } from "../../url";
-import type { LoginDto, LoginResponseDto, ResetPasswordDto } from "./dto";
+import type {
+  ChangePasswordDto,
+  LoginDto,
+  LoginResponseDto,
+  ResetPasswordDto,
+} from "./dto";
 import { toast } from "sonner";
-const { LoginSchema, LoginResponseSchema, ResetPasswordSchema } = AuthSchema;
+import http from "~/lib/http";
+const {
+  LoginSchema,
+  LoginResponseSchema,
+  ResetPasswordSchema,
+  ChangePasswordSchema,
+} = AuthSchema;
+
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 async function login(data: LoginDto): Promise<LoginResponseDto> {
   try {
@@ -86,6 +98,19 @@ async function revoke(refreshToken: string) {
     throw Promise.reject(err);
   }
 }
+
+async function changePassword(data: ChangePasswordDto) {
+  try {
+    const resp = await http.post(
+      Auth.changePassword,
+      ChangePasswordSchema.parse(data)
+    );
+    return resp.data;
+  } catch (err) {
+    console.error(err);
+    return Promise.reject(err);
+  }
+}
 export const AuthService = {
   forgotPassword,
   resetPassword,
@@ -93,4 +118,5 @@ export const AuthService = {
   logout,
   refresh,
   revoke,
+  changePassword,
 };

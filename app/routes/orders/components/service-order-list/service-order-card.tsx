@@ -53,18 +53,18 @@ export default function ServiceOrderCard({ order }: ServiceOrderCardProps) {
   };
 
   return (
-    <div className="group flex flex-col h-full overflow-hidden rounded-xl border border-muted bg-white shadow-sm transition-all hover:shadow-md hover:border-primary">
-      <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-3">
+    <div className="group flex flex-col h-full overflow-hidden rounded-xl border border-muted bg-background shadow-sm transition-all hover:shadow-md hover:border-primary">
+      <div className="flex items-center justify-between border-b border-muted bg-muted px-4 py-3">
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
-            className="bg-white font-mono text-[10px] font-bold text-gray-500"
+            className="bg-background font-mono text-[10px] font-bold text-accent-foreground"
           >
             #{order.id?.slice(0, 6)}
           </Badge>
 
           {/* Booking Context Pill - Quan trọng để nhân viên biết phục vụ ai/phòng nào */}
-          <div className="flex items-center gap-1.5 rounded-full bg-white border border-gray-200 px-2.5 py-0.5 text-xs font-semibold text-gray-700 shadow-sm">
+          <div className="flex items-center gap-1.5 rounded-full bg-background border border-muted-foreground px-2.5 py-0.5 text-xs font-semibold text-muted-foreground shadow-sm">
             {displayBookingInfo.icon}
             <span className="truncate ">{displayBookingInfo.text}</span>
           </div>
@@ -80,17 +80,17 @@ export default function ServiceOrderCard({ order }: ServiceOrderCardProps) {
       </div>
 
       {/* 2. BODY: Main Content */}
-      <div className="flex-1 px-4 py-3 bg-white flex flex-col">
+      <div className="flex-1 px-4 py-3 bg-background flex flex-col">
         {/* Service Name - Big & Bold */}
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-2">
+            <h3 className="text-base font-bold text-accent-foreground mb-1 line-clamp-2">
               {order.serviceName || order.customServiceName}
             </h3>
 
             {/* Schedule Time - Critical Info */}
             {scheduledDate && (
-              <div className="flex items-center gap-2 text-sm text-blue-700 font-medium mb-3">
+              <div className="flex items-center gap-2 text-sm text-primary font-medium mb-3">
                 <CalendarClock className="h-4 w-4" />
                 <span>
                   {format(scheduledDate, "HH:mm", { locale: vi })}
@@ -114,7 +114,7 @@ export default function ServiceOrderCard({ order }: ServiceOrderCardProps) {
         <ServiceOrderDetails order={order} bookingDetail={bookingDetail} />
       </div>
 
-      <div className="mt-auto bg-gray-50 px-4 py-3 border-t border-dashed border-gray-300">
+      <div className="mt-auto bg-muted px-4 py-3 border-t border-dashed border-muted">
         <ServiceFooterActions orderId={order.id || ""} status={order.status} />
       </div>
     </div>

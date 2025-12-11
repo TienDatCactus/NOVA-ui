@@ -1,4 +1,4 @@
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import {
   useReactTable,
@@ -23,6 +23,7 @@ import {
 } from "~/components/ui/table";
 import type { StockAdjustmentListItemDto } from "~/services/api/stocks/stock-adjustments/dto";
 import CreateStockAdjustmentDialog from "../create-stock-adjustment.dialog";
+import LowStockDialog from "../../fragments/low-stock.dialog";
 
 interface DataTableProps<TData extends StockAdjustmentListItemDto, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,7 +37,7 @@ export function DataTable<TData extends StockAdjustmentListItemDto, TValue>({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
-
+  const [openLowStockDialog, setOpenLowStockDialog] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -67,10 +68,20 @@ export function DataTable<TData extends StockAdjustmentListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
-          <Plus />
-          Tạo phiếu mới
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant={"warning"}
+            onClick={() => setOpenLowStockDialog(true)}
+          >
+            <TriangleAlert />
+            Các mặt hàng sắp hết kho
+          </Button>
+          <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
+            <Plus />
+            Tạo phiếu mới
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -125,6 +136,10 @@ export function DataTable<TData extends StockAdjustmentListItemDto, TValue>({
 
       <DataTablePagination table={table} />
 
+      <LowStockDialog
+        onOpenChange={setOpenLowStockDialog}
+        open={openLowStockDialog}
+      />
       <CreateStockAdjustmentDialog
         open={openCreateDialog}
         onOpenChange={setOpenCreateDialog}

@@ -1,27 +1,18 @@
-import { useState, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Loader2, Plus, Save, Search, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import { Form, FormField } from "~/components/ui/form";
-import { Badge } from "~/components/ui/badge";
-import {
-  Shield,
-  Loader2,
-  Save,
-  Search,
-  Trash2,
-  Plus,
-  AlertCircle,
-} from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import {
@@ -29,12 +20,10 @@ import {
   useRemoveRoles,
   useRoles,
 } from "../container/query.hooks";
-import {
-  getRoleBadgeColors,
-  getRoleDisplayName,
-} from "~/services/types/users.types";
-import type { UserItem } from "~/services/api/user/dto";
+
+import { ROLE_LABELS } from "~/lib/auth/roles";
 import { cn } from "~/lib/utils";
+import type { UserItem } from "~/services/api/user/dto";
 
 interface ManageRolesDialogProps {
   user: UserItem;
@@ -83,13 +72,11 @@ export function ManageRolesDialog({
     let roles = allRoles;
     if (searchQuery) {
       roles = allRoles.filter((role) =>
-        getRoleDisplayName(role)
+        ROLE_LABELS[role as keyof typeof ROLE_LABELS]
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       );
     }
-    // Optional: Sort so active roles appear at the top?
-    // For now, keeping alphabetical is usually less confusing for "Search"
     return roles;
   }, [allRoles, searchQuery]);
 
@@ -122,7 +109,7 @@ export function ManageRolesDialog({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md p-0 gap-0 overflow-hidden flex flex-col max-h-[85vh]">
-        <DialogHeader className="px-6 py-4 bg-muted/10 border-b shrink-0">
+        <DialogHeader className="p-4 bg-muted/10 border-b shrink-0">
           <DialogTitle>Phân quyền tài khoản</DialogTitle>
           <DialogDescription>{user.fullName}</DialogDescription>
         </DialogHeader>
@@ -133,15 +120,14 @@ export function ManageRolesDialog({
             className="flex flex-col flex-1 overflow-hidden"
           >
             <div className="p-4 border-b shrink-0 bg-background z-10">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Tìm kiếm vai trò..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+              <Input
+                startAddon={
+                  <Search className="w-4 h-4 text-muted-foreground " />
+                }
+                placeholder="Tìm kiếm vai trò..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
 
             <ScrollArea className="flex-1 bg-gray-50/30">
@@ -158,7 +144,6 @@ export function ManageRolesDialog({
                       ) : (
                         filteredRoles.map((role) => {
                           const isSelected = field.value?.includes(role);
-                          const colors = getRoleBadgeColors(role);
 
                           return (
                             <div
@@ -166,12 +151,11 @@ export function ManageRolesDialog({
                               className={cn(
                                 "flex items-center justify-between p-3 rounded-lg border transition-all duration-200",
                                 isSelected
-                                  ? "bg-white border-primary/20 shadow-sm"
-                                  : "bg-white/50 border-transparent hover:border-gray-200 hover:bg-white"
+                                  ? "bg-background border-primary/20 shadow-sm"
+                                  : "bg-background/50 border-transparent hover:border-gray-200 hover:bg-background"
                               )}
                             >
                               <div className="flex items-center gap-3">
-                                {/* Role Icon/Initial could go here */}
                                 <div className="flex flex-col">
                                   <span
                                     className={cn(
@@ -181,11 +165,13 @@ export function ManageRolesDialog({
                                         : "text-foreground"
                                     )}
                                   >
-                                    {getRoleDisplayName(role)}
+                                    {ROLE_LABELS[
+                                      role as keyof typeof ROLE_LABELS
+                                    ] || role}
                                   </span>
                                   {isSelected && (
                                     <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                      <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
                                       Đang kích hoạt
                                     </span>
                                   )}
@@ -197,8 +183,7 @@ export function ManageRolesDialog({
                                 <Button
                                   type="button"
                                   size="sm"
-                                  variant="outline"
-                                  className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30"
+                                  variant="destructive-ghost"
                                   onClick={() => {
                                     field.onChange(
                                       field.value.filter((r) => r !== role)
@@ -212,8 +197,7 @@ export function ManageRolesDialog({
                                 <Button
                                   type="button"
                                   size="sm"
-                                  variant="ghost"
-                                  className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10"
+                                  variant="info-ghost"
                                   onClick={() => {
                                     field.onChange([...field.value, role]);
                                   }}
@@ -242,7 +226,7 @@ export function ManageRolesDialog({
               </div>
             )}
 
-            <DialogFooter className="px-6 py-4 bg-white shrink-0 border-t">
+            <DialogFooter className="px-6 py-4 bg-background shrink-0 border-t">
               <Button
                 type="button"
                 variant="outline"

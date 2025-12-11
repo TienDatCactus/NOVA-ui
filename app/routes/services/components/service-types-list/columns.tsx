@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import ServiceTypeActionsCell from "../../fragments/service-types/actions.cell";
 import Image from "~/components/ui/image";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<ServiceTypeItem>[] = [
   {
@@ -127,7 +129,9 @@ export const columns: ColumnDef<ServiceTypeItem>[] = [
     id: "actions",
     header: () => null,
     cell: ({ row }) => {
-      return <ServiceTypeActionsCell type={row.original} />;
+      const { can } = useAuth();
+      if (can.update(RouteModule.ServiceTypes))
+        return <ServiceTypeActionsCell type={row.original} />;
     },
     enableSorting: false,
     enableHiding: false,

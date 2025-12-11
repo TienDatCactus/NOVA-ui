@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { cn } from "~/lib/utils";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 import {
   useAddSingleItemToPOSOrder,
@@ -205,6 +206,13 @@ export function OrderActionMenu({
             {!isCompleted && !isCancelled && (
               <>
                 <DropdownMenuSeparator />
+                <AlertDialogTriggerItem
+                  label="Hoàn tất thủ công"
+                  icon={<CheckCircle2 className="w-4 h-4 mr-2" />}
+                  onClick={handlers.handleComplete}
+                  variant="success"
+                />
+                <DropdownMenuSeparator />
                 {/* Logic Hủy Đơn chuyển vào Alert Dialog riêng bên dưới, ở đây chỉ trigger */}
                 <AlertDialogTriggerItem
                   label="Hủy đơn hàng"
@@ -240,7 +248,6 @@ export function OrderActionMenu({
 export function OrderFooterActions({
   orderId,
   status,
-  totalAmount,
   invoiceId,
 }: ActionProps) {
   const { dialogs, toggle, handlers, loading } = useOrderLogic({ orderId });
@@ -256,7 +263,7 @@ export function OrderFooterActions({
   if (status === "Completed")
     return (
       <div className="flex items-center justify-center p-3 text-sm font-medium text-green-600 bg-green-50">
-        <CheckCircle2 className="mr-2 h-4 w-4" /> Hoàn thành
+        <CheckCircle2 className="mr-2 h-4 w-4" /> Đã hoàn thành
       </div>
     );
 
@@ -275,17 +282,9 @@ export function OrderFooterActions({
       {canComplete && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            {!canPay ? (
+            {!canPay && (
               <Button className="w-full" variant="success">
                 <CheckCircle2 className="mr-2 h-4 w-4" /> Hoàn tất đơn
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full text-green-600 hover:text-green-700 hover:bg-green-50"
-              >
-                Hoàn tất thủ công (không in bill)
               </Button>
             )}
           </AlertDialogTrigger>
@@ -338,12 +337,7 @@ export function OrderAddButton({ orderId, status }: ActionProps) {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => toggle("add", true)}
-        className="w-full mt-2 border border-dashed border-gray-300 text-gray-500 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 h-9 text-xs uppercase font-semibold"
-      >
+      <Button variant="outline" size="sm" onClick={() => toggle("add", true)}>
         <Plus className="mr-1 h-3.5 w-3.5" /> Thêm món
       </Button>
       <AddMenuItemDialog
@@ -358,11 +352,15 @@ export function OrderAddButton({ orderId, status }: ActionProps) {
 
 // Helper nhỏ để xử lý cancel trong Dropdown (vì Dropdown chặn event click của Alert)
 // Trong thực tế, bạn nên tách Cancel Dialog ra ngoài Dropdown để tránh lỗi focus trap.
-const AlertDialogTriggerItem = ({ label, icon, onClick }: any) => {
+const AlertDialogTriggerItem = ({ label, icon, onClick, variant }: any) => {
   // Simplified for brevity - in real app, maintain separate state for Cancel Dialog
   return (
     <DropdownMenuItem
-      className="text-destructive focus:text-destructive"
+      className={cn(
+        variant === "success"
+          ? "text-green-600 focus:text-green-700 focus:bg-green-50"
+          : "text-destructive focus:text-destructive"
+      )}
       onSelect={(e) => {
         e.preventDefault();
         onClick();

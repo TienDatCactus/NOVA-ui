@@ -1,0 +1,78 @@
+{
+  "title": "Guest Information at Eco Palms House",
+  "subtitle": "Detailed guide for a comfortable and safe stay",
+  "times": {
+    "title": "Schedule",
+    "checkin": "Check-in",
+    "checkinTime": "From 1:00 PM",
+    "checkout": "Check-out",
+    "checkoutTime": "Before 11:00 AM",
+    "breakfast": "Breakfast",
+    "breakfastTime": "7:30 – 9:30 AM at restaurant",
+    "dinner": "Dinner Order",
+    "dinnerTime": "Until 8:30 PM"
+  },
+  "wifi": {
+    "title": "Wi-Fi Information",
+    "network": "Network Name:",
+    "password": "Password:"
+  },
+  "hotWater": {
+    "title": "Using Hot Water",
+    "step1": "Turn the faucet handle to the left and wait about 3-5 minutes.",
+    "step2": "On cold days, hot water may flow slower, please be patient."
+  },
+  "notes": {
+    "title": "Important Notes",
+    "roomDesign": {
+      "title": "Room Design & Amenities",
+      "ecoStyle": "Eco Palms House is built in an ecotourism style to help you experience natural tranquility, so there is no TV or refrigerator in the room.",
+      "noLaundry": "Please do not wash or hang clothes in the room to avoid mold and protect the furniture.",
+      "beanBag": "Please keep the bean bag dry; if it gets wet, it is very difficult to clean and may incur a special cleaning fee of"
+    },
+    "towels": {
+      "title": "Towels",
+      "purpose": "White towels are prepared specifically for bathing and personal use.",
+      "warning": "If used for other purposes (cleaning floors, shoes, pets…), the towels may be damaged beyond cleaning. In that case, we must charge a replacement fee of"
+    },
+    "electrical": {
+      "title": "Electrical Devices",
+      "safety": "For safety reasons, please do not use high-power electrical devices (such as rice cookers, stoves, or hair dryers you brought).",
+      "turnOff": "When going out, please remember to turn off all electrical devices to save energy and ensure safety."
+    },
+    "fire": {
+      "title": "Fire Safety",
+      "material": "The bungalows are made from natural materials and are quite sensitive to fire.",
+      "warning": "Therefore, please do not smoke, light candles, or use fire in the room.",
+      "emergency": "If there is an emergency, please notify the staff immediately."
+    },
+    "food": {
+      "title": "Food in Room",
+      "warning": "Please do not bring food into the room. Food crumbs will attract \"uninvited guests\" 🐭. Who knows, a mouse might come to your room for a photoshoot, become an idol, then take over the world and dominate the universe 🌌."
+    },
+    "insects": {
+      "title": "Insects & Natural Environment",
+      "nature": "In a place close to nature, small insects may occasionally appear.",
+      "prevention": "You can minimize this by closing doors and turning off unnecessary lights."
+    }
+  },
+  "services": {
+    "title": "Popular Services at Eco Palms House",
+    "cableCar": {
+      "title": "Fansipan Cable Car Tickets",
+      "description": "Skip the queue, our reception will help you book official tickets quickly."
+    },
+    "massage": "Relaxing Massage",
+    "massageDescription": "Great choice after trekking trips, helps the body recover faster.",
+    "happyHour": {
+      "title": "Happy Hour – Cocktail & Beer",
+      "time": "3:00 – 6:00 PM",
+      "description": "Enjoy the sunset view over the valley with special offers:",
+      "promotion": "Buy 1 Get 1 Free for cocktails & beers on our menu"
+    }
+  },
+  "thanks": {
+    "title": "Thank you for choosing Eco Palms House!",
+    "message": "We hope your stay brings you relaxing moments, closeness to nature and many memorable experiences 🌿"
+  }
+}

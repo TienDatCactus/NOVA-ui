@@ -16,8 +16,10 @@ import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -37,6 +39,7 @@ import {
 import { cn } from "~/lib/utils";
 import { ReportsService } from "~/services/api/reports";
 import { ReportsSchema } from "~/services/api/reports/reports.schema";
+import useReports from "../container/reservation-reports-query";
 
 // --- Types & Config ---
 const { ReservationReportsSchema } = ReportsSchema;
@@ -80,12 +83,9 @@ export function ReportsTableModal({
   const fromDateStr = format(dateRange.from, "yyyy-MM-dd");
   const toDateStr = format(dateRange.to, "yyyy-MM-dd");
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["daily-booking-dashboard", fromDateStr, toDateStr],
-    queryFn: async () =>
-      await ReportsService.getReservationReports(fromDateStr, toDateStr),
-    enabled: open,
-    staleTime: 5 * 60 * 1000,
+  const { data, isLoading } = useReports({
+    fromDate: fromDateStr,
+    toDate: toDateStr,
   });
 
   // --- Helpers & Handlers ---
@@ -115,11 +115,8 @@ export function ReportsTableModal({
     const days = data.dailyAvailability;
     const dates = days.map((d: any) => d.date);
 
-    // Get unique room types from the first day (assuming consistency)
     const roomTypes = days.length > 0 ? Object.keys(days[0].available) : [];
 
-    // Helper to calculate opacity for heatmap
-    // scale: 0 = none, 1 = low, 2 = med, 3 = high
     const getIntensity = (val: number, max: number) => {
       if (val === 0) return 0;
       if (max === 0) return 0;
@@ -132,40 +129,18 @@ export function ReportsTableModal({
     return { days, dates, roomTypes, getIntensity };
   }, [data]);
 
-  // --- Export Logic ---
-  const handleExport = () => {
-    if (!data?.dailyAvailability) return;
-    // ... (Keep your existing export logic here, it was fine)
-    // Just ensuring we don't break functionality while refactoring UI
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 bg-background">
         {/* 1. HEADER */}
         <DialogHeader className="px-6 py-4 border-b shrink-0 flex flex-row items-center justify-between space-y-0">
-          <div className="flex flex-col gap-1">
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <CalendarIcon className="h-5 w-5 text-primary" />
-              Báo cáo công suất phòng
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              {`Dữ liệu từ ${format(dateRange.from, "dd/MM/yyyy")} đến ${format(dateRange.to, "dd/MM/yyyy")}`}
-            </DialogDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={resetToToday}>
-              <RotateCcw className="h-4 w-4 mr-2" /> Hôm nay
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleExport}
-              disabled={!processedData}
-            >
-              <Download className="h-4 w-4 mr-2" /> Xuất Excel
-            </Button>
-          </div>
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <CalendarIcon className="h-5 w-5 text-primary" />
+            Báo cáo công suất phòng
+          </DialogTitle>
+          <DialogDescription className="text-xs">
+            {`Dữ liệu từ ${format(dateRange.from, "dd/MM/yyyy")} đến ${format(dateRange.to, "dd/MM/yyyy")}`}
+          </DialogDescription>
         </DialogHeader>
 
         {/* 2. TOOLBAR */}
@@ -216,7 +191,6 @@ export function ReportsTableModal({
                   mode="single"
                   selected={dateRange.to}
                   onSelect={(d) => d && setDateRange({ ...dateRange, to: d })}
-                  initialFocus
                 />
               </PopoverContent>
             </Popover>
@@ -227,6 +201,9 @@ export function ReportsTableModal({
               onClick={() => shiftDateRange(7)}
             >
               <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={resetToToday}>
+              <RotateCcw className="h-4 w-4 mr-2" /> Hôm nay
             </Button>
           </div>
 
@@ -251,11 +228,11 @@ export function ReportsTableModal({
         <div className="flex-1 overflow-auto relative">
           {isLoading ? (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              Loading data...
+              Đang tải...
             </div>
           ) : !processedData ? (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              No data available.
+              Không có dữ liệu.
             </div>
           ) : (
             <Table>
@@ -292,8 +269,6 @@ export function ReportsTableModal({
               <TableBody>
                 {CATEGORIES.map((category) => {
                   const isExpanded = expandedRows.has(category.key);
-
-                  // Calculate max value for this category across all days (for heatmap scaling)
                   const maxVal = Math.max(
                     ...processedData.days.map((d: any) =>
                       Object.values(
@@ -327,7 +302,7 @@ export function ReportsTableModal({
                             <span
                               className={cn(
                                 "text-sm px-2 py-0.5 rounded",
-                                `${category.baseColor}-100 text-${category.baseColor}-900` // Semantic badge
+                                `${category.baseColor}-100 dark:${category.baseColor}-700 text-accent-foreground` // Semantic badge
                               )}
                             >
                               {category.label}
@@ -397,6 +372,11 @@ export function ReportsTableModal({
             </Table>
           )}
         </div>
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <DialogClose>
+            <Button variant="outline">Đóng</Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

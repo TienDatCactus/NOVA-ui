@@ -50,28 +50,22 @@ export default function DataTable({ columns, data }: DataTableProps) {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="grid gap-2">
       {/* Toolbar */}
       <div className="flex items-center justify-between py-4">
-        <div className="flex flex-1 items-center gap-2">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Tìm kiếm vai trò..."
-              value={
-                (table.getColumn("name")?.getFilterValue() as string) ?? ""
-              }
-              onChange={(event) =>
-                table.getColumn("name")?.setFilterValue(event.target.value)
-              }
-              className="pl-9"
-            />
-          </div>
-        </div>
+        <Input
+          startAddon={<Search className="h-4 w-4 text-muted-foreground" />}
+          placeholder="Tìm kiếm Chức vụ..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
 
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4" />
-          Tạo vai trò
+          Tạo Chức vụ
         </Button>
       </div>
 

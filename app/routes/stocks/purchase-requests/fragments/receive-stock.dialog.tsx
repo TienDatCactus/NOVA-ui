@@ -109,7 +109,7 @@ export default function ReceiveStockDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-2">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-2">
         <DialogHeader className="px-4 pt-4">
           <DialogTitle>Nhập hàng vào kho</DialogTitle>
           <DialogDescription className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export default function ReceiveStockDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit, onError)}
-            className="space-y-6 overflow-y-auto max-h-[70vh] px-4 pb-4"
+            className="space-y-6  px-4 pb-4"
           >
             {/* Warning Alert */}
             <Alert variant="default" className="border-orange-500 bg-orange-50">
@@ -223,9 +223,9 @@ export default function ReceiveStockDialog({
                               <FormControl>
                                 <Input
                                   type="number"
-                                  placeholder={estimatedCost.toLocaleString(
-                                    "vi-VN"
-                                  )}
+                                  placeholder={
+                                    formatMoney(estimatedCost).vndFormatted
+                                  }
                                   value={field.value || ""}
                                   onChange={(e) =>
                                     field.onChange(

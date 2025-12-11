@@ -51,7 +51,6 @@ export default function RefundDialog({
   bookingId,
   bookingNumber,
   totalPaidAmount,
-  bookingStatus,
 }: RefundDialogProps) {
   const { mutate: createRefund, isPending } = useCreateRefund(bookingId);
 
@@ -80,12 +79,6 @@ export default function RefundDialog({
 
   const handleSubmit = (data: CreateRefundForBookingRequestDto) => {
     // Final validation
-    if (bookingStatus === "CheckedOut") {
-      form.setError("refundAmount", {
-        message: "Không thể hoàn tiền cho booking đã checkout",
-      });
-      return;
-    }
 
     if (data.refundAmount > totalPaidAmount) {
       form.setError("refundAmount", {
@@ -159,7 +152,6 @@ export default function RefundDialog({
                         type="number"
                         placeholder="Nhập số tiền cần hoàn"
                         min={0}
-                        step={1000}
                         {...field}
                         onChange={(e) =>
                           field.onChange(parseFloat(e.target.value) || 0)

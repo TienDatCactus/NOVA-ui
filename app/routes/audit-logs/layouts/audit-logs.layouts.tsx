@@ -49,7 +49,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "~/components/ui/pagination";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 
 import type { AuditListParams } from "~/services/api/audit/audit.types";
 import {
@@ -87,7 +87,6 @@ const AuditLogsLayout = ({
   const [openCleanupDialog, setOpenCleanupDialog] = useState(false);
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const { data: users } = useUsers();
-  // Đếm số lượng filter đang active
   const activeFiltersCount = [
     filters.Keyword,
     filters.FromDate,
@@ -167,7 +166,7 @@ const AuditLogsLayout = ({
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Database className="w-3.5 h-3.5" />
               <span>
-                Tổng <strong>{totalItems.toLocaleString("vi-VN")}</strong> bản
+                Tổng <strong>{formatMoney(totalItems).vndFormatted}</strong> bản
                 ghi
               </span>
             </div>
@@ -363,7 +362,7 @@ const AuditLogsLayout = ({
               className={cn(
                 "w-40 flex items-center justify-between px-3 h-9 rounded-md border cursor-pointer transition-all select-none",
                 filters.Success !== false
-                  ? "bg-green-50/50 border-green-200"
+                  ? "bg-green-50/50 dark:bg-green-300/20   border-green-200 dark:border-green-600"
                   : "bg-background border-muted-foreground/20 hover:bg-muted"
               )}
               onClick={() =>
@@ -385,7 +384,7 @@ const AuditLogsLayout = ({
                 <span
                   className={
                     filters.Success !== false
-                      ? "text-green-700"
+                      ? "text-green-700 dark:text-green-600"
                       : "text-muted-foreground"
                   }
                 >
@@ -394,7 +393,7 @@ const AuditLogsLayout = ({
               </div>
               <Switch
                 checked={filters.Success ?? true}
-                className="scale-75 data-[state=checked]:bg-green-600"
+                className=" data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 dark:data-[state=checked]:bg-green-600"
               />
             </div>
 

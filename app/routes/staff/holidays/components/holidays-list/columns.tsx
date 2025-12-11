@@ -6,6 +6,7 @@ import { DataTableColumnHeader } from "~/components/table/table-header";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
+import { formatMoney } from "~/lib/utils";
 
 export const columns: ColumnDef<HolidayListItem>[] = [
   {
@@ -91,9 +92,7 @@ export const columns: ColumnDef<HolidayListItem>[] = [
       const amount = row.getValue("bonusAmount") as number;
       return (
         <div className="flex items-center gap-2">
-          <span className="font-mono">
-            {amount.toLocaleString("vi-VN")} VNĐ
-          </span>
+          <span className="font-mono">{formatMoney(amount).vndFormatted}</span>
         </div>
       );
     },

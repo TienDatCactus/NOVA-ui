@@ -11,6 +11,8 @@ import {
   BOOKING_STATUSES,
 } from "~/services/api/booking/booking.types";
 import BookingDetailDialog from "../booking-detail.sheet";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 export const columns: ColumnDef<BookingListItem>[] = [
@@ -29,7 +31,23 @@ export const columns: ColumnDef<BookingListItem>[] = [
       <DataTableColumnHeader column={column} title="Mã đặt phòng" />
     ),
     cell: ({ row }) => {
-      return <BookingDetailDialog bookingCode={row.original.bookingCode!} />;
+      const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+      return (
+        <>
+          <Button
+            variant="link"
+            onClick={() => setDetailSheetOpen(true)}
+            className="p-0 m-0"
+          >
+            {row.original.bookingCode}
+          </Button>
+          <BookingDetailDialog
+            bookingCode={row.original.bookingCode!}
+            open={detailSheetOpen}
+            onOpenChange={setDetailSheetOpen}
+          />
+        </>
+      );
     },
   },
   {

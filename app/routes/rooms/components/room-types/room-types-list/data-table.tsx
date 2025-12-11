@@ -26,6 +26,8 @@ import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { CreateRoomTypeDialog } from "../create-room-types.dialog";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -39,7 +41,7 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-
+  const { can } = useAuth();
   const table = useReactTable({
     data,
     columns,
@@ -69,16 +71,12 @@ export function DataTable<TData extends RoomTypesListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="success" size={"sm"}>
-            <Download className="h-4 w-4" />
-            Xuất CSV
-          </Button>
+        {can.create(RouteModule.RoomTypes) && (
           <Button onClick={() => setCreateDialogOpen(true)} size={"sm"}>
             <Plus className="h-4 w-4" />
             Thêm hạng phòng
           </Button>
-        </div>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

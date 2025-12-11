@@ -23,6 +23,8 @@ import {
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import { Button } from "~/components/ui/button";
 import CreateRoomDialog from "../create-room.dialog";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,6 +37,7 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const { can } = useAuth();
   const table = useReactTable({
     data,
     columns,
@@ -62,10 +65,12 @@ export function DataTable<TData extends RoomListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        <Button size={"sm"} onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Thêm phòng
-        </Button>
+        {can.create(RouteModule.Rooms) && (
+          <Button size={"sm"} onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Thêm phòng
+          </Button>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table className="">

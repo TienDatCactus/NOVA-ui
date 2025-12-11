@@ -1,11 +1,14 @@
+import { format } from "date-fns";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import {
   Table,
   TableBody,
@@ -14,22 +17,20 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { format } from "date-fns";
-import type {
-  InvoiceDetailDto,
-  InvoiceDetailItemDto,
-} from "~/services/api/invoices/dto";
-import { useInvoiceDetail } from "../../container/invoices/query.hooks";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
 import { InvoicesService } from "~/services/api/invoices";
-import { toast } from "sonner";
-import { Download, Printer } from "lucide-react";
+import type { InvoiceDetailItemDto } from "~/services/api/invoices/dto";
+import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { useInvoiceDetail } from "../../container/invoices/query.hooks";
+import { formatMoney } from "~/lib/utils";
+import { AxiosError } from "axios";
+import type { error } from "console";
+import { useExportInvoice } from "../../container/invoices/mutation.hooks";
 
 type InvoiceDetailDialogProps = {
   open: boolean;
@@ -45,34 +46,33 @@ export function InvoiceDetailDialog({
   const { data: invoice } = useInvoiceDetail(invoiceId, {
     enabled: open,
   });
-
+  const { mutateAsync } = useExportInvoice(invoiceId);
   if (!invoice) return null;
 
   const handleExport = async () => {
     try {
-      const blob = await InvoicesService.exportInvoiceById(invoiceId);
+      const blob = await mutateAsync();
       console.log("Blob received:", blob);
 
-      const url = window.URL.createObjectURL(blob.data);
+      const url = window.URL.createObjectURL(blob as any);
       const a = document.createElement("a");
       a.href = url;
       const filename = `invoice-${invoiceId}.xlsx`;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      a.remove();
       window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
-      toast.success("Xuất báo cáo thành công");
-    } catch (e) {
-      console.error(e);
-      toast.error("Xuất báo cáo thất bại");
+      toast.success("Xuất hóa đơn thành công");
+    } catch (error) {
+      toast.error("Lỗi khi xuất báo cáo");
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-card shadow-sm rounded-2xl p-6 max-w-3xl w-full">
+      <DialogContent className="bg-card shadow-sm rounded-2xl p-6 max-w-3xl w-full overflow-y-auto max-h-[90vh] ">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-4">
             Hóa đơn #{invoice.invoiceNo}
@@ -111,21 +111,21 @@ export function InvoiceDetailDialog({
           <div className="space-y-2">
             <div className="text-xs text-muted-foreground">Tạm tính</div>
             <div className="font-medium text-foreground">
-              {invoice.subTotal?.toLocaleString() || 0}
+              {formatMoney(invoice.subTotal ?? 0).vndFormatted || 0}
             </div>
             <div className="text-xs text-muted-foreground mt-2">VAT</div>
             <div className="font-medium text-foreground">
-              {invoice.vatAmount?.toLocaleString() || 0}
+              {formatMoney(invoice.vatAmount ?? 0).vndFormatted || 0}
             </div>
             <div className="text-xs text-muted-foreground mt-2">
               Phí dịch vụ
             </div>
             <div className="font-medium text-foreground">
-              {invoice.serviceChargeAmount?.toLocaleString() || 0}
+              {formatMoney(invoice.serviceChargeAmount ?? 0).vndFormatted || 0}
             </div>
             <div className="text-xs text-muted-foreground mt-2">Tổng cộng</div>
             <div className="font-bold text-primary text-lg">
-              {invoice.total?.toLocaleString() || 0}
+              {formatMoney(invoice.total ?? 0).vndFormatted || 0}
             </div>
           </div>
         </div>
@@ -162,12 +162,8 @@ export function InvoiceDetailDialog({
                         </Tooltip>
                       </TableCell>
                       <TableCell>{item.quantity ?? "-"}</TableCell>
-                      <TableCell>
-                        {item.unitPrice?.toLocaleString() ?? "-"}
-                      </TableCell>
-                      <TableCell>
-                        {item.subtotal?.toLocaleString() ?? "-"}
-                      </TableCell>
+                      <TableCell>{item.unitPrice ?? "-"}</TableCell>
+                      <TableCell>{item.subtotal ?? "-"}</TableCell>
                     </TableRow>
                   )
                 )

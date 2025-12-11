@@ -1,32 +1,29 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ban, CreditCard, Plus, RotateCcw } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useCallback, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { InvoicesService } from "~/services/api/invoices";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole, hasRole } from "~/lib/auth/bouncer";
 import type {
   AddCustomItemsRequestDto,
   InvoiceListItemDto,
   InvoicePaymentRequestDto,
   RefundInvoiceRequestDto,
 } from "~/services/api/invoices/dto";
-import AddItemDialog from "../fragments/invoice-actions/add-custom-items.dialog";
-import { InvoicePaymentDialog } from "../fragments/invoice-actions/payment.dialog";
-import { RefundDialog } from "../fragments/invoice-actions/refund.dialog";
-import { UnifiedConfirmDialog } from "../fragments/invoice-actions/unified-confirm.dialog";
 import {
   useAddCustomItem,
   useInvoicePayment,
   useRefund,
   useVoidInvoice,
 } from "../container/invoices/mutation.hooks";
+import AddItemDialog from "../fragments/invoice-actions/add-custom-items.dialog";
+import { InvoicePaymentDialog } from "../fragments/invoice-actions/payment.dialog";
+import { RefundDialog } from "../fragments/invoice-actions/refund.dialog";
+import { UnifiedConfirmDialog } from "../fragments/invoice-actions/unified-confirm.dialog";
 type DialogType = "add-item" | "add-payment" | "refund" | "void" | null;
 
 export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
   const [dialog, setDialog] = useState<DialogType>(null);
-
   const canAddItem = ["Unpaid", "DepositOnly"].includes(invoice.status);
-
   const { mutate: addCustomItem, isPending: isAddingItem } = useAddCustomItem(
     invoice?.invoiceId || ""
   );
@@ -51,11 +48,42 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
     ["Unpaid", "DepositOnly", "PartiallyPaid"].includes(invoice.status);
   const canRefund = ["Paid", "Overpaid"].includes(invoice.status);
   const canVoid = ["Unpaid", "DepositOnly"].includes(invoice.status);
-  const handleAddItem = (data: AddCustomItemsRequestDto) => addCustomItem(data);
-  const handleInvoicePayment = (data: InvoicePaymentRequestDto) =>
-    invoicePayment(data);
-  const handleRefund = (data: RefundInvoiceRequestDto) => refund(data);
-  const handleVoid = () => voidInvoice();
+  const handleAddItem = useCallback(
+    (data: AddCustomItemsRequestDto) =>
+      addCustomItem(data, {
+        onSuccess: () => {
+          setDialog(null);
+        },
+      }),
+    []
+  );
+  const handleInvoicePayment = useCallback(
+    (data: InvoicePaymentRequestDto) =>
+      invoicePayment(data, {
+        onSuccess: () => {
+          setDialog(null);
+        },
+      }),
+    []
+  );
+  const handleRefund = useCallback(
+    (data: RefundInvoiceRequestDto) =>
+      refund(data, {
+        onSuccess: () => {
+          setDialog(null);
+        },
+      }),
+    []
+  );
+  const handleVoid = useCallback(
+    () =>
+      voidInvoice(undefined, {
+        onSuccess: () => {
+          setDialog(null);
+        },
+      }),
+    []
+  );
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -83,17 +111,18 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
         </Button>
       )}
 
-      {canRefund && (
-        <Button
-          variant="warning"
-          size={"sm"}
-          onClick={() => setDialog("refund")}
-          disabled={isRefunding}
-        >
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Hoàn tiền
-        </Button>
-      )}
+      {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) &&
+        canRefund && (
+          <Button
+            variant="warning"
+            size={"sm"}
+            onClick={() => setDialog("refund")}
+            disabled={isRefunding}
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Hoàn tiền
+          </Button>
+        )}
 
       {canVoid && (
         <Button
@@ -107,7 +136,6 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
         </Button>
       )}
 
-      {/* ----- Dialogs ----- */}
       <AddItemDialog
         open={dialog === "add-item"}
         onClose={() => setDialog(null)}
@@ -132,6 +160,7 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
         open={dialog === "refund"}
         onClose={() => setDialog(null)}
         onSubmit={handleRefund}
+        maxRefundAmount={invoice.paidAmount || 0}
       />
     </div>
   );

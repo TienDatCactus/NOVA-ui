@@ -52,9 +52,13 @@ const RoomBookingHistorySchema = z.object({
 const RoomBookingHistoryResponseSchema = z.array(RoomBookingHistorySchema);
 
 const EditRoomRequestSchema = z.object({
-  roomName: z.string(),
-  roomTypeId: z.string(),
-  status: z.string(),
+  roomName: z.string("Tên phòng là bắt buộc").min(1, "Tên phòng là bắt buộc"),
+  roomTypeId: z
+    .string("Loại phòng là bắt buộc")
+    .min(1, "Loại phòng là bắt buộc"),
+  status: z
+    .string("Trạng thái phòng là bắt buộc")
+    .min(1, "Trạng thái phòng là bắt buộc"),
 });
 const UpdateRoomDetailRequestSchema = EditRoomRequestSchema;
 const CreateRoomRequestSchema = EditRoomRequestSchema;
@@ -112,6 +116,7 @@ const BookingDetailRoomItemSchema = z.object({
   roomTypeName: z.string(),
   fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
   toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  baseRate: z.number().min(0),
 });
 
 // QR Code Response (base64 image or URL)

@@ -17,25 +17,41 @@ import { NavMain } from "./components/nav-main";
 import { NavProjects } from "./components/nav-projects";
 import { NavUser } from "./components/nav-user";
 import { TeamSwitcher } from "./components/switcher";
+import { useAuth } from "~/lib/auth/components";
+import { useLocation } from "react-router";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAuthStore();
+  const { canAccess, hasRole } = useAuth();
+
+  const filteredNavMain = React.useMemo(() => {
+    return SIDEBAR_NAV_MAIN.filter((item) => {
+      if (!item.module) return true;
+      return canAccess(item.module);
+    }).map((item) => {
+      if (item.items) {
+        return {
+          ...item,
+          items: item.items.filter((subItem) => {
+            if (!subItem.module) return true;
+            return canAccess(subItem.module);
+          }),
+        };
+      }
+      return item;
+    });
+  }, [canAccess]);
+
+  const filteredProjects = React.useMemo(() => {
+    return SIDEBAR_PROJECTS.filter((project) => {
+      if (!project.module) return true;
+      return canAccess(project.module);
+    });
+  }, [canAccess]);
 
   const data = {
-    user: user
-      ? {
-          name: user.fullName || user.userName || "User",
-          email: user.userName || "",
-          avatar: "/avatars/default.jpg",
-        }
-      : {
-          name: "Guest",
-          email: "",
-          avatar: "/avatars/default.jpg",
-        },
     teams: SIDEBAR_TEAMS,
-    navMain: SIDEBAR_NAV_MAIN,
-    projects: SIDEBAR_PROJECTS,
+    navMain: filteredNavMain,
+    projects: filteredProjects,
   };
 
   return (
@@ -48,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

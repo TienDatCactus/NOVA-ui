@@ -69,7 +69,7 @@ export function CreateRoomTypeDialog({
       code: "",
       name: "",
       description: "",
-      baseRate: 0,
+      baseRate: undefined as any,
       maxOccupancy: 2,
       active: true,
       images: [],
@@ -120,10 +120,20 @@ export function CreateRoomTypeDialog({
 
   // --- Handlers ---
   const onDropNewFiles = (accepted: File[]) => {
+    const totalFiles = newFiles.length + accepted.length;
+    if (totalFiles > 8) {
+      form.setError("images", {
+        type: "manual",
+        message: "Chỉ được tải lên tối đa 8 ảnh",
+      });
+      return;
+    }
+    form.clearErrors("images");
     setNewFiles((prev) => [...prev, ...accepted]);
   };
 
   const removeNewFile = (index: number) => {
+    form.clearErrors("images");
     setNewFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -271,10 +281,13 @@ export function CreateRoomTypeDialog({
                                 className="text-lg font-bold text-right "
                                 placeholder="0"
                                 {...field}
-                                value={field.value || ""}
-                                onChange={(e) =>
-                                  field.onChange(parseFloat(e.target.value))
-                                }
+                                value={field.value ?? ""}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  field.onChange(
+                                    val === "" ? undefined : parseFloat(val)
+                                  );
+                                }}
                                 disabled={isPending}
                                 endAddon={
                                   <span className="text-xs font-bold text-muted-foreground">
@@ -357,9 +370,16 @@ export function CreateRoomTypeDialog({
                     className="mt-0 space-y-4 outline-none"
                   >
                     <div className="flex justify-between items-center">
-                      <h4 className="text-sm font-medium">Thư viện ảnh</h4>
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-medium">Thư viện ảnh</h4>
+                        {form.formState.errors.images?.message && (
+                          <p className="text-xs text-destructive font-medium">
+                            {form.formState.errors.images.message as string}
+                          </p>
+                        )}
+                      </div>
                       <span className="text-xs text-muted-foreground">
-                        Tối đa 8 ảnh
+                        {previews.length} / 8 ảnh
                       </span>
                     </div>
 
@@ -390,15 +410,13 @@ export function CreateRoomTypeDialog({
                             alt="Preview"
                             className="w-full h-full object-cover"
                           />
-                          <Button
-                            size="icon"
-                            variant={"destructive"}
+                          <button
                             type="button"
                             onClick={() => removeNewFile(index)}
-                            className="w-6 h-6 absolute top-1.5 right-1.5 p-1.5 rounded-full bg-black/50 text-white hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                            className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-black/50 text-white hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100 backdrop-blur-sm"
                           >
                             <X className="w-3.5 h-3.5" />
-                          </Button>
+                          </button>
                           <Badge className="absolute bottom-1.5 left-1.5 h-5 px-1.5 text-[10px] bg-blue-600 text-white hover:bg-blue-700 border-none">
                             Mới
                           </Badge>

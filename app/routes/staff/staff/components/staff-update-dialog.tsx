@@ -71,10 +71,9 @@ export default function EditStaffDialog({
 }: EditStaffDialogProps) {
   const { data: roles } = useStaffRoleList();
 
-  // Chỉ fetch khi dialog mở và có staff ID
   const { data: staffDetail, isLoading: isLoadingDetail } = useStaffDetail(
     staff?.id || "",
-    { enabled: open && !!staff?.id }
+    { enabled: open }
   );
 
   const { mutateAsync: updateStaff, isPending } = useUpdateStaff();
@@ -97,7 +96,7 @@ export default function EditStaffDialog({
   // Effect: Reset form khi có dữ liệu chi tiết từ API
   useEffect(() => {
     if (staffDetail && open) {
-      form.reset({
+      const formData = {
         fullName: staffDetail.fullName || "",
         phoneNumber: staffDetail.phoneNumber || "",
         email: staffDetail.email || "",
@@ -105,7 +104,6 @@ export default function EditStaffDialog({
         citizenId: staffDetail.citizenId || "",
         note: staffDetail.note || "",
         staffRoleId: staffDetail.staffRoleId || "",
-        // Parse date an toàn
         dateOfBirth: staffDetail.dateOfBirth
           ? typeof staffDetail.dateOfBirth === "string"
             ? parseISO(staffDetail.dateOfBirth)
@@ -116,9 +114,29 @@ export default function EditStaffDialog({
             ? parseISO(staffDetail.startDate)
             : staffDetail.startDate
           : undefined,
+      };
+
+      console.log("Populating form with staff detail:", formData);
+      form.reset(formData);
+    }
+  }, [staffDetail, open]);
+
+  // Effect: Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      form.reset({
+        fullName: "",
+        phoneNumber: "",
+        email: "",
+        gender: "",
+        dateOfBirth: undefined,
+        citizenId: "",
+        startDate: undefined,
+        note: "",
+        staffRoleId: "",
       });
     }
-  }, [staffDetail, open, form]); // FIX: Thêm staffDetail vào dependency
+  }, [open]);
 
   const onSubmit = async (data: UpdateStaffDto) => {
     if (!staff?.id) return;
@@ -163,7 +181,7 @@ export default function EditStaffDialog({
               <div className="p-6 space-y-8">
                 {/* 1. THÔNG TIN ĐỊNH DANH */}
                 <section className="space-y-4">
-                  <h1 className="font-bold">Thông tin cơ bản</h1>
+                  <h1 className="font-bold">Thông tin định danh</h1>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {/* Full Name (Trái) */}
@@ -341,7 +359,7 @@ export default function EditStaffDialog({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Vai trò / Chức vụ{" "}
+                            Chức vụ / Chức vụ{" "}
                             <span className="text-destructive">*</span>
                           </FormLabel>
                           <Select
@@ -350,7 +368,7 @@ export default function EditStaffDialog({
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Chọn vai trò" />
+                                <SelectValue placeholder="Chọn Chức vụ" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>

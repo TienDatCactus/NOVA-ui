@@ -3,10 +3,17 @@ import RoomsDataTable from "./components/rooms/rooms-list";
 import useRoomFilters from "./container/rooms/filter.hooks";
 import { useRooms } from "./container/rooms/query.hooks";
 import RoomsViewLayout from "./layouts/rooms-view.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Phòng - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý phòng khách sạn" },
+  ];
+}
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Rooms, Permission.Read);
 
 export default function Component({
   loaderData,

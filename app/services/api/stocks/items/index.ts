@@ -81,7 +81,8 @@ async function updateStockItem(
 
 async function deleteStockItem(id: string): Promise<void> {
   try {
-    await http.delete(Stock.Items.delete(id));
+    const resp = await http.delete(Stock.Items.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -107,7 +108,17 @@ async function adjustStock(
 ): Promise<void> {
   try {
     const validatedData = StockAdjustRequestSchema.parse(data);
-    await http.post(Stock.Items.adjustStock(id), validatedData);
+    const resp = await http.post(Stock.Items.adjustStock(id), validatedData);
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+async function getLowStockItems(): Promise<StockItemsListDto> {
+  try {
+    const resp = await http.get(Stock.Items.lowStock);
+    return StockItemsListSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -122,4 +133,5 @@ export const StockItemsService = {
   deleteStockItem,
   getStockItemsTransactions,
   adjustStock,
+  getLowStockItems,
 };

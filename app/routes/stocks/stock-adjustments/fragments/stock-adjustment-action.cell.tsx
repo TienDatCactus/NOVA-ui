@@ -13,6 +13,9 @@ import type { StockAdjustmentListItemDto } from "~/services/api/stocks/stock-adj
 import EditStockAdjustmentDialog from "../components/edit-stock-adjustment.dialog";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
 import ApplyConfirmDialog from "./apply-confirm.dialog";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 interface StockAdjustmentActionCellProps {
   adjustment: StockAdjustmentListItemDto;
@@ -49,12 +52,18 @@ export default function StockAdjustmentActionCell({
             </DropdownMenuItem>
           )}
 
-          {canApply && (
-            <DropdownMenuItem onClick={() => setOpenApplyDialog(true)}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Áp dụng phiếu
-            </DropdownMenuItem>
-          )}
+          {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) &&
+            canApply && (
+              <DropdownMenuItem
+                asChild
+                onClick={() => setOpenApplyDialog(true)}
+              >
+                <Button variant="success-ghost" size="sm">
+                  <CheckCircle className="mr-2 text-green-600 h-4 w-4" />
+                  Áp dụng phiếu
+                </Button>
+              </DropdownMenuItem>
+            )}
 
           {canDelete && (
             <>

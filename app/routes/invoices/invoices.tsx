@@ -2,10 +2,17 @@ import type { Route } from "./+types/invoices";
 import InvoicesDataTable from "./components/invoices-list";
 import useInvoicesContainer from "./container/invoices/container.hooks";
 import InvoicesViewLayout from "./layouts/invoices-view.layout";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Hóa Đơn - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý hóa đơn khách sạn" },
+  ];
+}
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Invoices, Permission.Read);
 
 export default function Component({
   loaderData,

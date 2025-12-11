@@ -13,6 +13,18 @@ import { ChevronDownIcon, TableIcon } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
 import { vi } from "react-day-picker/locale";
 import { useState } from "react";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/reports";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Báo Cáo - NOVA Hotel Management" },
+    { name: "description", content: "Báo cáo và thống kê đặt phòng" },
+  ];
+}
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Reports, Permission.Read);
 import { format } from "date-fns";
 import useReports from "./container/reservation-reports-query";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -41,15 +53,10 @@ export default function Component() {
   const toDateStr = date.to ? format(date.to, "yyyy-MM-dd") : "";
 
   // Fetch reports data
-  const {
-    data: reportsData,
-    isLoading,
-    refetch,
-  } = useReports(fromDateStr, toDateStr);
-
-  const handleApplyFilter = () => {
-    refetch();
-  };
+  const { data: reportsData, isLoading } = useReports({
+    fromDate: fromDateStr,
+    toDate: toDateStr,
+  });
 
   const handleResetToToday = () => {
     const today = new Date();
@@ -138,7 +145,6 @@ export default function Component() {
               </PopoverContent>
             </Popover>
           </div>
-          <Button onClick={handleApplyFilter}>Áp dụng</Button>
           <Button variant="outline" onClick={handleResetToToday}>
             Hiện tại
           </Button>

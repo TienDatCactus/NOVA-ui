@@ -48,8 +48,8 @@ export default function InlineNoteEditor({
       value={note}
       onChange={(e) => setNote(e.target.value)}
       onBlur={handleBlur}
-      placeholder="Nhập ghi chú..."
-      className="min-h-[60px] text-sm resize-none"
+      placeholder="Chưa có ghi chú (VD: Khách dị ứng, bàn số 5...)"
+      className="min-h-[60px]"
       disabled={isSaving}
     />
   );

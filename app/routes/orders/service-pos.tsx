@@ -1,41 +1,35 @@
-import { useState, useMemo } from "react";
+import { ArrowLeft, Plus, RotateCcw, SearchIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Badge } from "~/components/ui/badge";
-import {
-  ArrowLeft,
-  RotateCcw,
-  SearchIcon,
-  SquareMenu,
-  Plus,
-} from "lucide-react";
-import { toast } from "sonner";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/service-pos";
 
-import type { ServiceItem } from "~/services/api/services/dto";
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bán Hàng Dịch Vụ - NOVA Hotel Management" },
+    { name: "description", content: "Điểm bán POS dịch vụ" },
+  ];
+}
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Orders, Permission.Create);
+
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
+import type { ServiceItem } from "~/services/api/services/dto";
 import { useServiceTypes } from "../services/container/service-types/query.hooks";
 import { useServices } from "../services/container/services/query.hooks";
 import BookingSelectionDialog from "./components/booking-selection.dialog";
-import CartSummary from "./components/cart-summary";
-import CheckoutConfirmDialog from "./components/checkout-confirm.dialog";
-import ServiceItemCard from "./components/service-pos/service-item-card";
 import OrderConfirmationDialog from "./components/order-confirmation.dialog";
 import ServedTimeDialog from "./components/scheduled-time.dialog";
 import CustomServiceDialog from "./components/service-pos/custom-service.dialog";
+import ServiceItemCard from "./components/service-pos/service-item-card";
 
-import useServiceFilters from "../services/container/services/filter.hooks";
-import { Link } from "react-router";
-import { DASHBOARD } from "~/lib/fe-url";
-import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
-import type { Route } from "./+types/service-pos";
-import { useServicePosOrderStore } from "~/store/service-pos-order.store";
 import { Image as ImageIcon } from "lucide-react";
-import { Textarea } from "~/components/ui/textarea";
-import { Label } from "~/components/ui/label";
-import { formatMoney } from "~/lib/utils";
-import Image from "~/components/ui/image";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Link } from "react-router";
 import { Card } from "~/components/ui/card";
 import {
   Empty,
@@ -44,6 +38,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
+import Image from "~/components/ui/image";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -51,10 +47,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Textarea } from "~/components/ui/textarea";
+import { DASHBOARD } from "~/lib/fe-url";
+import { formatMoney } from "~/lib/utils";
+import { useServicePosOrderStore } from "~/store/service-pos-order.store";
+import useServiceFilters from "../services/container/services/filter.hooks";
+import OrderConfirmDialog from "./components/order-confirm.dialog";
+import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
 
 export default function Component({
   loaderData,
@@ -258,14 +258,15 @@ export default function Component({
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
               </Button>
-            </Link>
+            </Link>{" "}
+            <Separator orientation="vertical" className="h-6" />
             <Select
               value={selectedTypeId || "all"}
               onValueChange={(value) =>
                 handleTypeSelect(value === "all" ? null : value)
               }
             >
-              <SelectTrigger className="w-[200px] border-primary/50 bg-white shadow-md">
+              <SelectTrigger className="w-[200px] border-primary/50 bg-background shadow-md">
                 <SelectValue placeholder="Chọn loại dịch vụ" />
               </SelectTrigger>
               <SelectContent>
@@ -357,113 +358,113 @@ export default function Component({
         </main>
 
         {/* Cart Sidebar - Single Service Selection */}
-        <aside className="p-2">
-          <div className="w-md bg-card rounded-xl h-full border p-4  overflow-y-auto flex flex-col">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Dịch vụ đã chọn</h2>
-            </div>
-            <Separator className="my-2" />
-
-            {/* Empty State */}
-            {isEmpty && (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant={"icon"}>
-                    <ImageIcon className="h-12 w-12 mx-auto opacity-20" />
-                  </EmptyMedia>
-                  <EmptyTitle>Chưa chọn dịch vụ</EmptyTitle>
-                  <EmptyDescription>Chọn dịch vụ để bắt đầu</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
-
-            {/* Selected Service */}
-            {selectedService && (
-              <div className="flex-1 flex flex-col justify-between space-y-4">
-                {/* Service Info Card */}
-                <Card className="rounded-lg border p-3 ">
-                  {selectedService.imageUrl && (
-                    <Image
-                      src={selectedService.imageUrl}
-                      alt={selectedService.name}
-                      className="w-full h-32 object-cover rounded-md"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-sm">
-                      {selectedService.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedService.code}
-                    </p>
-                    <p className="text-sm font-mono font-bold text-primary mt-1">
-                      {formatMoney(selectedService.unitPrice).vndFormatted}
-                    </p>
-                  </div>
-
-                  {/* Quantity Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity" className="text-xs">
-                      Số lượng
-                    </Label>
-                    <Counter
-                      value={selectedService.quantity}
-                      onChange={(e) => updateServiceQuantity(e || 1)}
-                    />
-                  </div>
-
-                  {/* Notes Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="note" className="text-xs">
-                      Ghi chú
-                    </Label>
-                    <Textarea
-                      id="note"
-                      placeholder="Ghi chú cho dịch vụ..."
-                      value={selectedService.note || ""}
-                      onChange={(e) => updateServiceNote(e.target.value)}
-                      rows={3}
-                      className="text-sm resize-none"
-                    />
-                  </div>
-
-                  {/* Subtotal */}
-                  <div className="pt-2 border-t">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Tổng cộng</span>
-                      <span className="text-lg font-bold text-primary font-mono">
-                        {formatMoney(subtotal).vndFormatted}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Action Buttons */}
-                <div className="space-y-2">
-                  <Button
-                    onClick={handleConfirm}
-                    className="w-full"
-                    size="lg"
-                    disabled={isEmpty}
-                  >
-                    Xác nhận đơn
-                  </Button>
-                  <Button
-                    onClick={clearService}
-                    variant="outline"
-                    className="w-full"
-                    size="sm"
-                  >
-                    Xóa dịch vụ
-                  </Button>
-                </div>
-              </div>
-            )}
+        <aside className="w-md shadow-md h-full border p-4  overflow-y-auto flex flex-col">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Dịch vụ đã chọn</h2>
           </div>
+          <Separator className="my-2" />
+
+          {/* Empty State */}
+          {isEmpty && (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant={"icon"}>
+                  <ImageIcon />
+                </EmptyMedia>
+                <EmptyTitle>Giỏ hàng trống</EmptyTitle>
+                <EmptyDescription>
+                  Lựa chọn 1 dịch vụ để bắt đầu
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+
+          {/* Selected Service */}
+          {selectedService && (
+            <div className="flex-1 flex flex-col justify-between space-y-4">
+              {/* Service Info Card */}
+              <Card className="border-none bg-transparent ">
+                {selectedService.imageUrl && (
+                  <Image
+                    src={selectedService.imageUrl}
+                    alt={selectedService.name}
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                )}
+                <div>
+                  <h3 className="font-semibold text-sm">
+                    {selectedService.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedService.code}
+                  </p>
+                  <p className="text-sm font-mono font-bold text-primary mt-1">
+                    {formatMoney(selectedService.unitPrice).vndFormatted}
+                  </p>
+                </div>
+
+                {/* Quantity Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="quantity" className="text-xs">
+                    Số lượng
+                  </Label>
+                  <Counter
+                    value={selectedService.quantity}
+                    onChange={(e) => updateServiceQuantity(e || 1)}
+                  />
+                </div>
+
+                {/* Notes Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="note" className="text-xs">
+                    Ghi chú
+                  </Label>
+                  <Textarea
+                    id="note"
+                    placeholder="Ghi chú cho dịch vụ..."
+                    value={selectedService.note || ""}
+                    onChange={(e) => updateServiceNote(e.target.value)}
+                    rows={3}
+                    className="text-sm resize-none"
+                  />
+                </div>
+
+                {/* Subtotal */}
+                <div className="pt-2 border-t">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Tổng cộng</span>
+                    <span className="text-lg font-bold text-primary font-mono">
+                      {formatMoney(subtotal).vndFormatted}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <Button
+                  onClick={handleConfirm}
+                  className="w-full"
+                  size="lg"
+                  disabled={isEmpty}
+                >
+                  Xác nhận đơn
+                </Button>
+                <Button
+                  onClick={clearService}
+                  variant="outline"
+                  className="w-full"
+                  size="sm"
+                >
+                  Xóa dịch vụ
+                </Button>
+              </div>
+            </div>
+          )}
         </aside>
       </div>
 
-      <CheckoutConfirmDialog
+      <OrderConfirmDialog
         open={checkoutDialog}
         onOpenChange={setCheckoutDialog}
         subtotal={subtotal}

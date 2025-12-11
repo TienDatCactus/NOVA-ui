@@ -36,13 +36,13 @@ export default function ServiceOrderDetails({
 
   const renderTimeline = () => {
     return (
-      <div className="space-y-2 rounded-md bg-gray-50 p-3 text-xs">
+      <div className="space-y-2 rounded-md bg-muted p-3 text-xs">
         {/* 1. Scheduled */}
         {serviceOrderDetail.scheduledAt && (
           <div className="flex items-center gap-2">
-            <CalendarClock className="h-3.5 w-3.5 text-blue-600" />
+            <CalendarClock className="h-3.5 w-3.5 text-primary" />
             <span className="text-muted-foreground w-16">Lịch hẹn:</span>
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-accent-foreground">
               {format(
                 new Date(serviceOrderDetail.scheduledAt),
                 "HH:mm - dd/MM/yyyy",
@@ -57,9 +57,9 @@ export default function ServiceOrderDetails({
         {/* 2. Performed (Đang/Đã thực hiện) */}
         {serviceOrderDetail.performedAt && (
           <div className="flex items-center gap-2">
-            <PlayCircle className="h-3.5 w-3.5 text-amber-600" />
+            <PlayCircle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
             <span className="text-muted-foreground w-16">Thực hiện:</span>
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-accent-foreground">
               {format(
                 new Date(serviceOrderDetail.performedAt),
                 "HH:mm - dd/MM/yyyy",
@@ -74,9 +74,9 @@ export default function ServiceOrderDetails({
         {/* 3. Completed */}
         {serviceOrderDetail.completedAt && (
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
             <span className="text-muted-foreground w-16">Hoàn tất:</span>
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-accent-foreground ">
               {format(
                 new Date(serviceOrderDetail.completedAt),
                 "HH:mm - dd/MM/yyyy",
@@ -100,15 +100,15 @@ export default function ServiceOrderDetails({
         {/* Context Info (Room & Staff) */}
         <div className="flex items-center justify-between gap-2 px-1">
           {bookingDetail ? (
-            <div className="flex items-center gap-1.5 text-xs font-medium text-gray-700">
-              <MapPin className="h-3.5 w-3.5 text-gray-400" />
+            <div className="flex items-center gap-1.5 text-xs font-medium text-accent-foreground">
+              <MapPin className="h-3.5 w-3.5 text-accent-foreground" />
               <span>
                 Phòng:{" "}
                 {bookingDetail.rooms.map((room) => room.roomName).join(", ")}
               </span>{" "}
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+            <div className="flex items-center gap-1.5 text-xs text-accent-foreground">
               <MapPin className="h-3.5 w-3.5" />{" "}
               <span>Tại sảnh / Khách lẻ</span>
             </div>
@@ -130,7 +130,7 @@ export default function ServiceOrderDetails({
 
       {/* SECTION 2: FINANCIAL BREAKDOWN (The Receipt) */}
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase text-gray-500 mb-2">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase text-accent-foreground mb-2">
           <Receipt className="h-3.5 w-3.5" /> Chi tiết thanh toán
         </div>
 
@@ -143,14 +143,6 @@ export default function ServiceOrderDetails({
           label="Số lượng"
           value={`x ${serviceOrderDetail.quantity}`}
           valueClass="font-bold"
-        />
-
-        <div className="my-1 h-px bg-gray-100" />
-
-        {/* Subtotal */}
-        <Row
-          label="Thành tiền"
-          value={formatMoney(serviceOrderDetail.subtotalAmount).vndFormatted}
         />
 
         {/* Surcharges & Discounts */}
@@ -166,7 +158,7 @@ export default function ServiceOrderDetails({
           <Row
             label="Phí dịch vụ (SVC)"
             value={`+${formatMoney(serviceOrderDetail.serviceChargeAmount).vndFormatted}`}
-            valueClass="text-gray-600"
+            valueClass="text-muted-foreground"
           />
         )}
 
@@ -174,16 +166,17 @@ export default function ServiceOrderDetails({
           <Row
             label="Thuế (VAT)"
             value={`+${formatMoney(serviceOrderDetail.vatAmount).vndFormatted}`}
-            valueClass="text-gray-600"
+            valueClass="text-muted-foreground"
           />
         )}
 
-        <Separator className="my-2 bg-gray-200" />
-
+        <Separator className="my-2 bg-muted" />
         {/* FINAL TOTAL */}
         <div className="flex items-center justify-between">
-          <span className="text-sm font-bold text-gray-800">Tổng cộng</span>
-          <span className="text-lg font-extrabold text-blue-700">
+          <span className="text-sm font-bold text-accent-foreground">
+            Tổng cộng
+          </span>
+          <span className="text-lg font-extrabold text-primary">
             {formatMoney(serviceOrderDetail.total).vndFormatted}
           </span>
         </div>
@@ -191,7 +184,7 @@ export default function ServiceOrderDetails({
 
       {/* SECTION 3: NOTE */}
       {serviceOrderDetail.note && (
-        <div className="mt-2 rounded-md border border-amber-100 bg-amber-50/50 p-2.5 text-xs text-amber-800">
+        <div className="mt-2 rounded-md border border-amber-100 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-900/50 p-2.5 text-xs text-amber-800 dark:text-amber-200">
           <span className="font-semibold mr-1">Ghi chú:</span>
           <span className="italic">{serviceOrderDetail.note}</span>
         </div>
@@ -214,7 +207,7 @@ function Row({
   return (
     <div className="flex items-center justify-between text-sm">
       <span className="text-muted-foreground text-xs">{label}</span>
-      <span className={cn("font-medium text-gray-900", valueClass)}>
+      <span className={cn("font-medium text-accent-foreground", valueClass)}>
         {value}
       </span>
     </div>

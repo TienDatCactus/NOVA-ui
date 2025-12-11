@@ -1,7 +1,8 @@
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 import { RoomsService } from "~/services/api/rooms";
 import type { UpdateRoomDetailRequestDto } from "~/services/api/rooms/dto";
-import { toast } from "sonner";
 
 function useCreateRoom() {
   const queryClient = useQueryClient();
@@ -19,6 +20,11 @@ function useCreateRoom() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      toast.success("Tạo phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -36,6 +42,11 @@ function useUpdateRoom() {
     }) => await RoomsService.updateRoomDetail(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      toast.success("Cập nhật phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -48,6 +59,11 @@ function useUpdateRoomStatus() {
       await RoomsService.updateRoomStatus(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      toast.success("Cập nhật trạng thái phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -59,6 +75,11 @@ function useDeleteRoom() {
     mutationFn: async (id: string) => await RoomsService.deleteRoom(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      toast.success("Xóa phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -73,14 +94,19 @@ function useRegenerateRoomQRCode() {
       queryClient.invalidateQueries({
         queryKey: ["room-qr-code", variables.roomId],
       });
+      toast.success("Tạo lại mã QR thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
 
 export {
   useCreateRoom,
-  useUpdateRoom,
-  useUpdateRoomStatus,
   useDeleteRoom,
   useRegenerateRoomQRCode,
+  useUpdateRoom,
+  useUpdateRoomStatus,
 };

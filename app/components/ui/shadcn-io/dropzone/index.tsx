@@ -44,7 +44,7 @@ export type DropzoneProps = Omit<DropzoneOptions, "onDrop"> & {
 
 export const Dropzone = ({
   accept,
-  maxFiles = 1,
+  maxFiles = 10,
   maxSize,
   minSize,
   onDrop,

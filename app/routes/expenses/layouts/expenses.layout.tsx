@@ -25,6 +25,10 @@ import { FE_URL } from "~/lib/fe-url";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import type { ExpensesFilter } from "../container/filter.hooks";
 import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
+import { useAuth } from "~/lib/auth/components";
+import { UserRole } from "~/lib/auth/roles";
+import { formatMoney } from "~/lib/utils";
+import { AuthLoader, hasRole } from "~/lib/auth/auth.loader";
 
 // --- PROPS ---
 interface ExpensesLayoutProps {
@@ -34,7 +38,7 @@ interface ExpensesLayoutProps {
   resetFilters: () => void;
   totalExpenses: number;
   totalAmount: number;
-  isDashboardView?: boolean; // ✨ NEW PROP
+  isDashboardView?: boolean;
 }
 
 export default function ExpensesLayout({
@@ -48,24 +52,23 @@ export default function ExpensesLayout({
 }: ExpensesLayoutProps) {
   const currentTab = isDashboardView ? "dashboard" : "list";
   const hasActiveFilters = Boolean(
-    filters.fromDate ||
-      filters.toDate ||
-      filters.categoryId ||
-      filters.paymentMethod
+    filters.fromDate || filters.toDate || filters.categoryId
   );
-
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
-      {/* === LEVEL 1: GLOBAL HEADER === */}
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between">
-        {/* Left: Title & Tabs */}
         <div className="flex items-center gap-6">
           <h1 className="text-xl font-bold tracking-tight">Quản lý chi phí</h1>
           <Separator orientation="vertical" className="h-6" />
 
           <Tabs value={currentTab} className="w-auto">
             <TabsList className="grid w-full grid-cols-2 h-9">
-              <TabsTrigger value="list" asChild className="text-xs px-4">
+              <TabsTrigger
+                value="list"
+                asChild
+                className="text-xs px-4"
+                disabled={!hasRole(AuthLoader.getUser(), UserRole.Accountant)}
+              >
                 <Link
                   to={FE_URL.dashboard.expenses}
                   className="flex items-center gap-2"
@@ -87,9 +90,7 @@ export default function ExpensesLayout({
           </Tabs>
         </div>
 
-        {/* Right: Actions */}
         <div className="flex items-center gap-3">
-          {/* Summary Badge (Only show in List view to avoid cluttering dashboard) */}
           {!isDashboardView && (
             <div className="hidden lg:flex items-center gap-3 mr-4 text-sm bg-muted/50 px-3 py-1.5 rounded-md border">
               <div className="flex items-center gap-2">
@@ -102,7 +103,7 @@ export default function ExpensesLayout({
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Tổng chi:</span>
                 <span className="font-mono font-bold text-primary">
-                  {totalAmount.toLocaleString("vi-VN")}
+                  {formatMoney(totalAmount).vndFormatted}
                 </span>
               </div>
             </div>
@@ -118,16 +119,10 @@ export default function ExpensesLayout({
               Bộ lọc:
             </div>
 
-            {/* Date Range - Common for both views */}
             <div className="flex items-center gap-2">
               <DatePicker
                 value={filters.fromDate}
-                onChange={(date) =>
-                  updateFilter(
-                    "fromDate",
-                    date ? date.toISOString().split("T")[0] : undefined
-                  )
-                }
+                onChange={(date) => updateFilter("fromDate", date)}
                 placeholder="Từ ngày"
                 className="w-[130px] h-9 text-xs"
               />
@@ -144,53 +139,23 @@ export default function ExpensesLayout({
                 className="w-[130px] h-9 text-xs"
               />
             </div>
-
-            {/* Extended Filters - Only for LIST View */}
-
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
-
             <Select
-              value={filters.categoryId || "all"}
+              value={filters.categoryId}
               onValueChange={(value) =>
                 updateFilter("categoryId", value === "all" ? undefined : value)
               }
             >
-              <SelectTrigger className="w-40 h-9 text-xs">
+              <SelectTrigger className="w-60 h-9 text-xs">
                 <div className="flex items-center gap-2 truncate">
                   <Tags className="w-3.5 h-3.5 text-muted-foreground" />
                   <SelectValue placeholder="Tất cả danh mục" />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả danh mục</SelectItem>
                 {ExpenseCategories.map((cat) => (
                   <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.paymentMethod || "all"}
-              onValueChange={(value) =>
-                updateFilter(
-                  "paymentMethod",
-                  value === "all" ? undefined : value
-                )
-              }
-            >
-              <SelectTrigger className="w-40 h-9 text-xs">
-                <div className="flex items-center gap-2 truncate">
-                  <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
-                  <SelectValue placeholder="Tất cả phương thức" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả phương thức</SelectItem>
-                {PAYMENT_METHODS.map((method) => (
-                  <SelectItem key={method.value} value={method.value}>
-                    {method.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -212,7 +177,6 @@ export default function ExpensesLayout({
         </div>
       )}
 
-      {/* === LEVEL 3: CONTENT AREA === */}
       <main className="flex-1 p-6 overflow-y-auto">{children}</main>
     </div>
   );

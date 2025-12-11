@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import type z from "zod";
+import { onError } from "~/lib/utils";
 import { BookingService } from "~/services/api/booking";
 import type { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
@@ -9,30 +11,42 @@ import type {
   StaffChangeRoomRequestDto,
 } from "~/services/api/booking/dto";
 
-function useUpdateBooking(bookingId: string) {
+function useUpdateBooking(bookingId: string, bookingCode?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: StaffUpdateBookingRequestDto) =>
       await BookingService.staffUpdateBookingDetail(bookingId, data),
-    onSuccess: (response) => {
-      // Don't toast here - let the component handle success message
-      queryClient.invalidateQueries({
+    onSuccess: async (response) => {
+      if (bookingCode) {
+        queryClient.setQueryData(
+          ["bookings-detail", bookingCode, response.bookingId],
+          response
+        );
+      }
+      (queryClient.invalidateQueries({
         queryKey: ["bookings"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["orderable-bookings"],
-        refetchType: "active",
-      });
+      }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+        toast.success("Cập nhật đặt phòng thành công"));
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật đặt phòng thất bại"
+        );
+      }
     },
   });
 }
@@ -43,27 +57,30 @@ function useChangeRoom(bookingId: string) {
   return useMutation({
     mutationFn: async (data: StaffChangeRoomRequestDto) =>
       await BookingService.staffChangeRoom(bookingId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      (queryClient.invalidateQueries({
         queryKey: ["bookings"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms-for-change"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-        refetchType: "active",
-      });
+      }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms-for-change"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        toast.success("Đổi phòng thành công"));
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật trạng thái thất bại"
+        );
+      }
     },
   });
 }
@@ -75,27 +92,30 @@ function useCancelBooking(bookingId: string) {
     mutationFn: async () => {
       return await BookingService.staffCancelBooking(bookingId);
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (data) => {
+      (queryClient.invalidateQueries({
         queryKey: ["bookings"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["orderable-bookings"],
-        refetchType: "active",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-        refetchType: "active",
-      });
+      }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+        toast.success("Hủy đặt phòng thành công"));
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật trạng thái thất bại"
+        );
+      }
     },
   });
 }
@@ -111,33 +131,44 @@ function useUpdateBookingStatus(bookingId: string) {
         newStatus: status,
       });
     },
-    onSuccess: () => {
-      toast.success("Cập nhật trạng thái thành công");
-
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      // Invalidate all related queries
+      (queryClient.invalidateQueries({
         queryKey: ["bookings-detail"],
-        refetchType: "active",
-      });
+      }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+        toast.success("Cập nhật trạng thái thành công"));
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật trạng thái thất bại"
+        );
+      }
+    },
+  });
+}
 
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-        refetchType: "active",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-        refetchType: "active",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["orderable-bookings"],
-        refetchType: "active",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-        refetchType: "active",
-      });
+function useExportBookings(date?: string) {
+  return useMutation({
+    mutationFn: async () => await BookingService.exportBookings(date),
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Cập nhật trạng thái thất bại"
+        );
+      }
     },
   });
 }
@@ -146,4 +177,5 @@ export {
   useUpdateBooking,
   useChangeRoom,
   useUpdateBookingStatus,
+  useExportBookings,
 };

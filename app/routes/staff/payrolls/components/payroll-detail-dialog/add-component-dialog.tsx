@@ -38,7 +38,7 @@ import {
   Banknote,
   AlignLeft,
 } from "lucide-react";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
 
 const { AddPayrollComponentFormSchema } = FormSchema;
@@ -51,15 +51,6 @@ interface AddComponentDialogProps {
   payrollId: string;
   onSuccess?: () => void;
 }
-
-// Utility: Format currency (VNĐ)
-const formatCurrencyInput = (value: string | number) => {
-  if (!value) return "";
-  // Xóa các ký tự không phải số
-  const number = value.toString().replace(/[^0-9]/g, "");
-  // Format có dấu chấm phân cách hàng nghìn
-  return new Intl.NumberFormat("vi-VN").format(Number(number));
-};
 
 export default function AddComponentDialog({
   open,
@@ -236,7 +227,7 @@ export default function AddComponentDialog({
                             className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 text-lg font-semibold font-mono px-4 shadow-none"
                             value={
                               field.value
-                                ? formatCurrencyInput(field.value)
+                                ? formatMoney(field.value).vndFormatted
                                 : ""
                             }
                             onChange={(e) => {

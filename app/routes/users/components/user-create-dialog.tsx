@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronsUpDown, Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -20,17 +20,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { cn } from "~/lib/utils";
 import type { CreateUserDto } from "~/services/api/user/dto";
 import { UserSchema } from "~/services/api/user/user.schema";
 import { useCreateUser, useRoles } from "../container/query.hooks";
+import { ROLE_LABELS } from "~/lib/auth/roles";
 
 interface UserFormDialogProps {
   open: boolean;
@@ -55,7 +48,7 @@ export function CreateUserDialog({ open, onClose }: UserFormDialogProps) {
 
   const handleSubmit = (data: CreateUserDto) => {
     createUser(data as CreateUserDto, {
-      onSuccess: (response) => {
+      onSuccess: () => {
         form.reset();
         onClose();
       },
@@ -67,7 +60,7 @@ export function CreateUserDialog({ open, onClose }: UserFormDialogProps) {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-3">
-            Thêm khách hàng mới
+            Tạo tài khoản mới
           </DialogTitle>
         </DialogHeader>
 
@@ -153,32 +146,50 @@ export function CreateUserDialog({ open, onClose }: UserFormDialogProps) {
               <FormField
                 control={form.control}
                 name="roles"
-                render={({ field }) => (
+                render={() => (
                   <FormItem>
                     <FormLabel>
                       Chọn vai trò <span className="text-destructive">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Select>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Chọn vai trò..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {rolesData?.map((role) => (
-                            <SelectItem
-                              key={role}
-                              value={role}
-                              className="cursor-pointer"
-                            >
-                              {role}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-
+                    <div className="border rounded-md p-3 space-y-2 bg-muted/20">
+                      {rolesData?.map((role) => (
+                        <FormField
+                          key={role}
+                          control={form.control}
+                          name="roles"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={role}
+                                className="flex flex-row items-start space-x-3 space-y-0"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(role)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, role])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== role
+                                            )
+                                          );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal cursor-pointer">
+                                  {ROLE_LABELS[
+                                    role as keyof typeof ROLE_LABELS
+                                  ] || role}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))}
+                    </div>
                     <FormDescription className="text-xs">
-                      Chọn ít nhất một vai trò cho khách hàng
+                      Chọn ít nhất một vai trò cho người dùng
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -201,7 +212,7 @@ export function CreateUserDialog({ open, onClose }: UserFormDialogProps) {
                     </FormControl>
 
                     <FormDescription className="text-xs">
-                      Chọn ít nhất một vai trò cho khách hàng
+                      Mật khẩu phải có ít nhất 6 ký tự
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -220,7 +231,7 @@ export function CreateUserDialog({ open, onClose }: UserFormDialogProps) {
               </Button>
               <Button type="submit" disabled={isPending} className="gap-2">
                 {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                Tạo khách hàng
+                Tạo tài khoản
               </Button>
             </DialogFooter>
           </form>

@@ -41,24 +41,20 @@ import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
+import type { BookingState } from "../container/use-booking-state.hooks";
 
 interface CustomerInfoBarProps {
   bookingDetail: BookingDetailResponseDto;
   form: UseFormReturn<StaffUpdateBookingRequestDto>;
   OTAList?: Array<{ id: string; name: string }>;
-  permissions: {
-    canDoSoftUpdate: boolean;
-    canUpdateNonStructural: boolean;
-    canUpdateGuestCount: boolean;
-    canUpdateTotalAmount: boolean;
-  };
+  bookingState: BookingState;
 }
 
 export default function CustomerInfoBar({
   bookingDetail,
   form,
   OTAList,
-  permissions,
+  bookingState,
 }: CustomerInfoBarProps) {
   return (
     <div className="bg-background border rounded-lg p-5 shadow-sm">
@@ -120,7 +116,7 @@ export default function CustomerInfoBar({
                   <FormControl>
                     <Counter
                       {...field}
-                      isDisabled={!permissions.canUpdateGuestCount}
+                      isDisabled={!bookingState.permissions.canEditGuests}
                       className="h-9"
                     />
                   </FormControl>
@@ -140,7 +136,7 @@ export default function CustomerInfoBar({
                   <FormControl>
                     <Counter
                       {...field}
-                      isDisabled={!permissions.canUpdateGuestCount}
+                      isDisabled={!bookingState.permissions.canEditGuests}
                       className="h-9"
                     />
                   </FormControl>
@@ -156,10 +152,6 @@ export default function CustomerInfoBar({
             render={({ field }) => {
               const checkinDate = form.watch("checkinDate");
               const checkoutDate = form.watch("checkoutDate");
-              const breakfastDates =
-                field.value?.map((item) =>
-                  item.date ? parseISO(item.date) : new Date()
-                ) || [];
 
               const handleSelectDates = (dates: Date[] | undefined) => {
                 if (!dates) {
@@ -184,14 +176,15 @@ export default function CustomerInfoBar({
                           variant="outline"
                           className={cn(
                             "w-full justify-start text-left font-normal h-9",
-                            !breakfastDates.length && "text-muted-foreground"
+                            !form.watch("breakfastDates")?.length &&
+                              "text-muted-foreground"
                           )}
-                          disabled={!permissions.canDoSoftUpdate}
+                          disabled={!bookingState.permissions.canEdit}
                         >
                           <CalendarDays className="mr-2 h-3.5 w-3.5" />
-                          {breakfastDates.length > 0 ? (
+                          {(form.watch("breakfastDates")?.length ?? 0 > 0) ? (
                             <span className="text-foreground font-medium">
-                              {breakfastDates.length} buổi sáng
+                              {form.watch("breakfastDates")?.length} buổi sáng
                             </span>
                           ) : (
                             "Chọn ngày"
@@ -201,7 +194,10 @@ export default function CustomerInfoBar({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="multiple"
-                          selected={breakfastDates}
+                          selected={form
+                            .watch("breakfastDates")
+                            ?.map((bd) => (bd.date ? parseISO(bd.date) : null))
+                            .filter((date): date is Date => date !== null)}
                           onSelect={handleSelectDates}
                           disabled={(date) => {
                             const checkin =
@@ -212,10 +208,9 @@ export default function CustomerInfoBar({
                               checkoutDate instanceof Date
                                 ? checkoutDate
                                 : parseISO(checkoutDate!.toString());
-                            return date < checkin || date > checkout;
+                            return date <= checkin || date > checkout;
                           }}
                           locale={vi}
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
@@ -243,7 +238,7 @@ export default function CustomerInfoBar({
                     <Select
                       value={field.value}
                       onValueChange={field.onChange}
-                      disabled={!permissions.canUpdateNonStructural}
+                      disabled={!bookingState.permissions.canEdit}
                     >
                       <FormControl>
                         <SelectTrigger className="h-9 w-40 text-xs">
@@ -275,7 +270,7 @@ export default function CustomerInfoBar({
                         {...field}
                         className="h-9 font-mono text-xs"
                         placeholder="Mã đặt phòng"
-                        disabled={!permissions.canUpdateNonStructural}
+                        disabled={!bookingState.permissions.canEdit}
                       />
                     </FormControl>
                     <FormMessage />
@@ -308,7 +303,7 @@ export default function CustomerInfoBar({
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value) || 0)
                       }
-                      disabled={!permissions.canUpdateTotalAmount}
+                      disabled={!bookingState.permissions.canEdit}
                     />
                     <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                       <span className="text-xs text-muted-foreground font-bold">

@@ -1,7 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { CalendarDays, ChevronDownIcon, Loader2 } from "lucide-react";
+import {
+  Banknote,
+  CalendarDays,
+  CalendarIcon,
+  ChevronDownIcon,
+  Loader2,
+} from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
@@ -43,12 +49,14 @@ interface UpdateHolidayDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   holiday: HolidayListItem | null;
+  onSuccess?: () => void;
 }
 
 export default function UpdateHolidayDialog({
   open,
   onOpenChange,
   holiday,
+  onSuccess,
 }: UpdateHolidayDialogProps) {
   const form = useForm<UpdateHolidayRequest>({
     resolver: zodResolver(HolidaySchema.UpdateHolidayRequestSchema),
@@ -85,6 +93,7 @@ export default function UpdateHolidayDialog({
         {
           onSuccess: () => {
             onOpenChange(false);
+            onSuccess?.();
           },
         }
       );
@@ -95,27 +104,26 @@ export default function UpdateHolidayDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px]">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5">
-              <CalendarDays className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle className="text-xl">Cập nhật ngày nghỉ</DialogTitle>
-              <DialogDescription className="mt-1">
-                Chỉnh sửa thông tin ngày nghỉ lễ
-              </DialogDescription>
-            </div>
-          </div>
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto p-0 gap-0">
+        {/* Header có background nhẹ để tách biệt */}
+        <DialogHeader className="px-6 py-4 border-b bg-muted/5">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <CalendarDays className="w-5 h-5 text-primary" />
+            Cập nhật ngày nghỉ lễ
+          </DialogTitle>
+          <DialogDescription>
+            Chỉnh sửa kỳ nghỉ và chế độ lương thưởng cho ngày nghỉ{" "}
+            <b className="font-bold">{holiday?.name}</b>.
+          </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6 mt-4"
-          >
-            <div className="space-y-4">
+        <div className="p-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-6"
+            >
+              {/* Tên ngày nghỉ */}
               <FormField
                 control={form.control}
                 name="name"
@@ -125,111 +133,10 @@ export default function UpdateHolidayDialog({
                       Tên ngày nghỉ <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="VD: Tết Nguyên Đán..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-semibold">
-                      Ngày bắt đầu <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: vi })
-                            ) : (
-                              <span>Chọn ngày bắt đầu</span>
-                            )}
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={new Date(field.value)}
-                          onSelect={field.onChange}
-                          captionLayout="dropdown"
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-semibold">
-                      Ngày kết thúc <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: vi })
-                            ) : (
-                              <span>Chọn ngày kết thúc</span>
-                            )}
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={new Date(field.value)}
-                          onSelect={field.onChange}
-                          captionLayout="dropdown"
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="bonusAmount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-semibold">
-                      Tiền thưởng <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
                       <Input
-                        type="text"
-                        placeholder="0"
-                        value={field.value}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        placeholder="VD: Tết Nguyên Đán, Giỗ tổ Hùng Vương..."
+                        className="h-10"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -237,19 +144,164 @@ export default function UpdateHolidayDialog({
                 )}
               />
 
+              {/* Khu vực chọn ngày - Gộp thành 2 cột */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-sm font-semibold">
+                        Bắt đầu <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal h-10",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(new Date(field.value), "dd/MM/yyyy")
+                              ) : (
+                                <span>DD/MM/YYYY</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={new Date(field.value)}
+                            onSelect={(date) =>
+                              field.onChange(
+                                date ? format(date, "yyyy-MM-dd") : ""
+                              )
+                            }
+                            initialFocus
+                            locale={vi}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-sm font-semibold">
+                        Kết thúc <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal h-10",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(new Date(field.value), "dd/MM/yyyy")
+                              ) : (
+                                <span>DD/MM/YYYY</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={new Date(field.value)}
+                            onSelect={(date) =>
+                              field.onChange(
+                                date ? format(date, "yyyy-MM-dd") : ""
+                              )
+                            }
+                            initialFocus
+                            locale={vi}
+                            disabled={(date) => {
+                              // UX Logic: Không cho chọn ngày kết thúc nhỏ hơn ngày bắt đầu
+                              const startDate = form.getValues("startDate");
+                              return startDate
+                                ? date < new Date(startDate)
+                                : false;
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Tiền thưởng - Thêm icon và hậu tố VND */}
+              <FormField
+                control={form.control}
+                name="bonusAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">
+                      Thưởng / Phụ cấp
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Banknote className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          className="pl-9 pr-12 h-10 font-mono"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                        <span className="absolute right-3 top-2.5 text-xs font-medium text-muted-foreground">
+                          VND
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      Áp dụng cho nhân viên đi làm vào ngày này.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Card trạng thái ngày lễ */}
               <FormField
                 control={form.control}
                 name="isPublicHoliday"
                 render={({ field }) => (
                   <FormItem>
-                    <Card className="p-4 border-muted bg-muted/30">
+                    <Card
+                      className={cn(
+                        "p-4 border transition-colors",
+                        field.value
+                          ? "border-primary/50 bg-primary/5"
+                          : "border-muted bg-muted/20"
+                      )}
+                    >
                       <div className="flex items-center justify-between space-x-4">
-                        <div className="flex-1 space-y-1">
+                        <div className="space-y-0.5">
                           <FormLabel className="text-sm font-semibold">
-                            Trạng thái ngày nghỉ
+                            Ngày lễ Quốc gia (Public Holiday)
                           </FormLabel>
                           <FormDescription className="text-xs">
-                            Đánh dấu là ngày lễ chính thức của quốc gia
+                            Nhân viên sẽ được hưởng chế độ lương x3 hoặc x4 tùy
+                            theo quy định.
                           </FormDescription>
                         </div>
                         <FormControl>
@@ -263,24 +315,34 @@ export default function UpdateHolidayDialog({
                   </FormItem>
                 )}
               />
-            </div>
 
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isPending}
-              >
-                Hủy
-              </Button>
-              <Button type="submit" disabled={isPending} className="gap-2">
-                {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isPending ? "Đang cập nhật..." : "Cập nhật"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              <DialogFooter className="pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isPending}
+                  className="h-10"
+                >
+                  Hủy bỏ
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="h-10 gap-2 min-w-[140px]"
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Đang lưu...
+                    </>
+                  ) : (
+                    "Tạo ngày nghỉ"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

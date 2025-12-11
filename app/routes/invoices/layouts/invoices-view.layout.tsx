@@ -47,7 +47,13 @@ import {
 import { InvoicesService } from "~/services/api/invoices";
 import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
+import {
+  INVOICE_STATUSES,
+  INVOICE_TYPES,
+} from "~/services/api/invoices/invoice.types";
+import type { InvoiceStatusEnum } from "~/services/api/invoices/dto";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface InvoicesViewLayoutProps {
   children: ReactNode;
@@ -88,7 +94,7 @@ function InvoicesViewLayout({
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages || page === currentPage) return;
-    onFilterChange("page" as keyof InvoiceListParams, page as any);
+    onFilterChange("Page", page);
   };
 
   const handleExport = async () => {
@@ -123,95 +129,84 @@ function InvoicesViewLayout({
     filters.IssuedFrom ||
     filters.IssuedTo ||
     filters.Status ||
-    filters.PaymentMethod;
+    filters.PaymentMethod ||
+    filters.InvoiceType;
 
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
-      {/* === LEVEL 1: GLOBAL HEADER === */}
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between shrink-0">
         {/* Left: Title */}
         <div className="flex items-center gap-4">
-          <div className="p-2 bg-primary/10 rounded-lg text-primary">
-            <FileText className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight gap-2">
-              Quản lý hóa đơn
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Tổng{" "}
-              <span className="font-medium text-foreground">
-                {totalInvoices}
-              </span>{" "}
-              hóa đơn trong hệ thống
-            </p>
-          </div>
+          <h1 className="text-xl font-bold tracking-tight gap-2">
+            Quản lý hóa đơn
+          </h1>
         </div>
 
         {/* Right: Primary Action */}
-        <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant={"success"}>
-              <Download className="w-4 h-4 mr-2" />
-              Xuất báo cáo
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Download className="w-5 h-5 text-green-700" />
-                Xuất dữ liệu hóa đơn
-              </DialogTitle>
-            </DialogHeader>
-            <div className="py-4 space-y-4">
-              <div className="p-4 bg-green-50 text-green-700 rounded-md text-sm border border-green-100">
-                Chọn ngày cụ thể để xuất báo cáo ngày, hoặc để trống để xuất
-                toàn bộ lịch sử.
-              </div>
-              <div className="space-y-2">
-                <Label>Ngày xuất báo cáo</Label>
-                <DatePicker
-                  value={exportDate}
-                  onChange={(date) =>
-                    setExportDate(date ? format(date, "yyyy-MM-dd") : undefined)
-                  }
-                  placeholder="Chọn ngày (Tùy chọn)"
-                  className="w-full"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setExportDialogOpen(false);
-                  setExportDate(undefined);
-                }}
-              >
-                Hủy bỏ
+        {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) && (
+          <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant={"success"}>
+                <Download className="w-4 h-4 mr-2" />
+                Xuất báo cáo
               </Button>
-              <Button onClick={handleExport} variant="success">
-                Xác nhận{" "}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Download className="w-5 h-5 text-green-700" />
+                  Xuất dữ liệu hóa đơn
+                </DialogTitle>
+              </DialogHeader>
+              <div className="py-4 space-y-4">
+                <div className="p-4 bg-green-50 text-green-700 rounded-md text-sm border border-green-100">
+                  Chọn ngày cụ thể để xuất báo cáo ngày, hoặc để trống để xuất
+                  toàn bộ lịch sử.
+                </div>
+                <div className="space-y-2">
+                  <Label>Ngày xuất báo cáo</Label>
+                  <DatePicker
+                    value={exportDate}
+                    onChange={(date) =>
+                      setExportDate(
+                        date ? format(date, "yyyy-MM-dd") : undefined
+                      )
+                    }
+                    placeholder="Chọn ngày (Tùy chọn)"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setExportDialogOpen(false);
+                    setExportDate(undefined);
+                  }}
+                >
+                  Hủy bỏ
+                </Button>
+                <Button onClick={handleExport} variant="success">
+                  Xác nhận{" "}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </header>
 
       {/* === LEVEL 2: FILTER TOOLBAR === */}
       <div className="px-6 py-3 bg-background border-b flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between shrink-0">
-        {/* Filter Groups */}
-        <div className="flex flex-wrap items-center gap-3 w-full">
+        <div className="flex flex-wrap items-center gap-2 w-full">
           {/* Search */}
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm theo mã, khách hàng..."
-              value={filters.Keyword || ""}
-              onChange={(e) => onFilterChange("Keyword", e.target.value)}
-              className="pl-9 h-9 text-sm bg-background"
-            />
-          </div>
+          <Input
+            startAddon={<Search className="w-4 h-4 text-muted-foreground " />}
+            placeholder="Tìm theo mã, khách hàng..."
+            value={filters.Keyword || ""}
+            onChange={(e) => onFilterChange("Keyword", e.target.value)}
+            className="max-w-xs"
+          />
 
           <Separator orientation="vertical" className="h-6 hidden sm:block" />
 
@@ -244,9 +239,9 @@ function InvoicesViewLayout({
 
           {/* Status Filter */}
           <Select
-            value={filters.Status || "all"}
-            onValueChange={(val) =>
-              onFilterChange("Status", val === "all" ? undefined : val)
+            value={filters.Status}
+            onValueChange={(val: InvoiceStatusEnum) =>
+              onFilterChange("Status", val)
             }
           >
             <SelectTrigger className="w-[160px] h-9 text-xs border-dashed">
@@ -256,7 +251,6 @@ function InvoicesViewLayout({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả trạng thái</SelectItem>
               {INVOICE_STATUSES?.map((s) => (
                 <SelectItem key={s.value} value={s.value}>
                   {s.label}
@@ -265,9 +259,8 @@ function InvoicesViewLayout({
             </SelectContent>
           </Select>
 
-          {/* Payment Method Filter */}
           <Select
-            value={filters.PaymentMethod || "all"} // Changed "Unknown" to "all" for consistency
+            value={filters.PaymentMethod}
             onValueChange={(val) =>
               onFilterChange(
                 "PaymentMethod",
@@ -282,10 +275,34 @@ function InvoicesViewLayout({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả phương thức</SelectItem>
               {PAYMENT_METHODS.map((pm) => (
                 <SelectItem key={pm.value} value={pm.value}>
                   {pm.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Invoice Type Filter */}
+          <Select
+            value={filters.InvoiceType}
+            onValueChange={(val) =>
+              onFilterChange(
+                "InvoiceType",
+                val === "all" ? undefined : (val as any)
+              )
+            }
+          >
+            <SelectTrigger className="w-[160px] h-9 text-xs border-dashed">
+              <div className="flex items-center gap-2 truncate">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                <SelectValue placeholder="Loại hóa đơn" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {INVOICE_TYPES.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -308,9 +325,7 @@ function InvoicesViewLayout({
 
       {/* === LEVEL 3: CONTENT AREA === */}
       <main className="flex-1 p-6 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto bg-background rounded-lg border shadow-sm">
-          {children}
-        </div>
+        <div className="flex-1 overflow-auto bg-background">{children}</div>
 
         {/* Pagination Footer */}
         {totalPages > 1 && (

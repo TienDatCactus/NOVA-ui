@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { Loader2, Lock, Unlock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 import { useLockPayroll, useUnlockPayroll } from "../container/query.hooks";
 
 interface StatusSelectCellProps {
@@ -21,72 +21,72 @@ export default function StatusSelectCell({
   locked,
   onSuccess,
 }: StatusSelectCellProps) {
-  const [currentStatus, setCurrentStatus] = useState(locked);
+  // Local state for optimistic UI
+  const [isLocked, setIsLocked] = useState(locked);
+
+  // Sync prop changes
   useEffect(() => {
-    setCurrentStatus(locked);
-  }, [locked, payrollId]);
+    setIsLocked(locked);
+  }, [locked]);
 
   const { mutate: lockPayroll, isPending: isLocking } = useLockPayroll();
   const { mutate: unlockPayroll, isPending: isUnlocking } = useUnlockPayroll();
 
-  const handleStatusChange = (value: string) => {
-    if (value === "locked") {
-      lockPayroll(payrollId, {
-        onSuccess: () => {
-          setCurrentStatus(true);
-          onSuccess?.();
-        },
-      });
-    } else {
-      unlockPayroll(payrollId, {
-        onSuccess: () => {
-          setCurrentStatus(false);
-          onSuccess?.();
-        },
-      });
-    }
-  };
-
   const isLoading = isLocking || isUnlocking;
+
+  const handleToggle = () => {
+    if (isLoading) return;
+
+    // 1. Determine action
+    const nextStatus = !isLocked;
+    const mutationFn = nextStatus ? lockPayroll : unlockPayroll;
+
+    // 2. Optimistic Update (Cập nhật ngay lập tức)
+    setIsLocked(nextStatus);
+
+    // 3. Server Mutation
+    mutationFn(payrollId, {
+      onSuccess: () => {
+        onSuccess?.();
+      },
+      onError: () => {
+        // 4. Revert on Error (Hoàn tác nếu lỗi)
+        setIsLocked(!nextStatus);
+      },
+    });
+  };
 
   return (
     <div className="flex items-center justify-center">
-      <Select
-        value={currentStatus ? "locked" : "unlocked"}
-        onValueChange={handleStatusChange}
-        disabled={isLoading}
-      >
-        <SelectTrigger
-          className={`w-[120px] h-8 text-xs ${
-            currentStatus
-              ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-              : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700"
-          }`}
-        >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              <span>Đang xử lý...</span>
-            </div>
-          ) : (
-            <SelectValue />
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="unlocked" className="text-xs">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-gray-500" />
-              <span>Tạm tính</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="locked" className="text-xs">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500" />
-              <span>Đã khóa</span>
-            </div>
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={isLocked ? "destructive" : "info"}
+              size="sm"
+              onClick={handleToggle}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+              ) : isLocked ? (
+                <Lock className="h-3.5 w-3.5 mr-1.5" />
+              ) : (
+                <Unlock className="h-3.5 w-3.5 mr-1.5" />
+              )}
+
+              <span>{isLocked ? "Đã chốt" : "Tạm tính"}</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              {isLocked
+                ? "Click để mở khóa (cho phép chỉnh sửa)"
+                : "Click để chốt lương (khóa chỉnh sửa)"}
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }

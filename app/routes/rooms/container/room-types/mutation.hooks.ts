@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { RoomTypesService } from "~/services/api/room-types";
 import type {
@@ -14,6 +15,11 @@ export function useCreateRoomType() {
       RoomTypesService.createRoomTypes(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room-types"] });
+      toast.success("Tạo loại phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -27,6 +33,11 @@ export function useUpdateRoomType(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room-types"] });
       queryClient.invalidateQueries({ queryKey: ["room-type", id] });
+      toast.success("Cập nhật loại phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }
@@ -38,6 +49,11 @@ export function useDeleteRoomType(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room-types"] });
       queryClient.invalidateQueries({ queryKey: ["room-type", id] });
+      toast.success("Xóa loại phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message);
     },
   });
 }

@@ -1,25 +1,37 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
-import {
-  AlertTriangle,
-  CreditCard,
-  DoorOpen,
-  FileWarning,
-  Loader2,
-  Receipt,
-  RotateCcw,
-  Save,
-} from "lucide-react";
+import { Check, FileWarning, NotebookPen, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  AuthLoader,
+  RouteModule,
+  Permission,
+  hasAnyRole,
+  UserRole,
+} from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/booking-detail";
 
-import { Badge } from "~/components/ui/badge";
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Chi Tiết Đặt Phòng - NOVA Hotel Management" },
+    {
+      name: "description",
+      content: "Thông tin chi tiết đặt phòng và quản lý thanh toán",
+    },
+  ];
+}
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Bookings, Permission.Read);
+
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -40,43 +52,33 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
-import { formatMoney, toYMD, useCalculateNights } from "~/lib/utils";
+import { onError, toYMD, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
 import { useUpdateBooking } from "../bookings/container/booking-mutation.hooks";
 import { useBookingDetail } from "../bookings/container/booking-query.hooks";
-import type { Route } from "./+types/booking-detail";
 
 // Components
 import BookingRoomsBar from "./components/booking-rooms-bar";
-import CheckoutSheet from "./components/checkout/checkout-sheet";
 import CustomerInfoBar from "./components/customer-info-bar";
 import AddCompletedChargesDialog from "./components/operations/add-completed-charges-dialog";
 import PendingChargesSection from "./components/pending-charges-section";
-import RefundButton from "./components/refunds/refund-button";
 import RefundHistory from "./components/refunds/refund-history";
 import StayDetailBar from "./components/stay-detail-bar";
 
-// Hooks
-import { Alert, AlertTitle } from "~/components/ui/alert";
-import { useAddCompletedCharges } from "./container/use-booking-checkout.hooks";
-import { useBookingFinancialStatus } from "./container/use-booking-financial-status.hooks";
-import { useBookingUpdatePermissions } from "./container/use-booking-update-permissions.hooks";
+import { useParams } from "react-router";
+import { useBookingState } from "./container/use-booking-state.hooks";
+import { BookingActionsBar } from "./fragments/booking-actions.bar";
 
 const { StaffUpdateBookingRequestSchema } = BookingSchema;
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  const bookingCode = params.bookingCode;
+export default function Component() {
+  const { bookingCode } = useParams<{ bookingCode: string }>();
+
   if (!bookingCode) {
-    throw new Response("Booking code is required", { status: 400 });
+    return <BookingDetailError errorDetails="Mã booking không hợp lệ" />;
   }
-  return { bookingCode };
-};
 
-export default function Component({ loaderData }: Route.ComponentProps) {
-  const { bookingCode } = loaderData;
-
-  // --- Queries ---
   const {
     data: bookingDetail,
     isPending,
@@ -85,30 +87,18 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     bookingCode,
     enabled: !!bookingCode,
   });
-
-  // --- Local State ---
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
-  const [isAddingCompletedCharges, setIsAddingCompletedCharges] =
-    useState(false);
 
-  // --- Derived State & Hooks ---
-  const permissions = useBookingUpdatePermissions(bookingDetail);
-  const financialSummary = useBookingFinancialStatus(bookingDetail?.invoices);
+  const bookingState = useBookingState(bookingDetail);
   const { data: OTAList } = useOTAInfo({ selection: true });
 
-  // --- Mutations ---
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
-    bookingDetail?.id || ""
+    bookingDetail?.id || "",
+    bookingCode
   );
 
-  const { mutate: addCompletedCharges } = useAddCompletedCharges(
-    bookingDetail?.id || ""
-  );
-
-  // --- Form Setup ---
   const form = useForm<StaffUpdateBookingRequestDto>({
     resolver: zodResolver(StaffUpdateBookingRequestSchema),
     defaultValues: {
@@ -130,46 +120,49 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     name: "rooms",
   });
 
-  // UX: Track Dirty State
   const { isDirty } = form.formState;
+  const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
+    if (data.rooms && data.rooms.length > 0) {
+      data.rooms.forEach((room, idx) => {
+        console.log(`Room operation ${idx}:`, {
+          action: room.action,
+          actionType: typeof room.action,
+          bookingRoomId: room.bookingRoomId,
+          roomId: room.roomId,
+          newRoomId: room.newRoomId,
+          fromDate: room.fromDate,
+          toDate: room.toDate,
+        });
 
-  // --- Effects ---
-  useEffect(() => {
-    if (bookingDetail && bookingDetail.id) {
-      // Reset form with new data.
-      // Important: This clears the 'isDirty' state after a successful fetch or save.
-      form.reset({
-        checkinDate: bookingDetail.checkinDate,
-        checkoutDate: bookingDetail.checkoutDate,
-        adultsAmount: bookingDetail.adults,
-        childrenAmount: bookingDetail.children || 0,
-        note: bookingDetail.note || "",
-        otaBookingCode: bookingDetail.source === "OTA" ? "" : "",
-        otaInformationId: bookingDetail.source === "OTA" ? "" : "",
-        customerId: bookingDetail.customer.id,
-        totalAmount: bookingDetail.totalAmount || 0,
-        breakfastDates: [],
-        rooms: [],
+        const result =
+          BookingSchema.UpdateBookingRoomRequestSchema.safeParse(room);
+
+        if (!result.success) {
+          console.error("Invalid room operation:", room, result.error);
+          const errorMsg = result.error.issues
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
+            .join(", ");
+          throw new Error(
+            `Phòng ${room.roomId || room.bookingRoomId || "unknown"} không hợp lệ: ${errorMsg}`
+          );
+        }
       });
     }
-  }, [bookingDetail]); // form is stable, safe to include
 
-  // --- Handlers ---
-  const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
     const hasDatesChanged =
       data.checkinDate !== bookingDetail?.checkinDate ||
       data.checkoutDate !== bookingDetail?.checkoutDate;
     const hasRoomChanges = data.rooms && data.rooms.length > 0;
 
-    if (hasDatesChanged && !permissions.canUpdateDates) {
+    if (hasDatesChanged && !bookingState.permissions.canEditDates) {
       toast.error(
-        permissions.dateChangeBlockReason ||
+        bookingState.permissions.dateChangeBlockReason ||
           "Không thể thay đổi ngày check-in/check-out"
       );
       return;
     }
 
-    if (hasRoomChanges && !permissions.canModifyRooms) {
+    if (hasRoomChanges && !bookingState.permissions.canEditRooms) {
       toast.error(
         "Không thể thay đổi phòng khi đã có thanh toán hoặc booking đã kết thúc"
       );
@@ -177,7 +170,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
     }
 
     const payload: Partial<StaffUpdateBookingRequestDto> = {
-      // ... (Giữ nguyên logic mapping payload) ...
       checkinDate:
         data.checkinDate instanceof Date
           ? toYMD(data.checkinDate)
@@ -196,21 +188,39 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       rooms: data.rooms,
     };
 
-    updateBooking(payload, {});
+    updateBooking(payload, {
+      onSuccess: () => {
+        form.setValue("rooms", [], { shouldDirty: false });
+      },
+    });
   };
 
-  const handleAddCompletedCharges = (data: any) => {
-    if (!bookingDetail?.id) return;
-    setIsAddingCompletedCharges(true);
-    try {
-      addCompletedCharges(data);
-      setCompletedChargesDialogOpen(false);
-    } catch (error) {
-      console.error("Failed to add completed charges:", error);
-    } finally {
-      setIsAddingCompletedCharges(false);
+  useEffect(() => {
+    if (bookingDetail && bookingDetail.id) {
+      form.reset(
+        {
+          checkinDate: bookingDetail.checkinDate,
+          checkoutDate: bookingDetail.checkoutDate,
+          adultsAmount: bookingDetail.adults,
+          childrenAmount: bookingDetail.children || 0,
+          note: bookingDetail.note || "",
+          otaBookingCode: bookingDetail.source === "OTA" ? "" : "",
+          otaInformationId: bookingDetail.source === "OTA" ? "" : "",
+          customerId: bookingDetail.customer.id,
+          totalAmount: bookingDetail.totalAmount || 0,
+          breakfastDates:
+            bookingDetail.breakfastDates?.map((date) => {
+              return { date: date };
+            }) || [],
+          rooms: [], // Always clear pending operations when data refreshes
+        },
+        {
+          keepDirty: false, // Don't preserve dirty state on data refresh
+          keepValues: false,
+        }
+      );
     }
-  };
+  }, [bookingDetail?.id]);
 
   const nights = useCalculateNights({
     checkinDate: bookingDetail
@@ -220,13 +230,11 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       ? parseISO(bookingDetail.checkoutDate)
       : undefined,
   });
-  // --- Render Loading/Error ---
   if (isPending) return <BookingDetailSkeleton />;
   if (error || !bookingDetail) return <BookingDetailError />;
 
   return (
     <div className="flex flex-col h-full bg-muted/10 relative">
-      {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto p-4">
         <Form {...form}>
           <div className="grid gap-4 container mx-auto">
@@ -234,26 +242,28 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               bookingDetail={bookingDetail}
               form={form}
               OTAList={OTAList || []}
-              permissions={permissions}
+              bookingState={bookingState}
             />
 
             <div className="flex  items-start gap-4">
-              <BookingRoomsBar
-                bookingDetail={bookingDetail}
-                form={form}
-                roomsFieldArray={roomsFieldArray}
-                permissions={permissions}
-              />
+              <div className="grid gap-2">
+                <BookingRoomsBar
+                  bookingDetail={bookingDetail}
+                  form={form}
+                  roomsFieldArray={roomsFieldArray}
+                  bookingState={bookingState}
+                />
+                <RefundHistory bookingId={bookingDetail.id} />
+              </div>
 
               <div className="flex-1  space-y-4">
                 <StayDetailBar
                   bookingCode={bookingCode}
                   bookingDetail={bookingDetail}
                   form={form}
-                  permissions={permissions}
+                  bookingState={bookingState}
                   nights={nights}
                   setNoteModalOpen={setNoteModalOpen}
-                  handleSubmit={handleSubmit} // Keep for internal save if needed
                 />
 
                 <PendingChargesSection
@@ -266,8 +276,6 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                     bookingDetail.status !== "Cancelled"
                   }
                 />
-
-                <RefundHistory bookingId={bookingDetail.id} />
               </div>
             </div>
 
@@ -275,225 +283,153 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             <AddCompletedChargesDialog
               open={completedChargesDialogOpen}
               onOpenChange={setCompletedChargesDialogOpen}
-              onConfirm={handleAddCompletedCharges}
-              isAdding={isAddingCompletedCharges}
+              booking={bookingDetail}
             />
 
             <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
-              <DialogContent className="max-w-xl">
-                {/* ... (Note Dialog Content Giữ nguyên) ... */}
-                <DialogHeader>
-                  <DialogTitle>Ghi chú đặt phòng</DialogTitle>
-                  <DialogDescription>
-                    Ghi chú nội bộ (khách không thấy)
-                  </DialogDescription>
+              <DialogContent className="sm:max-w-[500px] gap-0 p-0 overflow-hidden">
+                <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-primary/10 rounded-md">
+                      <NotebookPen className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <DialogTitle>Ghi chú đặt phòng</DialogTitle>
+                      <DialogDescription className="mt-1">
+                        Ghi chú nội bộ dành cho nhân viên (Khách sẽ không thấy)
+                      </DialogDescription>
+                    </div>
+                  </div>
                 </DialogHeader>
-                <FormField
-                  control={form.control}
-                  name="note"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          disabled={!permissions.canDoSoftUpdate}
-                          rows={6}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setNoteModalOpen(false)}
-                  >
-                    Đóng
-                  </Button>
-                  {/* Note: Saving here just closes dialog, user must click Main Save */}
-                  <Button onClick={() => setNoteModalOpen(false)}>Xong</Button>
+
+                {/* Body */}
+                <div className="p-6">
+                  <FormField
+                    control={form.control}
+                    name="note"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            disabled={!bookingState.permissions.canEdit}
+                            placeholder="Nhập các lưu ý quan trọng về khách hàng hoặc đơn đặt phòng này..."
+                            className="min-h-[200px] resize-none bg-muted/30 focus:bg-background transition-colors border-dashed focus:border-solid"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
+
+                {/* Footer */}
+                <DialogFooter className="px-6 py-4 bg-muted/10 border-t">
+                  <div className="flex w-full justify-between items-center">
+                    {/* Nhắc nhở nhỏ bên trái (Optional) */}
+                    <span className="text-[11px] text-muted-foreground italic">
+                      * Đừng quên bấm "Lưu thay đổi" ở màn hình chính
+                    </span>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => setNoteModalOpen(false)}
+                      >
+                        Hủy
+                      </Button>
+                      <Button
+                        onClick={() => setNoteModalOpen(false)}
+                        className="bg-primary/90 hover:bg-primary"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        Áp dụng
+                      </Button>
+                    </div>
+                  </div>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
         </Form>
       </div>
 
-      {/* SMART ACTION BAR 
-        Fixed at bottom, changes based on IsDirty state 
-      */}
-      <BookingActionsBar
-        isDirty={isDirty}
-        isUpdating={isUpdating}
-        bookingDetail={bookingDetail}
-        financialSummary={financialSummary}
-        onReset={() => form.reset()}
-        onSave={form.handleSubmit(handleSubmit)}
-        onCheckout={() => setCheckoutOpen(true)}
-      />
-
-      <CheckoutSheet
-        open={checkoutOpen}
-        onOpenChange={setCheckoutOpen}
-        bookingId={bookingDetail?.id || ""}
-        bookingCode={bookingDetail?.bookingCode || ""}
-        bookingDetail={bookingDetail}
-      />
+      {hasAnyRole(AuthLoader.getUser(), [
+        UserRole.HotelManager,
+        UserRole.Receptionist,
+      ]) && (
+        <BookingActionsBar
+          isDirty={isDirty}
+          isUpdating={isUpdating}
+          bookingDetail={bookingDetail}
+          bookingState={bookingState}
+          onReset={() => form.reset()}
+          onSave={form.handleSubmit(handleSubmit, onError)}
+        />
+      )}
     </div>
   );
 }
 
-// --- Sub-components for Cleaner File ---
-
-function BookingActionsBar({
-  isDirty,
-  isUpdating,
-  bookingDetail,
-  financialSummary,
-  onReset,
-  onSave,
-  onCheckout,
-}: {
-  isDirty: boolean;
-  isUpdating: boolean;
-  bookingDetail: any;
-  financialSummary: any;
-  onReset: () => void;
-  onSave: () => void;
-  onCheckout: () => void;
-}) {
-  return (
-    <div className="sticky bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 shadow-lg z-10 transition-all duration-200">
-      <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
-        {/* Left: Always Visible Operations (Refund) */}
-        <div className="flex items-center gap-2">
-          <RefundButton
-            bookingId={bookingDetail?.id || ""}
-            bookingNumber={bookingDetail?.bookingCode || ""}
-            bookingStatus={bookingDetail?.status || ""}
-            totalPaidAmount={bookingDetail.paidAmount}
-          />
-        </div>
-
-        {/* Right: Contextual Actions */}
-        <div className="flex items-center gap-3">
-          {isDirty ? (
-            <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">
-              <Alert variant="warning">
-                <AlertTriangle className="w-4 h-4" />
-                <AlertTitle>Thay đổi chưa lưu</AlertTitle>
-              </Alert>
-
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={onReset}
-                disabled={isUpdating}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Hoàn tác
-              </Button>
-
-              <Button
-                onClick={onSave}
-                disabled={isUpdating}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md min-w-[140px]"
-              >
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Lưu...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
-                  </>
-                )}
-              </Button>
-            </div>
-          ) : (
-            // === MODE 2: OPERATIONAL (CLEAN STATE) ===
-            // Shows Checkout/Operations.
-            <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2 fade-in">
-              {/* Checkout Button Logic */}
-              {(bookingDetail?.status === "InHouse" ||
-                bookingDetail?.status === "CheckedIn") && (
-                <Button
-                  variant="success"
-                  onClick={onCheckout}
-                  className="shadow-sm"
-                >
-                  <DoorOpen className="w-4 h-4 mr-2" />
-                  Checkout & Thanh toán
-                </Button>
-              )}
-
-              {/* Post-Checkout Collection */}
-              {bookingDetail?.status === "CheckedOut" &&
-                financialSummary.totalBalance > 0 && (
-                  <Button
-                    onClick={onCheckout}
-                    className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm"
-                  >
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Thu nợ sau checkout
-                    <Badge
-                      variant="secondary"
-                      className="ml-2 bg-white/20 text-white hover:bg-white/30 border-0"
-                    >
-                      {formatMoney(financialSummary.totalBalance).vndFormatted}
-                    </Badge>
-                  </Button>
-                )}
-
-              {/* View Invoices */}
-              {bookingDetail?.status === "CheckedOut" &&
-                financialSummary.totalBalance === 0 && (
-                  <Button variant="outline" onClick={onCheckout}>
-                    <Receipt className="w-4 h-4 mr-2" />
-                    Xem hóa đơn
-                  </Button>
-                )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Skeleton & Error Components (Keep them simple)
 function BookingDetailSkeleton() {
   return (
-    <div className="flex gap-4 p-6">
-      <div className="w-full space-y-4">
-        <div className="flex gap-4">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-1/3" />
+    <div className="flex flex-col gap-6 p-4 md:p-6 lg:flex-row">
+      {/* Main Content Area */}
+      <div className="flex w-full flex-col space-y-6">
+        {/* Top Summary / Stats Cards */}
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <Skeleton className="h-28 w-full rounded-xl sm:w-2/3" />
+          <Skeleton className="h-28 w-full rounded-xl sm:w-1/3" />
         </div>
-        <div className="flex gap-4">
-          <Skeleton className="h-96 w-2/3" />
-          <Skeleton className="h-96 w-1/3" />
+
+        {/* Detail Sections */}
+        <div className="flex flex-col gap-4 lg:flex-row">
+          {/* Main Info (Customer, Booking Details) */}
+          <Skeleton className="h-[500px] w-full rounded-xl lg:w-2/3" />
+
+          {/* Sidebar Info (Payment, History, Notes) */}
+          <Skeleton className="h-[500px] w-full rounded-xl lg:w-1/3" />
         </div>
       </div>
     </div>
   );
 }
 
-function BookingDetailError() {
+function BookingDetailError({
+  onRetry,
+  errorDetails,
+}: {
+  onRetry?: () => void;
+  errorDetails?: string;
+}) {
   return (
-    <div className="h-full flex items-center justify-center">
+    <div className="flex h-full min-h-[400px] items-center justify-center p-6">
       <Empty>
         <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <FileWarning />
+          <EmptyMedia
+            variant="icon"
+            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500"
+          >
+            <FileWarning className="h-8 w-8" />
           </EmptyMedia>
-          <EmptyTitle>Lỗi</EmptyTitle>
-          <EmptyDescription>
-            Không thể tải thông tin đặt phòng.
+          <EmptyTitle className="text-xl font-semibold text-gray-900">
+            Không thể tải thông tin
+          </EmptyTitle>
+          <EmptyDescription className="mt-2 text-center text-sm text-gray-500">
+            {errorDetails ||
+              "Đã có lỗi xảy ra trong quá trình lấy dữ liệu đặt phòng. Vui lòng kiểm tra kết nối mạng."}
           </EmptyDescription>
         </EmptyHeader>
+
+        {/* Actionable UX: Nút thử lại */}
+        {onRetry && (
+          <div className="mt-6 flex justify-center">
+            <Button variant="outline" onClick={onRetry} className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              Thử lại
+            </Button>
+          </div>
+        )}
       </Empty>
     </div>
   );

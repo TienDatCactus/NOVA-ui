@@ -74,7 +74,8 @@ async function updatePurchaseRequest(
 
 async function deletePurchaseRequest(id: string): Promise<void> {
   try {
-    await http.delete(Stock.PurchaseRequests.delete(id));
+    const resp = await http.delete(Stock.PurchaseRequests.delete(id));
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -128,10 +129,11 @@ async function receiveStock(
 ): Promise<void> {
   try {
     const validatedData = ReceiveStockRequestSchema.parse(data);
-    await http.post(
+    const resp = await http.post(
       Stock.PurchaseRequests.receiveStock(purchaseRequestId),
       validatedData
     );
+    return resp.data;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

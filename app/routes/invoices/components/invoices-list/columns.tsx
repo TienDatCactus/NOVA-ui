@@ -1,12 +1,10 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
-import { DataTableColumnHeader } from "~/components/table/table-header";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { DASHBOARD } from "~/lib/fe-url";
 import { cn, formatMoney } from "~/lib/utils";
 import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
 import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
@@ -80,14 +78,7 @@ export const columns: ColumnDef<InvoiceListItemDto>[] = [
       <DataTableColumnHeader column={column} title="Mã booking" />
     ),
     cell: ({ row }) => {
-      return (
-        <Link
-          to={DASHBOARD.bookings.bookingDetail(row.original.bookingCode || "")}
-          className="font-mono text-sm text-primary hover:underline"
-        >
-          {row.original.bookingCode}
-        </Link>
-      );
+      return <p>{row.original.bookingCode}</p>;
     },
   },
   {

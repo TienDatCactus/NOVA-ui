@@ -75,7 +75,7 @@ function RoomCardGrid({ roomId }: RoomCardGridProps) {
               <Button
                 size="icon"
                 variant="secondary"
-                className="h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white"
+                className="h-8 w-8 rounded-full bg-background/90 backdrop-blur-sm shadow-sm hover:bg-background"
               >
                 <MoreHorizontal className="h-4 w-4 text-foreground" />
               </Button>

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus, Save, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, type UseFormReturn } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -47,6 +47,7 @@ import type { CreateStockAdjustmentDto } from "~/services/api/stocks/stock-adjus
 import { StockAdjustmentsSchemas } from "~/services/api/stocks/stock-adjustments/stock-adjustments.schema";
 import { useStockItemList } from "../../items/container/query.hooks";
 import { useCreateStockAdjustment } from "../container/query.hooks";
+import type { StockItemsListDto } from "~/services/api/stocks/items/dto";
 
 interface CreateStockAdjustmentDialogProps {
   open: boolean;
@@ -173,14 +174,21 @@ export default function CreateStockAdjustmentDialog({
                             control={form.control}
                             name={`items.${index}.itemId`}
                             render={({ field: itemField }) => (
-                              <ItemCombobox
-                                value={itemField.value}
-                                onChange={itemField.onChange}
-                                items={stockItems}
-                                hasError={
-                                  !!form.formState.errors.items?.[index]?.itemId
-                                }
-                              />
+                              <FormItem>
+                                <FormControl>
+                                  <ItemCombobox
+                                    form={form}
+                                    value={itemField.value}
+                                    onChange={itemField.onChange}
+                                    items={stockItems}
+                                    hasError={
+                                      !!form.formState.errors.items?.[index]
+                                        ?.itemId
+                                    }
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
                             )}
                           />
                         </TableCell>
@@ -204,10 +212,11 @@ export default function CreateStockAdjustmentDialog({
                                           ? "text-green-600 font-bold bg-green-50 border-green-200"
                                           : ""
                                     )}
-                                    step={0.1}
+                                    step={1}
                                     minValue={-99999}
                                   />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -305,14 +314,16 @@ export default function CreateStockAdjustmentDialog({
 }
 
 function ItemCombobox({
+  form,
   value,
   onChange,
   items,
   hasError,
 }: {
+  form: UseFormReturn<any>;
   value: string;
   onChange: (val: string) => void;
-  items: any[];
+  items: StockItemsListDto;
   hasError?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -350,22 +361,30 @@ function ItemCombobox({
           <CommandList>
             <CommandEmpty>Không tìm thấy.</CommandEmpty>
             <CommandGroup>
-              {items.map((item) => (
-                <CommandItem
-                  key={item.id}
-                  value={item.name} // Use name for searching
-                  onSelect={() => {
-                    onChange(item.id);
-                    setOpen(false);
-                  }}
-                >
-                  <span className="font-mono text-xs text-muted-foreground w-[80px]">
-                    {item.code}
-                  </span>
-                  <span>{item.name}</span>
-                  {/* Add Check icon if selected if desired */}
-                </CommandItem>
-              ))}
+              {items.map((item) => {
+                const isSelected =
+                  form
+                    .getValues("items")
+                    .some((itm: any) => itm.itemId === item.id) &&
+                  value !== item.id;
+                return (
+                  <CommandItem
+                    key={item.id}
+                    disabled={isSelected}
+                    value={item.name}
+                    onSelect={() => {
+                      onChange(item.id);
+                      setOpen(false);
+                    }}
+                  >
+                    <span className="font-mono text-xs text-muted-foreground w-[80px]">
+                      {item.code}
+                    </span>
+                    <span>{item.name}</span>
+                    {/* Add Check icon if selected if desired */}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

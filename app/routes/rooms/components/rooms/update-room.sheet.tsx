@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Activity, BedDouble, DoorOpen, Hash, Save, X } from "lucide-react";
+import { AlertTriangle, BedDouble, Hash, Loader2, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -13,10 +13,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,29 +28,32 @@ import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
-import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import { cn } from "~/lib/utils";
 import type {
   RoomListItemDto,
   UpdateRoomDetailRequestDto,
 } from "~/services/api/rooms/dto";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useRoomTypes } from "../../container/room-types/query.hooks";
 import { useUpdateRoom } from "../../container/rooms/mutation.hooks";
-import { RoomSchema } from "~/services/api/rooms/room.schema";
+import { ROOM_STATUS_CONFIG } from "../../fragments/rooms/status.cell";
 
 const { UpdateRoomDetailRequestSchema } = RoomSchema;
 
@@ -61,8 +66,7 @@ interface UpdateRoomSheetProps {
 function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
   // --- Hooks ---
   const { mutate, isPending } = useUpdateRoom();
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const { data: roomTypes } = useRoomTypes();
+  const { data: roomTypes, isLoading: isLoadingTypes } = useRoomTypes();
 
   const form = useForm<UpdateRoomDetailRequestDto>({
     resolver: zodResolver(UpdateRoomDetailRequestSchema),
@@ -75,195 +79,225 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
 
   // --- Effects ---
   useEffect(() => {
-    if (room) {
+    if (room && open) {
       form.reset({
         roomName: room.roomName,
         roomTypeId: room.roomTypeId,
         status: room.status,
       });
     }
-  }, [room, form]);
+  }, [room, open, form]);
 
   // --- Handlers ---
   const handleSubmit = (data: UpdateRoomDetailRequestDto) => {
     if (!room) return;
-    mutate({ id: room.roomId, data: data }, { onSuccess: () => onClose() });
+    mutate(
+      { id: room.roomId, data: data },
+      {
+        onSuccess: () => {
+          form.reset(); // Reset form state để tránh trigger dirty check
+          onClose();
+        },
+      }
+    );
   };
 
   const handleClose = () => {
-    if (form.formState.isDirty) {
-      setShowCancelDialog(true);
-    } else {
-      onClose();
-    }
-  };
-
-  const handleConfirmClose = () => {
-    form.reset();
-    setShowCancelDialog(false);
     onClose();
   };
 
   if (!room) return null;
 
   return (
-    <>
-      <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="sm:max-w-[500px] w-full p-0 flex flex-col bg-background">
-          {/* === HEADER === */}
-          <SheetHeader className="px-6 py-4 border-b shrink-0 flex flex-row items-start justify-between space-y-0">
-            <div className="space-y-1">
-              <SheetTitle className="text-xl flex items-center gap-2">
-                <DoorOpen className="w-5 h-5 text-primary" />
-                Cập nhật phòng
-              </SheetTitle>
-              <SheetDescription>
-                Điều chỉnh thông tin vận hành cho phòng.
-              </SheetDescription>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-lg w-full p-0 flex flex-col gap-0 bg-background overflow-hidden">
+        {/* === HEADER === */}
+        <DialogHeader className="px-6 py-5 border-b bg-muted/30">
+          <div className="flex items-start justify-between">
+            <div className="space-y-1.5">
+              <DialogTitle className="text-xl flex items-center gap-2.5">
+                Chỉnh sửa thông tin phòng
+              </DialogTitle>
+              <DialogDescription>
+                Cập nhật tên, loại phòng và trạng thái vận hành.
+              </DialogDescription>
             </div>
 
-            {/* Technical ID Badge */}
             <Badge
               variant="outline"
-              className="font-mono text-[10px] text-muted-foreground"
+              className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider bg-background"
             >
-              {room.roomId.split("-")[0]}...
+              ID: {room.roomId.split("-")[0]}
             </Badge>
-          </SheetHeader>
+          </div>
+        </DialogHeader>
 
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="flex-1 flex flex-col min-h-0"
-            >
-              {/* === BODY === */}
-              <div className="flex-1 px-6 space-y-6 overflow-y-auto">
-                {/* 1. HERO SECTION: NAME & CODE */}
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="roomName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                          Tên / Số phòng{" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="flex flex-col"
+          >
+            {/* === BODY === */}
+            <div className="p-6 space-y-6">
+              {/* 1. Primary Info */}
+              <div className="grid gap-6">
+                <FormField
+                  control={form.control}
+                  name="roomName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-foreground font-semibold">
+                        Tên định danh phòng
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
-                            startAddon={
-                              <Hash className=" h-5 w-5 text-muted-foreground" />
-                            }
-                            className="text-lg font-bold "
-                            placeholder="VD: 101, 202..."
                             {...field}
+                            className="pl-9 font-medium text-base h-10"
+                            placeholder="VD: P.101, VIP-01..."
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <Separator />
-
-                {/* 2. CONFIGURATION */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    <Activity className="w-3.5 h-3.5" /> Cấu hình vận hành
-                  </div>
-
-                  <div className="grid gap-5">
-                    {/* Room Type */}
-                    <FormField
-                      control={form.control}
-                      name="roomTypeId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Loại phòng</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-11 w-40 pl-9 relative">
-                                <BedDouble className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <SelectValue placeholder="Chọn loại phòng" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {roomTypes?.map((type) => (
-                                <SelectItem key={type.id} value={type.id}>
-                                  <div className="flex items-center justify-between w-full gap-2">
-                                    <span>{type.name}</span>
-                                    <span className="text-xs text-muted-foreground font-mono">
-                                      Code: {type.code}
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Status */}
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Trạng thái phòng</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-11 w-40 pl-9 relative">
-                                <Activity className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <SelectValue placeholder="Chọn trạng thái" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {Object.entries(RoomStatusEnum).map(
-                                ([key, value]) => (
-                                  <SelectItem key={key} value={key}>
-                                    {/* You can map colors here based on status if needed */}
-                                    {value}
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
+                        </div>
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Tên hiển thị trên bảng điều khiển và hóa đơn.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              {/* === FOOTER === */}
-              <SheetFooter className="p-6 pt-4 border-t shrink-0 bg-background">
+              <Separator className="bg-border/60" />
+
+              {/* 2. Configuration Grid */}
+              <div className="grid grid-cols-2 gap-6">
+                {/* Room Type */}
+                <FormField
+                  control={form.control}
+                  name="roomTypeId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Loại phòng</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isLoadingTypes}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <div className="flex items-center gap-2">
+                              <BedDouble className="h-4 w-4 text-muted-foreground" />
+                              <SelectValue placeholder="Chọn loại phòng" />
+                            </div>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Danh sách loại phòng</SelectLabel>
+                            {roomTypes?.map((type) => (
+                              <SelectItem key={type.id} value={type.id}>
+                                <div className="flex flex-col items-start gap-0.5">
+                                  <span className="font-medium">
+                                    {type.name}
+                                  </span>
+                                  <span className="text-[10px] text-muted-foreground font-mono">
+                                    CODE: {type.code}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Status */}
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Trạng thái hiện tại</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              className={cn("h-10 transition-colors")}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={cn(
+                                    "h-2.5 w-2.5 rounded-full shadow-sm"
+                                  )}
+                                />
+                                <SelectValue placeholder="Chọn trạng thái" />
+                              </div>
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.entries(ROOM_STATUS_CONFIG).map(
+                              ([key, value]) => {
+                                return (
+                                  <SelectItem
+                                    key={key}
+                                    value={key}
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        className={cn(
+                                          "h-2 w-2 rounded-full",
+                                          value.style.dot
+                                        )}
+                                      />
+                                      <span>{value.label}</span>
+                                    </div>
+                                  </SelectItem>
+                                );
+                              }
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* === FOOTER === */}
+            <DialogFooter className="px-6 py-4 border-t bg-muted/20 gap-2 sm:gap-0">
+              <div className="flex items-center gap-2 w-full sm:w-auto sm:mr-auto">
+                {/* Placeholder for future delete button if needed */}
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={handleClose}
                   disabled={isPending}
+                  className="flex-1 sm:flex-none"
                 >
-                  <X className="w-4 h-4 mr-2" /> Hủy bỏ
+                  Hủy bỏ
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isPending}
-                  className="min-w-[140px]"
+                  disabled={isPending || !form.formState.isDirty}
+                  className="min-w-[120px] flex-1 sm:flex-none"
                 >
                   {isPending ? (
                     <>
-                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                      Đang lưu...
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Đang lưu
                     </>
                   ) : (
                     <>
@@ -271,30 +305,12 @@ function UpdateRoomSheet({ open, onClose, room }: UpdateRoomSheetProps) {
                     </>
                   )}
                 </Button>
-              </SheetFooter>
-            </form>
-          </Form>
-        </SheetContent>
-      </Sheet>
-
-      {/* Cancel Confirmation Dialog */}
-      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Có thay đổi chưa được lưu</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn đóng? Tất cả thay đổi sẽ bị mất.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Tiếp tục chỉnh sửa</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmClose}>
-              Đóng
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+              </div>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }
 

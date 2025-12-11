@@ -32,7 +32,7 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { ConfigSchema } from "~/services/api/configs/configs.schem";
+import { ConfigSchema } from "~/services/api/configs/configs.schema";
 import type { ConfigGroupItem } from "~/services/api/configs/dto";
 import {
   useConfigDetail,
@@ -162,9 +162,8 @@ export default function EditConfigDialog({
                     {config.defaultValue && (
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="info-ghost"
                         size="sm"
-                        className="h-6 px-2 text-xs text-muted-foreground hover:text-primary"
                         onClick={() =>
                           form.setValue(
                             "value",

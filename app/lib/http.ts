@@ -9,9 +9,7 @@ import STORAGE, { clearStorage, getStorage, setStorage } from "./storage";
 const parseBody = (response: AxiosResponse) => {
   const { message, success } = response.data;
   if (message) {
-    if (success) {
-      toast.success(message);
-    } else {
+    if (!success) {
       toast.error(message);
     }
   }
@@ -136,9 +134,6 @@ http.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
-    } else if (status && status !== 401) {
-      // Only show error toast for non-401 errors (401 is handled above)
-      toast.error(message || "Đã có lỗi xảy ra. Vui lòng thử lại.");
     }
 
     return Promise.reject(error);

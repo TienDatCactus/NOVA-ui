@@ -9,7 +9,7 @@ const ServiceOrderItemSchema = z.object({
   itemType: z.enum(["ServiceItem", "MenuItem"]),
   itemId: z.string().min(1),
   quantity: z.number().int().min(0),
-  scheduledDate: z.string().length(10).optional().nullable(),
+  scheduledDate: z.string().length(10, "Ngày thực hiện dịch vụ là bắt buộc"),
   note: z.string().max(500).optional().nullable(),
 });
 
@@ -64,11 +64,16 @@ const POSOrderDetailSchema = z.object({
   serviceChargeAmount: z.number().min(0),
   totalAmount: z.number().min(0),
   customerId: z.string().optional().nullable(),
+  customerName: z.string().optional().nullable(),
   invoiceId: z.string().optional().nullable(),
   scheduledAt: z.string().optional().nullable(),
   note: z.string().optional().nullable(),
   createdAt: z.string(),
   customerType: CustomerTypeEnum.optional(),
+  bookingId: z.string().optional().nullable(),
+  bookingCode: z.string().optional().nullable(),
+  bookingRoomId: z.string().optional().nullable(),
+  roomName: z.string().optional().nullable(),
   items: z.array(POSOrderItemSchema).optional(),
 });
 

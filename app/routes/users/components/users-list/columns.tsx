@@ -2,20 +2,17 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "~/components/ui/badge";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import type { UserItem } from "~/services/api/user/dto";
-import {
-  getRoleBadgeColors,
-  getRoleDisplayName,
-} from "~/services/types/users.types";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import { UserDetailDialog } from "../user-detail-dialog";
+import { ROLE_HIERARCHY, ROLE_LABELS } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<UserItem>[] = [
   {
-    accessorKey: "fullName",
+    accessorKey: "userName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Họ và tên" />
+      <DataTableColumnHeader column={column} title="Tên tài khoản" />
     ),
     cell: ({ row }) => {
       const [openDetailDialog, setOpenDetailDialog] = useState(false);
@@ -36,6 +33,17 @@ export const columns: ColumnDef<UserItem>[] = [
         </>
       );
     },
+  },
+  {
+    accessorKey: "fullName",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Họ và tên" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <span className="text-sm">{row.getValue("fullName")}</span>
+      </div>
+    ),
   },
   {
     accessorKey: "email",
@@ -59,14 +67,9 @@ export const columns: ColumnDef<UserItem>[] = [
       return (
         <div className="flex gap-1 flex-wrap">
           {roles.map((role) => {
-            const colors = getRoleBadgeColors(role);
             return (
-              <Badge
-                key={role}
-                variant="outline"
-                className={`text-xs ${colors.bg} ${colors.text} ${colors.border} shadow-sm`}
-              >
-                {getRoleDisplayName(role)}
+              <Badge key={role} variant="outline">
+                {ROLE_LABELS[role as keyof typeof ROLE_LABELS] || role}
               </Badge>
             );
           })}
@@ -97,16 +100,10 @@ export const columns: ColumnDef<UserItem>[] = [
     header: () => <div className="text-center">Thao tác</div>,
     cell: ({ row, table }) => {
       const user = row.original;
-      const onViewDetail = (table.options.meta as any)?.onViewDetail;
-      const onSuccess = (table.options.meta as any)?.onSuccess;
 
       return (
         <div className="flex justify-center">
-          <ActionsMenuCell
-            user={user}
-            onViewDetail={onViewDetail}
-            onSuccess={onSuccess}
-          />
+          <ActionsMenuCell user={user} />
         </div>
       );
     },

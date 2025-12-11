@@ -3,14 +3,13 @@ import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   ArrowRight,
-  Banknote,
   Calendar,
-  Check,
   CreditCard,
   Hash,
   Loader2,
   RefreshCw,
   Tag,
+  Upload,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -21,14 +20,13 @@ import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -53,32 +51,28 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { formatMoney } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
-import type { StaffCheckoutPaymentRequestDto } from "~/services/api/booking/dto";
-import type { UpdateInvoiceRequestDto } from "~/services/api/invoices/dto";
+import {
+  INVOICE_STATUSES,
+  INVOICE_TYPES,
+} from "~/services/api/invoices/invoice.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useCheckoutStore } from "~/store/checkout.store";
 import {
   useCalculateInvoiceFees,
   useCheckoutPayment,
   useInvoiceDetail,
+  useInvoicePayment,
+  useSyncInvoiceWithOrders,
   useUpdateInvoice,
 } from "../../container/use-booking-checkout.hooks";
 import {
-  useInvoicePayment,
-  useSyncInvoiceWithOrders,
-} from "~/routes/invoices/container/invoices/mutation.hooks";
-import {
-  INVOICE_STATUSES,
-  INVOICE_TYPES,
-} from "~/services/api/invoices/invoice.types";
-import {
   canInvoiceAcceptPayment,
   validatePaymentAmount,
-} from "../../container/payment-validation";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { cn } from "~/lib/utils";
+} from "../../container/use-booking-state.hooks";
+import { InvoicesService } from "~/services/api/invoices";
+import { AxiosError } from "axios";
 
 const { StaffCheckoutPaymentRequestSchema } = BookingSchema;
 
@@ -157,9 +151,9 @@ export default function InvoiceDetailSheet({
   const { mutate: checkoutPayment, isPending: isProcessingCheckoutPayment } =
     useCheckoutPayment(bookingId);
   const { mutate: invoicePayment, isPending: isProcessingInvoicePayment } =
-    useInvoicePayment(invoiceId);
+    useInvoicePayment(invoiceId, bookingId);
   const { mutate: syncInvoice, isPending: isSyncingInvoice } =
-    useSyncInvoiceWithOrders(invoiceId);
+    useSyncInvoiceWithOrders(invoiceId, bookingId);
 
   const isProcessing =
     isUpdatingInvoice ||
@@ -196,12 +190,12 @@ export default function InvoiceDetailSheet({
   }, [invoiceDetail?.status]);
 
   const paymentValidation = useMemo(() => {
-    if (!invoiceDetail) return { isValid: false };
+    if (!invoiceDetail || !invoiceDetail.status) return { isValid: false };
     return validatePaymentAmount(
       amount,
       invoiceDetail.balance || 0,
       calculatedFees?.totalAmount || invoiceDetail.total || 0,
-      invoiceDetail.status || ""
+      invoiceDetail.status
     );
   }, [amount, invoiceDetail, calculatedFees]);
 
@@ -216,6 +210,28 @@ export default function InvoiceDetailSheet({
     });
   };
 
+  const handleExportInvoice = async () => {
+    try {
+      const blob = await InvoicesService.exportInvoiceById(invoiceId);
+
+      const url = window.URL.createObjectURL(blob as any);
+      const a = document.createElement("a");
+      a.href = url;
+      const filename = `invoice-${invoiceId}.xlsx`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Xuất hóa đơn thành công");
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Lỗi khi xuất báo cáo");
+      }
+    }
+  };
+
   const handlePayment = (data: CheckoutPaymentFormData) => {
     if (!paymentValidation.isValid) {
       paymentForm.setError("amount", {
@@ -224,8 +240,6 @@ export default function InvoiceDetailSheet({
       return;
     }
 
-    const onSuccess = () => onBack();
-
     if (isCheckoutInvoice) {
       checkoutPayment(
         {
@@ -233,7 +247,7 @@ export default function InvoiceDetailSheet({
           amount: data.amount,
           transactionReference: data.transactionReference || undefined,
         },
-        { onSuccess }
+        { onSuccess: () => onBack() }
       );
     } else {
       invoicePayment(
@@ -242,7 +256,7 @@ export default function InvoiceDetailSheet({
           amount: data.amount,
           note: data.transactionReference || "",
         },
-        { onSuccess }
+        { onSuccess: () => onBack() }
       );
     }
   };
@@ -286,15 +300,20 @@ export default function InvoiceDetailSheet({
 
           {/* Actions Header */}
           <div className="flex items-center gap-2">
+            {invoiceDetail?.status === "Paid" && (
+              <Button variant={"success"} onClick={handleExportInvoice}>
+                <Upload />
+                Xuất hóa đơn
+              </Button>
+            )}
             {isCheckoutInvoice &&
               invoiceDetail?.status !== "Paid" &&
-              invoiceDetail?.status !== "Void" && (
+              invoiceDetail?.status !== "Voided" && (
                 <Button
-                  variant="ghost"
+                  variant="info-outline"
                   size="sm"
                   onClick={handleSyncInvoice}
                   disabled={isSyncingInvoice}
-                  className="h-8 text-xs text-muted-foreground hover:text-primary"
                 >
                   <RefreshCw
                     className={cn(

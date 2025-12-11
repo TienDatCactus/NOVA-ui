@@ -15,6 +15,8 @@ interface MediaTabProps {
   removeMediaIds: string[];
   toggleRemoveExisting: (id: string) => void;
   onDrop: (acceptedFiles: File[]) => void;
+  handleRemoveNew: (index: number) => void;
+  formErrors?: { message?: string; type?: string };
 }
 
 const MediaTab: React.FC<MediaTabProps> = ({
@@ -24,6 +26,8 @@ const MediaTab: React.FC<MediaTabProps> = ({
   removeMediaIds,
   toggleRemoveExisting,
   onDrop,
+  handleRemoveNew,
+  formErrors,
 }) => {
   return (
     <TabsContent
@@ -35,9 +39,16 @@ const MediaTab: React.FC<MediaTabProps> = ({
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h4 className="text-sm font-medium">Thư viện ảnh</h4>
-            <p className="text-xs text-muted-foreground">
-              Kéo thả hoặc nhấn vào ô dấu cộng để thêm ảnh. Tối đa 8 ảnh.
-            </p>
+            {formErrors && formErrors.message && (
+              <p className="text-xs text-destructive font-medium">
+                {formErrors.message}
+              </p>
+            )}
+            {!formErrors?.message && (
+              <p className="text-xs text-muted-foreground">
+                Kéo thả hoặc nhấn vào ô dấu cộng để thêm ảnh. Tối đa 10 ảnh.
+              </p>
+            )}
           </div>
           {/* Hiển thị số lượng ảnh */}
           <Badge variant="outline" className="h-6">
@@ -49,11 +60,9 @@ const MediaTab: React.FC<MediaTabProps> = ({
         </div>
 
         {/* THE GRID */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-          {/* 1. UPLOAD BUTTON (Ô đầu tiên) */}
+        <div className="grid grid-cols-3 sm:grid-cols-4  gap-4">
           <Dropzone
             accept={{ "image/*": [] }}
-            maxFiles={8}
             onDrop={onDrop}
             className="group aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer bg-muted/5"
           >
@@ -85,7 +94,7 @@ const MediaTab: React.FC<MediaTabProps> = ({
                 type="button"
                 size="icon"
                 variant="destructive-ghost"
-                onClick={() => onDrop(newFiles.filter((_, i) => i !== index))}
+                onClick={() => handleRemoveNew(index)}
                 className="absolute w-6 h-6 top-1.5 right-1.5 p-1.5 rounded-full bg-black/50 text-white hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
               >
                 <X className="w-3.5 h-3.5" />
@@ -100,10 +109,10 @@ const MediaTab: React.FC<MediaTabProps> = ({
               <div
                 key={img.mediaId}
                 className={cn(
-                  "group relative aspect-square rounded-xl overflow-hidden border bg-background transition-all duration-200",
+                  "group relative aspect-square rounded-xl overflow-hidden border bg-background transition-all",
                   isRemoved
-                    ? "border-destructive ring-2 ring-destructive/20 grayscale opacity-60" // Trạng thái chờ xóa
-                    : "hover:shadow-md hover:border-primary/50" // Trạng thái bình thường
+                    ? "opacity-50 grayscale border-destructive/50"
+                    : "hover:border-primary/50 hover:shadow-sm"
                 )}
               >
                 <Image
@@ -112,34 +121,31 @@ const MediaTab: React.FC<MediaTabProps> = ({
                   className="w-full h-full object-cover"
                 />
 
-                {isRemoved ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/10 backdrop-blur-[1px]">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="icon"
-                      className="h-9 w-9 rounded-full shadow-lg hover:scale-110 transition-transform"
-                      onClick={() => toggleRemoveExisting(img.mediaId)}
-                      title="Phục hồi ảnh"
-                    >
-                      <RotateCcw className="w-4 h-4 text-foreground" />
-                    </Button>
-                    <span className="mt-2 text-[10px] font-bold text-destructive bg-white/80 px-2 py-0.5 rounded-full">
-                      Sẽ xóa
-                    </span>
-                  </div>
-                ) : (
-                  // Giao diện bình thường -> Hiện nút Xóa khi hover
+                {/* Overlay Actions */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button
                     type="button"
+                    variant={isRemoved ? "secondary" : "destructive"}
+                    size="sm"
+                    className="h-8 px-3 rounded-full shadow-lg"
                     onClick={() => toggleRemoveExisting(img.mediaId)}
-                    className=" w-6 h-6 absolute top-1.5 right-1.5 p-1.5 rounded-full bg-black/50 text-white hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
-                    title="Xóa ảnh này"
-                    size="icon"
-                    variant="destructive-ghost"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    {isRemoved ? (
+                      <>
+                        <RotateCcw className="w-3 h-3 mr-1.5" /> Phục hồi
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-3 h-3 mr-1.5" /> Xóa ảnh
+                      </>
+                    )}
                   </Button>
+                </div>
+
+                {isRemoved && (
+                  <div className="absolute top-2 right-2 bg-destructive text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">
+                    Sẽ xóa
+                  </div>
                 )}
               </div>
             );

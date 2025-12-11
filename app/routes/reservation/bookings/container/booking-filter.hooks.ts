@@ -1,4 +1,3 @@
-import type { BookingSearchFilters } from "../components/search";
 import { useState } from "react";
 import type z from "zod";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
@@ -6,16 +5,20 @@ import { BookingSchema } from "~/services/api/booking/booking.schema";
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
 
+export interface BookingSearchFilters {
+  date: Date | undefined;
+  searchText: string;
+}
+
 const INITIAL_FILTERS: BookingSearchFilters = {
+  date: new Date(),
   searchText: "",
-  status: "all",
-  source: "all",
 };
 
-function useSearchBooking(bookings: BookingListItem[] | undefined) {
+function useBookingFilters() {
   const [filters, setFilters] = useState<BookingSearchFilters>(INITIAL_FILTERS);
 
-  const filteredBookings = () => {
+  const filterBookings = (bookings: BookingListItem[] | undefined) => {
     if (!bookings || bookings.length === 0) return bookings;
 
     return bookings.filter((booking) => {
@@ -28,31 +31,26 @@ function useSearchBooking(bookings: BookingListItem[] | undefined) {
         if (!matchesSearch) return false;
       }
 
-      if (filters.status && filters.status !== "all") {
-        if (booking.status !== filters.status) return false;
-      }
-
-      if (filters.source && filters.source !== "all") {
-        if (booking.source !== filters.source) return false;
-      }
-
       return true;
     });
   };
 
-  const handleFiltersChange = (newFilters: BookingSearchFilters) => {
-    setFilters(newFilters);
+  const updateFilters = <K extends keyof BookingSearchFilters>(
+    key: K,
+    value: BookingSearchFilters[K]
+  ) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleResetFilters = () => {
+  const resetFilters = () => {
     setFilters(INITIAL_FILTERS);
   };
   return {
     filters,
-    filteredBookings: filteredBookings(),
-    handleFiltersChange,
-    handleResetFilters,
+    filterBookings,
+    updateFilters,
+    resetFilters,
   };
 }
 
-export default useSearchBooking;
+export default useBookingFilters;

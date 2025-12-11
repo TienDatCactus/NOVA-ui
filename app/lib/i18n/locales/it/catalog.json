@@ -1,0 +1,24 @@
+{
+  "title": "Servizio e Menu di Montagna",
+  "subtitle": "Sapore delle Alture",
+  "description": "Sperimenta i sapori nebbiosi e i servizi sereni delle montagne.",
+  "search": {
+    "placeholder": "Cerca piatti, trekking, servizi..."
+  },
+  "tabs": {
+    "food": "Cucina",
+    "service": "Servizi"
+  },
+  "loading": "Raccogliendo ingredienti dalla valle...",
+  "empty": {
+    "searching": {
+      "title": "Nascosto nella nebbia",
+      "description": "Non siamo riusciti a trovare nulla che corrisponda alla tua ricerca. Prova a cercare qualcos'altro."
+    },
+    "noItems": {
+      "title": "Quiete nella valle",
+      "description": "Non ci sono elementi qui al momento. Il raccolto sta arrivando presto."
+    },
+    "clearButton": "Cancella Nebbia"
+  }
+}

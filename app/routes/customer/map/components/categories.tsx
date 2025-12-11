@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import z from "zod";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 
 export const CategoryItemSchema = z.object({
@@ -79,14 +80,59 @@ export const RESORT_CATEGORIES = {
 } as const;
 
 const MapCategories: React.FC<MapCategoriesProps> = ({ ...props }) => {
+  const { t } = useTranslation("map");
+
+  const categories = {
+    restaurant: {
+      label: t("categories.restaurant"),
+      icon: Utensils,
+      mapbox_category: "restaurant",
+    },
+    cafe: {
+      label: t("categories.cafe"),
+      icon: Coffee,
+      mapbox_category: "cafe",
+    },
+    bar: {
+      label: t("categories.bar"),
+      icon: Wine,
+      mapbox_category: "bar",
+    },
+    hotel: {
+      label: t("categories.hotel"),
+      icon: Hotel,
+      mapbox_category: "lodging",
+    },
+    spa: {
+      label: t("categories.spa"),
+      icon: Bath,
+      mapbox_category: "spa",
+    },
+    shopping: {
+      label: t("categories.shopping"),
+      icon: ShoppingBag,
+      mapbox_category: "shopping",
+    },
+    park: {
+      label: t("categories.park"),
+      icon: TreePine,
+      mapbox_category: "park",
+    },
+    attraction: {
+      label: t("categories.attraction"),
+      icon: Landmark,
+      mapbox_category: "tourist_attraction",
+    },
+  };
+
   return (
     <div className={`z-10 ${props.className}`}>
-      {(!RESORT_CATEGORIES || Object.keys(RESORT_CATEGORIES).length === 0) && (
-        <div>Không có danh mục nào để hiển thị</div>
+      {(!categories || Object.keys(categories).length === 0) && (
+        <div>{t("categories.noCategories")}</div>
       )}
       <div className="flex flex-wrap items-center max-w-sm gap-2">
-        {RESORT_CATEGORIES &&
-          Object.entries(RESORT_CATEGORIES).map(([key, cat]) => (
+        {categories &&
+          Object.entries(categories).map(([key, cat]) => (
             <Button
               key={cat.label}
               variant={"outline"}

@@ -20,7 +20,6 @@ interface RoomActionsCellProps {
 function RoomActionsCell({ room }: RoomActionsCellProps) {
   const [updateSheetOpen, setUpdateSheetOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const canDelete = room.status === "OutOfService";
 
   const handleDeleteClick = () => {
@@ -43,10 +42,6 @@ function RoomActionsCell({ room }: RoomActionsCellProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setQrDialogOpen(true)}>
-            <QrCode className="mr-2 h-4 w-4" />
-            Xem QR
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setUpdateSheetOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
             Chỉnh sửa
@@ -66,12 +61,6 @@ function RoomActionsCell({ room }: RoomActionsCellProps) {
         open={updateSheetOpen}
         onClose={() => setUpdateSheetOpen(false)}
         room={room}
-      />
-      <QrDialog
-        open={qrDialogOpen}
-        onOpenChange={() => setQrDialogOpen(false)}
-        roomId={room.roomId}
-        roomName={room.roomName}
       />
 
       <DeleteConfirmDialog

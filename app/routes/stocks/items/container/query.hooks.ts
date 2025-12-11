@@ -7,6 +7,7 @@ import type {
   StockAdjustRequestDto,
 } from "~/services/api/stocks/items/dto";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 /**
  * Hook lấy danh sách items với params
@@ -16,6 +17,13 @@ export function useStockItemList(params: ItemListParams) {
     queryKey: ["stock-items", params],
     queryFn: async () => await StockItemsService.getStockItemList(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+export function useLowStockItems() {
+  return useQuery({
+    queryKey: ["low-stock-items"],
+    queryFn: async () => await StockItemsService.getLowStockItems(),
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -62,6 +70,11 @@ export function useCreateStockItem() {
       await StockItemsService.createStockItem(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock-items"] });
+      toast.success("Tạo hàng hóa thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error?.response?.data.message || "Lỗi khi tạo hàng hóa");
     },
   });
 }
@@ -84,6 +97,12 @@ export function useUpdateStockItem() {
       });
       toast.success("Cập nhật hàng hóa thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data.message || "Lỗi khi cập nhật hàng hóa"
+        );
+    },
   });
 }
 
@@ -100,8 +119,9 @@ export function useDeleteStockItem() {
       queryClient.invalidateQueries({ queryKey: ["stock-items"] });
       toast.success("Xóa hàng hóa thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi xóa hàng hóa");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error?.response?.data.message || "Lỗi khi xóa hàng hóa");
     },
   });
 }
@@ -130,8 +150,9 @@ export function useAdjustStock() {
       });
       toast.success("Điều chỉnh kho thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi điều chỉnh kho");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error?.response?.data.message || "Lỗi khi điều chỉnh kho");
     },
   });
 }

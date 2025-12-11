@@ -1,79 +1,105 @@
-import { useCallback, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useNavigate } from "react-router";
-import { DASHBOARD, AUTH } from "~/lib/fe-url";
+import { toast } from "sonner";
+import { UserRole } from "~/lib/auth/roles";
+import { AUTH, DASHBOARD } from "~/lib/fe-url";
 import { AuthService } from "~/services/api/auth";
-import type { LoginDto, ResetPasswordDto } from "~/services/api/auth/dto";
+import type {
+  ChangePasswordDto,
+  LoginDto,
+  ResetPasswordDto,
+} from "~/services/api/auth/dto";
 import { useAuthStore } from "~/store/auth.store";
 
-export function useAuth() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function useAuthHooks() {
   const navigate = useNavigate();
   const { setUser, clearUser } = useAuthStore();
-  const login = useCallback(async (data: LoginDto) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await AuthService.login(data);
-      setUser(response.user);
-      navigate(DASHBOARD.bookings.list);
-      return response;
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
-  const logout = useCallback(() => {
+  const loginMutation = useMutation({
+    mutationFn: async (data: LoginDto) => {
+      const response = await AuthService.login(data);
+      return response;
+    },
+    onSuccess: (response) => {
+      setUser(response.user);
+      if (response.user.roles.includes(UserRole.Admin)) {
+        navigate(DASHBOARD.auditLogs);
+      } else if (response.user.roles.includes(UserRole.HotelManager)) {
+        navigate(DASHBOARD.finances.dashboard);
+      } else if (response.user.roles.includes(UserRole.ServiceStaff)) {
+        navigate(DASHBOARD.rooms.list);
+      } else if (response.user.roles.includes(UserRole.Accountant)) {
+        navigate(DASHBOARD.expenses);
+      } else {
+        navigate(DASHBOARD.bookings.list);
+      }
+    },
+  });
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await AuthService.forgotPassword(email);
+      return { response, email };
+    },
+    onSuccess: ({ email }) => {
+      navigate(AUTH.resetPassword, {
+        state: { email },
+      });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (data: ResetPasswordDto) => {
+      const response = await AuthService.resetPassword(data);
+      return { response, email: data.email };
+    },
+    onSuccess: ({ email }) => {
+      navigate(AUTH.login, {
+        state: { email },
+      });
+    },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: ChangePasswordDto) => {
+      const response = await AuthService.changePassword(data);
+      return { response };
+    },
+    onSuccess: () => {
+      AuthService.logout();
+      navigate(AUTH.login);
+      clearUser();
+      toast.success("Vui lòng đăng nhập lại với mật khẩu mới.");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      }
+    },
+  });
+
+  const logout = () => {
     AuthService.logout();
     navigate(AUTH.login);
     clearUser();
-  }, []);
-
-  const forgotPassword = useCallback(async (email: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await AuthService.forgotPassword(email);
-      navigate(AUTH.resetPassword, {
-        state: {
-          email,
-        },
-      });
-      return response;
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const resetPassword = useCallback(async (data: ResetPasswordDto) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await AuthService.resetPassword(data);
-      navigate(AUTH.login, {
-        state: { email: data.email },
-      });
-      return response;
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  };
 
   return {
-    login,
+    login: loginMutation.mutateAsync,
     logout,
-    resetPassword,
-    forgotPassword,
-    isLoading,
-    error,
+    resetPassword: resetPasswordMutation.mutateAsync,
+    forgotPassword: forgotPasswordMutation.mutateAsync,
+    changePassword: changePasswordMutation.mutateAsync,
+    isLoading:
+      loginMutation.isPending ||
+      forgotPasswordMutation.isPending ||
+      resetPasswordMutation.isPending ||
+      changePasswordMutation.isPending,
+    error:
+      loginMutation.error ||
+      forgotPasswordMutation.error ||
+      resetPasswordMutation.error ||
+      changePasswordMutation.error,
   };
 }

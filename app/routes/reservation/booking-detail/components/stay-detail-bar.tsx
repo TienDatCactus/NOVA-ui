@@ -13,6 +13,10 @@ import {
   UserX,
   XCircle,
   AlertCircle,
+  FileText,
+  Wallet,
+  Toilet,
+  Soup,
 } from "lucide-react";
 import { useMemo } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
@@ -27,6 +31,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -74,29 +79,26 @@ import type {
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
+import type { BookingState } from "../container/use-booking-state.hooks";
+import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
+import { formatMoney } from "~/lib/utils";
 
 interface StayDetailBarProps {
   bookingCode: string;
   bookingDetail: BookingDetailResponseDto;
   form: UseFormReturn<StaffUpdateBookingRequestDto>;
-  permissions: {
-    canEditDates: boolean;
-    blockReason?: string | null;
-    dateChangeBlockReason?: string | null;
-  };
+  bookingState: BookingState;
   nights: number;
   setNoteModalOpen: (open: boolean) => void;
-  handleSubmit: (data: StaffUpdateBookingRequestDto) => void;
 }
 
 export default function StayDetailBar({
   bookingCode,
   bookingDetail,
   form,
-  permissions,
+  bookingState,
   nights,
   setNoteModalOpen,
-  handleSubmit,
 }: StayDetailBarProps) {
   // --- Hooks ---
   const { mutateAsync: updateBookingStatus, isPending: isUpdatingStatus } =
@@ -118,18 +120,36 @@ export default function StayDetailBar({
   const paidAmount = paymentForm.watch("paidAmount");
 
   const paymentSummary = useMemo(() => {
-    const totalAmount = bookingDetail?.totalAmount || 0;
+    const totalAmount =
+      (bookingDetail?.totalBreakfast || 0) +
+      (bookingDetail?.totalRoomCharge || 0);
     const previouslyPaid = bookingDetail?.paidAmount || 0;
     const currentPaid = paidAmount || 0;
-    const remaining = totalAmount - previouslyPaid - currentPaid;
 
     return {
       totalAmount,
       previouslyPaid,
       currentPaid,
-      remaining,
     };
   }, [bookingDetail, paidAmount]);
+
+  const paymentValidation = useMemo(() => {
+    const maxAllowed =
+      paymentSummary.totalAmount - paymentSummary.previouslyPaid;
+
+    if (paidAmount <= 0) {
+      return { isValid: false, error: "Số tiền phải lớn hơn 0" };
+    }
+
+    if (paidAmount > maxAllowed) {
+      return {
+        isValid: false,
+        error: `Số tiền không được vượt quá số tiền còn lại (${formatMoney(maxAllowed).vndFormatted})`,
+      };
+    }
+
+    return { isValid: true };
+  }, [paidAmount, paymentSummary]);
 
   const buttonStates = useMemo(() => {
     const today = startOfDay(new Date());
@@ -159,7 +179,7 @@ export default function StayDetailBar({
   };
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="flex-1">
+    <div className="flex-1">
       <Card className="shadow-sm overflow-hidden h-full gap-0  flex flex-col">
         {/* === HEADER === */}
         <CardHeader className="bg-muted/10 py-0 px-6 border-b shrink-0">
@@ -167,7 +187,7 @@ export default function StayDetailBar({
             {/* Identity */}
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                <span className="text-[0.625rem] uppercase font-bold text-muted-foreground tracking-wider">
                   Booking ID
                 </span>
                 <div className="text-lg font-bold font-mono leading-none">
@@ -188,7 +208,7 @@ export default function StayDetailBar({
                 }
               </Badge>
               {/* Permission Alert (Inline) */}
-              {!permissions.canEditDates && (
+              {!bookingState.permissions.canEditDates && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -197,7 +217,7 @@ export default function StayDetailBar({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom">
-                      <p>{permissions.dateChangeBlockReason}</p>
+                      <p>{bookingState.permissions.dateChangeBlockReason}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -207,7 +227,8 @@ export default function StayDetailBar({
             {/* Actions Area */}
             <div className="flex items-center gap-2">
               {/* Primary Action: Check In */}
-              {buttonStates.canCheckIn &&
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+                buttonStates.canCheckIn &&
                 bookingDetail.status === "Confirmed" && (
                   <Button
                     disabled={isUpdatingStatus}
@@ -219,160 +240,256 @@ export default function StayDetailBar({
                     <DoorOpen className="w-4 h-4 mr-2" /> Nhận phòng
                   </Button>
                 )}
-
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setNoteModalOpen(true)}
+              >
+                <PenLine className="w-4 h-4 mr-2" />
+                Ghi chú
+              </Button>
               {/* Primary Action: Payment (Pending) */}
-              {bookingDetail.status === "Pending" && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-primary/50 text-primary hover:bg-primary/5 relative"
-                    >
-                      <Receipt className="w-4 h-4 mr-2" />
-                      Xác nhận cọc
-                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
-                      </span>
-                    </Button>
-                  </DialogTrigger>
-                  {/* Payment Dialog Content (Refactored) */}
-                  <DialogContent className="max-w-md p-0 gap-0">
-                    <DialogHeader className="px-6 py-4 border-b bg-muted/5">
-                      <DialogTitle className="flex items-center gap-2">
-                        <CreditCard className="w-5 h-5 text-primary" />
-                        Thanh toán đặt cọc
-                      </DialogTitle>
-                      <DialogDescription>
-                        Ghi nhận khoản thanh toán trước cho booking #
-                        {bookingCode}
-                      </DialogDescription>
-                    </DialogHeader>
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+              bookingDetail.source === "RoomBlock" &&
+              bookingDetail.status === "Pending" ? (
+                <Button
+                  disabled={isUpdatingStatus}
+                  size="sm"
+                  variant="success"
+                  onClick={() => handleUpdateBookingStatus("Confirmed")}
+                  type="button"
+                >
+                  <DoorOpen className="w-4 h-4 mr-2" /> Xác nhận bảo trì
+                </Button>
+              ) : bookingDetail.source !== "RoomBlock" ? (
+                bookingDetail.status === "Pending" && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="info-outline" size="sm">
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Xác nhận cọc
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
+                      {/* HEADER */}
+                      <DialogHeader className="px-6 py-4 border-b bg-muted/5">
+                        <DialogTitle className="flex items-center gap-2">
+                          <div className="p-2 bg-primary/10 rounded-full">
+                            <Wallet className="w-5 h-5 text-primary" />
+                          </div>
+                          Thanh toán đặt cọc
+                        </DialogTitle>
+                        <DialogDescription>
+                          Ghi nhận khoản thanh toán trước cho booking{" "}
+                          <span className="font-mono font-medium text-foreground">
+                            #{bookingCode}
+                          </span>
+                        </DialogDescription>
+                      </DialogHeader>
 
-                    <div className="p-6 space-y-6">
-                      {/* Summary Card */}
-                      <div className="bg-muted/20 rounded-lg p-4 space-y-3 border">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Tổng giá trị:
-                          </span>
-                          <span className="font-mono font-semibold">
-                            {paymentSummary.totalAmount.toLocaleString("vi-VN")}{" "}
-                            VND
-                          </span>
+                      <div className="p-6 space-y-6">
+                        {/* SUMMARY CARD - Styled like a receipt */}
+                        <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+                          <div className="p-4 space-y-3 bg-muted/30">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground flex items-center gap-2">
+                                <Toilet className="w-4 h-4" /> Chi phí Phòng
+                              </span>
+                              <span className="font-mono font-medium">
+                                {
+                                  formatMoney(bookingDetail.totalRoomCharge)
+                                    .vndFormatted
+                                }
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground flex items-center gap-2">
+                                <Soup className="w-4 h-4" /> Ăn sáng
+                              </span>
+                              <span className="font-mono font-medium">
+                                {
+                                  formatMoney(bookingDetail.totalBreakfast)
+                                    .vndFormatted
+                                }
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground flex items-center gap-2">
+                                <CreditCard className="w-4 h-4" /> Đã thanh toán
+                              </span>
+                              <span className="font-mono font-medium text-muted-foreground">
+                                {
+                                  formatMoney(paymentSummary.previouslyPaid)
+                                    .vndFormatted
+                                }
+                              </span>
+                            </div>
+                          </div>
+
+                          <Separator />
+
+                          <div className="p-4 flex justify-between items-center bg-card">
+                            <span className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                              Tổng
+                            </span>
+                            <div className="text-right">
+                              <span
+                                className={`font-mono font-bold text-xl ${paymentSummary.totalAmount < 0 ? "text-orange-600" : "text-primary"}`}
+                              >
+                                {
+                                  formatMoney(paymentSummary.totalAmount)
+                                    .vndFormatted
+                                }
+                              </span>
+                              <span className="text-xs text-muted-foreground ml-1">
+                                VND
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Đã thanh toán:
-                          </span>
-                          <span className="font-mono">
-                            {paymentSummary.previouslyPaid.toLocaleString(
-                              "vi-VN"
-                            )}{" "}
-                            VND
-                          </span>
-                        </div>
-                        <Separator />
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-bold text-foreground">
-                            Còn lại:
-                          </span>
-                          <span
-                            className={`font-mono font-bold text-lg ${paymentSummary.remaining < 0 ? "text-orange-600" : "text-primary"}`}
+
+                        {/* FORM */}
+                        <Form {...paymentForm}>
+                          <form
+                            onSubmit={paymentForm.handleSubmit((data) => {
+                              if (!paymentValidation.isValid) {
+                                paymentForm.setError("paidAmount", {
+                                  message: paymentValidation.error,
+                                });
+                                return;
+                              }
+                              confirmPayment(data);
+                            })}
+                            className="space-y-5"
                           >
-                            {paymentSummary.remaining.toLocaleString("vi-VN")}{" "}
-                            VND
-                          </span>
-                        </div>
-                      </div>
+                            <div className="space-y-4">
+                              {/* Payment Method */}
+                              <FormField
+                                control={paymentForm.control}
+                                name="paymentMethod"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Phương thức thanh toán
+                                    </FormLabel>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="h-11">
+                                          <SelectValue placeholder="Chọn phương thức" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {PAYMENT_METHODS.filter(
+                                          (pm) => !pm.disabled
+                                        ).map((pm) => (
+                                          <SelectItem
+                                            key={pm.value}
+                                            value={pm.value}
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <pm.icon className="w-4 h-4 text-muted-foreground" />
+                                              <span>{pm.label}</span>
+                                            </div>
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </FormItem>
+                                )}
+                              />
 
-                      <Form {...paymentForm}>
-                        <form
-                          onSubmit={paymentForm.handleSubmit((data) =>
-                            confirmPayment(data)
-                          )}
-                          className="space-y-4"
-                        >
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={paymentForm.control}
-                              name="paymentMethod"
-                              render={({ field }) => (
-                                <FormItem className="col-span-2 sm:col-span-1">
-                                  <FormLabel>Phương thức</FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger className="w-40">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {PAYMENT_METHODS.filter(
-                                        (pm) => !pm.disabled
-                                      ).map((pm) => (
-                                        <SelectItem
-                                          key={pm.value}
-                                          value={pm.value}
+                              {/* Amount Field with Quick Actions */}
+                              <FormField
+                                control={paymentForm.control}
+                                name="paidAmount"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <div className="flex justify-between items-center mb-1.5">
+                                      <FormLabel>Số tiền thu</FormLabel>
+                                      {/* UX: Quick Fill Buttons */}
+                                      <div className="flex gap-2">
+                                        <Button
+                                          size={"sm"}
+                                          variant="outline"
+                                          onClick={() =>
+                                            paymentForm.setValue(
+                                              "paidAmount",
+                                              Math.round(
+                                                paymentSummary.totalAmount * 0.5
+                                              )
+                                            )
+                                          }
                                         >
-                                          <div className="flex items-center gap-2">
-                                            <pm.icon className="w-3.5 h-3.5" />
-                                            {pm.label}
-                                          </div>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={paymentForm.control}
-                              name="paidAmount"
-                              render={({ field }) => (
-                                <FormItem className="col-span-2 sm:col-span-1">
-                                  <FormLabel>Số tiền thu</FormLabel>
-                                  <FormControl>
-                                    <div className="relative">
+                                          50%
+                                        </Button>
+                                        <Button
+                                          size={"sm"}
+                                          variant="outline"
+                                          onClick={() =>
+                                            paymentForm.setValue(
+                                              "paidAmount",
+                                              paymentSummary.totalAmount
+                                            )
+                                          }
+                                        >
+                                          Tất cả
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    <FormControl>
                                       <Input
                                         type="number"
+                                        min={0}
                                         {...field}
-                                        className="pr-12 text-right font-mono font-bold"
+                                        className="font-mono font-bold text-lg"
                                         onChange={(e) =>
                                           field.onChange(
                                             parseFloat(e.target.value) || 0
                                           )
                                         }
+                                        endAddon={
+                                          <span className="text-sm text-muted-foreground font-medium">
+                                            VND
+                                          </span>
+                                        }
                                       />
-                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                                        VND
-                                      </span>
-                                    </div>
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          <DialogClose asChild>
-                            <Button
-                              type="submit"
-                              className="w-full mt-2"
-                              disabled={isConfirmingPayment}
-                            >
-                              {isConfirmingPayment
-                                ? "Đang xử lý..."
-                                : "Xác nhận đã thu tiền"}
-                            </Button>
-                          </DialogClose>
-                        </form>
-                      </Form>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+
+                            <DialogFooter className="pt-2">
+                              <Button
+                                type="submit"
+                                className="w-full h-11 text-base font-medium shadow-md"
+                                disabled={
+                                  isConfirmingPayment ||
+                                  !paymentValidation.isValid
+                                }
+                              >
+                                {isConfirmingPayment ? (
+                                  "Đang xử lý..."
+                                ) : (
+                                  <span className="flex items-center gap-2">
+                                    Xác nhận thu tiền{" "}
+                                    <ArrowRight className="w-4 h-4" />
+                                  </span>
+                                )}
+                              </Button>
+                            </DialogFooter>
+                          </form>
+                        </Form>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )
+              ) : null}
 
               {/* Secondary Actions Menu */}
               {(bookingDetail.status === "Pending" ||
@@ -387,12 +504,11 @@ export default function StayDetailBar({
                     <DropdownMenuLabel>Thao tác khác</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
+                      variant="destructive"
                       onClick={() => handleUpdateBookingStatus("Cancelled")}
-                      className="text-destructive focus:text-destructive"
                     >
                       <XCircle className="w-4 h-4 mr-2" /> Hủy đặt phòng
                     </DropdownMenuItem>
-                   
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
@@ -416,7 +532,7 @@ export default function StayDetailBar({
                   <FormControl>
                     <DatePicker
                       {...field}
-                      disabled={!permissions.canEditDates}
+                      disabled={!bookingState.permissions.canEditDates}
                       className="w-full"
                     />
                   </FormControl>
@@ -426,7 +542,7 @@ export default function StayDetailBar({
 
             {/* Duration Badge */}
             <div className="flex flex-col items-center justify-center pt-5 px-2">
-              <div className="text-[10px] text-muted-foreground uppercase font-bold mb-1 tracking-wider">
+              <div className="text-[0.625rem] text-muted-foreground uppercase font-bold mb-1 tracking-wider">
                 Lưu trú
               </div>
               <Badge
@@ -451,7 +567,7 @@ export default function StayDetailBar({
                   <FormControl>
                     <DatePicker
                       {...field}
-                      disabled={!permissions.canEditDates}
+                      disabled={!bookingState.permissions.canEditDates}
                       className="w-full"
                     />
                   </FormControl>
@@ -460,22 +576,9 @@ export default function StayDetailBar({
             />
           </div>
 
-          <Separator orientation="vertical" className="h-10 hidden md:block" />
-
           {/* Notes Trigger */}
-          <div className="w-full md:w-48 pt-5">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setNoteModalOpen(true)}
-              className="w-full justify-start text-muted-foreground hover:text-foreground border-dashed"
-            >
-              <PenLine className="w-4 h-4 mr-2" />
-              Ghi chú đặt phòng...
-            </Button>
-          </div>
         </CardContent>
       </Card>
-    </form>
+    </div>
   );
 }

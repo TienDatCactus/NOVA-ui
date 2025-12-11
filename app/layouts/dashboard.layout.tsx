@@ -18,11 +18,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "~/components/ui/sidebar";
+import { ModeToggle } from "~/features/theme/toggler";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import { COMMAND_BAR_ROUTES } from "~/lib/constants";
 import { DASHBOARD } from "~/lib/fe-url";
-import { signalRChatService } from "~/lib/signalr";
 import { cn } from "~/lib/utils";
-import { useChatConnection } from "~/routes/chat/container/use-chat-connection.hooks";
 const DashboardLayout: React.FC = () => {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const DashboardLayout: React.FC = () => {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="flex-1 flex flex-col overflow-hidden relative ml-0">
-          <header className="h-12 shadow-sm py-6 px-4 z-10 bg-white flex items-center w-full sticky top-0 justify-between border-b">
+          <header className="h-12 shadow-sm py-6 px-4 z-10 bg-background flex items-center w-full sticky top-0 justify-between border-b">
             <div className="flex gap-2 items-center">
               <SidebarTrigger />
               <Button onClick={() => navigate(-1)} variant={"outline"}>
@@ -49,12 +50,14 @@ const DashboardLayout: React.FC = () => {
               </Button>
             </div>
             <div className="flex gap-2 items-center">
-              <Button asChild size={"sm"} variant={"info-outline"}>
-                <Link to={DASHBOARD.bookings.newBooking}>
-                  Đặt phòng <BookDown />
-                </Link>
-              </Button>
-
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) && (
+                <Button asChild size={"sm"} variant={"info-outline"}>
+                  <Link to={DASHBOARD.bookings.newBooking}>
+                    Đặt phòng <BookDown />
+                  </Link>
+                </Button>
+              )}
+              <ModeToggle />
               <Input
                 placeholder="Tìm kiếm..."
                 className="w-64 h-8 placeholder:text-sm"
@@ -70,7 +73,7 @@ const DashboardLayout: React.FC = () => {
           </header>
           <div
             className={cn(
-              "rounded-md w-full mx-auto bg-background flex-1 overflow-y-auto min-h-0"
+              "rounded-md w-full mx-auto bg-background flex-1 overflow-y-auto min-h-0 container"
             )}
           >
             <Outlet />

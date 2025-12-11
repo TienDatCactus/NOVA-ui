@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { History, AlertCircle, CheckCircle2 } from "lucide-react";
+import { History, CheckCircle2 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import { formatMoney } from "~/lib/utils";
 import { TransactionHistoryDialog } from "../components/transaction-history.dialog";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 interface ItemDetailRowProps {
   item: StockItemsListItemDto;
@@ -22,13 +25,12 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
   const isHighStock = maxStock > 0 && currentStock > maxStock;
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md">
+    <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md">
       {/* Header: Title & Actions */}
-      <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-3">
+      <div className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-base font-bold text-gray-900">
-            {item.name || "Chi tiết sản phẩm"}{" "}
-            {/* Fallback name if available in DTO */}
+          <h3 className="text-base font-bold text-foreground">
+            {item.name || "Chi tiết sản phẩm"}
           </h3>
           {/* Status Badge - Solid Style */}
           {item.isActive ? (
@@ -36,28 +38,30 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
               <CheckCircle2 className="mr-1 h-3 w-3" /> Hoạt động
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-md bg-gray-500 px-2 py-0.5 text-xs font-medium text-white shadow-sm">
+            <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground shadow-sm">
               Ngừng
             </span>
           )}
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 border-gray-300 text-gray-700 hover:bg-gray-50"
-          onClick={() => setTransactionDialogOpen(true)}
-        >
-          <History className="mr-2 h-3.5 w-3.5" />
-          Lịch sử GD
-        </Button>
+        {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8"
+            onClick={() => setTransactionDialogOpen(true)}
+          >
+            <History className="mr-2 h-3.5 w-3.5" />
+            Lịch sử GD
+          </Button>
+        )}
       </div>
 
       {/* Main Grid Layout - 3 Columns with Vertical Dividers */}
-      <div className="grid grid-cols-1 divide-y divide-gray-100 text-sm lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+      <div className="grid grid-cols-1 divide-y divide-border text-sm lg:grid-cols-3 lg:divide-x lg:divide-y-0">
         {/* Column 1: Pricing Info */}
-        <div className="bg-white p-5">
-          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">
+        <div className="bg-card p-5">
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Thông tin giá
           </h4>
           <div className="space-y-3">
@@ -72,28 +76,28 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
             <Row
               label="Giá TB (Moving Avg)"
               value={formatMoney(item.averageCost ?? 0).vndFormatted}
-              valueClassName="text-blue-700 font-bold"
+              valueClassName="text-primary font-bold"
             />
           </div>
         </div>
 
         {/* Column 2: Inventory Config */}
-        <div className="bg-white p-5">
-          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">
+        <div className="bg-card p-5">
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Cấu hình tồn kho
           </h4>
           <div className="space-y-3">
             {/* Current Stock with Alert Logic */}
             <div className="flex items-center justify-between">
-              <span className="text-gray-500">Tồn hiện tại:</span>
+              <span className="text-muted-foreground">Tồn hiện tại:</span>
               <div className="flex items-center gap-2">
                 <span
                   className={`font-bold ${
                     isLowStock
                       ? "text-destructive"
                       : isHighStock
-                        ? "text-amber-600"
-                        : "text-green-700"
+                        ? "text-amber-600 dark:text-amber-500"
+                        : "text-green-700 dark:text-green-500"
                   }`}
                 >
                   {currentStock} {item.unitName}
@@ -108,7 +112,7 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
                   </Badge>
                 )}
                 {isHighStock && (
-                  <Badge className="bg-amber-500 hover:bg-amber-600 h-5 px-1.5 text-[10px]">
+                  <Badge className="bg-amber-500 hover:bg-amber-600 h-5 px-1.5 text-[10px] text-white">
                     Cao
                   </Badge>
                 )}
@@ -117,20 +121,24 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
 
             <div className="grid grid-cols-2 gap-4 pt-1">
               <div>
-                <dt className="text-xs text-gray-400">Tối thiểu</dt>
-                <dd className="mt-0.5 font-medium text-gray-900">{minStock}</dd>
+                <dt className="text-xs text-muted-foreground">Tối thiểu</dt>
+                <dd className="mt-0.5 font-medium text-foreground">
+                  {minStock}
+                </dd>
               </div>
               <div className="text-right">
-                <dt className="text-xs text-gray-400">Tối đa</dt>
-                <dd className="mt-0.5 font-medium text-gray-900">{maxStock}</dd>
+                <dt className="text-xs text-muted-foreground">Tối đa</dt>
+                <dd className="mt-0.5 font-medium text-foreground">
+                  {maxStock}
+                </dd>
               </div>
             </div>
           </div>
         </div>
 
         {/* Column 3: General Info */}
-        <div className="bg-white p-5">
-          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">
+        <div className="bg-card p-5">
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Thông tin khác
           </h4>
           <div className="space-y-3">
@@ -138,8 +146,10 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
               label="Đơn vị tính"
               value={
                 <span className="inline-flex items-center gap-1">
-                  <span className="font-medium">{item.unitName}</span>
-                  <span className="text-xs text-gray-400">
+                  <span className="font-medium text-foreground">
+                    {item.unitName}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
                     ({item.unitCode})
                   </span>
                 </span>
@@ -148,7 +158,7 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
             <Row
               label="Danh mục"
               value={
-                <span className="inline-flex items-center rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                <span className="inline-flex items-center rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                   {item.categoryName}
                 </span>
               }
@@ -158,12 +168,12 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
       </div>
 
       {/* Footer Description */}
-      <div className="border-t border-gray-100 bg-gray-50/50 px-6 py-3">
+      <div className="border-t border-border bg-muted/30 px-6 py-3">
         <div className="flex items-start gap-2">
-          <span className="mt-0.5 min-w-[60px] text-xs font-bold uppercase text-gray-500">
+          <span className="mt-0.5 min-w-[60px] text-xs font-bold uppercase text-muted-foreground">
             Mô tả:
           </span>
-          <p className="text-sm text-gray-600 italic">
+          <p className="text-sm text-muted-foreground italic">
             {item.description || "— Không có mô tả chi tiết cho sản phẩm này —"}
           </p>
         </div>
@@ -183,14 +193,14 @@ export function ItemDetailRow({ item }: ItemDetailRowProps) {
 const Row = ({
   label,
   value,
-  valueClassName = "text-gray-900 font-medium",
+  valueClassName = "text-foreground font-medium",
 }: {
   label: string;
   value: React.ReactNode;
   valueClassName?: string;
 }) => (
   <div className="flex items-center justify-between text-sm">
-    <dt className="text-gray-500">{label}</dt>
+    <dt className="text-muted-foreground">{label}</dt>
     <dd className={valueClassName}>{value}</dd>
   </div>
 );

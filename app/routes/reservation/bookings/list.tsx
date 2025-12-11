@@ -6,6 +6,18 @@ import useSearchBooking from "./container/booking-filter.hooks";
 import { useBookings } from "./container/booking-query.hooks";
 import BookingViewLayout from "./layouts/booking-view.layout";
 import type { Route } from "./+types/list";
+import useBookingFilters from "./container/booking-filter.hooks";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Đặt Phòng - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý đặt phòng và phòng trống" },
+  ];
+}
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Bookings, Permission.Read);
 
 type ViewMode = "grid" | "list";
 
@@ -13,24 +25,19 @@ export default function Component({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const [date, setDate] = useState<Date | undefined>(undefined);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-
-  const { data, isPending, refetch } = useBookings({
-    date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-  });
-  const { filters, filteredBookings, handleFiltersChange, handleResetFilters } =
-    useSearchBooking(data);
+  const { filters, filterBookings, updateFilters, resetFilters } =
+    useBookingFilters();
+  const { data, isPending, refetch } = useBookings(
+    filters.date ? { date: format(filters.date, "yyyy-MM-dd") } : undefined
+  );
+  const filteredBookings = filterBookings(data);
 
   return (
     <BookingViewLayout
-      date={date}
-      onDateChange={(date) => {
-        setDate(date);
-      }}
       filters={filters}
-      onFiltersChange={handleFiltersChange}
-      onResetFilters={handleResetFilters}
+      updateFilters={updateFilters}
+      resetFilters={resetFilters}
       viewMode={viewMode}
       onViewModeChange={setViewMode}
     >

@@ -27,6 +27,8 @@ import { DataTablePagination } from "~/components/table/table-pagination";
 import { Input } from "~/components/ui/input";
 import CreateServiceTypeDialog from "../create-service-type.dialog";
 import { Button } from "~/components/ui/button";
+import { RouteModule } from "~/lib/auth/roles";
+import { useAuth } from "~/lib/auth/components";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
@@ -42,6 +44,7 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [open, setOpen] = useState(false);
+  const { can } = useAuth();
   const table = useReactTable({
     data,
     columns,
@@ -71,10 +74,12 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
           }
           className="max-w-sm"
         />
-        <Button size="sm" onClick={() => setOpen(true)}>
-          <Plus />
-          Tạo loại dịch vụ mới
-        </Button>
+        {can.create(RouteModule.ServiceTypes) && (
+          <Button size="sm" onClick={() => setOpen(true)}>
+            <Plus />
+            Tạo loại dịch vụ mới
+          </Button>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

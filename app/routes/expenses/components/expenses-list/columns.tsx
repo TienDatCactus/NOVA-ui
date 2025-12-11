@@ -2,18 +2,23 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
-  Building2,
   Briefcase,
+  Building2,
+  DollarSign,
+  PackageOpen,
   Receipt,
   Wrench,
   Zap,
-  PackageOpen,
-  DollarSign,
 } from "lucide-react";
+import { useState } from "react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
+import { Button } from "~/components/ui/button";
 import { formatMoney } from "~/lib/utils";
 import type { ExpenseListItemDto } from "~/services/api/expenses/dto";
 import ExpensesActionCell from "../../fragments/expenses-action.cell";
+import SourceTypeBadge from "../../fragments/source-type-badge";
+import StatusBadge from "../../fragments/status-badge";
+import { ExpenseDetailDialog } from "../expense-detail.dialog";
 
 // Category icon mapping
 const CATEGORY_ICONS: Record<
@@ -27,8 +32,41 @@ const CATEGORY_ICONS: Record<
   Office: Building2,
   Other: Receipt,
 };
+const CATEGORY_LABELS: Record<string, string> = {
+  Procurement: "Mua sắm",
+  Salary: "Lương",
+  Utilities: "Tiện ích",
+  Maintenance: "Bảo trì",
+  Office: "Văn phòng",
+  Other: "Khác",
+};
 
 export const columns: ColumnDef<ExpenseListItemDto>[] = [
+  {
+    accessorKey: "receiptNumber",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Số chứng từ" />
+    ),
+    cell: ({ row }) => {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <Button
+            variant="link"
+            onClick={() => setOpen(true)}
+            className="font-mono text-sm p-0 text-muted-foreground hover:text-primary"
+          >
+            {row.original.receiptNumber}
+          </Button>
+          <ExpenseDetailDialog
+            open={open}
+            onClose={() => setOpen(false)}
+            expenseId={row.original.id}
+          />
+        </>
+      );
+    },
+  },
   {
     accessorKey: "expenseDate",
     header: ({ column }) => (
@@ -49,6 +87,7 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
     },
     sortingFn: "datetime",
   },
+
   {
     accessorKey: "category",
     header: ({ column }) => (
@@ -56,27 +95,16 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
     ),
     cell: ({ row }) => {
       const Icon = CATEGORY_ICONS[row.original.category] || DollarSign;
+      const Label = CATEGORY_LABELS[row.original.categoryName];
       return (
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{row.original.categoryName}</span>
+          <span className="font-medium">{Label}</span>
         </div>
       );
     },
   },
-  {
-    accessorKey: "description",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Mô tả" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="max-w-[400px]">
-          <p className="line-clamp-2 text-sm">{row.original.description}</p>
-        </div>
-      );
-    },
-  },
+
   {
     accessorKey: "amount",
     header: ({ column }) => (
@@ -96,30 +124,23 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
       );
     },
   },
+
   {
-    accessorKey: "paymentMethodName",
+    accessorKey: "status",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Phương thức" />
+      <DataTableColumnHeader column={column} title="Trạng thái" />
     ),
     cell: ({ row }) => {
-      return (
-        <span className="text-sm font-medium">
-          {row.original.paymentMethodName}
-        </span>
-      );
+      return <StatusBadge status={row.original.status} />;
     },
   },
   {
-    accessorKey: "receiptNumber",
+    accessorKey: "sourceType",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Số chứng từ" />
+      <DataTableColumnHeader column={column} title="Nguồn gốc" />
     ),
     cell: ({ row }) => {
-      return (
-        <span className="font-mono text-xs text-muted-foreground">
-          {row.original.receiptNumber}
-        </span>
-      );
+      return <SourceTypeBadge sourceType={row.original.sourceType} />;
     },
   },
   {

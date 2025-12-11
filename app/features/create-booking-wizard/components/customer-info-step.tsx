@@ -1,9 +1,16 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-
+import {
+  Ban,
+  Building2,
+  Check,
+  ChevronsUpDown,
+  Globe,
+  Mail,
+  Phone,
+  User,
+  Users,
+} from "lucide-react";
+import { type UseFormReturn } from "react-hook-form";
+import type z from "zod";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -14,9 +21,7 @@ import {
   CommandList,
 } from "~/components/ui/command";
 import {
-  Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,446 +33,366 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { cn, onError } from "~/lib/utils";
-import { BookingSchema } from "~/services/api/booking/booking.schema";
-import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
-import { useCreateBookingStore } from "~/store/create-booking.store";
-import { useOTAInfo } from "../container/create-booking-query.hooks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-const { StaffCreateBookingSchema } = BookingSchema;
+import { cn } from "~/lib/utils";
+import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
+import type { BookingMasterSchema } from "..";
+import { useOTAInfo } from "../container/create-booking-query.hooks";
 
-// Step 2 Schema: Customer Info + Detailed Booking Type
-const CustomerInfoSchema = z
-  .object({
-    guestFullName: StaffCreateBookingSchema.shape.guestFullName,
-    guestPhone: StaffCreateBookingSchema.shape.guestPhone,
-    guestEmail: StaffCreateBookingSchema.shape.guestEmail,
-    source: StaffCreateBookingSchema.shape.source,
-    otaInformationId: StaffCreateBookingSchema.shape.otaInformationId,
-    otaBookingCode: StaffCreateBookingSchema.shape.otaBookingCode,
-    adultsAmount: StaffCreateBookingSchema.shape.adultsAmount,
-    childrenAmount: StaffCreateBookingSchema.shape.childrenAmount,
-  })
-  .superRefine((data, ctx) => {
-    if (data.source === "OTA" || data.otaInformationId) {
-      if (!data.otaInformationId) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Vui lòng chọn nền tảng OTA",
-          path: ["otaInformationId"],
-        });
-      }
-      if (!data.otaBookingCode) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Mã đặt phòng OTA là bắt buộc",
-          path: ["otaBookingCode"],
-        });
-      }
-    }
-
-    // Agency validation - reuses otaBookingCode field for agency booking code
-    if (data.source === "Agency") {
-      if (!data.otaBookingCode) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Mã đặt phòng đại lý là bắt buộc",
-          path: ["otaBookingCode"],
-        });
-      }
-      if (!data.guestPhone && !data.guestEmail) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Vui lòng nhập ít nhất số điện thoại hoặc email của đại lý",
-          path: ["guestPhone"],
-        });
-      }
-    }
-
-    if (data.source === "RoomBlock") {
-      if (!data.guestFullName || data.guestFullName.trim().length < 2) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Vui lòng nhập lý do khóa phòng",
-          path: ["guestFullName"],
-        });
-      }
-      return;
-    }
-
-    if (data.source === "DirectStaff" || data.source === "Agency") {
-      if (!data.guestPhone && !data.guestEmail) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Vui lòng nhập ít nhất số điện thoại hoặc email",
-          path: ["guestPhone"],
-        });
-      }
-    }
-  });
-
-type CustomerInfoFormData = z.infer<typeof CustomerInfoSchema>;
-
-interface CustomerInfoStepProps {
-  onNext: () => void;
-  formRef?: React.RefObject<HTMLFormElement | null>;
+interface CustomerInfoSectionProps {
+  form: UseFormReturn<any>;
 }
 
-export function CustomerInfoStep({ onNext, formRef }: CustomerInfoStepProps) {
-  const { data: bookingData, setData } = useCreateBookingStore();
-  const bookingType = bookingData.bookingType;
+export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
+  const bookingType = form.watch("bookingType");
+  const source = form.watch("source");
 
   const { data: otaList } = useOTAInfo({
     selection: bookingType === "OTA",
   });
 
-  const form = useForm({
-    resolver: zodResolver(CustomerInfoSchema),
-    defaultValues: {
-      guestFullName: bookingData.guestFullName ?? "",
-      guestPhone: bookingData.guestPhone ?? "",
-      guestEmail: bookingData.guestEmail ?? "",
-      source: bookingData.source ?? undefined,
-      otaInformationId: bookingData.otaInformationId ?? undefined,
-      otaBookingCode: bookingData.otaBookingCode ?? "",
-      adultsAmount: bookingData.adultsAmount ?? 1,
-      childrenAmount: bookingData.childrenAmount ?? 0,
-    },
-    reValidateMode: "onChange",
-    mode: "onChange",
-  });
-
-  useEffect(() => {
-    form.reset({
-      guestFullName: bookingData.guestFullName ?? "",
-      guestPhone: bookingData.guestPhone ?? "",
-      guestEmail: bookingData.guestEmail ?? "",
-      source: bookingData.source,
-      otaInformationId: bookingData.otaInformationId ?? undefined,
-      otaBookingCode: bookingData.otaBookingCode ?? "",
-      adultsAmount: bookingData.adultsAmount ?? 1,
-      childrenAmount: bookingData.childrenAmount ?? 0,
-    });
-  }, [bookingData, form]);
-
-  const onSubmit = async (values: CustomerInfoFormData) => {
-    try {
-      let sourceValue = values.source;
-
-      if (bookingType === "RoomBlock") {
-        sourceValue = "RoomBlock";
-      } else if (bookingType === "OTA") {
-        sourceValue = "OTA";
-      } else if (bookingType === "Direct" && !values.source) {
-        sourceValue = "DirectStaff";
-      }
-
-      setData({
-        guestFullName: values.guestFullName,
-        guestPhone: bookingType === "RoomBlock" ? "" : values.guestPhone || "",
-        guestEmail: bookingType === "RoomBlock" ? "" : values.guestEmail || "",
-        source: sourceValue as any,
-        otaInformationId:
-          bookingType === "OTA" ? values.otaInformationId : undefined,
-        otaBookingCode:
-          bookingType === "OTA" || sourceValue === "Agency"
-            ? values.otaBookingCode
-            : "",
-        adultsAmount: values.adultsAmount,
-        childrenAmount: values.childrenAmount,
-      });
-
-      toast.success(
-        bookingType === "RoomBlock"
-          ? "Đã lưu lý do khóa phòng"
-          : "Đã lưu thông tin khách hàng"
-      );
-      onNext();
-    } catch (error) {
-      console.error("Form submission error:", error);
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+  // --- HANDLERS ---
+  const handleTypeChange = (val: string) => {
+    form.setValue(
+      "bookingType",
+      val as z.infer<typeof BookingMasterSchema>["bookingType"]
+    );
+    if (val === "RoomBlock") {
+      form.setValue("source", "RoomBlock"); // Assuming key matches value for simplicity in example
+      form.setValue("guestFullName", "");
+    } else if (val === "OTA") {
+      form.setValue("source", "OTA");
+    } else {
+      form.setValue("source", "DirectStaff"); // Default for Direct
     }
   };
 
   return (
-    <Form {...form}>
-      <form
-        ref={formRef}
-        onSubmit={form.handleSubmit(onSubmit, onError)}
-        className="space-y-6"
-      >
-        {bookingType === "Direct" && (
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="source"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nguồn đặt phòng</FormLabel>
-                  <FormControl>
-                    <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
-                      {BOOKING_SOURCES.filter(
-                        (s) => s.key !== "OTA" && s.key !== "RoomBlock"
-                      ).map((source) => (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          key={source.key}
-                          onClick={() => field.onChange(source.key)}
-                          className={cn(
-                            "rounded-lg border-2 h-12 p-4 text-center transition-all",
-                            field.value === source.key
-                              ? "border-primary bg-primary/10"
-                              : ""
-                          )}
-                        >
-                          {source.label}
-                        </Button>
-                      ))}
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    Chọn nguồn đặt phòng trực tiếp (Nhân viên, Đại lý, v.v.)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <div className="grid gap-6">
+      {/* --- 1. BOOKING MODE SELECTOR (Segmented Control Style) --- */}
+      <Select value={bookingType} onValueChange={handleTypeChange}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Chọn loại đặt phòng" />
+        </SelectTrigger>
+        <SelectContent>
+          {[
+            { id: "Direct", icon: Building2, label: "Khách lẻ / Trực tiếp" },
+            { id: "OTA", icon: Globe, label: "Kênh OTA" },
+            { id: "RoomBlock", icon: Ban, label: "Khóa phòng / Bảo trì" },
+          ].map((type) => (
+            <SelectItem value={type.id} key={type.id}>
+              <type.icon className="h-5 w-5" />
+              <span className="text-sm font-semibold">{type.label}</span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <div className="rounded-xl border bg-card shadow-sm">
+        <div className="border-b bg-muted/30 p-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+            Nguồn & Thông tin đặt phòng
+          </h3>
+          <div className="grid gap-2">
+            {bookingType === "Direct" && (
+              <FormField
+                control={form.control}
+                name="source"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">Nguồn khách</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Chọn nguồn" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {BOOKING_SOURCES.filter(
+                          (s) =>
+                            s.key !== "OTA" &&
+                            s.key !== "RoomBlock" &&
+                            s.key !== "DirectCustomer"
+                        ).map((bs) => (
+                          <SelectItem value={bs.key} key={bs.key}>
+                            {bs.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {bookingType === "OTA" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="otaInformationId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Kênh OTA</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-full justify-between bg-background h-9 px-3 font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? otaList?.find((ota) => ota.id === field.value)
+                                    ?.name
+                                : "Chọn kênh"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[250px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Tìm OTA..." />
+                            <CommandList>
+                              <CommandEmpty>Không tìm thấy.</CommandEmpty>
+                              <CommandGroup>
+                                {otaList?.map((ota) => (
+                                  <CommandItem
+                                    value={ota.name}
+                                    key={ota.id}
+                                    onSelect={() => {
+                                      form.setValue("otaInformationId", ota.id);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        ota.id === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {ota.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="otaBookingCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Mã Booking OTA</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="#123456789"
+                          className="bg-background h-9 font-mono"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+
+            {/* Agency Code (Conditional) */}
+            {source === "Agency" && bookingType === "Direct" && (
+              <FormField
+                control={form.control}
+                name="otaBookingCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">Mã Đại lý</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Nhập mã đại lý..."
+                        className="bg-background h-9"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
-        )}
+        </div>
 
-        {bookingType === "OTA" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* B. GUEST DETAILS */}
+        <div className="p-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Thông tin khách hàng
+          </h3>
+
+          <div className="grid gap-2">
+            {/* Full Name - Full Width on Mobile, 1/2 on Desktop */}
             <FormField
               control={form.control}
-              name="otaInformationId"
+              name="guestFullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Nền tảng OTA <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className="w-full justify-between bg-secondary"
-                        >
-                          {field.value
-                            ? otaList?.find((ota) => ota.id === field.value)
-                                ?.name
-                            : "Chọn nền tảng OTA"}
-                        </Button>
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-full p-0">
-                        <Command>
-                          <CommandInput placeholder="Tìm kiếm nền tảng..." />
-                          <CommandList>
-                            <CommandEmpty>Không có kết quả nào.</CommandEmpty>
-                            <CommandGroup>
-                              {otaList?.map((ota) => (
-                                <CommandItem
-                                  key={ota.id}
-                                  onSelect={() => {
-                                    field.onChange(ota.id);
-                                  }}
-                                >
-                                  {ota.name}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-
-                  <FormDescription>
-                    Booking.com, Agoda, Expedia, v.v.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="otaBookingCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Mã đặt phòng OTA <span className="text-destructive">*</span>
+                  <FormLabel className="text-xs">
+                    {bookingType === "RoomBlock"
+                      ? "Lý do khóa phòng"
+                      : "Họ và tên khách đại diện"}{" "}
+                    <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Nhập mã đặt phòng từ OTA"
-                      className="bg-secondary"
+                      placeholder={
+                        bookingType === "RoomBlock"
+                          ? "VD: Bảo trì máy lạnh, Sơn tường..."
+                          : "VD: Nguyễn Văn A"
+                      }
+                      className="bg-background h-10 text-base" // Slightly larger for main input
                     />
                   </FormControl>
-                  <FormDescription>Mã booking từ nền tảng OTA</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Contact Info (Hidden for RoomBlock) */}
+            {bookingType !== "RoomBlock" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="guestPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Số điện thoại</FormLabel>
+                      <FormControl>
+                        <Input
+                          startAddon={
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                          }
+                          {...field}
+                          value={field.value || ""}
+                          placeholder="+84 912 345 678"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="guestEmail"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">
+                        Email{" "}
+                        {bookingType === "OTA" && (
+                          <span className="text-destructive">*</span>
+                        )}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          startAddon={
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                          }
+                          {...field}
+                          value={field.value || ""}
+                          placeholder="example@gmail.com"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      {bookingType === "OTA" && !field.value && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Email bắt buộc cho booking OTA
+                        </p>
+                      )}
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* C. OCCUPANCY */}
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Số lượng khách
+            </h3>
+          </div>
+
+          <div className="grid gap-2">
+            <FormField
+              control={form.control}
+              name="adultsAmount"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <div className="flex justify-between mb-1.5">
+                    <FormLabel className="text-xs font-medium text-accent-foreground">
+                      Người lớn
+                    </FormLabel>
+                  </div>
+                  <FormControl>
+                    <Counter
+                      {...field}
+                      minValue={1}
+                      maxValue={10}
+                      className="w-full bg-background h-9 border-muted"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="childrenAmount"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <div className="flex justify-between mb-1.5">
+                    <FormLabel className="text-xs font-medium text-accent-foreground">
+                      Trẻ em
+                    </FormLabel>
+                  </div>
+                  <FormControl>
+                    <Counter
+                      {...field}
+                      value={field.value || 0}
+                      minValue={0}
+                      maxValue={5}
+                      className="w-full bg-background h-9 border-gray-200"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-        )}
-
-        {bookingType === "Direct" && form.watch("source") === "Agency" && (
-          <FormField
-            control={form.control}
-            name="otaBookingCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Mã đặt phòng đại lý{" "}
-                  <span className="text-destructive">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Nhập mã đặt phòng từ đại lý"
-                    className="bg-secondary"
-                  />
-                </FormControl>
-                <FormDescription>Mã booking do đại lý cung cấp</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="guestFullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {bookingType === "RoomBlock"
-                    ? "Lý do khóa phòng"
-                    : bookingType === "Direct" &&
-                        form.watch("source") === "Agency"
-                      ? "Tên đại lý"
-                      : "Họ và tên"}{" "}
-                  <span className="text-destructive">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={
-                      bookingType === "RoomBlock"
-                        ? "VD: Bảo trì hệ thống điện"
-                        : bookingType === "Direct" &&
-                            form.watch("source") === "Agency"
-                          ? "VD: Công ty Du lịch ABC"
-                          : "Nguyễn Văn A"
-                    }
-                    className="bg-secondary"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="guestPhone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Số điện thoại{" "}
-                  <span className="text-muted-foreground text-xs">
-                    (tùy chọn)
-                  </span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="tel"
-                    placeholder="+84 123 456 789"
-                    className="bg-secondary"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="guestEmail"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Email{" "}
-                  <span className="text-muted-foreground text-xs">
-                    (tùy chọn)
-                  </span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="email"
-                    placeholder="email@example.com"
-                    className="bg-secondary"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="adultsAmount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Số người lớn <span className="text-destructive">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Counter
-                    {...field}
-                    minValue={1}
-                    maxValue={10}
-                    isDisabled={form.formState.isSubmitting}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="childrenAmount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Số trẻ em{" "}
-                  <span className="text-muted-foreground text-xs">
-                    (&lt; 6 tuổi)
-                  </span>
-                </FormLabel>
-                <FormControl>
-                  <Counter
-                    {...field}
-                    minValue={0}
-                    maxValue={10}
-                    isDisabled={form.formState.isSubmitting}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        {/* Conditional Fields based on Booking Type */}
-      </form>
-    </Form>
+      </div>
+    </div>
   );
 }

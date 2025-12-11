@@ -4,10 +4,6 @@ import authBg from "~/assets/img/pexels-monica-tran-2153311664-34075390.jpg";
 import SectionLayout from "~/components/layouts/sections";
 import { TreePalm } from "lucide-react";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
-  return {};
-};
-
 export default function Component({
   loaderData,
   actionData,

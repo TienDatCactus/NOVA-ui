@@ -1,17 +1,27 @@
 import {
   flexRender,
   getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  type SortingState,
+  getSortedRowModel,
+  useReactTable,
   type ColumnDef,
-  type VisibilityState,
   type ColumnFiltersState,
   type RowSelectionState,
+  type SortingState,
+  type VisibilityState,
 } from "@tanstack/react-table";
+import { ChevronDown, Plus, Search } from "lucide-react";
 import { useState } from "react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -20,11 +30,9 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Plus, Search } from "lucide-react";
-import { DataTableViewOptions } from "~/components/table/colum-toggle";
-import { DataTablePagination } from "~/components/table/table-pagination";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 import GeneratePayrollDialog from "../generate-payroll-dialog";
 
 interface DataTableProps<TData, TValue> {
@@ -91,11 +99,61 @@ export function DataTable<TData, TValue>({
         />
 
         <div className="flex items-center gap-2">
-          <Button onClick={() => setGenerateDialogOpen(true)} size="sm">
-            <Plus />
-            Thêm bảng lương
-          </Button>
-          <DataTableViewOptions table={table} />
+          {hasAnyRole(AuthLoader.getUser(), [UserRole.Accountant]) && (
+            <Button onClick={() => setGenerateDialogOpen(true)} size="sm">
+              <Plus />
+              Thêm bảng lương
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Hiển thị cột
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-[200px]"
+              onCloseAutoFocus={(e) => e.preventDefault()}
+            >
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  const columnLabels: Record<string, string> = {
+                    index: "STT",
+                    staffCode: "Mã nhân viên",
+                    staffName: "Tên nhân viên",
+                    assignedDays: "Ngày công định mức",
+                    workDays: "Ngày công thực tế",
+                    paidLeaveDaysUsed: "Phép có lương",
+                    unpaidLeaveDays: "Phép không lương",
+                    baseSalaryFullMonth: "Lương cơ bản (tháng đủ)",
+                    baseSalaryCalculated: "Lương cơ bản tính theo công",
+                    componentsTotal: "Phụ cấp/Khấu trừ",
+                    totalAmount: "Tổng thu nhập kỳ này",
+                    hasUnusedLeavePending: "Còn ngày dư chưa xử lý",
+                    paidAmount: "Đã thanh toán",
+                    remainingAmount: "Còn phải trả",
+                    locked: "Trạng thái",
+                  };
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      {columnLabels[column.id] || column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <GeneratePayrollDialog
             open={generateDialogOpen}
             onOpenChange={setGenerateDialogOpen}

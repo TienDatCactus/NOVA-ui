@@ -17,9 +17,14 @@ import {
 } from "~/components/ui/select";
 import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
 import type { PayrollFilterState } from "../container/filter.hooks";
-import { useRefreshPayrollDays } from "../container/query.hooks";
+import {
+  useExportMonthlyPayroll,
+  useRefreshPayrollDays,
+} from "../container/query.hooks";
 import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
+import { AxiosError } from "axios";
+import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 
 interface HeaderLayoutProps {
   filterState: PayrollFilterState;
@@ -36,23 +41,22 @@ export default function PayrollsLayout({
 }: HeaderLayoutProps) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  const [isExporting, setIsExporting] = useState(false);
 
   const { mutate: refreshDays, isPending: isRefreshing } =
     useRefreshPayrollDays();
-
+  const { mutateAsync: exportMonthly, isPending: isExporting } =
+    useExportMonthlyPayroll(
+      filterState.year || currentYear,
+      filterState.month || 0
+    );
   const handleExportMonthly = async () => {
     if (!filterState.year) {
       toast.error("Vui lòng chọn năm để xuất báo cáo");
       return;
     }
 
-    setIsExporting(true);
     try {
-      const blob = await StaffPayrollService.exportMonthly({
-        year: filterState.year,
-        month: filterState.month || currentDate.getMonth() + 1,
-      });
+      const blob = await exportMonthly();
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -64,11 +68,7 @@ export default function PayrollsLayout({
       document.body.removeChild(a);
 
       toast.success("Xuất báo cáo thành công");
-    } catch (error) {
-      toast.error("Lỗi khi xuất báo cáo");
-    } finally {
-      setIsExporting(false);
-    }
+    } catch (error) {}
   };
 
   const handleRefreshDays = () => {
@@ -127,7 +127,6 @@ export default function PayrollsLayout({
                 <SelectValue placeholder="Tháng" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Cả năm</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                   <SelectItem key={m} value={m.toString()}>
                     Tháng {m}
@@ -177,19 +176,21 @@ export default function PayrollsLayout({
 
           <Separator orientation="vertical" className="h-6 hidden md:block" />
 
-          <Button
-            onClick={handleExportMonthly}
-            disabled={isExporting}
-            size="sm"
-            variant={"success"}
-          >
-            {isExporting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="mr-2 h-4 w-4" />
-            )}
-            Xuất Excel
-          </Button>
+          {hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
+            <Button
+              onClick={handleExportMonthly}
+              disabled={isExporting}
+              size="sm"
+              variant={"success"}
+            >
+              {isExporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Xuất Excel
+            </Button>
+          )}
         </div>
       </div>
     </div>

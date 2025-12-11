@@ -3,10 +3,25 @@ import StaffViewLayout from "./layouts/staff-view.layout";
 import { useStaffFilters } from "./container/filter.hooks";
 import { useStaffList } from "./container/query.hooks";
 import StaffDataTable from "./components/staff-list";
+import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/staff";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Nhân Viên - NOVA Hotel Management" },
+    { name: "description", content: "Quản lý thông tin nhân viên" },
+  ];
+}
+
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Staff, Permission.Read);
 
 export default function StaffPage() {
   const { filters, updateFilter, resetFilter } = useStaffFilters();
-  const { data: staffs, isPending } = useStaffList();
+  const { data: staffs, isPending } = useStaffList({
+    gender: filters.gender ?? undefined,
+    role: filters.role ?? undefined,
+  });
 
   return (
     <StaffViewLayout

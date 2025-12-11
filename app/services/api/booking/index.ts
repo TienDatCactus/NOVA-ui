@@ -10,7 +10,9 @@ import type {
   BookingListByWeekResponseDto,
   BookingListResponseDto,
   BookingOTAResponseDto,
+  BookingPayForRoomRequestDto,
   BookingPendingChargesResponseDto,
+  BookingUpgradeRoomRequestDto,
   ConfirmBookingPaymentRequestDto,
   ConfirmBookingPaymentResponseDto,
   OrderableBookingResponseDto,
@@ -28,6 +30,7 @@ import type {
   StaffCreateCheckoutInvoiceResponseDto,
   StaffUpdateBookingRequestDto,
   StaffUpdateBookingResponseDto,
+  UnpaidRoomsForBookingDto,
   UpdateBookingStatusRequestDto,
   UpdateBookingStatusResponseDto,
 } from "./dto";
@@ -35,7 +38,8 @@ import type {
 const {
   BookingListResponseSchema,
   BookingListByWeekResponseSchema,
-  StaffCreateBookingResponseSchema,
+  BookingPayForRoomRequestSchema,
+  BookingUpgradeRoomRequestSchema,
   StaffCreateBookingSchema,
   BookingDetailItemSchema,
   BookingOTAResponseSchema,
@@ -58,6 +62,7 @@ const {
   OrderableBookingResponseSchema,
   UpdateBookingStatusRequestSchema,
   UpdateBookingStatusResponseSchema,
+  UnpaidRoomsForBookingSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -418,6 +423,61 @@ async function getOrderableBookings(): Promise<OrderableBookingResponseDto> {
   }
 }
 
+async function payForRooms(
+  id: string,
+  data: BookingPayForRoomRequestDto
+): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
+  try {
+    const resp = await http.post(
+      Booking.payForRoom(id),
+      BookingPayForRoomRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function upgradeRoom(
+  id: string,
+  data: BookingUpgradeRoomRequestDto
+): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
+  try {
+    const resp = await http.post(
+      Booking.upgradeRoom(id),
+      BookingUpgradeRoomRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      }
+    );
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function unpaidRooms(
+  bookingId: string
+): Promise<UnpaidRoomsForBookingDto> {
+  try {
+    const resp = await http.get(Booking.unpaidRooms(bookingId));
+    return UnpaidRoomsForBookingSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
@@ -440,4 +500,8 @@ export const BookingService = {
   updateBookingStatus,
   staffConfirmBookingPayment,
   getOrderableBookings,
+
+  payForRooms,
+  upgradeRoom,
+  unpaidRooms,
 };

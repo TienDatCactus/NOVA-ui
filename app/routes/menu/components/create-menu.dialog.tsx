@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image as ImageIcon, Layers, Package, Save } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
 
@@ -15,7 +15,6 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { onError } from "~/lib/utils";
@@ -45,7 +44,7 @@ export default function CreateMenuDialog({
   const [activeTab, setActiveTab] = useState("general");
 
   const form = useForm<CreateMenuFormData>({
-    resolver: zodResolver(CreateMenuItemRequestSchema) as any,
+    resolver: zodResolver(CreateMenuItemRequestSchema),
     defaultValues: {
       CategoryId: "",
       Code: "",
@@ -71,20 +70,50 @@ export default function CreateMenuDialog({
   const { data: units } = useUnits();
   const { data: stockItems } = useStockItemList({ includeInactive: false });
 
-  const handleRemoveImage = (index: number) => {
-    const currentImgs = form.getValues("Images") || [];
-    const newImgs = currentImgs.filter((_, i) => i !== index);
-    form.setValue("Images", newImgs);
-    form.clearErrors("Images");
+  const handleRemoveImage = useCallback(
+    (index: number) => {
+      const currentImgs = form.getValues("Images") || [];
+      const newImgs = currentImgs.filter((_, i) => i !== index);
+      form.setValue("Images", newImgs);
 
-    URL.revokeObjectURL(imagePreview[index]);
-    setImagePreview((prev) => prev.filter((_, i) => i !== index));
-  };
+      URL.revokeObjectURL(imagePreview[index]);
+      setImagePreview((prev) => prev.filter((_, i) => i !== index));
+    },
+    [form, imagePreview]
+  );
 
   const handleSubmit = (data: CreateMenuFormData) => {
+    if (data.Components.length <= 0) {
+      setActiveTab("components");
+      return;
+    }
     createMenuItem(data, { onSuccess: handleClose });
   };
 
+  const handleError = (errors: any) => {
+    if (errors.Components) {
+      setActiveTab("components");
+    }
+  };
+
+  const handleDrop = useCallback((acceptedFiles: File[]) => {
+    const currentImgs = form.getValues("Images") || [];
+    const totalImgs = currentImgs.length + acceptedFiles.length;
+    if (totalImgs > 10) {
+      form.setError("Images", {
+        type: "manual",
+        message: "Chỉ được tải lên tối đa 10 ảnh",
+      });
+      return;
+    }
+    form.clearErrors("Images");
+    const newImgs = [...currentImgs, ...acceptedFiles];
+    form.setValue("Images", newImgs);
+    setImagePreview((prev) => [
+      ...prev,
+      ...acceptedFiles.map((file) => URL.createObjectURL(file)),
+    ]);
+  }, []);
   const handleClose = () => {
     imagePreview.forEach((url) => URL.revokeObjectURL(url));
     setImagePreview([]);
@@ -107,7 +136,7 @@ export default function CreateMenuDialog({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit, onError)}
+            onSubmit={form.handleSubmit(handleSubmit, handleError)}
             className="flex flex-col "
           >
             <Tabs
@@ -155,19 +184,7 @@ export default function CreateMenuDialog({
                   imagePreview={imagePreview}
                   handleRemoveImage={handleRemoveImage}
                   formErrors={form.formState.errors.Images}
-                  onDrop={(acceptedFiles: File[]) => {
-                    const currentImgs = form.getValues("Images") || [];
-                    const totalImgs = currentImgs.length + acceptedFiles.length;
-                    if (totalImgs > 8) {
-                      return;
-                    }
-                    const newImgs = [...currentImgs, ...acceptedFiles];
-                    form.setValue("Images", newImgs);
-                    setImagePreview((prev) => [
-                      ...prev,
-                      ...acceptedFiles.map((file) => URL.createObjectURL(file)),
-                    ]);
-                  }}
+                  onDrop={handleDrop}
                 />
 
                 {/* --- TAB 3: COMPONENTS --- */}

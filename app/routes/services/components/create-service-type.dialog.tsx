@@ -1,21 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ImagePlus,
-  Layers,
-  Package,
-  Plus,
-  RotateCcw,
-  Trash2,
-  X,
-  ScanBarcode,
-  Tag,
   AlignLeft,
   ImageIcon,
+  ImagePlus,
+  Package,
+  Plus,
+  ScanBarcode,
+  Tag,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -36,21 +34,14 @@ import {
 } from "~/components/ui/form";
 import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
+import { Dropzone } from "~/components/ui/shadcn-io/dropzone";
 import { Switch } from "~/components/ui/switch";
-import { Textarea } from "~/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Badge } from "~/components/ui/badge";
-import {
-  Dropzone,
-  DropzoneContent,
-  DropzoneEmptyState,
-} from "~/components/ui/shadcn-io/dropzone";
+import { Textarea } from "~/components/ui/textarea";
 
+import { Separator } from "~/components/ui/separator";
 import { ServiceTypesSchema } from "~/services/api/service-types/service-types.schema";
 import { useCreateServiceType } from "../container/service-types/mutation.hooks";
-import { cn } from "~/lib/utils";
-import { Separator } from "~/components/ui/separator";
 
 const { CreateServiceTypeRequestSchema } = ServiceTypesSchema;
 type CreateServiceTypeFormData = z.infer<typeof CreateServiceTypeRequestSchema>;
@@ -114,10 +105,20 @@ export default function CreateServiceTypeDialog({
   }, [files]);
 
   const onDropFiles = (accepted: File[]) => {
+    const totalFiles = files.length + accepted.length;
+    if (totalFiles > 8) {
+      form.setError("images", {
+        type: "manual",
+        message: "Chỉ được tải lên tối đa 8 ảnh",
+      });
+      return;
+    }
+    form.clearErrors("images");
     setFiles((prev) => [...prev, ...accepted]);
   };
 
   const removeImage = (index: number) => {
+    form.clearErrors("images");
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -127,10 +128,7 @@ export default function CreateServiceTypeDialog({
         {/* === HEADER === */}
         <DialogHeader className="px-6 py-4 border-b shrink-0 flex flex-row items-start justify-between space-y-0">
           <div className="space-y-1">
-            <DialogTitle className="text-xl flex items-center gap-2">
-              <Layers className="w-5 h-5 text-primary" />
-              Thêm loại dịch vụ
-            </DialogTitle>
+            <DialogTitle className="text-xl">Thêm loại dịch vụ</DialogTitle>
             <DialogDescription>
               Định nghĩa nhóm dịch vụ mới (Spa, F&B, Tour...).
             </DialogDescription>
@@ -283,7 +281,14 @@ export default function CreateServiceTypeDialog({
                   className="mt-0 space-y-4 outline-none"
                 >
                   <div className="flex justify-between items-center">
-                    <h4 className="text-sm font-medium">Thư viện ảnh</h4>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-medium">Thư viện ảnh</h4>
+                      {form.formState.errors.images?.message && (
+                        <p className="text-xs text-destructive font-medium">
+                          {form.formState.errors.images.message as string}
+                        </p>
+                      )}
+                    </div>
                     <span className="text-xs text-muted-foreground">
                       {previews.length} / 8 ảnh
                     </span>
@@ -327,7 +332,7 @@ export default function CreateServiceTypeDialog({
                           <X className="w-3.5 h-3.5" />
                         </button>
 
-                        <Badge className="absolute bottom-1.5 left-1.5 h-5 px-1.5 text-[10px] bg-white/90 text-foreground hover:bg-white">
+                        <Badge className="absolute bottom-1.5 left-1.5 h-5 px-1.5 text-[10px] bg-background/90 text-foreground hover:bg-background">
                           {index + 1}
                         </Badge>
                       </div>
