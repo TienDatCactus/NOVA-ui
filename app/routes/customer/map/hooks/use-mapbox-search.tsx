@@ -11,6 +11,7 @@ import {
   TreePine,
   Landmark,
 } from "lucide-react";
+import { uuidv4, ZodUUID } from "zod";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_BOX_TOKEN;
 
@@ -71,7 +72,7 @@ export const RESORT_CATEGORIES = {
 
 interface SuggestResult {
   suggestions: any[];
-  sessionToken: string;
+  sessionToken: ZodUUID;
 }
 
 export interface SearchHistoryItem {
@@ -94,7 +95,7 @@ export function useMapboxSearch(options?: {
     types = DEFAULT_TYPES,
     language = "vi",
   } = options || {};
-  const [sessionId] = useState(() => crypto.randomUUID());
+  const [sessionId] = useState(() => uuidv4());
   const sessionTokenRef = useRef(sessionId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

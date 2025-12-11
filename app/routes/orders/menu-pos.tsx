@@ -24,7 +24,7 @@ export function meta({}: Route.MetaArgs) {
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Orders, Permission.Create);
 
-import type { z } from "zod";
+import { uuidv4, type z } from "zod";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { MenuListItemSchema } from "~/services/api/menu/menu.schema";
@@ -184,7 +184,7 @@ export default function Component({
     unitPrice: number;
     quantity: number;
   }) => {
-    const id = crypto.randomUUID();
+    const id = uuidv4();
     const customId = `CUSTOM-${id}`;
     addItem({
       id: customId,

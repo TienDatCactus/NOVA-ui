@@ -55,6 +55,7 @@ import { useServicePosOrderStore } from "~/store/service-pos-order.store";
 import useServiceFilters from "../services/container/services/filter.hooks";
 import OrderConfirmDialog from "./components/order-confirm.dialog";
 import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
+import { uuidv4 } from "zod";
 
 export default function Component({
   loaderData,
@@ -151,7 +152,7 @@ export default function Component({
     unitPrice: number;
     quantity: number;
   }) => {
-    const id = crypto.randomUUID();
+    const id = uuidv4();
     const customId = `CUSTOM-${id}`;
     selectService({
       id: customId,
