@@ -10,8 +10,6 @@ interface ServiceCardProps {
 }
 
 export default function ServiceCard({ service }: ServiceCardProps) {
-  const { vndFormatted } = formatMoney(service.basePrice);
-
   return (
     <Card
       className={cn(
@@ -58,18 +56,6 @@ export default function ServiceCard({ service }: ServiceCardProps) {
             <h3 className="font-serif text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 transition-colors">
               {service.name}
             </h3>
-
-            {/* Pricing Block */}
-            <div className="flex flex-col items-end shrink-0">
-              <span className="text-base font-semibold text-emerald-700 dark:text-emerald-300 font-serif tracking-wide whitespace-nowrap">
-                {vndFormatted}
-              </span>
-              {service.unitName && (
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                  /{service.unitName}
-                </span>
-              )}
-            </div>
           </div>
 
           {/* Description */}

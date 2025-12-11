@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
+import type z from "zod";
 import { BookingService } from "~/services/api/booking";
 import type {
   BookingPayForRoomRequestDto,
@@ -16,6 +17,7 @@ import type {
   InvoiceCalculateFeesRequestDto,
   UpdateInvoiceRequestDto,
 } from "~/services/api/invoices/dto";
+import type { PaymentSchema } from "~/services/schema/payment.schema";
 
 /**
  * Hook to fetch pending charges for a booking
@@ -162,7 +164,7 @@ export function useInvoicePayment(invoiceId: string, bookingId: string) {
   return useMutation({
     mutationFn: (data: { method: string; amount: number; note?: string }) =>
       InvoicesService.proceedInvoicePayment(invoiceId, {
-        method: data.method,
+        method: data.method as z.infer<typeof PaymentSchema.PaymentMethodEnum>,
         amount: data.amount,
         note: data.note || "",
       }),
@@ -243,7 +245,7 @@ export function useCheckout(bookingId: string) {
       });
       // Invalidate all booking details
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       // Invalidate booking-specific invoice list
       queryClient.invalidateQueries({

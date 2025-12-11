@@ -1,5 +1,5 @@
 import { Ban, CreditCard, Plus, RotateCcw } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 import { hasAnyRole, hasRole } from "~/lib/auth/bouncer";
@@ -48,30 +48,42 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
     ["Unpaid", "DepositOnly", "PartiallyPaid"].includes(invoice.status);
   const canRefund = ["Paid", "Overpaid"].includes(invoice.status);
   const canVoid = ["Unpaid", "DepositOnly"].includes(invoice.status);
-  const handleAddItem = (data: AddCustomItemsRequestDto) =>
-    addCustomItem(data, {
-      onSuccess: () => {
-        setDialog(null);
-      },
-    });
-  const handleInvoicePayment = (data: InvoicePaymentRequestDto) =>
-    invoicePayment(data, {
-      onSuccess: () => {
-        setDialog(null);
-      },
-    });
-  const handleRefund = (data: RefundInvoiceRequestDto) =>
-    refund(data, {
-      onSuccess: () => {
-        setDialog(null);
-      },
-    });
-  const handleVoid = () =>
-    voidInvoice(undefined, {
-      onSuccess: () => {
-        setDialog(null);
-      },
-    });
+  const handleAddItem = useCallback(
+    (data: AddCustomItemsRequestDto) =>
+      addCustomItem(data, {
+        onSuccess: () => {
+          setDialog(null);
+        },
+      }),
+    []
+  );
+  const handleInvoicePayment = useCallback(
+    (data: InvoicePaymentRequestDto) =>
+      invoicePayment(data, {
+        onSuccess: () => {
+          setDialog(null);
+        },
+      }),
+    []
+  );
+  const handleRefund = useCallback(
+    (data: RefundInvoiceRequestDto) =>
+      refund(data, {
+        onSuccess: () => {
+          setDialog(null);
+        },
+      }),
+    []
+  );
+  const handleVoid = useCallback(
+    () =>
+      voidInvoice(undefined, {
+        onSuccess: () => {
+          setDialog(null);
+        },
+      }),
+    []
+  );
 
   return (
     <div className="flex flex-wrap gap-2">

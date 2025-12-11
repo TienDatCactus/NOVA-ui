@@ -131,8 +131,7 @@ const Units = {
 };
 //! hotel manager + receptionist
 const Reports = {
-  reservationReports: (fromDate: string, toDate: string) =>
-    `Reports/daily-booking-dashboard?fromDate=${fromDate}&toDate=${toDate}`,
+  reservationReports: `Reports/daily-booking-dashboard`,
 };
 
 //! receptionist

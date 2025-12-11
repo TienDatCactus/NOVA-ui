@@ -53,7 +53,10 @@ export default function Component() {
   const toDateStr = date.to ? format(date.to, "yyyy-MM-dd") : "";
 
   // Fetch reports data
-  const { data: reportsData, isLoading } = useReports(fromDateStr, toDateStr);
+  const { data: reportsData, isLoading } = useReports({
+    fromDate: fromDateStr,
+    toDate: toDateStr,
+  });
 
   const handleResetToToday = () => {
     const today = new Date();
