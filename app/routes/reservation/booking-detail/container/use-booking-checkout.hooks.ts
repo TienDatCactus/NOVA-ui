@@ -243,7 +243,7 @@ export function useCheckout(bookingId: string) {
       });
       // Invalidate all booking details
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       // Invalidate booking-specific invoice list
       queryClient.invalidateQueries({

@@ -49,7 +49,6 @@ export function InvoicePaymentDialog({
   const form = useForm<InvoicePaymentRequestDto>({
     resolver: zodResolver(InvoiceSchema.InvoicePaymentRequestSchema),
     defaultValues: {
-      method: "",
       amount: remaining,
       note: "",
     },
@@ -58,7 +57,7 @@ export function InvoicePaymentDialog({
 
   useEffect(() => {
     if (open) {
-      form.reset({ method: "", amount: remaining, note: "" });
+      form.reset({ amount: remaining, note: "" });
     }
   }, [open, remaining, form]);
 
@@ -74,7 +73,7 @@ export function InvoicePaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-card p-0 gap-0 max-w-md w-full overflow-hidden">
+      <DialogContent className="bg-card p-0 gap-0 max-w-md w-full overflow-y-auto">
         {/* HEADER */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/10">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold text-foreground">

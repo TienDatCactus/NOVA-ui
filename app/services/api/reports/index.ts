@@ -8,7 +8,9 @@ async function getReservationReports(
   toDate: string
 ): Promise<ReservationReportResponseDTO> {
   try {
-    const resp = await http.get(Reports.reservationReports(fromDate, toDate));
+    const resp = await http.get(Reports.reservationReports, {
+      params: { fromDate, toDate },
+    });
     return ReservationReportsSchema.parse(resp.data);
   } catch (error) {
     console.error(error);

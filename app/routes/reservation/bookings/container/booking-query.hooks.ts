@@ -19,7 +19,7 @@ function useBookingDetail({
   enabled?: boolean;
 }) {
   return useQuery({
-    queryKey: ["bookings-detail", bookingCode, bookingId],
+    queryKey: ["bookings-detail", bookingCode ?? "", bookingId ?? ""],
     queryFn: async () =>
       await BookingService.getBookingDetail({
         code: bookingCode,

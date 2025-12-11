@@ -104,9 +104,11 @@ const InvoiceByIdResponseSchema = InvoiceDetailSchema;
 const InvoiceByBookingResponseSchema = z.array(InvoiceDetailSchema);
 
 const InvoicePaymentRequestSchema = z.object({
-  amount: z.number(),
-  method: z.string(),
-  note: z.string(),
+  amount: z
+    .number("Số tiền không hợp lệ")
+    .min(0, "Số tiền phải lớn hơn hoặc bằng 0"),
+  method: PaymentSchema.PaymentMethodEnum,
+  note: z.string("Ghi chú không hợp lệ").optional(),
 });
 
 const InvoicePaymentResponseSchema = z.object({

@@ -9,8 +9,6 @@ interface MenuCardProps {
 }
 
 export default function MenuCard({ item }: MenuCardProps) {
-  const { vndFormatted } = formatMoney(item.price);
-
   return (
     <Card
       className={cn(
@@ -58,16 +56,6 @@ export default function MenuCard({ item }: MenuCardProps) {
             </h3>
 
             {/* Price Tag */}
-            <div className="flex flex-col items-end shrink-0">
-              <span className="text-base font-semibold text-emerald-700 dark:text-emerald-300   font-serif tracking-wide whitespace-nowrap">
-                {vndFormatted}
-              </span>
-              {item.unitName && (
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                  /{item.unitName}
-                </span>
-              )}
-            </div>
           </div>
 
           {/* Description */}
