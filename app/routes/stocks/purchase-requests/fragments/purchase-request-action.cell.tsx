@@ -51,9 +51,7 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
 
   const canEdit = purchaseRequest.status === "Draft";
   const canDelete =
-    purchaseRequest.status === "Draft" ||
-    purchaseRequest.status === "Rejected" ||
-    purchaseRequest.status === "Cancelled";
+    purchaseRequest.status === "Draft" || purchaseRequest.status === "Rejected";
   const canApprove = purchaseRequest.status === "Draft";
   const canReject = canApprove;
   const canCancel =

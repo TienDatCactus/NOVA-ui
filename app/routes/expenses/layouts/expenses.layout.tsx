@@ -28,6 +28,7 @@ import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
 import { useAuth } from "~/lib/auth/components";
 import { UserRole } from "~/lib/auth/roles";
 import { formatMoney } from "~/lib/utils";
+import { AuthLoader, hasRole } from "~/lib/auth/auth.loader";
 
 // --- PROPS ---
 interface ExpensesLayoutProps {
@@ -53,7 +54,6 @@ export default function ExpensesLayout({
   const hasActiveFilters = Boolean(
     filters.fromDate || filters.toDate || filters.categoryId
   );
-  const { hasRole } = useAuth();
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-between">
@@ -67,7 +67,7 @@ export default function ExpensesLayout({
                 value="list"
                 asChild
                 className="text-xs px-4"
-                disabled={hasRole(UserRole.HotelManager)}
+                disabled={!hasRole(AuthLoader.getUser(), UserRole.Accountant)}
               >
                 <Link
                   to={FE_URL.dashboard.expenses}
