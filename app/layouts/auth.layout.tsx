@@ -4,10 +4,7 @@ import authBg from "~/assets/img/pexels-monica-tran-2153311664-34075390.jpg";
 import SectionLayout from "~/components/layouts/sections";
 import { TreePalm } from "lucide-react";
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   return (
     <SectionLayout>
       <div className="grid grid-cols-5 place-items-center h-full w-full ">
@@ -20,22 +17,20 @@ export default function Component({
           }}
         >
           <div className="absolute inset-0 bg-black/40"></div>
-          <div className="absolute p-6 top-0 text-white flex items-center justify-center space-x-2">
+          <div className="absolute p-6 top-0 text-accent-foreground flex items-center justify-center space-x-2">
             <div className="p-4 rounded-lg">
               <TreePalm className="size-10" />
             </div>
             <div>
               <h1 className="font-bold text-4xl">NOVA</h1>
               <p className="text-sm text-muted">
-                Network Operation for Vacation Acommodation
+                Network Operation for Vacation Accommodation
               </p>
             </div>
           </div>
-          <div className="absolute flex-col p-6 bottom-0 space-y-4 text-white flex">
-            <h2 className="text-3xl font-medium">
-              "Lorem ipsum dolor sit amet ?"
-            </h2>
-            <p>- Lorem ipser -</p>
+          <div className="absolute flex-col p-6 bottom-0 space-y-4 text-accent-foreground flex">
+            <h2 className="text-3xl font-medium">Welcome to NOVA Platform</h2>
+            <p>- NOVA Team -</p>
           </div>
         </div>
         <div className="col-span-3">

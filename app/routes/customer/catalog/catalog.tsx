@@ -259,10 +259,10 @@ function LoadingNature() {
   return (
     <div className="flex flex-col items-center justify-center py-32 text-muted-foreground ">
       <div className="relative">
-        <div className="absolute inset-0 bg-emerald-200/40 rounded-full blur-xl animate-pulse"></div>
-        <CloudFog className="relative h-14 w-14 animate-bounce text-emerald-600/70 duration-[3000ms]" />
+        <div className="absolute inset-0 bg-emerald-200/40 dark:bg-emerald-700/40 rounded-full blur-xl animate-pulse"></div>
+        <CloudFog className="relative h-14 w-14 animate-bounce  text-emerald-600/70 dark:text-emerald-300/70 duration-[3000ms]" />
       </div>
-      <p className="mt-6 text-sm font-medium tracking-wide text-emerald-800/60 uppercase">
+      <p className="mt-6 text-sm font-medium tracking-wide text-emerald-800/60 dark:text-emerald-300/60 uppercase">
         {t("loading")}...
       </p>
     </div>
@@ -280,18 +280,18 @@ function EmptyState({
 }) {
   const { t } = useTranslation("catalog");
   return (
-    <div className="flex flex-col items-center justify-center py-24 px-4 text-center border border-dashed border-emerald-900/10 rounded-3xl bg-background/40 backdrop-blur-sm">
-      <div className="w-20 h-20 bg-background/80 rounded-full flex items-center justify-center mb-6 shadow-sm border border-white">
+    <div className="flex flex-col items-center justify-center py-24 px-4 text-center border border-dashed border-emerald-900/10 dark:border-emerald-700/20 rounded-3xl bg-background/40 backdrop-blur-sm">
+      <div className="w-20 h-20 bg-background/80 rounded-full flex items-center justify-center mb-6 shadow-sm border border-accent">
         {type === "menu" ? (
-          <UtensilsCrossed className="h-9 w-9 text-emerald-800/40" />
+          <UtensilsCrossed className="h-9 w-9 text-emerald-800/40 dark:text-emerald-400" />
         ) : (
-          <Leaf className="h-9 w-9 text-emerald-800/40" />
+          <Leaf className="h-9 w-9 text-emerald-800/40 dark:text-emerald-400" />
         )}
       </div>
-      <h3 className="text-xl font-serif font-bold text-emerald-950">
+      <h3 className="text-xl font-serif font-bold text-emerald-950 dark:text-emerald-100">
         {isSearching ? t("empty.searching.title") : t("empty.noItems.title")}
       </h3>
-      <p className="text-stone-500 max-w-sm mx-auto mt-2 mb-8 leading-relaxed font-light">
+      <p className="text-muted-foreground max-w-sm mx-auto mt-2 mb-8 leading-relaxed font-light">
         {isSearching
           ? t("empty.searching.description")
           : t("empty.noItems.description")}
@@ -299,7 +299,7 @@ function EmptyState({
       {isSearching && (
         <Button
           onClick={onClear}
-          className="rounded-full px-8 bg-emerald-800 text-white hover:bg-emerald-900 shadow-lg shadow-emerald-900/10 transition-all"
+          className="rounded-full px-8 bg-emerald-800 dark:bg-emerald-300 text-accent-foreground hover:bg-emerald-900 dark:hover:bg-emerald-400 shadow-lg shadow-emerald-900/10 transition-all"
         >
           {t("empty.clearButton")}
         </Button>

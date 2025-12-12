@@ -1,19 +1,22 @@
 import {
+  ChevronRight,
+  Cog,
+  HelpCircle,
+  Loader2,
+  LogOut,
   MessageSquare,
   QrCode,
-  Loader2,
   Scan,
   Terminal,
-  MessageCircle,
-  LogOut,
-  ChevronRight,
-  HelpCircle,
   TreePine,
-  Cog,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import sapaBg from "~/assets/img/pexels-son-hoa-nguyen-2155579462-33908286.jpg";
+import { QRScanner } from "~/components/qr-scanner";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -24,18 +27,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { toast } from "sonner";
-import { cn } from "~/lib/utils";
-import STORAGE, { deleteStorage, getStorage, setStorage } from "~/lib/storage";
-import { useChatEntry } from "~/routes/chat/container/query.hooks";
 import { CUSTOMER } from "~/lib/fe-url";
-import { QRScanner } from "~/components/qr-scanner";
+import STORAGE, { deleteStorage, getStorage, setStorage } from "~/lib/storage";
+import { cn } from "~/lib/utils";
+import { useChatEntry } from "~/routes/chat/container/query.hooks";
 import type { Route } from "./+types/inbox";
-import { Badge } from "~/components/ui/badge";
-import Image from "~/components/ui/image";
-import sapaBg from "~/assets/img/pexels-son-hoa-nguyen-2155579462-33908286.jpg";
 
 export default function ChatInbox({}: Route.ComponentProps) {
   const { t } = useTranslation("chat");
@@ -97,13 +96,6 @@ export default function ChatInbox({}: Route.ComponentProps) {
     } catch {
       toast.error(t("inbox.invalidQR"));
     }
-  };
-
-  const handleManualSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const token = formData.get("roomToken") as string;
-    if (token.trim()) handleQRScanned(token.trim());
   };
 
   if (isLoading) {
@@ -176,55 +168,6 @@ export default function ChatInbox({}: Route.ComponentProps) {
               >
                 <Scan className="h-5 w-5 mr-2" /> {t("inbox.scanQR")}
               </Button>
-
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full h-12 text-base rounded-xl border-dashed border-2 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 hover:border-stone-300 dark:hover:border-stone-600 hover:text-stone-800 dark:hover:text-stone-100 transition-all"
-                  >
-                    <Terminal className="h-4 w-4 mr-2 text-stone-400 dark:text-stone-500" />{" "}
-                    {t("inbox.manualInput")}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md rounded-xl">
-                  <DialogHeader>
-                    <DialogTitle>{t("inbox.manualTitle")}</DialogTitle>
-                    <DialogDescription>
-                      {t("inbox.manualDescription")}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form
-                    onSubmit={handleManualSubmit}
-                    className="space-y-4 pt-2"
-                  >
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="roomToken"
-                        className="text-stone-600 dark:text-stone-300"
-                      >
-                        {t("inbox.tokenLabel")}
-                      </Label>
-                      <Input
-                        id="roomToken"
-                        name="roomToken"
-                        placeholder="VD: ROOM-123-XYZ"
-                        className="font-mono uppercase border-stone-200 dark:border-stone-700 focus:border-emerald-500 focus:ring-emerald-500 dark:focus:border-emerald-400 dark:focus:ring-emerald-400"
-                        required
-                        autoFocus
-                      />
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        type="submit"
-                        className="w-full sm:w-auto bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-700 dark:hover:bg-emerald-800"
-                      >
-                        {t("inbox.connect")}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
             </div>
           </div>
         )}
