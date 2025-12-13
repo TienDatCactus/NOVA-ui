@@ -1,17 +1,11 @@
-import { useEffect } from "react";
-import type z from "zod";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Loader2,
-  Save,
-  Package,
-  Tags,
-  DollarSign,
-  Archive,
-  Activity,
-} from "lucide-react";
+import { Loader2, Package, Save, Tags } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import type z from "zod";
 
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -30,9 +24,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
-import { Button } from "~/components/ui/button";
-import { Switch } from "~/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -40,18 +31,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
+import { Switch } from "~/components/ui/switch";
+import { Textarea } from "~/components/ui/textarea";
 
-import { FormSchema } from "~/services/schema/forms.schema";
+import { onError } from "~/lib/utils";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
+import { FormSchema } from "~/services/schema/forms.schema";
 import { useItemCategories } from "../../item-categories/container/query.hooks";
 import {
   useStockItemDetail,
   useUpdateStockItem,
 } from "../container/query.hooks";
-import { onError } from "~/lib/utils";
 
 export type UpdateItemFormData = z.infer<
   typeof FormSchema.UpdateItemFormSchema
@@ -79,7 +69,6 @@ export default function EditItemDialog({
 
   const { mutate: updateItem, isPending: isSubmitting } = useUpdateStockItem();
 
-  // --- Form Setup ---
   const form = useForm<UpdateItemFormData>({
     resolver: zodResolver(FormSchema.UpdateItemFormSchema),
     mode: "onChange",
@@ -180,10 +169,7 @@ export default function EditItemDialog({
                       <FormLabel className="flex items-center gap-1.5 text-muted-foreground">
                         <Tags className="h-3.5 w-3.5" /> Danh mục
                       </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                      <Select {...field}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Chọn danh mục" />
@@ -210,10 +196,7 @@ export default function EditItemDialog({
                       <FormLabel className="flex items-center gap-1.5 text-muted-foreground">
                         <Package className="h-3.5 w-3.5" /> Đơn vị tính
                       </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                      <Select {...field}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Chọn đơn vị" />
@@ -288,16 +271,19 @@ export default function EditItemDialog({
                           Giá vốn
                         </FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              className="pr-10 text-right font-mono"
-                              {...field}
-                            />
-                            <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
-                              đ
-                            </span>
-                          </div>
+                          <Input
+                            type="number"
+                            className="pr-10 text-right font-mono"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(e.target.valueAsNumber)
+                            }
+                            endAddon={
+                              <span className="text-xs text-muted-foreground">
+                                đ
+                              </span>
+                            }
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -311,16 +297,19 @@ export default function EditItemDialog({
                           Giá bán niêm yết
                         </FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              className="pr-10 text-right font-mono font-semibold text-emerald-600 bg-background border-emerald-200 focus-visible:ring-emerald-500"
-                              {...field}
-                            />
-                            <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
-                              đ
-                            </span>
-                          </div>
+                          <Input
+                            type="number"
+                            className="pr-10 text-right font-mono font-semibold text-emerald-600 bg-background border-emerald-200 focus-visible:ring-emerald-500"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(e.target.valueAsNumber)
+                            }
+                            endAddon={
+                              <span className="text-xs text-muted-foreground">
+                                đ
+                              </span>
+                            }
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -342,15 +331,19 @@ export default function EditItemDialog({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs text-muted-foreground">
-                          Min
+                          Tối thiểu
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             className="text-center font-mono h-9"
                             {...field}
+                            onChange={(e) =>
+                              field.onChange(e.target.valueAsNumber)
+                            }
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -360,15 +353,19 @@ export default function EditItemDialog({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs text-muted-foreground">
-                          Max
+                          Tối đa
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             className="text-center font-mono h-9"
                             {...field}
+                            onChange={(e) =>
+                              field.onChange(e.target.valueAsNumber)
+                            }
                           />
-                        </FormControl>
+                        </FormControl>{" "}
+                        <FormMessage />
                       </FormItem>
                     )}
                   />

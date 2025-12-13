@@ -1,8 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
-import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,

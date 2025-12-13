@@ -220,7 +220,7 @@ export default function Component() {
         }
       );
     }
-  }, [bookingDetail?.id]);
+  }, [bookingDetail]);
 
   const nights = useCalculateNights({
     checkinDate: bookingDetail
@@ -238,25 +238,24 @@ export default function Component() {
       <div className="flex-1 overflow-y-auto p-4">
         <Form {...form}>
           <div className="grid gap-4 container mx-auto">
-            <CustomerInfoBar
-              bookingDetail={bookingDetail}
-              form={form}
-              OTAList={OTAList || []}
-              bookingState={bookingState}
-            />
-
-            <div className="flex  items-start gap-4">
+            <div className="flex  items-start gap-2">
               <div className="grid gap-2">
                 <BookingRoomsBar
                   bookingDetail={bookingDetail}
                   form={form}
                   roomsFieldArray={roomsFieldArray}
                   bookingState={bookingState}
+                />{" "}
+                <CustomerInfoBar
+                  bookingDetail={bookingDetail}
+                  form={form}
+                  OTAList={OTAList || []}
+                  bookingState={bookingState}
                 />
                 <RefundHistory bookingId={bookingDetail.id} />
               </div>
 
-              <div className="flex-1  space-y-4">
+              <div className="flex-1  grid  gap-2">
                 <StayDetailBar
                   bookingCode={bookingCode}
                   bookingDetail={bookingDetail}

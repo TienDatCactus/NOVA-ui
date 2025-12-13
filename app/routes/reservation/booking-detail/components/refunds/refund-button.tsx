@@ -1,19 +1,8 @@
 import { RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
+import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 import RefundDialog from "./refund-dialog";
-import {
-  AuthLoader,
-  hasAnyRole,
-  hasRole,
-  UserRole,
-} from "~/lib/auth/auth.loader";
 
 interface RefundButtonProps {
   bookingId: string;
@@ -34,7 +23,7 @@ export default function RefundButton({
 }: RefundButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const canRefund =
-    (bookingStatus === "CheckedOut" || bookingStatus === "Pending") &&
+    (bookingStatus === "CheckedOut" || bookingStatus === "Confirmed") &&
     hasRole(AuthLoader.getUser(), UserRole.HotelManager) &&
     totalPaidAmount > 0;
   if (!canRefund) {

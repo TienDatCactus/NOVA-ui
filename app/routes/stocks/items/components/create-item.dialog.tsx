@@ -1,6 +1,8 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Save } from "lucide-react";
+import { useForm } from "react-hook-form";
+import type z from "zod";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,8 +21,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
-import { Button } from "~/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -28,14 +28,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
-import { FormSchema } from "~/services/schema/forms.schema";
-import type z from "zod";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Textarea } from "~/components/ui/textarea";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
+import { FormSchema } from "~/services/schema/forms.schema";
 import { useItemCategories } from "../../item-categories/container/query.hooks";
 import { useCreateStockItem } from "../container/query.hooks";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Switch } from "~/components/ui/switch";
 
 export type CreateItemFormData = z.infer<
   typeof FormSchema.CreateItemFormSchema
@@ -65,18 +65,17 @@ export default function CreateItemDialog({
       description: "",
       categoryId: "",
       unitId: "",
-      unitCost: 0,
-      unitPrice: 0,
-      minStock: 0,
-      maxStock: 0,
-      initialQuantity: 0,
+      isActive: true,
     },
   });
 
   const handleSubmit = (data: CreateItemFormData) => {
-    onSubmit(data);
-    form.reset();
-    onOpenChange(false);
+    onSubmit(data, {
+      onSuccess: () => {
+        form.reset();
+        onOpenChange(false);
+      },
+    });
   };
 
   return (
@@ -248,6 +247,26 @@ export default function CreateItemDialog({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/30">
+                    <div className="space-y-0.5">
+                      <FormLabel className="">Trạng thái hoạt động</FormLabel>
+                      <FormDescription className="text-xs">
+                        Bật để danh mục có thể được sử dụng trong hệ thống
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* RIGHT COLUMN: Các con số (Giá & Kho) - Nền xám nhẹ để tách biệt */}
@@ -355,6 +374,9 @@ export default function CreateItemDialog({
                       </FormItem>
                     )}
                   />
+                </div>{" "}
+                <div className="bg-background border rounded p-3 text-[11px] text-muted-foreground leading-snug">
+                  Cảnh báo sẽ kích hoạt khi tồn kho nằm ngoài khoảng này.
                 </div>
               </div>
             </div>

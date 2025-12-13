@@ -1,22 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAfter, isBefore, isSameDay, parseISO, startOfDay } from "date-fns";
 import {
+  AlertCircle,
   ArrowRight,
   CalendarDays,
   CreditCard,
-  DollarSign,
   DoorOpen,
-  MoreHorizontal,
   Moon,
+  MoreHorizontal,
   PenLine,
   Receipt,
-  UserX,
-  XCircle,
-  AlertCircle,
-  FileText,
-  Wallet,
-  Toilet,
   Soup,
+  Toilet,
+  Wallet,
+  XCircle,
 } from "lucide-react";
 import { useMemo } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
@@ -24,11 +21,10 @@ import type z from "zod";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -47,7 +43,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -69,6 +64,8 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
+import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
+import { formatMoney } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type {
@@ -80,8 +77,6 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
 import type { BookingState } from "../container/use-booking-state.hooks";
-import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
-import { formatMoney } from "~/lib/utils";
 
 interface StayDetailBarProps {
   bookingCode: string;
@@ -180,7 +175,7 @@ export default function StayDetailBar({
 
   return (
     <div className="flex-1">
-      <Card className="shadow-sm overflow-hidden h-full gap-0  flex flex-col">
+      <Card className="shadow-sm  hover:border-primary bg-background h-full gap-0  flex flex-col">
         {/* === HEADER === */}
         <CardHeader className="bg-muted/10 py-0 px-6 border-b shrink-0">
           <div className="flex justify-between items-center">

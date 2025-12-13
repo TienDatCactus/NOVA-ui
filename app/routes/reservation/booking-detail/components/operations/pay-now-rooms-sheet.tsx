@@ -11,7 +11,7 @@ import {
   Utensils,
   Wallet,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
@@ -43,7 +43,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { Switch } from "~/components/ui/switch";
 import { cn, formatMoney } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type {
@@ -52,7 +51,6 @@ import type {
 } from "~/services/api/booking/dto";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import {
-  useCalculateInvoiceFees,
   usePayNowRooms,
   useUnpaidRooms,
 } from "../../container/use-booking-checkout.hooks";
@@ -68,9 +66,6 @@ export function PayNowRoomsSheet({
   onOpenChange,
   bookingDetail,
 }: PayNowRoomsSheetProps) {
-  const [applyVat, setApplyVat] = useState(false);
-  const [applyServiceCharge, setApplyServiceCharge] = useState(false);
-
   const { mutate: payNowRooms, isPending: isPaying } = usePayNowRooms(
     bookingDetail?.id || ""
   );
@@ -114,28 +109,13 @@ export function PayNowRoomsSheet({
     return Math.round(selectedRoomsTotalCharge * unpaidRatio);
   }, [unpaidRoomsData?.unpaidRooms, selectedRoomIds, unpaidRatio]);
 
-  const { data: calculatedFees, refetch: refetchFees } =
-    useCalculateInvoiceFees(
-      { subtotalAmount: selectedRoomsSubtotal, applyVat, applyServiceCharge },
-      open && selectedRoomsSubtotal > 0
-    );
-
-  useEffect(() => {
-    if (selectedRoomsSubtotal > 0 && open) refetchFees();
-  }, [applyVat, applyServiceCharge, selectedRoomsSubtotal, open, refetchFees]);
-
-  const totalWithFees = useMemo(
-    () => calculatedFees?.totalAmount || selectedRoomsSubtotal,
-    [calculatedFees, selectedRoomsSubtotal]
-  );
-
   const paymentValidation = useMemo(() => {
     if (!paidAmount || paidAmount <= 0)
       return { isValid: false, error: "Số tiền phải lớn hơn 0" };
-    if (paidAmount > (totalWithFees ?? 0))
+    if (paidAmount > (selectedRoomsSubtotal ?? 0))
       return { isValid: false, error: "Số tiền vượt quá tổng phòng đã chọn" };
     return { isValid: true, error: null };
-  }, [paidAmount, totalWithFees]);
+  }, [paidAmount, selectedRoomsSubtotal]);
 
   // --- Handlers ---
   const toggleRoomSelection = (bookingRoomId: string) => {
@@ -158,7 +138,7 @@ export function PayNowRoomsSheet({
   };
 
   const handleQuickAmount = (percentage: number) => {
-    const amount = Math.round((totalWithFees ?? 0) * percentage);
+    const amount = Math.round((selectedRoomsSubtotal ?? 0) * percentage);
     form.setValue("paidAmount", amount);
   };
 
@@ -355,52 +335,12 @@ export function PayNowRoomsSheet({
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between py-1">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={applyServiceCharge}
-                          onCheckedChange={setApplyServiceCharge}
-                          id="svc"
-                          className="h-4 w-7"
-                        />
-                        <Label htmlFor="svc" className="text-sm cursor-pointer">
-                          Phí dịch vụ
-                        </Label>
-                      </div>
-                      <span className="font-mono text-sm">
-                        {
-                          formatMoney(calculatedFees?.serviceChargeAmount || 0)
-                            .vndFormatted
-                        }
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between py-1">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={applyVat}
-                          onCheckedChange={setApplyVat}
-                          id="vat"
-                          className="h-4 w-7"
-                        />
-                        <Label htmlFor="vat" className="text-sm cursor-pointer">
-                          VAT
-                        </Label>
-                      </div>
-                      <span className="font-mono text-sm">
-                        {
-                          formatMoney(calculatedFees?.vatAmount || 0)
-                            .vndFormatted
-                        }
-                      </span>
-                    </div>
-
                     <Separator className="my-2" />
 
                     <div className="flex justify-between items-center pt-1">
                       <span className="font-bold text-base">Tổng cộng</span>
                       <span className="font-mono font-bold text-xl text-emerald-700">
-                        {formatMoney(totalWithFees ?? 0).vndFormatted}
+                        {formatMoney(selectedRoomsSubtotal ?? 0).vndFormatted}
                       </span>
                     </div>
                   </div>
@@ -499,18 +439,18 @@ export function PayNowRoomsSheet({
                                     type="number"
                                     {...field}
                                     className="pl-9 font-mono text-lg font-semibold bg-stone-50 border-stone-200 focus-visible:ring-emerald-500"
-                                    max={totalWithFees}
+                                    max={selectedRoomsSubtotal}
                                   />
                                 </div>
                               </FormControl>
                             </div>
-                            {field.value < (totalWithFees ?? 0) && (
+                            {field.value < (selectedRoomsSubtotal ?? 0) && (
                               <p className="text-xs text-orange-600 font-medium flex items-center gap-1">
                                 <Info className="h-3 w-3" />
                                 Còn thiếu:{" "}
                                 {
                                   formatMoney(
-                                    (totalWithFees ?? 0) - field.value
+                                    (selectedRoomsSubtotal ?? 0) - field.value
                                   ).vndFormatted
                                 }
                               </p>

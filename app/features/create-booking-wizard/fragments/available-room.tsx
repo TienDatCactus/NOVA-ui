@@ -150,10 +150,8 @@ export function AvailableRoomRow({
               {roomType.availableRooms.length > 0 ? (
                 roomType.availableRooms.map((room) => {
                   const isSelected = selectedRoomIds.includes(room.roomId);
-                  const isReady = room.status === "Ready";
                   return (
                     <Button
-                      disabled={!isReady}
                       key={room.roomId}
                       type="button"
                       onClick={() => onToggleRoom(room.roomId)}

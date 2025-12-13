@@ -1,4 +1,4 @@
-import { eachDayOfInterval, format, isSameDay, subDays } from "date-fns";
+import { eachDayOfInterval, format, isSameDay, startOfDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Calendar as CalendarIcon, Coffee } from "lucide-react";
 import { useMemo } from "react";
@@ -13,6 +13,24 @@ import {
 } from "~/components/ui/popover";
 import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
+
+/**
+ * Validates if a date is within valid breakfast range
+ * Hotel logic: Breakfast available from (CheckinDate + 1) to CheckoutDate (inclusive)
+ * Guest doesn't get breakfast on check-in day, gets it on checkout morning
+ */
+function isValidBreakfastDate(
+  date: Date,
+  checkinDate: Date,
+  checkoutDate: Date
+): boolean {
+  const normalized = startOfDay(date);
+  const checkin = startOfDay(checkinDate);
+  const checkout = startOfDay(checkoutDate);
+
+  // Valid: date > CheckinDate AND date <= CheckoutDate
+  return normalized > checkin && normalized <= checkout;
+}
 
 interface BreakfastSelectionProps {
   isBreakfastAll: boolean;
@@ -33,13 +51,24 @@ export function BreakfastSelection({
   checkoutDate,
   nights,
 }: BreakfastSelectionProps) {
+  /**
+   * Calculate available breakfast dates
+   * Hotel logic: Breakfast is served on mornings AFTER check-in, up to checkout day
+   * For 1 night (13->14): breakfast on day 14 only (morning before checkout)
+   * For 2 nights (13->15): breakfast on day 14 and 15
+   */
   const availableDates = useMemo(() => {
     if (!checkinDate || !checkoutDate || nights <= 0) return [];
     try {
-      return eachDayOfInterval({
-        start: checkinDate,
-        end: subDays(checkoutDate, 1),
+      // Generate dates from (checkin + 1 day) to checkout (inclusive)
+      // Guest doesn't get breakfast on check-in day (they arrive afternoon/evening)
+      // Guest gets breakfast on checkout day (morning before leaving)
+      const dates = eachDayOfInterval({
+        start: new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000), // checkin + 1 day
+        end: checkoutDate,
       });
+
+      return dates;
     } catch (e) {
       return [];
     }
@@ -50,6 +79,11 @@ export function BreakfastSelection({
   const handleToggleDate = (date: Date) => {
     if (isBreakfastAll) return;
 
+    if (!isValidBreakfastDate(date, checkinDate, checkoutDate)) {
+      console.warn("Attempted to select invalid breakfast date:", date);
+      return;
+    }
+
     const exists = breakfastDates.find((d) => isSameDay(d, date));
     let newDates: Date[];
 
@@ -58,7 +92,12 @@ export function BreakfastSelection({
     } else {
       newDates = [...breakfastDates, date];
     }
-    onSelectDates(newDates);
+
+    // Filter to ensure all dates remain valid (defensive)
+    const validDates = newDates.filter((d) =>
+      isValidBreakfastDate(d, checkinDate, checkoutDate)
+    );
+    onSelectDates(validDates);
   };
 
   return (
@@ -134,8 +173,17 @@ export function BreakfastSelection({
               <Calendar
                 mode="multiple"
                 selected={breakfastDates}
-                onSelect={(dates) => onSelectDates(dates || [])}
-                disabled={(date) => date < checkinDate || date >= checkoutDate}
+                onSelect={(dates) => {
+                  // Filter out any invalid dates (defensive)
+                  const validDates = (dates || []).filter((d) =>
+                    isValidBreakfastDate(d, checkinDate, checkoutDate)
+                  );
+                  onSelectDates(validDates);
+                }}
+                disabled={(date) =>
+                  // Breakfast only available from (checkin + 1) to checkout (inclusive)
+                  date <= checkinDate || date > checkoutDate
+                }
                 locale={vi}
                 numberOfMonths={2}
               />

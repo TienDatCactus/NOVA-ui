@@ -60,6 +60,7 @@ export const CreateItemFormSchema = z
     initialQuantity: z
       .number({ message: "Số lượng ban đầu phải là số" })
       .nonnegative("Số lượng ban đầu phải lớn hơn hoặc bằng 0"),
+    isActive: z.boolean(),
   })
   .refine((data) => data.minStock <= data.maxStock, {
     message: "Tồn kho tối thiểu phải nhỏ hơn hoặc bằng tồn kho tối đa",
@@ -102,6 +103,10 @@ export const UpdateItemFormSchema = z
   .refine((data) => data.minStock <= data.maxStock, {
     message: "Tồn kho tối thiểu phải nhỏ hơn hoặc bằng tồn kho tối đa",
     path: ["minStock"],
+  })
+  .refine((data) => data.unitCost <= data.unitPrice, {
+    message: "Giá nhập phải nhỏ hơn hoặc bằng giá bán",
+    path: ["unitCost"],
   });
 
 /**

@@ -7,7 +7,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "~/components/ui/sidebar";
-import { useAuthStore } from "~/store/auth.store";
+import { useAuth } from "~/lib/auth/components";
 import {
   SIDEBAR_NAV_MAIN,
   SIDEBAR_PROJECTS,
@@ -17,11 +17,9 @@ import { NavMain } from "./components/nav-main";
 import { NavProjects } from "./components/nav-projects";
 import { NavUser } from "./components/nav-user";
 import { TeamSwitcher } from "./components/switcher";
-import { useAuth } from "~/lib/auth/components";
-import { useLocation } from "react-router";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { canAccess, hasRole } = useAuth();
+  const { canAccess } = useAuth();
 
   const filteredNavMain = React.useMemo(() => {
     return SIDEBAR_NAV_MAIN.filter((item) => {

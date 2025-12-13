@@ -21,7 +21,15 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Separator } from "~/components/ui/separator";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import {
   createAddRoomOperation,
   createRemoveRoomOperation,
@@ -30,24 +38,15 @@ import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
-import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
-import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
-import { AddRoomModal } from "./operations/add-room-modal";
-import { Dropdown } from "react-day-picker";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 import ChangeRoomDialog from "../../bookings/components/change-room.dialog";
 import {
   canUpgradeRoom,
   type BookingState,
 } from "../container/use-booking-state.hooks";
+import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
+import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
+import { AddRoomModal } from "./operations/add-room-modal";
 import { UpgradeRoomDialog } from "./operations/upgrade-room-dialog";
-import { hasAnyRole } from "~/lib/auth/bouncer";
-import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -207,7 +206,7 @@ export default function BookingRoomsBar({
 
   return (
     <>
-      <Card className="shadow-sm flex flex-col w-96">
+      <Card className="shadow-sm hover:border-primary bg-background flex flex-col w-96">
         <CardHeader className="text-card-foreground ">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base  font-medium uppercase">

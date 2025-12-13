@@ -57,10 +57,9 @@ export default function CustomerInfoBar({
   bookingState,
 }: CustomerInfoBarProps) {
   return (
-    <div className="bg-background border rounded-lg p-5 shadow-sm">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-        {/* COLUMN 1: CUSTOMER IDENTITY (4 cols) */}
-        <div className="lg:col-span-4 space-y-4 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4">
+    <div className="bg-background  hover:border-primary border rounded-lg p-5 shadow-sm">
+      <div className="flex flex-col gap-4">
+        <div className="space-y-4 border-b ">
           <div className="space-y-1">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
               <User className="w-3.5 h-3.5" /> Khách hàng
@@ -102,9 +101,8 @@ export default function CustomerInfoBar({
           </div>
         </div>
 
-        {/* COLUMN 2: GUESTS & MEALS (4 cols) */}
-        <div className="lg:col-span-4 space-y-5 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className=" space-y-5 border-b ">
+          <div className="felx flex-col gap-4">
             <FormField
               control={form.control}
               name="adultsAmount"
@@ -223,7 +221,7 @@ export default function CustomerInfoBar({
         </div>
 
         {/* COLUMN 3: SOURCE & PAYMENT (4 cols) */}
-        <div className="lg:col-span-4 space-y-5">
+        <div className=" space-y-5">
           {/* OTA Section - Conditional */}
           {form.watch("otaInformationId") ? (
             <div className="grid grid-cols-2 gap-3">
@@ -279,7 +277,6 @@ export default function CustomerInfoBar({
               />
             </div>
           ) : (
-            // Visual Placeholder for Direct Bookings to maintain alignment
             <div className="hidden lg:flex h-[66px] border-2 border-dashed rounded-md bg-muted/10 items-center justify-center text-xs font-medium text-muted-foreground/70">
               Đặt trực tiếp (Direct Booking)
             </div>

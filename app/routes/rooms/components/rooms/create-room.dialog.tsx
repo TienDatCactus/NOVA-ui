@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Activity, BedDouble, Hash, Loader2, Plus } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import type z from "zod";
-import { BedDouble, Hash, Plus, X, Loader2, Activity } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -15,29 +15,28 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
-  SelectGroup,
-  SelectLabel,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 
-import { RoomSchema } from "~/services/api/rooms/room.schema";
-import { RoomStatusEnum } from "~/services/api/rooms/room.types";
-import { useCreateRoom } from "../../container/rooms/mutation.hooks";
-import { useRoomTypes } from "../../container/room-types/query.hooks";
 import { cn } from "~/lib/utils";
+import { RoomSchema } from "~/services/api/rooms/room.schema";
+import { useRoomTypes } from "../../container/room-types/query.hooks";
+import { useCreateRoom } from "../../container/rooms/mutation.hooks";
 import { ROOM_STATUS_CONFIG } from "../../fragments/rooms/status.cell";
 
 const { CreateRoomRequestSchema } = RoomSchema;
@@ -95,7 +94,7 @@ function CreateRoomDialog({ open, onClose }: CreateRoomDialogProps) {
             className="flex flex-col"
           >
             {/* === BODY === */}
-            <div className="p-6 space-y-6">
+            <div className="p-4 space-y-2">
               {/* Room Name Input */}
               <FormField
                 control={form.control}

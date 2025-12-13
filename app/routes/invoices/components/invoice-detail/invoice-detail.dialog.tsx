@@ -22,15 +22,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { InvoicesService } from "~/services/api/invoices";
+import { formatMoney } from "~/lib/utils";
 import type { InvoiceDetailItemDto } from "~/services/api/invoices/dto";
 import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import { useInvoiceDetail } from "../../container/invoices/query.hooks";
-import { formatMoney } from "~/lib/utils";
-import { AxiosError } from "axios";
-import type { error } from "console";
 import { useExportInvoice } from "../../container/invoices/mutation.hooks";
+import { useInvoiceDetail } from "../../container/invoices/query.hooks";
 
 type InvoiceDetailDialogProps = {
   open: boolean;

@@ -1,3 +1,4 @@
+import { AlertCircle, CheckCircle2, Info, Palette } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -11,7 +12,6 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import { AlertCircle, CheckCircle2, Info, Palette } from "lucide-react";
 
 export default function ColorSystemShowcase() {
   return (

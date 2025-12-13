@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -24,9 +23,6 @@ import { Progress } from "~/components/ui/progress";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
 
-import { cn, useCalculateNights } from "~/lib/utils";
-import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
-import { AvailableRoomRow } from "../fragments/available-room";
 import {
   Empty,
   EmptyDescription,
@@ -34,8 +30,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import type { BookingMasterSchema } from "..";
-import type z from "zod";
+import { cn, useCalculateNights } from "~/lib/utils";
+import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
+import { AvailableRoomRow } from "../fragments/available-room";
 
 interface RoomSelectionSectionProps {
   form: UseFormReturn<any>;
