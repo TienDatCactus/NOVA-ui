@@ -650,8 +650,8 @@ const BookingUpgradeRoomRequestSchema = z
   );
 
 const UnpaidRoomSchema = z.object({
-  bookingRoomId: z.uuid(),
-  roomId: z.uuid(),
+  bookingRoomId: z.string(),
+  roomId: z.string(),
   roomName: z.string(),
   roomTypeName: z.string(),
   totalCharge: z.number(),
@@ -663,7 +663,7 @@ const UnpaidRoomSchema = z.object({
 });
 
 const UnpaidRoomsForBookingSchema = z.object({
-  bookingId: z.uuid(),
+  bookingId: z.string(),
   bookingCode: z.string(),
   unpaidRooms: z.array(UnpaidRoomSchema),
   totalUnpaidAmount: z.number().min(0),

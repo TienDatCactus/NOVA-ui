@@ -6,14 +6,11 @@ import {
   ArrowRight,
   CheckCircle2,
   CreditCard,
-  FileText,
   Info,
   Loader2,
   Receipt,
-  Wallet,
 } from "lucide-react";
 import { useMemo } from "react";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -38,10 +35,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { cn, formatMoney } from "~/lib/utils";
-import {
-  INVOICE_STATUSES,
-  INVOICE_TYPES,
-} from "~/services/api/invoices/invoice.types";
+import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
 import { useCheckoutStore } from "~/store/checkout.store";
 import {
   useBookingPendingCharges,
@@ -53,10 +47,10 @@ import {
 import { useCheckoutEligibility } from "../../container/use-booking-state.hooks";
 import InvoiceDetailSheet from "./invoice-detail-sheet";
 
-import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
-import { hasAnyRole } from "~/lib/auth/bouncer";
-import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 import { toast } from "sonner";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
 interface CheckoutSheetProps {
   open: boolean;
@@ -169,7 +163,11 @@ export default function CheckoutSheet({
   const handleFinalCheckout = () => {
     finalizeCheckout(
       { actualCheckoutTime: new Date().toISOString() },
-      { onSuccess: () => onOpenChange(false) }
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+      }
     );
   };
 

@@ -243,17 +243,30 @@ export function useCheckout(bookingId: string) {
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
       });
-      // Invalidate all booking details
+      // Invalidate specific booking detail
       queryClient.invalidateQueries({
         queryKey: ["bookings-detail", bookingId],
+      });
+      // Also invalidate without ID to cover all variations
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail"],
       });
       // Invalidate booking-specific invoice list
       queryClient.invalidateQueries({
         queryKey: ["booking-invoices", bookingId],
       });
+      // Invalidate pending charges
+      queryClient.invalidateQueries({
+        queryKey: ["checkout", "pending-charges", bookingId],
+      });
       // Invalidate rooms week view
       queryClient.invalidateQueries({
         queryKey: ["bookings-rooms-week"],
+      });
+
+      // Force refetch to ensure UI updates immediately
+      queryClient.refetchQueries({
+        queryKey: ["bookings-detail", bookingId],
       });
     },
     onError: (error) => {
@@ -346,9 +359,8 @@ export function usePayNowRooms(bookingId: string) {
       toast.success("Thanh toán phòng thành công", {
         description: "Invoice đã được tạo và thanh toán.",
       });
-
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
@@ -358,6 +370,9 @@ export function usePayNowRooms(bookingId: string) {
       });
       queryClient.invalidateQueries({
         queryKey: ["checkout", "pending-charges", bookingId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["unpaid-rooms", bookingId],
       });
     },
     onError: (error) => {
@@ -398,11 +413,14 @@ export function useUpgradeRoom(bookingId: string) {
   });
 }
 
-export function useUnpaidRooms(bookingId: string) {
+export function useUnpaidRooms(
+  bookingId: string,
+  options?: { enabled: boolean }
+) {
   return useQuery({
     queryKey: ["unpaid-rooms", bookingId],
     queryFn: () => BookingService.unpaidRooms(bookingId),
-    enabled: !!bookingId,
+    enabled: options?.enabled ?? !!bookingId,
     staleTime: 5 * 60 * 1000,
   });
 }

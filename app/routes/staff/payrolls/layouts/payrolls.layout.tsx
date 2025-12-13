@@ -1,11 +1,4 @@
-import {
-  Download,
-  Loader2,
-  RefreshCw,
-  CalendarDays,
-  Calendar,
-} from "lucide-react";
-import { useState } from "react";
+import { CalendarDays, Download, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
@@ -15,16 +8,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
+import { Separator } from "~/components/ui/separator";
+import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 import type { PayrollFilterState } from "../container/filter.hooks";
 import {
   useExportMonthlyPayroll,
   useRefreshPayrollDays,
 } from "../container/query.hooks";
-import { cn } from "~/lib/utils";
-import { Separator } from "~/components/ui/separator";
-import { AxiosError } from "axios";
-import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 
 interface HeaderLayoutProps {
   filterState: PayrollFilterState;
@@ -159,20 +149,22 @@ export default function PayrollsLayout({
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 w-full md:w-auto justify-end p-2 pt-0 md:pt-2 md:pl-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRefreshDays}
-            disabled={isRefreshing}
-            className="h-9 text-muted-foreground hover:text-foreground"
-          >
-            {isRefreshing ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="mr-2 h-4 w-4" />
-            )}
-            Đồng bộ
-          </Button>
+          {hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefreshDays}
+              disabled={isRefreshing}
+              className="h-9 text-muted-foreground hover:text-foreground"
+            >
+              {isRefreshing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Đồng bộ
+            </Button>
+          )}
 
           <Separator orientation="vertical" className="h-6 hidden md:block" />
 

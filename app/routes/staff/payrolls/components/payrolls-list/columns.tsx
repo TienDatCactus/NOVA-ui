@@ -315,14 +315,11 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
   },
   {
     accessorKey: "locked",
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Trạng thái"
-        className="justify-center"
-      />
-    ),
+    header: () => null,
     cell: ({ row, table }) => {
+      if (!hasAnyRole(AuthLoader.getUser(), [UserRole.Accountant])) {
+        return null;
+      }
       const locked = row.getValue("locked") as boolean;
       const payroll = row.original;
       const onSuccess = (table.options.meta as any)?.onSuccess;

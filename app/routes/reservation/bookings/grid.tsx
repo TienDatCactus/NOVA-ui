@@ -1,11 +1,10 @@
 import { format } from "date-fns";
+import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/grid";
 import BookingGrid from "./components/booking-grid";
 import { useAvailableRoomsFilter } from "./container/available-booking-filter.hooks";
-import useBookingFilters from "./container/booking-filter.hooks";
 import { useAvailableRooms } from "./container/booking-query.hooks";
 import BookingGridFilters from "./fragments/booking-grid.filters";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -17,10 +16,7 @@ export function meta({}: Route.MetaArgs) {
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Bookings, Permission.Read);
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   const { filters, resetFilters, updateFilter } = useAvailableRoomsFilter();
 
   const {

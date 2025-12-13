@@ -1,7 +1,7 @@
-import { addDays, eachDayOfInterval, format, isSameDay } from "date-fns";
+import { eachDayOfInterval, format, isSameDay, subDays } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Calendar as CalendarIcon, Check, Coffee } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Calendar as CalendarIcon, Coffee } from "lucide-react";
+import { useMemo } from "react";
 
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -37,8 +37,8 @@ export function BreakfastSelection({
     if (!checkinDate || !checkoutDate || nights <= 0) return [];
     try {
       return eachDayOfInterval({
-        start: addDays(checkinDate, 1), // Morning after checkin
-        end: checkoutDate,
+        start: checkinDate,
+        end: subDays(checkoutDate, 1),
       });
     } catch (e) {
       return [];
@@ -135,7 +135,7 @@ export function BreakfastSelection({
                 mode="multiple"
                 selected={breakfastDates}
                 onSelect={(dates) => onSelectDates(dates || [])}
-                disabled={(date) => date <= checkinDate || date > checkoutDate}
+                disabled={(date) => date < checkinDate || date >= checkoutDate}
                 locale={vi}
                 numberOfMonths={2}
               />

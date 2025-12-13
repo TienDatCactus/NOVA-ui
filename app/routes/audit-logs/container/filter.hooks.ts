@@ -14,10 +14,29 @@ export function useAuditFilters() {
     key: K,
     value: AuditListParams[K]
   ) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilters((prev) => {
+      // Reset to page 1 when changing PageSize or any filter (except Page itself)
+      if (key === "PageSize") {
+        return {
+          ...prev,
+          [key]: value,
+          Page: 1, // Always reset to first page when changing page size
+        };
+      }
+
+      if (key !== "Page") {
+        return {
+          ...prev,
+          [key]: value,
+          Page: 1, // Reset to page 1 when applying new filters
+        };
+      }
+
+      return {
+        ...prev,
+        [key]: value,
+      };
+    });
   };
 
   const resetFilters = () => {

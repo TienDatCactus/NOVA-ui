@@ -1,10 +1,7 @@
-import { CalendarDays, Search, Users, X, Baby, Hotel } from "lucide-react";
+import { CalendarDays, Users, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { DatePicker } from "~/components/ui/date-picker";
-import { Input } from "~/components/ui/input";
-import { Separator } from "~/components/ui/separator";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import { cn } from "~/lib/utils";
 import type { AvailableRoomFilters } from "../container/available-booking-filter.hooks";
 
 interface BookingGridFiltersProps {

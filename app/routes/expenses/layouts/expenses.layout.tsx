@@ -1,11 +1,4 @@
-import {
-  CreditCard,
-  Filter,
-  LayoutList,
-  PieChart,
-  RotateCcw,
-  Tags,
-} from "lucide-react";
+import { Filter, LayoutList, PieChart, RotateCcw, Tags } from "lucide-react";
 import React from "react";
 import { Link } from "react-router";
 
@@ -21,14 +14,12 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { FE_URL } from "~/lib/fe-url";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import type { ExpensesFilter } from "../container/filter.hooks";
-import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
-import { useAuth } from "~/lib/auth/components";
-import { UserRole } from "~/lib/auth/roles";
-import { formatMoney } from "~/lib/utils";
 import { AuthLoader, hasRole } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
+import { FE_URL } from "~/lib/fe-url";
+import { formatMoney } from "~/lib/utils";
+import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
+import type { ExpensesFilter } from "../container/filter.hooks";
 
 // --- PROPS ---
 interface ExpensesLayoutProps {

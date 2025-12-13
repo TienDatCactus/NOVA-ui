@@ -17,18 +17,18 @@ export default function Component({}: Route.ComponentProps) {
           }}
         >
           <div className="absolute inset-0 bg-black/40"></div>
-          <div className="absolute p-6 top-0 text-accent-foreground flex items-center justify-center space-x-2">
+          <div className="absolute p-6 top-0 text-white flex items-center justify-center space-x-2">
             <div className="p-4 rounded-lg">
               <TreePalm className="size-10" />
             </div>
             <div>
               <h1 className="font-bold text-4xl">NOVA</h1>
-              <p className="text-sm text-muted">
+              <p className="text-sm text-white">
                 Network Operation for Vacation Accommodation
               </p>
             </div>
           </div>
-          <div className="absolute flex-col p-6 bottom-0 space-y-4 text-accent-foreground flex">
+          <div className="absolute flex-col p-6 bottom-0 space-y-4 text-white flex">
             <h2 className="text-3xl font-medium">Welcome to NOVA Platform</h2>
             <p>- NOVA Team -</p>
           </div>

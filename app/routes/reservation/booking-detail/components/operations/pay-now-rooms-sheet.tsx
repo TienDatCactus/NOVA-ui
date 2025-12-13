@@ -1,18 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
 import {
-  ArrowRight,
+  BedDouble,
   Check,
+  CheckCircle2,
+  CircleDollarSign,
   CreditCard,
   Info,
   Loader2,
+  Receipt,
+  Utensils,
   Wallet,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
@@ -37,7 +40,6 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
@@ -72,7 +74,9 @@ export function PayNowRoomsSheet({
   const { mutate: payNowRooms, isPending: isPaying } = usePayNowRooms(
     bookingDetail?.id || ""
   );
-  const { data: unpaidRoomsData } = useUnpaidRooms(bookingDetail?.id || "");
+  const { data: unpaidRoomsData } = useUnpaidRooms(bookingDetail?.id || "", {
+    enabled: open,
+  });
 
   const form = useForm<BookingPayForRoomRequestDto>({
     resolver: zodResolver(BookingSchema.BookingPayForRoomRequestSchema),
@@ -88,43 +92,52 @@ export function PayNowRoomsSheet({
   const paymentMethod = form.watch("paymentMethod");
   const paidAmount = form.watch("paidAmount");
 
-  // Calculate fees (VAT + Service Charge)
+  const unpaidRatio = useMemo(() => {
+    if (
+      !unpaidRoomsData?.unpaidRooms ||
+      unpaidRoomsData.unpaidRooms.length === 0
+    )
+      return 1;
+    const totalChargeAllRooms = unpaidRoomsData.unpaidRooms.reduce(
+      (sum, room) => sum + room.totalCharge,
+      0
+    );
+    if (totalChargeAllRooms === 0) return 1;
+    return (unpaidRoomsData.totalUnpaidAmount || 0) / totalChargeAllRooms;
+  }, [unpaidRoomsData]);
+
+  const selectedRoomsSubtotal = useMemo(() => {
+    if (!unpaidRoomsData?.unpaidRooms || selectedRoomIds.length === 0) return 0;
+    const selectedRoomsTotalCharge = unpaidRoomsData.unpaidRooms
+      .filter((room) => selectedRoomIds.includes(room.bookingRoomId))
+      .reduce((sum, room) => sum + room.totalCharge, 0);
+    return Math.round(selectedRoomsTotalCharge * unpaidRatio);
+  }, [unpaidRoomsData?.unpaidRooms, selectedRoomIds, unpaidRatio]);
+
   const { data: calculatedFees, refetch: refetchFees } =
     useCalculateInvoiceFees(
-      {
-        subtotalAmount: unpaidRoomsData?.totalUnpaidAmount || 0,
-        applyVat,
-        applyServiceCharge,
-      },
-      open && (unpaidRoomsData?.totalUnpaidAmount ?? 0) > 0
+      { subtotalAmount: selectedRoomsSubtotal, applyVat, applyServiceCharge },
+      open && selectedRoomsSubtotal > 0
     );
 
-  // Recalculate when toggles change
   useEffect(() => {
-    if ((unpaidRoomsData?.totalUnpaidAmount ?? 0) > 0 && open) {
-      refetchFees();
-    }
-  }, [
-    applyVat,
-    applyServiceCharge,
-    unpaidRoomsData?.totalUnpaidAmount || 0,
-    open,
-    refetchFees,
-  ]);
-  const totalWithFees = useMemo(() => {
-    return calculatedFees?.totalAmount || unpaidRoomsData?.totalUnpaidAmount;
-  }, [calculatedFees, unpaidRoomsData?.totalUnpaidAmount]);
+    if (selectedRoomsSubtotal > 0 && open) refetchFees();
+  }, [applyVat, applyServiceCharge, selectedRoomsSubtotal, open, refetchFees]);
+
+  const totalWithFees = useMemo(
+    () => calculatedFees?.totalAmount || selectedRoomsSubtotal,
+    [calculatedFees, selectedRoomsSubtotal]
+  );
 
   const paymentValidation = useMemo(() => {
-    if (!paidAmount || paidAmount <= 0) {
+    if (!paidAmount || paidAmount <= 0)
       return { isValid: false, error: "Số tiền phải lớn hơn 0" };
-    }
-    if (paidAmount > (totalWithFees ?? 0)) {
+    if (paidAmount > (totalWithFees ?? 0))
       return { isValid: false, error: "Số tiền vượt quá tổng phòng đã chọn" };
-    }
     return { isValid: true, error: null };
   }, [paidAmount, totalWithFees]);
 
+  // --- Handlers ---
   const toggleRoomSelection = (bookingRoomId: string) => {
     const current = form.getValues("bookingRoomIds");
     const newValue = current.includes(bookingRoomId)
@@ -150,26 +163,18 @@ export function PayNowRoomsSheet({
   };
 
   useEffect(() => {
-    if (!open) {
-      form.reset();
-    }
+    if (!open) form.reset();
   }, [open, form]);
 
-  const handleSubmit = form.handleSubmit(async (data) => {
+  const handleSubmit = form.handleSubmit((data) => {
     if (!paymentValidation.isValid) {
       toast.error(
         paymentValidation.error || "Thông tin thanh toán không hợp lệ"
       );
       return;
     }
-
     payNowRooms(
-      {
-        bookingRoomIds: data.bookingRoomIds,
-        paymentMethod: data.paymentMethod,
-        paidAmount: data.paidAmount,
-        transactionReference: data.transactionReference || undefined,
-      },
+      { ...data, transactionReference: data.transactionReference || undefined },
       {
         onSuccess: () => {
           toast.success("Thanh toán phòng thành công");
@@ -179,262 +184,263 @@ export function PayNowRoomsSheet({
     );
   });
 
-  const canSubmit = useMemo(() => {
-    return (
+  const canSubmit = useMemo(
+    () =>
       selectedRoomIds.length > 0 &&
       paymentMethod &&
       paymentValidation.isValid &&
-      !isPaying
-    );
-  }, [
-    selectedRoomIds.length,
-    paymentMethod,
-    paymentValidation.isValid,
-    isPaying,
-  ]);
+      !isPaying,
+    [selectedRoomIds.length, paymentMethod, paymentValidation.isValid, isPaying]
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[100vw] lg:max-w-5xl gap-0 p-0 flex flex-col bg-background"
+        className="w-full sm:max-w-[100vw] lg:max-w-5xl gap-0 p-0 flex flex-col bg-stone-50"
       >
         {/* HEADER */}
-        <SheetHeader className="px-6 py-4 border-b bg-background shrink-0">
-          <div className="space-y-1">
-            <SheetTitle className="text-xl flex items-center gap-2">
-              <Wallet className="h-5 w-5 text-primary" />
-              Thanh toán phòng ngay (InHouse Payment)
-            </SheetTitle>
-            <SheetDescription>
-              Chọn phòng cần thanh toán ngay trong lúc khách đang ở. Hệ thống sẽ
-              tạo invoice riêng cho các phòng này.
-            </SheetDescription>
+        <SheetHeader className="px-6 py-4 border-b bg-white shrink-0 shadow-sm z-10">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-emerald-100 rounded-lg text-emerald-700">
+              <Wallet className="h-6 w-6" />
+            </div>
+            <div className="space-y-0.5">
+              <SheetTitle className="text-xl">
+                Thanh toán phòng (In-house)
+              </SheetTitle>
+              <SheetDescription>
+                Tạo phiếu thu riêng cho từng phòng khi khách đang lưu trú.
+              </SheetDescription>
+            </div>
           </div>
         </SheetHeader>
 
         <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-          {/* LEFT COLUMN: ROOM SELECTION & PREVIEW */}
-          <ScrollArea className="flex-1 border-r bg-background">
+          {/* LEFT: ROOM SELECTION */}
+          <ScrollArea className="flex-1 border-r bg-stone-50/50">
             <div className="p-6 space-y-6">
-              <Form {...form}>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-semibold">
-                      Chọn phòng cần thanh toán
-                    </Label>
-                    {unpaidRoomsData?.unpaidRooms &&
-                      unpaidRoomsData?.unpaidRooms.length > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={toggleSelectAll}
-                          className="h-7 text-xs"
-                        >
-                          {selectedRoomIds.length ===
-                          unpaidRoomsData?.unpaidRooms.length
-                            ? "Bỏ chọn tất cả"
-                            : "Chọn tất cả"}
-                        </Button>
-                      )}
-                  </div>
-
-                  {unpaidRoomsData?.unpaidRooms.length === 0 ? (
-                    <Card className="p-6 text-center bg-muted/30">
-                      <p className="text-sm text-muted-foreground">
-                        Không có phòng nào khả dụng để thanh toán ngay.
-                        <br />
-                        Chức năng này chỉ áp dụng khi khách đang ở (CheckedIn).
-                      </p>
-                    </Card>
-                  ) : (
-                    <div className="space-y-2">
-                      {unpaidRoomsData?.unpaidRooms.map((room) => {
-                        const isSelected = selectedRoomIds.includes(
-                          room.bookingRoomId
-                        );
-                        return (
-                          <Card
-                            key={room.bookingRoomId}
-                            className={cn(
-                              "p-4 cursor-pointer transition-all hover:border-primary/50",
-                              isSelected && "border-primary bg-primary/5"
-                            )}
-                            onClick={() =>
-                              toggleRoomSelection(room.bookingRoomId)
-                            }
-                          >
-                            <div className="flex items-start gap-3">
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() =>
-                                  toggleRoomSelection(room.bookingRoomId)
-                                }
-                                className="mt-1"
-                              />
-                              <div className="flex-1 space-y-1">
-                                <div className="flex items-center justify-between">
-                                  <span className="font-medium text-foreground">
-                                    {room.roomName}
-                                  </span>
-                                  <span className="font-mono font-semibold text-primary">
-                                    {formatMoney(room.roomCharge).vndFormatted}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                  <span>{room.roomTypeName}</span>
-                                  <Separator
-                                    orientation="vertical"
-                                    className="h-3"
-                                  />
-                                  <span>
-                                    {format(
-                                      new Date(room.checkinDate),
-                                      "dd/MM/yyyy"
-                                    )}{" "}
-                                    →{" "}
-                                    {format(
-                                      new Date(room.checkoutDate),
-                                      "dd/MM/yyyy"
-                                    )}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
+              {/* Toolbar */}
+              <div className="flex items-center justify-between sticky top-0 bg-stone-50 z-10 pb-2 border-b border-stone-200/60 mb-4">
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <BedDouble className="h-4 w-4 text-muted-foreground" />
+                  Danh sách phòng chưa thanh toán
+                </Label>
+                {unpaidRoomsData?.unpaidRooms &&
+                  unpaidRoomsData?.unpaidRooms.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleSelectAll}
+                      className="h-8 text-xs font-medium text-primary hover:bg-primary/10"
+                    >
+                      {selectedRoomIds.length ===
+                      unpaidRoomsData?.unpaidRooms.length
+                        ? "Bỏ chọn tất cả"
+                        : "Chọn tất cả"}
+                    </Button>
                   )}
+              </div>
+
+              {/* Room Grid */}
+              {!unpaidRoomsData?.unpaidRooms?.length ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                  <div className="p-4 bg-white rounded-full mb-3 shadow-sm">
+                    <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                  </div>
+                  <p>Tất cả các phòng đã được thanh toán!</p>
                 </div>
+              ) : (
+                <div className="grid gap-3">
+                  {unpaidRoomsData?.unpaidRooms.map((room) => {
+                    const isSelected = selectedRoomIds.includes(
+                      room.bookingRoomId
+                    );
+                    return (
+                      <div
+                        key={room.bookingRoomId}
+                        onClick={() => toggleRoomSelection(room.bookingRoomId)}
+                        className={cn(
+                          "relative group flex items-start gap-4 p-4 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-md",
+                          isSelected
+                            ? "border-emerald-500 ring-1 ring-emerald-500 shadow-sm"
+                            : "border-stone-200 hover:border-emerald-300"
+                        )}
+                      >
+                        <Checkbox
+                          checked={isSelected}
+                          className={cn(
+                            "mt-1 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                          )}
+                        />
 
-                {/* Summary Section */}
-                {selectedRoomIds.length > 0 && (
-                  <>
-                    <Separator className="my-6" />
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-semibold">
-                        Tổng kết thanh toán
-                      </h3>
-                      <div className="border rounded-lg overflow-hidden bg-background">
-                        <div className="divide-y text-sm">
-                          <div className="flex justify-between p-4">
-                            <span className="text-muted-foreground">
-                              Số phòng đã chọn
-                            </span>
-                            <span className="font-medium">
-                              {selectedRoomIds.length} phòng
-                            </span>
-                          </div>
-                          <div className="flex justify-between p-4">
-                            <span className="text-muted-foreground">
-                              Subtotal
-                            </span>
-                            <span className="font-mono">
-                              {
-                                formatMoney(
-                                  unpaidRoomsData?.totalUnpaidAmount ?? 0
-                                ).vndFormatted
-                              }
-                            </span>
-                          </div>
-
-                          {/* VAT Toggle */}
-                          <div className="flex justify-between items-center p-4">
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={applyVat}
-                                onCheckedChange={setApplyVat}
-                                className="data-[state=checked]:bg-blue-600"
-                              />
-                              <span className="text-sm text-muted-foreground">
-                                VAT
-                              </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h4 className="font-bold text-foreground text-base">
+                                {room.roomName}
+                              </h4>
+                              <p className="text-xs text-muted-foreground">
+                                {room.roomTypeName}
+                              </p>
                             </div>
-                            <span className="font-mono text-sm">
-                              {applyVat && calculatedFees
-                                ? formatMoney(calculatedFees.vatAmount || 0)
-                                    .vndFormatted
-                                : "0 ₫"}
-                            </span>
-                          </div>
-
-                          {/* Service Charge Toggle */}
-                          <div className="flex justify-between items-center p-4">
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={applyServiceCharge}
-                                onCheckedChange={setApplyServiceCharge}
-                                className="data-[state=checked]:bg-blue-600"
-                              />
-                              <span className="text-sm text-muted-foreground">
-                                Phí dịch vụ
-                              </span>
-                            </div>
-                            <span className="font-mono text-sm">
-                              {applyServiceCharge && calculatedFees
-                                ? formatMoney(
-                                    calculatedFees.serviceChargeAmount || 0
+                            <div className="text-right">
+                              <p className="font-mono font-bold text-emerald-700">
+                                {
+                                  formatMoney(
+                                    room.roomCharge + room.breakfastCharge
                                   ).vndFormatted
-                                : "0 ₫"}
-                            </span>
+                                }
+                              </p>
+                              {room.nights > 0 && (
+                                <span className="text-[10px] bg-stone-100 px-1.5 py-0.5 rounded text-muted-foreground">
+                                  {room.nights} đêm
+                                </span>
+                              )}
+                            </div>
                           </div>
 
-                          <div className="flex justify-between items-center p-4 bg-emerald-50/50 dark:bg-emerald-900/20">
-                            <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-                              Tổng tiền
-                            </span>
-                            <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">
-                              {formatMoney(totalWithFees ?? 0).vndFormatted}
-                            </span>
+                          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground pt-2 border-t border-dashed">
+                            <div className="flex items-center gap-1.5">
+                              <BedDouble className="h-3.5 w-3.5" />
+                              Phòng:{" "}
+                              <span className="font-medium text-foreground">
+                                {formatMoney(room.roomCharge).vndFormatted}
+                              </span>
+                            </div>
+                            {room.breakfastCharge > 0 && (
+                              <>
+                                <Separator
+                                  orientation="vertical"
+                                  className="h-3"
+                                />
+                                <div className="flex items-center gap-1.5">
+                                  <Utensils className="h-3.5 w-3.5" />
+                                  Ăn sáng:{" "}
+                                  <span className="font-medium text-foreground">
+                                    {
+                                      formatMoney(room.breakfastCharge)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Calculation Breakdown */}
+              {selectedRoomIds.length > 0 && (
+                <div className="mt-8 bg-white rounded-xl border border-stone-200 overflow-hidden">
+                  <div className="bg-stone-50/50 px-4 py-3 border-b border-stone-200">
+                    <h3 className="font-semibold text-sm flex items-center gap-2">
+                      <Receipt className="h-4 w-4 text-muted-foreground" />
+                      Chi tiết thanh toán
+                    </h3>
+                  </div>
+
+                  <div className="p-4 space-y-3">
+                    <SummaryRow
+                      label={`Tiền phòng (${selectedRoomIds.length} phòng)`}
+                      value={selectedRoomsSubtotal}
+                    />
+                    {unpaidRatio < 1 && (
+                      <div className="flex justify-end text-xs text-orange-600 italic -mt-2 mb-2">
+                        *Đã trừ {Math.round((1 - unpaidRatio) * 100)}% tiền cọc
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between py-1">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={applyServiceCharge}
+                          onCheckedChange={setApplyServiceCharge}
+                          id="svc"
+                          className="h-4 w-7"
+                        />
+                        <Label htmlFor="svc" className="text-sm cursor-pointer">
+                          Phí dịch vụ
+                        </Label>
+                      </div>
+                      <span className="font-mono text-sm">
+                        {
+                          formatMoney(calculatedFees?.serviceChargeAmount || 0)
+                            .vndFormatted
+                        }
+                      </span>
                     </div>
-                  </>
-                )}
-              </Form>
+
+                    <div className="flex items-center justify-between py-1">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={applyVat}
+                          onCheckedChange={setApplyVat}
+                          id="vat"
+                          className="h-4 w-7"
+                        />
+                        <Label htmlFor="vat" className="text-sm cursor-pointer">
+                          VAT
+                        </Label>
+                      </div>
+                      <span className="font-mono text-sm">
+                        {
+                          formatMoney(calculatedFees?.vatAmount || 0)
+                            .vndFormatted
+                        }
+                      </span>
+                    </div>
+
+                    <Separator className="my-2" />
+
+                    <div className="flex justify-between items-center pt-1">
+                      <span className="font-bold text-base">Tổng cộng</span>
+                      <span className="font-mono font-bold text-xl text-emerald-700">
+                        {formatMoney(totalWithFees ?? 0).vndFormatted}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </ScrollArea>
 
-          {/* RIGHT COLUMN: PAYMENT FORM */}
-          <div className="w-full lg:w-[420px] bg-background border-l flex flex-col h-full">
-            <div className="p-6 flex-1 overflow-y-auto">
-              <Form {...form}>
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CreditCard className="w-4 h-4" />
-                    <span className="font-semibold uppercase tracking-wide">
-                      Thông tin thanh toán
-                    </span>
-                  </div>
+          {/* RIGHT: PAYMENT FORM */}
+          <div className="w-full lg:w-[400px] bg-white border-l shadow-[-4px_0_24px_rgba(0,0,0,0.02)] flex flex-col h-full z-20">
+            <Form {...form}>
+              <div className="p-6 flex-1 overflow-y-auto space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold flex items-center gap-2 text-stone-800">
+                    <CreditCard className="h-5 w-5 text-emerald-600" />
+                    Thông tin thanh toán
+                  </h3>
 
                   {selectedRoomIds.length === 0 ? (
-                    <Card className="p-6 text-center bg-muted/10">
-                      <Info className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        Vui lòng chọn ít nhất một phòng để tiếp tục thanh toán
-                      </p>
-                    </Card>
+                    <div className="rounded-lg bg-stone-50 border border-dashed border-stone-300 p-6 text-center text-sm text-muted-foreground">
+                      Vui lòng chọn phòng bên trái để tiếp tục.
+                    </div>
                   ) : (
                     <>
-                      {/* Payment Method */}
                       <FormField
                         control={form.control}
                         name="paymentMethod"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs">
-                              Phương thức thanh toán{" "}
-                              <span className="text-destructive">*</span>
+                            <FormLabel>
+                              Phương thức{" "}
+                              <span className="text-red-500">*</span>
                             </FormLabel>
                             <Select
-                              value={field.value}
                               onValueChange={field.onChange}
+                              value={field.value}
                             >
                               <FormControl>
-                                <SelectTrigger className="h-10">
-                                  <SelectValue placeholder="Chọn phương thức..." />
+                                <SelectTrigger className="bg-stone-50 border-stone-200">
+                                  <SelectValue placeholder="Chọn phương thức" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -444,8 +450,10 @@ export function PayNowRoomsSheet({
                                     value={method.value}
                                   >
                                     <div className="flex items-center gap-2">
-                                      <CreditCard className="h-3.5 w-3.5" />
-                                      <span>{method.label}</span>
+                                      <div className="p-1 bg-stone-100 rounded">
+                                        <CreditCard className="h-3 w-3" />
+                                      </div>
+                                      {method.label}
                                     </div>
                                   </SelectItem>
                                 ))}
@@ -456,69 +464,57 @@ export function PayNowRoomsSheet({
                         )}
                       />
 
-                      {/* Paid Amount */}
                       <FormField
                         control={form.control}
                         name="paidAmount"
                         render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center justify-between">
-                              <FormLabel className="text-xs">
-                                Số tiền thanh toán{" "}
-                                <span className="text-destructive">*</span>
-                              </FormLabel>
-                              <div className="flex gap-1.5">
-                                <Button
-                                  type="button"
+                          <FormItem className="space-y-3">
+                            <FormLabel className="flex justify-between items-center">
+                              <span>
+                                Số tiền trả{" "}
+                                <span className="text-red-500">*</span>
+                              </span>
+                              <div className="flex gap-1">
+                                <Badge
                                   variant="outline"
-                                  size="sm"
+                                  className="cursor-pointer hover:bg-stone-100 font-normal"
                                   onClick={() => handleQuickAmount(0.5)}
-                                  className="h-6 px-2 text-xs"
                                 >
                                   50%
-                                </Button>
-                                <Button
-                                  type="button"
+                                </Badge>
+                                <Badge
                                   variant="outline"
-                                  size="sm"
+                                  className="cursor-pointer hover:bg-stone-100 font-normal"
                                   onClick={() => handleQuickAmount(1)}
-                                  className="h-6 px-2 text-xs"
                                 >
                                   100%
-                                </Button>
+                                </Badge>
                               </div>
-                            </div>
+                            </FormLabel>
                             <div className="relative">
                               <FormControl>
-                                <Input
-                                  type="number"
-                                  placeholder="0"
-                                  {...field}
-                                  className="pl-3 pr-12 h-10 font-mono"
-                                  max={totalWithFees}
-                                />
+                                <div className="relative">
+                                  <CircleDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    className="pl-9 font-mono text-lg font-semibold bg-stone-50 border-stone-200 focus-visible:ring-emerald-500"
+                                    max={totalWithFees}
+                                  />
+                                </div>
                               </FormControl>
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium pointer-events-none">
-                                VND
-                              </span>
                             </div>
-                            {field.value &&
-                              field.value < (totalWithFees ?? 0) && (
-                                <p className="text-xs text-orange-600">
-                                  Còn thiếu:{" "}
-                                  {
-                                    formatMoney(
-                                      (totalWithFees ?? 0) - field.value
-                                    ).vndFormatted
-                                  }
-                                </p>
-                              )}
-                            {!paymentValidation.isValid &&
-                              paymentValidation.error && (
-                                <p className="text-xs text-destructive">
-                                  {paymentValidation.error}
-                                </p>
-                              )}
+                            {field.value < (totalWithFees ?? 0) && (
+                              <p className="text-xs text-orange-600 font-medium flex items-center gap-1">
+                                <Info className="h-3 w-3" />
+                                Còn thiếu:{" "}
+                                {
+                                  formatMoney(
+                                    (totalWithFees ?? 0) - field.value
+                                  ).vndFormatted
+                                }
+                              </p>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
@@ -529,15 +525,12 @@ export function PayNowRoomsSheet({
                         name="transactionReference"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs">
-                              Mã giao dịch (tùy chọn)
-                            </FormLabel>
+                            <FormLabel>Mã giao dịch (Ref No)</FormLabel>
                             <FormControl>
                               <Input
-                                type="text"
-                                placeholder="VD: TXN123456"
                                 {...field}
-                                className="h-10"
+                                placeholder="VD: 492042"
+                                className="bg-stone-50 border-stone-200"
                               />
                             </FormControl>
                             <FormMessage />
@@ -547,51 +540,48 @@ export function PayNowRoomsSheet({
                     </>
                   )}
                 </div>
-              </Form>
-            </div>
+              </div>
 
-            {/* Footer Actions */}
-            <div className="p-4 bg-background border-t shrink-0">
-              <Button
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                className="w-full h-11"
-                variant={canSubmit ? "default" : "secondary"}
-              >
-                {isPaying ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang xử lý...
-                  </>
-                ) : (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Xác nhận thanh toán
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </div>
+              {/* PAYMENT BUTTON AREA */}
+              <div className="p-6 border-t bg-stone-50">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                  className={cn(
+                    "w-full h-12 text-base shadow-lg transition-all",
+                    canSubmit
+                      ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                      : ""
+                  )}
+                >
+                  {isPaying ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Đang xử
+                      lý...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-5 w-5" /> Xác nhận thanh toán
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Form>
           </div>
         </div>
-
-        {/* SHEET FOOTER */}
-        <SheetFooter className="p-4 border-t bg-background shrink-0 flex-row items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Info className="w-4 h-4" />
-            <span>
-              Invoice sẽ được tạo tự động sau khi thanh toán thành công
-            </span>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPaying}
-          >
-            Đóng
-          </Button>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
+  );
+}
+
+// Helper
+function SummaryRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex justify-between items-center text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-mono font-medium text-foreground">
+        {formatMoney(value).vndFormatted}
+      </span>
+    </div>
   );
 }

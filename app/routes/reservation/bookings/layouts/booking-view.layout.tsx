@@ -1,10 +1,10 @@
+import { LayoutGrid, List } from "lucide-react";
 import { type ReactNode } from "react";
-import { Grid3x3, List, LayoutGrid } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
-import type { BookingSearchFilters } from "../container/booking-filter.hooks";
+import { cn } from "~/lib/utils";
 import SearchRoom from "../components/search";
+import type { BookingSearchFilters } from "../container/booking-filter.hooks";
 
 type ViewMode = "grid" | "list";
 

@@ -2,21 +2,16 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type RowSelectionState,
-  type VisibilityState,
   type SortingState,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { FileDown, Search, SlidersHorizontal, X } from "lucide-react";
-import React, { useState } from "react";
-import { DataTableViewOptions } from "~/components/table/colum-toggle";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import { SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -59,9 +54,9 @@ export function DataTable<TData extends AuditListItem, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
+    manualPagination: true, // Important: Tell TanStack Table we're handling pagination ourselves
   });
 
   return (

@@ -1,29 +1,30 @@
-import React, { useState } from "react";
 import { format } from "date-fns";
 import {
   Activity,
   Archive,
-  CalendarDays,
   Check,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Database,
   Download,
   Eraser,
-  Filter,
   LayoutGrid,
   MousePointerClick,
   RotateCcw,
   Search,
   User,
-  X,
 } from "lucide-react";
+import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
+import { DateRangePicker } from "~/components/ui/date-range-picker";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "~/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -31,38 +32,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Switch } from "~/components/ui/switch";
-import { DateRangePicker } from "~/components/ui/date-range-picker";
 import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
+import { Switch } from "~/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "~/components/ui/pagination";
-import { cn, formatMoney } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 
 import type { AuditListParams } from "~/services/api/audit/audit.types";
 import {
-  AuditModuleEnum,
   AuditActionEnum,
+  AuditModuleEnum,
 } from "~/services/api/audit/audit.types";
 
 // Import các dialog đã refactor ở các bước trước
+import { useUsers } from "~/routes/users/container/query.hooks";
 import ArchiveAuditDialog from "../fragments/archive-audit.dialog";
 import CleanupAuditDialog from "../fragments/cleanup-audit.dialog";
 import ExportAuditDialog from "../fragments/export-audit.dialog";
-import users from "~/routes/users/users";
-import { useUsers } from "~/routes/users/container/query.hooks";
 
 interface AuditLogsLayoutProps {
   children: React.ReactNode;
@@ -159,15 +149,14 @@ const AuditLogsLayout = ({
           <div className="p-2.5 bg-background border rounded-xl shadow-sm text-primary">
             <Activity className="w-6 h-6" />
           </div>
-          <div>
+          <div className="grio gap-1">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               Lịch sử truy vấn
             </h1>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Database className="w-3.5 h-3.5" />
               <span>
-                Tổng <strong>{formatMoney(totalItems).vndFormatted}</strong> bản
-                ghi
+                Tổng <strong>{totalItems}</strong> bản ghi
               </span>
             </div>
           </div>
@@ -452,7 +441,7 @@ const AuditLogsLayout = ({
             <div className="flex items-center gap-2">
               <Label>Số bản ghi mỗi trang:</Label>
               <Select
-                value={String(filters.PageSize || 20)}
+                value={filters.PageSize + ""}
                 onValueChange={(val) => updateFilter("PageSize", Number(val))}
               >
                 <SelectTrigger className="h-8 w-[70px]">

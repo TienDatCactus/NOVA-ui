@@ -1,13 +1,11 @@
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   BookOpenCheck,
-  Calendar as CalendarIcon,
   CheckCircle2,
   Download,
   RotateCcw,
   Search,
-  X,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -23,12 +21,11 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import { BookingService } from "~/services/api/booking";
 
 // Giả lập data type nếu chưa import được
 import type { BookingSearchFilters } from "../container/booking-filter.hooks";
-import { AxiosError } from "axios";
 import { useExportBookings } from "../container/booking-mutation.hooks";
+import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 
 interface SearchRoomProps {
   filters: BookingSearchFilters;
@@ -107,15 +104,17 @@ function SearchRoom({ filters, updateFilters, resetFilters }: SearchRoomProps) {
           <RotateCcw />
         </Button>
 
-        <Button
-          variant="success"
-          size="sm"
-          onClick={() => setOpenExportDialog(true)}
-          disabled={isExporting}
-        >
-          <Download className="h-4 w-4" />
-          <span className="hidden sm:inline">Xuất Excel</span>
-        </Button>
+        {hasRole(AuthLoader.getUser(), UserRole.Receptionist) && (
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() => setOpenExportDialog(true)}
+            disabled={isExporting}
+          >
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Xuất Excel</span>
+          </Button>
+        )}
       </div>
 
       {/* Export Dialog */}
