@@ -280,11 +280,10 @@ export default function CreateHolidayDialog({
                       <div className="flex items-center justify-between space-x-4">
                         <div className="space-y-0.5">
                           <FormLabel className="text-sm font-semibold">
-                            Ngày lễ Quốc gia (Public Holiday)
+                            Trạng thái hoạt động 
                           </FormLabel>
                           <FormDescription className="text-xs">
-                            Nhân viên sẽ được hưởng chế độ lương x3 hoặc x4 tùy
-                            theo quy định.
+                            Thay đổi trạng thái hoạt động của ngày nghỉ
                           </FormDescription>
                         </div>
                         <FormControl>

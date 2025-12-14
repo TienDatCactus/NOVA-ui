@@ -13,12 +13,19 @@ const UserSchema = z.object({
 });
 const LoginSchema = z.object({
   userNameOrEmail: z.union([
-    z.email("Email không hợp lệ"),
-    z.string().min(2, "Mã quản lý phải có ít nhất 2 ký tự"),
+    z
+      .string()
+      .min(2, "Mã quản lý phải có ít nhất 2 ký tự")
+      .max(32, "Mã quản lý không được quá 32 kí tự")
+      .regex(/^[a-zA-Z0-9]+$/, "Mã quản lý không được chứa kí tự đặc biệt"),
   ]),
   password: z
     .string("Mật khẩu không hợp lệ")
     .min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+  // .regex(
+  //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+  //   "Mật khẩu cần chứa chữ hoa, chữ thường, số và ký tự đặc biệt"
+  // ),
 });
 
 const ResetPasswordSchema = z

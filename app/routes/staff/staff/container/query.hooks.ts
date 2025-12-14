@@ -54,7 +54,9 @@ export function useCreateStaff() {
       toast.success("Tạo nhân sự thành công");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi tạo nhân sự");
+      const errorMessage =
+        error?.response?.data?.message || "Lỗi khi tạo nhân sự";
+      toast.error(errorMessage);
     },
   });
 }

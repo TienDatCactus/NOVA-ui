@@ -23,7 +23,7 @@ export const columns: ColumnDef<UserItem>[] = [
             variant="link"
             size="sm"
           >
-            {row.getValue("fullName")}
+            {row.getValue("userName")}
           </Button>
           <UserDetailDialog
             open={openDetailDialog}

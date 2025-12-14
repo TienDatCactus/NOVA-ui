@@ -162,7 +162,7 @@ const ServiceOrderListByBookingDetailSchema = z.array(
 const ServiceOrderListItemSchema = z.object({
   id: z.string().optional(),
   bookingId: z.string().optional(),
-  serviceItemId: z.string().optional(),
+  serviceItemId: z.string().optional().nullable(),
   customServiceName: z.string().optional().nullable(),
   serviceName: z.string().optional(),
   quantity: z.number().min(0),
@@ -177,7 +177,7 @@ const ServiceOrderListSchema = z.array(ServiceOrderListItemSchema);
 const CreateServiceOrderRequestSchema = z.object({
   bookingId: z.string().optional().nullable(),
   bookingRoomId: z.string().optional().nullable(),
-  serviceItemId: z.string(),
+  serviceItemId: z.string().nullable(),
   customServiceName: z.string().min(2).max(100).optional().nullable(),
   customServiceDescription: z.string().min(2).max(500).optional().nullable(),
   scheduledAt: z.string().optional().nullable(),
@@ -188,7 +188,7 @@ const CreateServiceOrderRequestSchema = z.object({
 });
 const CreateServiceOrderResponseSchema = z.object({
   serviceOrderId: z.string().optional(),
-  serviceItemId: z.string().optional(),
+  serviceItemId: z.string().optional().nullable(),
   customServiceName: z.string().optional().nullable(),
   serviceItemName: z.string().optional(),
   scheduledAt: z.string().optional(),
@@ -211,7 +211,7 @@ const ServiceOrderDetailSchema = z.object({
   id: z.string(),
   bookingId: z.string(),
   bookingRoomId: z.string().optional().nullable(),
-  serviceItemId: z.string(),
+  serviceItemId: z.string().nullable(),
   customServiceName: z.string().optional().nullable(),
   serviceItemName: z.string(),
   serviceItemCode: z.string(),

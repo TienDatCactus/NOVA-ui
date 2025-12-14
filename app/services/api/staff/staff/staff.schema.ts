@@ -40,11 +40,14 @@ const StaffDetailSchema = z.object({
 
 // Create Staff Schema (for API requests)
 const CreateStaffSchema = z.object({
-  code: z.string().min(1, "Mã nhân sự là bắt buộc"),
+  code: z
+    .string()
+    .min(1, "Mã nhân sự là bắt buộc")
+    .regex(/^\S+$/, "Mã nhân sự không được chứa khoảng trắng"),
   fullName: z.string("Họ tên không hợp lệ").min(1, "Họ tên là bắt buộc"),
   phoneNumber: z
     .string("Số điện thoại không hợp lệ")
-    .min(1, "Số điện thoại là bắt buộc"),
+    .regex(/^\d{10}$/, "Số điện thoại phải chứa đúng 10 chữ số"),
   email: z.email("Email không hợp lệ").optional(),
   gender: z.string("Giới tính không hợp lệ").optional(),
   dateOfBirth: z.date().optional(),
