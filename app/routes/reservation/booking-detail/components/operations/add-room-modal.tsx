@@ -1,13 +1,6 @@
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  BedDouble,
-  CheckCircle2,
-  Loader2,
-  Plus,
-  SearchX,
-  Users,
-} from "lucide-react";
+import { BedDouble, Loader2, Plus, SearchX, Users } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "~/components/ui/badge";
@@ -27,15 +20,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
 import { cn, formatMoney } from "~/lib/utils";
 import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
@@ -55,7 +41,6 @@ export function AddRoomModal({
 }: AddRoomModalProps) {
   const [addingRoomId, setAddingRoomId] = useState<string | null>(null);
 
-  // Format dates for display and API
   const checkInStr = bookingDetail?.checkinDate
     ? format(bookingDetail.checkinDate, "yyyy-MM-dd")
     : "";
@@ -78,10 +63,15 @@ export function AddRoomModal({
     );
 
   const handleAddRoom = async (roomId: string) => {
-    setAddingRoomId(roomId);
-    onAddRoom(roomId);
-    setAddingRoomId(null);
-    onOpenChange(false);
+    try {
+      setAddingRoomId(roomId);
+      onAddRoom(roomId);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAddingRoomId(null);
+      onOpenChange(false);
+    }
   };
 
   return (

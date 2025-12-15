@@ -1,6 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format, parseISO } from "date-fns";
+import { vi } from "date-fns/locale";
+import { CalendarIcon, Loader2, Lock, Mail } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +24,11 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -27,34 +36,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
+import { Textarea } from "~/components/ui/textarea";
+import { cn } from "~/lib/utils";
 import type {
   StaffListItemDto,
   UpdateStaffDto,
 } from "~/services/api/staff/staff/dto";
-import { toast } from "sonner";
-import { format, parseISO } from "date-fns";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { vi } from "date-fns/locale";
-import {
-  CalendarIcon,
-  UserCog,
-  BadgeInfo,
-  Phone,
-  Briefcase,
-  Mail,
-  Lock,
-  Loader2,
-} from "lucide-react";
-import { Calendar } from "~/components/ui/calendar";
-import { cn } from "~/lib/utils";
 import { StaffSchema } from "~/services/api/staff/staff/staff.schema";
 import { useStaffRoleList } from "../../staff-role/container/query.hooks";
 import { useStaffDetail, useUpdateStaff } from "../container/query.hooks";
-import { Separator } from "~/components/ui/separator";
 
 interface EditStaffDialogProps {
   open: boolean;
@@ -96,7 +87,7 @@ export default function EditStaffDialog({
   // Effect: Reset form khi có dữ liệu chi tiết từ API
   useEffect(() => {
     if (staffDetail && open) {
-      const formData = {
+      form.reset({
         fullName: staffDetail.fullName || "",
         phoneNumber: staffDetail.phoneNumber || "",
         email: staffDetail.email || "",
@@ -114,29 +105,9 @@ export default function EditStaffDialog({
             ? parseISO(staffDetail.startDate)
             : staffDetail.startDate
           : undefined,
-      };
-
-      console.log("Populating form with staff detail:", formData);
-      form.reset(formData);
-    }
-  }, [staffDetail, open]);
-
-  // Effect: Reset form when dialog closes
-  useEffect(() => {
-    if (!open) {
-      form.reset({
-        fullName: "",
-        phoneNumber: "",
-        email: "",
-        gender: "",
-        dateOfBirth: undefined,
-        citizenId: "",
-        startDate: undefined,
-        note: "",
-        staffRoleId: "",
       });
     }
-  }, [open]);
+  }, [form, staffDetail]);
 
   const onSubmit = async (data: UpdateStaffDto) => {
     if (!staff?.id) return;
@@ -362,10 +333,7 @@ export default function EditStaffDialog({
                             Chức vụ / Chức vụ{" "}
                             <span className="text-destructive">*</span>
                           </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
+                          <Select {...field}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Chọn Chức vụ" />

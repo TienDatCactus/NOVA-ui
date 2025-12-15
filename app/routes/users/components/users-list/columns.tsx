@@ -1,12 +1,12 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "~/components/ui/badge";
+import { useState } from "react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { ROLE_LABELS } from "~/lib/auth/roles";
 import type { UserItem } from "~/services/api/user/dto";
 import ActionsMenuCell from "../../fragments/actions.cell";
-import { Button } from "~/components/ui/button";
-import { useState } from "react";
 import { UserDetailDialog } from "../user-detail-dialog";
-import { ROLE_HIERARCHY, ROLE_LABELS } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<UserItem>[] = [
   {
@@ -23,7 +23,7 @@ export const columns: ColumnDef<UserItem>[] = [
             variant="link"
             size="sm"
           >
-            {row.getValue("fullName")}
+            {row.getValue("userName")}
           </Button>
           <UserDetailDialog
             open={openDetailDialog}

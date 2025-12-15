@@ -139,6 +139,8 @@ export default function BookingRoomsBar({
       }
 
       const checkinDate = form.watch("checkinDate");
+      const actualCheckinDate =
+        new Date() > checkinDate! ? new Date() : checkinDate;
       const checkoutDate = form.watch("checkoutDate");
 
       // Validate dates exist
@@ -147,23 +149,14 @@ export default function BookingRoomsBar({
         return;
       }
 
-      const isCheckIn =
-        bookingDetail.status === "CheckedIn" ||
-        bookingDetail.status === "InHouse";
+      const isCheckIn = bookingDetail.status === "InHouse";
 
-      let fromDate: string | null;
-      if (isCheckIn) {
-        // When InHouse, new room starts from TODAY
-        fromDate = format(new Date(), "yyyy-MM-dd");
-      } else {
-        // For Pending/Confirmed: use booking's checkin date
-        fromDate =
-          checkinDate instanceof Date
-            ? format(checkinDate, "yyyy-MM-dd")
-            : typeof checkinDate === "string"
-              ? checkinDate
-              : null;
-      }
+      const fromDate =
+        actualCheckinDate instanceof Date
+          ? format(actualCheckinDate, "yyyy-MM-dd")
+          : typeof actualCheckinDate === "string"
+            ? actualCheckinDate
+            : null;
 
       const toDate =
         checkoutDate instanceof Date
@@ -177,7 +170,6 @@ export default function BookingRoomsBar({
         return;
       }
 
-      // Validate: If CheckedIn, today must be before checkout (at least 1 night)
       if (isCheckIn) {
         const today = new Date();
         const checkout =
@@ -190,14 +182,10 @@ export default function BookingRoomsBar({
         }
       }
 
-      // Use helper function with built-in validation
       const operation = createAddRoomOperation(roomId, fromDate, toDate);
-
-      // Append validated operation
       append(operation);
       toast.success("Đã thêm phòng mới");
     } catch (error) {
-      console.error("Add room failed:", error);
       toast.error(
         error instanceof Error ? error.message : "Thêm phòng thất bại"
       );

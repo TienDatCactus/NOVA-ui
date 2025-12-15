@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -22,12 +21,12 @@ import {
 import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
+import type { UpdateStaffRoleDto } from "~/services/api/staff/staff-role/dto";
+import { StaffRoleSchema } from "~/services/api/staff/staff-role/staff-role.schema";
 import {
   useStaffRoleDetail,
   useUpdateStaffRole,
 } from "../container/query.hooks";
-import type { UpdateStaffRoleDto } from "~/services/api/staff/staff-role/dto";
-import { StaffRoleSchema } from "~/services/api/staff/staff-role/staff-role.schema";
 
 interface EditRoleDialogProps {
   open: boolean;

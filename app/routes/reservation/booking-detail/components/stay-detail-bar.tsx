@@ -64,7 +64,12 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
-import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
+import {
+  AuthLoader,
+  hasAnyRole,
+  hasRole,
+  UserRole,
+} from "~/lib/auth/auth.loader";
 import { formatMoney } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
@@ -258,7 +263,8 @@ export default function StayDetailBar({
                   <DoorOpen className="w-4 h-4 mr-2" /> Xác nhận bảo trì
                 </Button>
               ) : bookingDetail.source !== "RoomBlock" ? (
-                bookingDetail.status === "Pending" && (
+                bookingDetail.status === "Pending" &&
+                hasRole(AuthLoader.getUser(), UserRole.Receptionist) && (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="info-outline" size="sm">

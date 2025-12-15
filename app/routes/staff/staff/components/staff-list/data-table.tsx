@@ -20,9 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import CreateStaffDialog from "../staff-create-dialog";
-import { hasAnyRole, hasRole } from "~/lib/auth/bouncer";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import CreateStaffDialog from "../staff-create-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

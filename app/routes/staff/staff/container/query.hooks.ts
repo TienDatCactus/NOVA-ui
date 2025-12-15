@@ -7,6 +7,7 @@ import type {
   TerminateStaffDto,
 } from "~/services/api/staff/staff/dto";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 /**
  * Hook to fetch staff list
@@ -53,8 +54,10 @@ export function useCreateStaff() {
       });
       toast.success("Tạo nhân sự thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi tạo nhân sự");
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.message || "Lỗi khi tạo nhân sự");
+      }
     },
   });
 }
@@ -79,6 +82,11 @@ export function useUpdateStaff() {
       });
       toast.success("Cập nhật nhân sự thành công");
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.message || "Lỗi khi cập nhật nhân sự");
+      }
+    },
   });
 }
 
@@ -96,6 +104,11 @@ export function useDeleteStaff() {
         refetchType: "active",
       });
       toast.success("Xóa nhân sự thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.message || "Lỗi khi xóa nhân sự");
+      }
     },
   });
 }
@@ -120,8 +133,10 @@ export function useTerminateStaff() {
       });
       toast.success("Kết thúc hợp đồng nhân sự thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi kết thúc hợp đồng nhân sự");
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.message || "Lỗi khi kết thúc hợp đồng nhân sự");
+      }
     },
   });
 }

@@ -1,16 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
 import { addDays, format, isSameDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
-  CalendarIcon,
-  ChevronDown,
+  BarChart3,
   ChevronLeft,
   ChevronRight,
-  Download,
   RotateCcw,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import type z from "zod";
 
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -18,9 +15,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import {
@@ -37,28 +31,83 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
-import { ReportsService } from "~/services/api/reports";
-import { ReportsSchema } from "~/services/api/reports/reports.schema";
 import useReports from "../container/reservation-reports-query";
 
 // --- Types & Config ---
-const { ReservationReportsSchema } = ReportsSchema;
-type ReservationReportsData = z.infer<typeof ReservationReportsSchema>;
 
 type CategoryKey = "available" | "booked" | "checkin" | "checkout";
 
 interface ReportCategoryConfig {
   key: CategoryKey;
   label: string;
-  baseColor: string; // Tailwind color class base
+  colors: {
+    bg: string;
+    text: string;
+    border: string;
+    intensity: [string, string, string]; // Low, Med, High
+  };
 }
 
 const CATEGORIES: ReportCategoryConfig[] = [
-  { key: "available", label: "Phòng trống", baseColor: "bg-emerald" },
-  { key: "booked", label: "Đã đặt", baseColor: "bg-blue" },
-  { key: "checkin", label: "Check-in", baseColor: "bg-orange" },
-  { key: "checkout", label: "Check-out", baseColor: "bg-purple" },
+  {
+    key: "available",
+    label: "Phòng trống",
+    colors: {
+      bg: "bg-emerald-100 dark:bg-emerald-900/30",
+      text: "text-emerald-900 dark:text-emerald-100",
+      border: "border-emerald-200",
+      intensity: [
+        "bg-emerald-50/50 text-emerald-700",
+        "bg-emerald-200/50 text-emerald-800 font-medium",
+        "bg-emerald-400/30 text-emerald-900 font-bold",
+      ],
+    },
+  },
+  {
+    key: "booked",
+    label: "Đã đặt",
+    colors: {
+      bg: "bg-blue-100 dark:bg-blue-900/30",
+      text: "text-blue-900 dark:text-blue-100",
+      border: "border-blue-200",
+      intensity: [
+        "bg-blue-50/50 text-blue-700",
+        "bg-blue-200/50 text-blue-800 font-medium",
+        "bg-blue-400/30 text-blue-900 font-bold",
+      ],
+    },
+  },
+  {
+    key: "checkin",
+    label: "Check-in",
+    colors: {
+      bg: "bg-orange-100 dark:bg-orange-900/30",
+      text: "text-orange-900 dark:text-orange-100",
+      border: "border-orange-200",
+      intensity: [
+        "bg-orange-50/50 text-orange-700",
+        "bg-orange-200/50 text-orange-800 font-medium",
+        "bg-orange-400/30 text-orange-900 font-bold",
+      ],
+    },
+  },
+  {
+    key: "checkout",
+    label: "Check-out",
+    colors: {
+      bg: "bg-purple-100 dark:bg-purple-900/30",
+      text: "text-purple-900 dark:text-purple-100",
+      border: "border-purple-200",
+      intensity: [
+        "bg-purple-50/50 text-purple-700",
+        "bg-purple-200/50 text-purple-800 font-medium",
+        "bg-purple-400/30 text-purple-900 font-bold",
+      ],
+    },
+  },
 ];
+
+// --- Main Component ---
 
 interface ReportsTableModalProps {
   open: boolean;
@@ -69,26 +118,19 @@ export function ReportsTableModal({
   open,
   onOpenChange,
 }: ReportsTableModalProps) {
-  // --- State ---
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set([]));
-  const [dateRange, setDateRange] = useState<{
-    from: Date;
-    to: Date;
-  }>({
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: new Date(),
-    to: addDays(new Date(), 6),
+    to: addDays(new Date(), 6), // Default 1 week view
   });
 
-  // --- Queries ---
-  const fromDateStr = format(dateRange.from, "yyyy-MM-dd");
-  const toDateStr = format(dateRange.to, "yyyy-MM-dd");
-
+  // Query
   const { data, isLoading } = useReports({
-    fromDate: fromDateStr,
-    toDate: toDateStr,
+    fromDate: format(dateRange.from, "yyyy-MM-dd"),
+    toDate: format(dateRange.to, "yyyy-MM-dd"),
   });
 
-  // --- Helpers & Handlers ---
+  // Logic
   const toggleRow = (rowKey: string) => {
     const newExpanded = new Set(expandedRows);
     if (newExpanded.has(rowKey)) newExpanded.delete(rowKey);
@@ -96,167 +138,174 @@ export function ReportsTableModal({
     setExpandedRows(newExpanded);
   };
 
-  const shiftDateRange = (days: number) => {
+  const handleDateShift = (days: number) => {
     setDateRange((prev) => ({
       from: addDays(prev.from, days),
       to: addDays(prev.to, days),
     }));
   };
 
-  const resetToToday = () => {
-    const today = new Date();
-    setDateRange({ from: today, to: addDays(today, 6) });
-  };
-
-  // --- Data Processing (Memoized) ---
   const processedData = useMemo(() => {
     if (!data?.dailyAvailability) return null;
 
     const days = data.dailyAvailability;
-    const dates = days.map((d: any) => d.date);
-
     const roomTypes = days.length > 0 ? Object.keys(days[0].available) : [];
 
-    const getIntensity = (val: number, max: number) => {
-      if (val === 0) return 0;
-      if (max === 0) return 0;
+    // Pre-calculate max values for intensity to avoid doing it in render loop
+    const maxValues: Record<CategoryKey, number> = {} as any;
+
+    CATEGORIES.forEach((cat) => {
+      const max = Math.max(
+        ...days.map((d: any) => {
+          const values = Object.values(d[cat.key] as Record<string, number>);
+          return values.reduce((a, b) => a + b, 0);
+        })
+      );
+      maxValues[cat.key] = max;
+    });
+
+    const getIntensity = (val: number, categoryKey: CategoryKey): 0 | 1 | 2 => {
+      const max = maxValues[categoryKey];
+      if (val === 0 || max === 0) return 0;
       const percentage = val / max;
-      if (percentage < 0.3) return 1;
-      if (percentage < 0.7) return 2;
-      return 3;
+      if (percentage < 0.3) return 0;
+      if (percentage < 0.7) return 1;
+      return 2;
     };
 
-    return { days, dates, roomTypes, getIntensity };
+    return { days, roomTypes, getIntensity };
   }, [data]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 bg-background">
-        {/* 1. HEADER */}
-        <DialogHeader className="px-6 py-4 border-b shrink-0 flex flex-row items-center justify-between space-y-0">
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <CalendarIcon className="h-5 w-5 text-primary" />
-            Báo cáo công suất phòng
-          </DialogTitle>
-          <DialogDescription className="text-xs">
-            {`Dữ liệu từ ${format(dateRange.from, "dd/MM/yyyy")} đến ${format(dateRange.to, "dd/MM/yyyy")}`}
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* 2. TOOLBAR */}
-        <div className="px-6 py-3 border-b bg-muted/5 flex items-center justify-between shrink-0">
+      <DialogContent className="flex flex-col p-0 gap-0 bg-background border-none shadow-none rounded-none sm:rounded-xl overflow-hidden">
+        {/* 1. Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b shrink-0 bg-background z-20">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <BarChart3 className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <DialogTitle className="text-lg font-semibold">
+                Báo cáo công suất
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                Dữ liệu {format(dateRange.from, "dd/MM")} -{" "}
+                {format(dateRange.to, "dd/MM")}
+              </p>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <X className="h-5 w-5" />
+              </Button>
+            </DialogClose>
+          </div>
+        </div>
+
+        {/* 2. Controls Toolbar */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-2 bg-muted/30 border-b gap-3 shrink-0">
+          <div className="flex items-center gap-1 bg-background rounded-md border p-1 shadow-sm">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => shiftDateRange(-7)}
+              className="h-8 w-8"
+              onClick={() => handleDateShift(-7)}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-[240px] justify-start text-left font-normal h-9"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(dateRange.from, "PPP", { locale: vi })}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateRange.from}
-                  onSelect={(d) => d && setDateRange({ ...dateRange, from: d })}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-
-            <span className="text-muted-foreground text-sm px-2">➔</span>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-[240px] justify-start text-left font-normal h-9"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(dateRange.to, "PPP", { locale: vi })}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateRange.to}
-                  onSelect={(d) => d && setDateRange({ ...dateRange, to: d })}
-                />
-              </PopoverContent>
-            </Popover>
+            <DatePopover
+              date={dateRange.from}
+              onSelect={(d) => setDateRange((prev) => ({ ...prev, from: d }))}
+            />
+            <span className="text-muted-foreground text-xs px-1">→</span>
+            <DatePopover
+              date={dateRange.to}
+              onSelect={(d) => setDateRange((prev) => ({ ...prev, to: d }))}
+            />
 
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => shiftDateRange(7)}
+              className="h-8 w-8"
+              onClick={() => handleDateShift(7)}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={resetToToday}>
-              <RotateCcw className="h-4 w-4 mr-2" /> Hôm nay
+            <div className="w-px h-4 bg-border mx-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs font-normal"
+              onClick={() =>
+                setDateRange({ from: new Date(), to: addDays(new Date(), 6) })
+              }
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Hôm nay
             </Button>
           </div>
 
-          {/* Legend / Chú thích màu */}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-emerald-100 border border-emerald-200"></div>{" "}
-              Trống
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-blue-100 border border-blue-200"></div>{" "}
-              Đã đặt
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-orange-100 border border-orange-200"></div>{" "}
-              Check-in
-            </div>
+          <div className="flex flex-wrap gap-3">
+            {CATEGORIES.map((cat) => (
+              <div
+                key={cat.key}
+                className="flex items-center gap-1.5 text-xs font-medium"
+              >
+                <div
+                  className={cn(
+                    "w-3 h-3 rounded-full border",
+                    cat.colors.bg,
+                    cat.colors.border
+                  )}
+                />
+                <span className="text-muted-foreground">{cat.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* 3. DATA TABLE */}
-        <div className="flex-1 overflow-auto relative">
+        {/* 3. The Grid */}
+        <div className="flex-1 overflow-auto relative bg-muted/10">
           {isLoading ? (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              Đang tải...
+            <div className="flex h-full items-center justify-center">
+              Loading...
             </div>
           ) : !processedData ? (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              Không có dữ liệu.
+              Không có dữ liệu
             </div>
           ) : (
             <Table>
-              <TableHeader className="sticky top-0 bg-background z-20 shadow-sm">
-                <TableRow className="border-b-2 border-muted">
-                  <TableHead className="w-[250px] sticky left-0 bg-background z-30 border-r font-bold text-foreground pl-6">
-                    Chỉ số / Loại phòng
+              <TableHeader className="bg-background sticky top-0 z-40 shadow-sm after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-border">
+                <TableRow className="border-none hover:bg-transparent">
+                  <TableHead className="w-[250px] sticky left-0 z-50 bg-background border-r h-auto py-3 pl-6 shadow-[1px_0_0_0_hsl(var(--border))]">
+                    <span className="text-xs font-bold uppercase text-muted-foreground">
+                      Chỉ số / Loại phòng
+                    </span>
                   </TableHead>
-                  {processedData.days.map((dayData: any) => {
-                    const dateObj = new Date(dayData.date);
+                  {processedData.days.map((day: any) => {
+                    const dateObj = new Date(day.date);
                     const isToday = isSameDay(dateObj, new Date());
                     return (
                       <TableHead
-                        key={dayData.date}
+                        key={day.date}
                         className={cn(
-                          "text-center min-w-[120px] border-r last:border-r-0",
-                          isToday ? "bg-primary/5 text-primary font-bold" : ""
+                          "text-center min-w-[120px] border-r border-dashed last:border-r-0 h-auto py-3",
+                          isToday ? "bg-primary/5 text-primary" : ""
                         )}
                       >
-                        <div className="flex flex-col py-2">
-                          <span className="text-xs uppercase text-muted-foreground font-semibold">
+                        <div className="flex flex-col items-center justify-center gap-0.5">
+                          <span className="text-[10px] uppercase font-semibold opacity-70">
                             {format(dateObj, "EEE", { locale: vi })}
                           </span>
-                          <span className="text-lg">
+                          <span
+                            className={cn(
+                              "text-lg font-bold leading-none",
+                              isToday && "text-primary"
+                            )}
+                          >
                             {format(dateObj, "dd/MM")}
                           </span>
                         </div>
@@ -269,115 +318,148 @@ export function ReportsTableModal({
               <TableBody>
                 {CATEGORIES.map((category) => {
                   const isExpanded = expandedRows.has(category.key);
-                  const maxVal = Math.max(
-                    ...processedData.days.map((d: any) =>
-                      Object.values(
-                        d[category.key] as Record<string, number>
-                      ).reduce((a: any, b: any) => a + b, 0)
-                    )
-                  );
 
                   return (
-                    <>
-                      {/* Summary Row */}
-                      <TableRow
-                        key={category.key}
-                        className="hover:bg-muted/50 cursor-pointer transition-colors border-b-2 border-muted"
-                        onClick={() => toggleRow(category.key)}
-                      >
-                        <TableCell className="sticky left-0 bg-background z-10 border-r font-semibold py-4 pl-4">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={cn(
-                                "p-1 rounded hover:bg-muted",
-                                isExpanded && "bg-muted"
-                              )}
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </div>
-                            <span
-                              className={cn(
-                                "text-sm px-2 py-0.5 rounded",
-                                `${category.baseColor}-100 dark:${category.baseColor}-700 text-accent-foreground` // Semantic badge
-                              )}
-                            >
-                              {category.label}
-                            </span>
-                          </div>
-                        </TableCell>
-
-                        {processedData.days.map((dayData: any) => {
-                          const val = Object.values(
-                            dayData[category.key] as Record<string, number>
-                          ).reduce((a: any, b: any) => a + b, 0);
-                          const intensity = processedData.getIntensity(
-                            val,
-                            maxVal
-                          );
-
-                          return (
-                            <TableCell
-                              key={`${category.key}-${dayData.date}`}
-                              className="text-center border-r p-0 h-full"
-                            >
-                              <div
-                                className={cn(
-                                  "h-full w-full flex items-center justify-center font-mono text-sm font-medium py-4",
-                                  intensity === 1 && `${category.baseColor}-50`,
-                                  intensity === 2 &&
-                                    `${category.baseColor}-100`,
-                                  intensity === 3 &&
-                                    `${category.baseColor}-200 font-bold`
-                                )}
-                              >
-                                {val}
-                              </div>
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-
-                      {/* Detailed Rows (Expanded) */}
-                      {isExpanded &&
-                        processedData.roomTypes.map((roomType: string) => (
-                          <TableRow
-                            key={`${category.key}-${roomType}`}
-                            className="hover:bg-muted/20 animate-in fade-in slide-in-from-top-1 duration-200"
-                          >
-                            <TableCell className="sticky left-0 bg-muted/5 z-10 border-r pl-12 text-xs text-muted-foreground font-medium">
-                              {roomType}
-                            </TableCell>
-                            {processedData.days.map((dayData: any) => {
-                              const val =
-                                (dayData[category.key] as any)[roomType] || 0;
-                              return (
-                                <TableCell
-                                  key={`${category.key}-${roomType}-${dayData.date}`}
-                                  className="text-center border-r text-xs text-muted-foreground"
-                                >
-                                  {val > 0 ? val : "-"}
-                                </TableCell>
-                              );
-                            })}
-                          </TableRow>
-                        ))}
-                    </>
+                    <CategorySection
+                      key={category.key}
+                      category={category}
+                      processedData={processedData}
+                      isExpanded={isExpanded}
+                      onToggle={() => toggleRow(category.key)}
+                    />
                   );
                 })}
               </TableBody>
             </Table>
           )}
         </div>
-        <DialogFooter className="px-6 py-4 border-t shrink-0">
-          <DialogClose>
-            <Button variant="outline">Đóng</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// --- Sub-components for cleaner code ---
+
+function DatePopover({
+  date,
+  onSelect,
+}: {
+  date: Date;
+  onSelect: (d: Date) => void;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          className="h-8 px-2 text-sm font-normal hover:bg-muted"
+        >
+          {format(date, "dd/MM/yyyy")}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(d) => d && onSelect(d)}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+interface CategorySectionProps {
+  category: ReportCategoryConfig;
+  processedData: any;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+function CategorySection({
+  category,
+  processedData,
+  isExpanded,
+  onToggle,
+}: CategorySectionProps) {
+  return (
+    <>
+      {/* Main Category Row */}
+      <TableRow
+        className="hover:bg-muted/50 cursor-pointer border-b group transition-colors"
+        onClick={onToggle}
+      >
+        {/* Sticky Left Column */}
+        <TableCell className="sticky left-0 z-30 bg-background border-r p-0 shadow-[1px_0_0_0_hsl(var(--border))] group-hover:bg-muted/50 transition-colors">
+          <div className="flex items-center gap-3 px-6 py-4">
+            <div
+              className={cn(
+                "flex items-center justify-center w-6 h-6 rounded-md transition-transform duration-200 text-muted-foreground bg-muted",
+                isExpanded && "rotate-90 text-foreground bg-primary/10"
+              )}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </div>
+            <div
+              className={cn(
+                "px-2.5 py-1 rounded-md text-sm font-medium border",
+                category.colors.bg,
+                category.colors.text,
+                category.colors.border
+              )}
+            >
+              {category.label}
+            </div>
+          </div>
+        </TableCell>
+
+        {/* Data Cells */}
+        {processedData.days.map((day: any) => {
+          const val = Object.values(
+            day[category.key] as Record<string, number>
+          ).reduce((a: any, b: any) => a + b, 0);
+          const intensity = processedData.getIntensity(val, category.key);
+
+          return (
+            <TableCell
+              key={day.date}
+              className="p-0 border-r border-dashed last:border-r-0 text-center h-full"
+            >
+              <div
+                className={cn(
+                  "flex items-center justify-center h-full min-h-[56px] w-full text-sm font-medium transition-all",
+                  category.colors.intensity[intensity]
+                )}
+              >
+                {val > 0 ? val : <span className="opacity-20">-</span>}
+              </div>
+            </TableCell>
+          );
+        })}
+      </TableRow>
+
+      {/* Expanded Detail Rows */}
+      {isExpanded &&
+        processedData.roomTypes.map((roomType: string) => (
+          <TableRow
+            key={`${category.key}-${roomType}`}
+            className="border-b bg-muted/5 hover:bg-muted/10"
+          >
+            <TableCell className="sticky left-0 z-20 bg-background/95 backdrop-blur border-r py-2 pl-16 text-xs font-medium text-muted-foreground shadow-[1px_0_0_0_hsl(var(--border))]">
+              {roomType}
+            </TableCell>
+            {processedData.days.map((day: any) => {
+              const val = (day[category.key] as any)[roomType] || 0;
+              return (
+                <TableCell
+                  key={`${category.key}-${roomType}-${day.date}`}
+                  className="text-center py-2 border-r border-dashed last:border-r-0 text-xs text-muted-foreground"
+                >
+                  {val > 0 ? val : ""}
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        ))}
+    </>
   );
 }

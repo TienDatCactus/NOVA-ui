@@ -1,5 +1,10 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { CalendarIcon, Hash, Mail } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -17,8 +22,11 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -26,31 +34,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type { CreateStaffDto } from "~/services/api/staff/staff/dto";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { vi } from "date-fns/locale";
-import {
-  CalendarIcon,
-  ChevronDown,
-  User,
-  Briefcase,
-  BadgeInfo,
-  Mail,
-  Phone,
-  Hash,
-} from "lucide-react";
-import { Calendar } from "~/components/ui/calendar";
+import { Separator } from "~/components/ui/separator";
+import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
+import type { CreateStaffDto } from "~/services/api/staff/staff/dto";
 import { StaffSchema } from "~/services/api/staff/staff/staff.schema";
 import { useStaffRoleList } from "../../staff-role/container/query.hooks";
 import { useCreateStaff } from "../container/query.hooks";
-import { Separator } from "~/components/ui/separator";
 
 interface StaffDialogProps {
   open: boolean;
@@ -81,13 +71,12 @@ export default function CreateStaffDialog({
   });
 
   const onSubmit = async (data: CreateStaffDto) => {
-    try {
-      await createStaff(data);
-      onOpenChange(false);
-      form.reset();
-    } catch (error) {
-      console.error("Staff dialog error:", error);
-    }
+    await createStaff(data, {
+      onSuccess: () => {
+        onOpenChange(false);
+        form.reset();
+      },
+    });
   };
 
   return (

@@ -63,12 +63,8 @@ import { cn } from "~/lib/utils";
 import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { useCreateBookingStore } from "~/store/create-booking.store";
 import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
-import type { BookingMasterSchema } from "..";
-import {
-  useCreateBookingStore,
-  type CreateBookingData,
-} from "~/store/create-booking.store";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItem = z.infer<typeof ServiceOrderItemSchema>;

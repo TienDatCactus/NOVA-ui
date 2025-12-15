@@ -9,11 +9,7 @@ import type {
   HolidayMutationResponseDto,
 } from "./dto";
 
-const {
-  HolidayListResponseSchema,
-  HolidayDetailResponseSchema,
-  HolidayMutationResponseSchema,
-} = HolidaySchema;
+const { HolidayListResponseSchema } = HolidaySchema;
 
 // GET /api/Holidays - Get list of holidays
 async function getHolidayList(): Promise<HolidayListResponseDto> {
@@ -32,7 +28,7 @@ async function createHoliday(
 ): Promise<HolidayMutationResponseDto> {
   try {
     const resp = await http.post(Holiday.create, data);
-    return HolidayMutationResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }
@@ -42,7 +38,7 @@ async function createHoliday(
 async function getHolidayById(id: string): Promise<HolidayDetailResponseDto> {
   try {
     const resp = await http.get(Holiday.detail(id));
-    return HolidayDetailResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }
@@ -55,7 +51,7 @@ async function updateHoliday(
 ): Promise<HolidayMutationResponseDto> {
   try {
     const resp = await http.put(Holiday.update(id), data);
-    return HolidayMutationResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }
@@ -65,7 +61,7 @@ async function updateHoliday(
 async function deleteHoliday(id: string): Promise<HolidayMutationResponseDto> {
   try {
     const resp = await http.delete(Holiday.delete(id));
-    return HolidayMutationResponseSchema.parse(resp.data);
+    return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }

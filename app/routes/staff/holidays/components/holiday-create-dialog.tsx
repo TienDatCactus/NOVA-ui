@@ -1,6 +1,11 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { CalendarDays, CalendarIcon, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
+import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -19,33 +24,17 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { Switch } from "~/components/ui/switch";
-import { Card } from "~/components/ui/card";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { Calendar } from "~/components/ui/calendar";
-import {
-  Loader2,
-  CalendarDays,
-  ChevronDownIcon,
-  Banknote,
-  CalendarIcon,
-} from "lucide-react";
-import { useState } from "react";
-import { HolidayService } from "~/services/api/holiday";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
 
-import { useCreateHoliday } from "../container/mutation.hooks";
-import { HolidaySchema } from "~/services/api/holiday/holiday.schema";
 import type { CreateHolidayRequest } from "~/services/api/holiday/dto";
-import { DatePicker } from "~/components/ui/date-picker";
+import { HolidaySchema } from "~/services/api/holiday/holiday.schema";
+import { useCreateHoliday } from "../container/mutation.hooks";
 
 interface CreateHolidayDialogProps {
   open: boolean;
@@ -63,7 +52,6 @@ export default function CreateHolidayDialog({
       startDate: undefined,
       endDate: undefined,
       isPublicHoliday: false,
-      bonusAmount: 0,
     },
   });
 
@@ -229,40 +217,6 @@ export default function CreateHolidayDialog({
                 />
               </div>
 
-              {/* Tiền thưởng - Thêm icon và hậu tố VND */}
-              <FormField
-                control={form.control}
-                name="bonusAmount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-semibold">
-                      Thưởng / Phụ cấp
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Banknote className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          className="pl-9 pr-12 h-10 font-mono"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                        <span className="absolute right-3 top-2.5 text-xs font-medium text-muted-foreground">
-                          VND
-                        </span>
-                      </div>
-                    </FormControl>
-                    <FormDescription className="text-xs">
-                      Áp dụng cho nhân viên đi làm vào ngày này.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Card trạng thái ngày lễ */}
               <FormField
                 control={form.control}
@@ -280,11 +234,10 @@ export default function CreateHolidayDialog({
                       <div className="flex items-center justify-between space-x-4">
                         <div className="space-y-0.5">
                           <FormLabel className="text-sm font-semibold">
-                            Ngày lễ Quốc gia (Public Holiday)
+                            Trạng thái
                           </FormLabel>
                           <FormDescription className="text-xs">
-                            Nhân viên sẽ được hưởng chế độ lương x3 hoặc x4 tùy
-                            theo quy định.
+                            Trạng thái hoạt động của ngày nghỉ này
                           </FormDescription>
                         </div>
                         <FormControl>

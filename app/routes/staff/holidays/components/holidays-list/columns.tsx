@@ -1,12 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "~/components/ui/badge";
-import type { HolidayListItem } from "~/services/api/holiday/dto";
-import { Checkbox } from "~/components/ui/checkbox";
-import { DataTableColumnHeader } from "~/components/table/table-header";
-import ActionsMenuCell from "../../fragments/actions.cell";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { formatMoney } from "~/lib/utils";
+import { DataTableColumnHeader } from "~/components/table/table-header";
+import { Badge } from "~/components/ui/badge";
+import { Checkbox } from "~/components/ui/checkbox";
+import type { HolidayListItem } from "~/services/api/holiday/dto";
+import ActionsMenuCell from "../../fragments/actions.cell";
 
 export const columns: ColumnDef<HolidayListItem>[] = [
   {
@@ -83,20 +82,7 @@ export const columns: ColumnDef<HolidayListItem>[] = [
       );
     },
   },
-  {
-    accessorKey: "bonusAmount",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Tiền thưởng" />
-    ),
-    cell: ({ row }) => {
-      const amount = row.getValue("bonusAmount") as number;
-      return (
-        <div className="flex items-center gap-2">
-          <span className="font-mono">{formatMoney(amount).vndFormatted}</span>
-        </div>
-      );
-    },
-  },
+
   {
     accessorKey: "isPublicHoliday",
     header: ({ column }) => (
@@ -105,7 +91,7 @@ export const columns: ColumnDef<HolidayListItem>[] = [
     cell: ({ row }) => {
       const isPublic = row.getValue("isPublicHoliday") as boolean;
       return (
-        <Badge variant={isPublic ? "default" : "secondary"}>
+        <Badge variant={isPublic ? "success" : "secondary"}>
           {isPublic ? "Hoạt động" : "Không hoạt động"}
         </Badge>
       );

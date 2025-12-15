@@ -50,7 +50,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
     checkinDate: dateRange?.from,
     checkoutDate: dateRange?.to,
   });
-
+  console.log(nights);
   const totalGuestsTarget = Number(adultsAmount) + Number(childrenAmount);
 
   const {

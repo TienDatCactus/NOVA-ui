@@ -1,8 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { differenceInDays, format, parseISO } from "date-fns";
+import type { FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
-import type { FieldErrors } from "react-hook-form";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -70,11 +70,16 @@ export function useCalculateNights({
   checkoutDate?: string | Date;
 }) {
   if (!checkinDate || !checkoutDate) return 0;
-  return differenceInDays(checkoutDate, checkinDate);
+  const start = startOfLocalDay(
+    checkinDate instanceof Date ? checkinDate : parseDateYMD(checkinDate)
+  );
+  const end = startOfLocalDay(
+    checkoutDate instanceof Date ? checkoutDate : parseDateYMD(checkoutDate)
+  );
+  return differenceInDays(end, start);
 }
 
 export const onError = (errors: FieldErrors) => {
-  // Get all error messages
   const errorEntries = Object.entries(errors);
 
   if (errorEntries.length === 0) {

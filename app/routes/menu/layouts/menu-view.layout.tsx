@@ -1,20 +1,18 @@
+import { RotateCcw, UtensilsCrossed } from "lucide-react";
 import type { ReactNode } from "react";
+import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import type { MenuFilters } from "~/services/api/menu/menu.types";
 import { useMenuCategories } from "../container/menu-categories/query.hooks";
-import { Button } from "~/components/ui/button";
-import { CheckCircle2, RotateCcw, UtensilsCrossed } from "lucide-react";
-import { Separator } from "~/components/ui/separator";
 
 interface MenuViewLayoutProps {
   children: ReactNode;

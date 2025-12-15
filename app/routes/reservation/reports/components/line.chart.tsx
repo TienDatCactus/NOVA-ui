@@ -100,7 +100,7 @@ export function BookingLineChart({ className, data }: BookingLineChartProps) {
                   key={roomType}
                   dataKey={roomType}
                   type="monotone"
-                  stroke={`var(--color-${roomType})`}
+                  stroke={`var(${roomType})`}
                   strokeWidth={2}
                   dot={{ r: 4 }}
                   activeDot={{ r: 6 }}

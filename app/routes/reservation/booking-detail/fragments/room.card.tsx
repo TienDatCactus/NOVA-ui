@@ -1,4 +1,5 @@
-import { ArrowRight, ImageIcon, MoreHorizontal, Tag } from "lucide-react";
+import { ArrowRight, MoreHorizontal, Tag } from "lucide-react";
+import { Link } from "react-router";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
@@ -10,6 +11,9 @@ import {
 } from "~/components/ui/dropdown-menu";
 import Image from "~/components/ui/image";
 import { Skeleton } from "~/components/ui/skeleton";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { DASHBOARD } from "~/lib/fe-url";
 import { cn, formatMoney } from "~/lib/utils";
 import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
@@ -114,12 +118,16 @@ function RoomCardGrid({ roomId }: RoomCardGridProps) {
           </div>
         </div>
 
-        <Button
-          size="sm"
-          className="rounded-full px-5 shadow-sm transition-transform active:scale-95 bg-foreground text-background hover:bg-primary hover:text-primary-foreground"
-        >
-          Chọn <ArrowRight className="ml-2 h-3.5 w-3.5" />
-        </Button>
+        {hasRole(AuthLoader.getUser(), UserRole.Receptionist) && (
+          <Link to={DASHBOARD.bookings.newBooking}>
+            <Button
+              size="sm"
+              className="rounded-full px-5 shadow-sm transition-transform active:scale-95 bg-foreground text-background hover:bg-primary hover:text-primary-foreground"
+            >
+              Chọn <ArrowRight className="ml-2 h-3.5 w-3.5" />
+            </Button>
+          </Link>
+        )}
       </CardFooter>
     </Card>
   );

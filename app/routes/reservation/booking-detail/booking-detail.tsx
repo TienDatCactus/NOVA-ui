@@ -121,34 +121,13 @@ export default function Component() {
   });
 
   const { isDirty } = form.formState;
+
+  // Clear pending operations on mount to prevent auto-submission on refresh
+  useEffect(() => {
+    form.setValue("rooms", [], { shouldDirty: false });
+  }, []);
+
   const handleSubmit = (data: StaffUpdateBookingRequestDto) => {
-    if (data.rooms && data.rooms.length > 0) {
-      data.rooms.forEach((room, idx) => {
-        console.log(`Room operation ${idx}:`, {
-          action: room.action,
-          actionType: typeof room.action,
-          bookingRoomId: room.bookingRoomId,
-          roomId: room.roomId,
-          newRoomId: room.newRoomId,
-          fromDate: room.fromDate,
-          toDate: room.toDate,
-        });
-
-        const result =
-          BookingSchema.UpdateBookingRoomRequestSchema.safeParse(room);
-
-        if (!result.success) {
-          console.error("Invalid room operation:", room, result.error);
-          const errorMsg = result.error.issues
-            .map((e) => `${e.path.join(".")}: ${e.message}`)
-            .join(", ");
-          throw new Error(
-            `Phòng ${room.roomId || room.bookingRoomId || "unknown"} không hợp lệ: ${errorMsg}`
-          );
-        }
-      });
-    }
-
     const hasDatesChanged =
       data.checkinDate !== bookingDetail?.checkinDate ||
       data.checkoutDate !== bookingDetail?.checkoutDate;

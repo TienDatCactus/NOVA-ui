@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { StaffRoleService } from "~/services/api/staff/staff-role";
 import type {
@@ -7,7 +8,7 @@ import type {
 } from "~/services/api/staff/staff-role/dto";
 
 /**
- * Hook để lấy danh sách Chức vụ nhân sự
+ * Hook để lấy danh sách chức vụ nhân sự
  */
 export function useStaffRoleList() {
   return useQuery({
@@ -18,7 +19,7 @@ export function useStaffRoleList() {
 }
 
 /**
- * Hook để lấy chi tiết Chức vụ nhân sự
+ * Hook để lấy chi tiết chức vụ nhân sự
  */
 export function useStaffRoleDetail(id: string) {
   return useQuery({
@@ -30,7 +31,7 @@ export function useStaffRoleDetail(id: string) {
 }
 
 /**
- * Hook để tạo Chức vụ nhân sự mới
+ * Hook để tạo chức vụ nhân sự mới
  */
 export function useCreateStaffRole() {
   const queryClient = useQueryClient();
@@ -40,11 +41,14 @@ export function useCreateStaffRole() {
       await StaffRoleService.createStaffRole(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff-roles"] });
-      toast.success("Tạo Chức vụ nhân sự thành công");
+      toast.success("Tạo chức vụ nhân sự thành công");
     },
     onError: (error) => {
-      console.error("Create staff role error:", error);
-      toast.error("Không thể tạo Chức vụ nhân sự");
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Lỗi khi tạo chức vụ nhân sự"
+        );
+      }
     },
   });
 }
@@ -69,8 +73,11 @@ export function useUpdateStaffRole() {
       toast.success("Cập nhật Chức vụ nhân sự thành công");
     },
     onError: (error) => {
-      console.error("Update staff role error:", error);
-      toast.error("Không thể cập nhật Chức vụ nhân sự");
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Lỗi khi cập nhật chức vụ nhân sự"
+        );
+      }
     },
   });
 }
@@ -89,8 +96,11 @@ export function useDeleteStaffRole() {
       toast.success("Xóa Chức vụ nhân sự thành công");
     },
     onError: (error) => {
-      console.error("Delete staff role error:", error);
-      toast.error("Không thể xóa Chức vụ nhân sự");
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Lỗi khi xóa chức vụ nhân sự"
+        );
+      }
     },
   });
 }

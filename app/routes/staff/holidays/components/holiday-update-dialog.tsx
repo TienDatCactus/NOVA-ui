@@ -1,13 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  Banknote,
-  CalendarDays,
-  CalendarIcon,
-  ChevronDownIcon,
-  Loader2,
-} from "lucide-react";
+import { CalendarDays, CalendarIcon, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
@@ -65,14 +59,12 @@ export default function UpdateHolidayDialog({
       startDate: undefined,
       endDate: undefined,
       isPublicHoliday: false,
-      bonusAmount: 0,
     },
   });
   const { mutateAsync: updateHoliday, isPending } = useUpdateHoliday();
   useEffect(() => {
     if (holiday) {
       form.reset({
-        bonusAmount: holiday.bonusAmount ?? 0,
         name: holiday.name,
         startDate: holiday.startDate,
         endDate: holiday.endDate,
@@ -246,40 +238,6 @@ export default function UpdateHolidayDialog({
                 />
               </div>
 
-              {/* Tiền thưởng - Thêm icon và hậu tố VND */}
-              <FormField
-                control={form.control}
-                name="bonusAmount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-semibold">
-                      Thưởng / Phụ cấp
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Banknote className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          className="pl-9 pr-12 h-10 font-mono"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                        <span className="absolute right-3 top-2.5 text-xs font-medium text-muted-foreground">
-                          VND
-                        </span>
-                      </div>
-                    </FormControl>
-                    <FormDescription className="text-xs">
-                      Áp dụng cho nhân viên đi làm vào ngày này.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Card trạng thái ngày lễ */}
               <FormField
                 control={form.control}
@@ -297,11 +255,10 @@ export default function UpdateHolidayDialog({
                       <div className="flex items-center justify-between space-x-4">
                         <div className="space-y-0.5">
                           <FormLabel className="text-sm font-semibold">
-                            Ngày lễ Quốc gia (Public Holiday)
+                            Trạng thái
                           </FormLabel>
                           <FormDescription className="text-xs">
-                            Nhân viên sẽ được hưởng chế độ lương x3 hoặc x4 tùy
-                            theo quy định.
+                            Trạng thái hoạt động của ngày nghỉ này
                           </FormDescription>
                         </div>
                         <FormControl>

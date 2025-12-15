@@ -1,17 +1,7 @@
 import { addDays, format, isSameDay, subDays } from "date-fns";
-import { vi } from "date-fns/locale";
-import {
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardList,
-  Filter,
-  Loader2,
-  PackageOpen,
-  UtensilsCrossed,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, PackageOpen } from "lucide-react";
 import { useMemo, useState } from "react";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/menu-orders";
 
 export function meta({}: Route.MetaArgs) {
@@ -42,6 +32,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn, formatMoney } from "~/lib/utils";
+import type { POSOrderDetailDto } from "~/services/api/orders/dto";
 import {
   ORDER_STATUSES,
   type OrderStatus,
@@ -49,15 +40,11 @@ import {
 import OrderCard from "./components/menu-order-list/order-card";
 import OrderDetailSheet from "./components/menu-order-list/order-detail.sheet";
 import { usePOSOrderList } from "./container/pos-orders/query.hooks";
-import type { POSOrderDetailDto } from "~/services/api/orders/dto";
 
 // Extend OrderStatus to include 'All' for the UI filter
 type FilterStatus = OrderStatus | "All";
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("All");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date()

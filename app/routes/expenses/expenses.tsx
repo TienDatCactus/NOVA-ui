@@ -24,7 +24,7 @@ export function meta({}: Route.MetaArgs) {
 export const clientLoader = () => {
   const user = AuthLoader.getUser();
 
-  if (hasRole(user, UserRole.HotelManager)) {
+  if (!hasRole(user, UserRole.Accountant)) {
     throw redirect(DASHBOARD.expensesDashboard);
   }
 

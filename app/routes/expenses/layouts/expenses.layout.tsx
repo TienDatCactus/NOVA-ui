@@ -14,8 +14,6 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { AuthLoader, hasRole } from "~/lib/auth/auth.loader";
-import { UserRole } from "~/lib/auth/roles";
 import { FE_URL } from "~/lib/fe-url";
 import { formatMoney } from "~/lib/utils";
 import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
@@ -54,12 +52,7 @@ export default function ExpensesLayout({
 
           <Tabs value={currentTab} className="w-auto">
             <TabsList className="grid w-full grid-cols-2 h-9">
-              <TabsTrigger
-                value="list"
-                asChild
-                className="text-xs px-4"
-                disabled={!hasRole(AuthLoader.getUser(), UserRole.Accountant)}
-              >
+              <TabsTrigger value="list" asChild className="text-xs px-4">
                 <Link
                   to={FE_URL.dashboard.expenses}
                   className="flex items-center gap-2"
