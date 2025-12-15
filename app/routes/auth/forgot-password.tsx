@@ -53,7 +53,7 @@ export default function ForgotPassword() {
     return false;
   };
   return (
-    <Card className="w-124 pb-0 max-w-md shadow-none border-none">
+    <Card className="w-124 pb-0 max-w-md shadow-none border-none bg-background">
       <CardHeader>
         <CardTitle>Thay đổi mật khẩu</CardTitle>
         <CardDescription>

@@ -210,10 +210,6 @@ export function CreateUserDialog({ open, onClose }: UserFormDialogProps) {
                         {...field}
                       />
                     </FormControl>
-
-                    <FormDescription className="text-xs">
-                      Mật khẩu phải có ít nhất 6 ký tự
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus, Save, Trash2, Search } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, type UseFormReturn } from "react-hook-form";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -219,6 +219,7 @@ export default function EditStockAdjustmentDialog({
                                       !!form.formState.errors.items?.[index]
                                         ?.itemId
                                     }
+                                    form={form}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -346,11 +347,13 @@ function ItemCombobox({
   onChange,
   items,
   hasError,
+  form,
 }: {
   value: string;
   onChange: (val: string) => void;
   items: any[];
   hasError?: boolean;
+  form: UseFormReturn<any>;
 }) {
   const [open, setOpen] = useState(false);
   const selectedItem = items.find((item) => item.id === value);
@@ -381,27 +384,35 @@ function ItemCombobox({
           <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[350px] p-0" align="start">
+      <PopoverContent className="w-[21.875rem] p-0" align="start">
         <Command>
           <CommandInput placeholder="Tìm mã hoặc tên..." />
           <CommandList>
             <CommandEmpty>Không tìm thấy.</CommandEmpty>
             <CommandGroup>
-              {items.map((item) => (
-                <CommandItem
-                  key={item.id}
-                  value={item.name}
-                  onSelect={() => {
-                    onChange(item.id);
-                    setOpen(false);
-                  }}
-                >
-                  <span className="font-mono text-xs text-muted-foreground w-[80px]">
-                    {item.code}
-                  </span>
-                  <span>{item.name}</span>
-                </CommandItem>
-              ))}
+              {items.map((item) => {
+                const isSelected =
+                  form
+                    .getValues("items")
+                    .some((itm: any) => itm.itemId === item.id) &&
+                  value !== item.id;
+                return (
+                  <CommandItem
+                    key={item.id}
+                    value={item.name}
+                    onSelect={() => {
+                      onChange(item.id);
+                      setOpen(false);
+                    }}
+                    disabled={isSelected}
+                  >
+                    <span className="font-mono text-xs text-muted-foreground w-fit">
+                      {item.code}
+                    </span>
+                    <span>{item.name}</span>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

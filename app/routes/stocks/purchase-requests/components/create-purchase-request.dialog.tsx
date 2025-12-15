@@ -46,15 +46,19 @@ import type { CreatePurchaseRequestDto } from "~/services/api/stocks/purchase-re
 import { PurchaseRequestsSchemas } from "~/services/api/stocks/purchase-requests/purchase-requests.schema";
 import { useStockItemList } from "../../items/container/query.hooks";
 import { useCreatePurchaseRequest } from "../container/query.hooks";
+import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import { useEffect } from "react";
 
 interface CreatePurchaseRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialItems?: StockItemsListItemDto[];
 }
 
 export default function CreatePurchaseRequestDialog({
   open,
   onOpenChange,
+  initialItems,
 }: CreatePurchaseRequestDialogProps) {
   const { data: stockItems = [] } = useStockItemList({
     includeInactive: false,
@@ -81,6 +85,42 @@ export default function CreatePurchaseRequestDialog({
       ],
     },
   });
+
+  // Populate form with initial items when dialog opens with low stock items
+  useEffect(() => {
+    if (open && initialItems && initialItems.length > 0) {
+      const formattedItems = initialItems.map((item) => ({
+        itemId: item.id,
+        freeTextItemName: item.name,
+        freeTextItemDescription: item.description || undefined,
+        freeTextUnitName: item.unitName,
+        quantity: Math.max(1, (item.minStock || 0) - (item.currentStock || 0)),
+        unitCost: item.unitCost,
+        note: `Tồn kho hiện tại: ${item.currentStock || 0}/${item.minStock || 0}`,
+      }));
+
+      form.reset({
+        notes: `Yêu cầu nhập hàng cho ${initialItems.length} mặt hàng sắp hết`,
+        items: formattedItems,
+      });
+    } else if (open && !initialItems) {
+      // Reset to default when opening without initial items
+      form.reset({
+        notes: undefined,
+        items: [
+          {
+            itemId: null,
+            freeTextItemName: "",
+            freeTextItemDescription: undefined,
+            freeTextUnitName: undefined,
+            quantity: 1,
+            unitCost: 0,
+            note: undefined,
+          },
+        ],
+      });
+    }
+  }, [open, initialItems]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -261,14 +301,25 @@ export default function CreatePurchaseRequestDialog({
                                               Nhập thủ công
                                             </span>
                                           </SelectItem>
-                                          {stockItems.map((item) => (
-                                            <SelectItem
-                                              key={item.id}
-                                              value={item.id}
-                                            >
-                                              {item.code} - {item.name}
-                                            </SelectItem>
-                                          ))}
+                                          {stockItems.map((item) => {
+                                            const isSelected =
+                                              form
+                                                .getValues("items")
+                                                .some(
+                                                  (itm: any) =>
+                                                    itm.itemId === item.id
+                                                ) &&
+                                              itemField.value !== item.id;
+                                            return (
+                                              <SelectItem
+                                                disabled={isSelected}
+                                                key={item.id}
+                                                value={item.id}
+                                              >
+                                                {item.code} - {item.name}
+                                              </SelectItem>
+                                            );
+                                          })}
                                         </SelectContent>
                                       </Select>
                                     </FormControl>

@@ -1,4 +1,5 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
+import http from "~/lib/http";
 import STORAGE, { clearStorage, getStorage, setStorage } from "~/lib/storage";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import { Auth } from "../../url";
@@ -8,8 +9,6 @@ import type {
   LoginResponseDto,
   ResetPasswordDto,
 } from "./dto";
-import { toast } from "sonner";
-import http from "~/lib/http";
 const {
   LoginSchema,
   LoginResponseSchema,
@@ -27,11 +26,6 @@ async function login(data: LoginDto): Promise<LoginResponseDto> {
       setStorage(STORAGE.REFRESH_TOKEN, parsedData.refreshToken);
     return parsedData;
   } catch (err) {
-    if (err instanceof AxiosError) {
-      toast.error(
-        err.response?.data.message || "Đã có lỗi xảy ra. Vui lòng thử lại."
-      );
-    }
     console.error(err);
     return Promise.reject(err);
   }
@@ -44,11 +38,6 @@ async function forgotPassword(email: string) {
     const resp = await axios.post(Auth.forgotPassword, { email });
     return resp.data.data;
   } catch (err) {
-    if (err instanceof AxiosError) {
-      toast.error(
-        err.response?.data.message || "Đã có lỗi xảy ra. Vui lòng thử lại."
-      );
-    }
     console.error(err);
     return Promise.reject(err);
   }
@@ -75,11 +64,6 @@ async function refresh(refreshToken: string) {
     const resp = await axios.post(Auth.refresh, { refreshToken });
     return resp.data?.data || resp.data;
   } catch (err) {
-    if (err instanceof AxiosError) {
-      toast.error(
-        err.response?.data.message || "Đã có lỗi xảy ra. Vui lòng thử lại."
-      );
-    }
     console.error(err);
     throw Promise.reject(err);
   }
@@ -89,11 +73,6 @@ async function revoke(refreshToken: string) {
     const resp = await axios.post(Auth.revoke, { refreshToken });
     return resp.data.data;
   } catch (err) {
-    if (err instanceof AxiosError) {
-      toast.error(
-        err.response?.data.message || "Đã có lỗi xảy ra. Vui lòng thử lại."
-      );
-    }
     console.error(err);
     throw Promise.reject(err);
   }

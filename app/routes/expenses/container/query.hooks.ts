@@ -6,6 +6,7 @@ import type {
   UpdateExpenseRequestDto,
 } from "~/services/api/expenses/dto";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 /**
  * Get list of expenses with filters
@@ -61,8 +62,9 @@ export function useCreateExpense() {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary"] });
       toast.success("Tạo chi phí thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi tạo chi phí");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error?.response?.data?.message || "Lỗi khi tạo chi phí");
     },
   });
 }
@@ -87,19 +89,11 @@ export function useUpdateExpense() {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary"] });
       toast.success("Cập nhật chi phí thành công");
     },
-    onError: (error: any) => {
-      const errorCode = error?.response?.data?.errorCode;
-      const errorMessages: Record<string, string> = {
-        CANNOT_EDIT_PAYROLL_EXPENSE:
-          "Chi phí từ module khác không được chỉnh sửa từ đây",
-        CANNOT_EDIT_POSTED_EXPENSE: "Chi phí đã chốt, vui lòng hủy trước",
-        CANNOT_EDIT_VOIDED_EXPENSE: "Chi phí đã hủy, không thể chỉnh sửa",
-        INVALID_AMOUNT: "Số tiền phải lớn hơn 0",
-        INVALID_EXPENSE_DATE: "Ngày chi phí không được ở tương lai",
-      };
-      toast.error(
-        errorMessages[errorCode] || error?.message || "Lỗi khi cập nhật chi phí"
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi cập nhật chi phí"
+        );
     },
   });
 }
@@ -117,18 +111,9 @@ export function useDeleteExpense() {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary"] });
       toast.success("Xóa chi phí thành công");
     },
-    onError: (error: any) => {
-      const errorCode = error?.response?.data?.errorCode;
-      const errorMessages: Record<string, string> = {
-        CANNOT_DELETE_PAYROLL_EXPENSE:
-          "Chi phí từ module khác không được xóa từ đây",
-        CANNOT_DELETE_POSTED_EXPENSE:
-          "Chi phí đã chốt, vui lòng hủy thay vì xóa",
-        CANNOT_DELETE_VOIDED_EXPENSE: "Không thể xóa chi phí đã hủy",
-      };
-      toast.error(
-        errorMessages[errorCode] || error?.message || "Lỗi khi xóa chi phí"
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error?.response?.data?.message || "Lỗi khi xóa chi phí");
     },
   });
 }
@@ -146,14 +131,9 @@ export function usePostExpense() {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary"] });
       toast.success("Chốt chi phí thành công");
     },
-    onError: (error: any) => {
-      const errorCode = error?.response?.data?.errorCode;
-      const errorMessages: Record<string, string> = {
-        INVALID_STATUS_TRANSITION: "Chỉ chi phí nháp mới có thể chốt",
-      };
-      toast.error(
-        errorMessages[errorCode] || error?.message || "Lỗi khi chốt chi phí"
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error?.response?.data?.message || "Lỗi khi chốt chi phí");
     },
   });
 }
@@ -171,16 +151,9 @@ export function useVoidExpense() {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary"] });
       toast.success("Hủy chi phí thành công");
     },
-    onError: (error: any) => {
-      const errorCode = error?.response?.data?.errorCode;
-      const errorMessages: Record<string, string> = {
-        CANNOT_VOID_PAYROLL_EXPENSE:
-          "Chi phí từ module khác không được hủy từ đây",
-        INVALID_STATUS_TRANSITION: "Chỉ chi phí đã chốt mới có thể hủy",
-      };
-      toast.error(
-        errorMessages[errorCode] || error?.message || "Lỗi khi hủy chi phí"
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error?.response?.data?.message || "Lỗi khi hủy chi phí");
     },
   });
 }

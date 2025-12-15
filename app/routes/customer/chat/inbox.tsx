@@ -7,7 +7,6 @@ import {
   MessageSquare,
   QrCode,
   Scan,
-  Terminal,
   TreePine,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -22,14 +21,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
 import Image from "~/components/ui/image";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { CUSTOMER } from "~/lib/fe-url";
 import STORAGE, { deleteStorage, getStorage, setStorage } from "~/lib/storage";
 import { cn } from "~/lib/utils";

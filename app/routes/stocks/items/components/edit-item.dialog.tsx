@@ -130,7 +130,6 @@ export default function EditItemDialog({
           </div>
         </DialogHeader>
 
-        {/* === Body (Scrollable Split View) === */}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit, onError)}
@@ -285,6 +284,7 @@ export default function EditItemDialog({
                             }
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -311,6 +311,7 @@ export default function EditItemDialog({
                             }
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />

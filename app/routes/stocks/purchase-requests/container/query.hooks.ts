@@ -7,6 +7,7 @@ import type {
   ReceiveStockRequestDto,
 } from "~/services/api/stocks/purchase-requests/dto";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 /**
  * Hook lấy danh sách purchase requests với params
@@ -46,8 +47,11 @@ export function useCreatePurchaseRequest() {
       queryClient.invalidateQueries({ queryKey: ["purchase-requests"] });
       toast.success("Tạo yêu cầu mua hàng thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi tạo yêu cầu mua hàng");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi tạo yêu cầu mua hàng"
+        );
     },
   });
 }
@@ -73,8 +77,11 @@ export function useUpdatePurchaseRequest() {
       });
       toast.success("Cập nhật yêu cầu mua hàng thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi cập nhật yêu cầu mua hàng");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi cập nhật yêu cầu mua hàng"
+        );
     },
   });
 }
@@ -92,8 +99,11 @@ export function useDeletePurchaseRequest() {
       queryClient.invalidateQueries({ queryKey: ["purchase-requests"] });
       toast.success("Xóa yêu cầu mua hàng thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi xóa yêu cầu mua hàng");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi xóa yêu cầu mua hàng"
+        );
     },
   });
 }
@@ -112,8 +122,11 @@ export function useApprovePurchaseRequest() {
       queryClient.invalidateQueries({ queryKey: ["purchase-request", id] });
       toast.success("Phê duyệt yêu cầu mua hàng thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi phê duyệt yêu cầu mua hàng");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi phê duyệt yêu cầu mua hàng"
+        );
     },
   });
 }
@@ -134,8 +147,11 @@ export function useRejectPurchaseRequest() {
       });
       toast.success("Từ chối yêu cầu mua hàng thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi từ chối yêu cầu mua hàng");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi từ chối yêu cầu mua hàng"
+        );
     },
   });
 }
@@ -156,8 +172,11 @@ export function useCancelPurchaseRequest() {
       });
       toast.success("Hủy yêu cầu mua hàng thành công");
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Lỗi khi hủy yêu cầu mua hàng");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi hủy yêu cầu mua hàng"
+        );
     },
   });
 }
@@ -184,9 +203,11 @@ export function useReceiveStock() {
       queryClient.invalidateQueries({ queryKey: ["stock-items"] });
       toast.success("Nhận hàng vào kho thành công");
     },
-    onError: (error: any) => {
-      console.log(error);
-      toast.error(error?.message || "Lỗi khi nhận hàng vào kho");
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error?.response?.data?.message || "Lỗi khi nhận hàng vào kho"
+        );
     },
   });
 }

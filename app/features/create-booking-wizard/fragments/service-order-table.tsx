@@ -1,4 +1,4 @@
-import { format, parseISO, isSameDay } from "date-fns";
+import { format, isSameDay, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   Calendar as CalendarIcon,
@@ -211,8 +211,15 @@ function ServiceOrderItemRow({
                 date && onUpdate({ scheduledDate: format(date, "yyyy-MM-dd") })
               }
               disabled={(date) => {
-                if (!checkinDate || !checkoutDate) return false;
-                return date < checkinDate || date >= checkoutDate;
+                const checkin =
+                  checkinDate instanceof Date
+                    ? checkinDate
+                    : parseISO(checkinDate!.toString());
+                const checkout =
+                  checkoutDate instanceof Date
+                    ? checkoutDate
+                    : parseISO(checkoutDate!.toString());
+                return date <= checkin || date > checkout;
               }}
               locale={vi}
             />

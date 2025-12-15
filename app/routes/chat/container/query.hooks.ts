@@ -1,4 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 import { ChatService } from "~/services/api/chat";
 import type { ChatMessagesParams } from "~/services/api/chat/chat.types";
 import type { ChatSendHttpMessageRequestDto } from "~/services/api/chat/dto";
@@ -50,7 +52,7 @@ export function useStaffInbox(params?: ChatMessagesParams) {
   return useQuery({
     queryKey: ["staff-chat-inbox", params],
     queryFn: async () => await ChatService.getStaffChatInbox(params),
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 0, // 30 seconds
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });
@@ -63,11 +65,16 @@ export function useSendMessageHttp() {
   return useMutation({
     mutationFn: (data: ChatSendHttpMessageRequestDto) =>
       ChatService.sendChatMessageHttp(data),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       // Invalidate messages to refetch
       queryClient.invalidateQueries({
         queryKey: ["chat-messages", variables.sessionId],
       });
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message || "Gửi tin nhắn thất bại");
+      }
     },
   });
 }
@@ -84,8 +91,20 @@ export function useAssignStaff() {
       sessionId: string;
       staffUserId: string;
     }) => ChatService.assignChatSession(sessionId, staffUserId),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["staff-chat-inbox"] });
+      queryClient.invalidateQueries({
+        queryKey: ["chat-session", variables.sessionId],
+      });
+
+      toast.success("Giao phiên chat thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data?.message || "Giao phiên chat thất bại"
+        );
+      }
     },
   });
 }
@@ -98,6 +117,14 @@ export function useCloseSession() {
     mutationFn: (sessionId: string) => ChatService.closeChatSession(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff-chat-inbox"] });
+      toast.success("Đóng phiên chat thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data?.message || "Đóng phiên chat thất bại"
+        );
+      }
     },
   });
 }
@@ -125,9 +152,17 @@ export function useMarkRead() {
         }
       });
     },
-    onError: (error, messageId) => {
-      // Rollback on error
-      queryClient.invalidateQueries({ queryKey: ["chat-messages"] });
+    onSuccess: (_, sessionId) => {
+      queryClient.invalidateQueries({ queryKey: ["chat-messages", sessionId] });
+      toast.success("Đánh dấu tất cả tin nhắn là đã đọc thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data?.message ||
+            "Đánh dấu tin nhắn là đã đọc thất bại"
+        );
+      }
     },
   });
 }
@@ -154,17 +189,17 @@ export function useMarkAllRead() {
 
       return { previousData };
     },
-    onError: (error, sessionId, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          ["chat-messages", sessionId],
-          context.previousData
+    onSuccess: (_, sessionId) => {
+      queryClient.invalidateQueries({ queryKey: ["chat-messages", sessionId] });
+      toast.success("Đánh dấu tất cả tin nhắn là đã đọc thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data?.message ||
+            "Đánh dấu tất cả tin nhắn là đã đọc thất bại"
         );
       }
-    },
-    onSuccess: (data, sessionId) => {
-      queryClient.invalidateQueries({ queryKey: ["chat-messages", sessionId] });
     },
   });
 }

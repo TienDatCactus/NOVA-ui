@@ -377,7 +377,7 @@ function ItemCombobox({
                       setOpen(false);
                     }}
                   >
-                    <span className="font-mono text-xs text-muted-foreground w-[80px]">
+                    <span className="font-mono text-xs text-muted-foreground w-fit">
                       {item.code}
                     </span>
                     <span>{item.name}</span>

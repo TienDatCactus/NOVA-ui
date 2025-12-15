@@ -9,7 +9,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, TriangleAlert } from "lucide-react";
 import React, { useState } from "react";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Button } from "~/components/ui/button";
@@ -24,6 +24,8 @@ import {
 } from "~/components/ui/table";
 import type { PurchaseRequestListItemDto } from "~/services/api/stocks/purchase-requests/dto";
 import CreatePurchaseRequestDialog from "../create-purchase-request.dialog";
+import LowStockDialog from "~/routes/stocks/stock-adjustments/fragments/low-stock.dialog";
+import { useLowStockItems } from "~/routes/stocks/items/container/query.hooks";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,7 +40,23 @@ export function DataTable<TData extends PurchaseRequestListItemDto, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [openLowStockDialog, setOpenLowStockDialog] = useState(false);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [prefillLowStockItems, setPrefillLowStockItems] = useState(false);
+
+  const { data: lowStockItems = [] } = useLowStockItems();
+
+  const handleCreateFromLowStock = () => {
+    setPrefillLowStockItems(true);
+    setOpenCreateDialog(true);
+  };
+
+  const handleCreateDialogClose = (open: boolean) => {
+    setOpenCreateDialog(open);
+    if (!open) {
+      setPrefillLowStockItems(false);
+    }
+  };
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -74,10 +92,20 @@ export function DataTable<TData extends PurchaseRequestListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        <Button size={"sm"} onClick={() => setOpenCreateDialog(true)}>
-          <Plus />
-          Tạo yêu cầu mua hàng
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant={"warning-outline"}
+            onClick={() => setOpenLowStockDialog(true)}
+          >
+            <TriangleAlert />
+            Các mặt hàng sắp hết
+          </Button>
+          <Button size={"sm"} onClick={() => setOpenCreateDialog(true)}>
+            <Plus />
+            Tạo yêu cầu mua hàng
+          </Button>
+        </div>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -131,10 +159,16 @@ export function DataTable<TData extends PurchaseRequestListItemDto, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} />{" "}
+      <LowStockDialog
+        onOpenChange={setOpenLowStockDialog}
+        open={openLowStockDialog}
+        onCreatePurchaseRequest={handleCreateFromLowStock}
+      />
       <CreatePurchaseRequestDialog
         open={openCreateDialog}
-        onOpenChange={setOpenCreateDialog}
+        onOpenChange={handleCreateDialogClose}
+        initialItems={prefillLowStockItems ? lowStockItems : undefined}
       />
     </div>
   );

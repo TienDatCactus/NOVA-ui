@@ -206,7 +206,7 @@ export default function CustomerInfoBar({
                               checkoutDate instanceof Date
                                 ? checkoutDate
                                 : parseISO(checkoutDate!.toString());
-                            return date < checkin || date >= checkout;
+                            return date <= checkin || date > checkout;
                           }}
                           locale={vi}
                         />

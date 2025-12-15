@@ -47,7 +47,7 @@ export default function StaffViewLayout({
           <div className="flex items-center gap-2">
             <div>
               <Select
-                value={filters.gender}
+                value={filters.gender || ""}
                 onValueChange={(value) =>
                   onFilterChange("gender", value as any)
                 }
@@ -80,7 +80,7 @@ export default function StaffViewLayout({
 
             <div>
               <Select
-                value={filters.role}
+                value={filters.role || ""}
                 onValueChange={(value) => onFilterChange("role", value as any)}
               >
                 <SelectTrigger className="w-[180px]">

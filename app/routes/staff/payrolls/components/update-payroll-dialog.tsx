@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
@@ -22,9 +21,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { formatMoney } from "~/lib/utils";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import { useUpdatePayroll } from "../container/query.hooks";
-import { formatMoney } from "~/lib/utils";
 
 const updatePayrollSchema = z.object({
   baseSalaryFullMonth: z.string().optional(),
@@ -92,12 +91,8 @@ export default function UpdatePayrollDialog({
       },
       {
         onSuccess: () => {
-          toast.success("Cập nhật bảng lương thành công");
           onSuccess?.();
           onOpenChange(false);
-        },
-        onError: (error: any) => {
-          toast.error(error?.message || "Không thể cập nhật bảng lương");
         },
       }
     );

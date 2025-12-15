@@ -1,19 +1,7 @@
-import {
-  MessageSquare,
-  RotateCw,
-  X,
-  CloudFog,
-  Search,
-  Leaf,
-} from "lucide-react";
+import { CloudFog, Leaf, RotateCw, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Skeleton } from "~/components/ui/skeleton";
-import { useStaffInbox } from "../container/query.hooks";
-import ChatSessionCard from "../fragments/chat-session.cards";
-import { cn } from "~/lib/utils";
 import {
   Empty,
   EmptyContent,
@@ -21,6 +9,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
+import { Input } from "~/components/ui/input";
+import { Skeleton } from "~/components/ui/skeleton";
+import { cn } from "~/lib/utils";
+import { useStaffInbox } from "../container/query.hooks";
+import ChatSessionCard from "../fragments/chat-session.cards";
 
 interface ChatSidebarProps {
   activeSessionId: string | null;

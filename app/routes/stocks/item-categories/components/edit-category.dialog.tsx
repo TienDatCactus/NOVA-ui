@@ -71,7 +71,7 @@ export default function EditCategoryDialog({
         isActive: category.isActive,
       });
     }
-  }, [category, form]);
+  }, [category, form, open]);
 
   const onSubmit = (data: UpdateCategoryFormData) => {
     updateCategory(

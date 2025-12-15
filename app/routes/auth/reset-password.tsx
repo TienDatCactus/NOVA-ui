@@ -28,10 +28,12 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "~/components/ui/input-otp";
+import PasswordInput from "~/components/ui/password-input";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { ResetPasswordDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/reset-password";
 import { useAuthHooks } from "./container/auth.hooks";
+import { Loader2 } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -40,11 +42,8 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function VerifyOTP({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
-  const { resetPassword, isLoading, error: apiError } = useAuthHooks();
+export default function VerifyOTP({}: Route.ComponentProps) {
+  const { resetPassword, isLoading } = useAuthHooks();
   const requestedEmail = useLocation().state.email as string;
   if (!requestedEmail) {
     toast.error(
@@ -55,6 +54,7 @@ export default function VerifyOTP({
   const { ResetPasswordSchema } = AuthSchema;
   const resetPasswordForm = useForm({
     resolver: zodResolver(ResetPasswordSchema),
+    defaultValues: { email: requestedEmail },
   });
   const onSubmit: SubmitHandler<ResetPasswordDto> = async (data) => {
     try {
@@ -66,7 +66,7 @@ export default function VerifyOTP({
   };
   return (
     <SectionLayout center>
-      <Card className="w-124 pb-0 max-w-md shadow-none border-none">
+      <Card className="w-124 pb-0 max-w-md shadow-none bg-background border-none">
         <CardHeader className="text-center">
           <CardTitle>Thay đổi mật khẩu</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
@@ -88,12 +88,7 @@ export default function VerifyOTP({
                       <FormItem>
                         <FormLabel>Email quản lý</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="nova-admin"
-                            defaultValue={requestedEmail}
-                            disabled={!!requestedEmail}
-                            {...field}
-                          />
+                          <Input placeholder="nova-admin" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -114,7 +109,7 @@ export default function VerifyOTP({
                             className="w-full"
                             {...field}
                           >
-                            <InputOTPGroup className="*:w-16 *:h-14">
+                            <InputOTPGroup className="*:w-14 gap-2 *:h-12 *:border-2 *:border-input *:bg-transparent *:text-center *:text-2xl *:focus:border-primary *:focus:outline-none *:rounded-md *:shadow-sm *:transition-colors">
                               <InputOTPSlot index={0} />
                               <InputOTPSlot index={1} />
                               <InputOTPSlot index={2} />
@@ -140,7 +135,10 @@ export default function VerifyOTP({
                       <FormItem>
                         <FormLabel>Mật khẩu mới</FormLabel>
                         <FormControl>
-                          <Input placeholder="nova-new-password" {...field} />
+                          <PasswordInput
+                            placeholder="nova-new-password"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -150,12 +148,12 @@ export default function VerifyOTP({
                 <div className="grid gap-2">
                   <FormField
                     control={resetPasswordForm.control}
-                    name="confirmNewPassword"
+                    name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Xác nhận mật khẩu mới</FormLabel>
                         <FormControl>
-                          <Input
+                          <PasswordInput
                             placeholder="confirm-new-password"
                             {...field}
                           />
@@ -168,7 +166,13 @@ export default function VerifyOTP({
               </div>
             </CardContent>
             <CardFooter className="grid grid-cols-2 gap-2">
-              <Button size={"lg"} className="w-full" type="submit">
+              <Button
+                disabled={isLoading}
+                size={"lg"}
+                className="w-full"
+                type="submit"
+              >
+                {isLoading && <Loader2 className="animate-spin" />}
                 Gửi
               </Button>
               <Button

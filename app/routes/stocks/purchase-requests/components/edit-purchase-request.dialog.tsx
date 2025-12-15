@@ -291,14 +291,25 @@ export default function EditPurchaseRequestDialog({
                                               Nhập thủ công
                                             </span>
                                           </SelectItem>
-                                          {stockItems.map((item) => (
-                                            <SelectItem
-                                              key={item.id}
-                                              value={item.id}
-                                            >
-                                              {item.code} - {item.name}
-                                            </SelectItem>
-                                          ))}
+                                          {stockItems.map((item) => {
+                                            const isSelected =
+                                              form
+                                                .getValues("items")
+                                                .some(
+                                                  (itm: any) =>
+                                                    itm.itemId === item.id
+                                                ) &&
+                                              itemField.value !== item.id;
+                                            return (
+                                              <SelectItem
+                                                disabled={isSelected}
+                                                key={item.id}
+                                                value={item.id}
+                                              >
+                                                {item.code} - {item.name}
+                                              </SelectItem>
+                                            );
+                                          })}
                                         </SelectContent>
                                       </Select>
                                     </FormControl>

@@ -1,36 +1,38 @@
-import {
-  AlertTriangle,
-  PackageOpen,
-  ArrowRight,
-  CheckCircle2,
-} from "lucide-react";
+import { CheckCircle2, PackageOpen } from "lucide-react";
 import React from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
+  DialogHeader,
+  DialogTitle,
 } from "~/components/ui/dialog";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Progress } from "~/components/ui/progress";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { cn } from "~/lib/utils";
 import { useLowStockItems } from "../../items/container/query.hooks";
 
 interface LowStockDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreatePurchaseRequest?: () => void;
 }
 
 const LowStockDialog: React.FC<LowStockDialogProps> = ({
   open,
   onOpenChange,
+  onCreatePurchaseRequest,
 }) => {
   const { data: items = [] } = useLowStockItems();
+
+  const handleCreatePurchaseRequest = () => {
+    onOpenChange(false);
+    onCreatePurchaseRequest?.();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,7 +133,10 @@ const LowStockDialog: React.FC<LowStockDialogProps> = ({
             </Button>
           </DialogClose>
           {items.length > 0 && (
-            <Button className="w-full sm:w-auto gap-2">
+            <Button
+              className="w-full sm:w-auto gap-2"
+              onClick={handleCreatePurchaseRequest}
+            >
               <PackageOpen className="h-4 w-4" />
               Tạo phiếu nhập hàng
             </Button>

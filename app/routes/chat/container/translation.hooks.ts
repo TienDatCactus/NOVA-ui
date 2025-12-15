@@ -83,7 +83,7 @@ export function useTranslateMessage() {
           const detectedLang = detection?.language;
 
           if (!detectedLang) {
-            toast.error("Không thể nhận diện ngôn ngữ");
+            console.error("Không thể nhận diện ngôn ngữ");
             updateMessage(message.id, { isTranslating: false });
             return;
           }
@@ -121,7 +121,6 @@ export function useTranslateMessage() {
           return;
         } catch (error) {
           console.error("Language detection failed:", error);
-          toast.error("Không thể nhận diện ngôn ngữ");
           updateMessage(message.id, { isTranslating: false });
           return;
         }

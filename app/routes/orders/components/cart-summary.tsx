@@ -1,16 +1,11 @@
-import { Hotel, ShoppingCart, User } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "~/components/ui/empty";
+import { Card, CardContent } from "~/components/ui/card";
+import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
-import { Label } from "~/components/ui/label";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 import { formatMoney } from "~/lib/utils";
 
 type CartSummaryProps = {
@@ -80,7 +75,9 @@ export default function CartSummary({
           className="w-full"
           size="lg"
           onClick={onConfirm}
-          disabled={isInvalid}
+          disabled={
+            isInvalid || !hasRole(AuthLoader.getUser(), UserRole.Receptionist)
+          }
         >
           Xác nhận
         </Button>

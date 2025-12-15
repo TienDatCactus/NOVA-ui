@@ -22,6 +22,7 @@ export function useAuthHooks() {
       return response;
     },
     onSuccess: (response) => {
+      toast.success("Đăng nhập thành công.");
       setUser(response.user);
       if (response.user.roles.includes(UserRole.Admin)) {
         navigate(DASHBOARD.auditLogs);
@@ -35,6 +36,13 @@ export function useAuthHooks() {
         navigate(DASHBOARD.bookings.list);
       }
     },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Đặt lại mật khẩu thất bại."
+        );
+      }
+    },
   });
 
   const forgotPasswordMutation = useMutation({
@@ -43,9 +51,19 @@ export function useAuthHooks() {
       return { response, email };
     },
     onSuccess: ({ email }) => {
+      toast.success(
+        "Mã xác nhận đã được gửi đến email quản lý. Vui lòng kiểm tra hộp thư."
+      );
       navigate(AUTH.resetPassword, {
         state: { email },
       });
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Đặt lại mật khẩu thất bại."
+        );
+      }
     },
   });
 
@@ -55,9 +73,18 @@ export function useAuthHooks() {
       return { response, email: data.email };
     },
     onSuccess: ({ email }) => {
+      toast.success("Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.");
+
       navigate(AUTH.login, {
         state: { email },
       });
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Đặt lại mật khẩu thất bại."
+        );
+      }
     },
   });
 

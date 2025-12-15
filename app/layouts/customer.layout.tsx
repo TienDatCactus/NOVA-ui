@@ -167,7 +167,7 @@ const CustomerLayout: React.FC = () => {
       </main>
 
       {isMobile && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/20 bg-background/80 backdrop-blur-xl pb-safe-area shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/20 bg-background/80 backdrop-blur-xl pb-safe-area shadow-md">
           <div className="flex h-16 items-center justify-around px-2">
             {CUSTOMER_NAVS.map((nav) => {
               const active = isActive(nav.href);

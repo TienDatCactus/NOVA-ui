@@ -1,14 +1,15 @@
 import { format, parseISO } from "date-fns";
+import { Calendar, Clock, User, UserX } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "~/components/ui/dialog";
 import {
   Form,
@@ -18,12 +19,10 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import type { StaffAttendanceListItem } from "~/services/api/staff/staff-attendance/dto";
 import { useMarkAbsent } from "../container/query.hooks";
-import { AlertCircle, Calendar, Clock, User, UserX } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
 
 interface MarkAbsentDialogProps {
   open: boolean;
@@ -60,18 +59,19 @@ export default function MarkAbsentDialog({
       return;
     }
 
-    try {
-      await markAbsent.mutateAsync({
+    await markAbsent.mutateAsync(
+      {
         assignmentId: attendance.id,
         data: { reason: data.reason.trim() || "" },
-      });
-      toast.success("Đã ghi nhận vắng mặt");
-      form.reset();
-      onSuccess?.();
-      onOpenChange(false);
-    } catch (error) {
-      // Error handled by http interceptor
-    }
+      },
+      {
+        onSuccess: () => {
+          form.reset();
+          onSuccess?.();
+          onOpenChange(false);
+        },
+      }
+    );
   };
 
   if (!attendance) return null;

@@ -6,7 +6,6 @@ import {
   Leaf,
   Loader2,
   Map as MapIcon,
-  MessageSquare,
   Mountain,
   Send,
 } from "lucide-react";
@@ -44,6 +43,7 @@ import {
   EmptyTitle,
 } from "~/components/ui/empty";
 import { cn, formatMoney } from "~/lib/utils";
+import { BackgroundLayer } from "~/routes/chat/components/chat-main";
 import {
   useChatEntry,
   useChatMessages,
@@ -55,7 +55,6 @@ import { MessageBubble } from "~/routes/chat/fragments/message-bubble";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
 import type { Route } from "./+types/chat";
-import { BackgroundLayer } from "~/routes/chat/components/chat-main";
 
 export default function GuestChat({}: Route.ComponentProps) {
   const { t } = useTranslation("chat");
@@ -437,7 +436,7 @@ export default function GuestChat({}: Route.ComponentProps) {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="flex items-end gap-2 max-w-4xl mx-auto"
+            className="flex items-end gap-2 max-w-4xl sm:pb-0 pb-16 mx-auto"
           >
             <Popover
               open={isItemPopoverOpen}
@@ -554,7 +553,7 @@ export default function GuestChat({}: Route.ComponentProps) {
               </PopoverContent>
             </Popover>
 
-            <div className="flex-1 relative">
+            <div className="flex-1">
               <Input
                 id="chat-input"
                 value={inputMessage}

@@ -24,7 +24,7 @@ const ChatSessionDetailSchema = z.object({
   roomName: z.string().nullable(),
   customerName: z.string(),
   customerEmail: z.email().optional().nullable(),
-  customerPhone: z.string(),
+  customerPhone: z.string().nullable(),
   checkinDate: z.string(),
   checkoutDate: z.string(),
 });

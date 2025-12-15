@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Divider } from "~/components/ui/divider";
 import {
   Form,
   FormControl,
@@ -20,11 +19,11 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import type { LoginDto } from "~/services/api/auth/dto";
-import { useAuthHooks } from "./container/auth.hooks";
-import { AuthSchema } from "~/services/api/auth/auth.schema";
 import PasswordInput from "~/components/ui/password-input";
+import { AuthSchema } from "~/services/api/auth/auth.schema";
+import type { LoginDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/login";
+import { useAuthHooks } from "./container/auth.hooks";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -105,10 +104,7 @@ export default function Login() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
-            <Divider className="px-6 py-2">hoặc</Divider>
-            <Button type="button" className="w-full" variant={"secondary"}>
-              Đăng nhập với SMS
-            </Button>
+
             <div className="flex justify-center items-center pt-2">
               <Link
                 to="/auth/forgot-password"

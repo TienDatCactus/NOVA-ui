@@ -4,18 +4,14 @@ import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import {
+  AuthLoader,
+  RouteModule,
+  Permission,
+  hasRole,
+  UserRole,
+} from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/service-pos";
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Bán Hàng Dịch Vụ - NOVA Hotel Management" },
-    { name: "description", content: "Điểm bán POS dịch vụ" },
-  ];
-}
-
-export const clientLoader = () =>
-  AuthLoader.guard(RouteModule.Orders, Permission.Create);
 
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -56,11 +52,16 @@ import useServiceFilters from "../services/container/services/filter.hooks";
 import OrderConfirmDialog from "./components/order-confirm.dialog";
 import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
 import { uuidv4 } from "zod";
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bán Hàng Dịch Vụ - NOVA Hotel Management" },
+    { name: "description", content: "Điểm bán POS dịch vụ" },
+  ];
+}
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export const clientLoader = () =>
+  AuthLoader.guard(RouteModule.Orders, Permission.Read);
+export default function Component({}: Route.ComponentProps) {
   // Data fetching
   const { data: serviceTypes } = useServiceTypes();
 
@@ -447,7 +448,10 @@ export default function Component({
                   onClick={handleConfirm}
                   className="w-full"
                   size="lg"
-                  disabled={isEmpty}
+                  disabled={
+                    isEmpty ||
+                    !hasRole(AuthLoader.getUser(), UserRole.Receptionist)
+                  }
                 >
                   Xác nhận đơn
                 </Button>
