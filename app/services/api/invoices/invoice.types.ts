@@ -28,12 +28,7 @@ export const INVOICE_STATUSES = [
 
 export const INVOICE_TYPES = [
   { code: 1, value: "Deposit", label: "Hóa đơn cọc", variant: "info" },
-  {
-    code: 2,
-    value: "RoomCharges",
-    label: "Hóa đơn tiền phòng",
-    variant: "success",
-  },
+
   {
     code: 3,
     value: "ServiceCharges",

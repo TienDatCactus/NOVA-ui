@@ -14,10 +14,7 @@ export function meta({}: Route.MetaArgs) {
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Invoices, Permission.Read);
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   const { invoices, meta, isPending, filters, updateFilter, resetFilters } =
     useInvoicesContainer();
 

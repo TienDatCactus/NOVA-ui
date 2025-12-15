@@ -25,7 +25,6 @@ const ExpenseSourceTypeEnum = z.enum([
 const ExpenseListItemSchema = z.object({
   id: z.string(),
   category: ExpenseCategoryEnum,
-  categoryName: z.string(),
   amount: z.number(),
   expenseDate: z.string(),
   description: z.string(),

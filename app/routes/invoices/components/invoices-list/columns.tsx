@@ -81,19 +81,6 @@ export const columns: ColumnDef<InvoiceListItemDto>[] = [
       return <p>{row.original.bookingCode}</p>;
     },
   },
-  {
-    accessorKey: "invoiceType",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Loại" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <span className="text-sm text-muted-foreground">
-          {row.original.invoiceType}
-        </span>
-      );
-    },
-  },
 
   {
     accessorKey: "status",

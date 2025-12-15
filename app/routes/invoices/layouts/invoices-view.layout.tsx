@@ -1,19 +1,27 @@
+import { format } from "date-fns";
 import {
-  Calendar,
-  ChevronRight,
+  CreditCard,
   Download,
   FileText,
   Filter,
-  LayoutList,
   RotateCcw,
   Search,
-  CreditCard, // Added missing icon import
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { format } from "date-fns";
 import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
+import { DatePicker } from "~/components/ui/date-picker";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Pagination,
   PaginationContent,
@@ -23,19 +31,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "~/components/ui/pagination";
-import { cn } from "~/lib/utils";
-import { DatePicker } from "~/components/ui/date-picker";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "~/components/ui/dialog";
-import { Label } from "~/components/ui/label";
-import { Input } from "~/components/ui/input";
-import { Separator } from "~/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -43,17 +38,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
+import { cn } from "~/lib/utils";
 
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import { InvoicesService } from "~/services/api/invoices";
+import type { InvoiceStatusEnum } from "~/services/api/invoices/dto";
 import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import {
   INVOICE_STATUSES,
   INVOICE_TYPES,
 } from "~/services/api/invoices/invoice.types";
-import type { InvoiceStatusEnum } from "~/services/api/invoices/dto";
-import { hasAnyRole } from "~/lib/auth/bouncer";
-import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
 
 interface InvoicesViewLayoutProps {
   children: ReactNode;

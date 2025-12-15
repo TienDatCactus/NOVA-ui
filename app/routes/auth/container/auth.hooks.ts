@@ -38,9 +38,7 @@ export function useAuthHooks() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(
-          error.response?.data.message || "Đặt lại mật khẩu thất bại."
-        );
+        toast.error(error.response?.data.message || "Đăng nhập thất bại.");
       }
     },
   });
@@ -60,9 +58,7 @@ export function useAuthHooks() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(
-          error.response?.data.message || "Đặt lại mật khẩu thất bại."
-        );
+        toast.error(error.response?.data.message || "Quên mật khẩu thất bại.");
       }
     },
   });
