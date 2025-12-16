@@ -1,37 +1,37 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, ArrowRight, Banknote } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
-import {
-  Select,
-  SelectTrigger,
-  SelectItem,
-  SelectContent,
-  SelectValue,
-} from "~/components/ui/select";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Textarea } from "~/components/ui/textarea";
+import { cn } from "~/lib/utils";
 import type { InvoicePaymentRequestDto } from "~/services/api/invoices/dto";
 import { InvoiceSchema } from "~/services/api/invoices/invoice.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import { Badge } from "~/components/ui/badge";
-import { Wallet, Banknote, AlertCircle, ArrowRight } from "lucide-react";
-import { cn } from "~/lib/utils";
 
 type InvoicePaymentDialogProps = {
   open: boolean;
@@ -73,13 +73,10 @@ export function InvoicePaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-card p-0 gap-0 max-w-md w-full overflow-y-auto">
+      <DialogContent className="bg-background p-0 gap-0 max-w-md w-full overflow-y-auto">
         {/* HEADER */}
-        <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+        <DialogHeader className="px-6 py-4 border-b bg-card ">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
-            <div className="p-2 bg-emerald-100 text-emerald-600 rounded-full">
-              <Wallet className="w-5 h-5" />
-            </div>
             Thanh toán hóa đơn
           </DialogTitle>
         </DialogHeader>
@@ -167,26 +164,24 @@ export function InvoicePaymentDialog({
                       </Badge>
                     </div>
                     <FormControl>
-                      <div className="relative">
-                        <Banknote className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          min={1}
-                          placeholder="0"
-                          className={cn(
-                            "pl-9 pr-12 font-mono text-lg font-semibold",
-                            isOverPay &&
-                              "border-destructive text-destructive focus-visible:ring-destructive"
-                          )}
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
-                          VND
-                        </span>
-                      </div>
+                      <Input
+                        startAddon={<Banknote />}
+                        endAddon={
+                          <span className="text-sm text-muted-foreground font-medium">
+                            VND
+                          </span>
+                        }
+                        type="number"
+                        min={1}
+                        placeholder="0"
+                        className={cn(
+                          "font-mono text-lg font-semibold",
+                          isOverPay &&
+                            "border-destructive text-destructive focus-visible:ring-destructive"
+                        )}
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
                     </FormControl>
                     {isOverPay && (
                       <p className="text-xs text-destructive font-medium mt-1 animate-in slide-in-from-top-1">

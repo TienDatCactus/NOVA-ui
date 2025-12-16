@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Coffee, Plus, Sparkles, Utensils } from "lucide-react";
+import { Plus, Utensils } from "lucide-react";
 import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import type z from "zod";
@@ -16,9 +16,6 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 
-import { BreakfastSelection } from "../fragments/breakfast-selection";
-import { ServiceOrderTable } from "../fragments/service-order-table";
-import AddServiceDialog from "./add-service-dialog";
 import {
   Empty,
   EmptyContent,
@@ -27,6 +24,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
+import { BreakfastSelection } from "../fragments/breakfast-selection";
+import { ServiceOrderTable } from "../fragments/service-order-table";
+import AddServiceDialog from "./add-service-dialog";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItem = z.infer<typeof ServiceOrderItemSchema>;

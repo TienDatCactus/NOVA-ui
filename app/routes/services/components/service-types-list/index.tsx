@@ -14,6 +14,9 @@ import { FolderTree } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import CreateServiceTypeDialog from "../create-service-type.dialog";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
@@ -53,7 +56,9 @@ function ServiceTypesDataTable({
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={() => setOpen(true)}>Thêm loại dịch vụ</Button>
+          {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+            <Button onClick={() => setOpen(true)}>Thêm loại dịch vụ</Button>
+          )}
         </EmptyContent>
         <CreateServiceTypeDialog open={open} onClose={() => setOpen(false)} />
       </Empty>

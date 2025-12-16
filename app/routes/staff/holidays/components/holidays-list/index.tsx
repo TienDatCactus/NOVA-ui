@@ -14,6 +14,9 @@ import { DataTable } from "./data-table";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import CreateHolidayDialog from "../holiday-create-dialog";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 
 interface HolidaysListProps {
   holidays: HolidayListItem[];
@@ -52,9 +55,11 @@ export default function HolidaysList({
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setOpenCreateDialog(true)}>
-              Thêm ngày nghỉ lễ
-            </Button>
+            {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+              <Button onClick={() => setOpenCreateDialog(true)}>
+                Thêm ngày nghỉ lễ
+              </Button>
+            )}
           </EmptyContent>
         </Empty>
         <CreateHolidayDialog

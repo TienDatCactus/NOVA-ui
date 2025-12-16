@@ -291,23 +291,21 @@ export default function CustomerInfoBar({
                   <Wallet className="h-3.5 w-3.5" /> Tổng tiền dự kiến
                 </FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      className="h-10 font-mono font-bold text-lg text-right pr-12 text-primary"
-                      min={0}
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || 0)
-                      }
-                      disabled={!bookingState.permissions.canEdit}
-                    />
-                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                  <Input
+                    type="number"
+                    className="h-10 font-mono font-bold text-lg text-right pr-12 text-primary"
+                    min={0}
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                    disabled={!bookingState.permissions.canEdit}
+                    endAddon={
                       <span className="text-xs text-muted-foreground font-bold">
                         VND
                       </span>
-                    </div>
-                  </div>
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

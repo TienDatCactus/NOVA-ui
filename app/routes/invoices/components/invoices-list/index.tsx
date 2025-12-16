@@ -1,7 +1,4 @@
-import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
-import { Skeleton } from "~/components/ui/skeleton";
+import { FileText } from "lucide-react";
 import {
   Empty,
   EmptyContent,
@@ -10,23 +7,17 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { FileText } from "lucide-react";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
 
 interface InvoicesDataTableProps {
   invoices: InvoiceListItemDto[];
   isLoading?: boolean;
-  pageCount?: number;
-  currentPage?: number;
-  onPageChange?: (page: number) => void;
 }
 
-function InvoicesDataTable({
-  invoices,
-  isLoading,
-  pageCount,
-  currentPage,
-  onPageChange,
-}: InvoicesDataTableProps) {
+function InvoicesDataTable({ invoices, isLoading }: InvoicesDataTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">

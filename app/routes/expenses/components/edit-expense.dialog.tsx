@@ -1,15 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 import {
+  AlignLeft,
   Banknote,
-  CalendarIcon,
   CreditCard,
   FileText,
   Receipt,
   Save,
   Tag,
-  AlignLeft,
   X,
 } from "lucide-react";
 import { useEffect } from "react";
@@ -17,6 +14,7 @@ import { useForm } from "react-hook-form";
 import type z from "zod";
 
 import { Button } from "~/components/ui/button";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +32,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -42,12 +39,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { DatePicker } from "~/components/ui/date-picker";
 import { Separator } from "~/components/ui/separator";
-import { cn } from "~/lib/utils";
+import { Textarea } from "~/components/ui/textarea";
 
-import { useExpenseDetail, useUpdateExpense } from "../container/query.hooks";
 import { ExpenseSchema } from "~/services/api/expenses/expenses.schema";
+import { useExpenseDetail, useUpdateExpense } from "../container/query.hooks";
 
 const { UpdateExpenseRequestSchema } = ExpenseSchema;
 type UpdateExpenseFormData = z.infer<typeof UpdateExpenseRequestSchema>;
@@ -196,21 +192,20 @@ export default function EditExpenseDialog({
                           <span className="text-destructive">*</span>
                         </FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              className="pl-10 pr-12 h-10 text-lg font-bold text-right font-mono"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value) || 0)
-                              }
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
-                              VND
-                            </span>
-                          </div>
+                          <Input
+                            startAddon={<Banknote />}
+                            endAddon={
+                              <span className="text-xs font-bold text-muted-foreground">
+                                VND
+                              </span>
+                            }
+                            type="number"
+                            placeholder="0"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value) || 0)
+                            }
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -230,21 +225,14 @@ export default function EditExpenseDialog({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Ngày ghi nhận</FormLabel>
-                      <div className="relative w-full">
-                        <div className="absolute left-2.5 top-2.5 z-10 pointer-events-none text-muted-foreground">
-                          <CalendarIcon className="h-4 w-4" />
-                        </div>
-                        <DatePicker
-                          value={
-                            field.value ? new Date(field.value) : undefined
-                          }
-                          onChange={(date) => {
-                            if (date)
-                              field.onChange(date.toISOString().split("T")[0]);
-                          }}
-                          className="pl-9 w-full"
-                        />
-                      </div>
+
+                      <DatePicker
+                        value={field.value ? new Date(field.value) : undefined}
+                        onChange={(date) => {
+                          if (date)
+                            field.onChange(date.toISOString().split("T")[0]);
+                        }}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -262,8 +250,8 @@ export default function EditExpenseDialog({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="pl-9 w-40 relative">
-                            <CreditCard className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <SelectTrigger className="w-full">
+                            <CreditCard className="h-4 w-4 text-muted-foreground" />
                             <SelectValue placeholder="Chọn phương thức" />
                           </SelectTrigger>
                         </FormControl>

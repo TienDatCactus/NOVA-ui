@@ -1,11 +1,11 @@
 import {
+  CheckCircle2,
   MoreHorizontal,
   Pencil,
   Trash2,
-  CheckCircle2,
   XCircle,
 } from "lucide-react";
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -42,7 +42,6 @@ const ExpensesActionCell: React.FC<ExpensesActionCellProps> = ({ expense }) => {
     const isManual = expense.sourceType === "Manual";
     const isDraft = expense.status === "Draft";
     const isPosted = expense.status === "Posted";
-    const isVoided = expense.status === "Voided";
 
     return {
       canEdit: isManual && isDraft,
@@ -111,7 +110,7 @@ const ExpensesActionCell: React.FC<ExpensesActionCellProps> = ({ expense }) => {
                   <DropdownMenuItem
                     onClick={() => setOpenDeleteDialog(true)}
                     disabled={!permissions.canDelete}
-                    className="text-destructive"
+                    variant="destructive"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Xóa
@@ -145,7 +144,7 @@ const ExpensesActionCell: React.FC<ExpensesActionCellProps> = ({ expense }) => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setOpenVoidDialog(true)}
-                  className="text-destructive"
+                  variant="destructive"
                 >
                   <XCircle className="mr-2 h-4 w-4" />
                   Hủy

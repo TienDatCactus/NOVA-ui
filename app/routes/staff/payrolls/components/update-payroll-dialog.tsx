@@ -104,7 +104,7 @@ export default function UpdatePayrollDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Cập nhật bảng lương</DialogTitle>
           <DialogDescription>

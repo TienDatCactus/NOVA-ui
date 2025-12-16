@@ -95,7 +95,7 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
     ),
     cell: ({ row }) => {
       const Icon = CATEGORY_ICONS[row.original.category] || DollarSign;
-      const Label = CATEGORY_LABELS[row.original.categoryName];
+      const Label = CATEGORY_LABELS[row.original.category];
       return (
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />

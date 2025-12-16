@@ -1,10 +1,6 @@
-import type {
-  WorkShiftListItem,
-  WorkShiftListResponseDto,
-} from "~/services/api/work-shift/dto";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Clock } from "lucide-react";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -13,10 +9,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { Clock } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { useState } from "react";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { WorkShiftListResponseDto } from "~/services/api/work-shift/dto";
 import CreateWorkShiftDialog from "../work-shift-create-dialog";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 interface WorkShiftsDataTableProps {
   workShifts: WorkShiftListResponseDto;
@@ -54,9 +54,11 @@ export default function WorkShiftsDataTable({
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setOpenCreateDialog(true)}>
-              Thêm ca làm việc
-            </Button>
+            {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+              <Button onClick={() => setOpenCreateDialog(true)}>
+                Thêm ca làm việc
+              </Button>
+            )}
           </EmptyContent>
         </Empty>
         <CreateWorkShiftDialog

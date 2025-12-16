@@ -72,7 +72,7 @@ export default function ApplyUnusedLeaveDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Áp dụng chế độ xử lý phép dư</DialogTitle>
           <DialogDescription>
@@ -128,25 +128,24 @@ export default function ApplyUnusedLeaveDialog({
                 <span className="font-mono">{payroll.staffCode}</span>
               </div>
             </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={applyMutation.isPending}
-              >
-                Hủy
-              </Button>
-              <Button type="submit" disabled={applyMutation.isPending}>
-                {applyMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Áp dụng
-              </Button>
-            </DialogFooter>
           </form>
         </Form>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={applyMutation.isPending}
+          >
+            Hủy
+          </Button>
+          <Button onClick={handleSubmit} disabled={applyMutation.isPending}>
+            {applyMutation.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Áp dụng
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

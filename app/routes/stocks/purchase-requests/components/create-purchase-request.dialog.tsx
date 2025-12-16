@@ -48,6 +48,7 @@ import { useStockItemList } from "../../items/container/query.hooks";
 import { useCreatePurchaseRequest } from "../container/query.hooks";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import { useEffect } from "react";
+import { formatMoney } from "~/lib/utils";
 
 interface CreatePurchaseRequestDialogProps {
   open: boolean;
@@ -430,10 +431,7 @@ export default function CreatePurchaseRequestDialog({
                             {/* Subtotal (Read-only) */}
                             <TableCell className="align-top pt-3 text-right font-medium">
                               <div className="h-9 flex items-center justify-end">
-                                {new Intl.NumberFormat("vi-VN", {
-                                  style: "currency",
-                                  currency: "VND",
-                                }).format(subtotal)}
+                                {formatMoney(subtotal).vndFormatted}
                               </div>
                             </TableCell>
 
@@ -507,10 +505,7 @@ export default function CreatePurchaseRequestDialog({
               Tổng giá trị dự kiến
             </span>
             <span className="text-xl font-bold text-primary">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(totalCost)}
+              {formatMoney(totalCost).vndFormatted}
             </span>
           </div>
           <div className="flex gap-3">

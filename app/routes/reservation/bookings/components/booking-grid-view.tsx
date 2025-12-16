@@ -13,6 +13,9 @@ import type { BookingListResponseDto } from "~/services/api/booking/dto";
 import { Link } from "react-router";
 import { DASHBOARD } from "~/lib/fe-url";
 import { BookingCard } from "./booking-card";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 
 interface BookingGridProps {
   bookings: BookingListResponseDto;
@@ -52,9 +55,13 @@ export function BookingGridView({
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
-            <Button asChild>
-              <Link to={DASHBOARD.bookings.newBooking}>Tạo đơn đặt phòng</Link>
-            </Button>
+            {hasRole(AuthLoader.getUser(), UserRole.Receptionist) && (
+              <Button asChild>
+                <Link to={DASHBOARD.bookings.newBooking}>
+                  Tạo đơn đặt phòng
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" onClick={refetch}>
               Tải lại
             </Button>

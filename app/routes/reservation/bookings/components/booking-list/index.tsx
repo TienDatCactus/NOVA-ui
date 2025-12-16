@@ -12,6 +12,11 @@ import {
 } from "~/components/ui/empty";
 import { FolderCode, ArrowUpRightIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { Link } from "react-router";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
+import { DASHBOARD } from "~/lib/fe-url";
 
 interface BookingListProps {
   bookings: BookingListResponseDto;
@@ -46,7 +51,13 @@ function BookingList({ bookings, isLoading, refetch }: BookingListProps) {
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
-            <Button>Tạo đơn đặt phòng</Button>
+            {hasRole(AuthLoader.getUser(), UserRole.Receptionist) && (
+              <Button asChild>
+                <Link to={DASHBOARD.bookings.newBooking}>
+                  Tạo đơn đặt phòng
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" onClick={refetch}>
               Tải lại
             </Button>

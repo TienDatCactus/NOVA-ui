@@ -9,7 +9,7 @@ export type ExpensesFilter = {
 const initialState: ExpensesFilter = {
   fromDate: undefined,
   toDate: undefined,
-  categoryId: undefined,
+  categoryId: "",
 };
 
 export default function useExpensesFilters() {

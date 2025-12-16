@@ -7,8 +7,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type { PurchaseRequestFilters } from "../container/filter.hooks";
 import { PURCHASE_REQUESTS_STATUS } from "~/services/api/stocks/purchase-requests/purchase-requests.types";
+import type { PurchaseRequestFilters } from "../container/filter.hooks";
+import { RotateCcw } from "lucide-react";
+import { Button } from "~/components/ui/button";
 
 interface PurchaseRequestsLayoutProps {
   children: React.ReactNode;
@@ -36,31 +38,34 @@ const PurchaseRequestsLayout = ({
             phiếu
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="status-filter" className="text-sm font-medium">
-                Trạng thái:
-              </Label>
-              <Select
-                value={filters.status || "all"}
-                onValueChange={(value) =>
-                  updateFilter("status", value === "all" ? null : value)
-                }
-              >
-                <SelectTrigger id="status-filter" className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  {PURCHASE_REQUESTS_STATUS.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="status-filter" className="text-sm font-medium">
+              Trạng thái:
+            </Label>
+            <Select
+              value={filters.status || "all"}
+              onValueChange={(value) =>
+                updateFilter("status", value === "all" ? null : value)
+              }
+            >
+              <SelectTrigger id="status-filter" className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                {PURCHASE_REQUESTS_STATUS.map((status) => (
+                  <SelectItem key={status.value} value={status.value}>
+                    {status.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Button onClick={resetFilters} variant="outline">
+              <RotateCcw />
+            </Button>
           </div>
         </div>
       </div>

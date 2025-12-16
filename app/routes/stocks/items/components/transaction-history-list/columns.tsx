@@ -1,10 +1,8 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { ExternalLink } from "lucide-react";
 import { format } from "date-fns";
-import { Badge } from "~/components/ui/badge";
 import { DataTableColumnHeader } from "~/components/table/table-header";
+import { Badge } from "~/components/ui/badge";
 import { formatMoney } from "~/lib/utils";
-import { FE_URL } from "~/lib/fe-url";
 import type { StockTransactionsItemDto } from "~/services/api/stocks/items/dto";
 
 // Transaction type badge configuration

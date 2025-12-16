@@ -9,19 +9,25 @@ import {
   subMonths,
 } from "date-fns";
 import { Filter, LayoutDashboard } from "lucide-react";
-import { useNavigate } from "react-router";
+import { redirect, useNavigate } from "react-router";
 import { Button } from "~/components/ui/button";
 import { DateRangePicker } from "~/components/ui/date-range-picker";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
-import { FE_URL } from "~/lib/fe-url";
+import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
+import { DASHBOARD, FE_URL } from "~/lib/fe-url";
 import useExpensesFilters from "../container/filter.hooks";
 import ExpensesLayout from "../layouts/expenses.layout";
 import CategoryChart from "./components/category-chart";
 import MetricsCards from "./components/metrics-cards";
 import MonthlyTrendChart from "./components/monthly-trend-chart";
 import { useDashboardData } from "./container/dashboard.hooks";
-
+export const clientLoader = () => {
+  const user = AuthLoader.getUser();
+  if (!hasRole(user, UserRole.HotelManager)) {
+    throw redirect(DASHBOARD.expenses);
+  }
+};
 export default function ExpenseDashboard() {
   const navigate = useNavigate();
   const { filters, updateFilter } = useExpensesFilters();

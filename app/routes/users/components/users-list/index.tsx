@@ -1,8 +1,6 @@
 import { Users } from "lucide-react";
-import type { UserItem } from "~/services/api/user/dto";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
-import { Skeleton } from "~/components/ui/skeleton";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -11,17 +9,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
-import { Button } from "~/components/ui/button";
-import { useState } from "react";
+import { Skeleton } from "~/components/ui/skeleton";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
+import type { UserItem } from "~/services/api/user/dto";
 import { CreateUserDialog } from "../user-create-dialog";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
 
 interface UsersDataTableProps {
   users: UserItem[];
@@ -56,9 +51,11 @@ function UsersDataTable({ users, isLoading }: UsersDataTableProps) {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setOpenCreateDialog(true)}>
-              Thêm tài khoản
-            </Button>
+            {hasRole(AuthLoader.getUser(), UserRole.Admin) && (
+              <Button onClick={() => setOpenCreateDialog(true)}>
+                Thêm tài khoản
+              </Button>
+            )}
           </EmptyContent>
         </Empty>
         <CreateUserDialog

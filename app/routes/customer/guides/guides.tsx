@@ -27,7 +27,7 @@ import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import Image from "~/components/ui/image";
 import { Separator } from "~/components/ui/separator";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import type { Route } from "./+types/guides";
 
 export function meta({}: Route.MetaArgs) {
@@ -175,7 +175,7 @@ export default function GuidesPage() {
                   <AlertDescription className="font-medium">
                     {t("notes.towels.warning")}
                     <strong className="text-red-600 dark:text-red-400">
-                      1,000,000 VND
+                      {formatMoney(1000000).vndFormatted}
                     </strong>
                   </AlertDescription>
                 </Alert>
@@ -198,7 +198,7 @@ export default function GuidesPage() {
                     <span>
                       {t("notes.roomDesign.beanBag")}{" "}
                       <strong className="text-red-600 dark:text-red-400">
-                        500,000 VND
+                        {formatMoney(500000).vndFormatted}
                       </strong>
                     </span>
                   }

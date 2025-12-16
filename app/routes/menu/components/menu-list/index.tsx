@@ -14,6 +14,9 @@ import { DataTable } from "./data-table";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import CreateMenuDialog from "../create-menu.dialog";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 interface MenuDataTableProps {
   menu: MenuListResponseDto;
   isLoading?: boolean;
@@ -46,9 +49,11 @@ function MenuDataTable({ menu, isLoading }: MenuDataTableProps) {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={() => setOpenCreateDialog(true)}>
-            Tạo thực đơn đầu tiên
-          </Button>
+          {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+            <Button onClick={() => setOpenCreateDialog(true)}>
+              Tạo thực đơn đầu tiên
+            </Button>
+          )}
         </EmptyContent>
         <CreateMenuDialog
           open={openCreateDialog}

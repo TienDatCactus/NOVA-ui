@@ -1,12 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  AlertCircle,
   ArrowUpCircle,
   Check,
   CreditCard,
   Gift,
   Loader2,
   TrendingUp,
-  AlertCircle, // Icon mới cho warning
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -33,7 +33,6 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -42,9 +41,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
-import { Textarea } from "~/components/ui/textarea";
 import { Skeleton } from "~/components/ui/skeleton"; // Cần component này
+import { Textarea } from "~/components/ui/textarea";
 import { cn, formatMoney } from "~/lib/utils";
+import { useAvailableRoomsForChange } from "~/routes/reservation/bookings/container/booking-query.hooks";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type {
   BookingDetailResponseDto,
   BookingUpgradeRoomRequestDto,
@@ -55,9 +56,7 @@ import {
   calculateUpgradeSurcharge,
   getUpgradeValidationMessage,
 } from "../../container/upgrade-room-calculator";
-import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { useUpgradeRoom } from "../../container/use-booking-checkout.hooks";
-import { useAvailableRoomsForChange } from "~/routes/reservation/bookings/container/booking-query.hooks";
 
 interface UpgradeRoomDialogProps {
   open: boolean;
@@ -557,17 +556,14 @@ export function UpgradeRoomDialog({
                                   <div className="relative">
                                     <Input
                                       type="number"
+                                      endAddon={
+                                        <span className="text-xs text-muted-foreground">
+                                          VND
+                                        </span>
+                                      }
                                       {...field}
                                       max={surcharge}
-                                      className={cn(
-                                        "pr-12 font-mono",
-                                        form.formState.errors.paidAmount &&
-                                          "border-destructive focus-visible:ring-destructive"
-                                      )}
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                                      VND
-                                    </span>
                                   </div>
                                   <FormMessage />
                                 </FormItem>

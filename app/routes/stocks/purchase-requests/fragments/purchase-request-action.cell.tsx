@@ -1,7 +1,5 @@
 import {
   CheckCircle,
-  Download,
-  Eye,
   MoreHorizontal,
   PackageCheck,
   Pencil,
@@ -19,21 +17,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import type { PurchaseRequestListItemDto } from "~/services/api/stocks/purchase-requests/dto";
-import EditPurchaseRequestDialog from "../components/edit-purchase-request.dialog";
-import PurchaseRequestDetailDialog from "../components/purchase-request-detail.dialog";
-import ApproveRejectDialog from "./approve-reject.dialog";
-import DeleteConfirmDialog from "./delete-confirm.dialog";
-import ReceiveStockDialog from "./receive-stock.dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { PurchaseRequestsService } from "~/services/api/stocks/purchase-requests";
-import { toast } from "sonner";
-import { hasAnyRole, hasRole } from "~/lib/auth/bouncer";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import type { PurchaseRequestListItemDto } from "~/services/api/stocks/purchase-requests/dto";
+import EditPurchaseRequestDialog from "../components/edit-purchase-request.dialog";
+import ApproveRejectDialog from "./approve-reject.dialog";
+import DeleteConfirmDialog from "./delete-confirm.dialog";
+import ReceiveStockDialog from "./receive-stock.dialog";
 
 interface PurchaseRequestActionCellProps {
   purchaseRequest: PurchaseRequestListItemDto;
@@ -69,7 +64,7 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant={"success"}
+                variant={"success-outline"}
                 size={"icon"}
                 onClick={() => setOpenApproveDialog(true)}
               >
@@ -85,7 +80,7 @@ const PurchaseRequestActionCell: React.FC<PurchaseRequestActionCellProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="destructive"
+                variant="destructive-outline"
                 size={"icon"}
                 onClick={() => setOpenRejectDialog(true)}
               >

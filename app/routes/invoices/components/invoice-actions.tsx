@@ -2,7 +2,7 @@ import { Ban, CreditCard, Plus, RotateCcw } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
-import { hasAnyRole, hasRole } from "~/lib/auth/bouncer";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import type {
   AddCustomItemsRequestDto,
   InvoiceListItemDto,

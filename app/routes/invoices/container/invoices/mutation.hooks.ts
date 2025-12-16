@@ -22,7 +22,7 @@ const useAddCustomItem = (invoiceId: string) => {
     onError: (error) => {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
+          error.response?.data.message || "Thêm mục tùy chỉnh thất bại"
         );
       }
     },
@@ -50,7 +50,7 @@ const useInvoicePayment = (invoiceId: string, bookingId?: string) => {
     onError: (error) => {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
+          error.response?.data.message || "Thanh toán hóa đơn thất bại"
         );
       }
     },
@@ -88,9 +88,7 @@ const useVoidInvoice = (invoiceId: string) => {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(
-          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
-        );
+        toast.error(error.response?.data.message || "Hủy hóa đơn thất bại");
       }
     },
   });
@@ -108,7 +106,8 @@ const useSyncInvoiceWithOrders = (invoiceId: string) => {
     onError: (error) => {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data.message || "Hoàn tiền hóa đơn thất bại"
+          error.response?.data.message ||
+            "Đồng bộ hóa đơn với đơn hàng thất bại"
         );
       }
     },

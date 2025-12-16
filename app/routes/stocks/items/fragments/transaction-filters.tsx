@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -130,7 +129,6 @@ export function TransactionFilters({
             <SelectValue placeholder="Tất cả" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tất cả</SelectItem>
             <SelectItem value="Manual">Thủ công</SelectItem>
             <SelectItem value="PosOrder">Đơn hàng POS</SelectItem>
             <SelectItem value="PurchaseRequest">Yêu cầu mua hàng</SelectItem>

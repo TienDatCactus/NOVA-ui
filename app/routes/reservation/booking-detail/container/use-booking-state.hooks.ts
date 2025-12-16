@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type z from "zod";
+import { formatMoney } from "~/lib/utils";
 import type { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
@@ -372,13 +373,7 @@ export function canCheckoutBooking(
       0
     );
     reasons.push(
-      `Còn ${unpaidInvoices.length} hóa đơn chưa thanh toán (tổng: ${new Intl.NumberFormat(
-        "vi-VN",
-        {
-          style: "currency",
-          currency: "VND",
-        }
-      ).format(totalUnpaid)})`
+      `Còn ${unpaidInvoices.length} hóa đơn chưa thanh toán (tổng: ${formatMoney(totalUnpaid).vndFormatted})`
     );
   }
 
@@ -393,15 +388,9 @@ export function canCheckoutBooking(
       0
     );
     warnings.push(
-      `Có ${overpaidInvoices.length} hóa đơn thanh toán thừa (${new Intl.NumberFormat(
-        "vi-VN",
-        {
-          style: "currency",
-          currency: "VND",
-        }
-      ).format(
-        totalOverpaid
-      )}). Khách hàng cần được hoàn trả trước khi checkout.`
+      `Có ${overpaidInvoices.length} hóa đơn thanh toán thừa (${
+        formatMoney(totalOverpaid).vndFormatted
+      }). Khách hàng cần được hoàn trả trước khi checkout.`
     );
   }
 

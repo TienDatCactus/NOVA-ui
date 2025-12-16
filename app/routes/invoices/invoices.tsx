@@ -27,13 +27,7 @@ export default function Component({}: Route.ComponentProps) {
       totalPages={meta?.totalPages}
       currentPage={meta?.page}
     >
-      <InvoicesDataTable
-        invoices={invoices}
-        isLoading={isPending}
-        pageCount={meta?.totalPages}
-        currentPage={meta?.page}
-        onPageChange={(page) => updateFilter("Page", page)}
-      />
+      <InvoicesDataTable invoices={invoices} isLoading={isPending} />
     </InvoicesViewLayout>
   );
 }

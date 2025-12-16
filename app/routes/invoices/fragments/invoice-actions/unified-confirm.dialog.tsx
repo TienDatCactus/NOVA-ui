@@ -1,12 +1,11 @@
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-  AlertDialogDescription,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 
@@ -46,15 +45,13 @@ export function UnifiedConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter className="flex flex-row gap-4 justify-end pt-4">
           <AlertDialogCancel asChild>
-            <Button variant={"destructive-ghost"} onClick={onCancel}>
+            <Button variant={"outline"} onClick={onCancel}>
               Hủy
             </Button>
           </AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button variant={"warning"} onClick={onConfirm}>
-              {config.actionLabel}
-            </Button>
-          </AlertDialogAction>
+          <Button variant={"destructive"} onClick={onConfirm}>
+            {config.actionLabel}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

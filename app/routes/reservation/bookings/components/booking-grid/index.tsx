@@ -1,11 +1,5 @@
-import {
-  ArrowUpRight,
-  BedDouble,
-  Coins,
-  FolderOpen,
-  LayoutGrid,
-  Users,
-} from "lucide-react";
+import { Coins, FolderOpen, Users } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Empty,
@@ -15,9 +9,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { Skeleton } from "~/components/ui/skeleton";
 import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
+import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
 import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
 import RoomCardGrid from "../../../booking-detail/fragments/room.card";

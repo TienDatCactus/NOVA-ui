@@ -13,6 +13,9 @@ import ExpensesDataTable from "./expenses-list";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import CreateExpenseDialog from "./create-expense.dialog";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 interface ExpensesListViewProps {
   expenses: ExpenseListResponseDto;
@@ -60,9 +63,11 @@ function EmptyState() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button onClick={() => setOpenCreateDialog(true)}>
-          Tạo chi phí mới
-        </Button>
+        {hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
+          <Button onClick={() => setOpenCreateDialog(true)}>
+            Tạo chi phí mới
+          </Button>
+        )}
       </EmptyContent>
       <CreateExpenseDialog
         open={openCreateDialog}

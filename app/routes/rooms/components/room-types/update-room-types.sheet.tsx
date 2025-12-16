@@ -1,12 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   BedDouble,
-  DollarSign,
   FileText,
-  Hash,
   ImageIcon,
-  Info,
-  Layers,
   Package,
   RotateCcw,
   Save,
@@ -19,22 +15,12 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -42,33 +28,23 @@ import {
 } from "~/components/ui/form";
 import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
-import {
-  Dropzone,
-  DropzoneContent,
-  DropzoneEmptyState,
-} from "~/components/ui/shadcn-io/dropzone";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Dropzone } from "~/components/ui/shadcn-io/dropzone";
 import { MinimalTiptap } from "~/components/ui/shadcn-io/minimal-tiptap";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
-import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { cn, onError } from "~/lib/utils";
 import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
+import { useUpdateRoomType } from "../../container/room-types/mutation.hooks";
 import { useRoomTypeDetail } from "../../container/room-types/query.hooks";
-import {
-  useUpdateRoomType,
-  useDeleteRoomType,
-} from "../../container/room-types/mutation.hooks";
-import { toast } from "sonner";
 
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 

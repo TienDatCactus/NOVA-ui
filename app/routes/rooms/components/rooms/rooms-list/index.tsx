@@ -14,6 +14,9 @@ import { DataTable } from "./data-table";
 import { Button } from "react-aria-components";
 import { useState } from "react";
 import CreateRoomDialog from "../create-room.dialog";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 interface RoomsDataTableProps {
   rooms: RoomListResponseDto;
@@ -48,9 +51,11 @@ function RoomsDataTable({ rooms, isLoading }: RoomsDataTableProps) {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={() => setOpenCreateDialog(true)}>
-            Thêm phòng mới
-          </Button>
+          {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+            <Button onClick={() => setOpenCreateDialog(true)}>
+              Thêm phòng mới
+            </Button>
+          )}
         </EmptyContent>
       </Empty>
     );

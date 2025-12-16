@@ -1,5 +1,4 @@
 import { Download, Loader2 } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -12,11 +11,9 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { StaffPayrollService } from "~/services/api/staff/staff-payroll";
+import { formatMoney } from "~/lib/utils";
 import { useExportPayslips, usePayrollDetail } from "../container/query.hooks";
 import ComponentsList from "./payroll-detail-dialog/components-list";
-import { formatMoney } from "~/lib/utils";
-import { AxiosError } from "axios";
 
 interface PayrollDetailDialogProps {
   payrollId: string;
@@ -29,29 +26,19 @@ export default function PayrollDetailDialog({
   open,
   onOpenChange,
 }: PayrollDetailDialogProps) {
-  const [isExporting, setIsExporting] = useState(false);
-
   const { data: payroll, isPending, refetch } = usePayrollDetail(payrollId);
-  const { mutateAsync } = useExportPayslips(payrollId);
+  const { mutateAsync, isPending: isExporting } = useExportPayslips(payrollId);
   const handleExportPayslip = async () => {
-    setIsExporting(true);
-    try {
-      const blob = await mutateAsync();
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `PhieuLuong_${payroll?.staffCode}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast.success("Xuất phiếu lương thành công");
-    } catch (error) {
-    } finally {
-      setIsExporting(false);
-    }
+    const blob = await mutateAsync();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `PhieuLuong_${payroll?.staffCode}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    toast.success("Xuất phiếu lương thành công");
   };
 
   return (

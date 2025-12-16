@@ -9,7 +9,11 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -31,18 +35,13 @@ import {
 import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Dropzone } from "~/components/ui/shadcn-io/dropzone";
 import { MinimalTiptap } from "~/components/ui/shadcn-io/minimal-tiptap";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
 import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
 import { useCreateRoomType } from "../../container/room-types/mutation.hooks";
-import { toast } from "sonner";
 
 const { CreateRoomTypesRequestSchema } = RoomTypesSchema;
 type CreateRoomTypeFormData = z.infer<typeof CreateRoomTypesRequestSchema>;

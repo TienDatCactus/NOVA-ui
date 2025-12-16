@@ -36,7 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { DASHBOARD } from "~/lib/fe-url";
-import { cn, useCalculateNights } from "~/lib/utils";
+import { cn, formatMoney, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import {
   BOOKING_SOURCES,
@@ -134,10 +134,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     if (!canCheckOut) {
       if (bookingState.financial.totalBalance > 0) {
         toast.error(
-          `Không thể checkout. Còn ${bookingState.financial.unpaidInvoiceCount} hóa đơn chưa thanh toán (${new Intl.NumberFormat(
-            "vi-VN",
-            { style: "currency", currency: "VND" }
-          ).format(bookingState.financial.totalBalance)})`
+          `Không thể checkout. Còn ${bookingState.financial.unpaidInvoiceCount} hóa đơn chưa thanh toán (${formatMoney(bookingState.financial.totalBalance).vndFormatted})`
         );
       } else {
         toast.error("Không thể checkout booking này");

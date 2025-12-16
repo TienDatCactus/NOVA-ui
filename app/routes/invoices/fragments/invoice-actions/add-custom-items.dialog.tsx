@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Banknote, Calculator, Hash, PackagePlus, Plus } from "lucide-react";
+import { Banknote, Calculator, Hash, Plus } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
@@ -64,13 +64,10 @@ export default function AddItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-card shadow-lg p-0 gap-0 max-w-lg w-full overflow-hidden">
+      <DialogContent className="bg-background shadow-lg p-0 gap-0 max-w-lg w-full overflow-hidden">
         {/* HEADER */}
-        <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+        <DialogHeader className="px-6 py-4 border-b bg-card ">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
-            <div className="p-2 bg-primary/10 rounded-full text-primary">
-              <PackagePlus className="w-5 h-5" />
-            </div>
             Thêm mục tùy chỉnh
           </DialogTitle>
         </DialogHeader>
@@ -121,18 +118,17 @@ export default function AddItemDialog({
                       <FormItem>
                         <FormLabel>Số lượng</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Hash className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground opacity-50" />
-                            <Input
-                              type="number"
-                              min={1}
-                              className="pl-9 text-center font-mono"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                            />
-                          </div>
+                          <Input
+                            startAddon={
+                              <Hash className=" h-4 w-4 text-muted-foreground " />
+                            }
+                            type="number"
+                            min={1}
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -149,22 +145,21 @@ export default function AddItemDialog({
                       <FormItem>
                         <FormLabel>Đơn giá</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Banknote className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground opacity-50" />
-                            <Input
-                              type="number"
-                              min={0}
-                              placeholder="0"
-                              className="pl-9 pr-12 font-mono text-right"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
-                              VND
-                            </span>
-                          </div>
+                          <Input
+                            startAddon={<Banknote />}
+                            endAddon={
+                              <span className="text-xs text-muted-foreground font-medium">
+                                VND
+                              </span>
+                            }
+                            type="number"
+                            min={0}
+                            placeholder="0"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

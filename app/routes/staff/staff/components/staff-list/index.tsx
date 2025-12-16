@@ -1,5 +1,6 @@
-import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
-import { columns } from "./columns";
+import { FolderTree } from "lucide-react";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -8,12 +9,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { FolderTree } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
-import { DataTable } from "./data-table";
-import { useState } from "react";
+import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
+import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
 import CreateStaffDialog from "../staff-create-dialog";
-import { Button } from "~/components/ui/button";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
 
 interface StaffListProps {
   staffs: StaffListItemDto[];
@@ -50,9 +51,11 @@ export default function StaffDataTable({ staffs, isLoading }: StaffListProps) {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setOpenCreateDialog(true)}>
-              Thêm nhân viên
-            </Button>
+            {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+              <Button onClick={() => setOpenCreateDialog(true)}>
+                Thêm nhân viên
+              </Button>
+            )}
           </EmptyContent>
         </Empty>
         <CreateStaffDialog

@@ -563,23 +563,22 @@ export default function InvoiceDetailSheet({
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
-                                    <div className="relative">
-                                      <Input
-                                        type="number"
-                                        {...field}
-                                        value={field.value || ""}
-                                        onChange={(e) => {
-                                          // ... (Giữ nguyên logic validation cũ)
-                                          const val =
-                                            parseFloat(e.target.value) || 0;
-                                          field.onChange(val);
-                                        }}
-                                        className="text-right font-mono text-lg font-semibold h-12 pr-12"
-                                      />
-                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
-                                        VND
-                                      </span>
-                                    </div>
+                                    <Input
+                                      type="number"
+                                      {...field}
+                                      value={field.value || ""}
+                                      onChange={(e) => {
+                                        // ... (Giữ nguyên logic validation cũ)
+                                        const val =
+                                          parseFloat(e.target.value) || 0;
+                                        field.onChange(val);
+                                      }}
+                                      endAddon={
+                                        <span className="text-xs font-bold text-muted-foreground">
+                                          VND
+                                        </span>
+                                      }
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>

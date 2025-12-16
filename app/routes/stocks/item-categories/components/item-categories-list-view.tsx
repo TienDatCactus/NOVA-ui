@@ -12,6 +12,9 @@ import {
 import type { ItemCategoryListItemDto } from "~/services/api/stocks/item-category/dto";
 import ItemCategoriesList from "./item-categories-list";
 import CreateCategoryDialog from "./create-category.dialog";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
 
 interface ItemCategoriesListViewProps {
   categories: ItemCategoryListItemDto[];
@@ -45,9 +48,11 @@ export default function ItemCategoriesListView({
           <EmptyDescription>Tạo danh mục đầu tiên để bắt đầu</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={() => setOpenCreateDialog(true)}>
-            Tạo danh mục hàng hóa
-          </Button>
+          {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+            <Button onClick={() => setOpenCreateDialog(true)}>
+              Tạo danh mục hàng hóa
+            </Button>
+          )}
         </EmptyContent>
         <CreateCategoryDialog
           open={openCreateDialog}

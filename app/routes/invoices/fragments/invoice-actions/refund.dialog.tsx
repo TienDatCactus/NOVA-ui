@@ -1,6 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo } from "react";
+import { AlertCircle, Banknote } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -19,11 +22,9 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { cn, formatMoney } from "~/lib/utils";
 import type { RefundInvoiceRequestDto } from "~/services/api/invoices/dto";
 import { InvoiceSchema } from "~/services/api/invoices/invoice.schema";
-import { Undo2, Banknote, AlertCircle } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
-import { cn, formatMoney } from "~/lib/utils";
 
 type RefundDialogProps = {
   open: boolean;
@@ -63,13 +64,10 @@ export function RefundDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-card shadow-lg p-0 gap-0 max-w-md w-full overflow-hidden">
+      <DialogContent className="bg-background shadow-lg p-0 gap-0 max-w-md w-full overflow-hidden">
         {/* HEADER */}
-        <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+        <DialogHeader className="px-6 py-4 border-b bg-card ">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
-            <div className="p-2 bg-orange-100 text-orange-600 rounded-full">
-              <Undo2 className="w-5 h-5" />
-            </div>
             Hoàn tiền hóa đơn
           </DialogTitle>
         </DialogHeader>
@@ -81,17 +79,16 @@ export function RefundDialog({
           >
             <div className="p-6 space-y-6">
               {/* INFO CARD */}
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-800">
-                  <span className="font-semibold block mb-0.5">Lưu ý:</span>
+              <Alert variant={"warning"}>
+                <AlertCircle />
+                <AlertTitle>Lưu ý:</AlertTitle>
+                <AlertDescription>
                   Số tiền hoàn tối đa cho hóa đơn này là{" "}
                   <span className="font-mono font-bold">
                     {formatMoney(maxRefundAmount).vndFormatted}
                   </span>
-                  .
-                </div>
-              </div>
+                </AlertDescription>
+              </Alert>
 
               {/* AMOUNT FIELD */}
               <FormField
@@ -110,28 +107,27 @@ export function RefundDialog({
                       </Badge>
                     </div>
                     <FormControl>
-                      <div className="relative">
-                        <Banknote className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          min={0}
-                          max={maxRefundAmount}
-                          placeholder="0"
-                          className={cn(
-                            "pl-9 pr-12 font-mono text-lg font-semibold",
-                            isOverLimit &&
-                              "border-destructive focus-visible:ring-destructive text-destructive"
-                          )}
-                          {...field}
-                          value={field.value === 0 ? "" : field.value} // UX: Không hiện số 0 mặc định để placeholder hiện ra
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
-                          VND
-                        </span>
-                      </div>
+                      <Input
+                        type="number"
+                        startAddon={
+                          <Banknote className="h-4 w-4 text-muted-foreground" />
+                        }
+                        endAddon={
+                          <span className="text-sm text-muted-foreground font-medium">
+                            VND
+                          </span>
+                        }
+                        min={0}
+                        max={maxRefundAmount}
+                        placeholder="0"
+                        className={cn(
+                          isOverLimit &&
+                            "border-destructive focus-visible:ring-destructive text-destructive"
+                        )}
+                        {...field}
+                        value={field.value === 0 ? "" : field.value}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
                     </FormControl>
                     {isOverLimit && (
                       <p className="text-xs text-destructive font-medium mt-1 animate-in slide-in-from-top-1">

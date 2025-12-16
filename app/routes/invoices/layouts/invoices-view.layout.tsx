@@ -38,7 +38,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
@@ -204,8 +203,6 @@ function InvoicesViewLayout({
             onChange={(e) => onFilterChange("Keyword", e.target.value)}
             className="max-w-xs"
           />
-
-          <Separator orientation="vertical" className="h-6 hidden sm:block" />
 
           {/* Date Range */}
           <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-md border">

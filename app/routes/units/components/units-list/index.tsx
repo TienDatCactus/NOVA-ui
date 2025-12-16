@@ -14,6 +14,9 @@ import { Package } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import CreateUnitDialog from "../create-unit.dialog";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 
 interface UnitsDataTableProps {
   units: UnitItemDetailResponseDto[];
@@ -47,9 +50,11 @@ function UnitsDataTable({ units, isLoading }: UnitsDataTableProps) {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            Thêm đơn vị tính đầu tiên
-          </Button>
+          {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              Thêm đơn vị tính đầu tiên
+            </Button>
+          )}
         </EmptyContent>
         <CreateUnitDialog
           open={createDialogOpen}

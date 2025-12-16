@@ -12,6 +12,9 @@ import type { StaffRoleItem } from "~/services/api/staff/staff-role/dto";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import CreateRoleDialog from "./create-role.dialog";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 
 interface StaffRolesListViewProps {
   roles: StaffRoleItem[];
@@ -48,9 +51,11 @@ export default function StaffRolesListView({
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setOpenCreateDialog(true)}>
-              Thêm Chức vụ
-            </Button>
+            {hasRole(AuthLoader.getUser(), UserRole.HotelManager) && (
+              <Button onClick={() => setOpenCreateDialog(true)}>
+                Thêm Chức vụ
+              </Button>
+            )}
           </EmptyContent>
         </Empty>
         <CreateRoleDialog

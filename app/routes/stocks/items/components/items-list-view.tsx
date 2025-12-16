@@ -1,10 +1,5 @@
-import { Package, Plus } from "lucide-react";
-import { useNavigate } from "react-router";
-import { Badge } from "~/components/ui/badge";
+import { Package } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
-import { Switch } from "~/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Empty,
   EmptyContent,
@@ -13,19 +8,13 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { StockItemsListDto } from "~/services/api/stocks/items/dto";
 import StockItemsDataTable from "./items-list";
 
-import type { StockItemDetailsDto } from "~/services/api/stocks/items/dto";
 import { useState } from "react";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
 import CreateItemDialog from "./create-item.dialog";
 
 interface ItemsListViewProps {
@@ -74,9 +63,11 @@ function EmptyState() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button onClick={() => setOpenCreateDialog(true)}>
-          Tạo hàng hóa mới
-        </Button>
+        {hasRole(AuthLoader.getUser(), UserRole.ServiceStaff) && (
+          <Button onClick={() => setOpenCreateDialog(true)}>
+            Tạo hàng hóa mới
+          </Button>
+        )}
       </EmptyContent>
       <CreateItemDialog
         onOpenChange={setOpenCreateDialog}

@@ -60,7 +60,9 @@ function EmptyState() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button onClick={() => setOpenCreateDialog(true)}>Tạo phiếu mới</Button>
+        <Button onClick={() => setOpenCreateDialog(true)}>
+          Tạo phiếu thay đổi mới
+        </Button>
       </EmptyContent>
       <CreateStockAdjustmentDialog
         open={openCreateDialog}

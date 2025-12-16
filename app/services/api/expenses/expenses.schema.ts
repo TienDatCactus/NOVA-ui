@@ -1,24 +1,25 @@
 import z from "zod";
 import { PaymentSchema } from "~/services/schema/payment.schema";
 
-const ExpenseCategoryEnum = z.enum([
-  "Procurement",
-  "Salary",
-  "Utilities",
-  "Maintenance",
-  "Marketing",
-  "Office",
-  "Other",
-]);
+const ExpenseCategoryEnum = z.enum(
+  [
+    "Procurement",
+    "Salary",
+    "Utilities",
+    "Maintenance",
+    "Marketing",
+    "Office",
+    "Other",
+  ],
+  "Danh mục chi tiêu không hợp lệ"
+);
 
 const ExpenseStatusEnum = z.enum(["Draft", "Posted", "Voided"]);
 
-const ExpenseSourceTypeEnum = z.enum([
-  "Manual",
-  "StaffPayroll",
-  "Procurement",
-  "OtherModule",
-]);
+const ExpenseSourceTypeEnum = z.enum(
+  ["Manual", "StaffPayroll", "Procurement", "OtherModule"],
+  "Nguồn vốn chi không hợp lệ"
+);
 
 //*-------------------------------------
 
@@ -41,11 +42,16 @@ const ExpenseListResponseSchema = z.array(ExpenseListItemSchema);
 
 const CreateExpenseRequestSchema = z.object({
   category: ExpenseCategoryEnum,
-  amount: z.number().positive(),
-  expenseDate: z.string(),
-  description: z.string(),
+  amount: z.number("Số tiền không hợp lệ").positive(" Số tiền phải lớn hơn 0 "),
+  expenseDate: z.string(" Ngày chi tiêu không hợp lệ "),
+  description: z
+    .string(" Mô tả không được để trống ")
+    .max(500, " Mô tả tối đa 500 ký tự "),
   paymentMethod: PaymentSchema.PaymentMethodEnum,
-  receiptNumber: z.string(),
+  receiptNumber: z
+    .string(" Số hóa đơn không hợp lệ ")
+    .max(100, " Số hóa đơn tối đa 100 ký tự ")
+    .optional(),
 });
 
 const UpdateExpenseRequestSchema = CreateExpenseRequestSchema;
@@ -55,7 +61,7 @@ const ExpenseSummaryResponseSchema = z.object({
   totalAmount: z.number(),
   byCategory: z.object({
     Procurement: z.number(),
-    Salary: z.number(),
+    Salary: z.number().optional(),
     Utilities: z.number(),
     Maintenance: z.number(),
     Marketing: z.number(),

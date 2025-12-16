@@ -42,12 +42,12 @@ export interface InvoiceListParams {
   PageSize?: number;
   SortBy?: string;
   SortDirection?: string;
-  Status?: z.infer<typeof InvoiceSchema.InvoiceStatusEnum>;
-  PaymentMethod?: z.infer<typeof PaymentSchema.PaymentMethodEnum>;
+  Status?: z.infer<typeof InvoiceSchema.InvoiceStatusEnum> | "";
+  PaymentMethod?: z.infer<typeof PaymentSchema.PaymentMethodEnum> | "";
   BookingId?: string;
   BookingCode?: string;
   Keyword?: string;
   IssuedFrom?: string;
   IssuedTo?: string;
-  InvoiceType?: z.infer<typeof InvoiceSchema.InvoiceTypeEnum>;
+  InvoiceType?: z.infer<typeof InvoiceSchema.InvoiceTypeEnum> | "";
 }

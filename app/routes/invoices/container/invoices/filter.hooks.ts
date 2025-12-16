@@ -1,21 +1,19 @@
-import { useState, useMemo } from "react";
-import type { InvoiceListItemDto } from "~/services/api/invoices/dto";
+import { useState } from "react";
 import type { InvoiceListParams } from "~/services/api/invoices/invoice.types";
-import { format } from "date-fns";
 
 const DEFAULT_FILTERS: InvoiceListParams = {
-  BookingCode: undefined,
-  BookingId: undefined,
-  InvoiceType: undefined,
+  BookingCode: "",
+  BookingId: "",
+  InvoiceType: "",
   Page: 1,
   PageSize: 20,
   IssuedFrom: undefined,
   IssuedTo: undefined,
-  Keyword: undefined,
-  PaymentMethod: undefined,
+  Keyword: "",
+  PaymentMethod: "",
   SortBy: "issuedAt",
   SortDirection: "desc",
-  Status: undefined,
+  Status: "",
 };
 
 function useInvoiceFilters() {

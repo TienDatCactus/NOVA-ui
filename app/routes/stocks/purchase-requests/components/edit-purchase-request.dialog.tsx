@@ -44,6 +44,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { formatMoney } from "~/lib/utils";
 import type { UpdatePurchaseRequestDto } from "~/services/api/stocks/purchase-requests/dto";
 import { PurchaseRequestsSchemas } from "~/services/api/stocks/purchase-requests/purchase-requests.schema";
 import { useStockItemList } from "../../items/container/query.hooks";
@@ -417,17 +418,12 @@ export default function EditPurchaseRequestDialog({
                               />
                             </TableCell>
 
-                            {/* Subtotal (Read-only) */}
                             <TableCell className="align-top pt-3 text-right font-medium">
                               <div className="h-9 flex items-center justify-end">
-                                {new Intl.NumberFormat("vi-VN", {
-                                  style: "currency",
-                                  currency: "VND",
-                                }).format(subtotal)}
+                                {formatMoney(subtotal).vndFormatted}
                               </div>
                             </TableCell>
 
-                            {/* Note */}
                             <TableCell className="align-top pt-3">
                               <FormField
                                 control={form.control}
@@ -497,10 +493,7 @@ export default function EditPurchaseRequestDialog({
               Tổng giá trị dự kiến
             </span>
             <span className="text-xl font-bold text-primary">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(totalCost)}
+              {formatMoney(totalCost).vndFormatted}
             </span>
           </div>
           <div className="flex gap-3">
