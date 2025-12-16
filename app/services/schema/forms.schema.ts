@@ -153,9 +153,9 @@ export const UpdatePayrollFormSchema = z.object({
  */
 export const AddPayrollComponentFormSchema = z.object({
   type: StaffPayrollSchema.PayrollComponentTypeEnum,
-  title: z.string().min(1, "Vui lòng nhập tiêu đề"),
-  amount: z.number().min(1, "Vui lòng nhập số tiền"),
-  note: z.string().optional(),
+  title: z.string("").min(1, "Vui lòng nhập tiêu đề"),
+  amount: z.number("").min(1, "Vui lòng nhập số tiền"),
+  note: z.string("").optional(),
 });
 
 export const FormSchema = {

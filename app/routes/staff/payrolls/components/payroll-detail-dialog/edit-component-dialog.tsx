@@ -1,7 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -23,23 +26,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import type { PayrollComponentDto } from "~/services/api/staff/staff-payroll/dto";
 import { ComponentTypeConfig } from "~/services/api/staff/staff-payroll/staff-payroll.type";
 import { FormSchema } from "~/services/schema/forms.schema";
 import { useUpdatePayrollComponent } from "../../container/query.hooks";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { cn } from "~/lib/utils";
 
 const { AddPayrollComponentFormSchema } = FormSchema;
 
@@ -105,62 +96,31 @@ export default function EditComponentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Chỉnh sửa phụ cấp / khấu trừ</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Hàng 1: Loại + Tiêu đề */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Loại khoản</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-10">
-                          <SelectValue>
-                            {field.value &&
-                              (() => {
-                                const isDeductionType = [
-                                  "Penalty",
-                                  "Advance",
-                                  "AdjustmentDecrease",
-                                ].includes(field.value);
-                                return (
-                                  <div className="flex items-center gap-2">
-                                    <span
-                                      className={`text-base font-bold ${
-                                        isDeductionType
-                                          ? "text-red-600"
-                                          : "text-green-600"
-                                      }`}
-                                    >
-                                      {isDeductionType ? "-" : "+"}
-                                    </span>
-                                    <span>
-                                      {ComponentTypeConfig[field.value]?.label}
-                                    </span>
-                                  </div>
-                                );
-                              })()}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Object.entries(ComponentTypeConfig).map(
-                          ([key, config]) => {
-                            const isDeductionType = [
-                              "Penalty",
-                              "Advance",
-                              "AdjustmentDecrease",
-                            ].includes(key);
-                            return (
-                              <SelectItem key={key} value={key}>
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Loại khoản</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-10">
+                        <SelectValue>
+                          {field.value &&
+                            (() => {
+                              const isDeductionType = [
+                                "Penalty",
+                                "Advance",
+                                "AdjustmentDecrease",
+                              ].includes(field.value);
+                              return (
                                 <div className="flex items-center gap-2">
                                   <span
                                     className={`text-base font-bold ${
@@ -171,19 +131,50 @@ export default function EditComponentDialog({
                                   >
                                     {isDeductionType ? "-" : "+"}
                                   </span>
-                                  <span>{config.label}</span>
+                                  <span>
+                                    {ComponentTypeConfig[field.value]?.label}
+                                  </span>
                                 </div>
-                              </SelectItem>
-                            );
-                          }
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                              );
+                            })()}
+                        </SelectValue>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.entries(ComponentTypeConfig).map(
+                        ([key, config]) => {
+                          const isDeductionType = [
+                            "Penalty",
+                            "Advance",
+                            "AdjustmentDecrease",
+                          ].includes(key);
+                          return (
+                            <SelectItem key={key} value={key}>
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`text-base font-bold ${
+                                    isDeductionType
+                                      ? "text-red-600"
+                                      : "text-green-600"
+                                  }`}
+                                >
+                                  {isDeductionType ? "-" : "+"}
+                                </span>
+                                <span>{config.label}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        }
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
+            {/* Hàng 2: Số tiền + Ngày hiệu lực */}
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="title"
@@ -204,10 +195,6 @@ export default function EditComponentDialog({
                   </FormItem>
                 )}
               />
-            </div>
-
-            {/* Hàng 2: Số tiền + Ngày hiệu lực */}
-            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="amount"
@@ -217,15 +204,18 @@ export default function EditComponentDialog({
                     <FormControl>
                       <div className="relative">
                         <Input
-                          type="text"
+                          type="number"
                           placeholder="0"
-                          className="pr-12 h-10"
                           value={field.value}
-                          onChange={(e) => field.onChange(e)}
+                          onChange={(e) =>
+                            field.onChange(e.target.valueAsNumber)
+                          }
+                          endAddon={
+                            <span className="text-sm text-muted-foreground">
+                              VND
+                            </span>
+                          }
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          VNĐ
-                        </span>
                       </div>
                     </FormControl>
                     <FormMessage />

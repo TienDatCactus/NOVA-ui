@@ -56,7 +56,7 @@ export function useCreateStaff() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(error.message || "Lỗi khi tạo nhân sự");
+        toast.error(error.response?.data.message || "Lỗi khi tạo nhân sự");
       }
     },
   });
@@ -84,7 +84,7 @@ export function useUpdateStaff() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(error.message || "Lỗi khi cập nhật nhân sự");
+        toast.error(error.response?.data.message || "Lỗi khi cập nhật nhân sự");
       }
     },
   });
@@ -107,7 +107,7 @@ export function useDeleteStaff() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(error.message || "Lỗi khi xóa nhân sự");
+        toast.error(error.response?.data.message || "Lỗi khi xóa nhân sự");
       }
     },
   });
@@ -135,7 +135,9 @@ export function useTerminateStaff() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(error.message || "Lỗi khi kết thúc hợp đồng nhân sự");
+        toast.error(
+          error.response?.data.message || "Lỗi khi kết thúc hợp đồng nhân sự"
+        );
       }
     },
   });

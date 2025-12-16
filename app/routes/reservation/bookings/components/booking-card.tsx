@@ -95,9 +95,10 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const canConfirmPayment = booking.status === "Pending";
 
   const canCheckIn =
-    booking.status === "Confirmed" &&
-    !!checkinDate &&
-    !isBefore(startOfDay(new Date()), startOfDay(checkinDate));
+    (isRoomBlock && booking.status === "Confirmed") ||
+    (booking.status === "Confirmed" &&
+      !!checkinDate &&
+      !isBefore(startOfDay(new Date()), startOfDay(checkinDate)));
 
   const canCheckOut =
     (booking.status === "InHouse" || booking.status === "CheckedIn") &&
@@ -213,7 +214,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const renderPrimaryAction = () => {
     const btnClass = "w-full shadow-sm font-semibold transition-all";
     if (hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist])) {
-      if (canCheckIn || isRoomBlock) {
+      if (canCheckIn) {
         return (
           <Button
             size="sm"

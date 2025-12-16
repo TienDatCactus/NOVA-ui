@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { ArrowRightLeft } from "lucide-react";
+import { ArrowRightLeft, RotateCcw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,6 +11,7 @@ import {
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useRoomTypes } from "../container/room-types/query.hooks";
 import type { RoomFilters } from "../container/rooms/filter.hooks";
+import { Button } from "~/components/ui/button";
 
 interface RoomsViewLayoutProps {
   children: ReactNode;
@@ -49,17 +50,13 @@ function RoomsViewLayout({
             <Select
               value={filters.status}
               onValueChange={(value) =>
-                onFilterChange(
-                  "status",
-                  value === "all" ? undefined : (value as RoomFilters["status"])
-                )
+                onFilterChange("status", value as RoomFilters["status"])
               }
             >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
                 {Object.entries(RoomStatusEnum).map(([key, value]) => (
                   <div key={key} className="flex items-center gap-2">
                     <SelectItem id={`status-${key}`} value={key}>
@@ -71,19 +68,13 @@ function RoomsViewLayout({
             </Select>
             <ArrowRightLeft className="w-4 h-4" />
             <Select
-              value={filters.typeId ?? "all"}
-              onValueChange={(value) =>
-                onFilterChange(
-                  "typeId",
-                  value === "all" ? undefined : (value as RoomFilters["typeId"])
-                )
-              }
+              value={filters.typeId || ""}
+              onValueChange={(value) => onFilterChange("typeId", value)}
             >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Hạng phòng" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
                 {roomTypes?.map((item) => (
                   <div key={item.id} className="flex items-center gap-2">
                     <SelectItem id={`status-${item.id}`} value={item.id}>
@@ -93,6 +84,11 @@ function RoomsViewLayout({
                 ))}
               </SelectContent>
             </Select>
+            <div>
+              <Button onClick={() => onResetFilters()} variant="outline">
+                <RotateCcw />
+              </Button>
+            </div>
           </div>
         </div>
         {children}

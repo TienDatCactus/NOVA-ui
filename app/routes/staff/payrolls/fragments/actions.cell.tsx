@@ -1,23 +1,22 @@
 import {
+  DollarSign,
+  Edit,
+  FileText,
+  MoreHorizontal,
+  RefreshCw,
+} from "lucide-react";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Button } from "~/components/ui/button";
-import {
-  MoreHorizontal,
-  FileText,
-  Edit,
-  RefreshCw,
-  DollarSign,
-} from "lucide-react";
-import { useState } from "react";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
-import UpdatePayrollDialog from "../components/update-payroll-dialog";
 import CreateSalaryExpenseDialog from "../components/create-salary-expense-dialog";
-import { toast } from "sonner";
+import UpdatePayrollDialog from "../components/update-payroll-dialog";
 import { useRefreshSinglePayroll } from "../container/query.hooks";
 
 interface ActionsMenuCellProps {
@@ -39,12 +38,7 @@ export default function ActionsMenuCell({
   const handleRefreshSingle = () => {
     refreshSingle(payroll.payrollId, {
       onSuccess: () => {
-        toast.success("Làm mới dữ liệu thành công");
         onSuccess?.();
-      },
-      onError: (error) => {
-        toast.error("Không thể làm mới dữ liệu");
-        console.error("Refresh single error:", error);
       },
     });
   };

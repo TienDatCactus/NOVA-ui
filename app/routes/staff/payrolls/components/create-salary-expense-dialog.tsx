@@ -32,6 +32,7 @@ import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-pay
 import { useCreateSalaryExpense } from "../container/query.hooks";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import { formatMoney } from "~/lib/utils";
+import { PAYMENT_METHODS } from "~/services/types/payment.types";
 
 const { CreateSalaryExpenseRequestSchema } = StaffPayrollSchema;
 
@@ -130,10 +131,11 @@ export default function CreateSalaryExpenseDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Cash">Tiền mặt</SelectItem>
-                      <SelectItem value="BankTransfer">Chuyển khoản</SelectItem>
-                      <SelectItem value="MoMo">MoMo</SelectItem>
-                      <SelectItem value="ZaloPay">ZaloPay</SelectItem>
+                      {PAYMENT_METHODS.map((method) => (
+                        <SelectItem key={method.value} value={method.value}>
+                          {method.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />

@@ -5,6 +5,7 @@ import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -43,27 +44,10 @@ export default function PayrollDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[85vh] p-0 flex flex-col">
+      <DialogContent className="max-w-3xl h-[85vh] overflow-y-auto p-0 flex flex-col">
         {/* Header */}
-        <DialogHeader className="px-9 pt-6 pb-3 shrink-0 border-b">
-          <div className="flex items-center justify-between">
-            <DialogTitle>Chi tiết bảng lương</DialogTitle>
-            {payroll && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportPayslip}
-                disabled={isExporting}
-              >
-                {isExporting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="mr-2 h-4 w-4" />
-                )}
-                Xuất phiếu lương
-              </Button>
-            )}
-          </div>
+        <DialogHeader className="px-4 py-4 shrink-0 border-b">
+          <DialogTitle>Chi tiết bảng lương</DialogTitle>
         </DialogHeader>
 
         {isPending ? (
@@ -354,6 +338,23 @@ export default function PayrollDetailDialog({
             </div>
           </Tabs>
         ) : null}
+        <DialogFooter className="px-4 py-4 border-t justify-between">
+          {payroll && (
+            <Button
+              variant="success"
+              size="sm"
+              onClick={handleExportPayslip}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Xuất phiếu lương
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

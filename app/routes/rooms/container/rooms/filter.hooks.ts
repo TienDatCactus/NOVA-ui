@@ -10,7 +10,7 @@ export interface RoomFilters {
     | "Reserved"
     | "Cleaning"
     | "Locked"
-    | undefined;
+    | "";
   date?: string;
   typeId?: string;
   isOccupied?: boolean | null;

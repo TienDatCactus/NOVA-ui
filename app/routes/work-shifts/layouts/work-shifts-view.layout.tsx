@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
-import { Switch } from "~/components/ui/switch";
 import type { WorkShiftFilters } from "../container/filter.hooks";
-import { Label } from "~/components/ui/label";
 
 interface WorkShiftsViewLayoutProps {
   filters: WorkShiftFilters;

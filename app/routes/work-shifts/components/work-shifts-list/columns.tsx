@@ -1,8 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Badge } from "~/components/ui/badge";
 import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
-import { Checkbox } from "~/components/ui/checkbox";
-import { DataTableColumnHeader } from "~/components/table/table-header";
 import ActionsMenuCell from "../../fragments/actions.cell";
 
 export const columns: ColumnDef<WorkShiftListItem>[] = [

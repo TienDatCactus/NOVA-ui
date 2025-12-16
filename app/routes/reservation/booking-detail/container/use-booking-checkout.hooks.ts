@@ -315,6 +315,9 @@ export function useConfirmBookingPayment(bookingId: string) {
         queryKey: ["bookings-detail"],
       });
       queryClient.invalidateQueries({
+        queryKey: ["bookings"],
+      });
+      queryClient.invalidateQueries({
         queryKey: ["booking-invoices", bookingId],
       });
     },

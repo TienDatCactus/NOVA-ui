@@ -1,7 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlignLeft, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -25,21 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Input } from "~/components/ui/input";
+import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
-import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 import { ComponentTypeConfig } from "~/services/api/staff/staff-payroll/staff-payroll.type";
 import { FormSchema } from "~/services/schema/forms.schema";
 import { useAddPayrollComponent } from "../../container/query.hooks";
-import {
-  Loader2,
-  TrendingUp,
-  TrendingDown,
-  Banknote,
-  AlignLeft,
-} from "lucide-react";
-import { cn, formatMoney } from "~/lib/utils";
-import { Separator } from "~/components/ui/separator";
 
 const { AddPayrollComponentFormSchema } = FormSchema;
 
@@ -116,26 +110,13 @@ export default function AddComponentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-lg p-0 gap-0 overflow-y-auto bg-background">
         {/* === HEADER === */}
-        <DialogHeader className="px-6 py-4 border-b bg-muted/5">
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "p-2 rounded-lg",
-                typeConfig.bgColor,
-                typeConfig.color
-              )}
-            >
-              <Banknote className="w-5 h-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-lg">Điều chỉnh lương</DialogTitle>
-              <DialogDescription className="mt-0.5">
-                Thêm khoản phụ cấp hoặc khấu trừ mới
-              </DialogDescription>
-            </div>
-          </div>
+        <DialogHeader className="px-6 py-4 border-b bg-card">
+          <DialogTitle className="text-lg">Điều chỉnh lương</DialogTitle>
+          <DialogDescription>
+            Thêm khoản phụ cấp hoặc khấu trừ mới
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -145,7 +126,7 @@ export default function AddComponentDialog({
           >
             <div className="p-6 space-y-6">
               {/* 1. SELECTION GROUP */}
-              <div className="space-y-4">
+              <div className="flex items-center gap-2">
                 <FormField
                   control={form.control}
                   name="type"
@@ -204,46 +185,26 @@ export default function AddComponentDialog({
                     <FormItem>
                       <FormLabel>Số tiền (VNĐ)</FormLabel>
                       <FormControl>
-                        <div
-                          className={cn(
-                            "relative group flex items-center border rounded-md overflow-hidden transition-all ring-offset-background",
-                            typeConfig.borderColor
-                          )}
-                        >
-                          {/* Visual Prefix */}
-                          <div
-                            className={cn(
-                              "flex items-center justify-center w-12 h-12 bg-muted/20 border-r",
-                              typeConfig.color
-                            )}
-                          >
-                            {typeConfig.icon}
-                          </div>
-
-                          {/* Main Input */}
-                          <Input
-                            type="text"
-                            placeholder="0"
-                            className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 text-lg font-semibold font-mono px-4 shadow-none"
-                            value={
-                              field.value
-                                ? formatMoney(field.value).vndFormatted
-                                : ""
-                            }
-                            onChange={(e) => {
-                              const rawValue = e.target.value.replace(
-                                /[^0-9]/g,
-                                ""
-                              );
-                              field.onChange(Number(rawValue));
-                            }}
-                          />
-
-                          {/* Suffix */}
-                          <div className="absolute right-4 text-sm text-muted-foreground font-medium pointer-events-none">
-                            VNĐ
-                          </div>
-                        </div>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          {...field}
+                          startAddon={
+                            <div
+                              className={cn(
+                                "flex items-center justify-center",
+                                typeConfig.color
+                              )}
+                            >
+                              {typeConfig.icon}
+                            </div>
+                          }
+                          endAddon={
+                            <div className="text-sm text-muted-foreground font-medium">
+                              VND
+                            </div>
+                          }
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

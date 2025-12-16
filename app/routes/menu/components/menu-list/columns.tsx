@@ -1,15 +1,13 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { Badge } from "~/components/ui/badge";
-import { Checkbox } from "~/components/ui/checkbox";
+import { ChevronDown } from "lucide-react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
-import { cn, formatMoney } from "~/lib/utils";
-import type { MenuListItemDto } from "~/services/api/menu/dto";
-import MenuActionsCell from "../../fragments/menu/actions.cell";
-import { ChevronDown, ImageIcon } from "lucide-react";
-import Image from "~/components/ui/image";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/lib/auth/components";
 import { RouteModule } from "~/lib/auth/roles";
+import { cn, formatMoney } from "~/lib/utils";
+import type { MenuListItemDto } from "~/services/api/menu/dto";
+import MenuActionsCell from "../../fragments/menu/actions.cell";
 
 export const columns: ColumnDef<MenuListItemDto>[] = [
   {

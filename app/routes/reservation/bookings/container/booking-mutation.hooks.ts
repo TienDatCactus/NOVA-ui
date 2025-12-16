@@ -17,10 +17,9 @@ function useUpdateBooking(bookingId: string, bookingCode?: string) {
       await BookingService.staffUpdateBookingDetail(bookingId, data),
     onSuccess: async (response) => {
       if (bookingCode) {
-        queryClient.setQueryData(
-          ["bookings-detail", bookingCode, response.bookingId],
-          response
-        );
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail", bookingCode, response.bookingId],
+        });
       }
       (queryClient.invalidateQueries({
         queryKey: ["bookings"],
