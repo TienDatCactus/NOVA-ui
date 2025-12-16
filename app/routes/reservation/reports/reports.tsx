@@ -1,20 +1,19 @@
+import { format } from "date-fns";
+import { ChevronDownIcon, TableIcon } from "lucide-react";
+import { useState } from "react";
+import { vi } from "react-day-picker/locale";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { BookingLineChart } from "./components/line.chart";
-import { BookingPieChart } from "./components/pie.chart";
-import { BookingRadarChart } from "./components/radar.chart";
-import { BookingStackedBarChart } from "./components/stacked-bar.chart";
-import { ReportsTableModal } from "./components/reports-table-modal";
-import { Button } from "~/components/ui/button";
-import { ChevronDownIcon, TableIcon } from "lucide-react";
-import { Calendar } from "~/components/ui/calendar";
-import { vi } from "react-day-picker/locale";
-import { useState } from "react";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import { Skeleton } from "~/components/ui/skeleton";
+import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/reports";
+import { ReportsTableModal } from "./components/reports-table-modal";
+import useReports from "./container/reservation-reports-query";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -25,9 +24,6 @@ export function meta({}: Route.MetaArgs) {
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Reports, Permission.Read);
-import { format } from "date-fns";
-import useReports from "./container/reservation-reports-query";
-import { Skeleton } from "~/components/ui/skeleton";
 
 export default function Component() {
   const [open, setOpen] = useState<{
@@ -173,31 +169,8 @@ export default function Component() {
         </div>
       ) : (
         <>
-          <div className="flex gap-4">
-            <BookingStackedBarChart
-              className="flex-2 w-auto flex-col justify-between"
-              data={reportsData?.bookingData}
-            />
-            <BookingLineChart
-              className="flex-1 flex-col justify-between"
-              data={reportsData?.availableRoomsTrendData}
-            />
-          </div>
-          <div className="flex gap-4">
-            <BookingPieChart
-              className="flex-1 flex-col justify-between"
-              data={reportsData?.availableRoomsByType}
-              dateRange={
-                date.from && date.to
-                  ? { from: date.from, to: date.to }
-                  : undefined
-              }
-            />
-            <BookingRadarChart
-              className="flex-2 flex-col justify-between"
-              data={reportsData?.roomTypeComparisonData}
-            />
-          </div>
+          <div className="flex gap-4"></div>
+          <div className="flex gap-4"></div>
         </>
       )}
 

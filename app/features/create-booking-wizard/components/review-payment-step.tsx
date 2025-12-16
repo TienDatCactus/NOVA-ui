@@ -597,10 +597,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                     type="button"
                                     onClick={() =>
                                       field.onChange(
-                                        Math.round(
-                                          (pricePreview?.roomsSubtotal ??
-                                            finalTotal) * 0.5
-                                        )
+                                        Math.round(finalTotal * 0.5)
                                       )
                                     }
                                   >
@@ -610,10 +607,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                     variant={"outline"}
                                     type="button"
                                     onClick={() =>
-                                      field.onChange(
-                                        pricePreview?.roomsSubtotal ??
-                                          finalTotal
-                                      )
+                                      field.onChange(Math.round(finalTotal))
                                     }
                                   >
                                     100%

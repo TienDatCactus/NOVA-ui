@@ -125,7 +125,6 @@ const Image = forwardRef<HTMLImageElement, ComponentProps<"img"> & ImageProps>(
     const handleError = useCallback(() => {
       setLoading(false);
       if (fallbackSrc && currentSrc !== fallbackSrc) {
-        // Try fallback image
         setCurrentSrc(fallbackSrc);
         setError(false);
       } else {

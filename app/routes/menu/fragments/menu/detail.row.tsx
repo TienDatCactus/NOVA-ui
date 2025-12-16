@@ -2,7 +2,6 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   CalendarDays,
-  Copy,
   ImageIcon,
   Layers,
   LayoutGrid,
@@ -10,22 +9,14 @@ import {
   Tag,
 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import Image from "~/components/ui/image";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { Skeleton } from "~/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import { cn, formatMoney } from "~/lib/utils";
+import { formatMoney } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { useMenuItemDetail } from "../../container/menu/query.hooks";
-import { toast } from "sonner";
 
 interface MenuDetailRowProps {
   menuItem: MenuListItemDto;
@@ -59,7 +50,6 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
     <div className="bg-muted border-t shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* === LEFT COLUMN: VISUALS === */}
           <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">
             {mainImage ? (
               <div className="space-y-3">
@@ -72,7 +62,6 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                     />
                   </ImageZoom>
                 </div>
-                {/* Sub Images Grid - Show max 3 more images directly */}
                 {subImages.length > 0 && (
                   <div className="grid grid-cols-3 gap-2">
                     {subImages.map((img, idx) => (
@@ -106,7 +95,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
             <div className="space-y-6">
               {/* Header: Name, Price, Status */}
               <div>
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge
@@ -115,17 +104,15 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                       >
                         {detailData.code}
                       </Badge>
-                      <h3 className="text-xl font-bold text-foreground">
+                      <h3 className="text-xl font-bold text-foreground w-52 lg:w-auto truncate">
                         {detailData.name}
                       </h3>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="grid gap-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <LayoutGrid className="w-3.5 h-3.5" />{" "}
                         {detailData.categoryName}
                       </span>
-                      <Separator orientation="vertical" className="h-3" />
-                      <span>ĐVT: {detailData.unitName}</span>
                     </div>
                   </div>
                   <div className="text-right">

@@ -1,15 +1,7 @@
-import { DollarSign, FileText, FolderCode } from "lucide-react";
+import { DollarSign, FolderCode } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
-import {
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
 import {
   Empty,
   EmptyDescription,
@@ -19,11 +11,10 @@ import {
 } from "~/components/ui/empty";
 import Image from "~/components/ui/image";
 import { Separator } from "~/components/ui/separator";
+import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { formatMoney } from "~/lib/utils";
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
-import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { useRoomDetail } from "../../container/rooms/query.hooks";
 interface RoomDetailTabProps {
   roomId: string;

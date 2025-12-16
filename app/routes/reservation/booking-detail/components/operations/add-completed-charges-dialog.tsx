@@ -2,22 +2,16 @@ import {
   Minus,
   Plus,
   Search,
-  ShoppingBasketIcon,
-  ShoppingCart,
+  ShoppingBasket,
   Utensils,
   Wrench,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import {
@@ -27,17 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn, formatMoney } from "~/lib/utils";
 import { useMenuCategories } from "~/routes/menu/container/menu-categories/query.hooks";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServiceTypes } from "~/routes/services/container/service-types/query.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
-import type { MenuListItemDto } from "~/services/api/menu/dto";
-import type { ServiceItem } from "~/services/api/services/dto";
-import { useAddCompletedCharges } from "../../container/use-booking-checkout.hooks";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+import { useAddCompletedCharges } from "../../container/use-booking-checkout.hooks";
 
 interface AddCompletedChargesDialogProps {
   open: boolean;
@@ -61,14 +52,12 @@ export default function AddCompletedChargesDialog({
   const [selectedBookingRoom, setSelectedBookingRoom] = useState<string | null>(
     null
   );
-  const [selectedPOSItems, setSelectedPOSItems] = useState<
-    Map<string, { item: MenuListItemDto; quantity: number }>
-  >(new Map());
-  const [selectedServiceItems, setSelectedServiceItems] = useState<
-    Map<string, { item: ServiceItem; quantity: number }>
-  >(new Map());
 
-  // Queries
+  // Cart State
+  const [selectedPOSItems, setSelectedPOSItems] = useState(new Map());
+  const [selectedServiceItems, setSelectedServiceItems] = useState(new Map());
+
+  // Data Hooks
   const { data: menuCategories = [] } = useMenuCategories({}, true);
   const { data: serviceTypes = [] } = useServiceTypes({}, { enabled: true });
   const { data: menuItems = [] } = useMenuList({
@@ -81,106 +70,86 @@ export default function AddCompletedChargesDialog({
     booking.id
   );
 
-  const filterItems = (items: any[]) => {
+  // Filter Logic
+  const filteredItems = useMemo(() => {
+    const items = activeTab === "pos" ? menuItems : serviceItems;
     if (!searchText) return items;
     const lower = searchText.toLowerCase();
-    return items.filter(
-      (i) =>
-        i.name.toLowerCase().includes(lower) ||
-        i.description?.toLowerCase().includes(lower)
-    );
-  };
+    return items.filter((i: any) => i.name.toLowerCase().includes(lower));
+  }, [activeTab, menuItems, serviceItems, searchText]);
 
-  const filteredMenuItems = useMemo(
-    () => filterItems(menuItems),
-    [menuItems, searchText]
-  );
-  const filteredServiceItems = useMemo(
-    () => filterItems(serviceItems),
-    [serviceItems, searchText]
-  );
-
-  // Calculations
-  const calculateTotal = (map: Map<string, any>, priceKey: string) => {
-    return Array.from(map.values()).reduce(
-      (sum, { item, quantity }) => sum + item[priceKey] * quantity,
+  // Totals
+  const totalAmount = useMemo(() => {
+    const pos = Array.from(selectedPOSItems.values()).reduce(
+      (sum: number, { item, quantity }: any) => sum + item.price * quantity,
       0
     );
-  };
+    const svc = Array.from(selectedServiceItems.values()).reduce(
+      (sum: number, { item, quantity }: any) => sum + item.basePrice * quantity,
+      0
+    );
+    return pos + svc;
+  }, [selectedPOSItems, selectedServiceItems]);
 
-  const totalPOSAmount = useMemo(
-    () => calculateTotal(selectedPOSItems, "price"),
-    [selectedPOSItems]
-  );
-  const totalServiceAmount = useMemo(
-    () => calculateTotal(selectedServiceItems, "basePrice"),
-    [selectedServiceItems]
-  );
-  const totalAmount = totalPOSAmount + totalServiceAmount;
-  const totalItemsCount = selectedPOSItems.size + selectedServiceItems.size;
+  const totalCount = selectedPOSItems.size + selectedServiceItems.size;
 
   // Handlers
-  const updateQuantity = (
-    map: Map<string, any>,
-    setMap: Function,
+  const handleUpdateQuantity = (
     id: string,
     delta: number,
-    itemData?: any,
-    isMenuType: boolean = false
+    item: any,
+    isMenu: boolean
   ) => {
+    const map = isMenu ? selectedPOSItems : selectedServiceItems;
+    const setMap = isMenu ? setSelectedPOSItems : setSelectedServiceItems;
+    const existing = map.get(id);
     const newMap = new Map(map);
-    const existing = newMap.get(id);
+
+    // Validation logic (Max Qty)
+    if (isMenu && delta > 0) {
+      const currentQty = existing?.quantity || 0;
+      const max = item.maxQuantityAvailable ?? Infinity;
+      if (currentQty + delta > max) {
+        toast.error(`Chỉ còn lại ${max} sản phẩm`);
+        return;
+      }
+    }
 
     if (existing) {
       const newQty = existing.quantity + delta;
-
-      // Validate max quantity for menu items
-      if (isMenuType && delta > 0) {
-        const maxAvailable = existing.item.maxQuantityAvailable;
-        if (maxAvailable !== undefined && maxAvailable !== null) {
-          if (newQty > maxAvailable) {
-            toast.error(
-              `Số lượng tối đa cho ${existing.item.name} là ${maxAvailable}`
-            );
-            return;
-          }
-        }
-      }
-
       if (newQty <= 0) newMap.delete(id);
       else newMap.set(id, { ...existing, quantity: newQty });
-    } else if (delta > 0 && itemData) {
-      if (isMenuType) {
-        if (itemData.maxQuantityAvailable === 0) {
-          toast.error(`${itemData.name} hiện đã hết hàng`);
-          return;
-        }
-      }
-      newMap.set(id, { item: itemData, quantity: 1 });
+    } else if (delta > 0) {
+      newMap.set(id, { item, quantity: 1 });
     }
     setMap(newMap);
   };
 
   const handleConfirm = () => {
-    if (totalItemsCount === 0) return;
-    addCompletedCharges({
-      posItems: Array.from(selectedPOSItems.values()).map(
-        ({ item, quantity }) => ({ menuItemId: item.itemId, quantity })
-      ),
-      serviceItems: Array.from(selectedServiceItems.values()).map(
-        ({ item, quantity }) => ({
-          serviceItemId: item.serviceItemId,
-          quantity,
-        })
-      ),
-      bookingRoomId:
-        selectedBookingRoom == "booking" ? "" : selectedBookingRoom || "",
-      source: "Staff",
-    });
-    handleCancel();
+    addCompletedCharges(
+      {
+        posItems: Array.from(selectedPOSItems.values()).map(
+          ({ item, quantity }: any) => ({ menuItemId: item.itemId, quantity })
+        ),
+        serviceItems: Array.from(selectedServiceItems.values()).map(
+          ({ item, quantity }: any) => ({
+            serviceItemId: item.serviceItemId,
+            quantity,
+          })
+        ),
+        bookingRoomId:
+          selectedBookingRoom === "booking" ? "" : selectedBookingRoom || "",
+        source: "Staff",
+      },
+      {
+        onSuccess: () => {
+          handleClose();
+        },
+      }
+    );
   };
 
-  const handleCancel = () => {
+  const handleClose = () => {
     setSelectedPOSItems(new Map());
     setSelectedServiceItems(new Map());
     setSearchText("");
@@ -188,89 +157,83 @@ export default function AddCompletedChargesDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0 gap-0 overflow-y-auto">
-        {/* Header */}
-        <DialogHeader className="px-6 py-4 border-b flex flex-row items-center justify-between space-y-0 bg-muted/10">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-[95vw] w-[1200px] h-[90vh] p-0 flex flex-col gap-0 overflow-hidden bg-background">
+        {/* 1. Header */}
+        <div className="flex items-center justify-between px-6 py-3 border-b bg-background z-10 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <ShoppingCart className="h-6 w-6 text-primary" />
+            <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+              {activeTab === "pos" ? (
+                <Utensils className="h-5 w-5" />
+              ) : (
+                <Wrench className="h-5 w-5" />
+              )}
             </div>
             <div>
-              <DialogTitle>Thêm khoản thu</DialogTitle>
-              <p className="text-sm text-muted-foreground">
-                Chọn món ăn hoặc dịch vụ để tính phí vào phòng
+              <DialogTitle className="text-lg">Thêm dịch vụ</DialogTitle>
+              <p className="text-xs text-muted-foreground">
+                Chọn món hoặc dịch vụ để tính tiền
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 bg-card border px-4 py-2 rounded-lg shadow-sm">
-            <div className="text-right">
-              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                Tổng cộng
-              </p>
-              <p className="text-xl font-bold text-primary">
-                {formatMoney(totalAmount).vndFormatted}
-              </p>
-            </div>
-          </div>
-        </DialogHeader>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClose}
+            className="rounded-full"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
 
-        <div className="flex flex-1 ">
-          {/* LEFT: Main Content (Tabs & Grid) */}
-          <div className="flex-1 flex flex-col border-r bg-muted/5">
-            <div className="p-4 pb-0">
+        {/* 2. Main Body */}
+        <div className="flex flex-1 overflow-hidden relative">
+          {/* LEFT: Item Selection */}
+          <div className="flex-1 flex flex-col bg-muted/5 min-w-0">
+            {/* Filters */}
+            <div className="px-6 py-4 flex flex-col sm:flex-row gap-3 border-b bg-background shrink-0">
               <Tabs
                 value={activeTab}
-                onValueChange={(v) => setActiveTab(v as any)}
-                className="w-full"
+                onValueChange={(v: any) => setActiveTab(v)}
+                className="w-[240px] shrink-0"
               >
-                <TabsList className="w-full grid grid-cols-2 h-12">
-                  <TabsTrigger value="pos" className="gap-2 text-base">
-                    <Utensils className="h-4 w-4" /> Đồ ăn & Uống
-                  </TabsTrigger>
-                  <TabsTrigger value="service" className="gap-2 text-base">
-                    <Wrench className="h-4 w-4" /> Dịch vụ Khác
-                  </TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="pos">Menu</TabsTrigger>
+                  <TabsTrigger value="service">Dịch vụ</TabsTrigger>
                 </TabsList>
               </Tabs>
 
-              <div className="mt-4 flex gap-3">
-                <Input
-                  startAddon={
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                  }
-                  placeholder="Tìm kiếm nhanh..."
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                />
+              <div className="flex flex-1 gap-2 min-w-0">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Tìm tên món..."
+                    className="pl-9 bg-muted/20 border-transparent focus:bg-background focus:border-input transition-all"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                  />
+                </div>
                 <Select
                   value={
                     activeTab === "pos"
                       ? selectedCategoryCode || "all"
                       : selectedServiceType || "all"
                   }
-                  onValueChange={(value) => {
-                    if (value === "all") {
-                      setSelectedCategoryCode(null);
-                      setSelectedServiceType(null);
-                    } else {
-                      if (activeTab === "pos") {
-                        setSelectedCategoryCode(value);
-                      } else {
-                        setSelectedServiceType(value);
-                      }
-                    }
-                  }}
+                  onValueChange={(v) =>
+                    activeTab === "pos"
+                      ? setSelectedCategoryCode(v === "all" ? null : v)
+                      : setSelectedServiceType(v === "all" ? null : v)
+                  }
                 >
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Chọn danh mục" />
+                  <SelectTrigger className="w-[180px] bg-muted/20 border-transparent focus:bg-background focus:border-input">
+                    <SelectValue placeholder="Tất cả danh mục" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tất cả</SelectItem>
                     {(activeTab === "pos" ? menuCategories : serviceTypes).map(
-                      (cat: any) => (
-                        <SelectItem key={cat.code} value={cat.code}>
-                          {cat.name}
+                      (c: any) => (
+                        <SelectItem key={c.code || c.id} value={c.code || c.id}>
+                          {c.name}
                         </SelectItem>
                       )
                     )}
@@ -279,252 +242,57 @@ export default function AddCompletedChargesDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 p-2 gap-4">
-              {(activeTab === "pos"
-                ? filteredMenuItems
-                : filteredServiceItems
-              ).map((item: any) => {
-                const id =
-                  activeTab === "pos" ? item.itemId : item.serviceItemId;
-                const price = activeTab === "pos" ? item.price : item.basePrice;
-                const map =
-                  activeTab === "pos" ? selectedPOSItems : selectedServiceItems;
-                const qty = map.get(id)?.quantity || 0;
-                const isOutOfStock =
-                  activeTab === "pos" && item.maxQuantityAvailable === 0;
-                const maxAvailable =
-                  activeTab === "pos" ? item.maxQuantityAvailable : undefined;
+            {/* Grid */}
+            <div className="flex-1 p-6 overflow-y-auto h-[60vh]">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
+                {filteredItems.map((item: any) => {
+                  const isMenu = activeTab === "pos";
+                  const id = isMenu ? item.itemId : item.serviceItemId;
+                  const price = isMenu ? item.price : item.basePrice;
+                  const map = isMenu ? selectedPOSItems : selectedServiceItems;
+                  const qty = map.get(id)?.quantity || 0;
+                  const maxQty = isMenu ? item.maxQuantityAvailable : null;
+                  const isSoldOut = isMenu && maxQty === 0;
 
-                return (
-                  <Card
-                    key={id}
-                    className={cn(
-                      "group relative flex flex-col justify-between transition-all hover:shadow-md cursor-pointer border-2",
-                      isOutOfStock
-                        ? "opacity-50 cursor-not-allowed border-muted"
-                        : qty > 0
-                          ? "border-primary bg-primary/5"
-                          : "border-transparent hover:border-muted"
-                    )}
-                    onClick={() => {
-                      if (isOutOfStock) return;
-                      updateQuantity(
-                        map,
-                        activeTab === "pos"
-                          ? setSelectedPOSItems
-                          : setSelectedServiceItems,
-                        id,
-                        1,
-                        item,
-                        activeTab === "pos"
-                      );
-                    }}
-                  >
-                    <div className="p-4 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-semibold line-clamp-2 text-sm min-h-[2.5em]">
-                          {item.name}
-                        </h4>
-                        {isOutOfStock ? (
-                          <Badge
-                            variant="destructive"
-                            className="ml-2 shrink-0 text-[10px]"
-                          >
-                            Hết hàng
-                          </Badge>
-                        ) : qty > 0 ? (
-                          <Badge className="ml-2 shrink-0">{qty}</Badge>
-                        ) : null}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-primary font-bold">
-                          {formatMoney(price).vndFormatted}
-                        </p>
-                        {!isOutOfStock &&
-                          maxAvailable !== undefined &&
-                          maxAvailable !== null && (
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] text-muted-foreground"
-                            >
-                              Còn {maxAvailable}
-                            </Badge>
-                          )}
-                      </div>
-                    </div>
-                    {/* Hover Actions (Desktop) or Always Visible if Qty > 0 */}
-                    <div
-                      className={cn(
-                        "flex items-center justify-between p-2 bg-background/80 backdrop-blur-sm border-t transition-opacity",
-                        qty > 0
-                          ? "opacity-100"
-                          : "opacity-0 group-hover:opacity-100"
-                      )}
-                    >
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateQuantity(
-                            map,
-                            activeTab === "pos"
-                              ? setSelectedPOSItems
-                              : setSelectedServiceItems,
-                            id,
-                            -1,
-                            undefined,
-                            activeTab === "pos"
-                          );
-                        }}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <span className="text-sm font-medium w-8 text-center">
-                        {qty}
-                      </span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-primary hover:bg-primary/10"
-                        disabled={isOutOfStock}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateQuantity(
-                            map,
-                            activeTab === "pos"
-                              ? setSelectedPOSItems
-                              : setSelectedServiceItems,
-                            id,
-                            1,
-                            item,
-                            activeTab === "pos"
-                          );
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
+                  return (
+                    <ItemCard
+                      key={id}
+                      name={item.name}
+                      price={price}
+                      quantity={qty}
+                      isSoldOut={isSoldOut}
+                      onAdd={() => handleUpdateQuantity(id, 1, item, isMenu)}
+                      onRemove={() =>
+                        handleUpdateQuantity(id, -1, item, isMenu)
+                      }
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* RIGHT: Cart Summary */}
-          <div className="w-[350px] overflow-y-auto flex flex-col bg-card border-l shadow-xl z-2 px-2">
-            <div className="p-4 border-b">
-              <h3 className="flex items-center gap-2">
-                <ShoppingBasketIcon className="h-4 w-4" />
-                Đã chọn ({totalItemsCount})
-              </h3>
-              <Select
-                value={selectedBookingRoom || ""}
-                onValueChange={(val) => setSelectedBookingRoom(val)}
-              >
-                <SelectTrigger className="w-full mt-2">
-                  <SelectValue placeholder="Chọn phòng để tính phí" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={"booking"}>Tính vào booking</SelectItem>
-                  {booking.rooms.map((br) => (
-                    <SelectItem key={br.bookingRoomId} value={br.bookingRoomId}>
-                      {br.roomName} ({br.roomTypeName})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {totalItemsCount === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center opacity-50 space-y-4 py-10">
-                <div className="bg-muted p-4 rounded-full">
-                  <ShoppingCart className="h-8 w-8" />
-                </div>
-                <p>Chưa có mục nào được chọn</p>
-              </div>
-            ) : (
-              <div className="space-y-4 flex flex-col h-full">
-                {/* POS Group */}
-                {selectedPOSItems.size > 0 && (
-                  <div className="space-y-2 h-full">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-                      Đồ ăn & Uống
-                    </p>
-                    {Array.from(selectedPOSItems.values()).map(
-                      ({ item, quantity }) => (
-                        <CartItemRow
-                          key={item.itemId}
-                          name={item.name}
-                          price={item.price}
-                          quantity={quantity}
-                          onUpdate={(d) =>
-                            updateQuantity(
-                              selectedPOSItems,
-                              setSelectedPOSItems,
-                              item.itemId,
-                              d,
-                              undefined,
-                              true
-                            )
-                          }
-                        />
-                      )
-                    )}
-                  </div>
-                )}
-                {/* Service Group */}
-                {selectedServiceItems.size > 0 && (
-                  <div className="space-y-2 h-full">
-                    {selectedPOSItems.size > 0 && <Separator />}
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 mt-2">
-                      Dịch vụ
-                    </p>
-                    {Array.from(selectedServiceItems.values()).map(
-                      ({ item, quantity }) => (
-                        <CartItemRow
-                          key={item.serviceItemId}
-                          name={item.name}
-                          price={item.basePrice}
-                          quantity={quantity}
-                          onUpdate={(d) =>
-                            updateQuantity(
-                              selectedServiceItems,
-                              setSelectedServiceItems,
-                              item.serviceItemId,
-                              d
-                            )
-                          }
-                        />
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Footer Actions */}
-            <div className="p-4 border-t bg-background space-y-3">
-              <div className="flex justify-between items-center text-lg font-bold">
-                <span>Tổng tiền:</span>
-                <span className="text-primary">
-                  {formatMoney(totalAmount).vndFormatted}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" onClick={handleCancel}>
-                  Hủy bỏ
-                </Button>
-                <Button
-                  onClick={handleConfirm}
-                  disabled={totalItemsCount === 0 || isPending}
-                  className="shadow-md"
-                >
-                  {isPending ? "Đang xử lý..." : "Xác nhận"}
-                </Button>
-              </div>
-            </div>
+          {/* RIGHT: Cart Sidebar (Desktop) */}
+          <div className="hidden lg:flex w-[380px] flex-col border-l bg-background z-20 shadow-md shrink-0 h-full overflow-hidden">
+            <CartContent
+              totalCount={totalCount}
+              totalAmount={totalAmount}
+              posItems={selectedPOSItems}
+              serviceItems={selectedServiceItems}
+              rooms={booking.rooms}
+              selectedRoom={selectedBookingRoom}
+              onRoomChange={setSelectedBookingRoom}
+              onUpdatePos={(id: string, d: number) => {
+                const entry = selectedPOSItems.get(id);
+                if (entry) handleUpdateQuantity(id, d, entry.item, true);
+              }}
+              onUpdateService={(id: string, d: number) => {
+                const entry = selectedServiceItems.get(id);
+                if (entry) handleUpdateQuantity(id, d, entry.item, false);
+              }}
+              onConfirm={handleConfirm}
+              isPending={isPending}
+            />
           </div>
         </div>
       </DialogContent>
@@ -532,47 +300,220 @@ export default function AddCompletedChargesDialog({
   );
 }
 
-// Helper Component for Cart Row
-function CartItemRow({
-  name,
-  price,
-  quantity,
-  onUpdate,
-}: {
-  name: string;
-  price: number;
-  quantity: number;
-  onUpdate: (d: number) => void;
-}) {
+// --- Sub-components ---
+
+function ItemCard({ name, price, quantity, isSoldOut, onAdd, onRemove }: any) {
   return (
-    <div className="flex items-start justify-between gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors group">
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{name}</p>
-        <p className="text-xs text-muted-foreground">
+    <div
+      className={cn(
+        "group relative flex flex-col justify-between rounded-xl border bg-card p-4 shadow-sm transition-all select-none",
+        isSoldOut
+          ? "opacity-60 bg-muted cursor-not-allowed"
+          : "hover:border-primary/50 hover:shadow-md cursor-pointer",
+        quantity > 0 ? "ring-2 ring-primary border-primary bg-primary/5" : ""
+      )}
+      onClick={!isSoldOut ? onAdd : undefined}
+    >
+      <div className="space-y-1.5 mb-8">
+        <div className="flex justify-between gap-2">
+          <h4 className="font-medium text-sm leading-snug line-clamp-2">
+            {name}
+          </h4>
+          {isSoldOut && (
+            <Badge variant="destructive" className="h-5 px-1 text-[10px]">
+              Hết
+            </Badge>
+          )}
+        </div>
+        <p className="font-bold text-primary">
           {formatMoney(price).vndFormatted}
         </p>
       </div>
-      <div className="flex items-center gap-1">
+
+      <div className="absolute bottom-3 right-3 flex items-center gap-1">
+        {quantity > 0 ? (
+          <div
+            className="flex items-center gap-2 bg-background shadow-sm rounded-full p-1 border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 rounded-full hover:bg-muted"
+              onClick={onRemove}
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+            <span className="w-6 text-center font-semibold text-sm tabular-nums">
+              {quantity}
+            </span>
+            <Button
+              size="icon"
+              variant="default"
+              className="h-7 w-7 rounded-full"
+              onClick={onAdd}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            disabled={isSoldOut}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CartContent({
+  totalCount,
+  totalAmount,
+  posItems,
+  serviceItems,
+  rooms,
+  selectedRoom,
+  onRoomChange,
+  onUpdatePos,
+  onUpdateService,
+  onConfirm,
+  isPending,
+}: any) {
+  return (
+    <div className="flex flex-col h-full bg-background overflow-hidden">
+      <div className="p-5 border-b bg-background shrink-0">
+        <div className="flex items-center gap-2 mb-4">
+          <ShoppingBasket className="h-5 w-5 text-primary" />
+          <span className="font-bold text-lg">Giỏ hàng ({totalCount})</span>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-muted-foreground uppercase">
+            Tính phí vào
+          </label>
+          <Select
+            value={selectedRoom || "booking"}
+            onValueChange={onRoomChange}
+          >
+            <SelectTrigger className="bg-muted/20 border-transparent focus:bg-background focus:border-input w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="booking">Chung (Booking)</SelectItem>
+              {rooms.map((r: any) => (
+                <SelectItem key={r.bookingRoomId} value={r.bookingRoomId}>
+                  {r.roomName} - {r.roomTypeName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <ScrollArea className="flex-1 p-4">
+        {totalCount === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-3 opacity-60">
+            <ShoppingBasket className="h-12 w-12" />
+            <p className="text-sm">Chưa có món nào</p>
+          </div>
+        ) : (
+          <div className="space-y-6 pb-4">
+            {posItems.size > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2">
+                  Đồ ăn & Uống
+                </h4>
+                {Array.from(posItems.values()).map(
+                  ({ item, quantity }: any) => (
+                    <CartRow
+                      key={item.itemId}
+                      name={item.name}
+                      price={item.price}
+                      qty={quantity}
+                      onUp={() => onUpdatePos(item.itemId, 1)}
+                      onDown={() => onUpdatePos(item.itemId, -1)}
+                    />
+                  )
+                )}
+              </div>
+            )}
+
+            {serviceItems.size > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2">
+                  Dịch vụ
+                </h4>
+                {Array.from(serviceItems.values()).map(
+                  ({ item, quantity }: any) => (
+                    <CartRow
+                      key={item.serviceItemId}
+                      name={item.name}
+                      price={item.basePrice}
+                      qty={quantity}
+                      onUp={() => onUpdateService(item.serviceItemId, 1)}
+                      onDown={() => onUpdateService(item.serviceItemId, -1)}
+                    />
+                  )
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </ScrollArea>
+
+      <div className="p-5 bg-background border-t space-y-4 shadow-md shrink-0">
+        <div className="flex justify-between items-end">
+          <span className="text-sm font-medium text-muted-foreground">
+            Tổng thanh toán
+          </span>
+          <span className="text-2xl font-bold text-primary font-mono">
+            {formatMoney(totalAmount).vndFormatted}
+          </span>
+        </div>
         <Button
-          size="icon"
-          variant="ghost"
-          className="h-6 w-6"
-          onClick={() => onUpdate(-1)}
+          className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
+          size="lg"
+          disabled={totalCount === 0 || isPending}
+          onClick={onConfirm}
         >
-          <Minus className="h-3 w-3" />
-        </Button>
-        <span className="w-6 text-center text-sm font-mono">{quantity}</span>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-6 w-6"
-          onClick={() => onUpdate(1)}
-        >
-          <Plus className="h-3 w-3" />
+          {isPending ? "Đang xử lý..." : "Xác nhận thêm"}
         </Button>
       </div>
     </div>
   );
 }
 
-// Helper icon
+function CartRow({ name, price, qty, onUp, onDown }: any) {
+  return (
+    <div className="group flex items-center justify-between p-3 bg-background rounded-xl border shadow-sm transition-all hover:border-primary/30">
+      <div className="min-w-0 flex-1 pr-3">
+        <div className="font-medium text-sm truncate">{name}</div>
+        <div className="text-xs text-muted-foreground">
+          {formatMoney(price).vndFormatted}
+        </div>
+      </div>
+      <div className="flex items-center gap-3 bg-muted rounded-lg p-1">
+        <button
+          onClick={onDown}
+          className="h-6 w-6 flex items-center justify-center rounded-md bg-background shadow-sm hover:text-destructive transition-colors"
+        >
+          <Minus className="h-3 w-3" />
+        </button>
+        <span className="w-4 text-center text-sm font-semibold tabular-nums">
+          {qty}
+        </span>
+        <button
+          onClick={onUp}
+          className="h-6 w-6 flex items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
+        >
+          <Plus className="h-3 w-3" />
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -4,9 +4,7 @@ export const PAYMENT_METHODS = [
   { value: "Cash", label: "Tiền mặt", icon: Wallet },
   { value: "Card", label: "Thẻ", icon: CreditCard },
   { value: "BankTransfer", label: "Chuyển khoản", icon: Building2 },
-  { value: "OTACollect", label: "OTA thu hộ", icon: Globe },
   { value: "OTAPrepaid", label: "OTA trả trước", icon: Globe },
-  { value: "OnAccount", label: "Ghi nợ", icon: Receipt },
 ];
 
 export const PAYMENT_STATUSES = [

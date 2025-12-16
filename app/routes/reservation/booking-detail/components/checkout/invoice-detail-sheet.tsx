@@ -199,6 +199,20 @@ export default function InvoiceDetailSheet({
     );
   }, [amount, invoiceDetail, calculatedFees]);
 
+  const roomItems = useMemo(
+    () =>
+      invoiceDetail?.items?.filter((item) => item.itemType === "Room") || [],
+    [invoiceDetail?.items]
+  );
+
+  const serviceItems = useMemo(
+    () =>
+      invoiceDetail?.items?.filter((item) =>
+        ["MenuItem", "ServiceItem"].includes(item.itemType ?? "")
+      ) || [],
+    [invoiceDetail?.items]
+  );
+
   // --- HANDLERS ---
   const handleSyncInvoice = () => {
     syncInvoice(undefined, {
@@ -389,9 +403,9 @@ export default function InvoiceDetailSheet({
 
                 <Separator />
 
-                {/* Line Items Table - Minimalist */}
+                {/* Room Items Table */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold">Chi tiết hạng mục</h3>
+                  <h3 className="text-sm font-semibold">Tiền phòng</h3>
                   <div className="border rounded-lg overflow-hidden">
                     <Table>
                       <TableHeader>
@@ -411,8 +425,8 @@ export default function InvoiceDetailSheet({
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {invoiceDetail.items?.length ? (
-                          invoiceDetail.items.map((item) => (
+                        {roomItems.length ? (
+                          roomItems.map((item) => (
                             <TableRow
                               key={item.id}
                               className="border-b hover:bg-muted/5"
@@ -437,7 +451,64 @@ export default function InvoiceDetailSheet({
                               colSpan={4}
                               className="h-24 text-center text-muted-foreground text-sm italic"
                             >
-                              Chưa có mục nào
+                              Chưa có tiền phòng
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+
+                {/* Service Items Table */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold">Dịch vụ & Nhà hàng</h3>
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent border-b bg-muted/5">
+                          <TableHead className="h-9 text-xs font-bold uppercase text-muted-foreground w-[50%]">
+                            Mô tả
+                          </TableHead>
+                          <TableHead className="h-9 text-xs font-bold uppercase text-muted-foreground text-right">
+                            SL
+                          </TableHead>
+                          <TableHead className="h-9 text-xs font-bold uppercase text-muted-foreground text-right">
+                            Đơn giá
+                          </TableHead>
+                          <TableHead className="h-9 text-xs font-bold uppercase text-muted-foreground text-right">
+                            Thành tiền
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {serviceItems.length ? (
+                          serviceItems.map((item) => (
+                            <TableRow
+                              key={item.id}
+                              className="border-b hover:bg-muted/5"
+                            >
+                              <TableCell className="py-3 font-medium text-sm">
+                                {item.customItemName || item.description}
+                              </TableCell>
+                              <TableCell className="py-3 text-right text-sm">
+                                {item.quantity}
+                              </TableCell>
+                              <TableCell className="py-3 text-right font-mono text-sm text-muted-foreground">
+                                {formatMoney(item.unitPrice || 0).vndFormatted}
+                              </TableCell>
+                              <TableCell className="py-3 text-right font-mono text-sm font-medium">
+                                {formatMoney(item.subtotal || 0).vndFormatted}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell
+                              colSpan={4}
+                              className="h-24 text-center text-muted-foreground text-sm italic"
+                            >
+                              Chưa có dịch vụ nào
                             </TableCell>
                           </TableRow>
                         )}

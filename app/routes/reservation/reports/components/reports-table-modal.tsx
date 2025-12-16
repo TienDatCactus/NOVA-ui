@@ -55,11 +55,11 @@ const CATEGORIES: ReportCategoryConfig[] = [
     colors: {
       bg: "bg-emerald-100 dark:bg-emerald-900/30",
       text: "text-emerald-900 dark:text-emerald-100",
-      border: "border-emerald-200",
+      border: "border-emerald-200 dark:border-emerald-800",
       intensity: [
-        "bg-emerald-50/50 text-emerald-700",
-        "bg-emerald-200/50 text-emerald-800 font-medium",
-        "bg-emerald-400/30 text-emerald-900 font-bold",
+        "bg-emerald-50/50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300",
+        "bg-emerald-200/50 text-emerald-800 font-medium dark:bg-emerald-800/40 dark:text-emerald-200",
+        "bg-emerald-400/30 text-emerald-900 font-bold dark:bg-emerald-700/50 dark:text-emerald-100",
       ],
     },
   },
@@ -69,11 +69,11 @@ const CATEGORIES: ReportCategoryConfig[] = [
     colors: {
       bg: "bg-blue-100 dark:bg-blue-900/30",
       text: "text-blue-900 dark:text-blue-100",
-      border: "border-blue-200",
+      border: "border-blue-200 dark:border-blue-800",
       intensity: [
-        "bg-blue-50/50 text-blue-700",
-        "bg-blue-200/50 text-blue-800 font-medium",
-        "bg-blue-400/30 text-blue-900 font-bold",
+        "bg-blue-50/50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300",
+        "bg-blue-200/50 text-blue-800 font-medium dark:bg-blue-800/40 dark:text-blue-200",
+        "bg-blue-400/30 text-blue-900 font-bold dark:bg-blue-700/50 dark:text-blue-100",
       ],
     },
   },
@@ -83,11 +83,11 @@ const CATEGORIES: ReportCategoryConfig[] = [
     colors: {
       bg: "bg-orange-100 dark:bg-orange-900/30",
       text: "text-orange-900 dark:text-orange-100",
-      border: "border-orange-200",
+      border: "border-orange-200 dark:border-orange-800",
       intensity: [
-        "bg-orange-50/50 text-orange-700",
-        "bg-orange-200/50 text-orange-800 font-medium",
-        "bg-orange-400/30 text-orange-900 font-bold",
+        "bg-orange-50/50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300",
+        "bg-orange-200/50 text-orange-800 font-medium dark:bg-orange-800/40 dark:text-orange-200",
+        "bg-orange-400/30 text-orange-900 font-bold dark:bg-orange-700/50 dark:text-orange-100",
       ],
     },
   },
@@ -97,11 +97,11 @@ const CATEGORIES: ReportCategoryConfig[] = [
     colors: {
       bg: "bg-purple-100 dark:bg-purple-900/30",
       text: "text-purple-900 dark:text-purple-100",
-      border: "border-purple-200",
+      border: "border-purple-200 dark:border-purple-800",
       intensity: [
-        "bg-purple-50/50 text-purple-700",
-        "bg-purple-200/50 text-purple-800 font-medium",
-        "bg-purple-400/30 text-purple-900 font-bold",
+        "bg-purple-50/50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300",
+        "bg-purple-200/50 text-purple-800 font-medium dark:bg-purple-800/40 dark:text-purple-200",
+        "bg-purple-400/30 text-purple-900 font-bold dark:bg-purple-700/50 dark:text-purple-100",
       ],
     },
   },
@@ -180,9 +180,9 @@ export function ReportsTableModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col p-0 gap-0 bg-background border-none shadow-none rounded-none sm:rounded-xl overflow-hidden">
         {/* 1. Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b shrink-0 bg-background z-20">
+        <div className="flex items-center justify-between px-6 py-4 border-b shrink-0 bg-background dark:bg-background z-20">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
+            <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-lg">
               <BarChart3 className="h-5 w-5 text-primary" />
             </div>
             <div>
@@ -205,8 +205,8 @@ export function ReportsTableModal({
         </div>
 
         {/* 2. Controls Toolbar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-2 bg-muted/30 border-b gap-3 shrink-0">
-          <div className="flex items-center gap-1 bg-background rounded-md border p-1 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-2 bg-muted/30 dark:bg-muted/20 border-b gap-3 shrink-0">
+          <div className="flex items-center gap-1 bg-background dark:bg-background rounded-md border dark:border-border p-1 shadow-sm">
             <Button
               variant="ghost"
               size="icon"
@@ -267,7 +267,7 @@ export function ReportsTableModal({
         </div>
 
         {/* 3. The Grid */}
-        <div className="flex-1 overflow-auto relative bg-muted/10">
+        <div className="flex-1 overflow-auto relative bg-muted/10 dark:bg-muted/5">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               Loading...
@@ -278,9 +278,9 @@ export function ReportsTableModal({
             </div>
           ) : (
             <Table>
-              <TableHeader className="bg-background sticky top-0 z-40 shadow-sm after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-border">
+              <TableHeader className="bg-background dark:bg-background sticky top-0 z-40 shadow-sm dark:shadow-md after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-border dark:after:bg-border">
                 <TableRow className="border-none hover:bg-transparent">
-                  <TableHead className="w-[250px] sticky left-0 z-50 bg-background border-r h-auto py-3 pl-6 shadow-[1px_0_0_0_hsl(var(--border))]">
+                  <TableHead className="w-[250px] sticky left-0 z-50 bg-background dark:bg-background border-r dark:border-border h-auto py-3 pl-6 shadow-md">
                     <span className="text-xs font-bold uppercase text-muted-foreground">
                       Chỉ số / Loại phòng
                     </span>
@@ -292,8 +292,10 @@ export function ReportsTableModal({
                       <TableHead
                         key={day.date}
                         className={cn(
-                          "text-center min-w-[120px] border-r border-dashed last:border-r-0 h-auto py-3",
-                          isToday ? "bg-primary/5 text-primary" : ""
+                          "text-center min-w-[120px] border-r border-dashed dark:border-border last:border-r-0 h-auto py-3",
+                          isToday
+                            ? "bg-primary/5 dark:bg-primary/10 text-primary"
+                            : ""
                         )}
                       >
                         <div className="flex flex-col items-center justify-center gap-0.5">
@@ -352,7 +354,7 @@ function DatePopover({
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="h-8 px-2 text-sm font-normal hover:bg-muted"
+          className="h-8 px-2 text-sm font-normal hover:bg-muted dark:hover:bg-muted"
         >
           {format(date, "dd/MM/yyyy")}
         </Button>
@@ -385,16 +387,17 @@ function CategorySection({
     <>
       {/* Main Category Row */}
       <TableRow
-        className="hover:bg-muted/50 cursor-pointer border-b group transition-colors"
+        className="hover:bg-muted/50 dark:hover:bg-muted/30 cursor-pointer border-b dark:border-border group transition-colors"
         onClick={onToggle}
       >
         {/* Sticky Left Column */}
-        <TableCell className="sticky left-0 z-30 bg-background border-r p-0 shadow-[1px_0_0_0_hsl(var(--border))] group-hover:bg-muted/50 transition-colors">
+        <TableCell className="sticky left-0 z-30 bg-background dark:bg-background border-r dark:border-border p-0 shadow-md group-hover:bg-muted/50 dark:group-hover:bg-muted/30 transition-colors">
           <div className="flex items-center gap-3 px-6 py-4">
             <div
               className={cn(
-                "flex items-center justify-center w-6 h-6 rounded-md transition-transform duration-200 text-muted-foreground bg-muted",
-                isExpanded && "rotate-90 text-foreground bg-primary/10"
+                "flex items-center justify-center w-6 h-6 rounded-md transition-transform duration-200 text-muted-foreground bg-muted dark:bg-muted",
+                isExpanded &&
+                  "rotate-90 text-foreground bg-primary/10 dark:bg-primary/20"
               )}
             >
               <ChevronRight className="h-4 w-4" />
@@ -422,7 +425,7 @@ function CategorySection({
           return (
             <TableCell
               key={day.date}
-              className="p-0 border-r border-dashed last:border-r-0 text-center h-full"
+              className="p-0 border-r border-dashed dark:border-border last:border-r-0 text-center h-full"
             >
               <div
                 className={cn(
@@ -442,9 +445,9 @@ function CategorySection({
         processedData.roomTypes.map((roomType: string) => (
           <TableRow
             key={`${category.key}-${roomType}`}
-            className="border-b bg-muted/5 hover:bg-muted/10"
+            className="border-b dark:border-border bg-muted/5 dark:bg-muted/5 hover:bg-muted/10 dark:hover:bg-muted/10"
           >
-            <TableCell className="sticky left-0 z-20 bg-background/95 backdrop-blur border-r py-2 pl-16 text-xs font-medium text-muted-foreground shadow-[1px_0_0_0_hsl(var(--border))]">
+            <TableCell className="sticky left-0 z-20 bg-background/95 dark:bg-background/95 backdrop-blur border-r dark:border-border py-2 pl-16 text-xs font-medium text-muted-foreground shadow-md">
               {roomType}
             </TableCell>
             {processedData.days.map((day: any) => {
@@ -452,7 +455,7 @@ function CategorySection({
               return (
                 <TableCell
                   key={`${category.key}-${roomType}-${day.date}`}
-                  className="text-center py-2 border-r border-dashed last:border-r-0 text-xs text-muted-foreground"
+                  className="text-center py-2 border-r border-dashed dark:border-border last:border-r-0 text-xs text-muted-foreground"
                 >
                   {val > 0 ? val : ""}
                 </TableCell>

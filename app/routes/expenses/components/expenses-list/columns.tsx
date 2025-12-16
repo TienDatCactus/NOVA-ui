@@ -1,45 +1,17 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  Briefcase,
-  Building2,
-  DollarSign,
-  PackageOpen,
-  Receipt,
-  Wrench,
-  Zap,
-} from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { useState } from "react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Button } from "~/components/ui/button";
 import { formatMoney } from "~/lib/utils";
 import type { ExpenseListItemDto } from "~/services/api/expenses/dto";
+import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
 import ExpensesActionCell from "../../fragments/expenses-action.cell";
 import SourceTypeBadge from "../../fragments/source-type-badge";
 import StatusBadge from "../../fragments/status-badge";
 import { ExpenseDetailDialog } from "../expense-detail.dialog";
-
-// Category icon mapping
-const CATEGORY_ICONS: Record<
-  string,
-  React.ComponentType<{ className?: string }>
-> = {
-  Procurement: PackageOpen,
-  Salary: Briefcase,
-  Utilities: Zap,
-  Maintenance: Wrench,
-  Office: Building2,
-  Other: Receipt,
-};
-const CATEGORY_LABELS: Record<string, string> = {
-  Procurement: "Mua sắm",
-  Salary: "Lương",
-  Utilities: "Tiện ích",
-  Maintenance: "Bảo trì",
-  Office: "Văn phòng",
-  Other: "Khác",
-};
 
 export const columns: ColumnDef<ExpenseListItemDto>[] = [
   {
@@ -94,8 +66,12 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
       <DataTableColumnHeader column={column} title="Danh mục" />
     ),
     cell: ({ row }) => {
-      const Icon = CATEGORY_ICONS[row.original.category] || DollarSign;
-      const Label = CATEGORY_LABELS[row.original.category];
+      const Icon =
+        ExpenseCategories.find((cat) => cat.value === row.original.category)
+          ?.icon || DollarSign;
+      const Label =
+        ExpenseCategories.find((cat) => cat.value === row.original.category)
+          ?.label || "Unknown";
       return (
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
