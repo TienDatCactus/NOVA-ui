@@ -125,7 +125,12 @@ export const columns: ColumnDef<StockItemsListItemDto>[] = [
     id: "actions",
     header: () => null,
     cell: ({ row }) => {
-      if (hasAnyRole(AuthLoader.getUser(), [UserRole.ServiceStaff]))
+      if (
+        hasAnyRole(AuthLoader.getUser(), [
+          UserRole.ServiceStaff,
+          UserRole.HotelManager,
+        ])
+      )
         return <ItemsActionCell item={row.original} />;
       return null;
     },

@@ -197,6 +197,7 @@ const UpdateBookingRoomRequestSchema = z
     newRoomId: z.string().optional(), // For Change operation
     fromDate: z.string().optional(), // For Add operation (yyyy-MM-dd)
     toDate: z.string().optional(), // For Add operation (yyyy-MM-dd)
+    isFreeChange: z.boolean().optional(), // For Change operation - indicates complimentary upgrade/change
   })
   .refine(
     (data) => {
@@ -626,29 +627,6 @@ const BookingPayForRoomRequestSchema = z.object({
   transactionReference: z.string().optional(),
 });
 
-const BookingUpgradeRoomRequestSchema = z
-  .object({
-    bookingRoomId: z.string().min(1, "Vui lòng chọn phòng hiện tại"),
-    newRoomId: z.string().min(1, "Vui lòng chọn phòng mới"),
-    isFree: z.boolean(),
-    reason: z.string().optional(),
-    paymentMethod: PaymentSchema.PaymentMethodEnum.optional(),
-    paidAmount: z.number().min(0).optional(),
-    transactionReference: z.string().optional().nullable(),
-  })
-  .refine(
-    (data) => {
-      if (data.isFree && (!data.reason || data.reason.trim().length === 0)) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Vui lòng nhập lý do upgrade miễn phí",
-      path: ["reason"],
-    }
-  );
-
 const UnpaidRoomSchema = z.object({
   bookingRoomId: z.string(),
   roomId: z.string(),
@@ -693,7 +671,6 @@ export const BookingSchema = {
   StaffChangeRoomResponseSchema,
   AvailableRoomsForChangeResponseSchema,
   BookingPayForRoomRequestSchema,
-  BookingUpgradeRoomRequestSchema,
 
   //! checkout booking
   StaffCheckoutRequestSchema,

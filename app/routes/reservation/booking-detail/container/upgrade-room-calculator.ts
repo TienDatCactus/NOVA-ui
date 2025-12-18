@@ -57,14 +57,8 @@ export function isValidUpgrade(
  * Get upgrade validation message
  */
 export function getUpgradeValidationMessage(
-  oldRoomDailyRate: number,
-  newRoomDailyRate: number,
   remainingNights: number
 ): string | null {
-  if (newRoomDailyRate <= oldRoomDailyRate) {
-    return "Phòng mới phải có giá cao hơn phòng hiện tại để được coi là upgrade.";
-  }
-
   if (remainingNights <= 0) {
     return "Không còn đêm nào để upgrade (checkout quá gần hoặc đã qua).";
   }

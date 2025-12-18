@@ -5,7 +5,6 @@ import type z from "zod";
 import { BookingService } from "~/services/api/booking";
 import type {
   BookingPayForRoomRequestDto,
-  BookingUpgradeRoomRequestDto,
   ConfirmBookingPaymentRequestDto,
   StaffAddCompletedChargesRequestDto,
   StaffCheckoutPaymentRequestDto,
@@ -376,37 +375,6 @@ export function usePayNowRooms(bookingId: string) {
       });
       queryClient.invalidateQueries({
         queryKey: ["unpaid-rooms", bookingId],
-      });
-    },
-    onError: (error) => {
-      if (error instanceof AxiosError)
-        toast.error(error.response?.data.message);
-    },
-  });
-}
-
-export function useUpgradeRoom(bookingId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: BookingUpgradeRoomRequestDto) => {
-      return await BookingService.upgradeRoom(bookingId, data);
-    },
-    onSuccess: () => {
-      toast.success("Upgrade phòng thành công", {
-        description: "Phòng đã được nâng cấp.",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
       });
     },
     onError: (error) => {

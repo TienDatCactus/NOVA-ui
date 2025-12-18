@@ -1,11 +1,5 @@
 import { format, parseISO } from "date-fns";
-import {
-  ArrowLeftRight,
-  ArrowUpCircle,
-  Plus,
-  RotateCcw,
-  Trash2,
-} from "lucide-react";
+import { ArrowUpCircle, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -38,7 +32,6 @@ import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
-import ChangeRoomDialog from "../../bookings/components/change-room.dialog";
 import {
   canUpgradeRoom,
   type BookingState,
@@ -67,7 +60,6 @@ export default function BookingRoomsBar({
 }: BookingRoomsBarProps) {
   const { fields, remove, append } = roomsFieldArray;
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
-  const [changeRoomModalOpen, setChangeRoomModalOpen] = useState(false);
   const [upgradeRoomOpen, setUpgradeRoomOpen] = useState(false);
   const [removeRoomConfirmOpen, setRemoveRoomConfirmOpen] = useState(false);
   const [roomToRemove, setRoomToRemove] = useState<{
@@ -227,13 +219,6 @@ export default function BookingRoomsBar({
                   <Plus className="h-4 w-4 mr-1" />
                   Thêm phòng
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setChangeRoomModalOpen(true)}
-                  disabled={!bookingState.permissions.canEditRooms}
-                >
-                  <ArrowLeftRight className="h-4 w-4 mr-1" />
-                  Đổi phòng
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -380,11 +365,7 @@ export default function BookingRoomsBar({
         onAddRoom={handleAddRoom}
         bookingDetail={bookingDetail}
       />
-      <ChangeRoomDialog
-        open={changeRoomModalOpen}
-        onOpenChange={setChangeRoomModalOpen}
-        bookingCode={bookingDetail.bookingCode}
-      />{" "}
+
       <UpgradeRoomDialog
         open={upgradeRoomOpen}
         onOpenChange={setUpgradeRoomOpen}

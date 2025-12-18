@@ -1,4 +1,3 @@
-import { AlertCircle } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -9,31 +8,42 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { formatMoney } from "~/lib/utils";
-import type { RevenueTrendDto } from "~/services/api/finances/dto";
 
-interface RevenueTrendChartProps {
-  data: RevenueTrendDto[];
+interface BookingDataItem {
+  date: string;
+  booked: number;
+  checkin: number;
+  checkout: number;
+  available: number;
 }
 
-// Màu sắc nhẹ nhàng hơn, phù hợp business dashboard
+interface BookingTrendChartProps {
+  data: BookingDataItem[];
+}
+
 const COLORS = {
-  room: "#3b82f6", // Blue 500
-  fnb: "#f97316", // Orange 500
-  service: "#10b981", // Emerald 500
+  available: "var(--chart-1)", // Primary blue
+  booked: "var(--chart-2)", // Lighter blue
+  checkin: "var(--chart-3)", // Darker blue
+  checkout: "var(--chart-4)", // Purple-blue
 };
 
-export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
-  const chartData = data.map((item) => ({
-    fullDate: item.date,
-    phong: item.roomRevenue,
-    fnb: item.fnBRevenue,
-    dichvu: item.serviceRevenue,
-    tong: item.totalRevenue,
-  }));
+export function BookingTrendChart({ data }: BookingTrendChartProps) {
+  const chartData = data.map((item) => {
+    return {
+      date: item.date,
+      fullDate: item.date,
+      phongtrong: item.available,
+      dadat: item.booked,
+      checkin: item.checkin,
+      checkout: item.checkout,
+      total: item.available + item.booked,
+    };
+  });
 
-  const hasData = data.some((d) => d.totalRevenue > 0);
-  const sampleSize = data.length;
+  const hasData = data.some(
+    (d) => d.available > 0 || d.booked > 0 || d.checkin > 0 || d.checkout > 0
+  );
 
   return (
     <Card className="h-full shadow-none border-border/60">
@@ -41,22 +51,17 @@ export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <CardTitle className="text-base font-semibold tracking-tight">
-              Xu hướng doanh thu
+              Xu hướng đặt phòng
             </CardTitle>
-            {sampleSize < 7 && (
-              <div className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 w-fit px-2 py-0.5 rounded-md border border-amber-100">
-                <AlertCircle className="h-3 w-3" />
-                <span>Dữ liệu &lt; 7 ngày</span>
-              </div>
-            )}
           </div>
 
-          {/* Moved Legend to Header to save vertical space */}
-          <div className="flex items-center gap-4">
+          {/* Legend in Header to save vertical space */}
+          <div className="flex items-center gap-4 flex-wrap">
             {[
-              { label: "Phòng", color: COLORS.room },
-              { label: "F&B", color: COLORS.fnb },
-              { label: "Dịch vụ", color: COLORS.service },
+              { label: "Phòng trống", color: COLORS.available },
+              { label: "Đã đặt", color: COLORS.booked },
+              { label: "Check-in", color: COLORS.checkin },
+              { label: "Check-out", color: COLORS.checkout },
             ].map((item) => (
               <div
                 key={item.label}
@@ -75,46 +80,74 @@ export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
 
       <CardContent className="px-2 sm:px-6 pb-6">
         {!hasData ? (
-          <div className="h-[280px] flex flex-col items-center justify-center text-muted-foreground bg-muted/5 rounded-lg border border-dashed border-muted">
+          <div className="h-[20rem] flex flex-col items-center justify-center text-muted-foreground bg-muted/5 rounded-lg border border-dashed border-muted">
             <p className="text-sm font-medium">Chưa có dữ liệu phát sinh</p>
           </div>
         ) : (
-          <div className="h-[280px] w-full">
+          <div className="h-[20rem] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
                 <defs>
-                  <linearGradient id="colorPhong" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id="colorAvailable"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop
                       offset="5%"
-                      stopColor={COLORS.room}
+                      stopColor={COLORS.available}
                       stopOpacity={0.2}
                     />
                     <stop
                       offset="95%"
-                      stopColor={COLORS.room}
+                      stopColor={COLORS.available}
                       stopOpacity={0}
                     />
                   </linearGradient>
-                  <linearGradient id="colorFnb" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="colorBooked" x1="0" y1="0" x2="0" y2="1">
                     <stop
                       offset="5%"
-                      stopColor={COLORS.fnb}
-                      stopOpacity={0.2}
-                    />
-                    <stop offset="95%" stopColor={COLORS.fnb} stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorDichvu" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor={COLORS.service}
+                      stopColor={COLORS.booked}
                       stopOpacity={0.2}
                     />
                     <stop
                       offset="95%"
-                      stopColor={COLORS.service}
+                      stopColor={COLORS.booked}
+                      stopOpacity={0}
+                    />
+                  </linearGradient>
+                  <linearGradient id="colorCheckin" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor={COLORS.checkin}
+                      stopOpacity={0.2}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={COLORS.checkin}
+                      stopOpacity={0}
+                    />
+                  </linearGradient>
+                  <linearGradient
+                    id="colorCheckout"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor={COLORS.checkout}
+                      stopOpacity={0.2}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={COLORS.checkout}
                       stopOpacity={0}
                     />
                   </linearGradient>
@@ -134,52 +167,53 @@ export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
                   tickLine={false}
                   axisLine={false}
                   dy={10}
-                  minTickGap={30} // Prevent overlapping dates
+                  minTickGap={30}
                 />
 
                 <YAxis
                   tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => {
-                    if (value >= 1000000000)
-                      return `${(value / 1000000000).toFixed(1)}B`;
-                    if (value >= 1000000)
-                      return `${(value / 1000000).toFixed(1)}M`;
-                    if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
-                    return value;
-                  }}
+                  tickFormatter={(value) => value.toLocaleString("vi-VN")}
                 />
 
                 <Tooltip content={<CustomTooltip />} cursor={false} />
 
-                {/* Stroke width reduced to 2 for elegance */}
                 <Area
                   type="monotone"
-                  dataKey="phong"
+                  dataKey="phongtrong"
                   stackId="1"
-                  stroke={COLORS.room}
-                  fill="url(#colorPhong)"
+                  stroke={COLORS.available}
+                  fill="url(#colorAvailable)"
                   strokeWidth={2}
-                  activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.room }}
+                  activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.available }}
                 />
                 <Area
                   type="monotone"
-                  dataKey="fnb"
+                  dataKey="dadat"
                   stackId="1"
-                  stroke={COLORS.fnb}
-                  fill="url(#colorFnb)"
+                  stroke={COLORS.booked}
+                  fill="url(#colorBooked)"
                   strokeWidth={2}
-                  activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.fnb }}
+                  activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.booked }}
                 />
                 <Area
                   type="monotone"
-                  dataKey="dichvu"
+                  dataKey="checkin"
                   stackId="1"
-                  stroke={COLORS.service}
-                  fill="url(#colorDichvu)"
+                  stroke={COLORS.checkin}
+                  fill="url(#colorCheckin)"
                   strokeWidth={2}
-                  activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.service }}
+                  activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.checkin }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="checkout"
+                  stackId="1"
+                  stroke={COLORS.checkout}
+                  fill="url(#colorCheckout)"
+                  strokeWidth={2}
+                  activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.checkout }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -190,17 +224,15 @@ export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
   );
 }
 
-// Tooltip tối giản, giống style của KpiCard
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload || !payload.length) return null;
-
   const total = payload.reduce(
     (sum: number, item: any) => sum + (item.value || 0),
     0
   );
 
   return (
-    <div className="bg-popover/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg p-3 min-w-[160px] text-xs">
+    <div className="bg-popover/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg p-3 min-w-[10rem] text-xs">
       <div className="mb-2 pb-2 border-b border-border/50">
         <p className="font-semibold text-foreground">{label}</p>
       </div>
@@ -217,15 +249,17 @@ function CustomTooltip({ active, payload, label }: any) {
                 style={{ backgroundColor: item.color }}
               />
               <span className="text-muted-foreground capitalize">
-                {item.dataKey === "phong"
-                  ? "Phòng"
-                  : item.dataKey === "fnb"
-                    ? "F&B"
-                    : "Dịch vụ"}
+                {item.dataKey === "phongtrong"
+                  ? "Phòng trống"
+                  : item.dataKey === "dadat"
+                    ? "Đã đặt"
+                    : item.dataKey === "checkin"
+                      ? "Check-in"
+                      : "Check-out"}
               </span>
             </div>
             <span className="font-mono font-medium text-foreground">
-              {formatMoney(item.value || 0).vndFormatted}
+              {item.value}
             </span>
           </div>
         ))}
@@ -233,9 +267,7 @@ function CustomTooltip({ active, payload, label }: any) {
 
       <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between">
         <span className="font-semibold text-muted-foreground">Tổng</span>
-        <span className="font-bold text-primary font-mono">
-          {formatMoney(total).vndFormatted}
-        </span>
+        <span className="font-bold text-primary font-mono">{total}</span>
       </div>
     </div>
   );

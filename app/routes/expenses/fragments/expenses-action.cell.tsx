@@ -37,7 +37,6 @@ const ExpensesActionCell: React.FC<ExpensesActionCellProps> = ({ expense }) => {
   const [openPostDialog, setOpenPostDialog] = useState(false);
   const [openVoidDialog, setOpenVoidDialog] = useState(false);
 
-  // Business rules for actions
   const permissions = useMemo(() => {
     const isManual = expense.sourceType === "Manual";
     const isDraft = expense.status === "Draft";
@@ -46,7 +45,7 @@ const ExpensesActionCell: React.FC<ExpensesActionCellProps> = ({ expense }) => {
     return {
       canEdit: isManual && isDraft,
       canDelete: isManual && isDraft,
-      canPost: isManual && isDraft,
+      canPost: isDraft,
       canVoid: isManual && isPosted,
     };
   }, [expense.sourceType, expense.status]);
@@ -132,7 +131,7 @@ const ExpensesActionCell: React.FC<ExpensesActionCellProps> = ({ expense }) => {
                   onClick={() => setOpenPostDialog(true)}
                   className="text-green-600"
                 >
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />
                   Chốt
                 </DropdownMenuItem>
               </>

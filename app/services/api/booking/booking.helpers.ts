@@ -70,13 +70,15 @@ export function createAddRoomOperation(
 
 /**
  * Creates a validated "Change" room operation
+ * @param isFreeChange - Optional boolean to indicate complimentary room change (VIP, compensation, etc.)
  * @throws Error if validation fails
  */
 export function createChangeRoomOperation(
   bookingRoomId: string,
   newRoomId: string,
   fromDate?: string | Date,
-  toDate?: string | Date
+  toDate?: string | Date,
+  isFreeChange?: boolean
 ): UpdateBookingRoomRequestDto {
   const operation: UpdateBookingRoomRequestDto = {
     action: "Change" as const,
@@ -92,6 +94,11 @@ export function createChangeRoomOperation(
   if (toDate) {
     operation.toDate =
       toDate instanceof Date ? format(toDate, "yyyy-MM-dd") : toDate;
+  }
+
+  // Add isFreeChange flag if provided
+  if (isFreeChange !== undefined) {
+    operation.isFreeChange = isFreeChange;
   }
 
   const result = UpdateBookingRoomRequestSchema.safeParse(operation);

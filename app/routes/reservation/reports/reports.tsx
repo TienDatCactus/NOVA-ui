@@ -14,6 +14,12 @@ import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/reports";
 import { ReportsTableModal } from "./components/reports-table-modal";
 import useReports from "./container/reservation-reports-query";
+import { KpiRow } from "./fragments/kpi-row";
+import { BookingTrendChart } from "./components/booking-trend-chart";
+import { RoomTypeDonut } from "./components/room-type-donut";
+import { RoomComparisonChart } from "./components/room-comparison-chart";
+import { AvailabilityLineChart } from "./components/availability-line-chart";
+import { DailyBreakdownTabs } from "./components/daily-breakdown-tabs";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -60,11 +66,14 @@ export default function Component() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 ">
+    <div className="flex flex-col gap-6 p-6 bg-muted/10 min-h-screen">
+      {/* Date Range Picker Header */}
       <div className="flex gap-4 items-center justify-between">
         <div className="flex gap-4 items-center">
           <div className="flex gap-2 items-center">
-            <p>Từ ngày:</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Từ ngày:
+            </p>
             <Popover
               open={open.from}
               onOpenChange={() => {
@@ -103,7 +112,9 @@ export default function Component() {
             </Popover>
           </div>
           <div className="flex gap-2 items-center">
-            <p>Đến ngày:</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Đến ngày:
+            </p>
             <Popover
               open={open.to}
               onOpenChange={() => {
@@ -156,22 +167,48 @@ export default function Component() {
         </Button>
       </div>
 
+      {/* KPI Summary Row */}
+      <KpiRow data={reportsData?.bookingData} isLoading={isLoading} />
+
+      {/* Primary Charts Section - 2 Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-[450px]" />
+            <Skeleton className="h-[450px]" />
+          </>
+        ) : (
+          <>
+            <BookingTrendChart data={reportsData?.bookingData || []} />
+            <RoomTypeDonut data={reportsData?.availableRoomsByType || []} />
+          </>
+        )}
+      </div>
+
+      {/* Secondary Analysis Row - 2 Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-[400px]" />
+            <Skeleton className="h-[400px]" />
+          </>
+        ) : (
+          <>
+            <RoomComparisonChart
+              data={reportsData?.roomTypeComparisonData || []}
+            />
+            <AvailabilityLineChart
+              data={reportsData?.availableRoomsTrendData || []}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Daily Breakdown Tabs - Full Width */}
       {isLoading ? (
-        <div className="space-y-4">
-          <div className="flex gap-4">
-            <Skeleton className="flex-2 h-[450px]" />
-            <Skeleton className="flex-1 h-[450px]" />
-          </div>
-          <div className="flex gap-4">
-            <Skeleton className="flex-1 h-[450px]" />
-            <Skeleton className="flex-2 h-[450px]" />
-          </div>
-        </div>
+        <Skeleton className="h-[450px]" />
       ) : (
-        <>
-          <div className="flex gap-4"></div>
-          <div className="flex gap-4"></div>
-        </>
+        <DailyBreakdownTabs data={reportsData?.dailyAvailability || []} />
       )}
 
       <ReportsTableModal
