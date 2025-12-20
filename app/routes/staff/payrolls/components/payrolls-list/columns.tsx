@@ -1,17 +1,16 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Check, X } from "lucide-react";
 import { useState } from "react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 import { cn, formatMoney } from "~/lib/utils";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import StatusSelectCell from "../../fragments/status-select.cell";
 import PayrollDetailDialog from "../payroll-detail-dialog";
-import { hasAnyRole } from "~/lib/auth/bouncer";
-import { AuthLoader } from "~/lib/auth/auth.loader";
-import { UserRole } from "~/lib/auth/roles";
 
 export const columns: ColumnDef<PayrollItemDto>[] = [
   {
@@ -84,7 +83,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
   {
     accessorKey: "assignedDays",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Định mức" />
+      <DataTableColumnHeader column={column} title="Số ngày đi làm" />
     ),
     cell: ({ row }) => (
       <div className="text-center font-mono text-muted-foreground">
@@ -284,34 +283,6 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
       );
     },
     size: 60,
-  },
-  {
-    accessorKey: "hasExpense",
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Phiếu chi"
-        className="justify-center"
-      />
-    ),
-    cell: ({ row }) => {
-      const hasExpense = row.original.hasExpense;
-
-      if (hasExpense) {
-        return (
-          <div className="flex justify-center">
-            <Check className="h-4 w-4 " />
-          </div>
-        );
-      }
-
-      return (
-        <div className="flex justify-center">
-          <X className="h-4 w-4" />
-        </div>
-      );
-    },
-    size: 80,
   },
   {
     accessorKey: "locked",

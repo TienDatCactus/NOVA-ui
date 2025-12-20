@@ -192,14 +192,15 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
       <div className="flex-1 overflow-hidden relative">
         <ScrollArea className="h-full">
           <div className="p-4 md:p-6 pb-20 max-w-[1920px] mx-auto">
-            {isPending ? (
+            {isPending && (
               <div className="flex h-[50vh] flex-col items-center justify-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500/50" />
                 <p className="text-sm font-medium text-muted-foreground animate-pulse">
                   Đang đồng bộ dữ liệu dịch vụ...
                 </p>
               </div>
-            ) : filteredOrders.length === 0 ? (
+            )}
+            {filteredOrders.length === 0 ? (
               <div className="flex h-[50vh] flex-col items-center justify-center">
                 <Empty>
                   <EmptyHeader>
@@ -216,7 +217,6 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
                 </Empty>
               </div>
             ) : (
-              // --- GRID LAYOUT ---
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
                 {filteredOrders.map((order) => (
                   <div key={order.id} className="relative">
@@ -239,7 +239,6 @@ function StatusTab({
   count = 0,
   isActive,
   onClick,
-  statusColor = "bg-primary",
 }: {
   label: string;
   count: number;

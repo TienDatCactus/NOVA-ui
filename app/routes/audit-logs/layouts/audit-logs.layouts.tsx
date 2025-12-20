@@ -103,45 +103,6 @@ const AuditLogsLayout = ({
     );
   };
 
-  const getPageNumbers = () => {
-    const delta = 1;
-    const pages: (number | "ellipsis")[] = [];
-
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first page
-      pages.push(1);
-
-      const start = Math.max(2, currentPage - delta);
-      const end = Math.min(totalPages - 1, currentPage + delta);
-
-      // Add ellipsis after first if needed
-      if (start > 2) {
-        pages.push("ellipsis");
-      }
-
-      // Add pages around current
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      // Add ellipsis before last if needed
-      if (end < totalPages - 1) {
-        pages.push("ellipsis");
-      }
-
-      // Always show last page
-      if (totalPages > 1) {
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
   return (
     <div className="flex flex-col h-full bg-muted/10 p-4 md:p-6 space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">

@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Calculator,
   CalendarDays,
   Check,
   Loader2,
@@ -157,19 +156,12 @@ export default function GeneratePayrollDialog({
       <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden">
         {/* === HEADER === */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg text-primary">
-              <Calculator className="w-5 h-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-lg font-semibold">
-                Tạo bảng lương
-              </DialogTitle>
-              <DialogDescription className="mt-0.5">
-                Tính toán và chốt lương cho kỳ làm việc.
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle className="text-lg font-semibold">
+            Tạo bảng lương
+          </DialogTitle>
+          <DialogDescription>
+            Tính toán và chốt lương cho kỳ làm việc.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

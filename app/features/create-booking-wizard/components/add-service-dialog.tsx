@@ -161,7 +161,7 @@ export default function AddServiceDialog({
                           )}
 
                           {/* Unit Badge (Overlay on Image) */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-[2px] p-1 text-center">
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/40  p-1 text-center">
                             <p className="text-[10px] font-medium text-white truncate">
                               {service.unitName}
                             </p>
@@ -270,7 +270,7 @@ export default function AddServiceDialog({
                           )}
 
                           {/* Unit Badge (Overlay on Image) */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-[2px] p-1 text-center">
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/40  p-1 text-center">
                             <p className="text-[10px] font-medium text-white truncate">
                               {menuItem.unitName || "F&B"}
                             </p>

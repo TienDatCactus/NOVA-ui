@@ -214,14 +214,15 @@ export default function Component({}: Route.ComponentProps) {
       <div className="flex-1 overflow-hidden relative">
         <ScrollArea className="h-full">
           <div className="p-4 md:p-6 pb-20 max-w-[1920px] mx-auto">
-            {isPending ? (
+            {isPending && (
               <div className="flex h-[50vh] flex-col items-center justify-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
                 <p className="text-sm font-medium text-muted-foreground animate-pulse">
                   Đang đồng bộ dữ liệu...
                 </p>
               </div>
-            ) : filteredOrders?.length === 0 ? (
+            )}
+            {filteredOrders?.length === 0 ? (
               <div className="flex h-[50vh] flex-col items-center justify-center">
                 <Empty>
                   <EmptyHeader>
@@ -269,7 +270,6 @@ function StatusTab({
   count = 0,
   isActive,
   onClick,
-  statusColor = "bg-primary",
 }: {
   label: string;
   count: number;

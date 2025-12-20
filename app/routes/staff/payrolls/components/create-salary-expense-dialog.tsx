@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DollarSign, Loader2, Receipt } from "lucide-react";
+import { DollarSign, Hash, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -28,11 +28,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
-import { useCreateSalaryExpense } from "../container/query.hooks";
-import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import { formatMoney } from "~/lib/utils";
+import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
+import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { useCreateSalaryExpense } from "../container/query.hooks";
 
 const { CreateSalaryExpenseRequestSchema } = StaffPayrollSchema;
 
@@ -152,7 +152,7 @@ export default function CreateSalaryExpenseDialog({
                   <FormLabel>Số phiếu chi</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Receipt className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         {...field}
                         placeholder="Nhập số phiếu chi"

@@ -1,12 +1,5 @@
 import { format } from "date-fns";
-import {
-  Check,
-  Coffee,
-  ConciergeBell,
-  Plus,
-  Sparkles,
-  Utensils,
-} from "lucide-react";
+import { CheckCircle2, Coffee, Plus, UtensilsCrossed } from "lucide-react";
 import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import type z from "zod";
@@ -16,25 +9,25 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { BreakfastSelection } from "../fragments/breakfast-selection";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
+import { cn } from "~/lib/utils";
 import { ServiceOrderTable } from "../fragments/service-order-table";
 import AddServiceDialog from "./add-service-dialog";
-import { Badge } from "~/components/ui/badge";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItem = z.infer<typeof ServiceOrderItemSchema>;
@@ -59,11 +52,6 @@ export default function ServiceBreakfastManagerDialog({
   const services = form.watch("serviceOrder.services") || [];
 
   // === LOGIC ===
-  const nights = (() => {
-    if (!checkinDate || !checkoutDate) return 0;
-    const diff = checkoutDate.getTime() - checkinDate.getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  })();
 
   const handleAddService = (
     serviceId: string,
@@ -126,143 +114,159 @@ export default function ServiceBreakfastManagerDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 overflow-hidden bg-background/95 backdrop-blur-sm">
-          {/* Header */}
-          <DialogHeader className="px-6 py-5 border-b bg-background/50 z-10 shrink-0">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20">
-                <ConciergeBell className="h-6 w-6" />
-              </div>
-              <div className="space-y-1">
-                <DialogTitle className="text-xl">
-                  Dịch vụ & Tiện ích
-                </DialogTitle>
-                <DialogDescription className="flex items-center gap-2 text-xs">
-                  <Badge
-                    variant="outline"
-                    className="font-normal text-muted-foreground bg-background/50"
-                  >
-                    <Coffee className="h-3 w-3 mr-1" /> Bữa sáng
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className="font-normal text-muted-foreground bg-background/50"
-                  >
-                    <Sparkles className="h-3 w-3 mr-1" /> Spa & Laundry
-                  </Badge>
-                </DialogDescription>
-              </div>
-            </div>
+        <DialogContent className="max-w-3xl p-0 gap-0 outline-none overflow-hidden sm:rounded-xl">
+          {/* === HEADER === */}
+          <DialogHeader className="px-6 py-5 border-b border-border/60 bg-background/95 ">
+            <DialogTitle className="text-xl font-semibold tracking-tight">
+              Dịch vụ & Tiện ích
+            </DialogTitle>
+            <DialogDescription className="text-xs uppercase tracking-wider font-medium text-muted-foreground/80">
+              Quản lý Bữa sáng • Spa • Giặt ủi • Di chuyển
+            </DialogDescription>
           </DialogHeader>
 
-          {/* Scrollable Content */}
-          <ScrollArea className="flex-1">
-            <div className="flex flex-col gap-8 p-6 md:p-8">
-              {/* 1. Breakfast Section */}
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <Utensils className="h-4 w-4 text-orange-500" />
+          <ScrollArea className="max-h-[70vh]">
+            <div className="flex flex-col gap-6 p-6">
+              {/* === SECTION 1: BREAKFAST === */}
+              <div
+                className={cn(
+                  "flex flex-row items-center justify-between rounded-xl border p-5 transition-all duration-200",
+                  isBreakfastAll
+                    ? "border-primary/50 bg-primary/5 shadow-sm"
+                    : "border-border bg-muted/20"
+                )}
+              >
+                <div className="flex gap-4">
+                  <div
+                    className={cn(
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border",
+                      isBreakfastAll
+                        ? "bg-background border-primary/30 text-primary"
+                        : "bg-background border-border text-muted-foreground"
+                    )}
+                  >
+                    <Coffee className="h-5 w-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="breakfast"
+                      className="text-base font-medium cursor-pointer"
+                    >
                       Lịch trình Bữa sáng
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Quản lý các suất ăn sáng theo ngày lưu trú.
+                    </Label>
+                    <p className="text-sm text-muted-foreground leading-snug">
+                      Bao gồm suất ăn sáng cho tất cả các ngày trong kỳ nghỉ.
                     </p>
                   </div>
-                  {/* Optional: Add summary badge e.g. "5 days selected" */}
                 </div>
+                <Switch
+                  id="breakfast"
+                  checked={isBreakfastAll}
+                  onCheckedChange={handleBreakfastToggleAll}
+                  className="data-[state=checked]:bg-primary"
+                />
+              </div>
 
-                <div className="rounded-xl border bg-card p-1 shadow-sm overflow-hidden">
-                  <BreakfastSelection
-                    isBreakfastAll={isBreakfastAll}
-                    onToggleAll={handleBreakfastToggleAll}
-                    checkinDate={checkinDate || new Date()}
-                    checkoutDate={checkoutDate || new Date()}
-                    nights={nights}
-                  />
-                </div>
-              </section>
+              <div className="h-px bg-border/50" />
 
-              <Separator />
-
-              {/* 2. Services Section */}
-              <section className="space-y-4">
+              {/* === SECTION 2: ADDITIONAL SERVICES === */}
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-purple-500" />
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                       Dịch vụ bổ sung
+                      <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                        {services.length}
+                      </span>
                     </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Spa, Giặt ủi, Minibar, Xe đưa đón...
+                    <p className="text-sm text-muted-foreground">
+                      Spa, đưa đón, hoặc các yêu cầu đặc biệt khác.
                     </p>
                   </div>
+
                   <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setAddServiceDialogOpen(true)}
                     disabled={!hasDates}
-                    className="gap-2 shadow-sm"
+                    className="h-9 border-dashed shadow-sm hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"
                   >
-                    <Plus className="h-4 w-4" /> Thêm dịch vụ
+                    <Plus className="mr-2 h-4 w-4" />
+                    Thêm dịch vụ
                   </Button>
                 </div>
 
-                {services.length > 0 ? (
-                  <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-                    <ServiceOrderTable
-                      services={services}
-                      onRemove={handleRemoveService}
-                      onUpdate={handleUpdateService}
-                      checkinDate={checkinDate}
-                      checkoutDate={checkoutDate}
-                    />
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed bg-muted/30 p-8">
+                <div className="min-h-[200px]">
+                  {services.length > 0 ? (
+                    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                      <ServiceOrderTable
+                        services={services}
+                        onRemove={handleRemoveService}
+                        onUpdate={handleUpdateService}
+                        checkinDate={checkinDate}
+                        checkoutDate={checkoutDate}
+                      />
+                    </div>
+                  ) : (
                     <Empty>
-                      <EmptyHeader>
-                        <EmptyMedia className="bg-background border shadow-sm">
-                          <Sparkles className="h-6 w-6 text-muted-foreground" />
+                      <EmptyHeader className="border-2 border-dashed border-muted-foreground/20 rounded-xl py-10">
+                        <EmptyMedia
+                          variant="icon"
+                          className="bg-muted/50 p-3 rounded-full mb-2"
+                        >
+                          <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
                         </EmptyMedia>
-                        <EmptyTitle>Chưa có dịch vụ nào</EmptyTitle>
-                        <EmptyDescription>
+                        <EmptyTitle className="mt-2 text-base">
+                          Chưa có dịch vụ nào
+                        </EmptyTitle>
+                        <EmptyDescription className="max-w-[250px] mx-auto">
                           {hasDates
-                            ? "Khách hàng chưa yêu cầu dịch vụ thêm."
-                            : "Vui lòng chọn ngày lưu trú trước khi thêm dịch vụ."}
+                            ? "Nhấn 'Thêm dịch vụ' để thiết lập tiện ích cho khách hàng."
+                            : "Vui lòng chọn ngày nhận/trả phòng trước khi thêm dịch vụ."}
                         </EmptyDescription>
-                      </EmptyHeader>
-                      {hasDates && (
-                        <EmptyContent>
+                        {hasDates && (
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
                             onClick={() => setAddServiceDialogOpen(true)}
+                            className="mt-4 text-primary hover:bg-primary/10 hover:text-primary"
                           >
                             Thêm ngay
                           </Button>
-                        </EmptyContent>
-                      )}
+                        )}
+                      </EmptyHeader>
                     </Empty>
-                  </div>
-                )}
-              </section>
+                  )}
+                </div>
+              </div>
             </div>
           </ScrollArea>
 
-          {/* Footer */}
-          <div className="px-6 py-4 border-t bg-muted/5 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Check className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Tự động lưu thay đổi</span>
+          {/* === FOOTER === */}
+          <DialogFooter className="flex flex-row items-center justify-between border-t bg-muted/20 px-6 py-4 sm:justify-between">
+            <div className="flex flex-col text-sm">
+              {/* Optional: Show Total Cost here if you have the data */}
+              <span className="text-muted-foreground text-xs font-medium">
+                Tổng tạm tính
+              </span>
+              <span className="font-bold text-base text-primary">
+                {/* Format currency here, e.g. 1.200.000 ₫ */}
+                --
+              </span>
             </div>
-            <Button
-              onClick={() => onOpenChange(false)}
-              className="min-w-[120px]"
-            >
-              Đóng
-            </Button>
-          </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => onOpenChange(false)}>
+                Đóng
+              </Button>
+              <Button
+                onClick={() => onOpenChange(false)}
+                className="min-w-[120px] shadow-sm"
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Hoàn tất
+              </Button>
+            </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

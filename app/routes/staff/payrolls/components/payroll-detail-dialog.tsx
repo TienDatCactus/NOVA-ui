@@ -72,20 +72,10 @@ export default function PayrollDetailDialog({
         ) : payroll ? (
           <Tabs defaultValue="info" className="flex-1 flex flex-col min-h-0">
             {/* Tabs List */}
-            <div className="px-6 border-b bg-background">
+            <div className="p-2 border-b bg-background">
               <TabsList className="h-10 p-0 bg-transparent gap-6">
-                <TabsTrigger
-                  value="info"
-                  className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 font-semibold text-muted-foreground data-[state=active]:text-foreground"
-                >
-                  Thông tin chung
-                </TabsTrigger>
-                <TabsTrigger
-                  value="components"
-                  className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 font-semibold text-muted-foreground data-[state=active]:text-foreground"
-                >
-                  Phụ cấp & Khấu trừ
-                </TabsTrigger>
+                <TabsTrigger value="info">Thông tin chung</TabsTrigger>
+                <TabsTrigger value="components">Phụ cấp & Khấu trừ</TabsTrigger>
               </TabsList>
             </div>
 
