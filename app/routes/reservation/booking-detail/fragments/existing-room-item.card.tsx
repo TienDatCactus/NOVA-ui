@@ -1,14 +1,15 @@
+import { format, parseISO } from "date-fns";
 import {
-  Clock,
+  BedDouble,
   ChevronDown,
   ChevronUp,
-  Trash2,
-  BedDouble,
+  Clock,
   Info,
+  Trash2,
 } from "lucide-react";
-import { format, parseISO } from "date-fns";
-import { Button } from "~/components/ui/button";
+import type z from "zod";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -16,7 +17,6 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn, formatMoney } from "~/lib/utils";
-import type z from "zod";
 import type { RoomSchema } from "~/services/api/rooms/room.schema";
 import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 
@@ -40,7 +40,7 @@ export default function ExistingRoomItemCard({
   onSelect,
   onToggleExpand,
   onRemove,
-  canRemove = false,
+  canRemove,
   removeTooltip,
 }: ExistingRoomItemCardProps) {
   const formatDate = (date: string | Date) => {
@@ -49,8 +49,7 @@ export default function ExistingRoomItemCard({
     }
     return format(date, "dd/MM");
   };
-  const canDelete =
-    roomDetail?.status === "Reserved" || roomDetail?.status === "CheckedIn";
+
   return (
     <div
       onClick={onSelect}

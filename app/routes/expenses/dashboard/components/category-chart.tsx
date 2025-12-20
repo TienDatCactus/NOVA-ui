@@ -184,8 +184,8 @@ export default function CategoryChart({
       </CardContent>
 
       {/* Custom Legend Footer */}
-      <div className="grid grid-cols-2 gap-4 p-6 pt-2">
-        {chartData.slice(0, 6).map((item) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6 pt-2">
+        {chartData.map((item) => (
           <div
             key={item.category}
             className="flex items-center gap-2 cursor-pointer group"
@@ -205,11 +205,6 @@ export default function CategoryChart({
             </div>
           </div>
         ))}
-        {chartData.length > 6 && (
-          <div className="col-span-2 text-center text-xs text-muted-foreground pt-2">
-            + {chartData.length - 6} danh mục khác
-          </div>
-        )}
       </div>
     </Card>
   );

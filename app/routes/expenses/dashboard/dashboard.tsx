@@ -11,8 +11,8 @@ import {
 import { Filter, LayoutDashboard } from "lucide-react";
 import { redirect, useNavigate } from "react-router";
 import { Button } from "~/components/ui/button";
+import { ButtonGroup } from "~/components/ui/button-group";
 import { DateRangePicker } from "~/components/ui/date-range-picker";
-import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 import { DASHBOARD, FE_URL } from "~/lib/fe-url";
@@ -45,19 +45,6 @@ export default function ExpenseDashboard() {
       to: filters.toDate || "",
     });
     navigate(`${FE_URL.dashboard.expenses}?${searchParams.toString()}`);
-  };
-
-  const handleMonthClick = (monthKey: string) => {
-    const [year, month] = monthKey.split("-");
-    if (year && month) {
-      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const from = format(startOfMonth(date), "yyyy-MM-dd");
-      const to = format(endOfMonth(date), "yyyy-MM-dd");
-
-      // Navigate to expense list filtered by that specific month
-      const searchParams = new URLSearchParams({ from, to });
-      navigate(`${FE_URL.dashboard.expenses}?${searchParams.toString()}`);
-    }
   };
 
   const setQuickFilter = (
@@ -111,47 +98,38 @@ export default function ExpenseDashboard() {
               Theo dõi dòng tiền chi tiêu và xu hướng tài chính.
             </p>
           </div>
-
-          {/* Unified Toolbar */}
-          <div className="flex items-center gap-2 bg-background p-1 rounded-lg border shadow-sm overflow-x-auto">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setQuickFilter("thisMonth")}
-              className="text-xs h-8 font-medium"
-            >
-              Tháng này
-            </Button>
-            <Separator orientation="vertical" className="h-4" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setQuickFilter("lastMonth")}
-              className="text-xs h-8 font-medium"
-            >
-              Tháng trước
-            </Button>
-            <Separator orientation="vertical" className="h-4" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setQuickFilter("thisQuarter")}
-              className="text-xs h-8 font-medium"
-            >
-              Quý này
-            </Button>
-            <Separator orientation="vertical" className="h-4" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setQuickFilter("thisYear")}
-              className="text-xs h-8 font-medium"
-            >
-              Năm nay
-            </Button>
-
-            {/* Custom Date Range Picker */}
-            <div className="ml-2 pl-2 border-l">
+          <div className="flex items-center">
+            <ButtonGroup>
+              <Button
+                variant="outline"
+                onClick={() => setQuickFilter("thisMonth")}
+                className="text-xs  font-medium"
+              >
+                Tháng này
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setQuickFilter("lastMonth")}
+                className="text-xs  font-medium"
+              >
+                Tháng trước
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setQuickFilter("thisQuarter")}
+                className="text-xs  font-medium"
+              >
+                Quý này
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setQuickFilter("thisYear")}
+                className="text-xs  font-medium"
+              >
+                Năm nay
+              </Button>
+            </ButtonGroup>
+            <div className="ml-2 pl-2">
               <DateRangePicker
                 from={filters.fromDate ? new Date(filters.fromDate) : undefined}
                 to={filters.toDate ? new Date(filters.toDate) : undefined}
@@ -191,15 +169,12 @@ export default function ExpenseDashboard() {
             {/* Charts Row */}
             <section className="grid gap-6 md:grid-cols-12">
               {/* Trend Chart (Wider) */}
-              <div className="md:col-span-7 xl:col-span-8">
-                <MonthlyTrendChart
-                  byMonth={byMonth}
-                  onMonthClick={handleMonthClick}
-                />
+              <div className="md:col-span-7 xl:col-span-6">
+                <MonthlyTrendChart byMonth={byMonth} />
               </div>
 
               {/* Category Chart (Square-ish) */}
-              <div className="md:col-span-5 xl:col-span-4">
+              <div className="md:col-span-5 xl:col-span-6">
                 <CategoryChart
                   byCategory={byCategory}
                   totalAmount={totalAmount}
@@ -236,7 +211,7 @@ function DashboardEmptyState({ onReset }: { onReset: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed rounded-xl bg-muted/10">
       <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
-        <Filter className="w-8 h-8 text-muted-foreground/50" />
+        <Filter className="w-8  text-muted-foreground/50" />
       </div>
       <h3 className="text-lg font-semibold text-foreground mb-2">
         Chưa có dữ liệu chi phí

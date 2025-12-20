@@ -14,7 +14,6 @@ const ItemsLayout = ({
   children,
   filters,
   updateFilter,
-  resetFilters,
   totalItems,
 }: ItemsLayoutProps) => {
   return (

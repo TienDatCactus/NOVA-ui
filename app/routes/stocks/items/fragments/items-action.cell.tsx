@@ -35,10 +35,13 @@ const ItemsActionCell: React.FC<ItemsActionCellProps> = ({ item }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setOpenEditDialog(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Chỉnh sửa
-          </DropdownMenuItem>
+          {hasAnyRole(AuthLoader.getUser(), [UserRole.ServiceStaff]) && (
+            <DropdownMenuItem onClick={() => setOpenEditDialog(true)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Chỉnh sửa
+            </DropdownMenuItem>
+          )}
+
           {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) && (
             <DropdownMenuItem onClick={() => setOpenQuickAdjustDialog(true)}>
               <PackageCheck className="mr-2 h-4 w-4" />

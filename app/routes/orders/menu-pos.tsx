@@ -261,6 +261,7 @@ export default function Component({}: Route.ComponentProps) {
           setBookingInfo(null, null);
           setScheduledAt("");
           setNotes("");
+          clearOrder();
         },
       }
     );

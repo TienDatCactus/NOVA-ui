@@ -23,10 +23,6 @@ import { Input } from "~/components/ui/input";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { ChangePasswordDto } from "~/services/api/auth/dto";
 import { useAuthHooks } from "./container/auth.hooks";
-import { redirect } from "react-router";
-import { AuthLoader } from "~/lib/auth/auth.loader";
-import { UserRole } from "~/lib/auth/roles";
-import { DASHBOARD } from "~/lib/fe-url";
 
 const { ChangePasswordSchema } = AuthSchema;
 
@@ -34,24 +30,7 @@ interface ChangePasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-export function clientLoader() {
-  const user = AuthLoader.getUser();
-  if (user) {
-    if (user.roles?.includes(UserRole.Admin)) {
-      throw redirect(DASHBOARD.auditLogs);
-    } else if (user.roles?.includes(UserRole.HotelManager)) {
-      throw redirect(DASHBOARD.finances.dashboard);
-    } else if (user.roles?.includes(UserRole.ServiceStaff)) {
-      throw redirect(DASHBOARD.rooms.list);
-    } else if (user.roles?.includes(UserRole.Accountant)) {
-      throw redirect(DASHBOARD.expenses);
-    } else if (user.roles?.includes(UserRole.Receptionist)) {
-      throw redirect(DASHBOARD.bookings.list);
-    } else {
-      throw redirect(DASHBOARD.bookings.list);
-    }
-  }
-}
+
 export function ChangePasswordDialog({
   open,
   onOpenChange,

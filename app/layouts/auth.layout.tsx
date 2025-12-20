@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
 import type { Route } from "./+types/auth.layout";
-import authBg from "~/assets/img/pexels-monica-tran-2153311664-34075390.jpg";
+import authBg from "~/assets/img/1c324d_127c0873be3e4b43bd000d80a46d175a~mv2.avif";
 import SectionLayout from "~/components/layouts/sections";
 import { TreePalm } from "lucide-react";
 

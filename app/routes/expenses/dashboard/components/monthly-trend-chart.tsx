@@ -1,13 +1,13 @@
-import { Bar, BarChart, XAxis, YAxis, Cell } from "recharts";
-import { ArrowDownRight, ArrowUpRight, TrendingUp } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { Bar, BarChart, Cell, XAxis, YAxis } from "recharts";
 
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "~/components/ui/card";
 import {
   ChartContainer,
@@ -19,7 +19,6 @@ import { cn, formatMoney } from "~/lib/utils";
 
 interface MonthlyTrendChartProps {
   byMonth: Record<string, number>;
-  onMonthClick?: (month: string) => void;
 }
 
 const chartConfig = {
@@ -29,10 +28,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function MonthlyTrendChart({
-  byMonth,
-  onMonthClick,
-}: MonthlyTrendChartProps) {
+export default function MonthlyTrendChart({ byMonth }: MonthlyTrendChartProps) {
   const chartData = Object.entries(byMonth)
     .map(([month, amount]) => ({
       month,
@@ -72,7 +68,7 @@ export default function MonthlyTrendChart({
   }
 
   return (
-    <Card className="shadow-none border bg-card/50 transition-all hover:bg-card">
+    <Card className="border bg-card shadow-sm  transition-all h-full flex-col flex justify-between hover:bg-card">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -108,11 +104,6 @@ export default function MonthlyTrendChart({
           <BarChart
             data={chartData}
             margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
-            onClick={(e) => {
-              if (e && e.activePayload && e.activePayload[0]) {
-                onMonthClick?.(e.activePayload[0].payload.month);
-              }
-            }}
           >
             <XAxis
               dataKey="shortLabel"
@@ -133,7 +124,7 @@ export default function MonthlyTrendChart({
               content={
                 <ChartTooltipContent
                   className="bg-background/95 backdrop-blur border shadow-sm"
-                  formatter={(value, name, item) => (
+                  formatter={(value, _, item) => (
                     <div className="flex flex-col gap-1 min-w-[120px]">
                       <span className="text-xs text-muted-foreground">
                         {item.payload.fullLabel}
@@ -189,7 +180,6 @@ export default function MonthlyTrendChart({
               biến
             </div>
           </div>
-          <div>Click cột để xem chi tiết</div>
         </div>
       </CardFooter>
     </Card>
@@ -200,7 +190,7 @@ export default function MonthlyTrendChart({
 
 // "2025-01" -> "T01" (Compact for X-Axis)
 function formatShortMonth(monthKey: string): string {
-  const [year, month] = monthKey.split("-");
+  const [_, month] = monthKey.split("-");
   if (!month) return monthKey;
   return `T${month}`;
 }

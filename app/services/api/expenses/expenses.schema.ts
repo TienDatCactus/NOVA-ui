@@ -24,18 +24,18 @@ const ExpenseSourceTypeEnum = z.enum(
 //*-------------------------------------
 
 const ExpenseListItemSchema = z.object({
-  id: z.string(),
-  category: ExpenseCategoryEnum,
-  amount: z.number(),
-  expenseDate: z.string(),
-  description: z.string(),
-  paymentMethod: PaymentSchema.PaymentMethodEnum.catch("Unknown"),
-  paymentMethodName: z.string(),
-  receiptNumber: z.string(),
-  createdAt: z.string(),
+  id: z.string().nullable(),
+  category: ExpenseCategoryEnum.nullable(),
+  amount: z.number().nullable(),
+  expenseDate: z.string().nullable(),
+  description: z.string().nullable(),
+  paymentMethod: PaymentSchema.PaymentMethodEnum.nullable(),
+  paymentMethodName: z.string().nullable(),
+  receiptNumber: z.string().nullable(),
+  createdAt: z.string().nullable(),
   createdBy: z.string().nullable(),
-  status: ExpenseStatusEnum,
-  sourceType: ExpenseSourceTypeEnum,
+  status: ExpenseStatusEnum.nullable(),
+  sourceType: ExpenseSourceTypeEnum.nullable(),
 });
 
 const ExpenseListResponseSchema = z.array(ExpenseListItemSchema);

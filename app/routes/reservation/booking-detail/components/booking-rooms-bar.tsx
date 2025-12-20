@@ -236,7 +236,8 @@ export default function BookingRoomsBar({
                 handleRemoveRoom(room.bookingRoomId, room.roomName)
               }
               canRemove={
-                bookingDetail.status == "Pending" &&
+                (bookingDetail.status == "Pending" ||
+                  bookingDetail.status == "InHouse") &&
                 bookingState.permissions.canEditRooms
               }
               removeTooltip={

@@ -24,7 +24,7 @@ export default function ExistingRoomItemWrapper({
   onSelect,
   onToggleExpand,
   onRemove,
-  canRemove = false,
+  canRemove,
   removeTooltip,
 }: ExistingRoomItemWrapperProps) {
   const { data: roomDetail, isPending } = useRoomDetail({
