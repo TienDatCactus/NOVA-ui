@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { Loader2 } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { Link, useLocation } from "react-router";
+import { Link, redirect, useLocation } from "react-router";
 import { toast } from "sonner";
 import SectionLayout from "~/components/layouts/sections";
 import { Button } from "~/components/ui/button";
@@ -34,6 +34,9 @@ import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { ResetPasswordDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/reset-password";
 import { useAuthHooks } from "./container/auth.hooks";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
+import { DASHBOARD } from "~/lib/fe-url";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -41,7 +44,24 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "Xác thực OTP và đặt lại mật khẩu mới" },
   ];
 }
-
+export function clientLoader({}: Route.ClientLoaderArgs) {
+  const user = AuthLoader.getUser();
+  if (user) {
+    if (user.roles?.includes(UserRole.Admin)) {
+      throw redirect(DASHBOARD.auditLogs);
+    } else if (user.roles?.includes(UserRole.HotelManager)) {
+      throw redirect(DASHBOARD.finances.dashboard);
+    } else if (user.roles?.includes(UserRole.ServiceStaff)) {
+      throw redirect(DASHBOARD.rooms.list);
+    } else if (user.roles?.includes(UserRole.Accountant)) {
+      throw redirect(DASHBOARD.expenses);
+    } else if (user.roles?.includes(UserRole.Receptionist)) {
+      throw redirect(DASHBOARD.bookings.list);
+    } else {
+      throw redirect(DASHBOARD.bookings.list);
+    }
+  }
+}
 export default function VerifyOTP({}: Route.ComponentProps) {
   const { resetPassword, isLoading } = useAuthHooks();
   const requestedEmail = useLocation().state.email as string;

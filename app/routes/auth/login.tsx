@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, redirect } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -24,6 +24,9 @@ import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { LoginDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/login";
 import { useAuthHooks } from "./container/auth.hooks";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { UserRole } from "~/lib/auth/roles";
+import { DASHBOARD } from "~/lib/fe-url";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -31,7 +34,24 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "Đăng nhập hệ thống quản lý khách sạn" },
   ];
 }
-
+export function clientLoader({}: Route.ClientLoaderArgs) {
+  const user = AuthLoader.getUser();
+  if (user) {
+    if (user.roles?.includes(UserRole.Admin)) {
+      throw redirect(DASHBOARD.auditLogs);
+    } else if (user.roles?.includes(UserRole.HotelManager)) {
+      throw redirect(DASHBOARD.finances.dashboard);
+    } else if (user.roles?.includes(UserRole.ServiceStaff)) {
+      throw redirect(DASHBOARD.rooms.list);
+    } else if (user.roles?.includes(UserRole.Accountant)) {
+      throw redirect(DASHBOARD.expenses);
+    } else if (user.roles?.includes(UserRole.Receptionist)) {
+      throw redirect(DASHBOARD.bookings.list);
+    } else {
+      throw redirect(DASHBOARD.bookings.list);
+    }
+  }
+}
 export default function Login() {
   const { login, isLoading } = useAuthHooks();
   const { LoginSchema } = AuthSchema;

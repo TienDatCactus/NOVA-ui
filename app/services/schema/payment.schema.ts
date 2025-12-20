@@ -8,6 +8,7 @@ const PaymentMethodEnum = z.enum([
   "OTACollect",
   "OTAPrepaid",
   "OnAccount",
+  "Refund",
 ]);
 
 const PaymentStatusEnum = z.enum(

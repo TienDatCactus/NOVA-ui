@@ -106,8 +106,8 @@ export function useAuthHooks() {
 
   const logout = () => {
     AuthService.logout();
-    navigate(AUTH.login);
     clearUser();
+    navigate(AUTH.login);
   };
 
   return {
