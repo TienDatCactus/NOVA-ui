@@ -82,6 +82,7 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
 import type { BookingState } from "../container/use-booking-state.hooks";
+import { ButtonGroup } from "~/components/ui/button-group";
 
 interface StayDetailBarProps {
   bookingCode: string;
@@ -412,7 +413,7 @@ export default function StayDetailBar({
                                     <div className="flex justify-between items-center mb-1.5">
                                       <FormLabel>Số tiền thu</FormLabel>
                                       {/* UX: Quick Fill Buttons */}
-                                      <div className="flex gap-2">
+                                      <ButtonGroup>
                                         <Button
                                           size={"sm"}
                                           variant="outline"
@@ -439,7 +440,7 @@ export default function StayDetailBar({
                                         >
                                           Tất cả
                                         </Button>
-                                      </div>
+                                      </ButtonGroup>
                                     </div>
                                     <FormControl>
                                       <Input

@@ -98,8 +98,8 @@ export default function MenuItemCard({
           <div className="space-y-1 flex-1">
             <h3
               className={cn(
-                "font-bold text-sm leading-tight line-clamp-2",
-                !isDisabled && "group-hover:text-primary transition-colors"
+                "font-bold text-sm leading-tight line-clamp-1",
+                !isDisabled && "group-hover:text-primary "
               )}
               title={name}
             >

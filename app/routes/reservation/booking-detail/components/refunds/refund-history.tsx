@@ -1,18 +1,23 @@
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { RotateCcw, User } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
-import { useRefundHistory } from "../../container/use-refund.hooks";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
-import { ScrollArea } from "~/components/ui/scroll-area";
+import { useRefundHistory } from "../../container/use-refund.hooks";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface RefundHistoryProps {
   bookingId: string;
 }
 
 export default function RefundHistory({ bookingId }: RefundHistoryProps) {
-  const { data: refundHistory, isPending } = useRefundHistory(bookingId);
+  if (!hasRole(AuthLoader.getUser(), UserRole.HotelManager)) return null;
+  const { data: refundHistory, isPending } = useRefundHistory(bookingId, {
+    enabled: hasRole(AuthLoader.getUser(), UserRole.HotelManager),
+  });
 
   if (isPending) return <Skeleton className="h-24 w-full rounded-lg" />;
 

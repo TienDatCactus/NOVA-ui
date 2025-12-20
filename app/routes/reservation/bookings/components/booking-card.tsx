@@ -1,6 +1,7 @@
 import { format, isBefore, isToday, parseISO, startOfDay } from "date-fns";
 import {
   ArrowRight,
+  CalendarDays,
   CheckCircle2,
   Clock,
   DoorOpen,
@@ -8,7 +9,9 @@ import {
   LogIn,
   LogOut,
   MoreVertical,
+  ShieldAlert,
   User,
+  Wrench,
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
@@ -35,6 +38,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import { DASHBOARD } from "~/lib/fe-url";
 import { cn, formatMoney, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
@@ -49,8 +54,6 @@ import {
 } from "../container/booking-mutation.hooks";
 import { useBookingDetail } from "../container/booking-query.hooks";
 import BookingDetailSheet from "./booking-detail.sheet";
-import { hasAnyRole } from "~/lib/auth/bouncer";
-import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 const { BookingListItemSchema } = BookingSchema;
 type BookingListItem = z.infer<typeof BookingListItemSchema>;
@@ -69,9 +72,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     enabled: true,
   });
 
-  // Get business logic permissions and financial status
   const bookingState = useBookingState(bookingDetail);
-
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
   const { mutateAsync: cancelBooking } = useCancelBooking(
@@ -80,7 +81,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   const navigate = useNavigate();
 
   const statusConfig = BOOKING_STATUSES.find((s) => s.value === booking.status);
-
   const checkinDate = booking.checkinDate
     ? parseISO(booking.checkinDate)
     : null;
@@ -89,9 +89,11 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     : null;
 
   const isArrivingToday = !!(checkinDate && isToday(checkinDate));
-  const isRoomBlock = bookingDetail?.source === "RoomBlock";
-  const isConfirmed = booking.status === "Confirmed";
-  // Business logic validation using booking state
+
+  // --- DIVERSITY LOGIC ---
+  const isRoomBlock =
+    booking.source === "RoomBlock" || bookingDetail?.source === "RoomBlock";
+
   const canConfirmPayment = booking.status === "Pending";
 
   const canCheckIn =
@@ -102,67 +104,55 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
   const canCheckOut =
     (booking.status === "InHouse" || booking.status === "CheckedIn") &&
-    bookingState.financial.totalBalance === 0; // Must be fully paid
+    (isRoomBlock || bookingState.financial.totalBalance === 0);
 
   const canCancel =
     (booking.status === "Pending" || booking.status === "Confirmed") &&
-    bookingState.permissions.canEdit && // Check general edit permission
-    !bookingState.permissions.blockReason; // No blocking reasons
+    bookingState.permissions.canEdit &&
+    !bookingState.permissions.blockReason;
 
   const handleCheckIn = async () => {
     if (!canCheckIn && !isRoomBlock) {
       toast.error("Không thể check-in booking này");
       return;
     }
-
-    if (isConfirmed) {
-      await updateStatus("CheckedIn");
-      await updateStatus("InHouse");
-      refetch?.();
-    } else if (isRoomBlock) {
-      await updateStatus("Confirmed");
-      await updateStatus("CheckedIn");
-      await updateStatus("InHouse");
-      refetch?.();
-    } else {
-      await updateStatus("CheckedIn");
-      await updateStatus("InHouse");
-      refetch?.();
-    }
+    await updateStatus("CheckedIn");
+    if (!isRoomBlock) await updateStatus("InHouse");
+    refetch?.();
   };
 
-  const handleCheckOut = () => {
+  const handleCheckOut = async () => {
     if (!canCheckOut) {
-      if (bookingState.financial.totalBalance > 0) {
+      if (!isRoomBlock && bookingState.financial.totalBalance > 0) {
         toast.error(
-          `Không thể checkout. Còn ${bookingState.financial.unpaidInvoiceCount} hóa đơn chưa thanh toán (${formatMoney(bookingState.financial.totalBalance).vndFormatted})`
+          `Còn nợ ${formatMoney(bookingState.financial.totalBalance).vndFormatted}`
         );
-      } else {
-        toast.error("Không thể checkout booking này");
+        return;
       }
+      toast.error("Không thể checkout");
       return;
     }
 
-    navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
+    if (isRoomBlock) {
+      await updateStatus("CheckedOut");
+      refetch?.();
+      toast.success("Đã hoàn tất bảo trì");
+    } else {
+      navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
+    }
   };
 
   const handleCancel = async () => {
-    if (!canCancel) {
-      if (bookingState.permissions.blockReason) {
-        toast.error(bookingState.permissions.blockReason);
-      } else {
-        toast.error("Không thể hủy booking này");
-      }
-      return;
-    }
-
+    if (!canCancel) return;
     try {
       await cancelBooking();
-      toast.success("Hủy đặt phòng thành công");
+      toast.success(
+        isRoomBlock ? "Đã hủy lịch bảo trì" : "Hủy đặt phòng thành công"
+      );
       refetch?.();
       setCancelDialogOpen(false);
     } catch {
-      toast.error("Hủy đặt phòng thất bại");
+      toast.error("Thao tác thất bại");
     }
   };
 
@@ -170,30 +160,55 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     checkinDate: booking.checkinDate,
     checkoutDate: booking.checkoutDate,
   });
+
   const handleViewDetail = () => {
     navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
   };
 
+  // --- RENDER HELPERS ---
+
   const renderStatusBadge = () => {
-    let bgClass = "bg-gray-600";
+    if (isRoomBlock) {
+      const isActive =
+        booking.status === "CheckedIn" || booking.status === "InHouse";
+      return (
+        <Badge
+          className={cn(
+            "border-0 text-muted-foreground shadow-sm",
+            isActive
+              ? "bg-orange-600 dark:bg-orange-700"
+              : "bg-muted dark:bg-muted"
+          )}
+        >
+          {isActive ? (
+            <Wrench className="mr-1 h-3 w-3 animate-pulse" />
+          ) : (
+            <CalendarDays className="mr-1 h-3 w-3" />
+          )}
+          {isActive ? "Đang bảo trì" : "Lên lịch"}
+        </Badge>
+      );
+    }
+
+    let bgClass = "bg-gray-600 dark:bg-gray-700";
     let icon = <Clock className="mr-1 h-3 w-3" />;
 
     switch (booking.status) {
       case "Confirmed":
-        bgClass = "bg-blue-600"; // Solid Blue
+        bgClass = "bg-blue-600 dark:bg-blue-700";
         icon = <CheckCircle2 className="mr-1 h-3 w-3" />;
         break;
       case "CheckedIn":
       case "InHouse":
-        bgClass = "bg-green-600"; // Solid Green
+        bgClass = "bg-green-600 dark:bg-green-700";
         icon = <LogIn className="mr-1 h-3 w-3" />;
         break;
       case "CheckedOut":
-        bgClass = "bg-gray-500";
+        bgClass = "bg-gray-500 dark:bg-gray-600";
         icon = <LogOut className="mr-1 h-3 w-3" />;
         break;
       case "Cancelled":
-        bgClass = "bg-destructive";
+        bgClass = "bg-destructive dark:bg-destructive";
         icon = <XCircle className="mr-1 h-3 w-3" />;
         break;
     }
@@ -213,86 +228,184 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
   const renderPrimaryAction = () => {
     const btnClass = "w-full shadow-sm font-semibold transition-all";
-    if (hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist])) {
-      if (canCheckIn) {
+    if (!hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist])) {
+      return (
+        <Button
+          size="sm"
+          variant="outline"
+          className={cn(btnClass, "bg-background dark:bg-background")}
+          onClick={handleViewDetail}
+        >
+          Xem chi tiết
+        </Button>
+      );
+    }
+
+    // Room Block Actions
+    if (isRoomBlock) {
+      if (booking.status === "Confirmed") {
         return (
           <Button
             size="sm"
-            variant={"success"}
-            className={cn(btnClass)}
+            className={cn(
+              btnClass,
+              "bg-orange-600 dark:bg-orange-700 hover:bg-orange-700 dark:hover:bg-orange-800 text-white"
+            )}
             onClick={handleCheckIn}
             disabled={isProcessing}
           >
-            <LogIn className="mr-2 h-4 w-4" /> Check-in ngay
+            <Wrench className="mr-2 h-4 w-4" /> Bắt đầu bảo trì
           </Button>
         );
       }
-      if (canCheckOut) {
+      if (booking.status === "CheckedIn" || booking.status === "InHouse") {
         return (
           <Button
             size="sm"
-            variant={"warning"}
-            className={cn(btnClass)}
+            variant="outline"
+            className={cn(
+              btnClass,
+              "border-orange-200 dark:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300"
+            )}
             onClick={handleCheckOut}
             disabled={isProcessing}
           >
-            <LogOut className="mr-2 h-4 w-4" /> Checkout
+            <CheckCircle2 className="mr-2 h-4 w-4" /> Hoàn tất bảo trì
           </Button>
         );
       }
-      if (canConfirmPayment && !isRoomBlock) {
-        return (
-          <Button
-            size="sm"
-            variant="default"
-            className={btnClass}
-            onClick={handleViewDetail}
-          >
-            <CheckCircle2 className="mr-2 h-4 w-4" /> Xác nhận cọc
-          </Button>
-        );
-      }
+      return null;
     }
+
+    // Guest Booking Actions
+    if (canCheckIn) {
+      return (
+        <Button
+          size="sm"
+          variant="success"
+          className={btnClass}
+          onClick={handleCheckIn}
+          disabled={isProcessing}
+        >
+          <LogIn className="mr-2 h-4 w-4" /> Check-in ngay
+        </Button>
+      );
+    }
+    if (canCheckOut) {
+      return (
+        <Button
+          size="sm"
+          variant="warning"
+          className={btnClass}
+          onClick={handleCheckOut}
+          disabled={isProcessing}
+        >
+          <LogOut className="mr-2 h-4 w-4" /> Checkout
+        </Button>
+      );
+    }
+    if (canConfirmPayment) {
+      return (
+        <Button
+          size="sm"
+          variant="default"
+          className={btnClass}
+          onClick={handleViewDetail}
+        >
+          <CheckCircle2 className="mr-2 h-4 w-4" /> Xác nhận cọc
+        </Button>
+      );
+    }
+
     return (
       <Button
         size="sm"
         variant="outline"
-        className={cn(btnClass, "bg-background hover:bg-accent")}
+        className={cn(btnClass, "bg-background dark:bg-background")}
         onClick={handleViewDetail}
       >
         Xem chi tiết
       </Button>
     );
   };
+
   return (
     <>
-      <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:border-primary/20 hover:shadow-lg">
-        {/* HEADER SECTION: System Info */}
-        <div className="flex items-center justify-between border-b border-border bg-muted/50 px-4 py-2.5">
+      <div
+        className={cn(
+          "group relative flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all hover:shadow-lg",
+          isRoomBlock
+            ? "border-orange-200 dark:border-orange-800 bg-orange-50/10 dark:bg-orange-950/20 hover:border-orange-300 dark:hover:border-orange-700"
+            : "border-border dark:border-border bg-card dark:bg-card hover:border-primary/20 dark:hover:border-primary/30"
+        )}
+      >
+        {/* HEADER SECTION */}
+        <div
+          className={cn(
+            "flex items-center justify-between border-b px-4 py-2.5",
+            isRoomBlock
+              ? "bg-orange-100/50 dark:bg-orange-950/30 border-orange-100 dark:border-orange-900"
+              : "bg-muted/50 dark:bg-muted/50 border-border dark:border-border"
+          )}
+        >
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-bold text-muted-foreground">
+            <span
+              className={cn(
+                "font-mono text-xs font-bold",
+                isRoomBlock
+                  ? "text-orange-700 dark:text-orange-400"
+                  : "text-muted-foreground dark:text-muted-foreground"
+              )}
+            >
               #{booking.bookingCode}
             </span>
-            <div className="h-4 w-[1px] bg-border"></div>
+            <div
+              className={cn(
+                "h-4 w-[1px]",
+                isRoomBlock
+                  ? "bg-orange-200 dark:bg-orange-800"
+                  : "bg-border dark:bg-border"
+              )}
+            ></div>
+
             {/* Source Pill */}
-            <div className="flex items-center gap-1 text-xs font-medium text-foreground">
-              {booking.source === "OTA" ? (
+            <div
+              className={cn(
+                "flex items-center gap-1 text-xs font-medium",
+                isRoomBlock
+                  ? "text-orange-800 dark:text-orange-300"
+                  : "text-foreground dark:text-foreground"
+              )}
+            >
+              {isRoomBlock ? (
+                <ShieldAlert className="h-3 w-3" />
+              ) : booking.source === "OTA" ? (
                 <Globe className="h-3 w-3" />
               ) : (
                 <User className="h-3 w-3" />
               )}
               <span className="truncate max-w-[80px]">
-                {booking.source === "OTA"
-                  ? booking.otaName
-                  : BOOKING_SOURCES.find((s) => s.key === booking.source)
-                      ?.label || "Trực tiếp"}
+                {isRoomBlock
+                  ? "Bảo trì"
+                  : booking.source === "OTA"
+                    ? booking.otaName
+                    : BOOKING_SOURCES.find((s) => s.key === booking.source)
+                        ?.label || "Trực tiếp"}
               </span>
             </div>
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={
+                  isRoomBlock
+                    ? "hover:bg-orange-200/50 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300"
+                    : ""
+                }
+              >
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -300,7 +413,8 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               <DropdownMenuLabel>Tác vụ</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleViewDetail}>
-                <DoorOpen className="mr-2 h-4 w-4" /> Xem chi tiết
+                <DoorOpen className="mr-2 h-4 w-4" />{" "}
+                {isRoomBlock ? "Chi tiết bảo trì" : "Xem chi tiết"}
               </DropdownMenuItem>
               {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
               canCancel ? (
@@ -308,28 +422,33 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
                   variant="destructive"
                   onClick={() => setCancelDialogOpen(true)}
                 >
-                  <XCircle className="mr-2 h-4 w-4" /> Hủy đặt phòng
+                  <XCircle className="mr-2 h-4 w-4" />{" "}
+                  {isRoomBlock ? "Hủy lịch bảo trì" : "Hủy đặt phòng"}
                 </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem disabled className="text-muted-foreground">
-                  <XCircle className="mr-2 h-4 w-4" /> Không thể hủy
-                </DropdownMenuItem>
-              )}
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        {/* BODY SECTION: Main Content */}
+        {/* BODY SECTION */}
         <div className="flex-1 px-4 py-4">
           <div className="mb-4 flex items-start justify-between">
             <div className="flex items-start gap-2">
               <Button
                 variant="link"
                 onClick={() => setDetailSheetOpen(true)}
-                className="p-0 h-auto font-bold text-lg text-foreground hover:text-primary hover:no-underline"
+                className="p-0 h-auto font-bold text-lg text-foreground dark:text-foreground hover:text-primary dark:hover:text-primary hover:no-underline"
               >
-                <span className="line-clamp-1 text-left">
-                  {booking.customerName || "Khách vãng lai"}
+                <span
+                  className={cn(
+                    "line-clamp-1 text-left",
+                    isRoomBlock &&
+                      "text-orange-900 dark:text-orange-200 uppercase tracking-tight"
+                  )}
+                >
+                  {isRoomBlock
+                    ? "BẢO TRÌ"
+                    : booking.customerName || "Khách vãng lai"}
                 </span>
               </Button>
               <BookingDetailSheet
@@ -342,18 +461,33 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
           </div>
 
           {/* Timeline Visual */}
-          <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <div
+            className={cn(
+              "rounded-lg border p-3",
+              isRoomBlock
+                ? "bg-orange-50 dark:bg-orange-950/30 border-orange-100 dark:border-orange-900"
+                : "bg-muted/30 dark:bg-muted/30 border-border dark:border-border"
+            )}
+          >
             <div className="flex items-center justify-between text-sm">
+              {/* Start Date */}
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold uppercase text-muted-foreground">
-                  Check-in
+                <span
+                  className={cn(
+                    "text-[10px] font-semibold uppercase",
+                    isRoomBlock
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-muted-foreground dark:text-muted-foreground"
+                  )}
+                >
+                  {isRoomBlock ? "Từ ngày" : "Check-in"}
                 </span>
                 <span
                   className={cn(
                     "font-bold",
-                    isArrivingToday
+                    isArrivingToday && !isRoomBlock
                       ? "text-green-600 dark:text-green-400"
-                      : "text-foreground"
+                      : "text-foreground dark:text-foreground"
                   )}
                 >
                   {checkinDate ? format(checkinDate, "dd/MM") : "--/--"}
@@ -362,20 +496,42 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
 
               {/* Arrow / Duration */}
               <div className="flex flex-col items-center px-4">
-                <span className="mb-1 text-[10px] font-medium text-muted-foreground">
-                  {nights} đêm
+                <span className="mb-1 text-[10px] font-medium text-muted-foreground dark:text-muted-foreground">
+                  {nights} {isRoomBlock ? "ngày" : "đêm"}
                 </span>
                 <div className="relative flex w-full items-center">
-                  <div className="h-[1px] w-12 bg-border"></div>
-                  <ArrowRight className="absolute right-0 -mr-1 h-3 w-3 text-muted-foreground" />
+                  <div
+                    className={cn(
+                      "h-[1px] w-12",
+                      isRoomBlock
+                        ? "bg-orange-300 dark:bg-orange-700"
+                        : "bg-border dark:bg-border"
+                    )}
+                  ></div>
+                  <ArrowRight
+                    className={cn(
+                      "absolute right-0 -mr-1 h-3 w-3",
+                      isRoomBlock
+                        ? "text-orange-400 dark:text-orange-600"
+                        : "text-muted-foreground dark:text-muted-foreground"
+                    )}
+                  />
                 </div>
               </div>
 
+              {/* End Date */}
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-semibold uppercase text-muted-foreground">
-                  Check-out
+                <span
+                  className={cn(
+                    "text-[10px] font-semibold uppercase",
+                    isRoomBlock
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-muted-foreground dark:text-muted-foreground"
+                  )}
+                >
+                  {isRoomBlock ? "Đến ngày" : "Check-out"}
                 </span>
-                <span className="font-bold text-foreground">
+                <span className="font-bold text-foreground dark:text-foreground">
                   {checkoutDate ? format(checkoutDate, "dd/MM") : "--/--"}
                 </span>
               </div>
@@ -383,8 +539,15 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
           </div>
         </div>
 
-        {/* FOOTER SECTION: Actions */}
-        <div className="border-t border-border p-3">
+        {/* FOOTER SECTION */}
+        <div
+          className={cn(
+            "border-t p-3",
+            isRoomBlock
+              ? "border-orange-100 dark:border-orange-900 bg-orange-50/30 dark:bg-orange-950/20"
+              : "border-border dark:border-border"
+          )}
+        >
           {renderPrimaryAction()}
         </div>
       </div>
@@ -393,11 +556,19 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận hủy đặt phòng</AlertDialogTitle>
+            <AlertDialogTitle>
+              {isRoomBlock ? "Hủy lịch bảo trì?" : "Xác nhận hủy đặt phòng"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn hủy đặt phòng{" "}
-              <strong>{booking.bookingCode}</strong>? Hành động này không thể
-              hoàn tác.
+              {isRoomBlock ? (
+                `Bạn có chắc chắn muốn mở lại phòng ${booking.bookingCode} để đón khách?`
+              ) : (
+                <>
+                  Bạn có chắc chắn muốn hủy đặt phòng{" "}
+                  <strong>{booking.bookingCode}</strong>? Hành động này không
+                  thể hoàn tác.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -405,9 +576,13 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
             <AlertDialogAction
               onClick={handleCancel}
               disabled={isProcessing}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-destructive dark:text-destructive-foreground dark:hover:bg-destructive/90"
             >
-              {isProcessing ? "Đang hủy..." : "Hủy đặt phòng"}
+              {isProcessing
+                ? "Đang xử lý..."
+                : isRoomBlock
+                  ? "Hủy bảo trì"
+                  : "Hủy đặt phòng"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

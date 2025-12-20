@@ -65,6 +65,7 @@ import { OrderSchema } from "~/services/api/orders/order.schema";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
+import { ButtonGroup } from "~/components/ui/button-group";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItem = z.infer<typeof ServiceOrderItemSchema>;
@@ -591,7 +592,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                   Số tiền thực thu
                                 </FormLabel>
                                 {/* QUICK ACTIONS */}
-                                <div className="flex gap-1.5">
+                                <ButtonGroup>
                                   <Button
                                     variant={"outline"}
                                     type="button"
@@ -612,7 +613,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                   >
                                     100%
                                   </Button>
-                                </div>
+                                </ButtonGroup>
                               </div>
 
                               <FormControl>

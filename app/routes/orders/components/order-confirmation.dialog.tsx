@@ -13,7 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
 import { DASHBOARD } from "~/lib/fe-url";
-import { cn, formatMoney } from "~/lib/utils";
+import { formatMoney } from "~/lib/utils";
 
 type OrderDialogStatus = "success" | "error" | "loading";
 

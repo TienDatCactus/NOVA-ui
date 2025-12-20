@@ -14,7 +14,6 @@ import { useMemo } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import {
@@ -25,7 +24,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { Switch } from "~/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -71,9 +69,7 @@ export default function CheckoutSheet({
     showInvoiceDetail,
     setShowInvoiceDetail,
     applyVat,
-    setApplyVat,
     applyServiceCharge,
-    setApplyServiceCharge,
     reset,
   } = useCheckoutStore();
 
@@ -236,37 +232,6 @@ export default function CheckoutSheet({
                           <p className="text-sm text-muted-foreground">
                             Các khoản này sẽ được gộp vào Invoice Checkout
                           </p>
-                        </div>
-
-                        {/* Toggles */}
-                        <div className="flex items-center gap-4 bg-muted/40 p-2 rounded-lg border">
-                          <div className="flex items-center gap-2 px-2">
-                            <Switch
-                              id="vat"
-                              checked={applyVat}
-                              onCheckedChange={setApplyVat}
-                            />
-                            <Label
-                              htmlFor="vat"
-                              className="cursor-pointer text-xs font-medium"
-                            >
-                              VAT
-                            </Label>
-                          </div>
-                          <Separator orientation="vertical" className="h-6" />
-                          <div className="flex items-center gap-2 px-2">
-                            <Switch
-                              id="svc"
-                              checked={applyServiceCharge}
-                              onCheckedChange={setApplyServiceCharge}
-                            />
-                            <Label
-                              htmlFor="svc"
-                              className="cursor-pointer text-xs font-medium"
-                            >
-                              Service Charge
-                            </Label>
-                          </div>
                         </div>
                       </div>
 

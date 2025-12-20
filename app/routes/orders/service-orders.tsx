@@ -1,13 +1,7 @@
 import { addDays, format, isSameDay, subDays } from "date-fns";
-import {
-  ChevronLeft,
-  ChevronRight,
-  HandPlatter,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, HandPlatter, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
+import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/service-orders";
 
 export function meta({}: Route.MetaArgs) {

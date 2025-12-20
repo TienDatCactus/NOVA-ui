@@ -287,7 +287,9 @@ export default function CreateItemDialog({
                           type="number"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(Number(e.target.value))
+                            field.onChange(
+                              Number(e.currentTarget.valueAsNumber)
+                            )
                           }
                           endAddon={
                             <span className=" text-xs text-muted-foreground">
@@ -311,7 +313,9 @@ export default function CreateItemDialog({
                           type="number"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(Number(e.target.value))
+                            field.onChange(
+                              Number(e.currentTarget.valueAsNumber)
+                            )
                           }
                           endAddon={
                             <span className=" text-xs text-muted-foreground">

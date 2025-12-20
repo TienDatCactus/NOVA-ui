@@ -46,11 +46,14 @@ export function useCreateRefund(bookingId: string) {
 /**
  * Hook to fetch refund history for a booking
  */
-export function useRefundHistory(bookingId: string, enabled: boolean = true) {
+export function useRefundHistory(
+  bookingId: string,
+  options: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["refund-history", bookingId],
     queryFn: async () => await RefundsService.bookingRefundHistory(bookingId),
-    enabled: !!bookingId && enabled,
+    enabled: !!bookingId && options.enabled,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

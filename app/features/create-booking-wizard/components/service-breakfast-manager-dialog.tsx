@@ -1,5 +1,12 @@
 import { format } from "date-fns";
-import { Plus, Utensils } from "lucide-react";
+import {
+  Check,
+  Coffee,
+  ConciergeBell,
+  Plus,
+  Sparkles,
+  Utensils,
+} from "lucide-react";
 import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import type z from "zod";
@@ -27,6 +34,7 @@ import {
 import { BreakfastSelection } from "../fragments/breakfast-selection";
 import { ServiceOrderTable } from "../fragments/service-order-table";
 import AddServiceDialog from "./add-service-dialog";
+import { Badge } from "~/components/ui/badge";
 
 const { ServiceOrderItemSchema } = OrderSchema;
 type ServiceOrderItem = z.infer<typeof ServiceOrderItemSchema>;
@@ -48,7 +56,6 @@ export default function ServiceBreakfastManagerDialog({
   const checkinDate = form.watch("dateRange.from");
   const checkoutDate = form.watch("dateRange.to");
   const isBreakfastAll = form.watch("isBreakfastAll") || false;
-  const breakfastDates = form.watch("breakfastDates") || [];
   const services = form.watch("serviceOrder.services") || [];
 
   // === LOGIC ===
@@ -112,13 +119,6 @@ export default function ServiceBreakfastManagerDialog({
 
   const handleBreakfastToggleAll = (value: boolean) => {
     form.setValue("isBreakfastAll", value, { shouldValidate: true });
-    if (value) {
-      form.setValue("breakfastDates", [], { shouldValidate: true });
-    }
-  };
-
-  const handleBreakfastDatesChange = (dates: Date[]) => {
-    form.setValue("breakfastDates", dates, { shouldValidate: true });
   };
 
   const hasDates = checkinDate && checkoutDate;
@@ -126,132 +126,141 @@ export default function ServiceBreakfastManagerDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl p-0 gap-0 outline-none overflow-hidden">
-          {/* === HEADER === */}
-          <DialogHeader className="px-6 py-5 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/5 text-primary ring-1 ring-inset ring-primary/10">
-                <Utensils className="h-5 w-5" />
+        <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 overflow-hidden bg-background/95 backdrop-blur-sm">
+          {/* Header */}
+          <DialogHeader className="px-6 py-5 border-b bg-background/50 z-10 shrink-0">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20">
+                <ConciergeBell className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <DialogTitle className="text-xl font-semibold tracking-tight">
+                <DialogTitle className="text-xl">
                   Dịch vụ & Tiện ích
                 </DialogTitle>
-                <DialogDescription className="text-xs uppercase tracking-wider font-mono">
-                  Quản lý Bữa sáng • Spa • Giặt ủi • Di chuyển
+                <DialogDescription className="flex items-center gap-2 text-xs">
+                  <Badge
+                    variant="outline"
+                    className="font-normal text-muted-foreground bg-background/50"
+                  >
+                    <Coffee className="h-3 w-3 mr-1" /> Bữa sáng
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="font-normal text-muted-foreground bg-background/50"
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" /> Spa & Laundry
+                  </Badge>
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
-          {/* === BODY === */}
-          <ScrollArea className="max-h-[75vh]">
-            <div className="flex flex-col gap-8 p-6">
-              {/* SECTION 1: BREAKFAST */}
-              <div className="space-y-4">
-                <div className="flex-1 space-y-1">
-                  <h3 className="text-sm font-semibold text-foreground">
-                    Lịch trình Bữa sáng
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Chọn các ngày khách hàng đặt kèm bữa sáng.
-                  </p>
+          {/* Scrollable Content */}
+          <ScrollArea className="flex-1">
+            <div className="flex flex-col gap-8 p-6 md:p-8">
+              {/* 1. Breakfast Section */}
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Utensils className="h-4 w-4 text-orange-500" />
+                      Lịch trình Bữa sáng
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Quản lý các suất ăn sáng theo ngày lưu trú.
+                    </p>
+                  </div>
+                  {/* Optional: Add summary badge e.g. "5 days selected" */}
                 </div>
 
-                {/* Indented Content */}
-                <div className="rounded-xl border border-border bg-card/50 p-4 shadow-sm">
+                <div className="rounded-xl border bg-card p-1 shadow-sm overflow-hidden">
                   <BreakfastSelection
                     isBreakfastAll={isBreakfastAll}
-                    breakfastDates={breakfastDates}
                     onToggleAll={handleBreakfastToggleAll}
-                    onSelectDates={handleBreakfastDatesChange}
                     checkinDate={checkinDate || new Date()}
                     checkoutDate={checkoutDate || new Date()}
                     nights={nights}
                   />
                 </div>
-              </div>
+              </section>
 
-              <Separator className="opacity-50" />
+              <Separator />
 
-              {/* SECTION 2: SERVICES */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-semibold text-foreground">
+              {/* 2. Services Section */}
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-purple-500" />
                       Dịch vụ bổ sung
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Spa, đưa đón sân bay, hoặc các yêu cầu đặc biệt.
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Spa, Giặt ủi, Minibar, Xe đưa đón...
                     </p>
                   </div>
-
                   <Button
-                    variant="outline"
                     size="sm"
                     onClick={() => setAddServiceDialogOpen(true)}
                     disabled={!hasDates}
-                    className="h-8 gap-2 border-dashed border-border hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"
+                    className="gap-2 shadow-sm"
                   >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Thêm dịch vụ</span>
-                    <span className="sm:hidden">Thêm</span>
+                    <Plus className="h-4 w-4" /> Thêm dịch vụ
                   </Button>
                 </div>
 
-                {/* Indented Content */}
-                <div>
-                  {services.length > 0 ? (
-                    <div className="overflow-hidden rounded-xl border border-border shadow-sm">
-                      <ServiceOrderTable
-                        services={services}
-                        onRemove={handleRemoveService}
-                        onUpdate={handleUpdateService}
-                        checkinDate={checkinDate}
-                        checkoutDate={checkoutDate}
-                      />
-                    </div>
-                  ) : (
+                {services.length > 0 ? (
+                  <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+                    <ServiceOrderTable
+                      services={services}
+                      onRemove={handleRemoveService}
+                      onUpdate={handleUpdateService}
+                      checkinDate={checkinDate}
+                      checkoutDate={checkoutDate}
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed bg-muted/30 p-8">
                     <Empty>
                       <EmptyHeader>
-                        <EmptyMedia variant={"icon"}>
-                          <Plus className="h-5 w-5" />
+                        <EmptyMedia className="bg-background border shadow-sm">
+                          <Sparkles className="h-6 w-6 text-muted-foreground" />
                         </EmptyMedia>
                         <EmptyTitle>Chưa có dịch vụ nào</EmptyTitle>
                         <EmptyDescription>
                           {hasDates
-                            ? "Nhấn để thêm dịch vụ vào đơn đặt phòng"
-                            : "Vui lòng chọn ngày nhận/trả phòng trước"}
+                            ? "Khách hàng chưa yêu cầu dịch vụ thêm."
+                            : "Vui lòng chọn ngày lưu trú trước khi thêm dịch vụ."}
                         </EmptyDescription>
                       </EmptyHeader>
-                      <EmptyContent>
-                        <Button
-                          variant="outline"
-                          onClick={() =>
-                            hasDates && setAddServiceDialogOpen(true)
-                          }
-                        >
-                          Thêm dịch vụ
-                        </Button>
-                      </EmptyContent>
+                      {hasDates && (
+                        <EmptyContent>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAddServiceDialogOpen(true)}
+                          >
+                            Thêm ngay
+                          </Button>
+                        </EmptyContent>
+                      )}
                     </Empty>
-                  )}
-                </div>
-              </div>
+                  </div>
+                )}
+              </section>
             </div>
           </ScrollArea>
 
-          {/* === FOOTER === */}
-          <div className="flex items-center justify-between border-t bg-muted/20 px-6 py-4">
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
-              <span className="block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Auto-saving
+          {/* Footer */}
+          <div className="px-6 py-4 border-t bg-muted/5 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Check className="h-3.5 w-3.5 text-emerald-500" />
+              <span>Tự động lưu thay đổi</span>
             </div>
             <Button
               onClick={() => onOpenChange(false)}
-              className="min-w-[100px]"
+              className="min-w-[120px]"
             >
-              Hoàn tất
+              Đóng
             </Button>
           </div>
         </DialogContent>

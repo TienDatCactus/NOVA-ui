@@ -313,7 +313,7 @@ export function useSetScheduledPOSOrder() {
       scheduledAt,
     }: {
       orderId: string;
-      scheduledAt: Date;
+      scheduledAt: string;
     }) => {
       return await OrderService.setScheduledOrder(orderId, { scheduledAt });
     },
@@ -399,7 +399,7 @@ export function useUpdateScheduledTime() {
       scheduledAt,
     }: {
       orderId: string;
-      scheduledAt: Date;
+      scheduledAt: string;
     }) => {
       return await OrderService.setScheduledOrder(orderId, { scheduledAt });
     },

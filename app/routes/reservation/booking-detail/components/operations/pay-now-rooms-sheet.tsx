@@ -54,6 +54,7 @@ import {
   usePayNowRooms,
   useUnpaidRooms,
 } from "../../container/use-booking-checkout.hooks";
+import { ButtonGroup } from "~/components/ui/button-group";
 
 interface PayNowRoomsSheetProps {
   open: boolean;
@@ -414,22 +415,20 @@ export function PayNowRoomsSheet({
                                 Số tiền trả{" "}
                                 <span className="text-red-500">*</span>
                               </span>
-                              <div className="flex gap-1">
-                                <Badge
+                              <ButtonGroup>
+                                <Button
                                   variant="outline"
-                                  className="cursor-pointer hover:bg-stone-100 font-normal"
                                   onClick={() => handleQuickAmount(0.5)}
                                 >
                                   50%
-                                </Badge>
+                                </Button>
                                 <Badge
                                   variant="outline"
-                                  className="cursor-pointer hover:bg-stone-100 font-normal"
                                   onClick={() => handleQuickAmount(1)}
                                 >
                                   100%
                                 </Badge>
-                              </div>
+                              </ButtonGroup>
                             </FormLabel>
                             <div className="relative">
                               <FormControl>

@@ -1,17 +1,16 @@
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
-import { cn } from "~/lib/utils";
-import type { ServiceOrderListItemDto } from "~/services/api/orders/dto";
-import { CalendarClock, BedDouble, User } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
+import { CalendarClock, User } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
+import { cn } from "~/lib/utils";
+import type { ServiceOrderListItemDto } from "~/services/api/orders/dto";
 
-import ServiceOrderDetails from "./service-order-details";
+import { useBookingDetail } from "~/routes/reservation/bookings/container/booking-query.hooks";
 import {
   ServiceActionMenu,
   ServiceFooterActions,
 } from "./service-order-actions";
-import { useBookingDetail } from "~/routes/reservation/bookings/container/booking-query.hooks";
+import ServiceOrderDetails from "./service-order-details";
 
 interface ServiceOrderCardProps {
   order: ServiceOrderListItemDto;

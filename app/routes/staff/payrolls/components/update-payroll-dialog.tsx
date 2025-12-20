@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Calculator, DollarSign, Loader2, User } from "lucide-react";
 import { useEffect } from "react";
+import { Separator } from "react-aria-components";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -24,13 +25,12 @@ import { Input } from "~/components/ui/input";
 import { formatMoney } from "~/lib/utils";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import { useUpdatePayroll } from "../container/query.hooks";
+import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
+import { ButtonGroup } from "~/components/ui/button-group";
 
-const updatePayrollSchema = z.object({
-  baseSalaryFullMonth: z.string().optional(),
-  paidAmount: z.string().optional(),
-});
-
-type UpdatePayrollFormData = z.infer<typeof updatePayrollSchema>;
+type UpdatePayrollFormData = z.infer<
+  typeof StaffPayrollSchema.UpdatePayrollSchema
+>;
 
 interface UpdatePayrollDialogProps {
   payroll: PayrollItemDto | null;
@@ -46,10 +46,10 @@ export default function UpdatePayrollDialog({
   onSuccess,
 }: UpdatePayrollDialogProps) {
   const form = useForm<UpdatePayrollFormData>({
-    resolver: zodResolver(updatePayrollSchema),
+    resolver: zodResolver(StaffPayrollSchema.UpdatePayrollSchema),
     defaultValues: {
-      baseSalaryFullMonth: "",
-      paidAmount: "",
+      baseSalaryFullMonth: payroll?.baseSalaryFullMonth,
+      paidAmount: payroll?.paidAmount,
     },
   });
 
@@ -57,10 +57,8 @@ export default function UpdatePayrollDialog({
   useEffect(() => {
     if (payroll) {
       form.reset({
-        baseSalaryFullMonth: payroll.baseSalaryFullMonth
-          ? payroll.baseSalaryFullMonth.toString()
-          : "",
-        paidAmount: payroll.paidAmount ? payroll.paidAmount.toString() : "",
+        baseSalaryFullMonth: payroll.baseSalaryFullMonth,
+        paidAmount: payroll.paidAmount,
       });
     }
   }, [payroll, form]);
@@ -72,15 +70,13 @@ export default function UpdatePayrollDialog({
 
     const payload: any = {};
     if (data.baseSalaryFullMonth) {
-      const parsed = parseFloat(data.baseSalaryFullMonth);
-      if (!isNaN(parsed)) {
-        payload.baseSalaryFullMonth = parsed;
+      if (!isNaN(data.baseSalaryFullMonth)) {
+        payload.baseSalaryFullMonth = data.baseSalaryFullMonth;
       }
     }
     if (data.paidAmount) {
-      const parsed = parseFloat(data.paidAmount);
-      if (!isNaN(parsed)) {
-        payload.paidAmount = parsed;
+      if (!isNaN(data.paidAmount)) {
+        payload.paidAmount = data.paidAmount;
       }
     }
 
@@ -98,132 +94,186 @@ export default function UpdatePayrollDialog({
     );
   });
 
-  const handleCancel = () => {
-    onOpenChange(false);
-  };
-
+  // Calculate projected values based on form input for real-time feedback
+  const watchedBaseSalary = form.watch("baseSalaryFullMonth") || 0;
+  const watchedPaidAmount = form.watch("paidAmount") || 0;
+  const projectedRemaining =
+    Number(watchedBaseSalary) - Number(watchedPaidAmount);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md gap-0 p-0 overflow-hidden">
+        {/* Header */}
+        <DialogHeader className="px-6 py-4 border-b bg-muted/5">
           <DialogTitle>Cập nhật bảng lương</DialogTitle>
-          <DialogDescription>
-            Cập nhật thông tin lương cơ bản và số tiền đã trả cho nhân viên{" "}
-            {payroll?.staffName}
+          <DialogDescription className="mt-0.5">
+            Điều chỉnh thông tin lương cho kỳ hiện tại.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={handleSubmit} className="space-y-4 py-4">
-            {/* Staff Info */}
-            <div className="rounded-lg bg-muted p-3 space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Mã nhân viên:</span>
-                <span className="font-mono font-medium">
-                  {payroll?.staffCode}
-                </span>
+          <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
+            {/* Staff Card */}
+            <div className="flex items-center gap-4 p-3 rounded-xl border bg-card shadow-sm">
+              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                <User className="h-5 w-5" />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Tên nhân viên:</span>
-                <span className="font-medium">{payroll?.staffName}</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm truncate">
+                  {payroll?.staffName}
+                </p>
+                <p className="text-xs text-muted-foreground font-mono">
+                  ID: {payroll?.staffCode}
+                </p>
               </div>
             </div>
 
-            {/* Base Salary Full Month */}
-            <FormField
-              control={form.control}
-              name="baseSalaryFullMonth"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Lương cơ bản (Tháng đủ)</FormLabel>
-                  <FormControl>
-                    <div className="relative">
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="baseSalaryFullMonth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-semibold uppercase text-muted-foreground">
+                      Lương cơ bản (Tháng)
+                    </FormLabel>
+                    <FormControl>
                       <Input
                         {...field}
-                        type="text"
-                        placeholder="Nhập lương cơ bản"
-                        className="pr-16"
+                        type="number"
+                        className=" font-mono font-medium"
+                        onChange={(e) =>
+                          field.onChange(e.currentTarget.valueAsNumber)
+                        }
+                        startAddon={
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        }
+                        endAddon={
+                          <span className=" text-xs font-medium text-muted-foreground">
+                            VND
+                          </span>
+                        }
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                        VNĐ
-                      </span>
-                    </div>
-                  </FormControl>
-                  {payroll && payroll.baseSalaryFullMonth !== undefined && (
-                    <p className="text-xs text-muted-foreground">
-                      Hiện tại:{" "}
-                      {formatMoney(payroll.baseSalaryFullMonth).vndFormatted}{" "}
-                      VNĐ
-                    </p>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Paid Amount */}
-            <FormField
-              control={form.control}
-              name="paidAmount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Số tiền đã trả</FormLabel>
-                  <FormControl>
-                    <div className="relative">
+              {/* Paid Amount Input */}
+              <FormField
+                control={form.control}
+                name="paidAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between items-center mb-1">
+                      <FormLabel className="text-xs font-semibold uppercase text-muted-foreground">
+                        Đã thanh toán
+                      </FormLabel>{" "}
+                      <div className="flex justify-end">
+                        <ButtonGroup>
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              form.setValue(
+                                "paidAmount",
+                                ((form.watch("baseSalaryFullMonth") ?? 0) *
+                                  50) /
+                                  100
+                              )
+                            }
+                          >
+                            50%
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              form.setValue(
+                                "paidAmount",
+                                ((form.watch("baseSalaryFullMonth") ?? 0) *
+                                  100) /
+                                  100
+                              )
+                            }
+                          >
+                            100%
+                          </Button>
+                        </ButtonGroup>
+                      </div>
+                    </div>
+                    <FormControl>
                       <Input
                         {...field}
-                        type="text"
-                        placeholder="Nhập số tiền đã trả"
-                        className="pr-16"
+                        type="number"
+                        className="font-mono font-medium text-emerald-600"
+                        onChange={(e) =>
+                          field.onChange(e.currentTarget.valueAsNumber)
+                        }
+                        startAddon={
+                          <DollarSign className="h-4 w-4 text-emerald-600/50" />
+                        }
+                        endAddon={
+                          <span className="text-xs font-medium text-muted-foreground">
+                            VND
+                          </span>
+                        }
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                        VNĐ
-                      </span>
-                    </div>
-                  </FormControl>
-                  {payroll && (
-                    <p className="text-xs text-muted-foreground">
-                      Hiện tại: {formatMoney(payroll.paidAmount).vndFormatted}{" "}
-                      VNĐ
-                    </p>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            {/* Summary */}
-            {payroll && (
-              <div className="rounded-lg border bg-card p-3 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Tổng lương:</span>
-                  <span className="font-mono font-semibold">
-                    {formatMoney(payroll.totalAmount || 0).vndFormatted}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Còn lại:</span>
-                  <span className="font-mono font-semibold text-orange-600">
-                    {formatMoney(payroll.remainingAmount || 0).vndFormatted}
-                  </span>
-                </div>
+            {/* Summary Preview */}
+            <div className="rounded-lg bg-muted border border-muted p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                <Calculator className="h-4 w-4" />
+                <span>Tạm tính</span>
               </div>
-            )}
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Tổng lương:</span>
+                <span className="font-mono font-medium">
+                  {formatMoney(watchedBaseSalary).vndFormatted}
+                </span>
+              </div>
+
+              <Separator className="bg-slate-200" />
+
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-sm font-semibold text-muted-foreground">
+                  Còn lại:
+                </span>
+                <span
+                  className={`font-mono text-lg font-bold ${projectedRemaining < 0 ? "text-red-600" : "text-muted-foreground  "}`}
+                >
+                  {formatMoney(projectedRemaining).vndFormatted}
+                </span>
+              </div>
+            </div>
           </form>
         </Form>
 
-        <DialogFooter>
+        {/* Footer */}
+        <DialogFooter className="px-6 py-4 bg-muted/5 border-t">
           <Button
             type="button"
             variant="outline"
-            onClick={handleCancel}
+            onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
             Hủy
           </Button>
-          <Button onClick={handleSubmit} disabled={isPending || !payroll}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Cập nhật
+          <Button
+            onClick={handleSubmit}
+            disabled={isPending}
+            className="min-w-[100px]"
+          >
+            {isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              "Lưu thay đổi"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

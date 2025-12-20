@@ -181,21 +181,13 @@ export function useUpdateServiceOrderSchedule() {
       scheduledAt,
     }: {
       orderId: string;
-      scheduledAt: Date;
+      scheduledAt: string;
     }) => {
       return await OrderService.setScheduledServiceOrder(orderId, {
-        scheduledAt: scheduledAt.toISOString(),
+        scheduledAt,
       });
     },
     onSuccess: (_, variables) => {
-      // Optimistically update scheduledAt in detail cache
-      queryClient.setQueryData(
-        ["service-order-detail", variables.orderId],
-        (prev: ServiceOrderDetailDto | undefined) =>
-          prev
-            ? { ...prev, scheduledAt: variables.scheduledAt.toISOString() }
-            : prev
-      );
       queryClient.invalidateQueries({
         queryKey: ["service-order-detail", variables.orderId],
       });
@@ -204,7 +196,7 @@ export function useUpdateServiceOrderSchedule() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(error.response?.data.message);
+        toast.error(error.response?.data.message || "Đã có lỗi xảy ra");
       }
     },
   });

@@ -272,10 +272,12 @@ export default function EditItemDialog({
                         <FormControl>
                           <Input
                             type="number"
-                            className="pr-10 text-right font-mono"
+                            className="text-right font-mono"
                             {...field}
                             onChange={(e) =>
-                              field.onChange(e.target.valueAsNumber)
+                              field.onChange(
+                                Number(e.currentTarget.valueAsNumber)
+                              )
                             }
                             endAddon={
                               <span className="text-xs text-muted-foreground">
@@ -299,10 +301,11 @@ export default function EditItemDialog({
                         <FormControl>
                           <Input
                             type="number"
-                            className="pr-10 text-right font-mono font-semibold text-emerald-600 bg-background border-emerald-200 focus-visible:ring-emerald-500"
                             {...field}
                             onChange={(e) =>
-                              field.onChange(e.target.valueAsNumber)
+                              field.onChange(
+                                Number(e.currentTarget.valueAsNumber)
+                              )
                             }
                             endAddon={
                               <span className="text-xs text-muted-foreground">

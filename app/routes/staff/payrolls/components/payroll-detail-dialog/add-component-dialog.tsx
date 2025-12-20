@@ -189,6 +189,9 @@ export default function AddComponentDialog({
                           type="number"
                           placeholder="0"
                           {...field}
+                          onChange={(e) =>
+                            field.onChange(e.currentTarget.valueAsNumber)
+                          }
                           startAddon={
                             <div
                               className={cn(

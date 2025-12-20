@@ -193,7 +193,7 @@ export default function BookingRoomsBar({
               Danh sách phòng
             </CardTitle>
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"

@@ -24,12 +24,35 @@ import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { LoginDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/login";
 import { useAuthHooks } from "./container/auth.hooks";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { redirect } from "react-router";
+import { DASHBOARD } from "~/lib/fe-url";
 
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Đăng Nhập - NOVA Hotel Management" },
     { name: "description", content: "Đăng nhập hệ thống quản lý khách sạn" },
   ];
+}
+
+export function clientLoader({}: Route.ClientLoaderArgs) {
+  const user = AuthLoader.getUser();
+  if (user) {
+    // Redirect to role-specific route
+    if (user.roles?.includes(UserRole.Admin)) {
+      throw redirect(DASHBOARD.auditLogs);
+    } else if (user.roles?.includes(UserRole.HotelManager)) {
+      throw redirect(DASHBOARD.finances.dashboard);
+    } else if (user.roles?.includes(UserRole.ServiceStaff)) {
+      throw redirect(DASHBOARD.rooms.list);
+    } else if (user.roles?.includes(UserRole.Accountant)) {
+      throw redirect(DASHBOARD.expenses);
+    } else if (user.roles?.includes(UserRole.Receptionist)) {
+      throw redirect(DASHBOARD.bookings.list);
+    } else {
+      throw redirect(DASHBOARD.bookings.list);
+    }
+  }
 }
 
 export default function Login() {

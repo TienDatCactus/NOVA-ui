@@ -7,16 +7,13 @@ import SearchBox from "./components/search";
 import { useMap } from "./context/map-context";
 import { useMapboxSearch } from "./hooks/use-mapbox-search";
 
-export function meta({ location }: Route.MetaArgs) {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: "Bản Đồ - NOVA Hotel" },
     { name: "description", content: "Khám phá địa điểm xung quanh khách sạn" },
   ];
 }
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   const { mapRef } = useMap();
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const ecoPalmMarkerRef = useRef<mapboxgl.Marker | null>(null);

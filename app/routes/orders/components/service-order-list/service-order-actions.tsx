@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   CreditCard,
   MoreVertical,
-  Printer,
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
@@ -71,13 +70,12 @@ function useServiceOrderLogic({ orderId }: { orderId: string }) {
         }
       );
     },
-    handleUpdateSchedule: (date: Date) => {
+    handleUpdateSchedule: (date: string) => {
       updateSchedule.mutate(
         { orderId, scheduledAt: date },
         {
           onSuccess: () => {
             toggle("schedule", false);
-            toast.success("Đã cập nhật lịch!");
           },
         }
       );

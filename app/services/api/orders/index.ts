@@ -1,6 +1,5 @@
 import http from "~/lib/http";
 import { Orders } from "~/services/url";
-import { format } from "date-fns";
 import type {
   AddBatchItemsToPOSOrderRequestDto,
   AddSingleItemToPOSOrderRequestDto,
@@ -36,7 +35,6 @@ const {
   CreateServiceOrderResponseSchema,
   ServiceOrderListSchema,
   OrderPayNowRequestSchema,
-  CreatePOSOrderWithItemsRequestSchema,
 } = OrderSchema;
 
 /**
@@ -222,10 +220,13 @@ async function setServedOrderItem(
   }
 }
 
-async function setScheduledOrder(orderId: string, data: { scheduledAt: Date }) {
+async function setScheduledOrder(
+  orderId: string,
+  data: { scheduledAt: string }
+) {
   try {
     const resp = await http.post(Orders.setScheduled(orderId), {
-      scheduledAt: data.scheduledAt.toISOString(),
+      scheduledAt: data.scheduledAt,
     });
     return resp.data;
   } catch (error) {

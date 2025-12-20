@@ -1,14 +1,14 @@
 import {
   Ban,
+  Banknote,
+  CalendarClock,
   CheckCircle2,
-  CreditCard,
   MoreVertical,
   Plus,
   Printer,
-  CalendarClock,
-  Banknote,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { z } from "zod";
 import {
   AlertDialog,
@@ -30,8 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { toast } from "sonner";
-import { cn } from "~/lib/utils";
+import { InvoiceDetailDialog } from "~/routes/invoices/components/invoice-detail/invoice-detail.dialog";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 import {
   useAddSingleItemToPOSOrder,
@@ -42,10 +41,9 @@ import {
   useUpdateScheduledTime,
 } from "../../container/pos-orders/mutation.hooks";
 import PaymentOrderSheet from "../payment-order.sheet";
+import UpdateScheduleDialog from "../update-schedule.dialog";
 import AddMenuItemDialog from "./add-menu-item.dialog";
 import PrintPreviewDialog from "./print-preview.dialog";
-import UpdateScheduleDialog from "../update-schedule.dialog";
-import { InvoiceDetailDialog } from "~/routes/invoices/components/invoice-detail/invoice-detail.dialog";
 
 // --- Types & Schema ---
 const { OrderPayNowRequestSchema } = OrderSchema;
@@ -131,7 +129,7 @@ function useOrderLogic({ orderId }: { orderId: string }) {
         { onSuccess: () => toggle("add", false) }
       );
     },
-    handleUpdateSchedule: (date: Date) => {
+    handleUpdateSchedule: (date: string) => {
       onUpdateSchedule(
         { orderId, scheduledAt: date },
         { onSuccess: () => toggle("schedule", false) }
@@ -206,19 +204,21 @@ export function OrderActionMenu({
             {!isCompleted && !isCancelled && (
               <>
                 <DropdownMenuSeparator />
-                <AlertDialogTriggerItem
-                  label="Hoàn tất thủ công"
-                  icon={<CheckCircle2 className="w-4 h-4 mr-2" />}
+                <DropdownMenuItem
+                  className="text-green-600 "
                   onClick={handlers.handleComplete}
-                  variant="success"
-                />
-                <DropdownMenuSeparator />
-                {/* Logic Hủy Đơn chuyển vào Alert Dialog riêng bên dưới, ở đây chỉ trigger */}
-                <AlertDialogTriggerItem
-                  label="Hủy đơn hàng"
-                  icon={<Ban className="w-4 h-4 mr-2" />}
+                >
+                  <CheckCircle2 className="w-4 text-green-500 h-4 mr-2" />
+                  Hoàn tất thủ công
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  variant="destructive"
                   onClick={handlers.handleCancel}
-                />
+                >
+                  <Ban className="w-4 h-4 mr-2" />
+                  Hủy đơn hàng
+                </DropdownMenuItem>
               </>
             )}
           </DropdownMenuContent>
@@ -349,24 +349,3 @@ export function OrderAddButton({ orderId, status }: ActionProps) {
     </>
   );
 }
-
-// Helper nhỏ để xử lý cancel trong Dropdown (vì Dropdown chặn event click của Alert)
-// Trong thực tế, bạn nên tách Cancel Dialog ra ngoài Dropdown để tránh lỗi focus trap.
-const AlertDialogTriggerItem = ({ label, icon, onClick, variant }: any) => {
-  // Simplified for brevity - in real app, maintain separate state for Cancel Dialog
-  return (
-    <DropdownMenuItem
-      className={cn(
-        variant === "success"
-          ? "text-green-600 focus:text-green-700 focus:bg-green-50"
-          : "text-destructive focus:text-destructive"
-      )}
-      onSelect={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
-    >
-      {icon} {label}
-    </DropdownMenuItem>
-  );
-};

@@ -85,9 +85,9 @@ export default function EditRoleDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Cập nhật vai trò</DialogTitle>
+          <DialogTitle>Cập nhật chức vụ</DialogTitle>
           <DialogDescription>
-            Chỉnh sửa thông tin vai trò nhân sự
+            Chỉnh sửa thông tin chức vụ nhân sự
           </DialogDescription>
         </DialogHeader>
 

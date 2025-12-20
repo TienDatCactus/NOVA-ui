@@ -2,7 +2,6 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { BookingGridView } from "./components/booking-grid-view";
 import BookingList from "./components/booking-list";
-import useSearchBooking from "./container/booking-filter.hooks";
 import { useBookings } from "./container/booking-query.hooks";
 import BookingViewLayout from "./layouts/booking-view.layout";
 import type { Route } from "./+types/list";
@@ -21,10 +20,7 @@ export const clientLoader = () =>
 
 type ViewMode = "grid" | "list";
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { filters, filterBookings, updateFilters, resetFilters } =
     useBookingFilters();

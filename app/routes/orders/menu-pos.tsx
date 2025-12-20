@@ -1,12 +1,13 @@
 import {
   ArrowLeft,
+  Loader2,
   Plus,
   RotateCcw,
   SearchIcon,
   ShoppingBasket,
   Trash2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -35,7 +36,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "~/components/ui/empty";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -138,63 +138,70 @@ export default function Component({}: Route.ComponentProps) {
 
   const isEmpty = items.length === 0;
 
-  const { mutate: createOrder, isError } = useCreatePOSOrderWithItems();
+  const {
+    mutate: createOrder,
+    isError,
+    isPending,
+  } = useCreatePOSOrderWithItems();
 
-  // Handlers
-  const handleAddToCart = (item: MenuItem) => {
-    // Check if out of stock
-    if (item.maxQuantityAvailable === 0) {
-      toast.error(`${item.name} hiện đã hết hàng`);
-      return;
-    }
-
-    // Check if adding would exceed max available
-    const existingItem = items.find((i) => i.id === item.itemId);
-    if (existingItem) {
-      const newQuantity = existingItem.quantity + 1;
-      if (
-        item.maxQuantityAvailable !== undefined &&
-        newQuantity > (item?.maxQuantityAvailable ?? 0)
-      ) {
-        toast.error(
-          `Số lượng tối đa cho ${item.name} là ${item.maxQuantityAvailable}`
-        );
+  const handleAddToCart = useCallback(
+    (item: MenuItem) => {
+      if (item.maxQuantityAvailable === 0) {
+        toast.error(`${item.name} hiện đã hết hàng`);
         return;
       }
-    }
 
-    addItem({
-      id: item.itemId,
-      menuItemId: item.itemId,
-      code: item.code,
-      name: item.name,
-      unitPrice: item.price,
-      imageUrl: item.imageUrls?.[0],
-      maxQuantityAvailable: item.maxQuantityAvailable || undefined,
-    });
-    toast.success(`Đã thêm ${item.name} vào đơn`);
-  };
+      const existingItem = items.find((i) => i.id === item.itemId);
+      if (existingItem) {
+        const newQuantity = existingItem.quantity + 1;
+        if (
+          item.maxQuantityAvailable !== undefined &&
+          newQuantity > (item?.maxQuantityAvailable ?? 0)
+        ) {
+          toast.error(
+            `Số lượng tối đa cho ${item.name} là ${item.maxQuantityAvailable}`
+          );
+          return;
+        }
+      }
 
-  const handleAddCustomItem = (item: {
-    name: string;
-    description?: string;
-    unitPrice: number;
-    quantity: number;
-  }) => {
-    const id = uuidv4();
-    const customId = `CUSTOM-${id}`;
-    addItem({
-      id: customId,
-      menuItemId: undefined,
-      code: "CUSTOM",
-      name: item.name,
-      unitPrice: item.unitPrice,
-      quantity: item.quantity,
-      customItemName: item.name,
-      customItemDescription: item.description,
-    });
-    toast.success(`Đã thêm "${item.name}" vào giỏ`);
-  };
+      addItem({
+        id: item.itemId,
+        menuItemId: item.itemId,
+        code: item.code,
+        name: item.name,
+        unitPrice: item.price,
+        imageUrl: item.imageUrls?.[0],
+        maxQuantityAvailable: item.maxQuantityAvailable || undefined,
+      });
+      toast.success(`Đã thêm ${item.name} vào đơn`);
+    },
+    [addItem, items]
+  );
+
+  const handleAddCustomItem = useCallback(
+    (item: {
+      name: string;
+      description?: string;
+      unitPrice: number;
+      quantity: number;
+    }) => {
+      const id = uuidv4();
+      const customId = `CUSTOM-${id}`;
+      addItem({
+        id: customId,
+        menuItemId: undefined,
+        code: "CUSTOM",
+        name: item.name,
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+        customItemName: item.name,
+        customItemDescription: item.description,
+      });
+      toast.success(`Đã thêm "${item.name}" vào giỏ`);
+    },
+    [addItem]
+  );
 
   const handleConfirm = () => {
     if (isEmpty) return;
@@ -224,7 +231,6 @@ export default function Component({}: Route.ComponentProps) {
 
   const handleScheduledTimeConfirm = (scheduledAt: string) => {
     setScheduledAt(scheduledAt);
-    console.log("Scheduled time confirmed:", scheduledAt);
     setScheduledTimeDialog(false);
     handleCreateOrder(scheduledAt);
   };
@@ -236,33 +242,28 @@ export default function Component({}: Route.ComponentProps) {
       return;
     }
 
-    try {
-      createOrder(
-        {
-          bookingId,
-          bookingRoomId,
-          scheduledAt: finalScheduledAt,
-          note: notes || "",
-          items,
+    createOrder(
+      {
+        bookingId,
+        bookingRoomId,
+        scheduledAt: finalScheduledAt,
+        note: notes || "",
+        items,
+      },
+      {
+        onSuccess: () => {
+          const wasBooking = !!bookingId;
+          setConfirmationDialog({
+            open: true,
+            customerType: wasBooking ? "In-House" : "Walk-In",
+          });
+          setSelectedBookingInfo(null);
+          setBookingInfo(null, null);
+          setScheduledAt("");
+          setNotes("");
         },
-        {
-          onSuccess: () => {
-            const wasBooking = !!bookingId;
-            setSelectedBookingInfo(null);
-            setBookingInfo(null, null);
-            setScheduledAt("");
-            setNotes("");
-            setConfirmationDialog({
-              open: true,
-              customerType: wasBooking ? "In-House" : "Walk-In",
-            });
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Create order failed:", error);
-      toast.error("Đã xảy ra lỗi khi tạo đơn hàng");
-    }
+      }
+    );
   };
 
   const handleNewOrder = () => {
@@ -281,7 +282,15 @@ export default function Component({}: Route.ComponentProps) {
     [items, menuItems]
   );
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen relative bg-background">
+      {isPending && (
+        <div className="absolute inset-0 flex h-full items-center justify-center bg-black/50 z-50">
+          <Loader2
+            className="m-auto h-12 w-12 text-white animate-spin"
+            aria-label="Loading"
+          />
+        </div>
+      )}
       <header className="flex items-center justify-between px-6 py-3 border-b bg-background z-20 shadow-sm">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex h-5 items-center space-x-4 text-sm">
@@ -379,7 +388,7 @@ export default function Component({}: Route.ComponentProps) {
               ))}
             </div>
           ) : filteredItems && filteredItems.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
               {filteredItems.map((item) => (
                 <MenuItemCard
                   key={item.itemId}
@@ -441,9 +450,9 @@ export default function Component({}: Route.ComponentProps) {
           </div>
 
           {/* 2. Scrollable Items Area */}
-          <ScrollArea className="flex-1">
+          <div className="flex-1 max-h-72 overflow-y-auto">
             {items.length > 0 ? (
-              <div className="flex flex-col p-4 gap-3">
+              <div className="flex flex-col p-4  gap-3">
                 {items.map((item) => (
                   <CartItem
                     key={item.id}
@@ -467,7 +476,7 @@ export default function Component({}: Route.ComponentProps) {
                 </EmptyHeader>
               </Empty>
             )}
-          </ScrollArea>
+          </div>
 
           {/* 3. Sticky Footer (Summary & Action) */}
           <div className="p-4 border-t bg-muted/5 space-y-4">

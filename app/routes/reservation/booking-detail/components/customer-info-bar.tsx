@@ -1,5 +1,3 @@
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
 import {
   Baby,
   Building2,
@@ -13,8 +11,6 @@ import {
 } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 
-import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
 import {
   FormControl,
   FormField,
@@ -24,11 +20,6 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -36,12 +27,21 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
-import { cn } from "~/lib/utils";
 import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
 import type { BookingState } from "../container/use-booking-state.hooks";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
+import { format, parseISO } from "date-fns";
+import { vi } from "date-fns/locale";
+import { Calendar } from "~/components/ui/calendar";
 
 interface CustomerInfoBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -177,7 +177,11 @@ export default function CustomerInfoBar({
                             !form.watch("breakfastDates")?.length &&
                               "text-muted-foreground"
                           )}
-                          disabled={!bookingState.permissions.canEdit}
+                          disabled={
+                            !bookingState.permissions.canEdit &&
+                            (bookingDetail.status == "Pending" ||
+                              bookingDetail.status == "Confirmed")
+                          }
                         >
                           <CalendarDays className="mr-2 h-3.5 w-3.5" />
                           {(form.watch("breakfastDates")?.length ?? 0 > 0) ? (
@@ -293,7 +297,7 @@ export default function CustomerInfoBar({
                 <FormControl>
                   <Input
                     type="number"
-                    className="h-10 font-mono font-bold text-lg text-right pr-12 text-primary"
+                    className="font-mono font-bold text-lg text-right text-primary"
                     min={0}
                     {...field}
                     onChange={(e) =>
