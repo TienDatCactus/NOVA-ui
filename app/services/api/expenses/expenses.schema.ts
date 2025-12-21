@@ -10,7 +10,6 @@ const ExpenseCategoryEnum = z.enum(
     "Marketing",
     "Office",
     "Other",
-    "Unknown",
   ],
   "Danh mục chi tiêu không hợp lệ"
 );

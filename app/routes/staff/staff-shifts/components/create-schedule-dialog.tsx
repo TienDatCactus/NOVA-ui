@@ -1,10 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths, format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { CalendarIcon, Check, ChevronDown, Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CalendarIcon, Check, ChevronDown, Search } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -44,13 +43,13 @@ import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
 
+import { Input } from "~/components/ui/input";
 import { useActiveWorkShiftList } from "~/routes/work-shifts/container/query.hooks";
 import type { CreateShiftScheduleRequest } from "~/services/api/staff/staff-shift/dto";
 import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
 import { WEEKDAYS } from "~/services/api/staff/staff-shift/staff-shift.type";
 import { useStaffList } from "../../staff/container/query.hooks";
 import { useCreateShiftSchedule } from "../container/query.hooks";
-import { Input } from "~/components/ui/input";
 
 const { CreateShiftScheduleRequestSchema } = StaffShiftSchema;
 
@@ -167,26 +166,36 @@ export default function CreateScheduleDialog({
                               <CommandList>
                                 <CommandEmpty>Không tìm thấy.</CommandEmpty>
                                 <CommandGroup>
-                                  {staffList.map((staff) => (
-                                    <CommandItem
-                                      value={staff.fullName}
-                                      key={staff.id}
-                                      onSelect={() => {
-                                        field.onChange(staff.id);
-                                        form.setValue("additionalStaffIds", []);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          staff.id === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                      {staff.fullName}
-                                    </CommandItem>
-                                  ))}
+                                  {staffList
+                                    .filter((i) => i.status !== "Terminated")
+                                    .map((staff) => {
+                                      const isSelected =
+                                        staff.id === field.value;
+                                      return (
+                                        <CommandItem
+                                          value={staff.fullName}
+                                          key={staff.id}
+                                          disabled={isSelected}
+                                          onSelect={() => {
+                                            field.onChange(staff.id);
+                                            form.setValue(
+                                              "additionalStaffIds",
+                                              []
+                                            );
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              staff.id === field.value
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                          />
+                                          {staff.fullName}
+                                        </CommandItem>
+                                      );
+                                    })}
                                 </CommandGroup>
                               </CommandList>
                             </Command>

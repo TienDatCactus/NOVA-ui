@@ -28,12 +28,11 @@ export function usePreviewBookingPrice(
       toast.success("Tính toán giá dự kiến thành công.");
     },
     onError: (error) => {
-      toast.error(
-        error instanceof AxiosError
-          ? error.response?.data?.message ||
-              "Đã có lỗi xảy ra khi tính toán giá dự kiến."
-          : "Đã có lỗi xảy ra khi tính toán giá dự kiến."
-      );
+      if (error instanceof AxiosError)
+        toast.error(
+          error.response?.data?.message ||
+            "Đã có lỗi xảy ra khi tính toán giá dự kiến."
+        );
     },
   });
 }
