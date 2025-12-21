@@ -441,7 +441,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               >
                 <span
                   className={cn(
-                    "line-clamp-1 text-left",
+                    "line-clamp-1 text-left truncate w-20",
                     isRoomBlock &&
                       "text-orange-900 dark:text-orange-200 uppercase tracking-tight"
                   )}
