@@ -1,18 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertTriangle, BedDouble, Hash, Loader2, Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { BedDouble, Hash, Loader2, Save } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -50,7 +40,6 @@ import type {
   UpdateRoomDetailRequestDto,
 } from "~/services/api/rooms/dto";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
-import { RoomStatusEnum } from "~/services/api/rooms/room.types";
 import { useRoomTypes } from "../../container/room-types/query.hooks";
 import { useUpdateRoom } from "../../container/rooms/mutation.hooks";
 import { ROOM_STATUS_CONFIG } from "../../fragments/rooms/status.cell";

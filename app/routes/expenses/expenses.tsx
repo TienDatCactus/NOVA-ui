@@ -37,13 +37,13 @@ export default function ExpensesRoute() {
   const { data: expenses, isPending } = useExpenses({
     fromDate: filters.fromDate,
     toDate: filters.toDate,
-    categoryId: filters.categoryId,
+    category: filters.category,
   });
 
   // Calculate total amount
   const totalAmount = useMemo(() => {
     if (!expenses) return 0;
-    return expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    return expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
   }, [expenses]);
 
   return (

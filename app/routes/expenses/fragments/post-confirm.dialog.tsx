@@ -28,11 +28,12 @@ export default function PostConfirmDialog({
   const { mutate: postExpense, isPending: isPosting } = usePostExpense();
 
   const handlePost = () => {
-    postExpense(expense.id, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+    if (expense.id)
+      postExpense(expense.id, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
   };
 
   return (
@@ -46,18 +47,22 @@ export default function PostConfirmDialog({
             <div className="mt-3 space-y-2 rounded-md bg-muted p-3">
               <div className="text-sm">
                 <span className="font-medium text-foreground">Ngày chi:</span>{" "}
-                {format(parseISO(expense.expenseDate), "dd/MM/yyyy", {
-                  locale: vi,
-                })}
+                {format(
+                  parseISO(expense?.expenseDate || "1970-01-01"),
+                  "dd/MM/yyyy",
+                  {
+                    locale: vi,
+                  }
+                )}
               </div>
               <div className="text-sm">
                 <span className="font-medium text-foreground">Danh mục:</span>{" "}
-                {expense.categoryName}
+                {expense?.category}
               </div>
               <div className="text-sm">
                 <span className="font-medium text-foreground">Số tiền:</span>{" "}
                 <span className="font-semibold">
-                  {formatMoney(expense.amount).vndFormatted}
+                  {formatMoney(expense?.amount || 0).vndFormatted}
                 </span>
               </div>
               <div className="text-sm">

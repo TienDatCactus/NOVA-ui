@@ -11,7 +11,7 @@ import {
 export interface ExpenseListParams {
   fromDate?: string;
   toDate?: string;
-  categoryId?: string;
+  category?: string;
 }
 
 export const ExpenseCategories = [

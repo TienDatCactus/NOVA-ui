@@ -28,11 +28,12 @@ export default function DeleteConfirmDialog({
   const { mutate: deleteExpense, isPending: isDeleting } = useDeleteExpense();
 
   const handleDelete = () => {
-    deleteExpense(expense.id, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+    if (expense.id)
+      deleteExpense(expense.id, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
   };
 
   return (
@@ -45,23 +46,27 @@ export default function DeleteConfirmDialog({
             <div className="mt-3 space-y-2 rounded-md bg-muted p-3">
               <div className="text-sm">
                 <span className="font-medium text-foreground">Ngày chi:</span>{" "}
-                {format(parseISO(expense.expenseDate), "dd/MM/yyyy", {
-                  locale: vi,
-                })}
+                {format(
+                  parseISO(expense?.expenseDate || "1970-01-01"),
+                  "dd/MM/yyyy",
+                  {
+                    locale: vi,
+                  }
+                )}
               </div>
               <div className="text-sm">
                 <span className="font-medium text-foreground">Danh mục:</span>{" "}
-                {expense.categoryName}
+                {expense?.category}
               </div>
               <div className="text-sm">
                 <span className="font-medium text-foreground">Số tiền:</span>{" "}
                 <span className="font-semibold">
-                  {formatMoney(expense.amount).vndFormatted}
+                  {formatMoney(expense?.amount || 0).vndFormatted}
                 </span>
               </div>
               <div className="text-sm">
                 <span className="font-medium text-foreground">Mô tả:</span>{" "}
-                {expense.description}
+                {expense?.description}
               </div>
             </div>
             <span className="mt-3 block text-destructive font-medium">

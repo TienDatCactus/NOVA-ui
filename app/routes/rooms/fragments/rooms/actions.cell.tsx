@@ -1,5 +1,6 @@
-import { MoreHorizontal, Pencil, QrCode, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -10,8 +11,6 @@ import {
 import type { RoomListItemDto } from "~/services/api/rooms/dto";
 import UpdateRoomSheet from "../../components/rooms/update-room.sheet";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
-import { toast } from "sonner";
-import { QrDialog } from "../../components/rooms/qr.dialog";
 
 interface RoomActionsCellProps {
   room: RoomListItemDto;

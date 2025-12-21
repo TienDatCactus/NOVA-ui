@@ -60,13 +60,13 @@ const ExpenseDetailResponseSchema = ExpenseListItemSchema;
 const ExpenseSummaryResponseSchema = z.object({
   totalAmount: z.number(),
   byCategory: z.object({
-    Procurement: z.number(),
-    Salary: z.number().optional(),
-    Utilities: z.number(),
-    Maintenance: z.number(),
-    Marketing: z.number(),
-    Office: z.number(),
-    Other: z.number(),
+    Procurement: z.number().optional().nullable(),
+    Salary: z.number().optional().nullable(),
+    Utilities: z.number().optional().nullable(),
+    Maintenance: z.number().optional().nullable(),
+    Marketing: z.number().optional().nullable(),
+    Office: z.number().optional().nullable(),
+    Other: z.number().optional().nullable(),
   }),
   byMonth: z.record(z.string(), z.number()),
 });

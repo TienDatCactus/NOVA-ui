@@ -40,17 +40,19 @@ export function ShiftCard({
   const isAbsent = attendance?.status?.toLowerCase() === "absent";
   const hasReason = isAbsent && attendance?.absentReason;
 
-  // Get shift time for staff view
   const shiftTime =
     viewMode === "staff" && workShifts
       ? workShifts.find((ws) => ws.id === shift.shiftId)
       : null;
 
-  const StatusBadgeIcon = statusBadge.icon;
-
   const cardContent = (
     <div
-      className="relative group p-2 bg-background rounded-md border hover:border-primary/50 transition-colors cursor-pointer overflow-visible"
+      className={cn(
+        "relative group p-2 bg-background rounded-md border transition-colors cursor-pointer overflow-visible",
+        isAbsent
+          ? "border-destructive/50 bg-destructive/5 hover:border-destructive"
+          : "hover:border-primary/50"
+      )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onEdit(shift)}
@@ -71,13 +73,12 @@ export function ShiftCard({
           </div>
         )}
 
-        {/* Status badge with icon - always show */}
         {statusBadge.showLabel && (
           <Badge
             variant={statusBadge.variant}
             className="text-[10px] h-5 flex items-center gap-1"
           >
-            <StatusBadgeIcon className="h-3 w-3" />
+            <statusBadge.icon className="h-3 w-3" />
             <span>{statusBadge.label}</span>
           </Badge>
         )}

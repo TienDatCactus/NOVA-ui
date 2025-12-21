@@ -13,11 +13,7 @@ import type {
   StaffShiftListResponseDto,
 } from "~/services/api/staff/staff-shift/dto";
 import type { WorkShiftListResponseDto } from "~/services/api/work-shift/dto";
-import {
-  useDeleteStaffShift,
-  useMarkAbsent,
-  useMarkPresent,
-} from "../container/query.hooks";
+import { useMarkPresent } from "../container/query.hooks";
 import { useScheduleTableData } from "../container/table-data.hooks";
 import {
   getAttendanceFromMap,
@@ -29,7 +25,8 @@ import DeleteScheduleDialog from "./delete-schedule-dialog";
 import MarkAbsentDialog from "./mark-absent-dialog";
 import { ShiftCard } from "./shift-card";
 import UpdateScheduleDialog from "./update-schedule-dialog";
-import { hasAnyRole } from "~/lib/auth/bouncer";
+import { Popover, PopoverContent } from "~/components/ui/popover";
+import { PopoverTrigger } from "@radix-ui/react-popover";
 
 interface UnifiedScheduleTableProps {
   viewMode: "shift" | "staff";
@@ -134,7 +131,7 @@ export default function UnifiedScheduleTable({
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="">
             {rows.length === 0 ? (
               <tr>
                 <td
@@ -156,7 +153,7 @@ export default function UnifiedScheduleTable({
                     : (row as any).staffName;
 
                 return (
-                  <tr key={rowId} className="hover:bg-muted/30">
+                  <tr key={rowId} className="hover:bg-muted/30 ">
                     {/* Row Header */}
                     <td className="border p-3 bg-muted/30">
                       <div className="space-y-1">
@@ -202,8 +199,8 @@ export default function UnifiedScheduleTable({
                         >
                           <div className="space-y-1 overflow-visible">
                             {/* Shift Cards */}
-                            <div className="space-y-2 overflow-visible">
-                              {cellShifts.map((shift) => {
+                            <div className="space-y-2 flex flex-col items-center overflow-visible">
+                              {cellShifts.slice(0, 1).map((shift) => {
                                 const attendance = getAttendance(
                                   shift.staffId,
                                   shift.shiftId,
@@ -242,6 +239,60 @@ export default function UnifiedScheduleTable({
                                   />
                                 );
                               })}
+                              {cellShifts.length > 1 && (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant={"link"}
+                                      className="text-xs mt-1 p-0"
+                                    >
+                                      +{cellShifts.length - 1} ca khác
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent>
+                                    {cellShifts.slice(0, 1).map((shift) => {
+                                      const attendance = getAttendance(
+                                        shift.staffId,
+                                        shift.shiftId,
+                                        shift.workDate
+                                      );
+                                      return (
+                                        <ShiftCard
+                                          key={shift.id}
+                                          shift={shift}
+                                          attendance={attendance}
+                                          viewMode={viewMode}
+                                          workShifts={workShifts}
+                                          onEdit={(shift) => {
+                                            setSelectedShift(shift);
+                                            setUpdateDialogOpen(true);
+                                          }}
+                                          onDelete={(shiftId) => {
+                                            const shiftToDelete =
+                                              cellShifts.find(
+                                                (s) => s.id === shiftId
+                                              );
+                                            if (shiftToDelete) {
+                                              setSelectedShift(shiftToDelete);
+                                              setDeleteDialogOpen(true);
+                                            }
+                                          }}
+                                          onMarkPresent={(attendance) => {
+                                            setSelectedAttendance(attendance);
+                                            if (attendance) {
+                                              markPresent.mutate(attendance.id);
+                                            }
+                                          }}
+                                          onMarkAbsent={(attendance) => {
+                                            setSelectedAttendance(attendance);
+                                            setMarkAbsentDialogOpen(true);
+                                          }}
+                                        />
+                                      );
+                                    })}
+                                  </PopoverContent>
+                                </Popover>
+                              )}
                             </div>
 
                             {/* Add Button - Only in shift view */}

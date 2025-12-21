@@ -9,7 +9,6 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { useDeleteRoom } from "../../container/rooms/mutation.hooks";
 import { useDeleteRoomType } from "../../container/room-types/mutation.hooks";
 
 interface DeleteConfirmDialogProps {

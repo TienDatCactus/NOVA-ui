@@ -16,14 +16,16 @@ import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { FE_URL } from "~/lib/fe-url";
 import { formatMoney } from "~/lib/utils";
-import { ExpenseCategories } from "~/services/api/expenses/expenses.types";
-import type { ExpensesFilter } from "../container/filter.hooks";
+import {
+  ExpenseCategories,
+  type ExpenseListParams,
+} from "~/services/api/expenses/expenses.types";
 
 // --- PROPS ---
 interface ExpensesLayoutProps {
   children: React.ReactNode;
-  filters: ExpensesFilter;
-  updateFilter: (key: keyof ExpensesFilter, value: any) => void;
+  filters: ExpenseListParams;
+  updateFilter: (key: keyof ExpenseListParams, value: any) => void;
   resetFilters: () => void;
   totalExpenses: number;
   totalAmount: number;
@@ -41,7 +43,7 @@ export default function ExpensesLayout({
 }: ExpensesLayoutProps) {
   const currentTab = isDashboardView ? "dashboard" : "list";
   const hasActiveFilters = Boolean(
-    filters.fromDate || filters.toDate || filters.categoryId
+    filters.fromDate || filters.toDate || filters.category
   );
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
@@ -125,9 +127,9 @@ export default function ExpensesLayout({
             </div>
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
             <Select
-              value={filters.categoryId}
+              value={filters.category}
               onValueChange={(value) =>
-                updateFilter("categoryId", value === "all" ? undefined : value)
+                updateFilter("category", value === "all" ? undefined : value)
               }
             >
               <SelectTrigger className="w-60 h-9 text-xs">

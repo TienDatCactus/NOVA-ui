@@ -1,15 +1,13 @@
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Button } from "~/components/ui/button";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { useState } from "react";
 import { UpdateRoomTypeSheet } from "../../components/room-types/update-room-types.sheet";
 import DeleteConfirmDialog from "./delete-confirm.dialog";
 

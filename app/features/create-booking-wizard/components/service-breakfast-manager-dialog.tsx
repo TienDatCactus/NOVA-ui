@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { CheckCircle2, Coffee, Plus, UtensilsCrossed } from "lucide-react";
 import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
+import { toast } from "sonner";
 import type z from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -55,17 +56,20 @@ export default function ServiceBreakfastManagerDialog({
 
   const handleAddService = (
     serviceId: string,
-    itemType: "ServiceItem" | "MenuItem" = "ServiceItem"
+    itemType: "ServiceItem" | "MenuItem" = "ServiceItem",
+    quantity: number = 1
   ) => {
     const exists = services.find(
       (s: ServiceOrderItem) => s.itemId === serviceId
     );
 
     if (exists) {
-      const updated = services.filter(
-        (s: ServiceOrderItem) => s.itemId !== serviceId
+      // Update quantity if item already exists
+      const updated = services.map((s: ServiceOrderItem) =>
+        s.itemId === serviceId ? { ...s, quantity } : s
       );
       form.setValue("serviceOrder.services", updated, { shouldValidate: true });
+      toast.success("Đã cập nhật số lượng");
     } else {
       const defaultDate = checkinDate
         ? format(
@@ -77,7 +81,7 @@ export default function ServiceBreakfastManagerDialog({
       const newService: ServiceOrderItem = {
         itemType: itemType,
         itemId: serviceId,
-        quantity: 1,
+        quantity: quantity,
         scheduledDate: defaultDate,
         note: "",
       };
@@ -85,6 +89,7 @@ export default function ServiceBreakfastManagerDialog({
       form.setValue("serviceOrder.services", [...services, newService], {
         shouldValidate: true,
       });
+      toast.success("Đã thêm dịch vụ");
     }
   };
 
@@ -108,7 +113,7 @@ export default function ServiceBreakfastManagerDialog({
   const handleBreakfastToggleAll = (value: boolean) => {
     form.setValue("isBreakfastAll", value, { shouldValidate: true });
   };
-
+  console.log(form.getValues("serviceOrder"));
   const hasDates = checkinDate && checkoutDate;
 
   return (
@@ -276,6 +281,7 @@ export default function ServiceBreakfastManagerDialog({
         onOpenChange={setAddServiceDialogOpen}
         onAddService={handleAddService}
         selectedServiceIds={services.map((s: ServiceOrderItem) => s.itemId)}
+        existingServices={services}
       />
     </>
   );

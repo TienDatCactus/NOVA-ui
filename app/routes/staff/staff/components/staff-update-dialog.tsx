@@ -251,7 +251,6 @@ export default function EditStaffDialog({
                                 mode="single"
                                 selected={field.value}
                                 onSelect={field.onChange}
-                                captionLayout="dropdown"
                                 locale={vi}
                               />
                             </PopoverContent>
@@ -387,7 +386,6 @@ export default function EditStaffDialog({
                                 mode="single"
                                 selected={field.value}
                                 onSelect={field.onChange}
-                                captionLayout="dropdown"
                                 locale={vi}
                               />
                             </PopoverContent>

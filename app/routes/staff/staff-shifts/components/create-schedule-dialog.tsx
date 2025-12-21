@@ -388,7 +388,6 @@ export default function CreateScheduleDialog({
                               align="start"
                             >
                               <Calendar
-                                captionLayout="dropdown"
                                 mode="single"
                                 selected={
                                   field.value
@@ -438,7 +437,6 @@ export default function CreateScheduleDialog({
                               align="start"
                             >
                               <Calendar
-                                captionLayout="dropdown"
                                 mode="single"
                                 selected={
                                   field.value

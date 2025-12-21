@@ -132,12 +132,12 @@ const InvoicePaymentResponseSchema = z.object({
 
 const PaymentsFromInvoiceResponseSchema = z.array(
   z.object({
-    paymentId: z.string(),
-    amount: z.number(),
-    method: z.string(),
-    status: z.string(),
-    createdAt: z.string(),
-    note: z.string(),
+    paymentId: z.string().nullable(),
+    amount: z.number().nullable(),
+    method: z.string().nullable(),
+    status: z.string().nullable(),
+    createdAt: z.string().nullable(),
+    note: z.string().nullable(),
   })
 );
 

@@ -158,10 +158,12 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
                   health={data.financialHealth}
                   collectionTarget={data.financialHealth.collectionRateTarget}
                 />
-                <PaymentMethodsTable
-                  data={data.paymentCollection}
-                  otaReceivable={data.otaReceivable}
-                />
+                {data.paymentCollection.length > 0 && (
+                  <PaymentMethodsTable
+                    data={data.paymentCollection}
+                    otaReceivable={data.otaReceivable}
+                  />
+                )}
               </div>
             </section>
           </div>

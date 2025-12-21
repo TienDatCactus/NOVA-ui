@@ -1,40 +1,20 @@
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
-import {
-  CalendarIcon,
-  Clock,
-  User,
-  CalendarDays,
-  AlertCircle,
-  ArrowRight,
-  Repeat,
-  Check,
-  X,
-} from "lucide-react";
+import { AlertCircle, ArrowRight, Repeat, X } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
-import { WEEKDAYS } from "~/services/api/staff/staff-shift/staff-shift.type";
-import type {
-  UpdateShiftScheduleRequest,
-  StaffShiftListItem,
-} from "~/services/api/staff/staff-shift/dto";
-import {
-  useStaffShiftById,
-  useUpdateShiftSchedule,
-} from "../container/query.hooks";
-import { useActiveWorkShiftList } from "~/routes/work-shifts/container/query.hooks";
+import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
@@ -43,11 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -55,13 +31,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Calendar } from "~/components/ui/calendar";
+import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
-import { Checkbox } from "~/components/ui/checkbox";
-import { Separator } from "~/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { DatePicker } from "~/components/ui/date-picker";
+import { useActiveWorkShiftList } from "~/routes/work-shifts/container/query.hooks";
+import type {
+  StaffShiftListItem,
+  UpdateShiftScheduleRequest,
+} from "~/services/api/staff/staff-shift/dto";
+import { StaffShiftSchema } from "~/services/api/staff/staff-shift/staff-shift.schema";
+import { WEEKDAYS } from "~/services/api/staff/staff-shift/staff-shift.type";
+import {
+  useStaffShiftById,
+  useUpdateShiftSchedule,
+} from "../container/query.hooks";
 
 const { UpdateShiftScheduleRequestSchema } = StaffShiftSchema;
 
@@ -142,7 +125,6 @@ export default function UpdateScheduleDialog({
     }
 
     try {
-      // Format newDate if it exists
       const formattedData = {
         ...data,
         newDate: data.newDate

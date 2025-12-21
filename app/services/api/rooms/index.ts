@@ -29,7 +29,6 @@ const {
   AvailableRoomsInternalResponseSchema,
   CreateRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
-  QRCodeResponseSchema,
 } = RoomSchema;
 
 async function getRoomList(

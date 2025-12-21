@@ -1,5 +1,6 @@
 import { Check, ImageOff, Search, Sparkles, Utensils } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -13,6 +14,7 @@ import {
 } from "~/components/ui/dialog";
 import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn, formatMoney } from "~/lib/utils";
@@ -26,9 +28,15 @@ interface AddServiceDialogProps {
   onOpenChange: (open: boolean) => void;
   onAddService: (
     serviceId: string,
-    itemType?: "ServiceItem" | "MenuItem"
+    itemType?: "ServiceItem" | "MenuItem",
+    quantity?: number
   ) => void;
   selectedServiceIds: string[];
+  existingServices?: Array<{
+    itemId: string;
+    itemType: "ServiceItem" | "MenuItem";
+    quantity: number;
+  }>;
   checkinDate?: Date | string;
   checkoutDate?: Date | string;
 }
@@ -38,9 +46,22 @@ export default function AddServiceDialog({
   onOpenChange,
   onAddService,
   selectedServiceIds,
+  existingServices = [],
 }: AddServiceDialogProps) {
   const [activeTab, setActiveTab] = useState<"services" | "menu">("services");
   const [searchText, setSearchText] = useState("");
+  // Track quantities for menu items before adding
+  const [menuQuantities, setMenuQuantities] = useState<Record<string, number>>(
+    {}
+  );
+
+  // Get quantity for a menu item (default to 1)
+  const getMenuQuantity = (itemId: string) => menuQuantities[itemId] ?? 1;
+
+  // Update quantity for a menu item
+  const updateMenuQuantity = (itemId: string, quantity: number) => {
+    setMenuQuantities((prev) => ({ ...prev, [itemId]: quantity }));
+  };
 
   // Services data
   const { filters, updateFilter, filterServices } = useServiceFilters();
@@ -71,7 +92,7 @@ export default function AddServiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] p-0 gap-0 overflow-y-auto outline-none">
+      <DialogContent className="max-w-3xl max-h-[85vh] p-0 gap-0 ">
         {/* === HEADER === */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/20">
           <DialogTitle>Thêm Dịch Vụ & F&B</DialogTitle>
@@ -114,7 +135,7 @@ export default function AddServiceDialog({
             </div>
 
             {/* === CONTENT GRID === */}
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto max-h-80">
               {isServicesLoading ? (
                 <ServiceListSkeleton />
               ) : filteredServices.length === 0 ? (
@@ -221,7 +242,7 @@ export default function AddServiceDialog({
             </div>
 
             {/* === CONTENT GRID === */}
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto max-h-80">
               {isMenuLoading ? (
                 <ServiceListSkeleton />
               ) : filteredMenuItems.length === 0 ? (
@@ -240,74 +261,131 @@ export default function AddServiceDialog({
                     const hasImage =
                       menuItem.imageUrls && menuItem.imageUrls.length > 0;
                     const isAvailable = menuItem.maxQuantityAvailable! > 0;
+                    const currentQuantity = getMenuQuantity(menuItem.itemId);
+                    const maxAvailable = menuItem.maxQuantityAvailable ?? 0;
+
                     return (
-                      <button
+                      <div
                         key={menuItem.itemId}
-                        type="button"
-                        disabled={!isAvailable}
-                        onClick={() =>
-                          onAddService(menuItem.itemId, "MenuItem")
-                        }
                         className={cn(
-                          "group relative flex items-start gap-4 rounded-xl border p-3 text-left transition-all duration-200 outline-none",
+                          "group relative flex flex-col gap-3 rounded-xl border p-3 transition-all duration-200",
                           isSelected
                             ? "border-primary bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary))]"
                             : "border-border bg-card hover:bg-muted/40 hover:border-primary/30",
-                          !isAvailable ? "opacity-50 cursor-not-allowed" : ""
+                          !isAvailable ? "opacity-50" : ""
                         )}
                       >
-                        <div className="shrink-0 relative h-20 w-20 rounded-lg overflow-hidden border bg-muted">
-                          {hasImage ? (
-                            <Image
-                              src={menuItem.imageUrls![0]}
-                              alt={menuItem.name}
-                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-muted/50 text-muted-foreground/30">
-                              <Utensils className="h-6 w-6" />
-                            </div>
-                          )}
+                        <button
+                          type="button"
+                          disabled={!isAvailable}
+                          onClick={() => {
+                            // Validate quantity doesn't exceed available stock
+                            if (currentQuantity > maxAvailable) {
+                              toast.error(
+                                `Chỉ còn ${maxAvailable} ${menuItem.name} khả dụng`,
+                                {
+                                  description: "Vui lòng giảm số lượng.",
+                                }
+                              );
+                              return;
+                            }
 
-                          {/* Unit Badge (Overlay on Image) */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/40  p-1 text-center">
-                            <p className="text-[10px] font-medium text-white truncate">
-                              {menuItem.unitName || "F&B"}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Content Info */}
-                        <div className="flex-1 min-w-0 pt-0.5 space-y-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <h4
-                              className={cn(
-                                "font-semibold text-sm truncate pr-4",
-                                isSelected ? "text-primary" : "text-foreground"
-                              )}
-                            >
-                              {menuItem.name}
-                            </h4>
-
-                            {/* Checkmark Badge if selected */}
-                            {isSelected && (
-                              <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm animate-in zoom-in-50">
-                                <Check className="h-3 w-3" />
+                            onAddService(
+                              menuItem.itemId,
+                              "MenuItem",
+                              currentQuantity
+                            );
+                            onOpenChange(false);
+                          }}
+                          className="flex items-start gap-4 text-left w-full"
+                        >
+                          <div className="shrink-0 relative h-20 w-20 rounded-lg overflow-hidden border bg-muted">
+                            {hasImage ? (
+                              <Image
+                                src={menuItem.imageUrls![0]}
+                                alt={menuItem.name}
+                                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center bg-muted/50 text-muted-foreground/30">
+                                <Utensils className="h-6 w-6" />
                               </div>
                             )}
+
+                            {/* Unit Badge (Overlay on Image) */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/40  p-1 text-center">
+                              <p className="text-[10px] font-medium text-white truncate">
+                                {menuItem.unitName || "F&B"}
+                              </p>
+                            </div>
                           </div>
 
-                          <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">
-                            {menuItem.description || "Không có mô tả chi tiết."}
-                          </p>
+                          {/* Content Info */}
+                          <div className="flex-1 min-w-0 pt-0.5 space-y-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <h4
+                                className={cn(
+                                  "font-semibold text-sm truncate pr-4",
+                                  isSelected
+                                    ? "text-primary"
+                                    : "text-foreground"
+                                )}
+                              >
+                                {menuItem.name}
+                              </h4>
 
-                          <div className="flex items-center gap-2 pt-1">
-                            <span className="text-sm font-bold font-mono text-foreground">
-                              {formatMoney(menuItem.price).vndFormatted}
+                              {/* Checkmark Badge if selected */}
+                              {isSelected && (
+                                <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm animate-in zoom-in-50">
+                                  <Check className="h-3 w-3" />
+                                </div>
+                              )}
+                            </div>
+
+                            <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">
+                              {menuItem.description ||
+                                "Không có mô tả chi tiết."}
+                            </p>
+
+                            <div className="flex items-center gap-2 pt-1">
+                              <span className="text-sm font-bold font-mono text-foreground">
+                                {formatMoney(menuItem.price).vndFormatted}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+
+                        {/* Quantity Counter - only show if item is available */}
+                        {isAvailable && (
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <span className="text-xs text-muted-foreground">
+                              Số lượng
+                              {maxAvailable < 999 && (
+                                <span className="ml-1 text-primary font-medium">
+                                  (Còn {maxAvailable})
+                                </span>
+                              )}
                             </span>
+                            <Counter
+                              value={currentQuantity}
+                              onChange={(value) => {
+                                if (value > maxAvailable) {
+                                  toast.error(
+                                    `Chỉ còn ${maxAvailable} ${menuItem.name}`,
+                                    {
+                                      description: "Vượt quá số lượng khả dụng",
+                                    }
+                                  );
+                                  return;
+                                }
+                                updateMenuQuantity(menuItem.itemId, value);
+                              }}
+                              minValue={1}
+                              maxValue={maxAvailable}
+                            />
                           </div>
-                        </div>
-                      </button>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

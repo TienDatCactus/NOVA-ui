@@ -58,7 +58,7 @@ const ExpensesActionCell: React.FC<ExpensesActionCellProps> = ({ expense }) => {
         Procurement: "nhập hàng",
         OtherModule: "module khác",
       };
-      return `Chi phí từ ${sourceTypeLabels[expense.sourceType] || expense.sourceType} không được ${action} từ đây`;
+      return `Chi phí từ ${sourceTypeLabels[expense.sourceType || 0] || expense.sourceType} không được ${action} từ đây`;
     }
     if (expense.status === "Posted") {
       return "Chi phí đã chốt, vui lòng hủy trước khi sửa";
@@ -157,7 +157,7 @@ const ExpensesActionCell: React.FC<ExpensesActionCellProps> = ({ expense }) => {
       <EditExpenseDialog
         open={openEditDialog}
         onOpenChange={setOpenEditDialog}
-        expenseId={expense.id}
+        expenseId={expense?.id || ""}
       />
       <DeleteConfirmDialog
         expense={expense}

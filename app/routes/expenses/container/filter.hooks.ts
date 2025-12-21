@@ -1,23 +1,18 @@
 import { useState } from "react";
+import type { ExpenseListParams } from "~/services/api/expenses/expenses.types";
 
-export type ExpensesFilter = {
-  fromDate?: string;
-  toDate?: string;
-  categoryId?: string;
-};
-
-const initialState: ExpensesFilter = {
+const initialState: ExpenseListParams = {
   fromDate: undefined,
   toDate: undefined,
-  categoryId: "",
+  category: "",
 };
 
 export default function useExpensesFilters() {
-  const [filters, setFilters] = useState<ExpensesFilter>(initialState);
+  const [filters, setFilters] = useState<ExpenseListParams>(initialState);
 
-  const updateFilter = <K extends keyof ExpensesFilter>(
+  const updateFilter = <K extends keyof ExpenseListParams>(
     key: K,
-    value: ExpensesFilter[K]
+    value: ExpenseListParams[K]
   ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };

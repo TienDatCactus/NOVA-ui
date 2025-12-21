@@ -26,7 +26,10 @@ export function ShiftCardActions({
   return (
     <div className="flex gap-1">
       {/* Mark Present Button - Show for assigned and absent */}
-      {(!attendance || status === "assigned" || status === "absent") && (
+      {(!attendance ||
+        status === "assigned" ||
+        status === "unplannedabsence" ||
+        status === "plannedabsence") && (
         <TooltipProvider>
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>

@@ -202,7 +202,6 @@ export default function CreateStaffDialog({
                               mode="single"
                               selected={field.value}
                               onSelect={field.onChange}
-                              captionLayout="dropdown"
                               locale={vi}
                             />
                           </PopoverContent>
