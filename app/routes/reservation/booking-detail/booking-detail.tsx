@@ -163,6 +163,7 @@ export default function Component() {
       otaInformationId: data.otaInformationId,
       totalAmount: data.totalAmount,
       rooms: data.rooms,
+      includeBreakfast: data.includeBreakfast,
     };
 
     updateBooking(payload, {
@@ -185,7 +186,7 @@ export default function Component() {
           otaInformationId: bookingDetail.source === "OTA" ? "" : "",
           customerId: bookingDetail.customer.id,
           totalAmount: bookingDetail.totalAmount || 0,
-
+          includeBreakfast: bookingDetail.includeBreakfast,
           rooms: [],
         },
         {

@@ -51,7 +51,7 @@ export default function MenuCard({ item }: MenuCardProps) {
         <div className="flex flex-col gap-2">
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3">
-            <h3 className="font-serif text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 transition-colors">
+            <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 transition-colors">
               {item.name}
             </h3>
 

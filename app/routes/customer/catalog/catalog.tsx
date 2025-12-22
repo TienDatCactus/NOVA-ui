@@ -138,7 +138,7 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
       </div>
 
       {/* === CONTENT SECTION === */}
-      <div className="container mx-auto px-4 relative z-20 -mt-12 pb-20">
+      <div className="container mx-auto px-4 relative z-10 -mt-12 pb-20">
         <Tabs defaultValue="menu" className="w-full space-y-8">
           {/* Sticky Tab Navigation */}
           <div className="flex justify-center sticky top-6 z-40">
@@ -159,10 +159,7 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
           </div>
 
           <div className="min-h-[500px]">
-            <TabsContent
-              value="menu"
-              className="focus-visible:outline-none animate-in fade-in zoom-in-95 duration-500"
-            >
+            <TabsContent value="menu" className="focus-visible:outline-none">
               <ContentGrid
                 isLoading={isLoadingMenu}
                 isEmpty={filteredMenuItems.length === 0}
@@ -178,7 +175,7 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
 
             <TabsContent
               value="services"
-              className="focus-visible:outline-none animate-in fade-in zoom-in-95 duration-500"
+              className="focus-visible:outline-none"
             >
               <ContentGrid
                 isLoading={isLoadingServices}

@@ -13,7 +13,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
   return (
     <Card
       className={cn(
-        "group relative p-0 overflow-hidden border-0 shadow-sm transition-all duration-500",
+        "group relative p-0 overflow-hidden border-0 shadow-sm -z-10",
         "hover:bg-background/80  hover:shadow-lg hover:shadow-stone-900/5 hover:-translate-y-1"
       )}
     >
@@ -29,14 +29,14 @@ export default function ServiceCard({ service }: ServiceCardProps) {
             )}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-stone-100">
+          <div className="flex h-full w-full items-center justify-center bg-muted">
             <Sparkles className="h-10 w-10 text-muted-foreground" />
           </div>
         )}
 
         {/* "Temporarily Suspended" Mist Overlay */}
         {!service.active && (
-          <div className="absolute inset-0 flex items-center justify-center bg-stone-100/60 backdrop-blur-[2px] z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/60  z-10">
             <div className="rotate-[-12deg] rounded-lg border-2 border-muted-foreground px-4 py-1 text-sm font-bold uppercase tracking-widest text-muted-foreground mix-blend-multiply bg-background/50 shadow-sm">
               Tạm ngưng
             </div>
@@ -52,7 +52,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
         <div className="flex flex-col gap-2">
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3">
-            <h3 className="font-serif text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 transition-colors">
+            <h3 className=" text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 ">
               {service.name}
             </h3>
           </div>

@@ -166,7 +166,7 @@ const CustomerLayout: React.FC = () => {
       <main className="flex-1 w-full relative flex flex-col z-10">
         <Outlet />
 
-        <div className="fixed bottom-4 right-4">
+        <div className="fixed bottom-4 right-4 z-50">
           <Button
             className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-900/20 hover:shadow-emerald-900/30 transition-all"
             size="icon"
