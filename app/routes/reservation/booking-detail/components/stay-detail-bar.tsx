@@ -82,7 +82,6 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
 import type { BookingState } from "../container/use-booking-state.hooks";
-import { ButtonGroup } from "~/components/ui/button-group";
 
 interface StayDetailBarProps {
   bookingCode: string;
@@ -420,34 +419,19 @@ export default function StayDetailBar({
                                     <div className="flex justify-between items-center mb-1.5">
                                       <FormLabel>Số tiền thu</FormLabel>
                                       {/* UX: Quick Fill Buttons */}
-                                      <ButtonGroup>
-                                        <Button
-                                          size={"sm"}
-                                          variant="outline"
-                                          onClick={() =>
-                                            paymentForm.setValue(
-                                              "paidAmount",
-                                              Math.round(
-                                                paymentSummary.totalAmount * 0.5
-                                              )
-                                            )
-                                          }
-                                        >
-                                          50%
-                                        </Button>
-                                        <Button
-                                          size={"sm"}
-                                          variant="outline"
-                                          onClick={() =>
-                                            paymentForm.setValue(
-                                              "paidAmount",
-                                              paymentSummary.totalAmount
-                                            )
-                                          }
-                                        >
-                                          Tất cả
-                                        </Button>
-                                      </ButtonGroup>
+
+                                      <Button
+                                        size={"sm"}
+                                        variant="outline"
+                                        onClick={() =>
+                                          paymentForm.setValue(
+                                            "paidAmount",
+                                            paymentSummary.totalAmount
+                                          )
+                                        }
+                                      >
+                                        100%
+                                      </Button>
                                     </div>
                                     <FormControl>
                                       <Input

@@ -56,7 +56,6 @@ import {
   useAssignStaff,
   useChatMessages,
   useChatSession,
-  useCloseSession,
   useMarkAllRead,
 } from "../container/query.hooks";
 import {
@@ -163,7 +162,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const { data: serviceItems } = useServices({});
 
   const assignStaffMutation = useAssignStaff();
-  const closeSessionMutation = useCloseSession();
   const markAllReadMutation = useMarkAllRead();
 
   // --- SignalR Connection ---
@@ -263,14 +261,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
       onError: () => toast.error("Could not mark as read"),
     });
   }, [sessionId, markAllReadMutation]);
-
-  const handleCloseSession = useCallback(() => {
-    if (!sessionId) return;
-    closeSessionMutation.mutate(sessionId, {
-      onSuccess: () => toast.success("Session closed"),
-      onError: () => toast.error("Could not close session"),
-    });
-  }, [sessionId, closeSessionMutation]);
 
   const handleAssignStaff = useCallback(
     (staffId: string) => {
@@ -542,18 +532,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 <CheckCheck className="h-4 w-4 mr-2 text-emerald-600" /> Đánh
                 dấu tất cả đã đọc
               </DropdownMenuItem>
-              {canSendMessage && (
-                <>
-                  <DropdownMenuSeparator className="bg-stone-100" />
-                  <DropdownMenuItem
-                    onClick={handleCloseSession}
-                    disabled={closeSessionMutation.isPending}
-                    className="text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
-                  >
-                    <XCircle className="h-4 w-4 mr-2" /> Đóng phiên
-                  </DropdownMenuItem>
-                </>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

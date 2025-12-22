@@ -137,12 +137,12 @@ export function useTerminateStaff() {
       queryClient.invalidateQueries({
         queryKey: ["staff-shifts"],
       });
-      toast.success("Kết thúc hợp đồng nhân sự thành công");
+      toast.success("Cho nghỉ việc nhân sự thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data.message || "Lỗi khi kết thúc hợp đồng nhân sự"
+          error.response?.data.message || "Lỗi khi Cho nghỉ việc nhân sự"
         );
       }
     },

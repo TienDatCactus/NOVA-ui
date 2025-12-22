@@ -586,28 +586,17 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                   Số tiền thực thu
                                 </FormLabel>
                                 {/* QUICK ACTIONS */}
-                                <ButtonGroup>
-                                  <Button
-                                    variant={"outline"}
-                                    type="button"
-                                    onClick={() =>
-                                      field.onChange(
-                                        Math.round(finalTotal * 0.5)
-                                      )
-                                    }
-                                  >
-                                    50%
-                                  </Button>
-                                  <Button
-                                    variant={"outline"}
-                                    type="button"
-                                    onClick={() =>
-                                      field.onChange(Math.round(finalTotal))
-                                    }
-                                  >
-                                    100%
-                                  </Button>
-                                </ButtonGroup>
+
+                                <Button
+                                  variant={"outline"}
+                                  type="button"
+                                  size={"sm"}
+                                  onClick={() =>
+                                    field.onChange(Math.round(finalTotal))
+                                  }
+                                >
+                                  100%
+                                </Button>
                               </div>
 
                               <FormControl>

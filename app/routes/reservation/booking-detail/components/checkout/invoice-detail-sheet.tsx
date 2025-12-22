@@ -6,6 +6,7 @@ import {
   Calendar,
   CreditCard,
   Hash,
+  Info,
   Loader2,
   RefreshCw,
   Tag,
@@ -106,42 +107,6 @@ export default function InvoiceDetailSheet({
     !!invoiceId && open
   );
 
-  const { data: calculatedFees, refetch: refetchFees } =
-    useCalculateInvoiceFees(
-      {
-        subtotalAmount: invoiceDetail?.subTotal || 0,
-        applyVat,
-        applyServiceCharge,
-      },
-      !!invoiceDetail && open
-    );
-
-  // --- EFFECTS ---
-  useEffect(() => {
-    if (invoiceDetail && open) refetchFees();
-  }, [applyVat, applyServiceCharge, invoiceDetail, open, refetchFees]);
-
-  useEffect(() => {
-    if (!invoiceDetail || !calculatedFees || !open) return;
-    if (!paymentEligibility.canProceed) return;
-
-    const vatChanged =
-      (calculatedFees.vatAmount || 0) !== (invoiceDetail.vatAmount || 0);
-    const serviceChargeChanged =
-      (calculatedFees.serviceChargeAmount || 0) !==
-      (invoiceDetail.serviceChargeAmount || 0);
-
-    if (vatChanged || serviceChargeChanged) {
-      updateInvoice({
-        vatAmount: applyVat ? calculatedFees.vatAmount : 0,
-        serviceChargeAmount: applyServiceCharge
-          ? calculatedFees.serviceChargeAmount
-          : 0,
-        paymentMethod: invoiceDetail.paymentMethod || "Cash",
-      });
-    }
-  }, [calculatedFees, invoiceDetail, applyVat, applyServiceCharge, open]);
-
   // --- MUTATIONS ---
   const isCheckoutInvoice =
     isNewlyCreatedInvoice || invoiceDetail?.invoiceType === "Checkout";
@@ -189,15 +154,6 @@ export default function InvoiceDetailSheet({
     return canInvoiceAcceptPayment(invoiceDetail.status);
   }, [invoiceDetail?.status]);
 
-  const paymentValidation = useMemo(() => {
-    if (!invoiceDetail || !invoiceDetail.status) return { isValid: false };
-    return validatePaymentAmount(
-      amount,
-      invoiceDetail.balance || 0,
-      invoiceDetail.status
-    );
-  }, [amount, invoiceDetail, calculatedFees]);
-
   const roomItems = useMemo(
     () =>
       invoiceDetail?.items?.filter((item) => item.itemType === "Room") || [],
@@ -211,6 +167,66 @@ export default function InvoiceDetailSheet({
       ) || [],
     [invoiceDetail?.items]
   );
+
+  const roomSubtotal = useMemo(
+    () => roomItems.reduce((sum, item) => sum + (item.subtotal || 0), 0),
+    [roomItems]
+  );
+
+  const serviceSubtotal = useMemo(
+    () => serviceItems.reduce((sum, item) => sum + (item.subtotal || 0), 0),
+    [serviceItems]
+  );
+
+  const hasServiceItems = serviceItems.length > 0;
+  const hasOnlyRoomItems = roomItems.length > 0 && !hasServiceItems;
+  const { data: calculatedFees, refetch: refetchFees } =
+    useCalculateInvoiceFees(
+      {
+        subtotalAmount: serviceSubtotal || 0,
+        applyVat,
+        applyServiceCharge,
+      },
+      !!invoiceDetail &&
+        open &&
+        invoiceDetail.status !== "Paid" &&
+        hasServiceItems
+    );
+
+  // --- EFFECTS ---
+  useEffect(() => {
+    if (invoiceDetail && open) refetchFees();
+  }, [applyVat, applyServiceCharge, invoiceDetail, refetchFees]);
+
+  useEffect(() => {
+    if (!invoiceDetail || !calculatedFees || !open) return;
+    if (!paymentEligibility.canProceed) return;
+
+    const vatChanged =
+      (calculatedFees.vatAmount || 0) !== (invoiceDetail.vatAmount || 0);
+    const serviceChargeChanged =
+      (calculatedFees.serviceChargeAmount || 0) !==
+      (invoiceDetail.serviceChargeAmount || 0);
+
+    if (vatChanged || serviceChargeChanged) {
+      updateInvoice({
+        vatAmount: applyVat ? calculatedFees.vatAmount : 0,
+        serviceChargeAmount: applyServiceCharge
+          ? calculatedFees.serviceChargeAmount
+          : 0,
+        paymentMethod: invoiceDetail.paymentMethod || "Cash",
+      });
+    }
+  }, [calculatedFees, invoiceDetail, applyVat, applyServiceCharge, open]);
+
+  const paymentValidation = useMemo(() => {
+    if (!invoiceDetail || !invoiceDetail.status) return { isValid: false };
+    return validatePaymentAmount(
+      amount,
+      invoiceDetail.balance || 0,
+      invoiceDetail.status
+    );
+  }, [amount, invoiceDetail, calculatedFees]);
 
   // --- HANDLERS ---
   const handleSyncInvoice = () => {
@@ -523,67 +539,92 @@ export default function InvoiceDetailSheet({
               <div className="p-8 flex-1 overflow-y-auto">
                 {/* 1. Calculation Block */}
                 <div className="space-y-3 mb-8">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tạm tính</span>
-                    <span className="font-mono">
-                      {formatMoney(invoiceDetail.subTotal || 0).vndFormatted}
-                    </span>
-                  </div>
-
-                  {/* Smart Toggles inside Calculation */}
-                  <div className="flex justify-between items-center h-8">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="vat"
-                        checked={applyVat}
-                        onCheckedChange={setApplyVat}
-                        className="scale-75 origin-left"
-                        disabled={!paymentEligibility.canProceed}
-                      />
-                      <Label
-                        htmlFor="vat"
-                        className="text-xs cursor-pointer text-muted-foreground"
-                      >
-                        VAT (GTGT)
-                      </Label>
+                  {/* Room Charges (No Fees) */}
+                  {roomItems.length > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Tiền phòng</span>
+                      <span className="font-mono">
+                        {formatMoney(roomSubtotal).vndFormatted}
+                      </span>
                     </div>
-                    <span className="font-mono text-sm text-muted-foreground">
-                      {
-                        formatMoney(
-                          calculatedFees?.vatAmount ||
-                            invoiceDetail.vatAmount ||
-                            0
-                        ).vndFormatted
-                      }
-                    </span>
-                  </div>
+                  )}
 
-                  <div className="flex justify-between items-center h-8">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="svc"
-                        checked={applyServiceCharge}
-                        onCheckedChange={setApplyServiceCharge}
-                        className="scale-75 origin-left"
-                        disabled={!paymentEligibility.canProceed}
-                      />
-                      <Label
-                        htmlFor="svc"
-                        className="text-xs cursor-pointer text-muted-foreground"
-                      >
-                        Phí dịch vụ
-                      </Label>
+                  {/* Service/Menu Charges with Fees */}
+                  {hasServiceItems && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          Dịch vụ & Nhà hàng
+                        </span>
+                        <span className="font-mono">
+                          {formatMoney(serviceSubtotal).vndFormatted}
+                        </span>
+                      </div>
+
+                      {/* Visual separator for fee section */}
+                      <div className="ml-4 pl-4 border-l-2 border-blue-200 dark:border-blue-800 space-y-2 py-2">
+                        {/* Smart Toggles inside Calculation */}
+                        <div className="flex justify-between items-center h-8">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              id="vat"
+                              checked={applyVat}
+                              onCheckedChange={setApplyVat}
+                              className="scale-75 origin-left"
+                              disabled={!paymentEligibility.canProceed}
+                            />
+                            <Label
+                              htmlFor="vat"
+                              className="text-xs cursor-pointer text-muted-foreground"
+                            >
+                              VAT (GTGT)
+                            </Label>
+                          </div>
+                          <span className="font-mono text-sm text-muted-foreground">
+                            {
+                              formatMoney(calculatedFees?.vatAmount || 0)
+                                .vndFormatted
+                            }
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center h-8">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              id="svc"
+                              checked={applyServiceCharge}
+                              onCheckedChange={setApplyServiceCharge}
+                              className="scale-75 origin-left"
+                              disabled={!paymentEligibility.canProceed}
+                            />
+                            <Label
+                              htmlFor="svc"
+                              className="text-xs cursor-pointer text-muted-foreground"
+                            >
+                              Phí dịch vụ
+                            </Label>
+                          </div>
+                          <span className="font-mono text-sm text-muted-foreground">
+                            {
+                              formatMoney(
+                                calculatedFees?.serviceChargeAmount || 0
+                              ).vndFormatted
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Visual cue when only room items */}
+                  {hasOnlyRoomItems && (
+                    <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-md">
+                      <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        Tiền phòng không áp dụng VAT và phí dịch vụ
+                      </p>
                     </div>
-                    <span className="font-mono text-sm text-muted-foreground">
-                      {
-                        formatMoney(
-                          calculatedFees?.serviceChargeAmount ||
-                            invoiceDetail.serviceChargeAmount ||
-                            0
-                        ).vndFormatted
-                      }
-                    </span>
-                  </div>
+                  )}
 
                   <Separator />
 
@@ -592,9 +633,8 @@ export default function InvoiceDetailSheet({
                     <span className="font-mono text-xl font-bold">
                       {
                         formatMoney(
-                          calculatedFees?.totalAmount ||
-                            invoiceDetail.total ||
-                            0
+                          roomSubtotal +
+                            (calculatedFees?.totalAmount || serviceSubtotal)
                         ).vndFormatted
                       }
                     </span>
@@ -606,6 +646,18 @@ export default function InvoiceDetailSheet({
                       {formatMoney(invoiceDetail.paidAmount || 0).vndFormatted}
                     </span>
                   </div>
+
+                  {/* Balance with visual distinction */}
+                  {invoiceDetail.balance! > 0 && (
+                    <div className="flex justify-between text-sm pt-2 border-t">
+                      <span className="font-medium text-foreground">
+                        Còn phải thu
+                      </span>
+                      <span className="font-mono font-bold text-destructive">
+                        {formatMoney(invoiceDetail.balance || 0).vndFormatted}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* 2. Payment Form */}

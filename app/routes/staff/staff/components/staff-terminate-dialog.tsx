@@ -65,9 +65,9 @@ export default function StaffTerminateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Kết thúc hợp đồng nhân sự</DialogTitle>
+          <DialogTitle>Cho nghỉ việc nhân sự</DialogTitle>
           <DialogDescription>
-            Kết thúc hợp đồng cho nhân sự: <strong>{staff.fullName}</strong> (
+            Cho nghỉ việc cho nhân sự: <strong>{staff.fullName}</strong> (
             {staff.code})
           </DialogDescription>
         </DialogHeader>
@@ -79,7 +79,7 @@ export default function StaffTerminateDialog({
               name="terminationDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ngày kết thúc hợp đồng</FormLabel>
+                  <FormLabel>Ngày Cho nghỉ việc</FormLabel>
                   <FormControl>
                     <DatePicker
                       value={field.value ? new Date(field.value) : undefined}
@@ -90,7 +90,7 @@ export default function StaffTerminateDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    Ngày chính thức kết thúc hợp đồng làm việc
+                    Ngày chính thức Cho nghỉ việc làm việc
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -105,14 +105,14 @@ export default function StaffTerminateDialog({
                   <FormLabel>Ghi chú</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Lý do kết thúc hợp đồng..."
+                      placeholder="Lý do Cho nghỉ việc..."
                       className="resize-none"
                       rows={4}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Ghi chú về lý do kết thúc hợp đồng (tùy chọn)
+                    Ghi chú về lý do Cho nghỉ việc (tùy chọn)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -129,7 +129,7 @@ export default function StaffTerminateDialog({
                 Hủy
               </Button>
               <Button type="submit" variant="destructive" disabled={isPending}>
-                {isPending ? "Đang xử lý..." : "Kết thúc hợp đồng"}
+                {isPending ? "Đang xử lý..." : "Cho nghỉ việc"}
               </Button>
             </DialogFooter>
           </form>

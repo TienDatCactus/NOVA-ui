@@ -70,14 +70,14 @@ export function KpiRow({ data, isLoading }: KpiRowProps) {
         subtitle="Sẵn sàng cho thuê"
       />
       <KpiCard
-        title="Check-in hôm nay"
+        title="Check-in "
         icon={LogIn}
         value={kpis.todayCheckins}
         format="number"
         subtitle="Khách đến"
       />
       <KpiCard
-        title="Check-out hôm nay"
+        title="Check-out "
         icon={LogOut}
         value={kpis.todayCheckouts}
         format="number"

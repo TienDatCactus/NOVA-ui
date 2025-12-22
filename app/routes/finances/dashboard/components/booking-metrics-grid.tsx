@@ -34,13 +34,13 @@ export function BookingMetricsGrid({ metrics }: BookingMetricsGridProps) {
         {/* Dùng màu sắc để định hướng hành động */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <OperationCard
-            label="Check-in hôm nay"
+            label="Check-in "
             value={metrics.checkIns}
             icon={LogIn}
             intent="success" // Xanh: Việc cần làm vào/tích cực
           />
           <OperationCard
-            label="Check-out hôm nay"
+            label="Check-out "
             value={metrics.checkOuts}
             icon={LogOut}
             intent="warning" // Cam: Việc cần làm ra/lưu ý

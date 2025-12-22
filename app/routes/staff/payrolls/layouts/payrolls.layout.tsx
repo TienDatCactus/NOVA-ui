@@ -31,8 +31,6 @@ export default function PayrollsLayout({
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
 
-  const { mutate: refreshDays, isPending: isRefreshing } =
-    useRefreshPayrollDays();
   const { mutateAsync: exportMonthly, isPending: isExporting } =
     useExportMonthlyPayroll(
       filterState.year || currentYear,
@@ -58,27 +56,6 @@ export default function PayrollsLayout({
 
       toast.success("Xuất báo cáo thành công");
     } catch (error) {}
-  };
-
-  const handleRefreshDays = () => {
-    if (!filterState.year) {
-      toast.error("Vui lòng chọn năm");
-      return;
-    }
-
-    refreshDays(
-      {
-        year: filterState.year,
-        month: filterState.month || currentDate.getMonth() + 1,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Đã làm mới dữ liệu lương");
-          onRefresh?.();
-        },
-        onError: () => toast.error("Lỗi khi làm mới dữ liệu"),
-      }
-    );
   };
 
   return (
@@ -148,25 +125,6 @@ export default function PayrollsLayout({
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 w-full md:w-auto justify-end p-2 pt-0 md:pt-2 md:pl-0">
-          {hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRefreshDays}
-              disabled={isRefreshing}
-              className="h-9 text-muted-foreground hover:text-foreground"
-            >
-              {isRefreshing ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="mr-2 h-4 w-4" />
-              )}
-              Đồng bộ
-            </Button>
-          )}
-
-          <Separator orientation="vertical" className="h-6 hidden md:block" />
-
           {hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
             <Button
               onClick={handleExportMonthly}

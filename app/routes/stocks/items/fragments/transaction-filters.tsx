@@ -20,7 +20,7 @@ interface TransactionFiltersProps {
   fromDate: Date | undefined;
   toDate: Date | undefined;
   transactionType: string;
-  sourceType: string;
+  sourceType: string | undefined;
   onFromDateChange: (date: Date | undefined) => void;
   onToDateChange: (date: Date | undefined) => void;
   onTransactionTypeChange: (value: string) => void;
@@ -64,7 +64,6 @@ export function TransactionFilters({
               mode="single"
               selected={fromDate}
               onSelect={onFromDateChange}
-              initialFocus
             />
           </PopoverContent>
         </Popover>
@@ -93,7 +92,6 @@ export function TransactionFilters({
               mode="single"
               selected={toDate}
               onSelect={onToDateChange}
-              initialFocus
             />
           </PopoverContent>
         </Popover>
@@ -129,6 +127,7 @@ export function TransactionFilters({
             <SelectValue placeholder="Tất cả" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">Tất cả</SelectItem>
             <SelectItem value="Manual">Thủ công</SelectItem>
             <SelectItem value="PosOrder">Đơn hàng POS</SelectItem>
             <SelectItem value="PurchaseRequest">Yêu cầu mua hàng</SelectItem>

@@ -109,26 +109,6 @@ export function useAssignStaff() {
   });
 }
 
-// Mutation: Close session
-export function useCloseSession() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (sessionId: string) => ChatService.closeChatSession(sessionId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["staff-chat-inbox"] });
-      toast.success("Đóng phiên chat thành công");
-    },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        toast.error(
-          error.response?.data?.message || "Đóng phiên chat thất bại"
-        );
-      }
-    },
-  });
-}
-
 // Mutation: Mark message as read
 export function useMarkRead() {
   const queryClient = useQueryClient();

@@ -111,7 +111,7 @@ export default function ServiceTypeDetailRow({
             {/* Identity Block */}
             <div>
               <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Info className="w-3.5 h-3.5" /> Thông tin định danh
+                <Info className="w-3.5 h-3.5" /> Thông tin
               </h4>
 
               <div className="space-y-4">

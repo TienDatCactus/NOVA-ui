@@ -9,13 +9,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 import type { StockAdjustmentListItemDto } from "~/services/api/stocks/stock-adjustments/dto";
 import EditStockAdjustmentDialog from "../components/edit-stock-adjustment.dialog";
-import DeleteConfirmDialog from "./delete-confirm.dialog";
 import ApplyConfirmDialog from "./apply-confirm.dialog";
-import { hasAnyRole } from "~/lib/auth/bouncer";
-import { AuthLoader } from "~/lib/auth/auth.loader";
-import { UserRole } from "~/lib/auth/roles";
+import DeleteConfirmDialog from "./delete-confirm.dialog";
 
 interface StockAdjustmentActionCellProps {
   adjustment: StockAdjustmentListItemDto;
@@ -45,12 +45,13 @@ export default function StockAdjustmentActionCell({
           <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          {canEdit && (
-            <DropdownMenuItem onClick={() => setOpenEditDialog(true)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Chỉnh sửa
-            </DropdownMenuItem>
-          )}
+          {canEdit &&
+            hasAnyRole(AuthLoader.getUser(), [UserRole.ServiceStaff]) && (
+              <DropdownMenuItem onClick={() => setOpenEditDialog(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Chỉnh sửa
+              </DropdownMenuItem>
+            )}
 
           {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) &&
             canApply && (

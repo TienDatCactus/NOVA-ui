@@ -63,7 +63,7 @@ export function useCalculateInvoiceFees(
       data.applyServiceCharge,
     ],
     queryFn: () => InvoicesService.calculateInvoiceFees(data),
-    enabled: enabled && data.subtotalAmount > 0,
+    enabled: enabled,
     staleTime: 0,
     refetchOnWindowFocus: false,
   });

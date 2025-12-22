@@ -1,19 +1,16 @@
-import {
-  Minus,
-  Plus,
-  Search,
-  ShoppingBasket,
-  Utensils,
-  Wrench,
-  X,
-} from "lucide-react";
+import { Minus, Plus, Search, ShoppingBasket } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -159,32 +156,12 @@ export default function AddCompletedChargesDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-[95vw] w-[1200px] h-[90vh] p-0 flex flex-col gap-0 overflow-hidden bg-background">
-        {/* 1. Header */}
-        <div className="flex items-center justify-between px-6 py-3 border-b bg-background z-10 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-              {activeTab === "pos" ? (
-                <Utensils className="h-5 w-5" />
-              ) : (
-                <Wrench className="h-5 w-5" />
-              )}
-            </div>
-            <div>
-              <DialogTitle className="text-lg">Thêm dịch vụ</DialogTitle>
-              <p className="text-xs text-muted-foreground">
-                Chọn món hoặc dịch vụ để tính tiền
-              </p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleClose}
-            className="rounded-full"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+        <DialogHeader className="px-6 py-4 border-b">
+          <DialogTitle className="text-lg">Thêm dịch vụ</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            Chọn món hoặc dịch vụ để tính tiền
+          </DialogDescription>
+        </DialogHeader>
 
         {/* 2. Main Body */}
         <div className="flex flex-1 overflow-hidden relative">
@@ -273,7 +250,7 @@ export default function AddCompletedChargesDialog({
           </div>
 
           {/* RIGHT: Cart Sidebar (Desktop) */}
-          <div className="hidden lg:flex w-[380px] flex-col border-l bg-background z-20 shadow-md shrink-0 h-full overflow-hidden">
+          <div className="hidden lg:flex w-[380px] flex-col border-l bg-background z-20 shadow-md shrink-0 h-full overflow-y-auto">
             <CartContent
               totalCount={totalCount}
               totalAmount={totalAmount}
@@ -415,7 +392,7 @@ function CartContent({
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
+      <div className="p-4 flex-1 overflow-y-auto">
         {totalCount === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-3 opacity-60">
             <ShoppingBasket className="h-12 w-12" />
@@ -464,7 +441,7 @@ function CartContent({
             )}
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       <div className="p-5 bg-background border-t space-y-4 shadow-md shrink-0">
         <div className="flex justify-between items-end">

@@ -82,13 +82,10 @@ export function NavUser() {
       });
 
       if (response) {
-        // Clean up current session data
         cleanupAllStores();
 
-        // Update lastUsed timestamp
         updateLastUsed(selectedAccount.id);
 
-        // Close dialog
         setShowQuickPassword(false);
         setSelectedAccount(null);
 
@@ -107,14 +104,10 @@ export function NavUser() {
         } else {
           navigate(DASHBOARD.bookings.list);
         }
-
         toast.success(
           `Đã chuyển sang tài khoản ${selectedAccount.fullName || selectedAccount.userName}`
         );
       }
-    } catch (error) {
-      // Error already handled by login hook with toast
-      console.error("Account switch failed:", error);
     } finally {
       setIsAccountSwitching(false);
     }

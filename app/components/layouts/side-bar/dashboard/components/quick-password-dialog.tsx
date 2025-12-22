@@ -68,8 +68,8 @@ export function QuickPasswordDialog({
       <DialogContent className="sm:max-w-[360px] gap-6">
         <DialogHeader className="space-y-3">
           <div className="flex justify-center">
-            <Avatar className="h-16 w-16 rounded-xl border-2 border-primary/20">
-              <AvatarFallback className="rounded-xl text-xl bg-primary/10 text-primary">
+            <Avatar className="h-16 w-16 rounded-xl border-2 border-muted">
+              <AvatarFallback className="rounded-xl text-xl bg-muted-foreground/20 ">
                 {account.fullName?.charAt(0) || account.userName.charAt(0)}
               </AvatarFallback>
             </Avatar>

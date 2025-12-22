@@ -128,8 +128,9 @@ export default function CheckoutSheet({
     const hasPendingOrders =
       (pendingCharges?.pendingOrders?.posOrders?.length || 0) > 0 ||
       (pendingCharges?.pendingOrders?.serviceOrders?.length || 0) > 0;
-
-    return hasPendingOrders;
+    const hasPendingRoomCharges =
+      pendingCharges?.roomInvoice?.paid === pendingCharges?.roomInvoice?.total;
+    return hasPendingOrders || !hasPendingRoomCharges;
   }, [existingInvoices, pendingCharges]);
   const handleCreateInvoice = () => {
     createInvoice(undefined, {
@@ -323,7 +324,7 @@ export default function CheckoutSheet({
                             <div className="bg-muted/10 p-4 border-t space-y-2">
                               <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">
-                                  Tạm tính:
+                                  Tạm tính (F&B & Dịch vụ):
                                 </span>
                                 <span className="font-mono">
                                   {
@@ -334,30 +335,37 @@ export default function CheckoutSheet({
                               </div>
                               {(invoicePreview.vatAmount > 0 ||
                                 invoicePreview.serviceChargeAmount > 0) && (
-                                <div className="text-xs text-muted-foreground space-y-1 py-1">
-                                  {invoicePreview.vatAmount > 0 && (
-                                    <div className="flex justify-between">
-                                      <span>VAT:</span>
-                                      <span>
-                                        {
-                                          formatMoney(invoicePreview.vatAmount)
-                                            .vndFormatted
-                                        }
-                                      </span>
-                                    </div>
-                                  )}
-                                  {invoicePreview.serviceChargeAmount > 0 && (
-                                    <div className="flex justify-between">
-                                      <span>Service Charge:</span>
-                                      <span>
-                                        {
-                                          formatMoney(
-                                            invoicePreview.serviceChargeAmount
-                                          ).vndFormatted
-                                        }
-                                      </span>
-                                    </div>
-                                  )}
+                                <div className="bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-md p-2 space-y-1">
+                                  <p className="text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400 font-semibold mb-1 flex items-center gap-1">
+                                    <Info className="w-3 h-3" />
+                                    Phí bổ sung (chỉ F&B & Dịch vụ)
+                                  </p>
+                                  <div className="text-xs text-muted-foreground space-y-1">
+                                    {invoicePreview.vatAmount > 0 && (
+                                      <div className="flex justify-between">
+                                        <span>VAT:</span>
+                                        <span className="font-mono">
+                                          {
+                                            formatMoney(
+                                              invoicePreview.vatAmount
+                                            ).vndFormatted
+                                          }
+                                        </span>
+                                      </div>
+                                    )}
+                                    {invoicePreview.serviceChargeAmount > 0 && (
+                                      <div className="flex justify-between">
+                                        <span>Service Charge:</span>
+                                        <span className="font-mono">
+                                          {
+                                            formatMoney(
+                                              invoicePreview.serviceChargeAmount
+                                            ).vndFormatted
+                                          }
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               )}
                               <Separator className="bg-slate-300" />

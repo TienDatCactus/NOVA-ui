@@ -221,8 +221,6 @@ export default function Component({}: Route.ComponentProps) {
         },
         {
           onSuccess: () => {
-            toast.success("Tạo đơn dịch vụ thành công!");
-            // Capture customer type before clearing
             const wasBooking = !!bookingId;
             setSelectedBookingInfo(null);
             setBookingInfo(null, null);

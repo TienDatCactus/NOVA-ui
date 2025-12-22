@@ -96,7 +96,7 @@ export default function UpdatePaidAmountPayrollDialog({
       <DialogContent className="sm:max-w-md gap-0 p-0 overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b bg-muted/10">
           <DialogTitle>Cập nhật số tiền đã trả</DialogTitle>
-          <DialogDescription className="mt-0.5">
+          <DialogDescription>
             Điều chỉnh số tiền thực trả cho kỳ lương này.
           </DialogDescription>
         </DialogHeader>
@@ -107,7 +107,6 @@ export default function UpdatePaidAmountPayrollDialog({
             onSubmit={handleSubmit}
             className="px-6 py-6 space-y-6"
           >
-            {/* Staff Card - Giữ nguyên logic hiển thị của bạn, chỉ tút lại style một chút */}
             <div className="flex items-center gap-4 p-3 rounded-xl border bg-card/50 shadow-sm">
               <div className="h-10 w-10 rounded-full flex items-center justify-center bg-muted">
                 <User className="h-5 w-5" />
@@ -122,7 +121,6 @@ export default function UpdatePaidAmountPayrollDialog({
               </div>
             </div>
 
-            {/* Paid Amount Input */}
             <FormField
               control={form.control}
               name="paidAmount"

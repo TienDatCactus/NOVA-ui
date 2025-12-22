@@ -43,7 +43,7 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
             onClick={() => setTerminateDialogOpen(true)}
           >
             <UserX className="mr-2 h-4 w-4" />
-            Kết thúc hợp đồng
+            Cho nghỉ việc
           </DropdownMenuItem>
         )}
         {canDelete && (

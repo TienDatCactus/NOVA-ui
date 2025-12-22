@@ -112,14 +112,12 @@ export default function PaymentOrderSheet({
         applyVat,
         applyServiceCharge,
       },
-      open && subTotal > 0
+      open
     );
-
   const displayVatAmount = calculatedFees?.vatAmount ?? 0;
   const displayServiceChargeAmount = calculatedFees?.serviceChargeAmount ?? 0;
   const displayTotalAmount = calculatedFees?.totalAmount ?? subTotal;
 
-  // --- Form Setup ---
   const paymentForm = useForm<PaymentFormData>({
     resolver: zodResolver(OrderPayNowRequestSchema),
     mode: "onChange",

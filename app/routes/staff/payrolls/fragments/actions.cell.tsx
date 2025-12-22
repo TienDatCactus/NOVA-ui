@@ -35,17 +35,6 @@ export default function ActionsMenuCell({
   const [applyLeaveOpen, setApplyLeaveOpen] = useState(false);
   const [createExpenseOpen, setCreateExpenseOpen] = useState(false);
 
-  const { mutate: refreshSingle, isPending: isRefreshing } =
-    useRefreshSinglePayroll();
-
-  const handleRefreshSingle = () => {
-    refreshSingle(payroll.payrollId, {
-      onSuccess: () => {
-        onSuccess?.();
-      },
-    });
-  };
-
   return (
     <>
       <DropdownMenu>
@@ -84,16 +73,6 @@ export default function ActionsMenuCell({
           >
             <DollarSign className="mr-2 h-4 w-4" />
             <span>Tạo phiếu chi lương</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={handleRefreshSingle}
-            disabled={isRefreshing}
-          >
-            <RefreshCw
-              className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            <span>Làm mới</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

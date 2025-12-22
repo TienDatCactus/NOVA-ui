@@ -13,6 +13,8 @@ import StockAdjustmentsDataTable from "./stock-adjustments-list";
 import { useState } from "react";
 import CreateStockAdjustmentDialog from "./create-stock-adjustment.dialog";
 import { Button } from "~/components/ui/button";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface StockAdjustmentsListViewProps {
   adjustments: StockAdjustmentListDto;
@@ -60,9 +62,11 @@ function EmptyState() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button onClick={() => setOpenCreateDialog(true)}>
-          Tạo phiếu thay đổi mới
-        </Button>
+        {hasRole(AuthLoader.getUser(), UserRole.ServiceStaff) && (
+          <Button onClick={() => setOpenCreateDialog(true)}>
+            Tạo phiếu thay đổi mới
+          </Button>
+        )}
       </EmptyContent>
       <CreateStockAdjustmentDialog
         open={openCreateDialog}
