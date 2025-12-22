@@ -30,7 +30,15 @@ import STORAGE, { deleteStorage, getStorage, setStorage } from "~/lib/storage";
 import { cn } from "~/lib/utils";
 import { useChatEntry } from "~/routes/chat/container/query.hooks";
 import type { Route } from "./+types/inbox";
-
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Danh sách tin nhắn - NOVA Hotel " },
+    {
+      name: "description",
+      content: "Danh sách tin nhắn với nhân viên khách sạn",
+    },
+  ];
+}
 export default function ChatInbox({}: Route.ComponentProps) {
   const { t } = useTranslation("chat");
   const navigate = useNavigate();

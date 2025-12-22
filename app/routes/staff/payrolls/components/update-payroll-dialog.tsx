@@ -234,7 +234,7 @@ export default function UpdatePayrollDialog({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tổng lương:</span>
                 <span className="font-mono font-medium">
-                  {formatMoney(watchedBaseSalary).vndFormatted}
+                  {formatMoney(payroll?.totalAmount || 0).vndFormatted}
                 </span>
               </div>
 

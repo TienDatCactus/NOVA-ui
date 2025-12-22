@@ -55,6 +55,12 @@ import { MessageBubble } from "~/routes/chat/fragments/message-bubble";
 import { useMenuList } from "~/routes/menu/container/menu/query.hooks";
 import { useServices } from "~/routes/services/container/services/query.hooks";
 import type { Route } from "./+types/chat";
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Tin nhắn - NOVA Hotel " },
+    { name: "description", content: "Tin nhắn với nhân viên khách sạn" },
+  ];
+}
 
 export default function GuestChat({}: Route.ComponentProps) {
   const { t } = useTranslation("chat");
@@ -167,10 +173,9 @@ export default function GuestChat({}: Route.ComponentProps) {
   };
 
   const handleTagItem = (item: any, type: "menu" | "service") => {
-    const tag = type === "menu" ? `#món:${item.name}` : `#dv:${item.name}`;
-    setInputMessage((prev) => `${prev} ${tag} `.trim()); // Add space after tag
+    const tag = type === "menu" ? `${item.name}` : `${item.name}`;
+    setInputMessage((prev) => `${prev} ${tag} `.trim());
     setIsItemPopoverOpen(false);
-    // Focus back to input
     const input = document.getElementById("chat-input");
     input?.focus();
   };

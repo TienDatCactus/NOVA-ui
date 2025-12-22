@@ -131,6 +131,12 @@ export function useTerminateStaff() {
         queryKey: ["staff", variables.id],
         refetchType: "active",
       });
+      queryClient.invalidateQueries({
+        queryKey: ["staff-attendance"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["staff-shifts"],
+      });
       toast.success("Kết thúc hợp đồng nhân sự thành công");
     },
     onError: (error) => {

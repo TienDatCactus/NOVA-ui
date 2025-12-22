@@ -281,9 +281,11 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   );
 
   const handleTagItem = useCallback((item: any, type: "menu" | "service") => {
-    const tag = type === "menu" ? `#item:${item.name}` : `#svc:${item.name}`;
+    const tag = type === "menu" ? `${item.name}` : `${item.name}`;
     setInputMessage((prev) => `${prev} ${tag}`.trim());
     setIsItemPopoverOpen(false);
+    const input = document.getElementById("chat-input");
+    input?.focus();
   }, []);
 
   const handleDetectAndTranslateInput = async () => {
@@ -725,6 +727,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
               <div className="relative flex-1 group">
                 <Input
+                  id="chat-input"
                   value={inputMessage}
                   onChange={(e) => {
                     setInputMessage(e.target.value);
