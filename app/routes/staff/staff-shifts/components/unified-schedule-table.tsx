@@ -199,7 +199,7 @@ export default function UnifiedScheduleTable({
                         >
                           <div className="space-y-1 overflow-visible">
                             {/* Shift Cards */}
-                            <div className="space-y-2 flex flex-col items-center overflow-visible">
+                            <div className=" flex flex-col items-center overflow-visible">
                               {cellShifts.slice(0, 1).map((shift) => {
                                 const attendance = getAttendance(
                                   shift.staffId,
@@ -250,46 +250,50 @@ export default function UnifiedScheduleTable({
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent>
-                                    {cellShifts.slice(0, 1).map((shift) => {
-                                      const attendance = getAttendance(
-                                        shift.staffId,
-                                        shift.shiftId,
-                                        shift.workDate
-                                      );
-                                      return (
-                                        <ShiftCard
-                                          key={shift.id}
-                                          shift={shift}
-                                          attendance={attendance}
-                                          viewMode={viewMode}
-                                          workShifts={workShifts}
-                                          onEdit={(shift) => {
-                                            setSelectedShift(shift);
-                                            setUpdateDialogOpen(true);
-                                          }}
-                                          onDelete={(shiftId) => {
-                                            const shiftToDelete =
-                                              cellShifts.find(
-                                                (s) => s.id === shiftId
-                                              );
-                                            if (shiftToDelete) {
-                                              setSelectedShift(shiftToDelete);
-                                              setDeleteDialogOpen(true);
-                                            }
-                                          }}
-                                          onMarkPresent={(attendance) => {
-                                            setSelectedAttendance(attendance);
-                                            if (attendance) {
-                                              markPresent.mutate(attendance.id);
-                                            }
-                                          }}
-                                          onMarkAbsent={(attendance) => {
-                                            setSelectedAttendance(attendance);
-                                            setMarkAbsentDialogOpen(true);
-                                          }}
-                                        />
-                                      );
-                                    })}
+                                    <ul className="space-y-2 max-h-80 overflow-x-hidden overflow-y-auto ">
+                                      {cellShifts.slice(1).map((shift) => {
+                                        const attendance = getAttendance(
+                                          shift.staffId,
+                                          shift.shiftId,
+                                          shift.workDate
+                                        );
+                                        return (
+                                          <ShiftCard
+                                            key={shift.id}
+                                            shift={shift}
+                                            attendance={attendance}
+                                            viewMode={viewMode}
+                                            workShifts={workShifts}
+                                            onEdit={(shift) => {
+                                              setSelectedShift(shift);
+                                              setUpdateDialogOpen(true);
+                                            }}
+                                            onDelete={(shiftId) => {
+                                              const shiftToDelete =
+                                                cellShifts.find(
+                                                  (s) => s.id === shiftId
+                                                );
+                                              if (shiftToDelete) {
+                                                setSelectedShift(shiftToDelete);
+                                                setDeleteDialogOpen(true);
+                                              }
+                                            }}
+                                            onMarkPresent={(attendance) => {
+                                              setSelectedAttendance(attendance);
+                                              if (attendance) {
+                                                markPresent.mutate(
+                                                  attendance.id
+                                                );
+                                              }
+                                            }}
+                                            onMarkAbsent={(attendance) => {
+                                              setSelectedAttendance(attendance);
+                                              setMarkAbsentDialogOpen(true);
+                                            }}
+                                          />
+                                        );
+                                      })}
+                                    </ul>
                                   </PopoverContent>
                                 </Popover>
                               )}

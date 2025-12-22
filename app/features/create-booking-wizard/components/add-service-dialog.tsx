@@ -1,4 +1,4 @@
-import { Check, ImageOff, Search, Sparkles, Utensils } from "lucide-react";
+import { Check, Search, Sparkles, Utensils } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -12,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -46,19 +45,18 @@ export default function AddServiceDialog({
   onOpenChange,
   onAddService,
   selectedServiceIds,
-  existingServices = [],
 }: AddServiceDialogProps) {
   const [activeTab, setActiveTab] = useState<"services" | "menu">("services");
   const [searchText, setSearchText] = useState("");
-  // Track quantities for menu items before adding
   const [menuQuantities, setMenuQuantities] = useState<Record<string, number>>(
     {}
   );
+  const [selectedMenuItems, setSelectedMenuItems] = useState<Set<string>>(
+    new Set()
+  );
 
-  // Get quantity for a menu item (default to 1)
   const getMenuQuantity = (itemId: string) => menuQuantities[itemId] ?? 1;
 
-  // Update quantity for a menu item
   const updateMenuQuantity = (itemId: string, quantity: number) => {
     setMenuQuantities((prev) => ({ ...prev, [itemId]: quantity }));
   };
@@ -75,7 +73,6 @@ export default function AddServiceDialog({
 
   const { data: menuItems = [], isPending: isMenuLoading } = useMenuList();
 
-  // Client-side search filtering
   const filteredServices = filterServices(serviceItems);
 
   const filteredMenuItems = useMemo(() => {
@@ -151,8 +148,7 @@ export default function AddServiceDialog({
                     const isSelected = selectedServiceIds.includes(
                       service.serviceItemId
                     );
-                    const hasImage =
-                      service.imageUrls && service.imageUrls.length > 0;
+
                     return (
                       <button
                         key={service.serviceItemId}
@@ -167,28 +163,6 @@ export default function AddServiceDialog({
                             : "border-border bg-card hover:bg-muted/40 hover:border-primary/30"
                         )}
                       >
-                        {/* Thumbnail Image */}
-                        <div className="shrink-0 relative h-20 w-20 rounded-lg overflow-hidden border bg-muted">
-                          {hasImage ? (
-                            <Image
-                              src={service.imageUrls![0]}
-                              alt={service.name}
-                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-muted/50 text-muted-foreground/30">
-                              <ImageOff className="h-6 w-6" />
-                            </div>
-                          )}
-
-                          {/* Unit Badge (Overlay on Image) */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/40  p-1 text-center">
-                            <p className="text-[10px] font-medium text-white truncate">
-                              {service.unitName}
-                            </p>
-                          </div>
-                        </div>
-
                         {/* Content Info */}
                         <div className="flex-1 min-w-0 pt-0.5 space-y-1">
                           <div className="flex items-start justify-between gap-2">
@@ -255,11 +229,10 @@ export default function AddServiceDialog({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {filteredMenuItems.map((menuItem) => {
-                    const isSelected = selectedServiceIds.includes(
-                      menuItem.itemId
-                    );
-                    const hasImage =
-                      menuItem.imageUrls && menuItem.imageUrls.length > 0;
+                    const isSelected =
+                      selectedMenuItems.has(menuItem.itemId) ||
+                      selectedServiceIds.includes(menuItem.itemId);
+
                     const isAvailable = menuItem.maxQuantityAvailable! > 0;
                     const currentQuantity = getMenuQuantity(menuItem.itemId);
                     const maxAvailable = menuItem.maxQuantityAvailable ?? 0;
@@ -279,47 +252,19 @@ export default function AddServiceDialog({
                           type="button"
                           disabled={!isAvailable}
                           onClick={() => {
-                            // Validate quantity doesn't exceed available stock
-                            if (currentQuantity > maxAvailable) {
-                              toast.error(
-                                `Chỉ còn ${maxAvailable} ${menuItem.name} khả dụng`,
-                                {
-                                  description: "Vui lòng giảm số lượng.",
-                                }
-                              );
-                              return;
-                            }
-
-                            onAddService(
-                              menuItem.itemId,
-                              "MenuItem",
-                              currentQuantity
-                            );
-                            onOpenChange(false);
+                            // Toggle selection
+                            setSelectedMenuItems((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(menuItem.itemId)) {
+                                next.delete(menuItem.itemId);
+                              } else {
+                                next.add(menuItem.itemId);
+                              }
+                              return next;
+                            });
                           }}
                           className="flex items-start gap-4 text-left w-full"
                         >
-                          <div className="shrink-0 relative h-20 w-20 rounded-lg overflow-hidden border bg-muted">
-                            {hasImage ? (
-                              <Image
-                                src={menuItem.imageUrls![0]}
-                                alt={menuItem.name}
-                                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                              />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center bg-muted/50 text-muted-foreground/30">
-                                <Utensils className="h-6 w-6" />
-                              </div>
-                            )}
-
-                            {/* Unit Badge (Overlay on Image) */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/40  p-1 text-center">
-                              <p className="text-[10px] font-medium text-white truncate">
-                                {menuItem.unitName || "F&B"}
-                              </p>
-                            </div>
-                          </div>
-
                           {/* Content Info */}
                           <div className="flex-1 min-w-0 pt-0.5 space-y-1">
                             <div className="flex items-start justify-between gap-2">
@@ -368,6 +313,7 @@ export default function AddServiceDialog({
                             </span>
                             <Counter
                               value={currentQuantity}
+                              className="w-40"
                               onChange={(value) => {
                                 if (value > maxAvailable) {
                                   toast.error(
@@ -397,20 +343,75 @@ export default function AddServiceDialog({
         {/* === FOOTER === */}
         <DialogFooter className="border-t bg-muted/20 px-6 py-4 flex items-center justify-between sm:justify-between">
           <div className="text-xs text-muted-foreground">
-            {selectedServiceIds.length > 0 ? (
+            {activeTab === "menu" && selectedMenuItems.size > 0 ? (
+              <span className="text-primary font-medium flex items-center gap-2">
+                <Badge variant="default" className="h-5 px-1.5 rounded-sm">
+                  {selectedMenuItems.size}
+                </Badge>
+                món đã chọn
+              </span>
+            ) : selectedServiceIds.length > 0 ? (
               <span className="text-primary font-medium flex items-center gap-2">
                 <Badge variant="default" className="h-5 px-1.5 rounded-sm">
                   {selectedServiceIds.length}
                 </Badge>
-                dịch vụ đã chọn
+                dịch vụ đã thêm
               </span>
             ) : (
               <span>Chưa chọn dịch vụ nào</span>
             )}
           </div>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Xong
-          </Button>
+          <div className="flex gap-2">
+            {activeTab === "menu" && selectedMenuItems.size > 0 && (
+              <Button
+                onClick={() => {
+                  // Validate and add all selected menu items
+                  let hasError = false;
+                  selectedMenuItems.forEach((itemId) => {
+                    const menuItem = filteredMenuItems.find(
+                      (m) => m.itemId === itemId
+                    );
+                    if (menuItem) {
+                      const quantity = getMenuQuantity(itemId);
+                      const maxAvailable = menuItem.maxQuantityAvailable ?? 0;
+
+                      if (quantity > maxAvailable) {
+                        toast.error(
+                          `${menuItem.name}: Chỉ còn ${maxAvailable} khả dụng`,
+                          { description: "Vui lòng giảm số lượng." }
+                        );
+                        hasError = true;
+                      } else {
+                        onAddService(itemId, "MenuItem", quantity);
+                      }
+                    }
+                  });
+
+                  if (!hasError) {
+                    setSelectedMenuItems(new Set());
+                    setMenuQuantities({});
+                    onOpenChange(false);
+                  }
+                }}
+                className="min-w-[100px]"
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Thêm món
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedMenuItems(new Set());
+                setMenuQuantities({});
+                onOpenChange(false);
+              }}
+            >
+              {activeTab === "menu" && selectedMenuItems.size > 0
+                ? "Hủy"
+                : "Đóng"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

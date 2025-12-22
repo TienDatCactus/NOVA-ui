@@ -149,15 +149,31 @@ function ServiceOrderItemRow({
             <ItemIcon className="h-4 w-4" />
           </div>
 
-          <div className="min-w-0">
-            <p
-              className={cn(
-                "text-sm font-medium truncate",
-                isInvalid && "text-destructive"
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p
+                className={cn(
+                  "text-sm font-medium truncate",
+                  isInvalid && "text-destructive"
+                )}
+              >
+                {displayName}
+              </p>
+              {service.itemType === "MenuItem" && service.quantity > 1 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="shrink-0 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
+                        ×{service.quantity}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Số lượng: {service.quantity}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
-            >
-              {displayName}
-            </p>
+            </div>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
               {service.itemType === "ServiceItem" ? "Service" : "F&B"}
             </p>

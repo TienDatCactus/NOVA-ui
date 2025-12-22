@@ -60,16 +60,24 @@ export default function ServiceBreakfastManagerDialog({
     quantity: number = 1
   ) => {
     const exists = services.find(
-      (s: ServiceOrderItem) => s.itemId === serviceId
+      (s: ServiceOrderItem) => s.itemId === serviceId && s.itemType === itemType
     );
 
     if (exists) {
-      // Update quantity if item already exists
-      const updated = services.map((s: ServiceOrderItem) =>
-        s.itemId === serviceId ? { ...s, quantity } : s
-      );
-      form.setValue("serviceOrder.services", updated, { shouldValidate: true });
-      toast.success("Đã cập nhật số lượng");
+      // For menu items, update quantity. For service items, ignore duplicate adds.
+      if (itemType === "MenuItem") {
+        const updated = services.map((s: ServiceOrderItem) =>
+          s.itemId === serviceId && s.itemType === itemType
+            ? { ...s, quantity }
+            : s
+        );
+        form.setValue("serviceOrder.services", updated, {
+          shouldValidate: true,
+        });
+        toast.success("Đã cập nhật số lượng");
+      } else {
+        toast.info("Dịch vụ này đã được thêm");
+      }
     } else {
       const defaultDate = checkinDate
         ? format(
@@ -89,7 +97,9 @@ export default function ServiceBreakfastManagerDialog({
       form.setValue("serviceOrder.services", [...services, newService], {
         shouldValidate: true,
       });
-      toast.success("Đã thêm dịch vụ");
+      toast.success(
+        itemType === "MenuItem" ? "Đã thêm món ăn" : "Đã thêm dịch vụ"
+      );
     }
   };
 
