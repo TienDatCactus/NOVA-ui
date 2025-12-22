@@ -19,7 +19,7 @@ export default function PurchaseRequestsRoute() {
   const { filters, updateFilter, resetFilters } = usePurchaseRequestFilters();
 
   const { data: purchaseRequests, isPending } = usePurchaseRequestList({
-    status: filters.status,
+    status: filters.status || undefined,
   });
 
   return (

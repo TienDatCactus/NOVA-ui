@@ -1,21 +1,11 @@
 import type { ReactNode } from "react";
-import type { WorkShiftFilters } from "../container/filter.hooks";
 
 interface WorkShiftsViewLayoutProps {
-  filters: WorkShiftFilters;
-  updateFilter: <K extends keyof WorkShiftFilters>(
-    key: K,
-    value: WorkShiftFilters[K]
-  ) => void;
-  resetFilters: () => void;
   totalWorkShifts: number;
   children: ReactNode;
 }
 
 export default function WorkShiftsViewLayout({
-  filters,
-  updateFilter,
-  resetFilters,
   children,
   totalWorkShifts,
 }: WorkShiftsViewLayoutProps) {

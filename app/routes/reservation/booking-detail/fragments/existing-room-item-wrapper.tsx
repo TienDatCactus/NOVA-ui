@@ -1,8 +1,7 @@
-import { Skeleton } from "~/components/ui/skeleton";
-import { Card, CardContent } from "~/components/ui/card";
-import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
-import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import type z from "zod";
+import { Card, CardContent } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
+import { useRoomDetail } from "~/routes/rooms/container/rooms/query.hooks";
 import type { RoomSchema } from "~/services/api/rooms/room.schema";
 import ExistingRoomItemCard from "./existing-room-item.card";
 

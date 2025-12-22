@@ -1,4 +1,5 @@
-import { MoreHorizontal, Eye, Pencil, Trash2, UserX } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, UserX } from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +12,6 @@ import {
 import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
 import StaffDeleteDialog from "../components/staff-delete-dialog";
 import StaffTerminateDialog from "../components/staff-terminate-dialog";
-import { useState } from "react";
 import StaffUpdateDialog from "../components/staff-update-dialog";
 
 interface StaffActionsCellProps {

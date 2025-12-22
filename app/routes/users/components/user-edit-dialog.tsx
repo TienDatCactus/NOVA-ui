@@ -1,14 +1,15 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
@@ -18,11 +19,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Pencil, Loader2 } from "lucide-react";
-import { useUpdateUser } from "../container/query.hooks";
-import type { UserItem, UpdateUserDto } from "~/services/api/user/dto";
-import { useEffect } from "react";
+import type { UpdateUserDto, UserItem } from "~/services/api/user/dto";
 import { UserSchema } from "~/services/api/user/user.schema";
+import { useUpdateUser } from "../container/query.hooks";
 
 interface UserEditDialogProps {
   user: UserItem;

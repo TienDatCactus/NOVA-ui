@@ -1,19 +1,19 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import type z from "zod";
-import { Button } from "~/components/ui/button";
-import { DataTableColumnHeader } from "~/components/table/table-header";
+import { QrCode } from "lucide-react";
 import { useState } from "react";
+import type z from "zod";
+import { DataTableColumnHeader } from "~/components/table/table-header";
+import { Button } from "~/components/ui/button";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule, UserRole } from "~/lib/auth/roles";
 import { formatMoney } from "~/lib/utils";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
 import RoomActionsCell from "../../../fragments/rooms/actions.cell";
 import RoomStatusCell from "../../../fragments/rooms/status.cell";
-import RoomDetailDialog from "../rooms-detail.dialog";
 import { QrDialog } from "../qr.dialog";
-import { QrCode, ScanLine } from "lucide-react";
-import { useAuth } from "~/lib/auth/components";
-import { RouteModule, UserRole } from "~/lib/auth/roles";
-import { hasAnyRole } from "~/lib/auth/bouncer";
-import { AuthLoader } from "~/lib/auth/auth.loader";
+import RoomDetailDialog from "../rooms-detail.dialog";
 
 const { RoomListItemSchema } = RoomSchema;
 type RoomListItem = z.infer<typeof RoomListItemSchema>;

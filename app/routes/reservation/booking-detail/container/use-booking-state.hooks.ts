@@ -70,13 +70,8 @@ function canEditDates(
   return !hasAnyInvoiceWithPayment(invoices);
 }
 
-function canEditRooms(
-  status: BookingStatus,
-  invoices: InvoiceListItemDto[]
-): boolean {
-  // Allow adding rooms for active stays
+function canEditRooms(status: BookingStatus): boolean {
   if (ACTIVE_STAY_STATUSES.includes(status)) return true;
-  // For pre-stay: allow even with payment
   if (PRE_STAY_STATUSES.includes(status)) return true;
   return false;
 }
@@ -225,7 +220,7 @@ export function useBookingState(
     const permissions: BookingPermissions = {
       canEdit: canEditBasicInfo(status),
       canEditDates: canEditDates(status, invoices),
-      canEditRooms: canEditRooms(status, invoices),
+      canEditRooms: canEditRooms(status),
       canEditGuests: canEditGuests(status, invoices),
       blockReason: getGeneralBlockReason(status, invoices),
       dateChangeBlockReason: getDateBlockReason(status, invoices),
@@ -272,10 +267,8 @@ export function canInvoiceAcceptPayment(status: string): {
 export function validatePaymentAmount(
   paidAmount: number,
   balance: number,
-  total: number,
   status: string
 ): { isValid: boolean; error?: string } {
-  // Rule 1: Amount must be positive
   if (paidAmount <= 0) {
     return { isValid: false, error: "Số tiền phải lớn hơn 0" };
   }

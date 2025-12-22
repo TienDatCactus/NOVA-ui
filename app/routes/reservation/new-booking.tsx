@@ -12,9 +12,6 @@ export function meta({}: Route.MetaArgs) {
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Bookings, Permission.Create);
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   return <BookingFlow />;
 }

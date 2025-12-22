@@ -9,10 +9,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   const navigate = useNavigate();
   return (
     <main className="grid min-h-full place-items-center px-6 py-24 sm:py-32 lg:px-8 relative h-full w-full bg-[#f8fafc] dark:bg-[#0f172a]">

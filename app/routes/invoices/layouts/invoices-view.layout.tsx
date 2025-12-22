@@ -81,7 +81,6 @@ function InvoicesViewLayout({
   filters,
   onFilterChange,
   onResetFilters,
-  totalInvoices,
   totalPages = 1,
   currentPage = 1,
 }: InvoicesViewLayoutProps) {

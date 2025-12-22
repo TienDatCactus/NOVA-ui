@@ -1,13 +1,5 @@
+import { Percent, RotateCcw, Wallet, type LucideIcon } from "lucide-react";
 import { Card, CardContent } from "~/components/ui/card";
-import {
-  Wallet,
-  RotateCcw,
-  Percent,
-  type LucideIcon,
-  ArrowUpRight,
-  ArrowDownRight,
-  Minus,
-} from "lucide-react";
 import { cn } from "~/lib/utils";
 import type { FinancialHealthDto } from "~/services/api/finances/dto";
 
@@ -60,19 +52,6 @@ function HealthStat({
     critical: "text-red-600 dark:text-red-500 bg-red-50 dark:bg-red-950/20",
     neutral: "text-muted-foreground bg-muted/50",
   };
-
-  // Icon chỉ thị xu hướng (Trend Icon)
-  const TrendIcon =
-    status === "good"
-      ? ArrowUpRight
-      : status === "critical"
-        ? ArrowDownRight
-        : Minus;
-
-  // Xử lý riêng cho trường hợp "Limit" (Hoàn tiền cao -> Mũi tên lên -> Màu đỏ)
-  const isInverseMetric = limit !== undefined;
-  const displayIcon =
-    isInverseMetric && status === "critical" ? ArrowUpRight : TrendIcon;
 
   return (
     <div className="flex items-start justify-between p-4 rounded-lg border border-border/40">

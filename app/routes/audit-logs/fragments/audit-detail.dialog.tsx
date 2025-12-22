@@ -1,24 +1,22 @@
-import { format } from "date-fns";
 import {
+  AlertCircle,
   ArrowRight,
-  User,
   Clock,
   LayoutGrid,
   MapPin,
-  AlertCircle,
-  Hash,
+  User,
 } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Badge } from "~/components/ui/badge";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useAuditDetail } from "../container/query.hooks";
 import { cn } from "~/lib/utils";
+import { useAuditDetail } from "../container/query.hooks";
 
 interface AuditDetailDialogProps {
   open: boolean;

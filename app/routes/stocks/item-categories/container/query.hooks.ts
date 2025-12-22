@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ItemCategoryService } from "~/services/api/stocks/item-category";
-import type { ItemCategoryListParams } from "~/services/api/stocks/item-category/item-category.types";
 import type {
   CreateItemCategoryDto,
   UpdateItemCategoryDto,
 } from "~/services/api/stocks/item-category/dto";
+import type { ItemCategoryListParams } from "~/services/api/stocks/item-category/item-category.types";
 
 export function useItemCategories(params: ItemCategoryListParams = {}) {
   return useQuery({
@@ -15,11 +15,16 @@ export function useItemCategories(params: ItemCategoryListParams = {}) {
   });
 }
 
-export function useItemCategoryDetail(id: string) {
+export function useItemCategoryDetail(
+  id: string,
+  options: {
+    enabled: boolean;
+  }
+) {
   return useQuery({
     queryKey: ["item-category", id],
     queryFn: async () => await ItemCategoryService.getItemCategoryDetail(id),
-    enabled: !!id,
+    enabled: !!options?.enabled && !!id,
     staleTime: 5 * 60 * 1000,
   });
 }

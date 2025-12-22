@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,10 +9,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { HolidayService } from "~/services/api/holiday";
-import { toast } from "sonner";
 import type { HolidayListItem } from "~/services/api/holiday/dto";
 import { useDeleteHoliday } from "../container/mutation.hooks";
 

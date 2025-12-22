@@ -3,14 +3,12 @@ import {
   type ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Search } from "lucide-react";
 import { useState } from "react";
 import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
 
 import {
   Table,

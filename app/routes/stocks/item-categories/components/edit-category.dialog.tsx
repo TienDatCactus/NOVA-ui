@@ -49,7 +49,9 @@ export default function EditCategoryDialog({
   categoryId,
 }: EditCategoryDialogProps) {
   const { data: category, isPending: isLoadingCategory } =
-    useItemCategoryDetail(categoryId);
+    useItemCategoryDetail(categoryId, {
+      enabled: open,
+    });
   const { mutate: updateCategory, isPending: isUpdating } =
     useUpdateItemCategory();
 

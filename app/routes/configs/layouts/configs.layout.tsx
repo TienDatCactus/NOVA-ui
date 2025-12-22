@@ -1,5 +1,3 @@
-import { Settings2 } from "lucide-react";
-
 interface ConfigsLayoutProps {
   children: React.ReactNode;
 }

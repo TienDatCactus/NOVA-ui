@@ -1,6 +1,5 @@
 import z from "zod";
 import { ROOM_TYPE } from "./room.types";
-import { PaymentSchema } from "../../schema/payment.schema";
 
 const RoomTypeEnum = z.enum(ROOM_TYPE, {
   error: "Loại phòng không hợp lệ",

@@ -1,47 +1,38 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addDays, addMonths, addWeeks, format, isBefore } from "date-fns";
+import {
+  Calendar as CalendarIcon,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  Lock,
+  Unlock,
+  UserX,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format, addDays, addWeeks, addMonths, isBefore } from "date-fns";
-import { vi } from "date-fns/locale"; // Assuming you have locale, optional
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
-import { Calendar } from "~/components/ui/calendar";
+import { Form, FormField, FormLabel } from "~/components/ui/form";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import {
-  Lock,
-  Unlock,
-  Loader2,
-  Calendar as CalendarIcon,
-  AlertTriangle,
-  Clock,
-  UserX,
-  CheckCircle2,
-} from "lucide-react";
-import { useLockUser, useUnlockUser } from "../container/query.hooks";
-import type { UserItem } from "~/services/api/user/dto";
-import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
+import { cn } from "~/lib/utils";
+import type { UserItem } from "~/services/api/user/dto";
+import { useLockUser, useUnlockUser } from "../container/query.hooks";
 
 interface LockUserDialogProps {
   user: UserItem;

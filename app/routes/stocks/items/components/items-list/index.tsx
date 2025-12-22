@@ -1,8 +1,7 @@
-import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import type { StockItemsListDto } from "~/services/api/stocks/items/dto";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
 import { Skeleton } from "~/components/ui/skeleton";
+import type { StockItemsListDto } from "~/services/api/stocks/items/dto";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
 
 interface StockItemsDataTableProps {
   items: StockItemsListDto;

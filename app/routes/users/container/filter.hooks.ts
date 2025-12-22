@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { UserItem } from "~/services/api/user/dto";
 
 export interface UserFilters {
   roleFilter: string;

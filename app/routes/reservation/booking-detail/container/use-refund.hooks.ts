@@ -15,7 +15,7 @@ export function useCreateRefund(bookingId: string) {
       await RefundsService.createBookingRefund(bookingId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
         refetchType: "active",
       });
       queryClient.invalidateQueries({

@@ -40,7 +40,7 @@ export function QRScanner({ onScan, onError, className }: QRScannerProps) {
           });
         },
         (errorMessage) => {
-          // console.log(errorMessage); // Optional: ignore frame errors
+          console.log(errorMessage);
         }
       );
     } catch (err) {

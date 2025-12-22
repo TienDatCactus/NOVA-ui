@@ -39,6 +39,7 @@ interface SendMessageCommandPascalCase {
 
 class SignalRChatService {
   private connection: signalR.HubConnection | null = null;
+  //@ts-ignore
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
 

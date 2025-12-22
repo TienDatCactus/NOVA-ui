@@ -1,5 +1,4 @@
-import { useState, useMemo } from "react";
-import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import { useState } from "react";
 
 export type ItemsFilter = {
   activeFilter: "active" | "inactive";

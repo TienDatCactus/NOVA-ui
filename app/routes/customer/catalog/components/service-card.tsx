@@ -2,7 +2,7 @@ import { Sparkles } from "lucide-react";
 
 import { Card, CardContent } from "~/components/ui/card";
 import Image from "~/components/ui/image";
-import { cn, formatMoney } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
 
 interface ServiceCardProps {
@@ -14,7 +14,6 @@ export default function ServiceCard({ service }: ServiceCardProps) {
     <Card
       className={cn(
         "group relative p-0 overflow-hidden border-0 shadow-sm transition-all duration-500",
-        // Glassy/Misty Background
         "hover:bg-background/80  hover:shadow-lg hover:shadow-stone-900/5 hover:-translate-y-1"
       )}
     >

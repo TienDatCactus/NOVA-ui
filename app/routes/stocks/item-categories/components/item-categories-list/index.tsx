@@ -1,8 +1,5 @@
+import type { ItemCategoriesListDto } from "~/services/api/stocks/item-category/dto";
 import { columns } from "./columns";
-import type {
-  ItemCategoriesListDto,
-  ItemCategoryListItemDto,
-} from "~/services/api/stocks/item-category/dto";
 import DataTable from "./data-table";
 
 interface ItemCategoriesListProps {

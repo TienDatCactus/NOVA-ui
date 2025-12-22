@@ -1,17 +1,6 @@
+import { MoreVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
-import type { PayrollComponentDto } from "~/services/api/staff/staff-payroll/dto";
-import {
-  ComponentTypeConfig,
-  type ComponentTypeKey,
-} from "~/services/api/staff/staff-payroll/staff-payroll.type";
-import { Plus, Pencil, Trash2, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
-import AddComponentDialog from "./add-component-dialog";
-import EditComponentDialog from "./edit-component-dialog";
-import { useDeletePayrollComponent } from "../../container/query.hooks";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,13 +11,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Separator } from "~/components/ui/separator";
 import { formatMoney } from "~/lib/utils";
+import type { PayrollComponentDto } from "~/services/api/staff/staff-payroll/dto";
+import {
+  ComponentTypeConfig,
+  type ComponentTypeKey,
+} from "~/services/api/staff/staff-payroll/staff-payroll.type";
+import { useDeletePayrollComponent } from "../../container/query.hooks";
+import AddComponentDialog from "./add-component-dialog";
+import EditComponentDialog from "./edit-component-dialog";
 
 interface ComponentsListProps {
   payrollId: string;
@@ -44,7 +44,6 @@ export default function ComponentsList({
   components,
   componentsTotal,
   hasExpense = false,
-  locked = false,
   onRefresh,
 }: ComponentsListProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -55,8 +54,7 @@ export default function ComponentsList({
   const [componentToDelete, setComponentToDelete] =
     useState<PayrollComponentDto | null>(null);
 
-  const { mutate: deleteComponent, isPending: isDeleting } =
-    useDeletePayrollComponent();
+  const { mutate: deleteComponent } = useDeletePayrollComponent();
 
   const handleEdit = (component: PayrollComponentDto) => {
     setSelectedComponent(component);

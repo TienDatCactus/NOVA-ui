@@ -248,6 +248,7 @@ export function useUpdatePayrollComponent() {
   return useMutation({
     mutationFn: async ({
       componentId,
+      //@ts-ignore
       payrollId,
       data,
     }: {
@@ -284,6 +285,7 @@ export function useDeletePayrollComponent() {
   return useMutation({
     mutationFn: async ({
       componentId,
+      //@ts-ignore
       payrollId,
     }: {
       componentId: string;

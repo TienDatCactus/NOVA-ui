@@ -1,18 +1,19 @@
 import {
   flexRender,
   getCoreRowModel,
-  getExpandedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
   type ColumnFiltersState,
-  type RowSelectionState,
   type SortingState,
 } from "@tanstack/react-table";
+import { Plus, Search } from "lucide-react";
 import React, { useState } from "react";
-import { Download, Plus, Search } from "lucide-react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -21,13 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { CreateRoomTypeDialog } from "../create-room-types.dialog";
 import { useAuth } from "~/lib/auth/components";
 import { RouteModule } from "~/lib/auth/roles";
+import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
+import { CreateRoomTypeDialog } from "../create-room-types.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

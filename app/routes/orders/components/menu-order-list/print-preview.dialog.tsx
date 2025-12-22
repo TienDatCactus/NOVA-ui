@@ -1,6 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Barcode, Cog, Hotel, MapPin, Printer, Receipt, X } from "lucide-react";
+import { Barcode, Hotel, MapPin, Printer } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -11,8 +11,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
-import { cn, formatMoney } from "~/lib/utils";
+import { formatMoney } from "~/lib/utils";
 import type { POSOrderPrintDataDto } from "~/services/api/orders/dto";
 
 interface PrintPreviewDialogProps {

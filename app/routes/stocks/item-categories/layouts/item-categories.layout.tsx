@@ -1,4 +1,3 @@
-import { Package } from "lucide-react";
 import type { PropsWithChildren } from "react";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";

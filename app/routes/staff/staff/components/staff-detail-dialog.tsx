@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { format, parseISO } from "date-fns";
+import { Badge } from "~/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -6,12 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { StaffService } from "~/services/api/staff/staff";
-import type { StaffDetailDto } from "~/services/api/staff/staff/dto";
-import { format, parseISO } from "date-fns";
-import { toast } from "sonner";
 import { useStaffDetail } from "../container/query.hooks";
 
 interface StaffDetailDialogProps {

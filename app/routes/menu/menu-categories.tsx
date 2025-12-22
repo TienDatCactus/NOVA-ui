@@ -1,10 +1,9 @@
-import { useMemo } from "react";
+import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
+import type { Route } from "./+types/menu-categories";
 import MenuCategoryDataTable from "./components/menu-category-list";
 import { useMenuCategoryFilters } from "./container/menu-categories/filter.hooks";
 import { useMenuCategories } from "./container/menu-categories/query.hooks";
 import MenuCategoryViewLayout from "./layouts/menu-category-view.layout";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
-import type { Route } from "./+types/menu-categories";
 
 export function meta({}: Route.MetaArgs) {
   return [

@@ -1,21 +1,21 @@
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
-  Calendar,
-  CreditCard,
-  User,
-  Tag,
-  Building2,
   Briefcase,
-  Wrench,
-  Zap,
+  Building2,
+  Calendar,
+  Copy,
+  CreditCard,
+  DollarSign,
+  Download,
   PackageOpen,
   Receipt,
-  DollarSign,
-  Share2,
-  Download,
-  Copy,
+  Tag,
+  User,
+  Wrench,
+  Zap,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -29,7 +29,6 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useExpenseDetail } from "../container/query.hooks";
 import SourceTypeBadge from "../fragments/source-type-badge";
 import StatusBadge from "../fragments/status-badge";
-import { toast } from "sonner";
 
 type ExpenseDetailDialogProps = {
   open: boolean;
@@ -81,9 +80,9 @@ export function ExpenseDetailDialog({
 
   if (!expense) return null;
 
-  const categoryConfig = CATEGORY_CONFIG[expense.category] || {
+  const categoryConfig = CATEGORY_CONFIG[expense.category || ""] || {
     icon: DollarSign,
-    label: expense.categoryName || expense.category,
+    label: expense.category || expense.category,
   };
 
   const paymentMethod = PAYMENT_METHODS.find(
@@ -91,7 +90,7 @@ export function ExpenseDetailDialog({
   );
 
   const handleCopyId = () => {
-    navigator.clipboard.writeText(expense.receiptNumber);
+    navigator.clipboard.writeText(expense.receiptNumber || "");
     toast.success("Đã sao chép mã phiếu");
   };
 
@@ -130,11 +129,11 @@ export function ExpenseDetailDialog({
                 Tổng thanh toán
               </span>
               <h1 className="text-4xl font-bold tracking-tighter text-foreground">
-                {formatMoney(expense.amount).vndFormatted}
+                {formatMoney(expense.amount || 0).vndFormatted}
               </h1>
               <div className="flex items-center gap-2 mt-2">
-                <StatusBadge status={expense.status} />
-                <SourceTypeBadge sourceType={expense.sourceType} />
+                <StatusBadge status={expense.status || "Draft"} />
+                <SourceTypeBadge sourceType={expense.sourceType || "Manual"} />
               </div>
             </div>
 
@@ -144,7 +143,7 @@ export function ExpenseDetailDialog({
                 icon={Calendar}
                 label="Ngày giao dịch"
                 value={format(
-                  parseISO(expense.expenseDate),
+                  parseISO(expense.expenseDate || ""),
                   "dd/MM/yyyy HH:mm",
                   { locale: vi }
                 )}

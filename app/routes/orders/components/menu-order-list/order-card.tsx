@@ -1,28 +1,24 @@
-import { format, parseISO, isBefore } from "date-fns";
+import { format, isBefore, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
+  BedDouble,
   CalendarClock,
   Clock,
-  User,
-  BedDouble,
-  MapPin,
-  Utensils,
-  MoreVertical,
-  Notebook,
   NotepadText,
+  User,
 } from "lucide-react";
 
-import { cn, formatMoney } from "~/lib/utils";
-import type { POSOrderDetailDto } from "~/services/api/orders/dto";
-import { OrderActionMenu } from "./order-actions";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { AuthLoader } from "~/lib/auth/auth.loader";
 import { hasAnyRole } from "~/lib/auth/bouncer";
 import { UserRole } from "~/lib/auth/roles";
-import { AuthLoader } from "~/lib/auth/auth.loader";
+import { cn, formatMoney } from "~/lib/utils";
+import type { POSOrderDetailDto } from "~/services/api/orders/dto";
+import { OrderActionMenu } from "./order-actions";
 
 interface OrderCardProps {
   order: POSOrderDetailDto;

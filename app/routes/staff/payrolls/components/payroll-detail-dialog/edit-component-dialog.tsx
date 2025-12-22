@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -51,8 +51,6 @@ export default function EditComponentDialog({
   component,
   onSuccess,
 }: EditComponentDialogProps) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-
   const form = useForm({
     resolver: zodResolver(AddPayrollComponentFormSchema),
     defaultValues: {
@@ -67,7 +65,6 @@ export default function EditComponentDialog({
 
   useEffect(() => {
     if (component) {
-      setDate(undefined);
       form.reset({
         type: component.type as any,
         title: component.title,

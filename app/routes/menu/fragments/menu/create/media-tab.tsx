@@ -1,7 +1,6 @@
 import { ImagePlus, X } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import Image from "~/components/ui/image";
 import { Dropzone } from "~/components/ui/shadcn-io/dropzone";
 import { TabsContent } from "~/components/ui/tabs";

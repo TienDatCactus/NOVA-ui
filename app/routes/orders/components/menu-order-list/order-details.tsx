@@ -1,13 +1,5 @@
-import { Badge } from "~/components/ui/badge";
-import { formatMoney } from "~/lib/utils";
-import type { POSOrderDetailDto } from "~/services/api/orders/dto";
-import { Check, Trash2, ChefHat } from "lucide-react";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import {
-  useDeleteItemFromPOSOrder,
-  useMarkItemServed,
-} from "../../container/pos-orders/mutation.hooks";
+import { Check, ChefHat, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +12,12 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
+import { formatMoney } from "~/lib/utils";
+import type { POSOrderDetailDto } from "~/services/api/orders/dto";
+import {
+  useDeleteItemFromPOSOrder,
+  useMarkItemServed,
+} from "../../container/pos-orders/mutation.hooks";
 
 interface OrderDetailsProps {
   order: POSOrderDetailDto;

@@ -1,8 +1,7 @@
 import { createContext, useContext, useRef } from "react";
-import mapboxgl from "mapbox-gl";
 
 interface MapContextType {
-  mapRef: React.MutableRefObject<mapboxgl.Map | null>;
+  mapRef: React.RefObject<mapboxgl.Map | null>;
 }
 
 const MapContext = createContext<MapContextType | null>(null);

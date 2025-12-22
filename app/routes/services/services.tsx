@@ -1,9 +1,9 @@
+import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/services";
 import ServicesDataTable from "./components/service-list";
 import useServiceFilters from "./container/services/filter.hooks";
 import { useServices } from "./container/services/query.hooks";
 import ServicesViewLayout from "./layouts/service-view.layout";
-import { AuthLoader, RouteModule, Permission } from "~/lib/auth/auth.loader";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -15,10 +15,7 @@ export function meta({}: Route.MetaArgs) {
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Services, Permission.Read);
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   const {
     filters,
     updateFilter,

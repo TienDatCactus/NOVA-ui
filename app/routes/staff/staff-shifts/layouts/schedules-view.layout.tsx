@@ -1,24 +1,25 @@
-import { format, addWeeks, startOfWeek, endOfWeek } from "date-fns";
+import { AxiosError } from "axios";
+import { addWeeks, endOfWeek, format, startOfWeek } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
+  CheckIcon,
   ChevronLeft,
   ChevronRight,
   Download,
   Filter,
-  Loader2,
-  X,
   LayoutGrid,
-  Users,
-  CalendarRange,
+  Loader2,
   Search,
-  CheckIcon,
+  Users,
+  X,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
+import { ButtonGroup } from "~/components/ui/button-group";
+import { DateRangePicker } from "~/components/ui/date-range-picker";
 import { Label } from "~/components/ui/label";
 import {
   Popover,
@@ -26,25 +27,14 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { cn } from "~/lib/utils";
 import { useStaffList } from "../../staff/container/query.hooks";
 import type { StaffShiftFilters } from "../container/filter.hooks";
 import {
-  useExportWeeklyMatrix,
   useExportWeeklyForm2,
+  useExportWeeklyMatrix,
 } from "../container/query.hooks";
-import { cn } from "~/lib/utils";
-import { Tabs, TabsTrigger } from "~/components/ui/tabs";
-import { ButtonGroup } from "~/components/ui/button-group";
-import { DateRangePicker } from "~/components/ui/date-range-picker";
-import { AxiosError } from "axios";
 
 interface SchedulesViewLayoutProps {
   filters: StaffShiftFilters;

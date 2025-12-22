@@ -1,7 +1,6 @@
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  type ExpandedState,
   type RowSelectionState,
   flexRender,
   getCoreRowModel,
@@ -10,8 +9,11 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useState } from "react";
 import { Plus, Search } from "lucide-react";
+import React, { useState } from "react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -20,15 +22,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 import { cn } from "~/lib/utils";
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
 import ServiceTypeDetailRow from "../../fragments/service-types/detail.row";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
 import CreateServiceTypeDialog from "../create-service-type.dialog";
-import { Button } from "~/components/ui/button";
-import { RouteModule } from "~/lib/auth/roles";
-import { useAuth } from "~/lib/auth/components";
 
 type EnrichedServiceTypeItem = ServiceTypeItem & { serviceCount?: number };
 
@@ -57,7 +56,7 @@ export function DataTable<TData extends EnrichedServiceTypeItem, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getRowCanExpand: (row) => true,
+    getRowCanExpand: () => true,
     getRowId: (row) => row.id,
     getPaginationRowModel: getPaginationRowModel(),
   });

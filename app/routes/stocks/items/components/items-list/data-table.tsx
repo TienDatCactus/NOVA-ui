@@ -12,7 +12,6 @@ import {
 } from "@tanstack/react-table";
 import { Plus, Search } from "lucide-react";
 import React, { useState } from "react";
-import { DataTableViewOptions } from "~/components/table/colum-toggle";
 import { DataTablePagination } from "~/components/table/table-pagination";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -24,12 +23,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
-import CreateItemDialog from "../create-item.dialog";
-import { ItemDetailRow } from "../../fragments/item-detail.row";
-import { hasAnyRole } from "~/lib/auth/bouncer";
 import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import { UserRole } from "~/lib/auth/roles";
+import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import { ItemDetailRow } from "../../fragments/item-detail.row";
+import CreateItemDialog from "../create-item.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,9 +47,6 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [expandedRows, setExpandedRows] = React.useState<
-    Record<string, boolean>
-  >({});
 
   const table = useReactTable({
     data,
@@ -68,9 +64,6 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     getRowId: (row) => row.id,
-    meta: {
-      expandedRows,
-    },
   });
 
   return (

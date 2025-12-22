@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { KeyRound } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { KeyRound } from "lucide-react";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +19,10 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
+import PasswordInput from "~/components/ui/password-input";
+import type { UserItem } from "~/services/api/user/dto";
 import { UserSchema } from "~/services/api/user/user.schema";
 import { useChangePassword } from "../container/query.hooks";
-import type { UserItem } from "~/services/api/user/dto";
-import PasswordInput from "~/components/ui/password-input";
 
 const { ChangePasswordSchema } = UserSchema;
 

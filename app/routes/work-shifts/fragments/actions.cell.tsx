@@ -15,13 +15,9 @@ import DeleteWorkShiftDialog from "../components/work-shift-delete-dialog";
 
 interface ActionsMenuCellProps {
   workShift: WorkShiftListItem;
-  onSuccess?: () => void;
 }
 
-export default function ActionsMenuCell({
-  workShift,
-  onSuccess,
-}: ActionsMenuCellProps) {
+export default function ActionsMenuCell({ workShift }: ActionsMenuCellProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 

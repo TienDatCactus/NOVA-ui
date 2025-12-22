@@ -3,10 +3,8 @@ import { Holiday } from "~/services/url";
 import { HolidaySchema } from "./holiday.schema";
 import type {
   HolidayListResponseDto,
-  HolidayDetailResponseDto,
   CreateHolidayRequest,
   UpdateHolidayRequest,
-  HolidayMutationResponseDto,
 } from "./dto";
 
 const { HolidayListResponseSchema } = HolidaySchema;
@@ -23,9 +21,7 @@ async function getHolidayList(): Promise<HolidayListResponseDto> {
 }
 
 // POST /api/Holidays - Create new holiday
-async function createHoliday(
-  data: CreateHolidayRequest
-): Promise<HolidayMutationResponseDto> {
+async function createHoliday(data: CreateHolidayRequest): Promise<void> {
   try {
     const resp = await http.post(Holiday.create, data);
     return resp.data;
@@ -35,7 +31,7 @@ async function createHoliday(
 }
 
 // GET /api/Holidays/{id} - Get holiday detail by ID
-async function getHolidayById(id: string): Promise<HolidayDetailResponseDto> {
+async function getHolidayById(id: string): Promise<void> {
   try {
     const resp = await http.get(Holiday.detail(id));
     return resp.data;
@@ -48,7 +44,7 @@ async function getHolidayById(id: string): Promise<HolidayDetailResponseDto> {
 async function updateHoliday(
   id: string,
   data: UpdateHolidayRequest
-): Promise<HolidayMutationResponseDto> {
+): Promise<void> {
   try {
     const resp = await http.put(Holiday.update(id), data);
     return resp.data;
@@ -58,7 +54,7 @@ async function updateHoliday(
 }
 
 // DELETE /api/Holidays/{id} - Delete holiday (soft delete)
-async function deleteHoliday(id: string): Promise<HolidayMutationResponseDto> {
+async function deleteHoliday(id: string): Promise<void> {
   try {
     const resp = await http.delete(Holiday.delete(id));
     return resp.data;

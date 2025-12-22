@@ -1,4 +1,5 @@
 import http from "~/lib/http";
+import type { UnitListParams } from "~/services/api/units/unit.types";
 import { Units } from "~/services/url";
 import type {
   CreateUnitRequestDto,
@@ -7,16 +8,12 @@ import type {
   UpdateUnitRequestDto,
   UpdateUnitResponseDto,
 } from "./dto";
-import type { UnitListParams } from "~/services/api/units/unit.types";
 import { UnitSchema } from "./unit.schema";
 
 const {
   CreateUnitRequestSchema,
   CreateUnitResponseSchema,
-  UnitItemDetailResponseSchema,
   UnitListResponseSchema,
-  UpdateUnitRequestSchema,
-  UpdateUnitResponseSchema,
 } = UnitSchema;
 
 async function getUnitList(

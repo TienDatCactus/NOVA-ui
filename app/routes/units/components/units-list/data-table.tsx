@@ -1,16 +1,19 @@
 import {
   flexRender,
   getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  type SortingState,
+  getSortedRowModel,
+  useReactTable,
   type ColumnDef,
   type ColumnFiltersState,
+  type SortingState,
 } from "@tanstack/react-table";
-import { useState } from "react";
 import { Plus, Search } from "lucide-react";
+import { useState } from "react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -19,13 +22,9 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import type { UnitItemDetailResponseDto } from "~/services/api/units/dto";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import CreateUnitDialog from "../create-unit.dialog";
-import { hasAnyRole } from "~/lib/auth/bouncer";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
+import CreateUnitDialog from "../create-unit.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

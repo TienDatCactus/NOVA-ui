@@ -1,29 +1,7 @@
-import {
-  CornerDownRight,
-  Edit,
-  History,
-  MoreHorizontal,
-  Pencil,
-  RotateCcw,
-} from "lucide-react";
-import { Button } from "~/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+import { CornerDownRight } from "lucide-react";
 import { cn } from "~/lib/utils";
 import type { ConfigGroupItem } from "~/services/api/configs/dto";
-import EditConfigDialog from "../fragments/edit-config.dialog";
-import ResetConfigDialog from "../fragments/reset-config.dialog";
-import { useState } from "react";
 import ConfigActionsCell from "../fragments/config-actions.cell";
-
-// NOTE: If you prefer ConfigActionsCell in a separate file, keep it there.
-// I have included the UI logic here for completeness of the visual design.
 
 interface ConfigItemRowProps {
   config: ConfigGroupItem;

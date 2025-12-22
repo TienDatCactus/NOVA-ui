@@ -18,7 +18,6 @@ function RoomTypesViewLayout({
   children,
   filters,
   onFilterChange,
-  onResetFilters,
   totalRoomTypes,
 }: RoomTypesViewLayoutProps) {
   return (

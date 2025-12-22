@@ -1,14 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  AlignLeft,
-  DollarSign,
-  Hash,
-  Layers,
-  Package,
-  Save,
-  Sparkles,
-  Tag,
-} from "lucide-react";
+import { AlignLeft, DollarSign, Hash, Save, Tag } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
@@ -30,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -40,8 +32,6 @@ import {
 } from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { Separator } from "~/components/ui/separator";
-import { ScrollArea } from "~/components/ui/scroll-area";
 
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import type { ServiceItem } from "~/services/api/services/dto";

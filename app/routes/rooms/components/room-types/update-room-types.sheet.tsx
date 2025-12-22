@@ -69,7 +69,6 @@ export function UpdateRoomTypeSheet({
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const [removeMediaIds, setRemoveMediaIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("general");
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const { data: roomTypeDetail } = useRoomTypeDetail({
     id: roomType?.id || "",
@@ -117,20 +116,10 @@ export function UpdateRoomTypeSheet({
         newFiles.length > 0 ||
         removeMediaIds.length > 0;
       if (isDirty && !isPending) {
-        setShowCancelDialog(true);
         return;
       }
       onClose(false);
     }
-  };
-
-  const handleConfirmClose = () => {
-    setShowCancelDialog(false);
-    form.reset();
-    setNewFiles([]);
-    setNewPreviews([]);
-    setRemoveMediaIds([]);
-    onClose(false);
   };
 
   // --- Effects ---

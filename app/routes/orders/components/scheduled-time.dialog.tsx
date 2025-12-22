@@ -1,6 +1,6 @@
 import { addMinutes, format, isSameDay } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Calendar as CalendarIcon, Clock, Timer, X } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Timer } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "~/components/ui/button";

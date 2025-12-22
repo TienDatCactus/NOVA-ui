@@ -1,9 +1,6 @@
-import type { RowSelectionState } from "@tanstack/react-table";
 import { BedDouble } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -11,8 +8,8 @@ import {
 } from "~/components/ui/empty";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { DataTable } from "./data-table";
 import { columns } from "./columns";
+import { DataTable } from "./data-table";
 
 interface RoomTypesTableProps {
   roomTypes: RoomTypesListItemDto[];

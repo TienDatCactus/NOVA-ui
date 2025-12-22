@@ -17,7 +17,6 @@ const {
   MenuListByCategoryResponseSchema,
   MenuItemDetailSchema,
   CreateMenuItemResponseSchema,
-  UpdateMenuItemResponseSchema,
 } = MenuSchema;
 
 /**

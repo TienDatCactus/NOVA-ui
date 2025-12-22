@@ -166,7 +166,6 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
     ],
     [UserRole.Receptionist]: [Permission.Read],
-    [UserRole.ServiceStaff]: [Permission.Read],
   },
 
   // Service Types - Same as Services
@@ -178,7 +177,6 @@ export const MODULE_PERMISSIONS: Record<
       Permission.Delete,
     ],
     [UserRole.Receptionist]: [Permission.Read],
-    [UserRole.ServiceStaff]: [Permission.Read],
   },
 
   // Orders - Receptionist full access

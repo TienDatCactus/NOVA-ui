@@ -194,7 +194,6 @@ export default function InvoiceDetailSheet({
     return validatePaymentAmount(
       amount,
       invoiceDetail.balance || 0,
-      calculatedFees?.totalAmount || invoiceDetail.total || 0,
       invoiceDetail.status
     );
   }, [amount, invoiceDetail, calculatedFees]);

@@ -1,12 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Box,
-  CircleDollarSign,
-  FileText,
-  Layers,
-  Power,
-  Tag,
-} from "lucide-react";
+import { CircleDollarSign, FileText, Layers, Power, Tag } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 import { Button } from "~/components/ui/button";

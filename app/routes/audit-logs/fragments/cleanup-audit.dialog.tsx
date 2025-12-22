@@ -1,14 +1,16 @@
-import { useState, useMemo } from "react";
-import { subMonths, format } from "date-fns";
+import { format, subMonths } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
-  Trash2,
   AlertTriangle,
   CalendarX2,
   Database,
-  Loader2,
   Eraser,
+  Loader2,
 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,15 +19,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
-import { Slider } from "~/components/ui/slider";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { useCleanupAuditLogs, useCleanupCount } from "../container/query.hooks";
-import { toast } from "sonner";
-import { cn } from "~/lib/utils";
+import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
+import { Slider } from "~/components/ui/slider";
+import { useCleanupAuditLogs, useCleanupCount } from "../container/query.hooks";
 
 interface CleanupAuditDialogProps {
   open: boolean;

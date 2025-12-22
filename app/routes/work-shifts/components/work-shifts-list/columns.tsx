@@ -87,13 +87,12 @@ export const columns: ColumnDef<WorkShiftListItem>[] = [
   {
     id: "actions",
     header: () => <div className="text-center">Thao tác</div>,
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       const workShift = row.original;
-      const onSuccess = (table.options.meta as any)?.onSuccess;
 
       return (
         <div className="flex justify-center">
-          <ActionsMenuCell workShift={workShift} onSuccess={onSuccess} />
+          <ActionsMenuCell workShift={workShift} />
         </div>
       );
     },

@@ -15,15 +15,12 @@ export function meta({}: Route.MetaArgs) {
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Rooms, Permission.Read);
 
-export default function Component({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function Component({}: Route.ComponentProps) {
   const { filters, updateFilter, resetFilters, filterRooms } = useRoomFilters();
   const { data: rooms, isPending } = useRooms({
     date: filters.date,
-    status: filters.status,
-    typeId: filters.typeId,
+    status: filters.status || undefined,
+    typeId: filters.typeId || undefined,
   });
   const filteredRooms = rooms ? filterRooms(rooms) : [];
 

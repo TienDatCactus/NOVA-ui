@@ -14,15 +14,10 @@ interface MenuCategoryViewLayoutProps {
   filters: MenuCategoryFilters;
 }
 
-/**
- * Layout cho menu category management page
- * Bao gồm header, stats, command bar, và content area
- */
 export default function MenuCategoryViewLayout({
   children,
   totalMenuCategories,
   updateFilter,
-  resetFilters,
   filters,
 }: MenuCategoryViewLayoutProps) {
   return (

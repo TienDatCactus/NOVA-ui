@@ -1,6 +1,5 @@
 import { format, parseISO } from "date-fns";
 import {
-  Calendar,
   CheckCircle2,
   Lock,
   Mail,

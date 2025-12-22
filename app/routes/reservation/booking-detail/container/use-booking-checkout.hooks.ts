@@ -111,7 +111,7 @@ export function useCreateCheckoutInvoice(bookingId: string) {
         queryKey: ["booking-invoices", bookingId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       toast.success("Tạo hóa đơn checkout thành công");
     },
@@ -138,7 +138,7 @@ export function useCheckoutPayment(bookingId: string) {
         queryKey: ["checkout", "pending-charges", bookingId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       queryClient.invalidateQueries({
         queryKey: ["booking-invoices", bookingId],
@@ -179,7 +179,7 @@ export function useInvoicePayment(invoiceId: string, bookingId: string) {
       });
       // Invalidate all booking details
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       // Invalidate pending charges to refresh UI
       queryClient.invalidateQueries({
@@ -216,7 +216,7 @@ export function useSyncInvoiceWithOrders(invoiceId: string, bookingId: string) {
       });
       // Invalidate all booking details
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       toast.success("Đồng bộ hóa đơn với các đơn hàng thành công");
     },
@@ -247,9 +247,7 @@ export function useCheckout(bookingId: string) {
         queryKey: ["bookings-detail", bookingId],
       });
       // Also invalidate without ID to cover all variations
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-      });
+
       // Invalidate booking-specific invoice list
       queryClient.invalidateQueries({
         queryKey: ["booking-invoices", bookingId],
@@ -311,7 +309,7 @@ export function useConfirmBookingPayment(bookingId: string) {
     onSuccess: (response) => {
       toast.success(response.message || "Xác nhận thanh toán thành công");
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       queryClient.invalidateQueries({
         queryKey: ["bookings"],
@@ -337,7 +335,7 @@ export function useAddCompletedCharges(bookingId: string) {
         queryKey: ["checkout", "pending-charges", bookingId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       });
       queryClient.invalidateQueries({
         queryKey: ["booking-invoices", bookingId],

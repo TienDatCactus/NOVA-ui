@@ -1,7 +1,8 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { PackageCheck } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Minus, Plus, PackageCheck } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -20,14 +21,11 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
-import { Badge } from "~/components/ui/badge";
-import { useAdjustStock } from "../container/query.hooks";
-import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Separator } from "~/components/ui/separator";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Textarea } from "~/components/ui/textarea";
+import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import { useAdjustStock } from "../container/query.hooks";
 
 interface QuickAdjustDialogProps {
   open: boolean;

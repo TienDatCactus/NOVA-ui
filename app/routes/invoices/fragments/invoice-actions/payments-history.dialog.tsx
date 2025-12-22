@@ -80,7 +80,7 @@ export default function PaymentsHistoryDialog({
 
   const totalPaid =
     payments?.reduce(
-      (sum, p) => (p.status === "completed" ? sum + p.amount : sum),
+      (sum, p) => (p.status === "completed" ? sum + (p.amount || 0) : sum),
       0
     ) || 0;
 
@@ -118,10 +118,10 @@ export default function PaymentsHistoryDialog({
             <div className="px-6 py-4 space-y-4">
               {payments.map((payment) => {
                 const methodCfg =
-                  METHOD_CONFIG[payment.method?.toLowerCase()] ||
+                  METHOD_CONFIG[payment.method?.toLowerCase() || ""] ||
                   METHOD_CONFIG.default;
                 const statusCfg =
-                  STATUS_CONFIG[payment.status?.toLowerCase()] ||
+                  STATUS_CONFIG[payment.status?.toLowerCase() || ""] ||
                   STATUS_CONFIG.completed;
                 const MethodIcon = methodCfg.icon;
                 const StatusIcon = statusCfg.icon;
@@ -145,7 +145,7 @@ export default function PaymentsHistoryDialog({
                             <Calendar className="h-3 w-3" />
                             <span>
                               {format(
-                                new Date(payment.createdAt),
+                                new Date(payment.createdAt || ""),
                                 "HH:mm dd/MM/yyyy",
                                 { locale: vi }
                               )}
@@ -163,7 +163,7 @@ export default function PaymentsHistoryDialog({
                               : "text-foreground"
                           )}
                         >
-                          {formatMoney(payment.amount).vndFormatted}
+                          {formatMoney(payment.amount || 0).vndFormatted}
                         </p>
                         <div
                           className={cn(

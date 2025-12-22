@@ -1,15 +1,13 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { Badge } from "~/components/ui/badge";
-import { Checkbox } from "~/components/ui/checkbox";
+import { ChevronDown } from "lucide-react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { useAuth } from "~/lib/auth/components";
+import { RouteModule } from "~/lib/auth/roles";
 import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
 import ServiceActionsCell from "../../fragments/services/actions.cell";
-import { Button } from "~/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import { Can } from "~/lib/auth/bouncer";
-import { RouteModule } from "~/lib/auth/roles";
-import { useAuth } from "~/lib/auth/components";
 
 export const columns: ColumnDef<ServiceItem>[] = [
   {

@@ -17,7 +17,6 @@ import {
 import { Form } from "~/components/ui/form";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import { onError } from "~/lib/utils";
 import { useStockItemList } from "~/routes/stocks/items/container/query.hooks";
 import { useUnits } from "~/routes/units/container/unit-query.hooks";
 import { MenuSchema } from "~/services/api/menu/menu.schema";

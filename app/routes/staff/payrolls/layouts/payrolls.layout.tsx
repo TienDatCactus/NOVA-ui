@@ -27,7 +27,6 @@ export default function PayrollsLayout({
   filterState,
   updateFilter,
   onRefresh,
-  resetFilter,
 }: HeaderLayoutProps) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();

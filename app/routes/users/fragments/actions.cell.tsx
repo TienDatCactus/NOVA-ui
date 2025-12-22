@@ -50,17 +50,17 @@ function ActionsMenuCell({ user }: ActionsMenuCellProps) {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const { mutate } = useDeleteUser();
-  const handleLockUser = (e: React.MouseEvent) => {
+  const handleLockUser = () => {
     setLockDialogMode("lock");
     setIsLockDialogOpen(true);
   };
 
-  const handleUnlockUser = (e: React.MouseEvent) => {
+  const handleUnlockUser = () => {
     setLockDialogMode("unlock");
     setIsLockDialogOpen(true);
   };
 
-  const handleDeleteAccount = (e: React.MouseEvent) => {
+  const handleDeleteAccount = () => {
     mutate(user.id, {
       onSuccess: () => {
         setIsDeleteAccountOpen(false);
@@ -82,7 +82,7 @@ function ActionsMenuCell({ user }: ActionsMenuCellProps) {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={() => {
               setIsEditOpen(true);
             }}
           >
@@ -91,7 +91,7 @@ function ActionsMenuCell({ user }: ActionsMenuCellProps) {
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={() => {
               setIsManageRolesOpen(true);
             }}
           >
@@ -100,7 +100,7 @@ function ActionsMenuCell({ user }: ActionsMenuCellProps) {
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={() => {
               setIsChangePasswordOpen(true);
             }}
           >
@@ -109,7 +109,7 @@ function ActionsMenuCell({ user }: ActionsMenuCellProps) {
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
-            onClick={(e) => {
+            onClick={() => {
               setIsDeleteAccountOpen(true);
             }}
           >

@@ -1,19 +1,16 @@
-import * as React from "react";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogClose,
 } from "~/components/ui/dialog";
-import { Card } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { Skeleton } from "~/components/ui/skeleton";
-import { useGetRoomQrCode } from "../../container/rooms/query.hooks";
-import { useRegenerateRoomQRCode } from "../../container/rooms/mutation.hooks";
-import { X } from "lucide-react";
 import Image from "~/components/ui/image";
+import { Skeleton } from "~/components/ui/skeleton";
+import { useRegenerateRoomQRCode } from "../../container/rooms/mutation.hooks";
+import { useGetRoomQrCode } from "../../container/rooms/query.hooks";
 
 interface QrDialogProps {
   open: boolean;

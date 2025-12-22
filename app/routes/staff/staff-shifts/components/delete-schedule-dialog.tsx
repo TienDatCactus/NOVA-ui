@@ -1,5 +1,14 @@
-import { useState } from "react";
 import { format, parseISO } from "date-fns";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Calendar,
+  Repeat,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,22 +17,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Label } from "~/components/ui/label";
-import { Button } from "~/components/ui/button";
-import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import type { StaffShiftListItem } from "~/services/api/staff/staff-shift/dto";
 import { DeleteScope } from "~/services/api/staff/staff-shift/staff-shift.type";
 import { useDeleteStaffShift } from "../container/query.hooks";
-import {
-  AlertTriangle,
-  Calendar,
-  Trash2,
-  Repeat,
-  ArrowRight,
-} from "lucide-react";
-import { cn } from "~/lib/utils";
-import { Separator } from "~/components/ui/separator";
 
 interface DeleteScheduleDialogProps {
   open: boolean;

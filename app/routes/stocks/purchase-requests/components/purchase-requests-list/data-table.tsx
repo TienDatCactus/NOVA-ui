@@ -26,6 +26,7 @@ import type { PurchaseRequestListItemDto } from "~/services/api/stocks/purchase-
 import CreatePurchaseRequestDialog from "../create-purchase-request.dialog";
 import LowStockDialog from "~/routes/stocks/stock-adjustments/fragments/low-stock.dialog";
 import { useLowStockItems } from "~/routes/stocks/items/container/query.hooks";
+import { Badge } from "~/components/ui/badge";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -92,15 +93,20 @@ export function DataTable<TData extends PurchaseRequestListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant={"warning-outline"}
-            onClick={() => setOpenLowStockDialog(true)}
-          >
-            <TriangleAlert />
-            Các mặt hàng sắp hết
-          </Button>
+        <div className="flex gap-4">
+          <div className="relative">
+            <Button
+              size="sm"
+              variant={"outline"}
+              onClick={() => setOpenLowStockDialog(true)}
+            >
+              <TriangleAlert />
+              Các mặt hàng sắp hết
+            </Button>
+            <Badge variant={"warning"} className="absolute -top-3 -right-3">
+              {lowStockItems.length}
+            </Badge>
+          </div>
           <Button size={"sm"} onClick={() => setOpenCreateDialog(true)}>
             <Plus />
             Tạo yêu cầu mua hàng

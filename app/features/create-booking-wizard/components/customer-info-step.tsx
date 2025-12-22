@@ -300,7 +300,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                 <FormField
                   control={form.control}
                   name="guestEmail"
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs">
                         Email{" "}

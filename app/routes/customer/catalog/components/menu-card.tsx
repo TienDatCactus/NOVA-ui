@@ -1,7 +1,7 @@
 import { UtensilsCrossed } from "lucide-react";
 
 import { Card, CardContent } from "~/components/ui/card";
-import { cn, formatMoney } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 
 interface MenuCardProps {

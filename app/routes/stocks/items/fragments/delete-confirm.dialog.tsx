@@ -8,9 +8,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import type { RoomListItemDto } from "~/services/api/rooms/dto";
-import { useDeleteStockItem } from "../container/query.hooks";
 import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
+import { useDeleteStockItem } from "../container/query.hooks";
 
 interface DeleteConfirmDialogProps {
   open: boolean;

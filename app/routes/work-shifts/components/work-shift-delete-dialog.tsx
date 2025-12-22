@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,8 +9,6 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import type { WorkShiftListItem } from "~/services/api/work-shift/dto";
-import { WorkShiftService } from "~/services/api/work-shift";
-import { toast } from "sonner";
 import { useDeleteWorkShift } from "../container/mutation.hooks";
 
 interface DeleteWorkShiftDialogProps {

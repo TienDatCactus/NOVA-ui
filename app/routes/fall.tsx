@@ -4,7 +4,7 @@ import { UserRole } from "~/lib/auth/roles";
 import { DASHBOARD } from "~/lib/fe-url";
 import type { Route } from "./+types/fall";
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs) => {
+export const clientLoader = async ({}: Route.LoaderArgs) => {
   const navigate = (path: string) => (window.location.href = path);
   if (hasRole(AuthLoader.getUser(), UserRole.Admin)) {
     navigate(DASHBOARD.auditLogs);

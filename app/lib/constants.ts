@@ -4,10 +4,8 @@ import {
   Bath,
   BookImage,
   Calendar,
-  FileText,
   Grid3x3,
   HandHelping,
-  HelpCircle,
   HousePlus,
   Inbox,
   List,
@@ -29,8 +27,8 @@ import {
   Utensils,
   UtensilsCrossed,
 } from "lucide-react";
-import FE_URL from "~/lib/fe-url";
 import { RouteModule } from "~/lib/auth/roles";
+import FE_URL from "~/lib/fe-url";
 
 // Translation supported languages
 const SUPPORTED_LANGUAGES = [

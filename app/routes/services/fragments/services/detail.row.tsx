@@ -12,10 +12,9 @@ import {
 import { Badge } from "~/components/ui/badge";
 import Image from "~/components/ui/image";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { Skeleton } from "~/components/ui/skeleton";
-import { formatMoney, cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
 import { useServiceDetail } from "../../container/services/query.hooks";
 

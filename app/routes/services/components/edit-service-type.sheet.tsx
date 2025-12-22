@@ -1,21 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlignLeft,
-  ImagePlus,
   ImageIcon,
-  Layers,
+  ImagePlus,
   Package,
   RotateCcw,
+  Save,
   ScanBarcode,
   Tag,
   Trash2,
   X,
-  Save,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -28,11 +28,8 @@ import {
 } from "~/components/ui/form";
 import Image from "~/components/ui/image";
 import { Input } from "~/components/ui/input";
-import {
-  Dropzone,
-  DropzoneContent,
-  DropzoneEmptyState,
-} from "~/components/ui/shadcn-io/dropzone";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Dropzone } from "~/components/ui/shadcn-io/dropzone";
 import {
   Sheet,
   SheetContent,
@@ -42,10 +39,8 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
-import { Textarea } from "~/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Badge } from "~/components/ui/badge";
+import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 
 import type { ServiceTypeItem } from "~/services/api/service-types/dto";
@@ -84,8 +79,9 @@ export default function EditServiceTypeSheet({
   });
 
   // --- Queries ---
-  const { data: serviceTypeDetails, isPending: isLoadingDetails } =
-    useServiceTypeDetails(type?.id || "", { enabled: open && !!type });
+  const { data: serviceTypeDetails } = useServiceTypeDetails(type?.id || "", {
+    enabled: open && !!type,
+  });
 
   const { mutate: updateServiceType, isPending: isUpdating } =
     useUpdateServiceType(type?.id || "");

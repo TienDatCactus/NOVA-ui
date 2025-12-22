@@ -40,11 +40,6 @@ export default function PendingPosTable({ orders }: PendingPosTableProps) {
         </TableHeader>
         <TableBody>
           {orders.map((order) => {
-            const orderTotal = order.items.reduce(
-              (sum, item) => sum + item.subtotal,
-              0
-            );
-
             return order.items.map((item, idx) => (
               <TableRow key={`${order.id}-${item.id}`}>
                 {idx === 0 && (

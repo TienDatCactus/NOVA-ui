@@ -33,7 +33,7 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
           <ExpenseDetailDialog
             open={open}
             onClose={() => setOpen(false)}
-            expenseId={row.original.id}
+            expenseId={row.original?.id || ""}
           />
         </>
       );
@@ -45,7 +45,7 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
       <DataTableColumnHeader column={column} title="Ngày chi" />
     ),
     cell: ({ row }) => {
-      const date = parseISO(row.original.expenseDate);
+      const date = parseISO(row.original.expenseDate || "");
       return (
         <div className="whitespace-nowrap">
           <div className="text-sm font-medium">
@@ -94,7 +94,7 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
       return (
         <div className="text-right">
           <div className="font-mono text-sm font-semibold">
-            {formatMoney(row.original.amount).vndFormatted}
+            {formatMoney(row.original.amount || 0).vndFormatted}
           </div>
         </div>
       );
@@ -107,7 +107,7 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
       <DataTableColumnHeader column={column} title="Trạng thái" />
     ),
     cell: ({ row }) => {
-      return <StatusBadge status={row.original.status} />;
+      return <StatusBadge status={row.original.status || "Draft"} />;
     },
   },
   {
@@ -116,7 +116,9 @@ export const columns: ColumnDef<ExpenseListItemDto>[] = [
       <DataTableColumnHeader column={column} title="Nguồn gốc" />
     ),
     cell: ({ row }) => {
-      return <SourceTypeBadge sourceType={row.original.sourceType} />;
+      return (
+        <SourceTypeBadge sourceType={row.original.sourceType || "Manual"} />
+      );
     },
   },
   {

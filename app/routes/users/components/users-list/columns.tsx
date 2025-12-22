@@ -98,7 +98,7 @@ export const columns: ColumnDef<UserItem>[] = [
   {
     id: "actions",
     header: () => <div className="text-center">Thao tác</div>,
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       const user = row.original;
 
       return (

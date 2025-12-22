@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -20,7 +21,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -31,7 +31,6 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 import { useStockAdjustmentDetail } from "../container/query.hooks";
-import { Button } from "~/components/ui/button";
 
 interface StockAdjustmentDetailDialogProps {
   open: boolean;

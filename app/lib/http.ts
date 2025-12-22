@@ -57,7 +57,6 @@ http.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
-    const message = error.response?.data?.message;
     const curPath = window.location.pathname;
 
     // Skip auth redirect for customer/public routes

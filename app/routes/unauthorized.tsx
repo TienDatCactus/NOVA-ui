@@ -1,5 +1,5 @@
+import { ArrowLeft, Home, Lock } from "lucide-react";
 import { Link } from "react-router";
-import { ShieldAlert, Home, ArrowLeft, Lock } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import type { Route } from "./+types/unauthorized";

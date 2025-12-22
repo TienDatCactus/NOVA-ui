@@ -1,16 +1,15 @@
-import { useCallback, useMemo, useRef, useState } from "react";
 import axios from "axios";
-import { useLocalStorage } from "usehooks-ts";
 import {
-  Utensils,
-  Coffee,
-  Wine,
-  Hotel,
   Bath,
+  Coffee,
+  Hotel,
+  Landmark,
   ShoppingBag,
   TreePine,
-  Landmark,
+  Utensils,
+  Wine,
 } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { uuidv4, ZodUUID } from "zod";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_BOX_TOKEN;
@@ -99,10 +98,6 @@ export function useMapboxSearch(options?: {
   const sessionTokenRef = useRef(sessionId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [searchHistory, setSearchHistory] = useLocalStorage<
-    SearchHistoryItem[]
-  >("mapbox-search-history", []);
 
   /** -------------------------------------------------------
    * AXIOS INSTANCE (stable via useMemo)
@@ -299,7 +294,6 @@ export function useMapboxSearch(options?: {
       searchByResortCategory,
       reverseLookup,
       resetSession,
-      searchHistory,
       sessionToken: sessionTokenRef.current,
       loading,
       error,
@@ -312,7 +306,6 @@ export function useMapboxSearch(options?: {
       searchByResortCategory,
       reverseLookup,
       resetSession,
-      searchHistory,
       error,
     ]
   );

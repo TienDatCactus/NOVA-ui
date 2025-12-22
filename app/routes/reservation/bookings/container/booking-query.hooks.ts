@@ -1,13 +1,9 @@
 // useBookingDetail.ts
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { BookingService } from "~/services/api/booking";
 import type { BookingListParams } from "~/services/api/booking/booking.types";
 import { RoomsService } from "~/services/api/rooms";
-import type {
-  AvailableRoomListParams,
-  InternalAvailableRoomListParams,
-} from "~/services/api/rooms/room.types";
+import type { InternalAvailableRoomListParams } from "~/services/api/rooms/room.types";
 
 function useBookingDetail({
   bookingCode,

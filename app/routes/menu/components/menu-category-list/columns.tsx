@@ -1,12 +1,11 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { format, parseISO } from "date-fns";
-import { Badge } from "~/components/ui/badge";
-import { Checkbox } from "~/components/ui/checkbox";
+import { format } from "date-fns";
 import { DataTableColumnHeader } from "~/components/table/table-header";
-import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
-import MenuCategoryActionsCell from "../../fragments/menu-categories/actions.cell";
+import { Badge } from "~/components/ui/badge";
 import { useAuth } from "~/lib/auth/components";
 import { RouteModule } from "~/lib/auth/roles";
+import type { MenuCategoryItemDto } from "~/services/api/menu-category/dto";
+import MenuCategoryActionsCell from "../../fragments/menu-categories/actions.cell";
 
 export const columns: ColumnDef<MenuCategoryItemDto>[] = [
   {

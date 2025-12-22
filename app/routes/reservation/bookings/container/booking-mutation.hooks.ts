@@ -21,22 +21,23 @@ function useUpdateBooking(bookingId: string, bookingCode?: string) {
           queryKey: ["bookings-detail", bookingCode, response.bookingId],
         });
       }
-      (queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["bookings"],
-      }),
-        queryClient.invalidateQueries({
-          queryKey: ["bookings-detail"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["available-rooms"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["bookings-rooms-week"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["orderable-bookings"],
-        }),
-        toast.success("Cập nhật đặt phòng thành công"));
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-detail", response.bookingId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookings-rooms-week"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["orderable-bookings"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-rooms"],
+      });
+
+      toast.success("Cập nhật đặt phòng thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
@@ -59,7 +60,7 @@ function useChangeRoom(bookingId: string) {
         queryKey: ["bookings"],
       }),
         queryClient.invalidateQueries({
-          queryKey: ["bookings-detail"],
+          queryKey: ["bookings-detail", bookingId],
         }),
         queryClient.invalidateQueries({
           queryKey: ["available-rooms-for-change"],
@@ -92,7 +93,7 @@ function useCancelBooking(bookingId: string) {
         queryKey: ["bookings"],
       }),
         queryClient.invalidateQueries({
-          queryKey: ["bookings-detail"],
+          queryKey: ["bookings-detail", data.bookingId, data.bookingCode],
         }),
         queryClient.invalidateQueries({
           queryKey: ["bookings-rooms-week"],
@@ -127,7 +128,7 @@ function useUpdateBookingStatus(bookingId: string) {
     onSuccess: async () => {
       // Invalidate all related queries
       (queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
+        queryKey: ["bookings-detail", bookingId],
       }),
         queryClient.invalidateQueries({
           queryKey: ["bookings"],

@@ -1,22 +1,14 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
-import { DataTableColumnHeader } from "~/components/table/table-header";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
-import { formatMoney } from "~/lib/utils";
-import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
-import { useState } from "react";
-import { RoomTypeActionsCell } from "~/routes/rooms/fragments/room-types/action.cell";
-import RoomTypesDetailDialog from "../room-types-detail.dialog";
 import { useAuth } from "~/lib/auth/components";
 import { RouteModule } from "~/lib/auth/roles";
+import { formatMoney } from "~/lib/utils";
+import { RoomTypeActionsCell } from "~/routes/rooms/fragments/room-types/action.cell";
+import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
+import RoomTypesDetailDialog from "../room-types-detail.dialog";
 
 export const columns: ColumnDef<RoomTypesListItemDto>[] = [
   {

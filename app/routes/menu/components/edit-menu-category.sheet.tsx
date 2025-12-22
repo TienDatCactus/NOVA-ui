@@ -1,16 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FileText, Hash, Save } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Archive,
-  CalendarDays,
-  FileText,
-  Layers,
-  Save,
-  Tag,
-  Hash,
-} from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -23,6 +15,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -33,12 +26,9 @@ import {
 } from "~/components/ui/sheet";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Switch } from "~/components/ui/switch";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
 import { MenuCategorySchema } from "~/services/api/menu-category/menu-category.schema";
 import { useUpdateMenuCategory } from "../container/menu-categories/mutation.hooks";
 import { useMenuCategoryDetail } from "../container/menu-categories/query.hooks";
-import { toYMD } from "~/lib/utils";
 
 const { UpdateMenuCategoryRequestSchema } = MenuCategorySchema;
 

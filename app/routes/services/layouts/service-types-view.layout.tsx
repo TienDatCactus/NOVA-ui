@@ -18,7 +18,6 @@ export default function ServiceTypesViewLayout({
   children,
   totalTypes,
   filters,
-  resetFilters,
   updateFilter,
 }: ServiceTypesViewLayoutProps) {
   return (

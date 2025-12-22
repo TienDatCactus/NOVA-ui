@@ -1,14 +1,14 @@
 import { ChevronRight, FolderOpen, Layers } from "lucide-react";
 import { useState } from "react";
+import type z from "zod";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import { cn } from "~/lib/utils";
-import ConfigItemRow from "./config-item-row";
-import type z from "zod";
 import type { ConfigSchema } from "~/services/api/configs/configs.schema";
+import ConfigItemRow from "./config-item-row";
 
 interface GroupSectionProps {
   group: z.infer<typeof ConfigSchema.ConfigGroupSchema>;
@@ -18,7 +18,6 @@ interface GroupSectionProps {
 
 export default function GroupSection({
   group,
-  moduleKey,
   defaultOpen = false,
 }: GroupSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);

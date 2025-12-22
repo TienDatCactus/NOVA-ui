@@ -67,20 +67,6 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
     },
   },
   {
-    accessorKey: "description",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Mô tả" />
-    ),
-    cell: ({ row }) => {
-      const description = row.original.description || "—";
-      return (
-        <p className="text-sm text-muted-foreground truncate max-w-xs">
-          {description}
-        </p>
-      );
-    },
-  },
-  {
     accessorKey: "unitName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Đơn vị" />

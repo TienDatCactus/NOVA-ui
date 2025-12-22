@@ -1,4 +1,4 @@
-import { ArrowDown, RotateCcw, Undo2 } from "lucide-react";
+import { ArrowDown, RotateCcw } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,

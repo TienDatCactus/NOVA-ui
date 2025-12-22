@@ -99,7 +99,7 @@ export default function InvoicesFilterBar({
             <FilterSelect<InvoiceStatus>
               title="Trạng thái"
               options={INVOICE_STATUSES}
-              value={filters.Status}
+              value={filters.Status || undefined}
               onChange={(val) => onFilterChange("Status", val)}
             />
 
@@ -107,14 +107,14 @@ export default function InvoicesFilterBar({
             <FilterSelect<PaymentMethod>
               title="Thanh toán"
               options={PAYMENT_METHODS}
-              value={filters.PaymentMethod}
+              value={filters.PaymentMethod || undefined}
               onChange={(val) => onFilterChange("PaymentMethod", val)}
             />
 
             <FilterSelect<InvoiceType>
               title="Loại mục"
               options={INVOICE_TYPES}
-              value={filters.InvoiceType}
+              value={filters.InvoiceType || undefined}
               onChange={(val) => onFilterChange("InvoiceType", val)}
             />
           </div>

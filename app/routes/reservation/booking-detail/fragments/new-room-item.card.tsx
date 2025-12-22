@@ -15,12 +15,7 @@ interface NewRoomItemCardProps {
   onRemove: () => void;
 }
 
-/**
- * Display card for newly added rooms in booking detail
- * Shows room info with dates and remove button
- */
 export default function NewRoomItemCard({
-  roomId,
   roomName,
   roomTypeName,
   imageUrl,

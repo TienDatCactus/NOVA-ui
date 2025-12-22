@@ -16,20 +16,7 @@ export const columns: ColumnDef<ItemCategoryListItemDto>[] = [
       return <div className="font-medium">{name}</div>;
     },
   },
-  {
-    accessorKey: "description",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Mô tả" />
-    ),
-    cell: ({ row }) => {
-      const description = row.original.description;
-      return (
-        <div className="max-w-md text-sm text-muted-foreground">
-          {description || "—"}
-        </div>
-      );
-    },
-  },
+
   {
     accessorKey: "itemCount",
     header: ({ column }) => (

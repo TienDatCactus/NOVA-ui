@@ -9,8 +9,11 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
 import { Plus, Search } from "lucide-react";
+import { useState } from "react";
+import { DataTablePagination } from "~/components/table/table-pagination";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -19,26 +22,20 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import type { ServiceItem } from "~/services/api/services/dto";
-import ServiceDetailRow from "../../fragments/services/detail.row";
-import { DataTablePagination } from "~/components/table/table-pagination";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import CreateServiceTypeDialog from "../create-service-type.dialog";
-import CreateServiceDialog from "../create-service.dialog";
 import { useAuth } from "~/lib/auth/components";
 import { RouteModule } from "~/lib/auth/roles";
+import type { ServiceItem } from "~/services/api/services/dto";
+import ServiceDetailRow from "../../fragments/services/detail.row";
+import CreateServiceDialog from "../create-service.dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 export function DataTable<TData extends ServiceItem, TValue>({
   columns,
   data,
-  onSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -56,7 +53,7 @@ export function DataTable<TData extends ServiceItem, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getRowCanExpand: (row) => true,
+    getRowCanExpand: () => true,
     getRowId: (row) => row.serviceItemId,
     getPaginationRowModel: getPaginationRowModel(),
   });

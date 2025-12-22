@@ -1,5 +1,6 @@
-import { Plus, Info, DollarSign, Hash } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { DollarSign, Hash, Info } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,9 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 

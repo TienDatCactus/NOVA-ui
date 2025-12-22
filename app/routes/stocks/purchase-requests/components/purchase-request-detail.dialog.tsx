@@ -92,7 +92,7 @@ export default function PurchaseRequestDetailDialog({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <DialogTitle className="text-xl flex items-center gap-3">
-                Chi tiết phiếu đề nghị
+                Chi tiết phiếu yêu cầu mua hàng
                 {purchaseRequest && getStatusBadge(purchaseRequest.status)}
               </DialogTitle>
               <DialogDescription className="font-mono text-sm text-primary font-medium bg-primary/5 w-fit px-2 py-0.5 rounded">

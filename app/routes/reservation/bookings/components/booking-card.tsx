@@ -412,6 +412,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Tác vụ</DropdownMenuLabel>
               <DropdownMenuSeparator />
+
               <DropdownMenuItem onClick={handleViewDetail}>
                 <DoorOpen className="mr-2 h-4 w-4" />{" "}
                 {isRoomBlock ? "Chi tiết bảo trì" : "Xem chi tiết"}

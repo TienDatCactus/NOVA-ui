@@ -1,13 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  AlertCircle,
-  BadgeInfo,
-  CheckCircle2,
-  Copy,
-  MoreHorizontal,
-} from "lucide-react";
+import { AlertCircle, BadgeInfo, CheckCircle2, Copy } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DataTableColumnHeader } from "~/components/table/table-header";

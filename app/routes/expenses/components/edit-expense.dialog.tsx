@@ -80,7 +80,7 @@ export default function EditExpenseDialog({
   expenseId,
 }: EditExpenseDialogProps) {
   // --- Queries & Mutations ---
-  const { data: expense, isPending: isLoading } = useExpenseDetail(expenseId, {
+  const { data: expense } = useExpenseDetail(expenseId, {
     enabled: open,
   });
   const { mutate: updateExpense, isPending: isUpdating } = useUpdateExpense();
@@ -103,11 +103,11 @@ export default function EditExpenseDialog({
   useEffect(() => {
     if (expense) {
       form.reset({
-        category: expense.category,
-        amount: expense.amount,
-        expenseDate: expense.expenseDate, // Ensure this is ISO string or Date object compatible
+        category: expense.category || "Other",
+        amount: expense.amount || 0,
+        expenseDate: expense.expenseDate || "",
         description: expense.description || "",
-        paymentMethod: expense.paymentMethod,
+        paymentMethod: expense.paymentMethod || "Unknown",
         receiptNumber: expense.receiptNumber || "",
       });
     }

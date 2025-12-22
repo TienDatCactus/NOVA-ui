@@ -1,4 +1,4 @@
-import { Box, PackageCheck } from "lucide-react";
+import { PackageCheck } from "lucide-react";
 import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 import type { GroupedConfigListItem } from "~/services/api/configs/dto";

@@ -15,6 +15,13 @@ import { Progress } from "~/components/ui/progress";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { cn } from "~/lib/utils";
 import { useLowStockItems } from "../../items/container/query.hooks";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "~/components/ui/empty";
 
 interface LowStockDialogProps {
   open: boolean;
@@ -54,11 +61,17 @@ const LowStockDialog: React.FC<LowStockDialogProps> = ({
         {/* Body */}
         <ScrollArea className="flex-1">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <CheckCircle2 className="h-12 w-12 mb-3 text-emerald-500 opacity-50" />
-              <p className="text-sm font-medium">Kho hàng ổn định</p>
-              <p className="text-xs">Không có mặt hàng nào dưới định mức.</p>
-            </div>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant={"icon"}>
+                  <CheckCircle2 />
+                </EmptyMedia>
+                <EmptyTitle>Kho hàng ổn định</EmptyTitle>
+                <EmptyDescription>
+                  Không có mặt hàng nào dưới định mức.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <div className="divide-y divide-border/50">
               {items.map((item) => {

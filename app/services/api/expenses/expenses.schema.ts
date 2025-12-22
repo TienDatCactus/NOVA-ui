@@ -25,11 +25,11 @@ const ExpenseSourceTypeEnum = z.enum(
 
 const ExpenseListItemSchema = z.object({
   id: z.string().nullable(),
-  category: ExpenseCategoryEnum.nullable(),
+  category: ExpenseCategoryEnum.catch("Other").nullable(),
   amount: z.number().nullable(),
   expenseDate: z.string().nullable(),
   description: z.string().nullable(),
-  paymentMethod: PaymentSchema.PaymentMethodEnum.nullable(),
+  paymentMethod: PaymentSchema.PaymentMethodEnum.catch("Unknown").nullable(),
   paymentMethodName: z.string().nullable(),
   receiptNumber: z.string().nullable(),
   createdAt: z.string().nullable(),

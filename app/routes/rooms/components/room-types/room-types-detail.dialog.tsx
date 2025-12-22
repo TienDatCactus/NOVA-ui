@@ -11,18 +11,6 @@ import {
 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import Image from "~/components/ui/image";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
-import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
-import { Skeleton } from "~/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import { formatMoney } from "~/lib/utils";
 import {
   Dialog,
   DialogClose,
@@ -32,6 +20,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import Image from "~/components/ui/image";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
+import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
+import { Skeleton } from "~/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { formatMoney } from "~/lib/utils";
 import { useRoomTypeDetail } from "../../container/room-types/query.hooks";
 
 interface RoomTypesDetailDialogProps {

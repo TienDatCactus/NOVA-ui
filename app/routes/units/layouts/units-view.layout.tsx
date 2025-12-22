@@ -17,7 +17,6 @@ interface UnitsViewLayoutProps {
 function UnitsViewLayout({
   filters,
   updateFilter,
-  resetFilter,
   totalUnits,
   children,
 }: UnitsViewLayoutProps) {
