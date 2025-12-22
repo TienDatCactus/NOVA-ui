@@ -112,7 +112,6 @@ export default function CreateBookingPage() {
       roomIds: storeData.roomIds || [],
 
       isBreakfastAll: storeData.isBreakfastAll || false,
-      breakfastDates: storeData.breakfastDates?.map((d) => new Date(d)) || [],
       specialRequest: storeData.specialRequest || "",
       overridePrice: storeData.overridePrice,
       internalNote: storeData.internalNote,
@@ -145,7 +144,6 @@ export default function CreateBookingPage() {
         );
 
         form.setValue("roomIds", []);
-        form.setValue("breakfastDates", []);
         form.setValue("isBreakfastAll", false);
         form.setValue("serviceOrder.services", []);
       }
@@ -166,7 +164,6 @@ export default function CreateBookingPage() {
         );
 
         form.setValue("roomIds", []);
-        form.setValue("breakfastDates", []);
         form.setValue("isBreakfastAll", false);
         form.setValue("serviceOrder.services", []);
       }

@@ -166,9 +166,6 @@ async function staffCreateBooking(
       ...parsed,
       checkinDate: toYMD(parsed.checkinDate),
       checkoutDate: toYMD(parsed.checkoutDate),
-      breakfastDates: Array.isArray(parsed.breakfastDates)
-        ? parsed.breakfastDates.map((bd) => toYMD(bd)).filter(Boolean)
-        : undefined,
     };
 
     const resp = await http.post(Booking.staffCreateBooking, payload, {

@@ -6,9 +6,9 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
   AuthLoader,
-  RouteModule,
-  Permission,
   hasAnyRole,
+  Permission,
+  RouteModule,
   UserRole,
 } from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/booking-detail";
@@ -110,7 +110,6 @@ export default function Component() {
       otaBookingCode: "",
       otaInformationId: "",
       rooms: [],
-      breakfastDates: [],
       totalAmount: 0,
     },
   });
@@ -162,7 +161,6 @@ export default function Component() {
       note: data.note,
       otaBookingCode: data.otaBookingCode,
       otaInformationId: data.otaInformationId,
-      breakfastDates: data.breakfastDates || [],
       totalAmount: data.totalAmount,
       rooms: data.rooms,
     };
@@ -187,11 +185,8 @@ export default function Component() {
           otaInformationId: bookingDetail.source === "OTA" ? "" : "",
           customerId: bookingDetail.customer.id,
           totalAmount: bookingDetail.totalAmount || 0,
-          breakfastDates:
-            bookingDetail.breakfastDates?.map((date) => {
-              return { date: date };
-            }) || [],
-          rooms: [], // Always clear pending operations when data refreshes
+
+          rooms: [],
         },
         {
           keepDirty: false, // Don't preserve dirty state on data refresh

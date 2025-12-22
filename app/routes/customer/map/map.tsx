@@ -6,7 +6,7 @@ import type { Route } from "./+types/map";
 import SearchBox from "./components/search";
 import { useMap } from "./context/map-context";
 import { useMapboxSearch } from "./hooks/use-mapbox-search";
-
+import bgImage from "~/assets/img/26fcda3a6e3cbad9802ff0e1dc10d117.jpg";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Bản Đồ - NOVA Hotel" },
@@ -74,8 +74,7 @@ export default function Component({}: Route.ComponentProps) {
       // Create custom Eco Palm marker
       const el = document.createElement("div");
       el.className = "eco-palm-marker";
-      el.style.backgroundImage =
-        "url('app/assets/img/26fcda3a6e3cbad9802ff0e1dc10d117.jpg')";
+      el.style.backgroundImage = `url(${bgImage})`;
       el.style.width = "60px";
       el.style.height = "60px";
       el.style.backgroundSize = "100%";

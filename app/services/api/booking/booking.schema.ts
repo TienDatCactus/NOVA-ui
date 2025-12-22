@@ -52,7 +52,6 @@ const StaffCreateBookingSchema = z
       .min(0)
       .default(0),
     isBreakfastAll: z.boolean("Thông tin bữa sáng không hợp lệ").default(false),
-    breakfastDates: z.array(z.date("Ngày không hợp lệ")).optional(),
 
     guestFullName: z
       .string()
@@ -145,7 +144,6 @@ const StaffBookingPricePreviewRequestSchema = z.object({
     })
   ),
   isBreakfastAll: z.boolean().default(false),
-  breakfastDates: z.array(z.string()).optional(),
   services: z.array(
     z.object({
       itemType: z.string(),
@@ -258,13 +256,7 @@ const StaffUpdateBookingRequestSchema = z.object({
     .number("Giá trị không hợp lệ")
     .min(0, "Tổng tiền không hợp lệ")
     .optional(),
-  breakfastDates: z
-    .array(
-      z.object({
-        date: z.string().optional(),
-      })
-    )
-    .optional(),
+  isBreakfastAll: z.boolean("Thông tin bữa sáng không hợp lệ").optional(),
   // ========== PHÒNG (Array operations: ADD, CHANGE, REMOVE) ==========
   rooms: z.array(UpdateBookingRoomRequestSchema).optional(),
 });

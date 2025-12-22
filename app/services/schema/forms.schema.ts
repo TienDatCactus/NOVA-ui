@@ -11,8 +11,6 @@ const RoomSelectionFormSchema = z.object({
 const ServicesBreakfastFormSchema = z.object({
   isBreakfastAll:
     BookingSchema.StaffCreateBookingSchema.shape.isBreakfastAll.optional(),
-  breakfastDates:
-    BookingSchema.StaffCreateBookingSchema.shape.breakfastDates.optional(),
   checkinDate: z.union([z.date(), z.string()]).optional(),
   checkoutDate: z.union([z.date(), z.string()]).optional(),
 });

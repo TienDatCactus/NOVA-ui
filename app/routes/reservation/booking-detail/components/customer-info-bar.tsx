@@ -1,7 +1,6 @@
 import {
   Baby,
   Building2,
-  CalendarDays,
   Globe,
   Mail,
   Phone,
@@ -27,21 +26,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
+import { Switch } from "~/components/ui/switch";
 import type {
   BookingDetailResponseDto,
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
 import type { BookingState } from "../container/use-booking-state.hooks";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
-import { Calendar } from "~/components/ui/calendar";
 
 interface CustomerInfoBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -146,76 +136,19 @@ export default function CustomerInfoBar({
 
           <FormField
             control={form.control}
-            name="breakfastDates"
+            name="isBreakfastAll"
             render={({ field }) => {
-              const checkinDate = form.watch("checkinDate");
-              const checkoutDate = form.watch("checkoutDate");
-
-              const handleSelectDates = (dates: Date[] | undefined) => {
-                if (!dates) {
-                  field.onChange([]);
-                  return;
-                }
-                const formatted = dates.map((date) => ({
-                  date: format(date, "yyyy-MM-dd"),
-                }));
-                field.onChange(formatted);
-              };
-
               return (
                 <FormItem className="space-y-1.5">
                   <FormLabel className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
                     <Utensils className="h-3.5 w-3.5" /> Đặt ăn sáng
                   </FormLabel>
                   <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal h-9",
-                            !form.watch("breakfastDates")?.length &&
-                              "text-muted-foreground"
-                          )}
-                          disabled={
-                            !bookingState.permissions.canEdit &&
-                            (bookingDetail.status == "Pending" ||
-                              bookingDetail.status == "Confirmed")
-                          }
-                        >
-                          <CalendarDays className="mr-2 h-3.5 w-3.5" />
-                          {(form.watch("breakfastDates")?.length ?? 0 > 0) ? (
-                            <span className="text-foreground font-medium">
-                              {form.watch("breakfastDates")?.length} buổi sáng
-                            </span>
-                          ) : (
-                            "Chọn ngày"
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="multiple"
-                          selected={form
-                            .watch("breakfastDates")
-                            ?.map((bd) => (bd.date ? parseISO(bd.date) : null))
-                            .filter((date): date is Date => date !== null)}
-                          onSelect={handleSelectDates}
-                          disabled={(date) => {
-                            const checkin =
-                              checkinDate instanceof Date
-                                ? checkinDate
-                                : parseISO(checkinDate!.toString());
-                            const checkout =
-                              checkoutDate instanceof Date
-                                ? checkoutDate
-                                : parseISO(checkoutDate!.toString());
-                            return date <= checkin || date > checkout;
-                          }}
-                          locale={vi}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={!bookingState.permissions.canEditGuests}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

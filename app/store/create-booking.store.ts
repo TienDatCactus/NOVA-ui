@@ -36,7 +36,6 @@ export const useCreateBookingStore = create<CreateBookingState>()(
           newData.serviceOrder = undefined;
           newData.roomPayment = undefined;
           newData.isBreakfastAll = false;
-          newData.breakfastDates = [];
         } else if (data.bookingType === "Direct") {
           newData.source = "DirectStaff";
         } else if (data.bookingType === "OTA") {
