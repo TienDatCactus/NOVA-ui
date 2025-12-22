@@ -2,7 +2,6 @@ import axios from "axios";
 import {
   Bath,
   Coffee,
-  Hotel,
   Landmark,
   ShoppingBag,
   TreePine,
@@ -36,12 +35,6 @@ export const RESORT_CATEGORIES = {
     label: "Bar",
     icon: Wine,
     mapbox_category: "bar",
-  },
-
-  hotel: {
-    label: "Khách sạn",
-    icon: Hotel,
-    mapbox_category: "lodging",
   },
 
   spa: {
@@ -133,6 +126,7 @@ export function useMapboxSearch(options?: {
             types,
             language,
             session_token: sessionTokenRef.current,
+            limit: 10,
           },
         });
 
@@ -193,6 +187,7 @@ export function useMapboxSearch(options?: {
             country,
             types,
             language,
+            limit: 10,
           },
         });
 
@@ -221,6 +216,7 @@ export function useMapboxSearch(options?: {
             bbox,
             country,
             language,
+            limit: 10,
           },
         });
 

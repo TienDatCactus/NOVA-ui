@@ -35,7 +35,7 @@ export const useCreateBookingStore = create<CreateBookingState>()(
           newData.overridePrice = 0;
           newData.serviceOrder = undefined;
           newData.roomPayment = undefined;
-          newData.isBreakfastAll = false;
+          newData.includeBreakfast = false;
         } else if (data.bookingType === "Direct") {
           newData.source = "DirectStaff";
         } else if (data.bookingType === "OTA") {

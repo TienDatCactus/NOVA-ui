@@ -49,7 +49,7 @@ export default function ServiceBreakfastManagerDialog({
   // === FORM WATCHERS ===
   const checkinDate = form.watch("dateRange.from");
   const checkoutDate = form.watch("dateRange.to");
-  const isBreakfastAll = form.watch("isBreakfastAll") || false;
+  const includeBreakfast = form.watch("includeBreakfast") || false;
   const services = form.watch("serviceOrder.services") || [];
 
   // === LOGIC ===
@@ -121,7 +121,7 @@ export default function ServiceBreakfastManagerDialog({
   };
 
   const handleBreakfastToggleAll = (value: boolean) => {
-    form.setValue("isBreakfastAll", value, { shouldValidate: true });
+    form.setValue("includeBreakfast", value, { shouldValidate: true });
   };
   console.log(form.getValues("serviceOrder"));
   const hasDates = checkinDate && checkoutDate;
@@ -146,7 +146,7 @@ export default function ServiceBreakfastManagerDialog({
               <div
                 className={cn(
                   "flex flex-row items-center justify-between rounded-xl border p-5 transition-all duration-200",
-                  isBreakfastAll
+                  includeBreakfast
                     ? "border-primary/50 bg-primary/5 shadow-sm"
                     : "border-border bg-muted/20"
                 )}
@@ -155,7 +155,7 @@ export default function ServiceBreakfastManagerDialog({
                   <div
                     className={cn(
                       "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border",
-                      isBreakfastAll
+                      includeBreakfast
                         ? "bg-background border-primary/30 text-primary"
                         : "bg-background border-border text-muted-foreground"
                     )}
@@ -176,7 +176,7 @@ export default function ServiceBreakfastManagerDialog({
                 </div>
                 <Switch
                   id="breakfast"
-                  checked={isBreakfastAll}
+                  checked={includeBreakfast}
                   onCheckedChange={handleBreakfastToggleAll}
                   className="data-[state=checked]:bg-primary"
                 />

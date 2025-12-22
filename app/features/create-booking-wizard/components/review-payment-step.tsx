@@ -83,8 +83,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
   const roomIds = form.watch("roomIds") || [];
   const dateRange = form.watch("dateRange");
   const bookingType = form.watch("bookingType");
-  const isBreakfastAll = form.watch("isBreakfastAll");
-  const breakfastDates = form.watch("breakfastDates");
+  const includeBreakfast = form.watch("includeBreakfast");
   const adultsAmount = form.watch("adultsAmount");
   const childrenAmount = form.watch("childrenAmount");
   const overridePrice = form.watch("overridePrice");
@@ -116,9 +115,8 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
       adultsAmount: adultsAmount || 1,
       childrenAmount: childrenAmount || 0,
       roomTypes,
-      isBreakfastAll: isBreakfastAll || false,
-      breakfastDates:
-        breakfastDates?.map((d: Date) => format(d, "yyyy-MM-dd")) || [],
+      includeBreakfast: includeBreakfast || false,
+
       services: serviceOrderServices.map((s: ServiceOrderItem) => ({
         itemType: s.itemType,
         itemId: s.itemId,
@@ -133,8 +131,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
     checkoutDate,
     adultsAmount,
     childrenAmount,
-    isBreakfastAll,
-    breakfastDates,
+    includeBreakfast,
     serviceOrderServices,
   ]);
 
@@ -165,8 +162,8 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
     checkinDate,
     checkoutDate,
     JSON.stringify(previewRequest.roomTypes),
-    previewRequest.isBreakfastAll,
-    JSON.stringify(previewRequest.breakfastDates),
+    previewRequest.includeBreakfast,
+    JSON.stringify(previewRequest.includeBreakfast),
     JSON.stringify(previewRequest.services),
     previewRequest.adultsAmount,
     previewRequest.childrenAmount,
@@ -355,11 +352,10 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
 
             <div className="space-y-2.5">
               {/* Breakfast Item */}
-              {(isBreakfastAll || (breakfastDates?.length ?? 0) > 0) && (
+              {includeBreakfast && (
                 <div className="flex justify-between text-sm items-center">
                   <span className="text-foreground/90">
-                    Bữa sáng (
-                    {isBreakfastAll ? "Tất cả" : breakfastDates?.length})
+                    Bữa sáng ({includeBreakfast ? "Tất cả" : ""})
                   </span>
                   <span className="font-mono tabular-nums text-foreground/90">
                     {
@@ -386,18 +382,16 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
               )}
 
               {/* Empty State Action */}
-              {!isBreakfastAll &&
-                (!breakfastDates || breakfastDates.length === 0) &&
-                serviceOrderServices.length === 0 && (
-                  <Button
-                    variant="outline"
-                    className="w-full border-dashed text-xs h-9 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all"
-                    onClick={() => setServiceDialogOpen(true)}
-                    disabled={!checkinDate || !checkoutDate}
-                  >
-                    + Thêm dịch vụ
-                  </Button>
-                )}
+              {!includeBreakfast && serviceOrderServices.length === 0 && (
+                <Button
+                  variant="outline"
+                  className="w-full border-dashed text-xs h-9 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all"
+                  onClick={() => setServiceDialogOpen(true)}
+                  disabled={!checkinDate || !checkoutDate}
+                >
+                  + Thêm dịch vụ
+                </Button>
+              )}
             </div>
 
             {/* Subtotals if needed, or rely on main Total */}

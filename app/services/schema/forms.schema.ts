@@ -9,8 +9,8 @@ const RoomSelectionFormSchema = z.object({
 });
 
 const ServicesBreakfastFormSchema = z.object({
-  isBreakfastAll:
-    BookingSchema.StaffCreateBookingSchema.shape.isBreakfastAll.optional(),
+  includeBreakfast:
+    BookingSchema.StaffCreateBookingSchema.shape.includeBreakfast.optional(),
   checkinDate: z.union([z.date(), z.string()]).optional(),
   checkoutDate: z.union([z.date(), z.string()]).optional(),
 });

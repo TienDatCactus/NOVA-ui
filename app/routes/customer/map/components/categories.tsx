@@ -48,12 +48,6 @@ export const RESORT_CATEGORIES = {
     mapbox_category: "bar",
   },
 
-  hotel: {
-    label: "Khách sạn",
-    icon: Hotel,
-    mapbox_category: "lodging",
-  },
-
   spa: {
     label: "Spa",
     icon: Bath,
@@ -132,17 +126,19 @@ const MapCategories: React.FC<MapCategoriesProps> = ({ ...props }) => {
       )}
       <div className="flex flex-wrap items-center max-w-sm gap-2">
         {categories &&
-          Object.entries(categories).map(([key, cat]) => (
-            <Button
-              key={cat.label}
-              variant={"outline"}
-              className="rounded-full"
-              onClick={() => props.onCategoryClick?.(key)}
-            >
-              <cat.icon className="w-6 h-6" />
-              <span>{cat.label}</span>
-            </Button>
-          ))}
+          Object.entries(categories)
+            .filter(([key]) => key !== "hotel")
+            .map(([key, cat]) => (
+              <Button
+                key={cat.label}
+                variant={"outline"}
+                className="rounded-full"
+                onClick={() => props.onCategoryClick?.(key)}
+              >
+                <cat.icon className="w-6 h-6" />
+                <span>{cat.label}</span>
+              </Button>
+            ))}
       </div>
     </div>
   );

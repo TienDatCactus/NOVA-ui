@@ -91,7 +91,7 @@ export default function CustomerInfoBar({
           </div>
         </div>
 
-        <div className=" space-y-5 border-b ">
+        <div className=" space-y-5  ">
           <div className="felx flex-col gap-4">
             <FormField
               control={form.control}
@@ -136,12 +136,12 @@ export default function CustomerInfoBar({
 
           <FormField
             control={form.control}
-            name="isBreakfastAll"
+            name="includeBreakfast"
             render={({ field }) => {
               return (
-                <FormItem className="space-y-1.5">
+                <FormItem className="flex items-center justify-between">
                   <FormLabel className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
-                    <Utensils className="h-3.5 w-3.5" /> Đặt ăn sáng
+                    <Utensils className="h-3.5 w-3.5" /> Ăn sáng
                   </FormLabel>
                   <FormControl>
                     <Switch
@@ -157,9 +157,7 @@ export default function CustomerInfoBar({
           />
         </div>
 
-        {/* COLUMN 3: SOURCE & PAYMENT (4 cols) */}
         <div className=" space-y-5">
-          {/* OTA Section - Conditional */}
           {form.watch("otaInformationId") ? (
             <div className="grid grid-cols-2 gap-3">
               <FormField
@@ -214,7 +212,7 @@ export default function CustomerInfoBar({
               />
             </div>
           ) : (
-            <div className="hidden lg:flex h-[66px] border-2 border-dashed rounded-md bg-muted/10 items-center justify-center text-xs font-medium text-muted-foreground/70">
+            <div className="hidden lg:flex h-[4.125rem] border-2 border-dashed rounded-md bg-muted/10 items-center justify-center text-xs font-medium text-muted-foreground/70">
               Đặt trực tiếp (Direct Booking)
             </div>
           )}
