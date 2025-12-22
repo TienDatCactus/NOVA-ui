@@ -9,7 +9,8 @@ import type {
   GenerateSinglePayrollDto,
   PayrollComponentInputDto,
   PayrollGridParams,
-  UpdatePayrollDto,
+  UpdateBaseSalaryPayrollDto,
+  UpdatePaidAmountPayrollDto,
 } from "~/services/api/staff/staff-payroll/dto";
 
 /**
@@ -113,12 +114,43 @@ export function useGenerateSinglePayroll() {
 /**
  * Hook cập nhật bảng lương (lương cơ bản, số tiền đã trả)
  */
-export function useUpdatePayroll() {
+export function useUpdatePaidAmountPayroll() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdatePayrollDto }) =>
-      await StaffPayrollService.updatePayroll(id, data),
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdatePaidAmountPayrollDto;
+    }) => await StaffPayrollService.updatePaidAmountPayroll(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["payrolls"] });
+      queryClient.invalidateQueries({
+        queryKey: ["payroll-detail", variables.id],
+      });
+      toast.success("Cập nhật bảng lương thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error.response?.data?.message || "Lỗi khi cập nhật bảng lương"
+        );
+    },
+  });
+}
+export function useUpdateBaseSalaryPayroll() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateBaseSalaryPayrollDto;
+    }) => await StaffPayrollService.updateBaseSalaryPayroll(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["payrolls"] });
       queryClient.invalidateQueries({

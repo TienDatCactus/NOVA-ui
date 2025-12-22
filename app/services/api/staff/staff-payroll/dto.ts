@@ -10,10 +10,11 @@ const {
   GeneratePayrollSchema,
   GenerateSinglePayrollSchema,
   ApplyUnusedLeaveSchema,
-  UpdatePayrollSchema,
   PayrollComponentInputSchema,
   PayrollComponentTypeEnum,
   CreateSalaryExpenseRequestSchema,
+  UpdateBaseSalaryPayrollSchema,
+  UpdatePaidAmountPayrollSchema,
 } = StaffPayrollSchema;
 
 // DTOs (consistent naming with Dto suffix)
@@ -31,7 +32,12 @@ export type GenerateSinglePayrollDto = z.infer<
   typeof GenerateSinglePayrollSchema
 >;
 export type ApplyUnusedLeaveDto = z.infer<typeof ApplyUnusedLeaveSchema>;
-export type UpdatePayrollDto = z.infer<typeof UpdatePayrollSchema>;
+export type UpdatePaidAmountPayrollDto = z.infer<
+  typeof UpdatePaidAmountPayrollSchema
+>;
+export type UpdateBaseSalaryPayrollDto = z.infer<
+  typeof UpdateBaseSalaryPayrollSchema
+>;
 export type PayrollComponentInputDto = z.infer<
   typeof PayrollComponentInputSchema
 >;

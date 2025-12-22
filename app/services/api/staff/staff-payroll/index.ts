@@ -8,10 +8,11 @@ import type {
   PayrollDetailDto,
   GenerateSinglePayrollDto,
   ApplyUnusedLeaveDto,
-  UpdatePayrollDto,
   PayrollComponentInputDto,
   PayrollComponentListDto,
   CreateSalaryExpenseRequestDto,
+  UpdatePaidAmountPayrollDto,
+  UpdateBaseSalaryPayrollDto,
 } from "./dto";
 
 const {
@@ -21,7 +22,8 @@ const {
   GeneratePayrollSchema,
   GenerateSinglePayrollSchema,
   ApplyUnusedLeaveSchema,
-  UpdatePayrollSchema,
+  UpdatePaidAmountPayrollSchema,
+  UpdateBaseSalaryPayrollSchema,
   PayrollComponentInputSchema,
 } = StaffPayrollSchema;
 
@@ -92,13 +94,26 @@ async function getPayrollDetail(id: string): Promise<PayrollDetailDto> {
 /**
  * Update payroll (base salary, paid amount)
  */
-async function updatePayroll(
+async function updatePaidAmountPayroll(
   id: string,
-  data: UpdatePayrollDto
+  data: UpdatePaidAmountPayrollDto
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const validated = UpdatePayrollSchema.parse(data);
-    const resp = await http.put(StaffPayroll.update(id), validated);
+    const validated = UpdatePaidAmountPayrollSchema.parse(data);
+    const resp = await http.patch(StaffPayroll.updatePaidAmount(id), validated);
+    return resp.data;
+  } catch (error) {
+    console.log(error);
+    return Promise.reject(error);
+  }
+}
+async function updateBaseSalaryPayroll(
+  id: string,
+  data: UpdateBaseSalaryPayrollDto
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const validated = UpdateBaseSalaryPayrollSchema.parse(data);
+    const resp = await http.patch(StaffPayroll.updateBaseSalary(id), validated);
     return resp.data;
   } catch (error) {
     console.log(error);
@@ -314,7 +329,8 @@ export const StaffPayrollService = {
   generatePayroll,
   generateSinglePayroll,
   getPayrollDetail,
-  updatePayroll,
+  updatePaidAmountPayroll,
+  updateBaseSalaryPayroll,
   applyUnusedLeave,
   lockPayroll,
   unlockPayroll,

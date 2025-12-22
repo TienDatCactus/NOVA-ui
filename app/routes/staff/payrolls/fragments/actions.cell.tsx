@@ -11,13 +11,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
 import CreateSalaryExpenseDialog from "../components/create-salary-expense-dialog";
-import UpdatePayrollDialog from "../components/update-payroll-dialog";
 import { useRefreshSinglePayroll } from "../container/query.hooks";
+import UpdateBaseSalaryPayrollDialog from "../components/update-base-salary-payroll-dialog";
+import UpdatePaidAmountPayrollDialog from "../components/update-paid-payroll-dialog";
 
 interface ActionsMenuCellProps {
   payroll: PayrollItemDto;
@@ -28,7 +30,8 @@ export default function ActionsMenuCell({
   payroll,
   onSuccess,
 }: ActionsMenuCellProps) {
-  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updateBaseSalaryOpen, setUpdateBaseSalaryOpen] = useState(false);
+  const [updatePaidAmountOpen, setUpdatePaidAmountOpen] = useState(false);
   const [applyLeaveOpen, setApplyLeaveOpen] = useState(false);
   const [createExpenseOpen, setCreateExpenseOpen] = useState(false);
 
@@ -53,10 +56,15 @@ export default function ActionsMenuCell({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setUpdateOpen(true)}>
+          <DropdownMenuItem onClick={() => setUpdateBaseSalaryOpen(true)}>
             <Edit className="mr-2 h-4 w-4" />
-            <span>Cập nhật</span>
+            <span>Cập nhật lương cơ bản</span>
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setUpdatePaidAmountOpen(true)}>
+            <DollarSign className="mr-2 h-4 w-4" />
+            <span>Cập nhật số tiền đã trả</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setApplyLeaveOpen(true)}
             disabled={payroll.locked}
@@ -77,6 +85,7 @@ export default function ActionsMenuCell({
             <DollarSign className="mr-2 h-4 w-4" />
             <span>Tạo phiếu chi lương</span>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={handleRefreshSingle}
             disabled={isRefreshing}
@@ -89,10 +98,16 @@ export default function ActionsMenuCell({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <UpdatePayrollDialog
+      <UpdateBaseSalaryPayrollDialog
         payroll={payroll}
-        open={updateOpen}
-        onOpenChange={setUpdateOpen}
+        open={updateBaseSalaryOpen}
+        onOpenChange={setUpdateBaseSalaryOpen}
+        onSuccess={onSuccess}
+      />
+      <UpdatePaidAmountPayrollDialog
+        payroll={payroll}
+        open={updatePaidAmountOpen}
+        onOpenChange={setUpdatePaidAmountOpen}
         onSuccess={onSuccess}
       />
 

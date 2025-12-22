@@ -78,8 +78,10 @@ const ApplyUnusedLeaveSchema = z.object({
 });
 
 // Update payroll request schema
-const UpdatePayrollSchema = z.object({
+const UpdateBaseSalaryPayrollSchema = z.object({
   baseSalaryFullMonth: z.number().optional(),
+});
+const UpdatePaidAmountPayrollSchema = z.object({
   paidAmount: z.number().optional(),
 });
 
@@ -118,7 +120,8 @@ export const StaffPayrollSchema = {
   GeneratePayrollSchema,
   GenerateSinglePayrollSchema,
   ApplyUnusedLeaveSchema,
-  UpdatePayrollSchema,
+  UpdateBaseSalaryPayrollSchema,
+  UpdatePaidAmountPayrollSchema,
   PayrollComponentInputSchema,
 
   // Enums

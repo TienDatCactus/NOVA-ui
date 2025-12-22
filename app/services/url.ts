@@ -264,7 +264,8 @@ const StaffPayroll = {
   grid: "StaffPayrolls/grid", //! hotel manager
   generate: "StaffPayrolls/generate",
   detail: (id: string) => `StaffPayrolls/${id}`, //! hotel manager
-  update: (id: string) => `StaffPayrolls/${id}`,
+  updateBaseSalary: (id: string) => `StaffPayrolls/${id}/base-salary`,
+  updatePaidAmount: (id: string) => `StaffPayrolls/${id}/paid-amount`,
   generateSingle: (staffId: string) =>
     `StaffPayrolls/staff/${staffId}/generate`,
   applyUnusedLeave: (id: string) => `StaffPayrolls/${id}/apply-unused-leave`,

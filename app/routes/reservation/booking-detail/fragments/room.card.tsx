@@ -1,14 +1,8 @@
-import { ArrowRight, MoreHorizontal, Tag } from "lucide-react";
+import { ArrowRight, Tag } from "lucide-react";
 import { Link } from "react-router";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 import Image from "~/components/ui/image";
 import { Skeleton } from "~/components/ui/skeleton";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
