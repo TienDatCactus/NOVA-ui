@@ -103,16 +103,21 @@ export function useCreateCheckoutInvoice(bookingId: string) {
 
   return useMutation({
     mutationFn: () => BookingService.staffCreateCheckoutInvoice(bookingId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["checkout", "pending-charges", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
+      ]);
+
       toast.success("Tạo hóa đơn checkout thành công");
     },
     onError: (error) => {
@@ -131,21 +136,26 @@ export function useCheckoutPayment(bookingId: string) {
   return useMutation({
     mutationFn: (data: StaffCheckoutPaymentRequestDto) =>
       BookingService.staffCheckoutPayment(bookingId, data),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["invoice-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
+      ]);
+
       toast.success("Thanh toán checkout thành công");
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({
-        queryKey: ["checkout", "pending-charges", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["invoice-detail"],
-      });
     },
     onError: (error) => {
       if (error instanceof AxiosError)
@@ -167,24 +177,26 @@ export function useInvoicePayment(invoiceId: string, bookingId: string) {
         amount: data.amount,
         note: data.note || "",
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["invoice-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
+      ]);
+
       toast.success("Thanh toán hóa đơn thành công");
-      // Invalidate specific invoice detail
-      queryClient.invalidateQueries({
-        queryKey: ["invoice-detail", invoiceId],
-      });
-      // Invalidate booking-specific invoice list (matches useInvoicesByBooking)
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices", bookingId],
-      });
-      // Invalidate all booking details
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      });
-      // Invalidate pending charges to refresh UI
-      queryClient.invalidateQueries({
-        queryKey: ["checkout", "pending-charges", bookingId],
-      });
     },
     onError: (error) => {
       if (error instanceof AxiosError)
@@ -201,23 +213,25 @@ export function useSyncInvoiceWithOrders(invoiceId: string, bookingId: string) {
 
   return useMutation({
     mutationFn: () => InvoicesService.syncInvoiceWithOrders(invoiceId),
-    onSuccess: () => {
-      // Invalidate specific invoice detail
-      queryClient.invalidateQueries({
-        queryKey: ["invoice-detail", invoiceId],
-      });
-      // Invalidate booking-specific invoice list
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices", bookingId],
-      });
-      // Invalidate booking-specific pending charges
-      queryClient.invalidateQueries({
-        queryKey: ["checkout", "pending-charges", bookingId],
-      });
-      // Invalidate all booking details
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["invoice-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
+      ]);
+
       toast.success("Đồng bộ hóa đơn với các đơn hàng thành công");
     },
     onError: (error) => {
@@ -236,35 +250,35 @@ export function useCheckout(bookingId: string) {
   return useMutation({
     mutationFn: (data: StaffCheckoutRequestDto) =>
       BookingService.staffCheckout(bookingId, data),
-    onSuccess: () => {
-      toast.success("Checkout thành công");
-      // Invalidate all booking lists
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-      });
-      // Invalidate specific booking detail
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      });
-      // Also invalidate without ID to cover all variations
-
-      // Invalidate booking-specific invoice list
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices", bookingId],
-      });
-      // Invalidate pending charges
-      queryClient.invalidateQueries({
-        queryKey: ["checkout", "pending-charges", bookingId],
-      });
-      // Invalidate rooms week view
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+      ]);
 
       // Force refetch to ensure UI updates immediately
-      queryClient.refetchQueries({
-        queryKey: ["bookings-detail", bookingId],
+      await queryClient.refetchQueries({
+        queryKey: ["bookings-detail"],
+        exact: false,
       });
+
+      toast.success("Checkout thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError)
@@ -282,17 +296,23 @@ export function useUpdateInvoice(invoiceId: string) {
   return useMutation({
     mutationFn: (data: UpdateInvoiceRequestDto) =>
       InvoicesService.updateInvoice(invoiceId, data),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["invoice-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+      ]);
+
       toast.success("Cập nhật invoice thành công");
-      queryClient.invalidateQueries({
-        queryKey: ["invoice-detail", invoiceId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices"],
-      });
     },
     onError: (error) => {
       if (error instanceof AxiosError)
@@ -306,17 +326,23 @@ export function useConfirmBookingPayment(bookingId: string) {
   return useMutation({
     mutationFn: (data: ConfirmBookingPaymentRequestDto) =>
       BookingService.staffConfirmBookingPayment(bookingId || "", data),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+      ]);
+
       toast.success(response.message || "Xác nhận thanh toán thành công");
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices", bookingId],
-      });
     },
     onError: (error) => {
       if (error instanceof AxiosError)
@@ -330,16 +356,21 @@ export function useAddCompletedCharges(bookingId: string) {
   return useMutation({
     mutationFn: async (data: StaffAddCompletedChargesRequestDto) =>
       await BookingService.staffAddCompletedCharges(bookingId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["checkout", "pending-charges", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices", bookingId],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
+      ]);
+
       toast.success("Đã thêm completed charges thành công");
     },
     onError: (error) => {
@@ -355,24 +386,30 @@ export function usePayNowRooms(bookingId: string) {
     mutationFn: async (data: BookingPayForRoomRequestDto) => {
       return await BookingService.payForRooms(bookingId, data);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["booking-invoices"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["unpaid-rooms", bookingId],
+        }),
+      ]);
+
       toast.success("Thanh toán phòng thành công", {
         description: "Invoice đã được tạo và thanh toán.",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["booking-invoices", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["checkout", "pending-charges", bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["unpaid-rooms", bookingId],
       });
     },
     onError: (error) => {

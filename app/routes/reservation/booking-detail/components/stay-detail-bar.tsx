@@ -15,7 +15,7 @@ import {
   Wallet,
   XCircle,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import type z from "zod";
 
@@ -101,7 +101,7 @@ export default function StayDetailBar({
   nights,
   setNoteModalOpen,
 }: StayDetailBarProps) {
-  // --- Hooks ---
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const { mutateAsync: updateBookingStatus, isPending: isUpdatingStatus } =
     useUpdateBookingStatus(bookingDetail.id!);
 
@@ -266,7 +266,10 @@ export default function StayDetailBar({
               ) : bookingDetail.source !== "RoomBlock" ? (
                 bookingDetail.status === "Pending" &&
                 hasRole(AuthLoader.getUser(), UserRole.Receptionist) && (
-                  <Dialog>
+                  <Dialog
+                    open={depositDialogOpen}
+                    onOpenChange={setDepositDialogOpen}
+                  >
                     <DialogTrigger asChild>
                       <Button variant="info-outline" size="sm">
                         <Receipt className="w-4 h-4 mr-2" />
@@ -361,7 +364,11 @@ export default function StayDetailBar({
                                 });
                                 return;
                               }
-                              confirmPayment(data);
+                              confirmPayment(data, {
+                                onSuccess: () => {
+                                  setDepositDialogOpen(false);
+                                },
+                              });
                             })}
                             className="space-y-5"
                           >

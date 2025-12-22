@@ -102,9 +102,6 @@ export function UpdateRoomTypeSheet({
           toast.success("Cập nhật hạng phòng thành công");
           onClose(false);
         },
-        onError: () => {
-          toast.error("Cập nhật hạng phòng thất bại");
-        },
       }
     );
   };

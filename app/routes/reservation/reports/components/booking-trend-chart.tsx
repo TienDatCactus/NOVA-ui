@@ -15,6 +15,7 @@ interface BookingDataItem {
   checkin: number;
   checkout: number;
   available: number;
+  inhouse: number;
 }
 
 interface BookingTrendChartProps {
@@ -26,6 +27,7 @@ const COLORS = {
   booked: "var(--chart-2)", // Lighter blue
   checkin: "var(--chart-3)", // Darker blue
   checkout: "var(--chart-4)", // Purple-blue
+  inhouse: "var(--chart-5)", // Teal
 };
 
 export function BookingTrendChart({ data }: BookingTrendChartProps) {
@@ -37,12 +39,18 @@ export function BookingTrendChart({ data }: BookingTrendChartProps) {
       dadat: item.booked,
       checkin: item.checkin,
       checkout: item.checkout,
+      inhouse: item.inhouse,
       total: item.available + item.booked,
     };
   });
 
   const hasData = data.some(
-    (d) => d.available > 0 || d.booked > 0 || d.checkin > 0 || d.checkout > 0
+    (d) =>
+      d.available > 0 ||
+      d.booked > 0 ||
+      d.checkin > 0 ||
+      d.checkout > 0 ||
+      d.inhouse > 0
   );
 
   return (
@@ -62,6 +70,7 @@ export function BookingTrendChart({ data }: BookingTrendChartProps) {
               { label: "Đã đặt", color: COLORS.booked },
               { label: "Check-in", color: COLORS.checkin },
               { label: "Check-out", color: COLORS.checkout },
+              { label: "Đang ở", color: COLORS.inhouse },
             ].map((item) => (
               <div
                 key={item.label}
@@ -151,6 +160,18 @@ export function BookingTrendChart({ data }: BookingTrendChartProps) {
                       stopOpacity={0}
                     />
                   </linearGradient>
+                  <linearGradient id="colorInhouse" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor={COLORS.inhouse}
+                      stopOpacity={0.2}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={COLORS.inhouse}
+                      stopOpacity={0}
+                    />
+                  </linearGradient>
                 </defs>
 
                 {/* Grid: Horizontal only, very light */}
@@ -215,6 +236,15 @@ export function BookingTrendChart({ data }: BookingTrendChartProps) {
                   strokeWidth={2}
                   activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.checkout }}
                 />
+                <Area
+                  type="monotone"
+                  dataKey="inhouse"
+                  stackId="1"
+                  stroke={COLORS.inhouse}
+                  fill="url(#colorInhouse)"
+                  strokeWidth={2}
+                  activeDot={{ r: 4, strokeWidth: 0, fill: COLORS.inhouse }}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -255,7 +285,11 @@ function CustomTooltip({ active, payload, label }: any) {
                     ? "Đã đặt"
                     : item.dataKey === "checkin"
                       ? "Check-in"
-                      : "Check-out"}
+                      : item.dataKey === "checkout"
+                        ? "Check-out"
+                        : item.dataKey === "inhouse"
+                          ? "Đang ở"
+                          : item.dataKey}
               </span>
             </div>
             <span className="font-mono font-medium text-foreground">

@@ -35,7 +35,7 @@ export function useCreateServiceOrder() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(error.response?.data.message);
+        toast.error(error.response?.data.message || "Đã có lỗi xảy ra");
       }
     },
   });

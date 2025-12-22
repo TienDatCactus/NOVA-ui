@@ -16,26 +16,25 @@ function useUpdateBooking(bookingId: string, bookingCode?: string) {
     mutationFn: async (data: StaffUpdateBookingRequestDto) =>
       await BookingService.staffUpdateBookingDetail(bookingId, data),
     onSuccess: async (response) => {
-      if (bookingCode) {
+      await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ["bookings-detail", bookingCode, response.bookingId],
-        });
-      }
-      queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", response.bookingId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["bookings-rooms-week"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["orderable-bookings"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["available-rooms"],
-      });
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["available-rooms"],
+        }),
+      ]);
 
       toast.success("Cập nhật đặt phòng thành công");
     },
@@ -56,11 +55,14 @@ function useChangeRoom(bookingId: string) {
     mutationFn: async (data: StaffChangeRoomRequestDto) =>
       await BookingService.staffChangeRoom(bookingId, data),
     onSuccess: async () => {
-      (queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-      }),
+      await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ["bookings-detail", bookingId],
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
         }),
         queryClient.invalidateQueries({
           queryKey: ["available-rooms-for-change"],
@@ -71,7 +73,8 @@ function useChangeRoom(bookingId: string) {
         queryClient.invalidateQueries({
           queryKey: ["bookings-rooms-week"],
         }),
-        toast.success("Đổi phòng thành công"));
+      ]);
+      toast.success("Đổi phòng thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
@@ -89,11 +92,14 @@ function useCancelBooking(bookingId: string) {
       return await BookingService.staffCancelBooking(bookingId);
     },
     onSuccess: async (data) => {
-      (queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-      }),
+      await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ["bookings-detail", data.bookingId, data.bookingCode],
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
         }),
         queryClient.invalidateQueries({
           queryKey: ["bookings-rooms-week"],
@@ -104,7 +110,8 @@ function useCancelBooking(bookingId: string) {
         queryClient.invalidateQueries({
           queryKey: ["available-rooms"],
         }),
-        toast.success("Hủy đặt phòng thành công"));
+      ]);
+      toast.success("Hủy đặt phòng thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
@@ -127,11 +134,14 @@ function useUpdateBookingStatus(bookingId: string) {
     },
     onSuccess: async () => {
       // Invalidate all related queries
-      (queryClient.invalidateQueries({
-        queryKey: ["bookings-detail", bookingId],
-      }),
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
         queryClient.invalidateQueries({
           queryKey: ["bookings"],
+          exact: false,
         }),
         queryClient.invalidateQueries({
           queryKey: ["bookings-rooms-week"],
@@ -142,7 +152,8 @@ function useUpdateBookingStatus(bookingId: string) {
         queryClient.invalidateQueries({
           queryKey: ["available-rooms"],
         }),
-        toast.success("Cập nhật trạng thái thành công"));
+      ]);
+      toast.success("Cập nhật trạng thái thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

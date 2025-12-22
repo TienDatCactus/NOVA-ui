@@ -232,15 +232,10 @@ export default function Component({}: Route.ComponentProps) {
               customerType: wasBooking ? "In-House" : "Walk-In",
             });
           },
-          onError: (error) => {
-            console.error("Create service order failed:", error);
-            toast.error("Không thể tạo đơn dịch vụ. Vui lòng thử lại.");
-          },
         }
       );
     } catch (error) {
       console.error("Create service order failed:", error);
-      toast.error("Đã xảy ra lỗi khi tạo đơn dịch vụ");
     }
   };
 

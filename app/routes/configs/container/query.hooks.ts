@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { ConfigService } from "~/services/api/configs";
 import type { UpdateConfigRequest } from "~/services/api/configs/dto";
@@ -63,8 +64,11 @@ export function useUpdateConfig() {
       queryClient.invalidateQueries({ queryKey: ["configs", "grouped"] });
       queryClient.invalidateQueries({ queryKey: ["configs", variables.key] });
     },
-    onError: (error: Error) => {
-      toast.error(`Cập nhật thất bại: ${error.message}`);
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error.response?.data.message || "Cập nhật cấu hình thất bại"
+        );
     },
   });
 }
@@ -85,8 +89,11 @@ export function useDeleteConfig() {
       // Invalidate grouped list to refresh display
       queryClient.invalidateQueries({ queryKey: ["configs", "grouped"] });
     },
-    onError: (error: Error) => {
-      toast.error(`Đặt lại thất bại: ${error.message}`);
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(
+          error.response?.data.message || "Đặt lại cấu hình thất bại"
+        );
     },
   });
 }

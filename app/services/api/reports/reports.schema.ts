@@ -25,6 +25,7 @@ const ReservationReportsSchema = z.object({
       checkin: z.number(),
       checkout: z.number(),
       available: z.number(),
+      inhouse: z.number(),
     })
   ),
   dailyAvailability: z.array(

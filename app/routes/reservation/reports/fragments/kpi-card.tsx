@@ -27,7 +27,7 @@ export function KpiCard({
         : value;
 
   return (
-    <Card className={cn("shadow-none border-border/60", className)}>
+    <Card className={cn("shadow-none border-border/60 p-0", className)}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between space-y-0 pb-2">
           <p className="text-sm font-medium text-muted-foreground truncate">
