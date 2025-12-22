@@ -73,12 +73,12 @@ export function DataTable<TData extends ExpenseListItemDto, TValue>({
       <div className="flex items-center justify-between">
         <Input
           startAddon={<Search className="h-4 w-4" />}
-          placeholder="Tìm theo mô tả, số chứng từ..."
+          placeholder="Tìm theo số chứng từ..."
           value={
-            (table.getColumn("description")?.getFilterValue() as string) ?? ""
+            (table.getColumn("receiptNumber")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("description")?.setFilterValue(event.target.value)
+            table.getColumn("receiptNumber")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

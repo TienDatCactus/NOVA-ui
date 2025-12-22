@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link, redirect } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -20,6 +21,8 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import PasswordInput from "~/components/ui/password-input";
+import { Checkbox } from "~/components/ui/checkbox";
+import { useAccountManager } from "~/store/account-manager.store";
 import { AuthSchema } from "~/services/api/auth/auth.schema";
 import type { LoginDto } from "~/services/api/auth/dto";
 import type { Route } from "./+types/login";
@@ -55,12 +58,26 @@ export function clientLoader({}: Route.ClientLoaderArgs) {
 export default function Login() {
   const { login, isLoading } = useAuthHooks();
   const { LoginSchema } = AuthSchema;
+  const { addAccount } = useAccountManager();
+  const [rememberAccount, setRememberAccount] = useState(true);
+
   const loginForm = useForm({
     resolver: zodResolver(LoginSchema),
   });
+
   const onSubmit: SubmitHandler<LoginDto> = async (data) => {
     try {
-      await login(data);
+      const response = await login(data);
+
+      // Save account if remember is checked
+      if (rememberAccount && response?.user) {
+        addAccount({
+          id: response.user.id,
+          userName: response.user.userName,
+          fullName: response.user.fullName,
+          roles: response.user.roles,
+        });
+      }
     } catch (error) {
       console.error(error);
     }
@@ -118,6 +135,23 @@ export default function Login() {
                   )}
                 />
               </div>
+            </div>
+
+            {/* Remember Account Checkbox */}
+            <div className="flex items-center space-x-2 mt-4">
+              <Checkbox
+                id="remember-account"
+                checked={rememberAccount}
+                onCheckedChange={(checked) =>
+                  setRememberAccount(checked as boolean)
+                }
+              />
+              <label
+                htmlFor="remember-account"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Ghi nhớ tài khoản này
+              </label>
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2">

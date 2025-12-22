@@ -23,6 +23,8 @@ import {
 } from "~/components/ui/table";
 import type { StockAdjustmentListItemDto } from "~/services/api/stocks/stock-adjustments/dto";
 import CreateStockAdjustmentDialog from "../create-stock-adjustment.dialog";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface DataTableProps<TData extends StockAdjustmentListItemDto, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -67,10 +69,12 @@ export function DataTable<TData extends StockAdjustmentListItemDto, TValue>({
           className="max-w-sm"
         />
 
-        <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
-          <Plus />
-          Tạo phiếu mới
-        </Button>
+        {hasRole(AuthLoader.getUser(), UserRole.ServiceStaff) && (
+          <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
+            <Plus />
+            Tạo phiếu mới
+          </Button>
+        )}
       </div>
 
       {/* Table */}
