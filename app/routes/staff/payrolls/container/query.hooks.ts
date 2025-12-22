@@ -29,14 +29,19 @@ export function usePayrolls(params?: PayrollGridParams) {
 /**
  * Hook lấy chi tiết 1 bảng lương
  */
-export function usePayrollDetail(id?: string) {
+export function usePayrollDetail(
+  id: string,
+  options: {
+    enabled?: boolean;
+  }
+) {
   return useQuery({
     queryKey: ["payroll-detail", id],
     queryFn: async () => {
       if (!id) throw new Error("Payroll ID is required");
       return await StaffPayrollService.getPayrollDetail(id);
     },
-    enabled: !!id,
+    enabled: options.enabled && !!id,
     staleTime: 5 * 60 * 1000,
   });
 }

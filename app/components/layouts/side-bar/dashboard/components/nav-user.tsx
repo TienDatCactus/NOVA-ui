@@ -1,16 +1,8 @@
-import {
-  ChevronsUpDown,
-  KeyRound,
-  LogOut,
-  Users,
-  Trash2,
-  CheckCircle2,
-} from "lucide-react";
+import { ChevronsUpDown, KeyRound, LogOut, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,7 +33,6 @@ import { useAccountCleanup } from "~/hooks/use-account-cleanup";
 import { useAuth } from "~/lib/auth/components";
 import { RouteModule } from "~/lib/auth/roles";
 import { DASHBOARD } from "~/lib/fe-url";
-import { QuickPasswordDialog } from "./quick-password-dialog";
 import { ChangePasswordDialog } from "~/routes/auth/change-pasword";
 import { useAuthHooks } from "~/routes/auth/container/auth.hooks";
 import {
@@ -48,6 +40,7 @@ import {
   type SavedAccount,
 } from "~/store/account-manager.store";
 import { useAuthStore } from "~/store/auth.store";
+import { QuickPasswordDialog } from "./quick-password-dialog";
 
 export function NavUser() {
   const { isMobile } = useSidebar();

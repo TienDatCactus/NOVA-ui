@@ -62,7 +62,7 @@ export default function ExistingRoomItemCard({
     >
       {/* --- Main Header Row --- */}
       <div className="flex items-start justify-between p-3">
-        <div className="flex-1 space-y-1">
+        <div className="flex-1 space-y-2">
           {/* Top Line: Name & Price */}
           <div className="flex items-center justify-between pr-2">
             <div className="font-semibold text-sm flex items-center gap-2">
@@ -83,7 +83,7 @@ export default function ExistingRoomItemCard({
           </div>
 
           {/* Bottom Line: Date Range */}
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 w-fit px-2 py-0.5 rounded-full">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground ">
             <Clock className="h-3 w-3" />
             <span className="font-medium text-foreground/80">
               {formatDate(room.fromDate)}

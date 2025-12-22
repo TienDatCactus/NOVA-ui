@@ -73,7 +73,6 @@ export default function NewRoomItemWrapper({
       roomId={roomDetail.roomId}
       roomName={roomDetail.roomName}
       roomTypeName={roomDetail.roomTypeName}
-      imageUrl={roomDetail.imageUrls?.[0]}
       fromDate={fromDate}
       toDate={toDate}
       onRemove={onRemove}

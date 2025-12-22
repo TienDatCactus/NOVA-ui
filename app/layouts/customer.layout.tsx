@@ -1,4 +1,4 @@
-import { Globe, TreePalm, User } from "lucide-react";
+import { ArrowUp, Globe, TreePalm, User } from "lucide-react";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Outlet, useLocation } from "react-router";
@@ -45,7 +45,9 @@ const CustomerLayout: React.FC = () => {
     i18n.changeLanguage(langCode);
     setUserLanguage(langCode);
   };
-
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -163,6 +165,16 @@ const CustomerLayout: React.FC = () => {
 
       <main className="flex-1 w-full relative flex flex-col z-10">
         <Outlet />
+
+        <div className="fixed bottom-4 right-4">
+          <Button
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-900/20 hover:shadow-emerald-900/30 transition-all"
+            size="icon"
+            onClick={handleScrollToTop}
+          >
+            <ArrowUp />
+          </Button>
+        </div>
       </main>
 
       {isMobile && (

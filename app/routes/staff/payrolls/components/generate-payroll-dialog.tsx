@@ -188,7 +188,7 @@ export default function GeneratePayrollDialog({
                           }
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Tháng" />
                             </SelectTrigger>
                           </FormControl>
@@ -218,7 +218,7 @@ export default function GeneratePayrollDialog({
                           }
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Năm" />
                             </SelectTrigger>
                           </FormControl>

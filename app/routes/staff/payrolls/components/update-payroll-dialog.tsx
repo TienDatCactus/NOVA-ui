@@ -94,11 +94,9 @@ export default function UpdatePayrollDialog({
     );
   });
 
-  // Calculate projected values based on form input for real-time feedback
-  const watchedBaseSalary = form.watch("baseSalaryFullMonth") || 0;
   const watchedPaidAmount = form.watch("paidAmount") || 0;
   const projectedRemaining =
-    Number(watchedBaseSalary) - Number(watchedPaidAmount);
+    Number(payroll?.totalAmount) - Number(watchedPaidAmount);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md gap-0 p-0 overflow-hidden">
@@ -172,6 +170,7 @@ export default function UpdatePayrollDialog({
                       <div className="flex justify-end">
                         <ButtonGroup>
                           <Button
+                            size={"sm"}
                             variant="outline"
                             onClick={() =>
                               form.setValue(
@@ -185,6 +184,7 @@ export default function UpdatePayrollDialog({
                             50%
                           </Button>
                           <Button
+                            size={"sm"}
                             variant="outline"
                             onClick={() =>
                               form.setValue(

@@ -6,7 +6,6 @@ import {
   Clock,
   Download,
   Loader2,
-  Receipt,
   User,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,7 +36,13 @@ export default function PayrollDetailDialog({
   open,
   onOpenChange,
 }: PayrollDetailDialogProps) {
-  const { data: payroll, isPending, refetch } = usePayrollDetail(payrollId);
+  const {
+    data: payroll,
+    isPending,
+    refetch,
+  } = usePayrollDetail(payrollId, {
+    enabled: open,
+  });
   const { mutateAsync, isPending: isExporting } = useExportPayslips(payrollId);
   const handleExportPayslip = async () => {
     const blob = await mutateAsync();
@@ -57,12 +62,7 @@ export default function PayrollDetailDialog({
       <DialogContent className="max-w-3xl h-[85vh] overflow-hidden p-0 flex flex-col gap-0 bg-background">
         {/* Header */}
         <DialogHeader className="px-6 py-4 shrink-0 border-b bg-muted/5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-full text-primary">
-              <Receipt className="h-5 w-5" />
-            </div>
-            <DialogTitle>Chi tiết phiếu lương</DialogTitle>
-          </div>
+          <DialogTitle>Chi tiết phiếu lương</DialogTitle>
         </DialogHeader>
 
         {isPending ? (
@@ -72,7 +72,7 @@ export default function PayrollDetailDialog({
         ) : payroll ? (
           <Tabs defaultValue="info" className="flex-1 flex flex-col min-h-0">
             {/* Tabs List */}
-            <div className="p-2 border-b bg-background">
+            <div className="p-2 border-b bg-background px-6">
               <TabsList className="h-10 p-0 bg-transparent gap-6">
                 <TabsTrigger value="info">Thông tin chung</TabsTrigger>
                 <TabsTrigger value="components">Phụ cấp & Khấu trừ</TabsTrigger>

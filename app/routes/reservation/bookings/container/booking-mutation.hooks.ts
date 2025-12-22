@@ -34,6 +34,9 @@ function useUpdateBooking(bookingId: string, bookingCode?: string) {
         queryClient.invalidateQueries({
           queryKey: ["available-rooms"],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
       ]);
 
       toast.success("Cập nhật đặt phòng thành công");
@@ -73,6 +76,9 @@ function useChangeRoom(bookingId: string) {
         queryClient.invalidateQueries({
           queryKey: ["bookings-rooms-week"],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
       ]);
       toast.success("Đổi phòng thành công");
     },
@@ -109,6 +115,9 @@ function useCancelBooking(bookingId: string) {
         }),
         queryClient.invalidateQueries({
           queryKey: ["available-rooms"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
         }),
       ]);
       toast.success("Hủy đặt phòng thành công");
@@ -151,6 +160,9 @@ function useUpdateBookingStatus(bookingId: string) {
         }),
         queryClient.invalidateQueries({
           queryKey: ["available-rooms"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
         }),
       ]);
       toast.success("Cập nhật trạng thái thành công");

@@ -19,26 +19,31 @@ import type {
 } from "~/services/api/finances/dto";
 import { Inbox } from "lucide-react";
 
-// --- System Colors (CSS Variables) ---
-// Ensure your globals.css defines these variables (chart-1 to chart-5).
-// Fallback logic provided for safety.
 const THEME_COLORS: Record<string, string> = {
   Room: "var(--chart-1)",
   FnB: "var(--chart-2)",
   Service: "var(--chart-3)",
   Other: "var(--chart-4)",
-  Direct: "var(--chart-1)",
-  OTA: "var(--chart-2)",
-  WalkIn: "var(--chart-3)",
-  Agency: "var(--chart-5)",
   Default: "var(--muted)",
+};
+
+// Dynamic chart color assignment
+const getChartColor = (index: number): string => {
+  const chartColors = [
+    "var(--chart-1)",
+    "var(--chart-2)",
+    "var(--chart-3)",
+    "var(--chart-4)",
+    "var(--chart-5)",
+  ];
+  return chartColors[index % chartColors.length];
 };
 
 // --- Shared Components ---
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-muted-foreground/50 border border-dashed border-border/40 rounded-lg">
+    <div className="flex flex-col items-center justify-center h-full min-h-[12.5rem] text-muted-foreground/50 border border-dashed border-border/40 rounded-lg">
       <Inbox className="h-8 w-8 mb-2 opacity-20" />
       <p className="text-xs font-medium uppercase tracking-wide">{label}</p>
     </div>
@@ -94,7 +99,7 @@ export function RevenueBreakdownDonut({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 pb-4">
-        <div className="h-[220px] w-full">
+        <div className="h-[13.75rem] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -183,10 +188,10 @@ export function ChannelRevenueChart({ data }: { data: ChannelRevenueDto[] }) {
   const sortedData = [...data].sort((a, b) => b.amount - a.amount);
   const dynamicHeight = Math.max(sortedData.length * 40, 200);
 
-  const chartData = sortedData.map((item) => ({
+  const chartData = sortedData.map((item, index) => ({
     name: item.channelName,
     amount: item.amount,
-    fill: THEME_COLORS[item.channelName] || THEME_COLORS.Default,
+    fill: getChartColor(index),
   }));
 
   return (
@@ -197,7 +202,7 @@ export function ChannelRevenueChart({ data }: { data: ChannelRevenueDto[] }) {
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex-1 pl-0 min-h-[200px]">
+      <CardContent className="flex-1 pl-0 min-h-[12.5rem]">
         <div className="w-full">
           <div style={{ height: `${dynamicHeight}px`, width: "100%" }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -250,7 +255,7 @@ export function ChannelRevenueChart({ data }: { data: ChannelRevenueDto[] }) {
                       (val / 1000000).toFixed(1) + "M"
                     }
                     style={{
-                      fontSize: "11px",
+                      fontSize: "0.6875rem",
                       fontWeight: 500,
                       fontFamily: "monospace",
                     }}

@@ -71,25 +71,6 @@ function RoomCardGrid({ roomId }: RoomCardGridProps) {
             ] || "Unknown"}
           </Badge>
         </div>
-
-        {/* Context Menu */}
-        <div className="absolute right-3 top-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="icon"
-                variant="secondary"
-                className="h-8 w-8 rounded-full bg-background/90 backdrop-blur-sm shadow-sm hover:bg-background"
-              >
-                <MoreHorizontal className="h-4 w-4 text-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Xem chi tiết</DropdownMenuItem>
-              <DropdownMenuItem>Cập nhật trạng thái</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </div>
 
       <CardContent className="flex flex-1 flex-col px-4 py-2">
