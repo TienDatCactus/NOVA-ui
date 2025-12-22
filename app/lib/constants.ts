@@ -91,7 +91,7 @@ const SIDEBAR_NAV_MAIN: Array<{
         module: RouteModule.Rooms,
       },
       {
-        title: "Loại phòng",
+        title: "Hạng phòng",
         url: FE_URL.dashboard.rooms.types,
         module: RouteModule.RoomTypes,
       },

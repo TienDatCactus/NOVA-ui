@@ -238,46 +238,48 @@ export default function CreateScheduleDialog({
                   render={({ field }) => (
                     <FormItem className="flex-1 overflow-auto px-2 pb-2">
                       <div className="space-y-1">
-                        {availableStaffForAdditional.map((staff) => {
-                          const isSelected =
-                            field.value?.includes(staff.id) ?? false;
-                          return (
-                            <FormControl key={staff.id}>
-                              <div
-                                onClick={() => {
-                                  const updatedValue = isSelected
-                                    ? (field.value ?? []).filter(
-                                        (id) => id !== staff.id
-                                      )
-                                    : [...(field.value ?? []), staff.id];
-                                  field.onChange(updatedValue);
-                                }}
-                                className={cn(
-                                  "flex items-center gap-3 p-2 rounded-md cursor-pointer select-none text-sm transition-colors",
-                                  isSelected
-                                    ? "bg-primary/10 text-primary font-medium"
-                                    : "hover:bg-muted"
-                                )}
-                              >
+                        {availableStaffForAdditional
+                          .filter((i) => i.status !== "Terminated")
+                          .map((staff) => {
+                            const isSelected =
+                              field.value?.includes(staff.id) ?? false;
+                            return (
+                              <FormControl key={staff.id}>
                                 <div
+                                  onClick={() => {
+                                    const updatedValue = isSelected
+                                      ? (field.value ?? []).filter(
+                                          (id) => id !== staff.id
+                                        )
+                                      : [...(field.value ?? []), staff.id];
+                                    field.onChange(updatedValue);
+                                  }}
                                   className={cn(
-                                    "h-4 w-4 border rounded flex items-center justify-center shrink-0",
+                                    "flex items-center gap-3 p-2 rounded-md cursor-pointer select-none text-sm transition-colors",
                                     isSelected
-                                      ? "border-primary bg-primary"
-                                      : "border-muted-foreground"
+                                      ? "bg-primary/10 text-primary font-medium"
+                                      : "hover:bg-muted"
                                   )}
                                 >
-                                  {isSelected && (
-                                    <Check className="h-3 w-3 text-white" />
-                                  )}
+                                  <div
+                                    className={cn(
+                                      "h-4 w-4 border rounded flex items-center justify-center shrink-0",
+                                      isSelected
+                                        ? "border-primary bg-primary"
+                                        : "border-muted-foreground"
+                                    )}
+                                  >
+                                    {isSelected && (
+                                      <Check className="h-3 w-3 text-white" />
+                                    )}
+                                  </div>
+                                  <span className="truncate">
+                                    {staff.fullName}
+                                  </span>
                                 </div>
-                                <span className="truncate">
-                                  {staff.fullName}
-                                </span>
-                              </div>
-                            </FormControl>
-                          );
-                        })}
+                              </FormControl>
+                            );
+                          })}
                         {availableStaffForAdditional.length === 0 && (
                           <p className="text-xs text-center text-muted-foreground mt-4">
                             Không tìm thấy

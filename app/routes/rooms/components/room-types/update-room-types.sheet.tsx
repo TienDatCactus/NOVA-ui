@@ -47,6 +47,7 @@ import { useUpdateRoomType } from "../../container/room-types/mutation.hooks";
 import { useRoomTypeDetail } from "../../container/room-types/query.hooks";
 
 import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
+import { DialogClose } from "~/components/ui/dialog";
 
 const { UpdateRoomTypesDetailRequestSchema } = RoomTypesSchema;
 type UpdateRoomTypeFormData = z.infer<
@@ -541,14 +542,11 @@ export function UpdateRoomTypeSheet({
             {/* === FOOTER === */}
             <SheetFooter className="p-6 pt-4 border-t shrink-0 ">
               <div className="flex gap-3 justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleOpenChange(false)}
-                  disabled={isPending}
-                >
-                  Hủy bỏ
-                </Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" disabled={isPending}>
+                    Hủy bỏ
+                  </Button>
+                </DialogClose>
 
                 <Button
                   onClick={form.handleSubmit(handleSubmit, onError)}
