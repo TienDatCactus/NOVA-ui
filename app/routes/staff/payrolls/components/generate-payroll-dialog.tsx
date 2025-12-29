@@ -56,6 +56,7 @@ import {
   useGeneratePayroll,
   useGenerateSinglePayroll,
 } from "../container/query.hooks";
+import { Badge } from "~/components/ui/badge";
 
 const generatePayrollSchema = z
   .object({
@@ -343,9 +344,7 @@ export default function GeneratePayrollDialog({
                     name="selectedStaffId"
                     render={({ field }) => (
                       <FormItem className="space-y-2">
-                        <FormLabel className="text-xs">
-                          Chọn nhân viên
-                        </FormLabel>
+                        <FormLabel>Chọn nhân viên</FormLabel>
                         <Popover
                           open={staffSearchOpen}
                           onOpenChange={setStaffSearchOpen}
@@ -368,9 +367,12 @@ export default function GeneratePayrollDialog({
                                     <span className="truncate">
                                       {selectedStaff.fullName}
                                     </span>
-                                    <span className="truncate">
+                                    <Badge
+                                      variant={"secondary"}
+                                      className="truncate"
+                                    >
                                       {selectedStaff.staffRoleName}
-                                    </span>
+                                    </Badge>
                                   </div>
                                 ) : (
                                   "Tìm kiếm nhân viên..."

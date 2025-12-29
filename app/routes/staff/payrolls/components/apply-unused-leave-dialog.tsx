@@ -92,7 +92,7 @@ export default function ApplyUnusedLeaveDialog({
                   <FormLabel>Chọn chế độ xử lý</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="w-40">
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Chọn chế độ" />
                       </SelectTrigger>
                     </FormControl>

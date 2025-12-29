@@ -40,7 +40,7 @@ export default function StaffDeleteDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Xác nhận xóa nhân sú</AlertDialogTitle>
+          <AlertDialogTitle>Xác nhận xóa nhân sự</AlertDialogTitle>
           <AlertDialogDescription>
             Bạn có chắc chắn muốn xóa nhân sự{" "}
             <span className="font-semibold">{staff?.fullName}</span> (

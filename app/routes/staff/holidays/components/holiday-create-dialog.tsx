@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { CalendarDays, CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -82,7 +82,6 @@ export default function CreateHolidayDialog({
         {/* Header có background nhẹ để tách biệt */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/5">
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <CalendarDays className="w-5 h-5 text-primary" />
             Thêm ngày nghỉ lễ
           </DialogTitle>
           <DialogDescription>

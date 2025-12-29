@@ -63,9 +63,9 @@ const CreateStaffSchema = z.object({
 
     .refine((date) => {
       const minAgeDate = new Date();
-      minAgeDate.setFullYear(minAgeDate.getFullYear() - 15);
+      minAgeDate.setFullYear(minAgeDate.getFullYear() - 18);
       return date <= minAgeDate;
-    }, "Ngày sinh không được ở tương lai")
+    }, "Ngày sinh phải đảm bảo nhân sự đủ 18 tuổi")
     .optional(),
 
   citizenId: z

@@ -55,7 +55,7 @@ export default function PrintPreviewDialog({
                   <Hotel className="h-6 w-6" />
                 </div>
                 <h2 className="text-lg font-black uppercase tracking-wider">
-                  NOVA HOTEL
+                  ECO PALM SAPA
                 </h2>
                 <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-medium uppercase tracking-wide">
                   <MapPin className="h-3 w-3" />

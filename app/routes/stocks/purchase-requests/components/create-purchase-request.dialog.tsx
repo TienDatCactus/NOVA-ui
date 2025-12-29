@@ -1,7 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Save, Trash2 } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Loader2, Plus, Save, Search, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useFieldArray, useForm, type UseFormReturn } from "react-hook-form";
 import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -20,12 +28,10 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -34,13 +40,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { formatMoney } from "~/lib/utils";
+import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
 import type { CreatePurchaseRequestDto } from "~/services/api/stocks/purchase-requests/dto";
 import { PurchaseRequestsSchemas } from "~/services/api/stocks/purchase-requests/purchase-requests.schema";
 import { useStockItemList } from "../../items/container/query.hooks";
 import { useCreatePurchaseRequest } from "../container/query.hooks";
-import type { StockItemsListItemDto } from "~/services/api/stocks/items/dto";
-import { useEffect } from "react";
-import { formatMoney } from "~/lib/utils";
 
 interface CreatePurchaseRequestDialogProps {
   open: boolean;
@@ -245,74 +250,17 @@ export default function CreatePurchaseRequestDialog({
                               render={({ field: itemField }) => (
                                 <FormItem className="space-y-0">
                                   <FormControl>
-                                    <Select
-                                      onValueChange={(value) => {
-                                        if (value === "empty") {
-                                          itemField.onChange(null);
-                                          form.setValue(
-                                            `items.${index}.freeTextItemName`,
-                                            ""
-                                          );
-                                          form.setValue(
-                                            `items.${index}.freeTextUnitName`,
-                                            undefined
-                                          );
-                                          form.setValue(
-                                            `items.${index}.unitCost`,
-                                            0
-                                          );
-                                        } else {
-                                          itemField.onChange(value);
-                                          const item = stockItems.find(
-                                            (i) => i.id === value
-                                          );
-                                          if (item) {
-                                            form.setValue(
-                                              `items.${index}.freeTextItemName`,
-                                              item.name
-                                            );
-                                            form.setValue(
-                                              `items.${index}.freeTextUnitName`,
-                                              item.unitName
-                                            );
-                                            form.setValue(
-                                              `items.${index}.unitCost`,
-                                              item.unitCost
-                                            );
-                                          }
-                                        }
-                                      }}
-                                      value={itemField.value || "empty"}
-                                    >
-                                      <SelectTrigger className="h-9">
-                                        <SelectValue placeholder="Chọn hàng" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="empty">
-                                          <span className="text-muted-foreground italic">
-                                            Nhập thủ công
-                                          </span>
-                                        </SelectItem>
-                                        {stockItems.map((item) => {
-                                          const isSelected =
-                                            form
-                                              .getValues("items")
-                                              .some(
-                                                (itm: any) =>
-                                                  itm.itemId === item.id
-                                              ) && itemField.value !== item.id;
-                                          return (
-                                            <SelectItem
-                                              disabled={isSelected}
-                                              key={item.id}
-                                              value={item.id}
-                                            >
-                                              {item.code} - {item.name}
-                                            </SelectItem>
-                                          );
-                                        })}
-                                      </SelectContent>
-                                    </Select>
+                                    <ItemCombobox
+                                      form={form}
+                                      index={index}
+                                      value={itemField.value || ""}
+                                      onChange={itemField.onChange}
+                                      items={stockItems}
+                                      hasError={
+                                        !!form.formState.errors.items?.[index]
+                                          ?.itemId
+                                      }
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -527,5 +475,107 @@ export default function CreatePurchaseRequestDialog({
         </Form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ItemCombobox({
+  form,
+  index,
+  value,
+  onChange,
+  items,
+  hasError,
+}: {
+  form: UseFormReturn<any>;
+  index: number;
+  value: string | null;
+  onChange: (val: string | null) => void;
+  items: StockItemsListItemDto[];
+  hasError?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedItem = items.find((item) => item.id === value);
+
+  const handleSelect = (itemId: string | null) => {
+    if (itemId === null) {
+      // Manual entry
+      onChange(null);
+      form.setValue(`items.${index}.freeTextItemName`, "");
+      form.setValue(`items.${index}.freeTextUnitName`, undefined);
+      form.setValue(`items.${index}.unitCost`, 0);
+    } else {
+      // Selected from list
+      onChange(itemId);
+      const item = items.find((i) => i.id === itemId);
+      if (item) {
+        form.setValue(`items.${index}.freeTextItemName`, item.name);
+        form.setValue(`items.${index}.freeTextUnitName`, item.unitName);
+        form.setValue(`items.${index}.unitCost`, item.unitCost);
+      }
+    }
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={`w-full justify-between font-normal px-3 h-9 ${
+            !value && "text-muted-foreground"
+          } ${hasError && "border-destructive bg-destructive/5"}`}
+        >
+          {selectedItem ? (
+            <span className="truncate">
+              <span className="font-mono text-xs text-muted-foreground mr-2">
+                {selectedItem.code}
+              </span>
+              {selectedItem.name}
+            </span>
+          ) : value === null ? (
+            <span className="text-muted-foreground italic">Nhập thủ công</span>
+          ) : (
+            "Chọn hàng hóa..."
+          )}
+          <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[350px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Tìm mã hoặc tên..." />
+          <CommandList>
+            <CommandEmpty>Không tìm thấy.</CommandEmpty>
+            {/* Manual Entry Option */}
+            <CommandItem
+              onSelect={() => handleSelect(null)}
+              className="text-muted-foreground italic"
+            >
+              Nhập thủ công
+            </CommandItem>
+            {items.map((item) => {
+              const isSelected =
+                form
+                  .getValues("items")
+                  .some((itm: any) => itm.itemId === item.id) &&
+                value !== item.id;
+              return (
+                <CommandItem
+                  key={item.id}
+                  disabled={isSelected}
+                  onSelect={() => handleSelect(item.id)}
+                >
+                  <span className="font-mono text-xs text-muted-foreground mr-2">
+                    {item.code}
+                  </span>
+                  <span>{item.name}</span>
+                </CommandItem>
+              );
+            })}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

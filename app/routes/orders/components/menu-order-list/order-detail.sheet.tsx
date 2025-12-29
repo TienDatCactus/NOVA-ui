@@ -117,24 +117,31 @@ export default function OrderDetailSheet({
               {/* Left: Customer */}
               <div className="p-4 space-y-1">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  {isCustomerInHouse ? (
-                    <BedDouble className="h-3.5 w-3.5" />
-                  ) : (
-                    <User className="h-3.5 w-3.5" />
-                  )}
+                  <User className="h-3.5 w-3.5" />
+
                   <span className="text-[10px] uppercase font-bold tracking-wider">
                     Khách hàng
                   </span>
                 </div>
                 <div className="font-medium text-sm pl-6">
                   {isCustomerInHouse
-                    ? `Khách lưu trú ${orderDetail.customerName || orderDetail.roomName || `#${orderDetail.bookingCode}`}`
+                    ? `Khách lưu trú ${orderDetail.customerName || `#${orderDetail.bookingCode}`}`
                     : "Khách lẻ"}
+
                   {orderDetail.customerId && (
                     <span className="block text-xs text-muted-foreground font-mono mt-0.5">
                       {orderDetail.customerId.slice(0, 8)}...
                     </span>
                   )}
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <BedDouble className="h-3.5 w-3.5" />
+                  <span className="text-[10px] uppercase font-bold tracking-wider">
+                    Phòng
+                  </span>
+                </div>
+                <div className="font-medium text-sm pl-6">
+                  {orderDetail.roomName || "N/A"}
                 </div>
               </div>
 

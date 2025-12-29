@@ -84,20 +84,11 @@ export default function MarkAbsentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 bg-destructive/5 border-b border-destructive/10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-destructive/10 rounded-full text-destructive">
-              <UserX className="w-5 h-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-lg text-foreground">
-                Xác nhận vắng mặt
-              </DialogTitle>
-              <DialogDescription className="text-xs mt-0.5">
-                Ghi nhận nhân viên nghỉ làm hoặc bỏ ca
-              </DialogDescription>
-            </div>
-          </div>
+        <DialogHeader className="px-6 py-4  border-b ">
+          <DialogTitle>Xác nhận vắng mặt</DialogTitle>
+          <DialogDescription>
+            Ghi nhận nhân viên nghỉ làm hoặc bỏ ca
+          </DialogDescription>
         </DialogHeader>
 
         <div className="p-6 space-y-5">

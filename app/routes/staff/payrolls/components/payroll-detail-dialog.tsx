@@ -266,11 +266,10 @@ export default function PayrollDetailDialog({
           </p>
           {payroll && (
             <Button
-              variant="outline"
+              variant="success"
               size="sm"
               onClick={handleExportPayslip}
               disabled={isExporting}
-              className="border-primary/20 hover:bg-primary/5 text-primary gap-2"
             >
               {isExporting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

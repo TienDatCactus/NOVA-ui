@@ -3,35 +3,10 @@ import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Badge } from "~/components/ui/badge";
-import { Checkbox } from "~/components/ui/checkbox";
 import type { HolidayListItem } from "~/services/api/holiday/dto";
 import ActionsMenuCell from "../../fragments/actions.cell";
 
 export const columns: ColumnDef<HolidayListItem>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Chọn tất cả"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Chọn dòng"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "index",
     header: ({ column }) => (

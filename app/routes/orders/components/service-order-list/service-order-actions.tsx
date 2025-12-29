@@ -187,12 +187,13 @@ export function ServiceFooterActions({ orderId, status }: ActionProps) {
   // Status === "Scheduled"
   return (
     <div className="grid grid-cols-2 gap-3 w-full">
-      <Button variant="info-outline" onClick={() => toggle("pay", true)}>
+      <Button variant="outline" size={"sm"} onClick={() => toggle("pay", true)}>
         <CreditCard className="mr-2 h-4 w-4" /> Thanh toán
       </Button>
 
       <Button
         variant="success"
+        size={"sm"}
         onClick={handlers.handleComplete}
         disabled={loading.isCompleting}
       >

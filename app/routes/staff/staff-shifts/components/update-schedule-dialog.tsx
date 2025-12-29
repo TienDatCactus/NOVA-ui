@@ -1,12 +1,27 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
-import { AlertCircle, ArrowRight, Repeat, X } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  CalendarIcon,
+  Loader2,
+  Repeat,
+  Save,
+  X,
+} from "lucide-react";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import {
+  type Control,
+  type FieldValues,
+  type Path,
+  useForm,
+} from "react-hook-form";
 import { toast } from "sonner";
+
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import { Checkbox } from "~/components/ui/checkbox";
-import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -20,9 +35,13 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import {
   Select,
@@ -33,7 +52,9 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
+import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
+
 import { useActiveWorkShiftList } from "~/routes/work-shifts/container/query.hooks";
 import type {
   StaffShiftListItem,
@@ -55,6 +76,59 @@ interface UpdateScheduleDialogProps {
   onSuccess?: () => void;
 }
 
+// --- Reusable Table Components ---
+const LabelCell = ({
+  children,
+  required,
+}: {
+  children: React.ReactNode;
+  required?: boolean;
+}) => (
+  <TableCell className="w-[140px] bg-muted/30 font-medium border-r text-muted-foreground align-top py-3">
+    {children} {required && <span className="text-red-500">*</span>}
+  </TableCell>
+);
+
+const InputCell = ({ children }: { children: React.ReactNode }) => (
+  <TableCell className="p-3 align-top border-0">{children}</TableCell>
+);
+
+interface FormRowProps<T extends FieldValues> {
+  control: Control<T>;
+  name: Path<T>;
+  label: string;
+  required?: boolean;
+  children: (field: any) => React.ReactNode;
+  className?: string;
+}
+
+const FormRow = <T extends FieldValues>({
+  control,
+  name,
+  label,
+  required,
+  children,
+  className,
+}: FormRowProps<T>) => {
+  return (
+    <TableRow className={`hover:bg-transparent ${className || ""}`}>
+      <LabelCell required={required}>{label}</LabelCell>
+      <InputCell>
+        <FormField
+          control={control}
+          name={name}
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormControl>{children(field)}</FormControl>
+              <FormMessage className="mt-1" />
+            </FormItem>
+          )}
+        />
+      </InputCell>
+    </TableRow>
+  );
+};
+
 export default function UpdateScheduleDialog({
   open,
   onOpenChange,
@@ -65,6 +139,8 @@ export default function UpdateScheduleDialog({
     shift?.id || "",
     { enabled: open && !!shift?.id }
   );
+
+  const updateShiftSchedule = useUpdateShiftSchedule();
 
   const form = useForm<UpdateShiftScheduleRequest>({
     resolver: zodResolver(UpdateShiftScheduleRequestSchema),
@@ -99,7 +175,7 @@ export default function UpdateScheduleDialog({
 
   const repeatWeekly = form.watch("repeatWeekly");
   const applyScope = form.watch("applyScope");
-  const updateShiftSchedule = useUpdateShiftSchedule();
+
   useEffect(() => {
     if (applyScope === "ThisOnly") {
       form.setValue("repeatWeekly", false);
@@ -150,338 +226,348 @@ export default function UpdateScheduleDialog({
 
   const workDate = shift.workDate ? parseISO(shift.workDate) : new Date();
   const formattedDate = format(workDate, "dd/MM/yyyy");
-
   const staffName = shiftDetail?.staffName || shift.staffName || "...";
   const currentShiftName = shiftDetail?.shiftName || shift.shiftName || "...";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
         {/* === HEADER === */}
-        <DialogHeader className="px-6 py-4 border-b shrink-0 bg-muted/5">
-          <DialogTitle className="text-lg">
-            Điều chỉnh lịch làm việc
-          </DialogTitle>
-          <DialogDescription className="flex items-center gap-2 mt-1">
-            <span className="font-medium text-foreground">{staffName}</span>
-            <span className="text-muted-foreground">•</span>
-            <span>{formattedDate}</span>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-primary font-medium">{currentShiftName}</span>
-          </DialogDescription>
+        <DialogHeader className="px-6 py-4 border-b shrink-0 bg-muted/10">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <DialogTitle>Điều chỉnh lịch làm việc</DialogTitle>
+              <DialogDescription>
+                Cập nhật ca làm việc hoặc thay đổi lịch trình
+              </DialogDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-background">
+                {staffName}
+              </Badge>
+              <span className="text-muted-foreground text-xs">|</span>
+              <Badge variant="secondary">{formattedDate}</Badge>
+            </div>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex-1 flex flex-col min-h-0"
+            className="flex flex-col md:flex-row flex-1 overflow-y-auto"
           >
-            {/* === SCROLLABLE BODY === */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
-              {/* 1. CA LÀM VIỆC MỚI */}
-              <FormField
-                control={form.control}
-                name="workShiftIds"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">
-                      Chuyển sang ca
-                    </FormLabel>
-                    <Select
-                      value={field.value?.[0] || ""}
-                      onValueChange={(value) => field.onChange([value])}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-11">
-                          <SelectValue placeholder="Chọn ca làm việc mới" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {workShifts?.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            <span className="font-medium">{s.name}</span>
-                            <span className="ml-2 text-muted-foreground text-xs">
-                              ({s.startTime.slice(0, 5)} -{" "}
-                              {s.endTime.slice(0, 5)})
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* === LEFT PANEL: MAIN ACTIONS === */}
+            <div className="flex-1 p-0">
+              <div className="p-4">
+                <h3 className="mb-3 text-sm font-semibold text-foreground/80 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-primary rounded-full" />
+                  Thông tin thay đổi
+                </h3>
+                <div className="border rounded-md overflow-hidden">
+                  <Table>
+                    <TableBody>
+                      <TableRow className="hover:bg-transparent bg-muted/5">
+                        <LabelCell>Ca hiện tại</LabelCell>
+                        <TableCell className="p-3 text-muted-foreground italic">
+                          {currentShiftName}
+                        </TableCell>
+                      </TableRow>
 
-              <Separator />
-
-              {/* 2. PHẠM VI ÁP DỤNG (CRITICAL UX) */}
-              <FormField
-                control={form.control}
-                name="applyScope"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="text-base font-medium">
-                      Phạm vi áp dụng
-                    </FormLabel>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="grid grid-cols-1 md:grid-cols-3 gap-3"
-                    >
-                      {/* Option 1: Chỉ hôm nay */}
-                      <FormItem className="flex items-center space-y-0">
-                        <FormControl>
-                          <RadioGroupItem
-                            value="ThisOnly"
-                            id="scope-this"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <label
-                          htmlFor="scope-this"
-                          className="flex flex-col gap-1 p-3 border rounded-lg cursor-pointer transition-all hover:bg-muted peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:text-primary w-full h-full"
-                        >
-                          <div className="flex items-center gap-2 font-medium text-sm">
-                            <div className="w-2 h-2 rounded-full bg-current" />
-                            Chỉ hôm nay
-                          </div>
-                          <p className="text-xs text-muted-foreground pl-4">
-                            Chỉ sửa ngày {formattedDate}
-                          </p>
-                        </label>
-                      </FormItem>
-
-                      {/* Option 2: Từ nay về sau */}
-                      <FormItem className="flex items-center space-y-0">
-                        <FormControl>
-                          <RadioGroupItem
-                            value="Forward"
-                            id="scope-forward"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <label
-                          htmlFor="scope-forward"
-                          className="flex flex-col gap-1 p-3 border rounded-lg cursor-pointer transition-all hover:bg-muted peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:text-primary w-full h-full"
-                        >
-                          <div className="flex items-center gap-2 font-medium text-sm">
-                            <ArrowRight className="w-3.5 h-3.5" />
-                            Từ hôm nay
-                          </div>
-                          <p className="text-xs text-muted-foreground pl-4">
-                            Cập nhật từ {formattedDate} trở đi
-                          </p>
-                        </label>
-                      </FormItem>
-
-                      {/* Option 3: Tất cả */}
-                      <FormItem className="flex items-center space-y-0">
-                        <FormControl>
-                          <RadioGroupItem
-                            value="All"
-                            id="scope-all"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <label
-                          htmlFor="scope-all"
-                          className="flex flex-col gap-1 p-3 border rounded-lg cursor-pointer transition-all hover:bg-muted peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:text-primary w-full h-full"
-                        >
-                          <div className="flex items-center gap-2 font-medium text-sm">
-                            <Repeat className="w-3.5 h-3.5" />
-                            Toàn bộ
-                          </div>
-                          <p className="text-xs text-muted-foreground pl-4">
-                            Toàn bộ chuỗi lặp (kể cả quá khứ)
-                          </p>
-                        </label>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormItem>
-                )}
-              />
-
-              {/* 3. CẤU HÌNH LẶP LẠI */}
-              <div className="space-y-2">
-                {applyScope === "ThisOnly" && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 p-2 rounded-md">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    <span>
-                      Chỉ áp dụng cho ngày {formattedDate}, không cần cấu hình
-                      lặp lại
-                    </span>
-                  </div>
-                )}
-                <div className={cn("transition-all")}>
-                  <div className="flex flex-col gap-4 p-4 border rounded-lg bg-muted/5">
-                    <FormField
-                      control={form.control}
-                      name="repeatWeekly"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-sm font-medium">
-                              Lặp lại hàng tuần
-                            </FormLabel>
-                            <p className="text-xs">
-                              Tự động tạo lịch vào các ngày cố định
-                            </p>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Separator />
-                    {repeatWeekly && (
-                      <FormField
+                      <FormRow
                         control={form.control}
-                        name="weekDays"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex flex-wrap gap-2 pt-2">
-                              {WEEKDAYS.map((day) => {
-                                const isSelected = field.value?.includes(
-                                  day.value
-                                );
-                                return (
-                                  <div
-                                    key={day.value}
-                                    onClick={() => {
-                                      const current = field.value || [];
-                                      if (isSelected)
-                                        field.onChange(
-                                          current.filter((v) => v !== day.value)
-                                        );
-                                      else
-                                        field.onChange([...current, day.value]);
-                                    }}
+                        name="workShiftIds"
+                        label="Chuyển sang ca"
+                      >
+                        {(field) => (
+                          <Select
+                            value={field.value?.[0] || ""}
+                            onValueChange={(value) => field.onChange([value])}
+                          >
+                            <SelectTrigger className="h-9 border-0 focus:ring-0">
+                              <SelectValue placeholder="Chọn ca làm việc mới" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {workShifts?.map((s) => (
+                                <SelectItem key={s.id} value={s.id}>
+                                  <span className="font-medium">{s.name}</span>
+                                  <span className="ml-2 text-muted-foreground text-xs">
+                                    ({s.startTime.slice(0, 5)} -{" "}
+                                    {s.endTime.slice(0, 5)})
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </FormRow>
+
+                      {/* Optional: Change Date (Only visible for 'ThisOnly') */}
+                      {applyScope === "ThisOnly" && !repeatWeekly && (
+                        <FormRow
+                          control={form.control}
+                          name="newDate"
+                          label="Đổi ngày (Tuỳ chọn)"
+                        >
+                          {(field) => (
+                            <div className="flex items-center gap-2">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
                                     className={cn(
-                                      "h-9 w-9 rounded-full flex items-center justify-center text-sm border cursor-pointer select-none transition-all",
-                                      isSelected
-                                        ? "bg-primary text-primary-foreground border-primary"
-                                        : "bg-background hover:bg-muted"
+                                      "w-[200px] justify-start text-left font-normal h-9 border-0 shadow-none hover:bg-transparent px-3",
+                                      !field.value && "text-muted-foreground"
                                     )}
                                   >
-                                    {day.label
-                                      .replace("Thứ ", "T")
-                                      .replace("Chủ nhật", "CN")}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                    )}
-
-                    {repeatWeekly && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                        <FormField
-                          control={form.control}
-                          name="endDate"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel className="text-xs">
-                                Ngày kết thúc
-                              </FormLabel>
-                              <DatePicker
-                                {...field}
-                                value={
-                                  field.value
-                                    ? parseISO(field.value)
-                                    : undefined
-                                }
-                                onChange={(date) =>
-                                  field.onChange(
-                                    date ? format(date, "yyyy-MM-dd") : null
-                                  )
-                                }
-                              />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="excludeHolidays"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-end space-x-2 space-y-0 h-full pb-2">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal text-sm text-muted-foreground cursor-pointer">
-                                Trừ ngày Lễ/Tết
-                              </FormLabel>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    )}
-                    {applyScope === "ThisOnly" && !repeatWeekly && (
-                      <FormField
-                        control={form.control}
-                        name="newDate"
-                        render={({ field }) => (
-                          <FormItem className="">
-                            <FormLabel className="text-xs">
-                              Chọn ngày mới ( optional )
-                            </FormLabel>
-                            <FormControl>
-                              <div className="flex items-center gap-2">
-                                <DatePicker
-                                  className="w-40"
-                                  {...field}
-                                  onChange={(date) =>
-                                    field.onChange(
-                                      format(date + "", "yyyy-MM-dd")
-                                    )
-                                  }
-                                />
+                                    {field.value ? (
+                                      format(
+                                        new Date(field.value),
+                                        "dd/MM/yyyy"
+                                      )
+                                    ) : (
+                                      <span>Giữ nguyên ngày cũ</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                  <Calendar
+                                    mode="single"
+                                    selected={
+                                      field.value
+                                        ? new Date(field.value)
+                                        : undefined
+                                    }
+                                    onSelect={(date) =>
+                                      field.onChange(
+                                        date ? format(date, "yyyy-MM-dd") : null
+                                      )
+                                    }
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              {field.value && (
                                 <Button
+                                  type="button"
                                   variant="ghost"
-                                  size={"icon"}
+                                  size="icon"
+                                  className="h-8 w-8"
                                   onClick={() => form.resetField("newDate")}
                                 >
-                                  <X />
+                                  <X className="h-4 w-4" />
                                 </Button>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                  </div>
+                              )}
+                            </div>
+                          )}
+                        </FormRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             </div>
 
-            {/* === FOOTER === */}
-            <DialogFooter className="px-6 py-4 border-t bg-background shrink-0">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => onOpenChange(false)}
-              >
-                Hủy bỏ
-              </Button>
-              <Button
-                type="submit"
-                disabled={updateShiftSchedule.isPending || isLoadingDetail}
-              >
-                {updateShiftSchedule.isPending ? "Đang lưu..." : "Lưu thay đổi"}
-              </Button>
-            </DialogFooter>
+            {/* === RIGHT PANEL: SCOPE & RECURRENCE === */}
+            <div className="w-full md:w-[350px] bg-muted/10 border-l flex flex-col">
+              <div className="p-4 space-y-6">
+                {/* Scope Selection */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+                    <span className="w-1 h-4 bg-orange-500 rounded-full" />
+                    Phạm vi áp dụng
+                  </h3>
+                  <FormField
+                    control={form.control}
+                    name="applyScope"
+                    render={({ field }) => (
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="grid grid-cols-1 gap-2"
+                      >
+                        <label
+                          className={cn(
+                            "flex items-center space-x-3 space-y-0 rounded-md border p-3 cursor-pointer transition-colors bg-background",
+                            field.value === "ThisOnly"
+                              ? "border-primary bg-primary/5"
+                              : "hover:bg-muted"
+                          )}
+                        >
+                          <RadioGroupItem value="ThisOnly" id="scope-this" />
+                          <div className="grid gap-0.5">
+                            <span className="text-sm font-medium">
+                              Chỉ hôm nay
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Chỉ sửa ngày {formattedDate}
+                            </span>
+                          </div>
+                        </label>
+
+                        <label
+                          className={cn(
+                            "flex items-center space-x-3 space-y-0 rounded-md border p-3 cursor-pointer transition-colors bg-background",
+                            field.value === "Forward"
+                              ? "border-primary bg-primary/5"
+                              : "hover:bg-muted"
+                          )}
+                        >
+                          <RadioGroupItem value="Forward" id="scope-forward" />
+                          <div className="grid gap-0.5">
+                            <span className="text-sm font-medium flex items-center gap-2">
+                              <ArrowRight className="w-3.5 h-3.5" /> Từ hôm nay
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Cập nhật từ {formattedDate} trở đi
+                            </span>
+                          </div>
+                        </label>
+
+                        <label
+                          className={cn(
+                            "flex items-center space-x-3 space-y-0 rounded-md border p-3 cursor-pointer transition-colors bg-background",
+                            field.value === "All"
+                              ? "border-primary bg-primary/5"
+                              : "hover:bg-muted"
+                          )}
+                        >
+                          <RadioGroupItem value="All" id="scope-all" />
+                          <div className="grid gap-0.5">
+                            <span className="text-sm font-medium flex items-center gap-2">
+                              <Repeat className="w-3.5 h-3.5" /> Toàn bộ chuỗi
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Áp dụng cho cả quá khứ và tương lai
+                            </span>
+                          </div>
+                        </label>
+                      </RadioGroup>
+                    )}
+                  />
+                </div>
+
+                <Separator />
+
+                {/* Recurrence Settings */}
+                {applyScope !== "ThisOnly" ? (
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+                      <span className="w-1 h-4 bg-blue-500 rounded-full" />
+                      Cấu hình lặp lại
+                    </h3>
+                    <div className="bg-background border rounded-md p-3 space-y-3">
+                      <FormField
+                        control={form.control}
+                        name="repeatWeekly"
+                        render={({ field }) => (
+                          <div className="flex flex-row items-center justify-between">
+                            <span className="text-sm">Lặp lại hàng tuần</span>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </div>
+                        )}
+                      />
+
+                      {repeatWeekly && (
+                        <>
+                          <div className="h-px bg-border/50" />
+                          <FormField
+                            control={form.control}
+                            name="weekDays"
+                            render={({ field }) => (
+                              <div className="flex flex-wrap gap-1 justify-center pt-1">
+                                {WEEKDAYS.map((day) => {
+                                  const isSelected = field.value?.includes(
+                                    day.value
+                                  );
+                                  return (
+                                    <div
+                                      key={day.value}
+                                      onClick={() => {
+                                        const current = field.value || [];
+                                        field.onChange(
+                                          isSelected
+                                            ? current.filter(
+                                                (v) => v !== day.value
+                                              )
+                                            : [...current, day.value]
+                                        );
+                                      }}
+                                      className={cn(
+                                        "h-7 w-7 rounded-full flex items-center justify-center text-xs border cursor-pointer select-none transition-all",
+                                        isSelected
+                                          ? "bg-primary text-primary-foreground border-primary"
+                                          : "bg-muted/30 hover:bg-muted text-muted-foreground"
+                                      )}
+                                    >
+                                      {day.label
+                                        .replace("Thứ ", "T")
+                                        .replace("Chủ nhật", "CN")}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          />
+                          <div className="h-px bg-border/50" />
+                          <FormField
+                            control={form.control}
+                            name="excludeHolidays"
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                  Trừ ngày Lễ/Tết
+                                </span>
+                              </div>
+                            )}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-3 rounded-md border border-dashed">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>
+                      Không cần cấu hình lặp lại cho thay đổi một lần.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           </form>
         </Form>
+
+        {/* === FOOTER === */}
+        <DialogFooter className="px-6 py-4 border-t bg-background shrink-0 z-10">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            disabled={updateShiftSchedule.isPending}
+          >
+            Hủy bỏ
+          </Button>
+          <Button
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={updateShiftSchedule.isPending || isLoadingDetail}
+            className="min-w-[120px]"
+          >
+            {updateShiftSchedule.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            Lưu thay đổi
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

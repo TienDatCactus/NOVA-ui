@@ -88,7 +88,7 @@ export default function StaffViewLayout({
                 </SelectTrigger>
                 <SelectContent>
                   {roles?.map((role) => (
-                    <SelectItem key={role.id} value={role.name}>
+                    <SelectItem key={role.id} value={role.id}>
                       {role.name}
                     </SelectItem>
                   ))}
