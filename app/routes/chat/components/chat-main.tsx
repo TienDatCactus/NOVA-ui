@@ -77,14 +77,10 @@ export const BackgroundLayer = () => {
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-      {/* 1. Base Background Color 
-        Sử dụng màu Stone (Đá) để tạo cảm giác núi rừng, tự nhiên hơn màu Gray mặc định 
-      */}
+      {/* 1. Base Background Color */}
       <div className="absolute inset-0 bg-stone-50 dark:bg-zinc-950 transition-colors duration-500" />
 
-      {/* 2. Terrace Pattern Layer (Ruộng bậc thang)
-        Sử dụng mask-image để áp dụng màu Tailwind linh hoạt cho Light/Dark mode
-      */}
+      {/* 2. Terrace Pattern Layer */}
       <div
         className="absolute inset-0 opacity-40"
         style={{
@@ -94,22 +90,18 @@ export const BackgroundLayer = () => {
           WebkitMaskSize: "200px 120px",
         }}
       >
-        {/* Màu của vân ruộng: Xanh đậm ở Light mode, Xanh sáng mờ ở Dark mode */}
         <div className="absolute inset-0 bg-emerald-800/10 dark:bg-emerald-400/10" />
       </div>
 
-      {/* 3. The "Mist" Gradient (Sương mù Sapa)
-        Tạo hiệu ứng mờ ảo từ trên xuống và dưới lên
-      */}
-      <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 via-transparent to-stone-100/80 dark:from-emerald-950/20 dark:to-zinc-950/90" />
+      {/* 3. The "Mist" Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 via-transparent to-stone-100/80 dark:from-emerald-950/20 dark:via-transparent dark:to-zinc-950/90" />
 
-      {/* 4. Subtle Ambient Light (Optional)
-        Điểm nhấn ánh sáng nhẹ ở góc để tạo chiều sâu
-      */}
+      {/* 4. Subtle Ambient Light */}
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-400/20 dark:bg-emerald-500/10 rounded-full blur-3xl opacity-50" />
     </div>
   );
 };
+
 export function ChatMain({ sessionId }: ChatMainProps) {
   // --- Refs & State ---
   const user = useAuthStore((s) => s.user);
@@ -173,7 +165,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     sendMessage: sendMessageViaSignalR,
     loadMessages,
   } = useChatConnection({
-    sessionId: sessionId, // Don't fallback to "" - let hook handle null
+    sessionId: sessionId,
     isGuest: false,
     userId: user?.id,
   });
@@ -191,11 +183,10 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
 
-    // Guard clause: Exit early if condition not met
     if (
       !lastMessage ||
       lastMessage.sender !== "Guest" ||
-      lastMessage.detectedLanguage // Already processed
+      lastMessage.detectedLanguage
     ) {
       return;
     }
@@ -207,7 +198,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         );
         const detectedLang = detection?.language;
 
-        // Optimistic update for detection
         updateMessage(lastMessage.id, { detectedLanguage: detectedLang });
 
         if (
@@ -331,7 +321,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
       await sendMessageViaSignalR(messageToSend);
 
-      // Clear input after successful send
       setInputMessage("");
       setTranslationState({
         isTranslating: false,
@@ -339,7 +328,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         sourceLang: null,
       });
 
-      // Force scroll to bottom
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -350,11 +338,11 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     return (
       <div className="flex-1 flex items-center justify-center bg-muted relative overflow-hidden">
         <BackgroundLayer />
-        <div className="text-center p-8 relative z-10  max-w-sm mx-4">
-          <div className="w-20 h-20 rounded-full  bg-muted border border-emerald-100 flex items-center justify-center mx-auto mb-6 shadow-inner">
+        <div className="text-center p-8 relative z-10 max-w-sm mx-4">
+          <div className="w-20 h-20 rounded-full bg-muted border border-emerald-100 dark:border-emerald-900 flex items-center justify-center mx-auto mb-6 shadow-inner">
             <CloudFog className="h-10 w-10 text-muted-foreground" />
           </div>
-          <p className=" font-bold text-xl text-accent-foreground mb-2">
+          <p className="font-bold text-xl text-accent-foreground mb-2">
             Bắt đầu trò chuyện
           </p>
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -368,11 +356,13 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
   if (isLoadingSession || isLoadingMessages) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-stone-50 relative">
+      <div className="flex-1 flex items-center justify-center bg-stone-50 dark:bg-zinc-950 relative">
         <BackgroundLayer />
         <div className="relative z-10 flex flex-col items-center">
-          <Loader2 className="h-10 w-10 animate-spin text-emerald-600 mb-4" />
-          <p className="text-stone-500 font-medium">Đang tải...</p>
+          <Loader2 className="h-10 w-10 animate-spin text-emerald-600 dark:text-emerald-500 mb-4" />
+          <p className="text-stone-500 dark:text-stone-400 font-medium">
+            Đang tải...
+          </p>
         </div>
       </div>
     );
@@ -380,9 +370,9 @@ export function ChatMain({ sessionId }: ChatMainProps) {
 
   if (!session) {
     return (
-      <div className="flex-1 flex items-center justify-center text-stone-500 bg-stone-50 relative">
+      <div className="flex-1 flex items-center justify-center text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-zinc-950 relative">
         <BackgroundLayer />
-        <div className="z-10 bg-background/80 p-6 rounded-2xl shadow-sm">
+        <div className="z-10 bg-background/80 dark:bg-background/90 p-6 rounded-2xl shadow-sm">
           Không tìm thấy phiên trò chuyện.
         </div>
       </div>
@@ -392,20 +382,22 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   const canSendMessage = session.state === "Open";
 
   return (
-    <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-stone-50 relative font-sans">
+    <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-stone-50 dark:bg-zinc-950 relative font-sans">
       <BackgroundLayer />
 
-      <header className="flex items-center justify-between border-b border-white/20 p-4 bg-background/70 backdrop-blur-xl shadow-sm shadow-stone-900/5 shrink-0 z-20">
+      <header className="flex items-center justify-between border-b border-white/20 dark:border-white/10 p-4 bg-background/70 dark:bg-background/80 backdrop-blur-xl shadow-sm shadow-stone-900/5 dark:shadow-black/20 shrink-0 z-20">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border border-white/50 shadow-sm">
-            <AvatarFallback className="bg-emerald-100 text-emerald-800  font-bold">
+          <Avatar className="h-10 w-10 border border-white/50 dark:border-white/20 shadow-sm">
+            <AvatarFallback className="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 font-bold">
               {session.customerName.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="font-bold text-stone-800">{session.customerName}</h2>
-            <p className="text-xs text-stone-500 flex items-center gap-1">
-              <TreePalm className="w-3 h-3 text-stone-400" />
+            <h2 className="font-bold text-stone-800 dark:text-stone-100">
+              {session.customerName}
+            </h2>
+            <p className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
+              <TreePalm className="w-3 h-3 text-stone-400 dark:text-stone-500" />
               Phòng {session.roomName}
             </p>
           </div>
@@ -415,20 +407,19 @@ export function ChatMain({ sessionId }: ChatMainProps) {
           {session.assignedStaffName && (
             <Badge
               variant="outline"
-              className="bg-emerald-50/50 text-emerald-700 border-emerald-200"
+              className="bg-emerald-50/50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700"
             >
               <UserCheck className="h-3 w-3 mr-1" />
               {session.assignedStaffName}
             </Badge>
           )}
 
-          {/* Settings Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-stone-500 hover:text-emerald-800 hover:bg-emerald-50/50 rounded-full"
+                className="text-stone-500 dark:text-stone-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/50 rounded-full"
               >
                 <Languages className="h-4 w-4 mr-2" />
                 Cài đặt
@@ -436,28 +427,28 @@ export function ChatMain({ sessionId }: ChatMainProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-64 bg-background/95 backdrop-blur-xl border-white/50 shadow-xl shadow-stone-900/10"
+              className="w-64 bg-background/95 dark:bg-background/98 backdrop-blur-xl border-white/50 dark:border-white/10 shadow-xl shadow-stone-900/10 dark:shadow-black/40"
             >
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="cursor-pointer focus:bg-emerald-50">
+                <DropdownMenuSubTrigger className="cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-950/50">
                   Ngôn ngữ dịch
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="bg-background/95 backdrop-blur-xl">
+                  <DropdownMenuSubContent className="bg-background/95 dark:bg-background/98 backdrop-blur-xl">
                     {SUPPORTED_LANGUAGES.map((lang) => (
                       <DropdownMenuItem
                         key={lang.code}
                         onClick={() => setUserLanguage(lang.code)}
                         className={cn(
-                          "cursor-pointer focus:bg-emerald-50 focus:text-emerald-800",
+                          "cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-950/50 focus:text-emerald-800 dark:focus:text-emerald-300",
                           userLanguage === lang.code &&
-                            "bg-emerald-50 text-emerald-800 font-medium"
+                            "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-medium"
                         )}
                       >
                         <span className="mr-2">{lang.flag}</span>
                         {lang.label}
                         {userLanguage === lang.code && (
-                          <span className="ml-auto text-xs text-emerald-600">
+                          <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400">
                             <Check className="h-4 w-4" />
                           </span>
                         )}
@@ -466,11 +457,11 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              <DropdownMenuSeparator className="bg-stone-100" />
+              <DropdownMenuSeparator className="bg-stone-100 dark:bg-stone-800" />
               <div className="px-2 py-2 flex items-center justify-between">
                 <Label
                   htmlFor="auto-translate"
-                  className="text-sm cursor-pointer text-stone-600"
+                  className="text-sm cursor-pointer text-stone-600 dark:text-stone-300"
                 >
                   Tự động dịch
                 </Label>
@@ -478,16 +469,16 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                   id="auto-translate"
                   checked={autoTranslateEnabled}
                   onCheckedChange={setAutoTranslate}
-                  className="data-[state=checked]:bg-emerald-600"
+                  className="data-[state=checked]:bg-emerald-600 dark:data-[state=checked]:bg-emerald-500"
                 />
               </div>
-              <DropdownMenuSeparator className="bg-stone-100" />
+              <DropdownMenuSeparator className="bg-stone-100 dark:bg-stone-800" />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="cursor-pointer focus:bg-emerald-50">
+                <DropdownMenuSubTrigger className="cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-950/50">
                   Giao cho nhân viên
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="bg-background/95 backdrop-blur-xl">
+                  <DropdownMenuSubContent className="bg-background/95 dark:bg-background/98 backdrop-blur-xl">
                     {staffList?.length ? (
                       staffList.map((staff) => (
                         <DropdownMenuItem
@@ -495,9 +486,9 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                           onClick={() => handleAssignStaff(staff.id)}
                           disabled={assignStaffMutation.isPending}
                           className={cn(
-                            "cursor-pointer focus:bg-emerald-50",
+                            "cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-950/50",
                             session.assignedStaffUserId === staff.id &&
-                              "bg-emerald-50 text-emerald-800"
+                              "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300"
                           )}
                         >
                           <div className="flex flex-col flex-1">
@@ -509,7 +500,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                             </span>
                           </div>
                           {session.assignedStaffUserId === staff.id && (
-                            <span className="ml-auto text-xs text-emerald-600">
+                            <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400">
                               <Check className="h-4 w-4" />
                             </span>
                           )}
@@ -523,14 +514,14 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              <DropdownMenuSeparator className="bg-stone-100" />
+              <DropdownMenuSeparator className="bg-stone-100 dark:bg-stone-800" />
               <DropdownMenuItem
                 onClick={handleMarkAllRead}
                 disabled={markAllReadMutation.isPending}
-                className="cursor-pointer focus:bg-emerald-50 focus:text-emerald-800"
+                className="cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-950/50 focus:text-emerald-800 dark:focus:text-emerald-300"
               >
-                <CheckCheck className="h-4 w-4 mr-2 text-emerald-600" /> Đánh
-                dấu tất cả đã đọc
+                <CheckCheck className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+                Đánh dấu tất cả đã đọc
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -542,16 +533,16 @@ export function ChatMain({ sessionId }: ChatMainProps) {
           <div className="space-y-4 pb-4">
             {isConnecting && (
               <div className="flex justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
+                <Loader2 className="h-6 w-6 animate-spin text-emerald-500 dark:text-emerald-400" />
               </div>
             )}
 
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-60">
-                <div className="w-16 h-16 rounded-full bg-background/40 border border-white/60 flex items-center justify-center">
-                  <Leaf className="h-8 w-8 text-emerald-800/40" />
+                <div className="w-16 h-16 rounded-full bg-background/40 dark:bg-background/30 border border-white/60 dark:border-white/20 flex items-center justify-center">
+                  <Leaf className="h-8 w-8 text-emerald-800/40 dark:text-emerald-400/40" />
                 </div>
-                <p className="text-sm text-stone-500 font-medium">
+                <p className="text-sm text-stone-500 dark:text-stone-400 font-medium">
                   Chưa có tin nhắn nào.
                 </p>
               </div>
@@ -569,29 +560,27 @@ export function ChatMain({ sessionId }: ChatMainProps) {
         </ScrollArea>
       </div>
 
-      {/* 3. Input Area (Floating/Glass) */}
-      <div className="border-t border-white/20 p-4 bg-background/70 backdrop-blur-xl shrink-0 z-20 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
+      <div className="border-t border-white/20 dark:border-white/10 p-4 bg-background/70 dark:bg-background/80 backdrop-blur-xl shrink-0 z-20 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.3)]">
         {!canSendMessage ? (
-          <div className="text-center text-sm text-stone-500 py-2 flex items-center justify-center gap-2 bg-stone-100/50 rounded-lg">
-            <span className="w-2 h-2 rounded-full bg-stone-400"></span>
+          <div className="text-center text-sm text-stone-500 dark:text-stone-400 py-2 flex items-center justify-center gap-2 bg-stone-100/50 dark:bg-stone-800/50 rounded-lg">
+            <span className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-500"></span>
             Phiên đã đóng. Không thể gửi tin nhắn.
           </div>
         ) : (
           <div className="space-y-3">
             {translationState.translatedText && (
-              <div className="bg-amber-50/80 backdrop-blur-sm rounded-xl p-3 border border-amber-100 shadow-sm animate-in fade-in slide-in-from-bottom-2">
+              <div className="bg-amber-50/80 dark:bg-amber-950/50 backdrop-blur-sm rounded-xl p-3 border border-amber-100 dark:border-amber-800 shadow-sm animate-in fade-in slide-in-from-bottom-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-amber-800/60 mb-1">
-                      Đang dịch ({translationState.sourceLang?.toUpperCase()}
-                      ):
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-amber-800/60 dark:text-amber-300/60 mb-1">
+                      Đang dịch ({translationState.sourceLang?.toUpperCase()}):
                     </p>
-                    <p className="text-xs text-stone-500 line-clamp-1 italic mb-1">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-1 italic mb-1">
                       "{inputMessage}"
                     </p>
-                    <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
-                      <Globe className="h-3.5 w-3.5 text-emerald-600" />
-                      <p className="text-sm font-medium text-stone-800">
+                    <div className="flex items-center gap-2 bg-background/50 dark:bg-background/30 rounded-lg p-2">
+                      <Globe className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <p className="text-sm font-medium text-stone-800 dark:text-stone-100">
                         {translationState.translatedText}
                       </p>
                     </div>
@@ -599,7 +588,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-6 w-6 p-0 hover:bg-amber-100/50 text-amber-800/60 rounded-full"
+                    className="h-6 w-6 p-0 hover:bg-amber-100/50 dark:hover:bg-amber-900/50 text-amber-800/60 dark:text-amber-300/60 rounded-full"
                     onClick={() =>
                       setTranslationState((prev) => ({
                         ...prev,
@@ -614,7 +603,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
               </div>
             )}
 
-            {/* Input Form */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -631,7 +619,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="rounded-full shrink-0 text-stone-500 hover:text-emerald-700 hover:bg-emerald-50"
+                    className="rounded-full shrink-0 text-stone-500 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
                     disabled={!isConnected}
                     title="Quick Tags"
                   >
@@ -640,19 +628,19 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 </PopoverTrigger>
                 <PopoverContent
                   align="start"
-                  className="w-80 bg-background/95 backdrop-blur-xl border-white/50 shadow-xl"
+                  className="w-80 bg-background/95 dark:bg-background/98 backdrop-blur-xl border-white/50 dark:border-white/10 shadow-xl"
                 >
                   <Tabs defaultValue="menu" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 bg-stone-100/50 p-1">
+                    <TabsList className="grid w-full grid-cols-2 bg-stone-100/50 dark:bg-stone-800/50 p-1">
                       <TabsTrigger
                         value="menu"
-                        className="data-[state=active]:bg-background data-[state=active]:text-emerald-800 data-[state=active]:shadow-sm"
+                        className="data-[state=active]:bg-background data-[state=active]:text-emerald-800 dark:data-[state=active]:text-emerald-300 data-[state=active]:shadow-sm"
                       >
                         Menu
                       </TabsTrigger>
                       <TabsTrigger
                         value="services"
-                        className="data-[state=active]:bg-background data-[state=active]:text-emerald-800 data-[state=active]:shadow-sm"
+                        className="data-[state=active]:bg-background data-[state=active]:text-emerald-800 dark:data-[state=active]:text-emerald-300 data-[state=active]:shadow-sm"
                       >
                         Services
                       </TabsTrigger>
@@ -672,7 +660,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                             ))}
                           </div>
                         ) : (
-                          <div className="text-center py-8 text-sm text-stone-400">
+                          <div className="text-center py-8 text-sm text-stone-400 dark:text-stone-500">
                             Không tìm thấy món ăn
                           </div>
                         )}
@@ -693,7 +681,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                             ))}
                           </div>
                         ) : (
-                          <div className="text-center py-8 text-sm text-stone-400">
+                          <div className="text-center py-8 text-sm text-stone-400 dark:text-stone-500">
                             Không tìm thấy dịch vụ
                           </div>
                         )}
@@ -721,16 +709,15 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                     isConnected ? "Type a message..." : "Connecting..."
                   }
                   disabled={!isConnected}
-                  className="flex-1 rounded-full border-stone-200 bg-stone-50/50 focus-visible:bg-background focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500 transition-all pr-10 pl-4 py-5 shadow-sm"
+                  className="flex-1 rounded-full border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-900/50 focus-visible:bg-background focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500 dark:focus-visible:border-emerald-400 transition-all pr-10 pl-4 py-5 shadow-sm"
                 />
 
-                {/* Translate Trigger Inside Input (Optional UX improvement) */}
                 {inputMessage.trim() && !translationState.isTranslating && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 p-0 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 p-0 text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
                     onClick={handleDetectAndTranslateInput}
                     title="Translate before sending"
                   >
@@ -739,7 +726,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                 )}
                 {translationState.isTranslating && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <Loader2 className="h-4 w-4 animate-spin text-emerald-500" />
+                    <Loader2 className="h-4 w-4 animate-spin text-emerald-500 dark:text-emerald-400" />
                   </div>
                 )}
               </div>
@@ -747,7 +734,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
               <Button
                 type="submit"
                 size="icon"
-                className="rounded-full shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 hover:scale-105 transition-all"
+                className="rounded-full shrink-0 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white shadow-md shadow-emerald-200 dark:shadow-emerald-900/50 hover:scale-105 transition-all"
                 disabled={!inputMessage.trim() || !isConnected}
               >
                 <Send className="h-4 w-4" />
@@ -760,7 +747,6 @@ export function ChatMain({ sessionId }: ChatMainProps) {
   );
 }
 
-// Helper Component for the Popover List Items
 const TagItemButton = ({
   name,
   description,
@@ -774,19 +760,19 @@ const TagItemButton = ({
 }) => (
   <Button
     variant="ghost"
-    className="w-full justify-start text-left h-auto py-2 hover:bg-emerald-50 group rounded-xl"
+    className="w-full justify-start text-left h-auto py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 group rounded-xl"
     onClick={onClick}
   >
     <div className="flex flex-col items-start w-full">
-      <span className="font-medium truncate w-full text-stone-700 group-hover:text-emerald-800 transition-colors">
+      <span className="font-medium truncate w-full text-stone-700 dark:text-stone-200 group-hover:text-emerald-800 dark:group-hover:text-emerald-300 transition-colors">
         {name}
       </span>
       {description && (
-        <span className="text-xs text-stone-400 line-clamp-1">
+        <span className="text-xs text-stone-400 dark:text-stone-500 line-clamp-1">
           {description}
         </span>
       )}
-      <span className="text-xs text-emerald-600 font-mono mt-0.5">
+      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
         {formatMoney(price || 0).vndFormatted}
       </span>
     </div>

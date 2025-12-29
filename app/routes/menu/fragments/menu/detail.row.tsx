@@ -1,13 +1,6 @@
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  CalendarDays,
-  ImageIcon,
-  Layers,
-  LayoutGrid,
-  Package,
-  Tag,
-} from "lucide-react";
+import { CalendarDays, Layers, LayoutGrid, Package, Tag } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import Image from "~/components/ui/image";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -51,7 +44,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">
-            {mainImage ? (
+            {mainImage && (
               <div className="space-y-3">
                 <div className="relative  w-full overflow-hidden rounded-xl border bg-background shadow-sm">
                   <ImageZoom>
@@ -67,24 +60,19 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                     {subImages.map((img, idx) => (
                       <div
                         key={idx}
-                        className="aspect-square rounded-lg overflow-hidden border bg-background cursor-pointer hover:opacity-80 transition-opacity"
+                        className=" rounded-lg overflow-hidden border bg-background cursor-pointer "
                       >
                         <ImageZoom>
                           <Image
                             src={img.url}
                             alt="sub"
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover aspect-square"
                           />
                         </ImageZoom>
                       </div>
                     ))}
                   </div>
                 )}
-              </div>
-            ) : (
-              <div className="aspect-square w-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-slate-100 text-muted-foreground">
-                <ImageIcon className="h-10 w-10 opacity-20" />
-                <span className="text-xs mt-2 font-medium">Không có ảnh</span>
               </div>
             )}
           </div>
@@ -93,39 +81,36 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* SECTION 1: GENERAL INFO */}
             <div className="space-y-6">
-              {/* Header: Name, Price, Status */}
-              <div>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant="outline"
-                        className="rounded-md font-mono text-xs text-muted-foreground px-1.5 py-0 h-5"
-                      >
-                        {detailData.code}
-                      </Badge>
-                      <h3 className="text-xl font-bold text-foreground w-52 lg:w-auto truncate">
-                        {detailData.name}
-                      </h3>
-                    </div>
-                    <div className="grid gap-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <LayoutGrid className="w-3.5 h-3.5" />{" "}
-                        {detailData.categoryName}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-primary font-mono tracking-tight">
-                      {formatMoney(detailData.price).vndFormatted}
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
                     <Badge
-                      variant={detailData.active ? "default" : "secondary"}
-                      className="mt-1"
+                      variant="outline"
+                      className="rounded-md font-mono text-xs text-muted-foreground px-1.5 py-0 h-5"
                     >
-                      {detailData.active ? "Đang bán" : "Ngừng bán"}
+                      {detailData.code}
                     </Badge>
+                    <h3 className="text-xl font-bold text-foreground  truncate">
+                      {detailData.name}
+                    </h3>
                   </div>
+                  <div className="grid gap-2 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <LayoutGrid className="w-3.5 h-3.5" />{" "}
+                      {detailData.categoryName}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-primary font-mono tracking-tight">
+                    {formatMoney(detailData.price).vndFormatted}
+                  </div>
+                  <Badge
+                    variant={detailData.active ? "default" : "secondary"}
+                    className="mt-1"
+                  >
+                    {detailData.active ? "Đang bán" : "Ngừng bán"}
+                  </Badge>
                 </div>
               </div>
 

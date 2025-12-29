@@ -36,22 +36,26 @@ const METHOD_CONFIG: Record<
   cash: {
     label: "Tiền mặt",
     icon: Banknote,
-    color: "text-emerald-600 bg-emerald-100/50",
+    color:
+      "text-emerald-600 bg-emerald-100/50 dark:text-emerald-400 dark:bg-emerald-900/30",
   },
   card: {
     label: "Thẻ",
     icon: CreditCard,
-    color: "text-purple-600 bg-purple-100/50",
+    color:
+      "text-purple-600 bg-purple-100/50 dark:text-purple-400 dark:bg-purple-900/30",
   },
   transfer: {
     label: "Chuyển khoản",
     icon: Globe,
-    color: "text-blue-600 bg-blue-100/50",
+    color:
+      "text-blue-600 bg-blue-100/50 dark:text-blue-400 dark:bg-blue-900/30",
   },
   default: {
     label: "Khác",
     icon: Wallet,
-    color: "text-gray-600 bg-gray-100/50",
+    color:
+      "text-gray-600 bg-gray-100/50 dark:text-gray-400 dark:bg-gray-800/30",
   },
 };
 
@@ -62,11 +66,23 @@ const STATUS_CONFIG: Record<
   completed: {
     label: "Thành công",
     icon: CheckCircle2,
-    color: "text-emerald-600",
+    color: "text-emerald-600 dark:text-emerald-400",
   },
-  pending: { label: "Đang xử lý", icon: Loader2, color: "text-amber-600" },
-  failed: { label: "Thất bại", icon: XCircle, color: "text-red-600" },
-  cancelled: { label: "Đã hủy", icon: FileX, color: "text-muted-foreground" },
+  pending: {
+    label: "Đang xử lý",
+    icon: Loader2,
+    color: "text-amber-600 dark:text-amber-400",
+  },
+  failed: {
+    label: "Thất bại",
+    icon: XCircle,
+    color: "text-red-600 dark:text-red-400",
+  },
+  cancelled: {
+    label: "Đã hủy",
+    icon: FileX,
+    color: "text-muted-foreground",
+  },
 };
 
 export default function PaymentsHistoryDialog({
@@ -87,7 +103,7 @@ export default function PaymentsHistoryDialog({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md p-0 overflow-y-auto flex flex-col max-h-[85vh]">
-        <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+        <DialogHeader className="px-6 py-4 border-b bg-muted/10 dark:bg-muted/5">
           <DialogTitle>Lịch sử thanh toán</DialogTitle>
           <DialogDescription>
             Chi tiết các giao dịch liên quan đến hóa đơn này.
@@ -129,7 +145,7 @@ export default function PaymentsHistoryDialog({
                 return (
                   <div
                     key={payment.paymentId}
-                    className="group flex flex-col gap-3 p-3 rounded-lg border border-border/40 hover:border-border hover:bg-muted/30 transition-all"
+                    className="group flex flex-col gap-3 p-3 rounded-lg border border-border/40 hover:border-border hover:bg-muted/30 dark:hover:bg-muted/20 transition-all"
                   >
                     {/* Top Row: Icon, Method Name, Amount */}
                     <div className="flex items-center justify-between">
@@ -138,7 +154,7 @@ export default function PaymentsHistoryDialog({
                           <MethodIcon className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold">
+                          <p className="text-sm font-semibold text-foreground">
                             {methodCfg.label}
                           </p>
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
@@ -179,14 +195,14 @@ export default function PaymentsHistoryDialog({
 
                     {/* Bottom Row: Note (if any) */}
                     {payment.note && (
-                      <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border border-border/50 italic">
+                      <div className="text-xs text-muted-foreground bg-muted/50 dark:bg-muted/30 p-2 rounded border border-border/50 dark:border-border/30 italic">
                         "{payment.note}"
                       </div>
                     )}
 
                     {/* Footer: ID */}
                     <div className="flex justify-between items-center pt-1">
-                      <span className="text-[10px] text-muted-foreground/50 font-mono">
+                      <span className="text-[10px] text-muted-foreground/50 dark:text-muted-foreground/40 font-mono">
                         ID: {payment.paymentId}
                       </span>
                     </div>

@@ -85,8 +85,9 @@ export default function ChatInbox({}: Route.ComponentProps) {
       try {
         const url = new URL(scannedText);
         token = url.searchParams.get("roomToken") || scannedText;
-      } catch {
+      } catch (error) {
         /* Not a URL, use raw text */
+        console.log(error);
       }
 
       if (!token) throw new Error("Invalid Token");

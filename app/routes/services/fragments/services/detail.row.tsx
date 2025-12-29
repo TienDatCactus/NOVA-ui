@@ -3,7 +3,6 @@ import {
   Barcode,
   CheckCircle2,
   Coins,
-  ImageIcon,
   Layers,
   Package,
   Tag,
@@ -52,7 +51,7 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* === LEFT: VISUAL GALLERY === */}
         <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">
-          {mainImage ? (
+          {mainImage && (
             <div className="space-y-3">
               <div className="relative w-full overflow-hidden rounded-lg border bg-background shadow-sm">
                 <ImageZoom>
@@ -69,24 +68,19 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
                   {subImages.map((img, idx) => (
                     <div
                       key={idx}
-                      className="aspect-square rounded-md overflow-hidden border bg-background cursor-pointer hover:ring-2 ring-primary/20 transition-all"
+                      className=" rounded-md overflow-hidden border bg-background cursor-pointer "
                     >
                       <ImageZoom>
                         <Image
                           src={img}
                           alt="sub"
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover aspect-square"
                         />
                       </ImageZoom>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-          ) : (
-            <div className="aspect-square w-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/30 text-muted-foreground">
-              <ImageIcon className="h-10 w-10 opacity-20" />
-              <span className="text-xs mt-2 font-medium">Không có ảnh</span>
             </div>
           )}
         </div>

@@ -44,26 +44,23 @@ export function ChatSidebar({
 
   // Shared container style for the sidebar (Glass pane)
   const containerClasses =
-    "flex w-80 flex-col border-r border-white/40 bg-background/60 backdrop-blur-xl h-full shadow-[5px_0_15px_-5px_rgba(0,0,0,0.03)]";
+    "flex w-80 flex-col border-r border-border bg-background/60 backdrop-blur-xl h-full shadow-[5px_0_15px_-5px_rgba(0,0,0,0.03)] dark:shadow-[5px_0_15px_-5px_rgba(0,0,0,0.2)]";
 
   if (isLoading) {
     return (
       <div className={cn(containerClasses, "p-4")}>
         <div className="mb-6 space-y-1">
-          <h1 className="text-2xl font-bold text-accent-foreground tracking-tight ">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
             Hộp thư đến
           </h1>
-          <p className="text-sm text-stone-500">Đang tải danh sách...</p>
+          <p className="text-sm text-muted-foreground">Đang tải danh sách...</p>
         </div>
 
         <div className="space-y-3">
           {Array(5)
             .fill(0)
             .map((_, i) => (
-              <Skeleton
-                key={i}
-                className="h-20 w-full rounded-xl bg-stone-200/50"
-              />
+              <Skeleton key={i} className="h-20 w-full rounded-xl" />
             ))}
         </div>
       </div>
@@ -75,9 +72,7 @@ export function ChatSidebar({
       <div className={cn(containerClasses, "p-4")}>
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-accent-foreground ">
-              Hộp thư đến
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground">Hộp thư đến</h1>
             <p className="text-sm text-muted-foreground">Danh sách tin nhắn</p>
           </div>
           <Button
@@ -85,7 +80,7 @@ export function ChatSidebar({
             variant="ghost"
             onClick={() => refetch()}
             disabled={isRefetching}
-            className="text-stone-400 hover:text-emerald-700 hover:bg-emerald-50/50 rounded-full"
+            className="text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full"
           >
             <RotateCw
               className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
@@ -115,8 +110,8 @@ export function ChatSidebar({
       <div className="grid gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-stone-800 ">Hộp thư đến</h1>
-            <div className="flex items-center gap-1 text-xs font-medium text-emerald-700/80 bg-emerald-50/50 px-2 py-0.5 rounded-full w-fit mt-1">
+            <h1 className="text-2xl font-bold text-foreground">Hộp thư đến</h1>
+            <div className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full w-fit mt-1">
               <Leaf className="w-3 h-3" />
               {sessions.length} cuộc hội thoại
             </div>
@@ -127,7 +122,7 @@ export function ChatSidebar({
             onClick={() => refetch()}
             disabled={isRefetching}
             title="Làm mới"
-            className="text-stone-400 hover:text-emerald-700 hover:bg-emerald-50/50 rounded-full transition-all hover:rotate-180 duration-500"
+            className="text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full transition-all hover:rotate-180 duration-500"
           >
             <RotateCw
               className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
@@ -136,12 +131,12 @@ export function ChatSidebar({
         </div>
 
         <div className="relative group">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-emerald-600 transition-colors">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
             <Search className="h-4 w-4" />
           </div>
           <Input
             placeholder="Tìm theo tên, phòng..."
-            className="w-full rounded-full bg-background/50 border-white/60 pl-9 pr-8 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-300 placeholder:text-stone-400 text-stone-700 shadow-sm"
+            className="w-full rounded-full bg-background/50 border-border pl-9 pr-8 focus-visible:ring-primary/20 focus-visible:border-primary placeholder:text-muted-foreground text-foreground shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -149,7 +144,7 @@ export function ChatSidebar({
             <Button
               size="icon"
               variant="ghost"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full hover:bg-stone-200/50 text-stone-400 hover:text-stone-600"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
               onClick={() => setSearchTerm("")}
             >
               <X className="h-3 w-3" />
@@ -158,14 +153,14 @@ export function ChatSidebar({
         </div>
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto pr-1 -mr-2 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent">
+      <div className="flex-1 space-y-2 overflow-y-auto pr-1 -mr-2 ">
         {filteredSessions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center p-6 text-stone-500">
-            <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mb-3">
+          <div className="flex flex-col items-center justify-center text-center p-6 text-muted-foreground">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
               <Search className="h-5 w-5 opacity-40" />
             </div>
             <p className="text-sm font-medium">Không tìm thấy kết quả</p>
-            <p className="text-xs text-stone-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Thử tìm kiếm với từ khóa khác
             </p>
           </div>
