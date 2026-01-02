@@ -23,6 +23,7 @@ const StaffListSchema = z.array(StaffListItemSchema);
 // Staff Detail Schema (from GET /api/Staffs/{id} - full details)
 const StaffDetailSchema = z.object({
   id: z.uuid(),
+  baseSalary: z.number(),
   code: z.string(),
   fullName: z.string(),
   phoneNumber: z.string().optional().nullable(),
@@ -40,18 +41,13 @@ const StaffDetailSchema = z.object({
 
 // Create Staff Schema (for API requests)
 const CreateStaffSchema = z.object({
-  code: z.string().min(1, "Mã nhân sự là bắt buộc"),
-
   fullName: z.string().min(1, "Họ tên là bắt buộc"),
-
+  baseSalary: z.number().min(0, "Lương cơ bản phải lớn hơn hoặc bằng 0"),
   phoneNumber: z
     .string()
     .regex(/^\d{9,11}$/, "Số điện thoại phải gồm 9 đến 11 chữ số"),
-
   email: z.email("Email không hợp lệ").optional(),
-
   gender: z.string().optional(),
-
   dateOfBirth: z
     .date()
     .refine((date) => date <= new Date(), "Ngày sinh không được ở tương lai")
@@ -78,33 +74,7 @@ const CreateStaffSchema = z.object({
 });
 
 // Update Staff Schema (for API requests)
-const UpdateStaffSchema = z.object({
-  fullName: z.string().min(1, "Họ tên là bắt buộc"),
-
-  phoneNumber: z
-    .string()
-    .regex(/^\d{9,11}$/, "Số điện thoại phải gồm 9 đến 11 chữ số"),
-
-  email: z.email("Email không hợp lệ").optional(),
-
-  gender: z.string().optional(),
-
-  dateOfBirth: z
-    .date()
-    .refine((date) => date <= new Date(), "Ngày sinh không được ở tương lai")
-    .optional(),
-
-  citizenId: z
-    .string()
-    .regex(/^(\d{9}|\d{12})$/, "CCCD phải gồm 9 hoặc 12 chữ số")
-    .optional(),
-
-  startDate: z.date("Ngày bắt đầu không hợp lệ").optional(),
-
-  note: z.string().optional(),
-
-  staffRoleId: z.string().min(1, "Chức vụ là bắt buộc"),
-});
+const UpdateStaffSchema = CreateStaffSchema;
 
 const TerminateStaffSchema = z.object({
   terminationDate: z.string(),

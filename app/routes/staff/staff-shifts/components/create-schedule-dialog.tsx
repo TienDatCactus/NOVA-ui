@@ -502,6 +502,7 @@ export default function CreateScheduleDialog({
                                   >
                                     <FormControl>
                                       <Checkbox
+                                        id={shift.id}
                                         checked={isChecked}
                                         onCheckedChange={(checked) => {
                                           const updated = checked
@@ -513,7 +514,10 @@ export default function CreateScheduleDialog({
                                         }}
                                       />
                                     </FormControl>
-                                    <FormLabel className="grid gap-0.5">
+                                    <FormLabel
+                                      className="grid gap-0.5"
+                                      htmlFor={shift.id}
+                                    >
                                       <span className="text-sm font-medium leading-none">
                                         {shift.name}
                                       </span>

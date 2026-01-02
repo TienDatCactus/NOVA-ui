@@ -131,6 +131,7 @@ export default function EditStaffDialog({
     resolver: zodResolver(StaffSchema.UpdateStaffSchema),
     defaultValues: {
       fullName: "",
+      baseSalary: 0,
       phoneNumber: "",
       email: "",
       gender: "",
@@ -148,6 +149,7 @@ export default function EditStaffDialog({
       form.reset({
         fullName: staffDetail.fullName || "",
         phoneNumber: staffDetail.phoneNumber || "",
+        baseSalary: staffDetail.baseSalary || 0,
         email: staffDetail.email || "",
         gender: staffDetail.gender || "",
         citizenId: staffDetail.citizenId || "",
@@ -237,7 +239,24 @@ export default function EditStaffDialog({
                             <Input {...field} className="h-9 font-medium" />
                           )}
                         </FormRow>
-
+                        <FormRow
+                          control={form.control}
+                          name="baseSalary"
+                          label="Lương cơ bản"
+                          required
+                        >
+                          {(field) => (
+                            <Input
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(e.currentTarget.valueAsNumber)
+                              }
+                              defaultValue={0}
+                              type="number"
+                              className="h-9 font-mono"
+                            />
+                          )}
+                        </FormRow>
                         <FormRow
                           control={form.control}
                           name="citizenId"

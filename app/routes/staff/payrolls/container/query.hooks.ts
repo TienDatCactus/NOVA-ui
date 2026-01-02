@@ -199,50 +199,6 @@ export function useApplyUnusedLeave() {
 }
 
 /**
- * Hook khóa bảng lương
- */
-export function useLockPayroll() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: string) => await StaffPayrollService.lockPayroll(id),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: ["payrolls"] });
-      queryClient.invalidateQueries({ queryKey: ["payroll-detail", id] });
-
-      toast.success("Khóa bảng lương thành công");
-    },
-    onError: (error) => {
-      if (error instanceof AxiosError)
-        toast.error(error.response?.data?.message || "Lỗi khi khóa bảng lương");
-    },
-  });
-}
-
-/**
- * Hook mở khóa bảng lương
- */
-export function useUnlockPayroll() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: string) =>
-      await StaffPayrollService.unlockPayroll(id),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: ["payrolls"] });
-      queryClient.invalidateQueries({ queryKey: ["payroll-detail", id] });
-      toast.success("Mở khóa bảng lương thành công");
-    },
-    onError: (error) => {
-      if (error instanceof AxiosError)
-        toast.error(
-          error.response?.data?.message || "Lỗi khi mở khóa bảng lương"
-        );
-    },
-  });
-}
-
-/**
  * Hook thêm component vào bảng lương (phụ cấp/khấu trừ)
  */
 export function useAddPayrollComponent() {

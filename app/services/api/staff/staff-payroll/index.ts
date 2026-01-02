@@ -139,36 +139,6 @@ async function applyUnusedLeave(
 }
 
 /**
- * Lock payroll (change status to locked)
- */
-async function lockPayroll(
-  id: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const resp = await http.post(StaffPayroll.lock(id));
-    return resp.data;
-  } catch (error) {
-    console.log(error);
-    return Promise.reject(error);
-  }
-}
-
-/**
- * Unlock payroll (change status to unlocked)
- */
-async function unlockPayroll(
-  id: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const resp = await http.post(StaffPayroll.unlock(id));
-    return resp.data;
-  } catch (error) {
-    console.log(error);
-    return Promise.reject(error);
-  }
-}
-
-/**
  * Get components list for a payroll
  */
 async function getComponents(id: string): Promise<PayrollComponentListDto> {
@@ -332,8 +302,6 @@ export const StaffPayrollService = {
   updatePaidAmountPayroll,
   updateBaseSalaryPayroll,
   applyUnusedLeave,
-  lockPayroll,
-  unlockPayroll,
   getComponents,
   addComponent,
   updateComponent,

@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import {
   AlertCircle,
-  ArrowRight,
   CalendarIcon,
   Loader2,
   Repeat,
@@ -397,10 +396,10 @@ export default function UpdateScheduleDialog({
                           <RadioGroupItem value="ThisOnly" id="scope-this" />
                           <div className="grid gap-0.5">
                             <span className="text-sm font-medium">
-                              Chỉ hôm nay
+                              Chỉ ngày này
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              Chỉ sửa ngày {formattedDate}
+                              Chỉ thay đổi ngày {formattedDate}
                             </span>
                           </div>
                         </label>
@@ -416,10 +415,12 @@ export default function UpdateScheduleDialog({
                           <RadioGroupItem value="Forward" id="scope-forward" />
                           <div className="grid gap-0.5">
                             <span className="text-sm font-medium flex items-center gap-2">
-                              <ArrowRight className="w-3.5 h-3.5" /> Từ hôm nay
+                              <CalendarIcon className="w-3.5 h-3.5" /> Cả tháng
+                              này
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              Cập nhật từ {formattedDate} trở đi
+                              Áp dụng cho tất cả ngày trong tháng{" "}
+                              {format(workDate, "MM/yyyy")}
                             </span>
                           </div>
                         </label>
@@ -435,10 +436,12 @@ export default function UpdateScheduleDialog({
                           <RadioGroupItem value="All" id="scope-all" />
                           <div className="grid gap-0.5">
                             <span className="text-sm font-medium flex items-center gap-2">
-                              <Repeat className="w-3.5 h-3.5" /> Toàn bộ chuỗi
+                              <Repeat className="w-3.5 h-3.5" /> Tất cả ca tương
+                              lai
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              Áp dụng cho cả quá khứ và tương lai
+                              Áp dụng cho tất cả ca đã được phân công trong
+                              tương lai
                             </span>
                           </div>
                         </label>

@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns";
-import { Calendar, Clock, User, UserX } from "lucide-react";
+import { Calendar, Clock, User } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";

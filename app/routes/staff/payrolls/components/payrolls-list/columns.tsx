@@ -9,7 +9,6 @@ import { UserRole } from "~/lib/auth/roles";
 import { cn, formatMoney } from "~/lib/utils";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ActionsMenuCell from "../../fragments/actions.cell";
-import StatusSelectCell from "../../fragments/status-select.cell";
 import PayrollDetailDialog from "../payroll-detail-dialog";
 
 export const columns: ColumnDef<PayrollItemDto>[] = [
@@ -284,28 +283,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
     },
     size: 60,
   },
-  {
-    accessorKey: "locked",
-    header: () => null,
-    cell: ({ row, table }) => {
-      if (!hasAnyRole(AuthLoader.getUser(), [UserRole.Accountant])) {
-        return null;
-      }
-      const locked = row.getValue("locked") as boolean;
-      const payroll = row.original;
-      const onSuccess = (table.options.meta as any)?.onSuccess;
 
-      return (
-        <StatusSelectCell
-          payrollId={payroll.payrollId}
-          locked={locked}
-          onSuccess={onSuccess}
-        />
-      );
-    },
-    enableHiding: false,
-    size: 140,
-  },
   {
     id: "actions",
     cell: ({ row, table }) => {

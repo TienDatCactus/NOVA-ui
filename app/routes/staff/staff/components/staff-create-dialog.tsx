@@ -116,8 +116,8 @@ export default function CreateStaffDialog({
     resolver: zodResolver(StaffSchema.CreateStaffSchema),
     mode: "onChange",
     defaultValues: {
-      code: "",
       fullName: "",
+      baseSalary: 0,
       phoneNumber: "",
       email: "",
       gender: "",
@@ -188,15 +188,19 @@ export default function CreateStaffDialog({
 
                       <FormRow
                         control={form.control}
-                        name="code"
-                        label="Mã nhân viên"
+                        name="baseSalary"
+                        label="Lương cơ bản"
                         required
                       >
                         {(field) => (
                           <Input
                             {...field}
-                            placeholder="NV001"
-                            className="h-9 font-mono uppercase"
+                            onChange={(e) =>
+                              field.onChange(e.currentTarget.valueAsNumber)
+                            }
+                            defaultValue={0}
+                            type="number"
+                            className="h-9 font-mono"
                           />
                         )}
                       </FormRow>
@@ -397,7 +401,7 @@ export default function CreateStaffDialog({
                           {(field) => (
                             <Input
                               {...field}
-                              type="tel"
+                              type="number"
                               placeholder="09xx..."
                               className="h-9 border-0 focus-visible:ring-0"
                               onChange={(e) => field.onChange(e.target.value)} // Keep as string for phone

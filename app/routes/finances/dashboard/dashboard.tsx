@@ -78,10 +78,9 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
             <AlertDescription className="flex items-center gap-2 mt-1">
               Không thể tải báo cáo tài chính.
               <Button
-                variant="outline"
+                variant="destructive-outline"
                 size="sm"
                 onClick={handleRefresh}
-                className="h-7 border-destructive/30 hover:bg-destructive/10"
               >
                 Thử lại
               </Button>
