@@ -118,13 +118,13 @@ export default function CreateStaffDialog({
     defaultValues: {
       fullName: "",
       baseSalary: 0,
-      phoneNumber: "",
-      email: "",
+      phoneNumber: undefined,
+      email: undefined,
       gender: "",
       dateOfBirth: undefined,
-      citizenId: "",
+      citizenId: undefined,
       startDate: undefined,
-      note: "",
+      note: undefined,
       staffRoleId: "",
     },
   });
@@ -404,7 +404,6 @@ export default function CreateStaffDialog({
                               type="number"
                               placeholder="09xx..."
                               className="h-9 border-0 focus-visible:ring-0"
-                              onChange={(e) => field.onChange(e.target.value)} // Keep as string for phone
                             />
                           )}
                         </FormRow>

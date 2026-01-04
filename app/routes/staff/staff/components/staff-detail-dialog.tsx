@@ -9,6 +9,7 @@ import {
 } from "~/components/ui/dialog";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useStaffDetail } from "../container/query.hooks";
+import { formatMoney } from "~/lib/utils";
 
 interface StaffDetailDialogProps {
   open: boolean;
@@ -41,9 +42,9 @@ export default function StaffDetailDialog({
             <Skeleton className="h-4 w-1/2" />
           </div>
         ) : staff ? (
-          <div className="space-y-6">
+          <div className="space-y-6 ">
             {/* Header Info */}
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between bg-muted p-4 rounded-md shadow-sm">
               <div>
                 <h3 className="text-2xl font-bold">{staff.fullName}</h3>
                 <p className="text-sm text-muted-foreground font-mono">
@@ -56,7 +57,7 @@ export default function StaffDetailDialog({
             </div>
 
             {/* Details Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid  grid-cols-1 md:grid-cols-2 gap-4">
               <DetailItem
                 label="Số điện thoại"
                 value={staff.phoneNumber || "-"}
@@ -81,11 +82,18 @@ export default function StaffDetailDialog({
                   )
                 }
               />
+
               <DetailItem
                 label="Ngày bắt đầu làm việc"
                 value={
-                  staff.startDate
-                    ? format(parseISO(staff.startDate), "dd/MM/yyyy")
+                  staff.startDate ? format(staff.startDate, "dd/MM/yyyy") : "-"
+                }
+              />
+              <DetailItem
+                label="Lương cơ bản"
+                value={
+                  staff.baseSalary !== undefined
+                    ? formatMoney(staff.baseSalary).vndFormatted
                     : "-"
                 }
               />

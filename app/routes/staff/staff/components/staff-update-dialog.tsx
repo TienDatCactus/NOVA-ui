@@ -448,7 +448,8 @@ export default function EditStaffDialog({
                             {(field) => (
                               <Input
                                 {...field}
-                                type="tel"
+                                type="number"
+                                placeholder="09xx..."
                                 className="h-9 border-0 focus-visible:ring-0"
                               />
                             )}
