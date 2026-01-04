@@ -60,17 +60,6 @@ export const BookingMasterSchema = z
       message: "Ngày trả phòng phải sau ngày nhận phòng",
       path: ["checkoutDate"],
     }
-  )
-  .refine(
-    (data) => {
-      // Validate: Must select at least 1 room (except for RoomBlock which can have no specific rooms)
-      if (data.bookingType === "RoomBlock") return true;
-      return data.roomIds && data.roomIds.length > 0;
-    },
-    {
-      message: "Phải chọn ít nhất 1 phòng",
-      path: ["roomIds"],
-    }
   );
 
 //*------------------------------------------------------------
@@ -119,6 +108,7 @@ export default function CreateBookingPage() {
       roomPayment: storeData.roomPayment,
       otaInformationId: storeData.otaInformationId,
       otaBookingCode: storeData.otaBookingCode,
+      roomTypeRequests: storeData.roomTypeRequests || [],
       serviceOrder: {
         services: storeData.serviceOrder?.services?.map((s) => ({
           ...s,

@@ -167,7 +167,7 @@ export default function ServiceBreakfastManagerDialog({
                       htmlFor="breakfast"
                       className="text-base font-medium cursor-pointer"
                     >
-                      Lịch trình Bữa sáng
+                      Bữa sáng
                     </Label>
                     <p className="text-sm text-muted-foreground leading-snug">
                       Bao gồm suất ăn sáng cho tất cả các ngày trong kỳ nghỉ.
@@ -223,8 +223,8 @@ export default function ServiceBreakfastManagerDialog({
                       />
                     </div>
                   ) : (
-                    <Empty>
-                      <EmptyHeader className="border-2 border-dashed border-muted-foreground/20 rounded-xl py-10">
+                    <Empty className="border-2 border-dashed border-muted-foreground/20 rounded-xl py-10">
+                      <EmptyHeader>
                         <EmptyMedia
                           variant="icon"
                           className="bg-muted/50 p-3 rounded-full mb-2"
@@ -239,16 +239,6 @@ export default function ServiceBreakfastManagerDialog({
                             ? "Nhấn 'Thêm dịch vụ' để thiết lập tiện ích cho khách hàng."
                             : "Vui lòng chọn ngày nhận/trả phòng trước khi thêm dịch vụ."}
                         </EmptyDescription>
-                        {hasDates && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setAddServiceDialogOpen(true)}
-                            className="mt-4 text-primary hover:bg-primary/10 hover:text-primary"
-                          >
-                            Thêm ngay
-                          </Button>
-                        )}
                       </EmptyHeader>
                     </Empty>
                   )}

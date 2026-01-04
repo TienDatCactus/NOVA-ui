@@ -1,14 +1,16 @@
-import { Check, ChevronDown, DoorOpen, Users } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, DoorOpen, Hash, Minus, Plus, Users } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type z from "zod";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
+import { Label } from "~/components/ui/label";
 import { cn, formatMoney } from "~/lib/utils";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
 
@@ -17,48 +19,72 @@ type AvailableRoomItem = z.infer<typeof AvailableRoomItemSchema>;
 
 interface AvailableRoomRowProps {
   roomType: AvailableRoomItem;
-  selectedRoomIds: string[];
-  onToggleRoom: (roomId: string) => void;
   nights: number;
+
+  // Data props
+  selectedRoomIds: string[];
+  currentQuantity: number;
+
+  // Handlers
+  onToggleRoom: (roomId: string) => void;
+  onQuantityChange: (quantity: number) => void;
 }
 
 export function AvailableRoomRow({
   roomType,
-  selectedRoomIds,
-  onToggleRoom,
   nights,
+  selectedRoomIds,
+  currentQuantity,
+  onToggleRoom,
+  onQuantityChange,
 }: AvailableRoomRowProps) {
-  const selectedInThisType = roomType.availableRooms.filter((r) =>
-    selectedRoomIds.includes(r.roomId)
+  const hasSelection = useMemo(
+    () => currentQuantity > 0 || selectedRoomIds.length > 0,
+    [currentQuantity, selectedRoomIds.length]
   );
-
-  const selectedCount = selectedInThisType.length;
-  const hasSelection = selectedCount > 0;
 
   const [isExpanded, setIsExpanded] = useState(hasSelection);
 
-  // Derived Data
-  const totalPrice = roomType.baseRatePerNight * nights;
-  const hasAvailableRooms = roomType.availableCount > 0;
+  const totalPrice = useMemo(
+    () => roomType.baseRatePerNight * nights,
+    [roomType.baseRatePerNight, nights]
+  );
+  const hasAvailableRooms = useMemo(
+    () => roomType.availableCount > 0,
+    [roomType.availableCount]
+  );
 
-  const statusColor = hasSelection
-    ? "bg-primary" // Active/Selected
-    : hasAvailableRooms
-      ? "bg-emerald-500/70" // Available
-      : "bg-muted-foreground/20"; // Full/Unavailable
+  // Status visual
+  const statusColor = useMemo(
+    () =>
+      hasSelection
+        ? "bg-primary"
+        : hasAvailableRooms
+          ? "bg-emerald-500/70"
+          : "bg-muted-foreground/20",
+    [hasSelection, hasAvailableRooms]
+  );
+
+  const handleIncrement = useCallback(() => {
+    if (currentQuantity < roomType.availableCount) {
+      onQuantityChange(currentQuantity + 1);
+    }
+  }, [currentQuantity, roomType.availableCount, onQuantityChange]);
+
+  const handleDecrement = useCallback(() => {
+    if (currentQuantity > 0) {
+      onQuantityChange(currentQuantity - 1);
+    }
+  }, [currentQuantity, onQuantityChange]);
 
   return (
-    <div
-      className={cn(
-        "group border-b last:border-0 transition-all duration-200",
-        isExpanded ? "bg-muted/30" : "bg-transparent hover:bg-muted/20"
-      )}
-    >
+    <div>
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        {/* === HEADER ROW === */}
         <CollapsibleTrigger asChild>
-          <div className="relative flex cursor-pointer flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between select-none">
-            <div className="flex items-start gap-4 min-w-0">
-              {/* Status Bar: A clean vertical visual anchor */}
+          <div className="relative flex cursor-pointer flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between ">
+            <div className="flex items-start gap-4 min-w-0 flex-1">
+              {/* Status Bar */}
               <div
                 className={cn(
                   "w-1 self-stretch rounded-full shrink-0 transition-colors duration-300",
@@ -71,34 +97,37 @@ export function AvailableRoomRow({
                 <div className="flex items-center gap-2.5">
                   <h3
                     className={cn(
-                      "text-sm font-semibold truncate transition-colors",
+                      "text-sm font-bold truncate",
                       !hasAvailableRooms && "text-muted-foreground"
                     )}
                   >
                     {roomType.roomTypeName}
                   </h3>
-                  {selectedCount > 0 && (
+                  {currentQuantity > 0 && (
                     <Badge
                       variant="default"
-                      className="h-5 px-1.5 text-[10px] font-bold animate-in zoom-in spin-in-12"
+                      className="h-5 px-1.5 text-[10px] font-bold animate-in zoom-in"
                     >
-                      {selectedCount}
+                      {currentQuantity}
                     </Badge>
                   )}
                 </div>
 
                 {/* Meta Details */}
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5 bg-muted/50 px-1.5 py-0.5 rounded-md">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-sm px-1.5 py-0 h-5 font-normal gap-1"
+                  >
                     <Users className="h-3 w-3 opacity-70" />
-                    <span className="font-medium">{roomType.maxOccupancy}</span>
-                  </span>
-                  <span className="text-muted-foreground/30">•</span>
+                    <span>{roomType.maxOccupancy}</span>
+                  </Badge>
+                  <span className="text-muted-foreground/20">|</span>
                   <span
                     className={cn(
                       "font-medium",
                       hasAvailableRooms
-                        ? "text-emerald-600 dark:text-emerald-500"
+                        ? "text-emerald-600"
                         : "text-destructive"
                     )}
                   >
@@ -111,9 +140,9 @@ export function AvailableRoomRow({
             </div>
 
             {/* Right: Price & Chevron */}
-            <div className="flex items-center justify-between sm:justify-end gap-5 ml-5 sm:ml-0">
+            <div className="flex items-center justify-between sm:justify-end gap-6 pl-5 sm:pl-0">
               <div className="text-right">
-                <p className="text-sm font-bold text-foreground tabular-nums tracking-tight">
+                <p className="text-sm font-bold text-foreground tabular-nums">
                   {formatMoney(totalPrice).vndFormatted}
                 </p>
                 {nights > 1 && (
@@ -122,13 +151,12 @@ export function AvailableRoomRow({
                   </p>
                 )}
               </div>
-
               <div
                 className={cn(
                   "h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200",
                   isExpanded
-                    ? "bg-background shadow-sm text-foreground"
-                    : "text-muted-foreground/50 bg-transparent group-hover:bg-muted"
+                    ? "bg-background shadow-sm text-foreground ring-1 ring-border"
+                    : "text-muted-foreground/50"
                 )}
               >
                 <ChevronDown
@@ -142,49 +170,85 @@ export function AvailableRoomRow({
           </div>
         </CollapsibleTrigger>
 
-        {/* === CONTENT: ROOM CHIPS === */}
-        <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-          <div className="px-4 pb-4 pt-0 pl-9 sm:pl-9">
-            {/* Grid Layout for better alignment on wider screens */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-              {roomType.availableRooms.length > 0 ? (
-                roomType.availableRooms.map((room) => {
-                  const isSelected = selectedRoomIds.includes(room.roomId);
-                  return (
-                    <Button
-                      key={room.roomId}
-                      type="button"
-                      onClick={() => onToggleRoom(room.roomId)}
-                      className={cn(
-                        "group/chip relative flex items-center justify-between px-3 py-2 rounded-lg border text-xs font-medium transition-all duration-200",
+        {/* === EXPANDED CONTENT: 2 COLS === */}
+        <CollapsibleContent>
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_250px] divide-y md:divide-y-0 md:divide-x border-t bg-background/50">
+            <div className="p-4 pl-9 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <DoorOpen className="h-3.5 w-3.5" />
+                <span>Chọn phòng cụ thể</span>
+              </div>
 
-                        isSelected
-                          ? "bg-primary border-primary text-primary-foreground shadow-md ring-1 ring-primary"
-                          : "bg-background border-border/60 text-foreground hover:border-primary/50 hover:bg-secondary/50 hover:shadow-sm"
-                      )}
-                    >
-                      {!isSelected && (
-                        <DoorOpen
-                          className={cn(
-                            "h-3.5 w-3.5 shrink-0 transition-colors"
-                          )}
+              <ul className="grid ">
+                {roomType.availableRooms.length > 0 ? (
+                  roomType.availableRooms.map((room) => {
+                    const isSelected = selectedRoomIds.includes(room.roomId);
+                    return (
+                      <li key={room.roomId} className="flex items-center gap-2">
+                        <Checkbox
+                          id={room.roomId}
+                          checked={isSelected}
+                          onCheckedChange={() => onToggleRoom(room.roomId)}
                         />
-                      )}
-                      <span className="truncate">{room.roomName}</span>
-
-                      {isSelected && (
-                        <Check className="h-3.5 w-3.5 shrink-0 animate-in zoom-in duration-300" />
-                      )}
-                    </Button>
-                  );
-                })
-              ) : (
-                <div className="col-span-full py-2">
-                  <p className="text-xs text-muted-foreground italic opacity-70">
-                    Không có phòng trống trong khoảng ngày đã chọn.
+                        <Label htmlFor={room.roomId} className="cursor-pointer">
+                          {room.roomName}
+                        </Label>
+                      </li>
+                    );
+                  })
+                ) : (
+                  <p className="col-span-full text-xs text-muted-foreground italic py-2">
+                    Không có phòng trống.
                   </p>
+                )}
+              </ul>
+            </div>
+
+            {/* COL 2: Quantity Adjustment */}
+            <div className="p-4 bg-muted/10 flex flex-col justify-center space-y-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <Hash className="h-3.5 w-3.5" />
+                <span>Số lượng</span>
+              </div>
+
+              <div className="flex items-center justify-between bg-background border rounded-lg p-1 shadow-sm">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                  onClick={handleDecrement}
+                  disabled={currentQuantity <= 0}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+
+                <div className="flex-1 text-center">
+                  <span className="text-lg font-bold tabular-nums">
+                    {currentQuantity}
+                  </span>
                 </div>
-              )}
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                  onClick={handleIncrement}
+                  disabled={currentQuantity >= roomType.availableCount}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <p className="text-[10px] text-muted-foreground">
+                  Tổng tiền tạm tính:
+                </p>
+                <p className="text-sm font-bold text-primary tabular-nums">
+                  {formatMoney(totalPrice * currentQuantity).vndFormatted}
+                </p>
+              </div>
             </div>
           </div>
         </CollapsibleContent>

@@ -8,7 +8,7 @@ import {
   RotateCcw,
   Users,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
 import { Button } from "~/components/ui/button";
@@ -41,16 +41,24 @@ interface RoomSelectionSectionProps {
 export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
   const dateRange = form.watch("dateRange");
   const selectedRoomIds = form.watch("roomIds") || [];
+  const roomTypeRequests = form.watch("roomTypeRequests") || [];
   const adultsAmount = form.watch("adultsAmount") || 1;
   const childrenAmount = form.watch("childrenAmount") || 0;
 
   const [shouldFetch, setShouldFetch] = useState(false);
 
-  const nights = useCalculateNights({
-    checkinDate: dateRange?.from,
-    checkoutDate: dateRange?.to,
-  });
-  const totalGuestsTarget = Number(adultsAmount) + Number(childrenAmount);
+  const nights = useMemo(
+    () =>
+      useCalculateNights({
+        checkinDate: dateRange?.from,
+        checkoutDate: dateRange?.to,
+      }),
+    [dateRange]
+  );
+  const totalGuestsTarget = useMemo(
+    () => Number(adultsAmount) + Number(childrenAmount),
+    [adultsAmount, childrenAmount]
+  );
 
   const {
     data: availableRooms,
@@ -66,7 +74,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
   );
 
   const selectionStatus = useMemo(() => {
-    if (!availableRooms || selectedRoomIds.length === 0) {
+    if (!availableRooms) {
       return {
         currentCapacity: 0,
         isSufficient: false,
@@ -77,11 +85,26 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
     }
 
     let currentCapacity = 0;
+    let roomCount = 0;
+
+    // Count from specific room selections
     availableRooms.forEach((roomType) => {
       const selectedRoomsInType = roomType.availableRooms.filter((room) =>
         selectedRoomIds.includes(room.roomId)
       );
       currentCapacity += selectedRoomsInType.length * roomType.maxOccupancy;
+      roomCount += selectedRoomsInType.length;
+    });
+
+    // Count from room type quantity requests
+    roomTypeRequests.forEach((request: any) => {
+      const roomType = availableRooms.find(
+        (rt) => rt.roomTypeId === request.roomTypeId
+      );
+      if (roomType && request.quantity > 0) {
+        currentCapacity += request.quantity * roomType.maxOccupancy;
+        roomCount += request.quantity;
+      }
     });
 
     const isSufficient = currentCapacity >= totalGuestsTarget;
@@ -91,31 +114,87 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
       currentCapacity,
       isSufficient,
       missing: Math.max(0, totalGuestsTarget - currentCapacity),
-      roomCount: selectedRoomIds.length,
+      roomCount,
       progress,
     };
-  }, [availableRooms, selectedRoomIds, totalGuestsTarget]);
+  }, [availableRooms, selectedRoomIds, roomTypeRequests, totalGuestsTarget]);
 
   // --- HANDLERS ---
-  const handleToggleRoom = (roomId: string) => {
-    const room = availableRooms
-      ?.flatMap((rt) => rt.availableRooms)
-      .find((r) => r.roomId === roomId);
+  const handleToggleRoom = useCallback(
+    (roomId: string) => {
+      const room = availableRooms
+        ?.flatMap((rt) => rt.availableRooms)
+        .find((r) => r.roomId === roomId);
 
-    if (!room) return;
+      if (!room) return;
 
-    const current = form.getValues("roomIds") || [];
-    const set = new Set(current as string[]);
-    if (set.has(roomId)) set.delete(roomId);
-    else set.add(roomId);
+      // Clear room type requests when selecting specific rooms
+      if (roomTypeRequests.length > 0) {
+        form.setValue("roomTypeRequests", [], {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      }
 
-    form.setValue("roomIds", Array.from(set), {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  };
+      const current = form.getValues("roomIds") || [];
+      const set = new Set(current as string[]);
+      if (set.has(roomId)) set.delete(roomId);
+      else set.add(roomId);
+
+      form.setValue("roomIds", Array.from(set), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [availableRooms, roomTypeRequests.length, form]
+  );
+
+  const handleQuantityChange = useCallback(
+    (roomTypeId: string, quantity: number) => {
+      if (selectedRoomIds.length > 0) {
+        form.setValue("roomIds", [], {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      }
+
+      const currentRequests = form.getValues("roomTypeRequests") || [];
+
+      if (quantity === 0) {
+        const filtered = currentRequests.filter(
+          (req: any) => req.roomTypeId !== roomTypeId
+        );
+        form.setValue("roomTypeRequests", filtered, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      } else {
+        const existingIndex = currentRequests.findIndex(
+          (req: any) => req.roomTypeId === roomTypeId
+        );
+
+        if (existingIndex >= 0) {
+          currentRequests[existingIndex].quantity = quantity;
+          form.setValue("roomTypeRequests", [...currentRequests], {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        } else {
+          form.setValue(
+            "roomTypeRequests",
+            [...currentRequests, { roomTypeId, quantity }],
+            {
+              shouldValidate: true,
+              shouldDirty: true,
+            }
+          );
+        }
+      }
+    },
+    [form]
+  );
   return (
-    <div className="flex flex-col justify-between rounded-md bg-background flex-1">
+    <div className="flex flex-col max-h-svh overflow-y-auto justify-between rounded-md bg-background flex-1">
       <div>
         <div className="border-b p-4 bg-background  space-y-4">
           <div className="flex items-center gap-2">
@@ -257,15 +336,26 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                     </span>
                   </div>
 
-                  {availableRooms.map((roomType) => (
-                    <AvailableRoomRow
-                      key={roomType.roomTypeId}
-                      roomType={roomType}
-                      selectedRoomIds={selectedRoomIds}
-                      onToggleRoom={handleToggleRoom}
-                      nights={nights}
-                    />
-                  ))}
+                  {availableRooms.map((roomType) => {
+                    const currentQuantity =
+                      roomTypeRequests.find(
+                        (req: any) => req.roomTypeId === roomType.roomTypeId
+                      )?.quantity || 0;
+
+                    return (
+                      <AvailableRoomRow
+                        key={roomType.roomTypeId}
+                        roomType={roomType}
+                        selectedRoomIds={selectedRoomIds}
+                        onToggleRoom={handleToggleRoom}
+                        currentQuantity={currentQuantity}
+                        onQuantityChange={(qty) =>
+                          handleQuantityChange(roomType.roomTypeId, qty)
+                        }
+                        nights={nights}
+                      />
+                    );
+                  })}
                 </>
               )}
             </div>
@@ -273,7 +363,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
         </div>
       </div>
 
-      {selectedRoomIds.length > 0 && (
+      {(selectedRoomIds.length > 0 || roomTypeRequests.length > 0) && (
         <div className="shrink-0 border-t sticky bottom-0 bg-background p-3 shadow-md z-20 ">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="text-xs font-medium text-foreground">

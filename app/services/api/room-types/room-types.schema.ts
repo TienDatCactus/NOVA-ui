@@ -3,7 +3,15 @@ import z from "zod";
 const RoomTypesListItem = z.object({
   id: z.string(),
   code: z.string().max(100),
-  name: z.string().max(100),
+  translations: z.array(
+    z.object({
+      languageCode: z.string(),
+      name: z.string(),
+      description: z.string(),
+    })
+  ),
+  imageUrls: z.array(z.url()),
+  currencyCode: z.string().length(3),
   baseRate: z.number().min(0),
   active: z.boolean(),
   roomsCount: z.number().min(0),

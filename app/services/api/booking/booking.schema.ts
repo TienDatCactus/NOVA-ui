@@ -27,9 +27,15 @@ const StaffCreateBookingSchema = z
     source: BookingSourceEnum,
     otaInformationId: z.string("Mã thông tin OTA không hợp lệ").optional(),
     otaBookingCode: z.string("Mã OTA booking không hợp lệ").optional(),
-    roomIds: z
-      .array(z.string("Mã phòng không hợp lệ"))
-      .min(1, "Phải chọn ít nhất 1 phòng cụ thể"),
+    roomIds: z.array(z.string("Mã phòng không hợp lệ")).optional(),
+    roomTypeRequests: z
+      .array(
+        z.object({
+          roomTypeId: z.string("Mã loại phòng không hợp lệ"),
+          quantity: z.number("Số lượng không hợp lệ").int().min(0),
+        })
+      )
+      .optional(),
     checkinDate: z.union([
       z.date("Ngày nhận phòng không hợp lệ"),
       z.string().refine((val) => !isNaN(Date.parse(val)), {
@@ -61,15 +67,14 @@ const StaffCreateBookingSchema = z
       .regex(/^[^\d]+$/, "Tên khách không được chứa số"),
     guestEmail: z.email("Email không hợp lệ").optional().or(z.literal("")),
     guestPhone: z
-      .string()
+      .string("Số điện thoại không hợp lệ")
       .optional()
-      .or(z.literal("")) // cho phép empty
-      .refine(
-        (val) =>
-          val === "" || /^((\+84|84|0)(3|5|7|8|9)[0-9]{8})$/.test(val || ""),
-        "Số điện thoại không hợp lệ"
-      ),
-
+      .or(z.literal("")), // cho phép empty
+    // .refine(
+    //   (val) =>
+    //     val === "" || /^((\+84|84|0)(3|5|7|8|9)[0-9]{8})$/.test(val || ""),
+    //   "Số điện thoại không hợp lệ"
+    // ), // this only
     specialRequest: z.string().optional(),
     overridePrice: z
       .number()

@@ -380,6 +380,14 @@ const Configs = {
   update: (key: string) => `Configs/${key}`,
   delete: (key: string) => `Configs/${key}`,
 };
+
+const ExchangeRates = {
+  getExchangeRates: "ExchangeRates",
+  getExchangeRatesUsd: "ExchangeRates/usd",
+  syncExchangeRates: "ExchangeRates/sync",
+  convertCurrency: "ExchangeRates/convert",
+};
+
 export {
   Auth,
   User,
@@ -411,4 +419,5 @@ export {
   FinancialReports,
   AuditLogs,
   Configs,
+  ExchangeRates,
 };
