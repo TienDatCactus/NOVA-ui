@@ -74,8 +74,14 @@ function ServiceOrderItemRow({
 
   const displayName = useMemo(() => {
     if (service.itemType === "ServiceItem" && serviceDetail)
-      return serviceDetail.name;
-    if (service.itemType === "MenuItem" && menuDetail) return menuDetail.name;
+      return serviceDetail.translations?.find((t) => t.languageCode === "vi")?.name || serviceDetail.translations?.[0]?.name || '';
+    if (service.itemType === "MenuItem" && menuDetail) {
+      return (
+        menuDetail.translations?.find((t) => t.languageCode === "vi")?.name ||
+        menuDetail.translations?.[0]?.name ||
+        ""
+      );
+    }
     return "Unknown Item";
   }, [service, serviceDetail, menuDetail]);
 

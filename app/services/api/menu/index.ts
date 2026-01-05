@@ -74,12 +74,24 @@ async function createMenuItem(
 
     formData.append("CategoryId", data.CategoryId);
     formData.append("Code", data.Code);
-    formData.append("Name", data.Name);
-    formData.append("Description", data.Description);
     formData.append("UnitId", data.UnitId);
     formData.append("Price", data.Price.toString());
     formData.append("Active", data.Active.toString());
-
+    if (data.translations && data.translations.length > 0) {
+      data.translations.forEach((translation, index) => {
+        formData.append(
+          `translations[${index}].languageCode`,
+          translation.languageCode
+        );
+        formData.append(`translations[${index}].name`, translation.name);
+        if (translation.description) {
+          formData.append(
+            `translations[${index}].description`,
+            translation.description
+          );
+        }
+      });
+    }
     if (data.Images?.length) {
       data.Images.forEach((file) => {
         formData.append("Images", file);
@@ -117,8 +129,21 @@ async function updateMenuItem(
 
     formData.append("CategoryId", data.CategoryId);
     formData.append("Code", data.Code);
-    formData.append("Name", data.Name);
-    formData.append("Description", data.Description);
+    if (data.translations && data.translations.length > 0) {
+      data.translations.forEach((translation, index) => {
+        formData.append(
+          `translations[${index}].languageCode`,
+          translation.languageCode
+        );
+        formData.append(`translations[${index}].name`, translation.name);
+        if (translation.description) {
+          formData.append(
+            `translations[${index}].description`,
+            translation.description
+          );
+        }
+      });
+    }
     formData.append("UnitId", data.UnitId);
     formData.append("Price", data.Price.toString());
     formData.append("Active", data.Active.toString());

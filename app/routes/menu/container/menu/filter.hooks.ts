@@ -25,12 +25,21 @@ export default function useMenuFilters() {
   const filterMenuItems = useMemo(
     () => (menuItems: MenuListResponseDto) => {
       return menuItems.filter((item) => {
+        const name =
+          item.translations?.find((t) => t.languageCode === "vi")?.name ||
+          item.translations?.[0]?.name ||
+          "";
+        const description =
+          item.translations?.find((t) => t.languageCode === "vi")
+            ?.description ||
+          item.translations?.[0]?.description ||
+          "";
         const matchesSearch =
           filters.searchText === "" ||
-          item.name.toLowerCase().includes(filters.searchText.toLowerCase()) ||
+          name.toLowerCase().includes(filters.searchText.toLowerCase()) ||
           item.code.toLowerCase().includes(filters.searchText.toLowerCase()) ||
-          (item.description &&
-            item.description
+          (description &&
+            description
               .toLowerCase()
               .includes(filters.searchText.toLowerCase()));
 

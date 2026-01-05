@@ -47,8 +47,7 @@ export default function CreateMenuDialog({
     defaultValues: {
       CategoryId: "",
       Code: "",
-      Name: "",
-      Description: "",
+      translations: [{ languageCode: "vi", name: "", description: "" }],
       UnitId: "",
       Price: 0,
       Active: true,
@@ -61,6 +60,15 @@ export default function CreateMenuDialog({
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "Components",
+  });
+
+  const {
+    fields: translationFields,
+    append: appendTranslation,
+    remove: removeTranslation,
+  } = useFieldArray({
+    control: form.control,
+    name: "translations",
   });
 
   // --- Queries ---
@@ -80,6 +88,16 @@ export default function CreateMenuDialog({
     },
     [form, imagePreview]
   );
+
+  const handleAddTranslation = () => {
+    appendTranslation({ languageCode: "en", name: "", description: "" });
+  };
+
+  const handleRemoveTranslation = (index: number) => {
+    if (translationFields.length > 1) {
+      removeTranslation(index);
+    }
+  };
 
   const handleSubmit = (data: CreateMenuFormData) => {
     if (data.Components.length <= 0) {
@@ -177,6 +195,9 @@ export default function CreateMenuDialog({
                   form={form}
                   menuCategories={categories}
                   units={units}
+                  translationFields={translationFields}
+                  handleAddTranslation={handleAddTranslation}
+                  handleRemoveTranslation={handleRemoveTranslation}
                 />
 
                 <MediaTab

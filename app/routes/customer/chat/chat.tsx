@@ -496,11 +496,19 @@ export default function GuestChat({}: Route.ComponentProps) {
                                   onClick={() => handleTagItem(item, "menu")}
                                 >
                                   <div className="font-medium text-sm text-stone-700 group-hover:text-emerald-800 transition-colors">
-                                    {item.name}
+                                    {item.translations?.find(
+                                      (t) => t.languageCode === "vi"
+                                    )?.name ||
+                                      item.translations?.[0]?.name ||
+                                      ""}
                                   </div>
                                   <div className="flex justify-between items-center mt-0.5">
                                     <span className="text-xs text-stone-500 line-clamp-1 max-w-[180px]">
-                                      {item.description || "Không có mô tả"}
+                                      {item.translations?.find(
+                                        (t) => t.languageCode === "vi"
+                                      )?.description ||
+                                        item.translations?.[0]?.description ||
+                                        "Không có mô tả"}
                                     </span>
                                     <span className="text-xs font-mono text-emerald-700 font-medium">
                                       {formatMoney(item.price).vndFormatted}

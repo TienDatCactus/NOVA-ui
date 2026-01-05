@@ -32,7 +32,12 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
         <div className="flex items-center gap-3">
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-semibold truncate">{item.name}</span>
+              <span className="font-semibold truncate">
+                {item.translations?.find((t) => t.languageCode === "vi")
+                  ?.name ||
+                  item.translations?.[0]?.name ||
+                  ""}
+              </span>
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {item.code}

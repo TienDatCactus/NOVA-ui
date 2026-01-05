@@ -146,8 +146,12 @@ export default function Component({}: Route.ComponentProps) {
 
   const handleAddToCart = useCallback(
     (item: MenuItem) => {
+      const name =
+        item.translations?.find((t) => t.languageCode === "vi")?.name ||
+        item.translations?.[0]?.name ||
+        "";
       if (item.maxQuantityAvailable === 0) {
-        toast.error(`${item.name} hiện đã hết hàng`);
+        toast.error(`${name} hiện đã hết hàng`);
         return;
       }
 
@@ -159,7 +163,7 @@ export default function Component({}: Route.ComponentProps) {
           newQuantity > (item?.maxQuantityAvailable ?? 0)
         ) {
           toast.error(
-            `Số lượng tối đa cho ${item.name} là ${item.maxQuantityAvailable}`
+            `Số lượng tối đa cho ${name} là ${item.maxQuantityAvailable}`
           );
           return;
         }
@@ -169,12 +173,12 @@ export default function Component({}: Route.ComponentProps) {
         id: item.itemId,
         menuItemId: item.itemId,
         code: item.code,
-        name: item.name,
+        name: name,
         unitPrice: item.price,
         imageUrl: item.imageUrls?.[0],
         maxQuantityAvailable: item.maxQuantityAvailable || undefined,
       });
-      toast.success(`Đã thêm ${item.name} vào đơn`);
+      toast.success(`Đã thêm ${name} vào đơn`);
     },
     [addItem, items]
   );

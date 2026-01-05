@@ -58,17 +58,23 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
   const filteredMenuItems = useMemo(() => {
     if (!menuItems) return [];
     const lowerQuery = debouncedSearch.toLowerCase();
-    return menuItems.filter(
-      (item) => item.active && item.name.toLowerCase().includes(lowerQuery)
-    );
+    return menuItems.filter((item) => {
+      const name =
+        item.translations?.find((t) => t.languageCode === "vi")?.name ||
+        item.translations?.[0]?.name ||
+        "";
+      return item.active && name.toLowerCase().includes(lowerQuery);
+    });
   }, [menuItems, debouncedSearch]);
 
   const filteredServices = useMemo(() => {
     if (!services) return [];
     const lowerQuery = debouncedSearch.toLowerCase();
     return services.filter(
-      (service) =>
-        service.active && service.name.toLowerCase().includes(lowerQuery)
+      (service) => {
+        const name = service.translations?.find(t => t.languageCode === 'vi')?.name || service.translations?.[0]?.name || '';
+        return service.active && name.toLowerCase().includes(lowerQuery);
+      }
     );
   }, [services, debouncedSearch]);
 

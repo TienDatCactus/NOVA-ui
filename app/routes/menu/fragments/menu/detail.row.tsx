@@ -50,7 +50,13 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                   <ImageZoom>
                     <Image
                       src={mainImage.url}
-                      alt={detailData.name}
+                      alt={
+                        detailData.translations?.find(
+                          (t) => t.languageCode === "vi"
+                        )?.name ||
+                        detailData.translations?.[0]?.name ||
+                        ""
+                      }
                       className="h-full w-full aspect-square object-cover transition-transform hover:scale-105 duration-500"
                     />
                   </ImageZoom>
@@ -91,7 +97,11 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                       {detailData.code}
                     </Badge>
                     <h3 className="text-xl font-bold text-foreground  truncate">
-                      {detailData.name}
+                      {detailData.translations?.find(
+                        (t) => t.languageCode === "vi"
+                      )?.name ||
+                        detailData.translations?.[0]?.name ||
+                        ""}
                     </h3>
                   </div>
                   <div className="grid gap-2 text-sm text-muted-foreground">
@@ -122,7 +132,10 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                   <Tag className="w-4 h-4 text-primary" /> Mô tả chi tiết
                 </h4>
                 <p className="text-sm text-muted-foreground leading-relaxed bg-background/50 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
-                  {detailData.description || "Chưa có mô tả cho món ăn này."}
+                  {detailData.translations?.find((t) => t.languageCode === "vi")
+                    ?.description ||
+                    detailData.translations?.[0]?.description ||
+                    "Chưa có mô tả cho món ăn này."}
                 </p>
               </div>
 

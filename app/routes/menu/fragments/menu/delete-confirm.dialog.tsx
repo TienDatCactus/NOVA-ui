@@ -46,7 +46,10 @@ export default function DeleteConfirmDialog({
             <p>
               Bạn có chắc chắn muốn xóa món ăn{" "}
               <span className="font-semibold text-foreground">
-                {menuItem.name}
+                {menuItem.translations?.find((t) => t.languageCode === "vi")
+                  ?.name ||
+                  menuItem.translations?.[0]?.name ||
+                  ""}
               </span>{" "}
               không?
             </p>

@@ -53,11 +53,20 @@ export default function AddMenuItemDialog({
   const filteredMenuItems = useMemo(() => {
     if (!searchText) return menuItems;
     const lower = searchText.toLowerCase();
-    return menuItems.filter(
-      (item) =>
-        item.name.toLowerCase().includes(lower) ||
-        item.description?.toLowerCase().includes(lower)
-    );
+    return menuItems.filter((item) => {
+      const name =
+        item.translations?.find((t) => t.languageCode === "vi")?.name ||
+        item.translations?.[0]?.name ||
+        "";
+      const description =
+        item.translations?.find((t) => t.languageCode === "vi")?.description ||
+        item.translations?.[0]?.description ||
+        "";
+      return (
+        name.toLowerCase().includes(lower) ||
+        description?.toLowerCase().includes(lower)
+      );
+    });
   }, [menuItems, searchText]);
 
   const handleConfirm = () => {
@@ -188,7 +197,11 @@ export default function AddMenuItemDialog({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-medium text-sm truncate">
-                                {item.name}
+                                {item.translations?.find(
+                                  (t) => t.languageCode === "vi"
+                                )?.name ||
+                                  item.translations?.[0]?.name ||
+                                  ""}
                               </p>
                               {!item.active && (
                                 <Badge
@@ -212,9 +225,15 @@ export default function AddMenuItemDialog({
                                 </Badge>
                               )}
                             </div>
-                            {item.description && (
+                            {(item.translations?.find(
+                              (t) => t.languageCode === "vi"
+                            )?.description ||
+                              item.translations?.[0]?.description) && (
                               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                {item.description}
+                                {item.translations?.find(
+                                  (t) => t.languageCode === "vi"
+                                )?.description ||
+                                  item.translations?.[0]?.description}
                               </p>
                             )}
                             <p className="text-sm font-semibold text-primary mt-2">
@@ -224,7 +243,13 @@ export default function AddMenuItemDialog({
                           {item.imageUrls && item.imageUrls.length > 0 && (
                             <Image
                               src={item.imageUrls[0]}
-                              alt={item.name}
+                              alt={
+                                item.translations?.find(
+                                  (t) => t.languageCode === "vi"
+                                )?.name ||
+                                item.translations?.[0]?.name ||
+                                ""
+                              }
                               className="w-16 h-16 object-cover rounded"
                             />
                           )}
@@ -243,7 +268,13 @@ export default function AddMenuItemDialog({
             {selectedItem ? (
               <Card className="p-4 space-y-4">
                 <div>
-                  <p className="font-medium text-sm">{selectedItem.name}</p>
+                  <p className="font-medium text-sm">
+                    {selectedItem.translations?.find(
+                      (t) => t.languageCode === "vi"
+                    )?.name ||
+                      selectedItem.translations?.[0]?.name ||
+                      ""}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatMoney(selectedItem.price).vndFormatted}
                   </p>

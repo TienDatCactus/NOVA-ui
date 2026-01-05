@@ -25,8 +25,15 @@ export const MenuItemDetailSchema = z.object({
   categoryId: z.string(),
   categoryName: z.string(),
   code: z.string(),
-  name: z.string(),
-  description: z.string().optional().nullable(),
+  translations: z
+    .array(
+      z.object({
+        languageCode: z.string(),
+        name: z.string(),
+        description: z.string().optional().nullable(),
+      })
+    )
+    .optional(),
   unitId: z.string().optional().nullable(),
   unitName: z.string().optional().nullable(),
   price: z.number().min(0),
@@ -50,8 +57,15 @@ export const MenuItemDetailSchema = z.object({
 export const MenuListItemSchema = z.object({
   itemId: z.string(),
   code: z.string(),
-  name: z.string(),
-  description: z.string().optional().nullable(),
+  translations: z
+    .array(
+      z.object({
+        languageCode: z.string(),
+        name: z.string(),
+        description: z.string().optional().nullable(),
+      })
+    )
+    .optional(),
   imageUrls: z.array(z.string()),
   unitName: z.string().optional().nullable(),
   price: z.number().min(0),
@@ -77,15 +91,23 @@ export const CreateMenuItemRequestSchema = z.object({
       /^[A-Z0-9-_]+$/,
       "Mã SKU chỉ chứa chữ in hoa, số, dấu gạch ngang và gạch dưới"
     ),
-  Name: z
-    .string("Tên món ăn phải là chuỗi ký tự")
-    .min(1, "Tên món ăn không được để trống")
-    .max(200, "Tên món ăn không được vượt quá 200 ký tự")
-    .trim(),
-  Description: z
-    .string()
-    .max(1000, "Mô tả không được vượt quá 1000 ký tự")
-    .trim(),
+  translations: z
+    .array(
+      z.object({
+        languageCode: z.string(),
+        name: z
+          .string("Tên món ăn phải là chuỗi ký tự")
+          .min(1, "Tên món ăn không được để trống")
+          .max(200, "Tên món ăn không được vượt quá 200 ký tự")
+          .trim(),
+        description: z
+          .string()
+          .max(1000, "Mô tả không được vượt quá 1000 ký tự")
+          .trim()
+          .nullish(),
+      })
+    )
+    .optional(),
   UnitId: z.string().min(1, "Vui lòng chọn đơn vị tính"),
   Price: z
     .number("Giá bán phải là số")

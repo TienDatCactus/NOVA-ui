@@ -77,12 +77,20 @@ export default function AddServiceDialog({
 
   const filteredMenuItems = useMemo(() => {
     return menuItems.filter((item) => {
+      const name =
+        item.translations?.find((t) => t.languageCode === "vi")?.name ||
+        item.translations?.[0]?.name ||
+        "";
+      const description =
+        item.translations?.find((t) => t.languageCode === "vi")?.description ||
+        item.translations?.[0]?.description ||
+        "";
       const matchesSearch =
         searchText === "" ||
-        item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        name.toLowerCase().includes(searchText.toLowerCase()) ||
         item.code.toLowerCase().includes(searchText.toLowerCase()) ||
-        (item.description &&
-          item.description.toLowerCase().includes(searchText.toLowerCase()));
+        (description &&
+          description.toLowerCase().includes(searchText.toLowerCase()));
       return matchesSearch;
     });
   }, [menuItems, searchText]);
@@ -172,10 +180,7 @@ export default function AddServiceDialog({
                                 isSelected ? "text-primary" : "text-foreground"
                               )}
                             >
-                              {service.name}
-                            </h4>
-
-                            {/* Checkmark Badge if selected */}
+                            {service.translations?.find(t => t.languageCode === 'vi')?.name || service.translations?.[0]?.name || ''}
                             {isSelected && (
                               <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm animate-in zoom-in-50">
                                 <Check className="h-3 w-3" />
@@ -184,8 +189,7 @@ export default function AddServiceDialog({
                           </div>
 
                           <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">
-                            {service.description || "Không có mô tả chi tiết."}
-                          </p>
+                          {service.translations?.find(t => t.languageCode === 'vi')?.description || service.translations?.[0]?.description || "Không có mô tả chi tiết."}
 
                           <div className="flex items-center gap-2 pt-1">
                             <span className="text-sm font-bold font-mono text-foreground">
@@ -276,7 +280,11 @@ export default function AddServiceDialog({
                                     : "text-foreground"
                                 )}
                               >
-                                {menuItem.name}
+                                {menuItem.translations?.find(
+                                  (t) => t.languageCode === "vi"
+                                )?.name ||
+                                  menuItem.translations?.[0]?.name ||
+                                  ""}
                               </h4>
 
                               {/* Checkmark Badge if selected */}
@@ -288,7 +296,10 @@ export default function AddServiceDialog({
                             </div>
 
                             <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">
-                              {menuItem.description ||
+                              {menuItem.translations?.find(
+                                (t) => t.languageCode === "vi"
+                              )?.description ||
+                                menuItem.translations?.[0]?.description ||
                                 "Không có mô tả chi tiết."}
                             </p>
 
@@ -316,8 +327,14 @@ export default function AddServiceDialog({
                               className="w-40"
                               onChange={(value) => {
                                 if (value > maxAvailable) {
+                                  const name =
+                                    menuItem.translations?.find(
+                                      (t) => t.languageCode === "vi"
+                                    )?.name ||
+                                    menuItem.translations?.[0]?.name ||
+                                    "";
                                   toast.error(
-                                    `Chỉ còn ${maxAvailable} ${menuItem.name}`,
+                                    `Chỉ còn ${maxAvailable} ${name}`,
                                     {
                                       description: "Vượt quá số lượng khả dụng",
                                     }
@@ -376,8 +393,14 @@ export default function AddServiceDialog({
                       const maxAvailable = menuItem.maxQuantityAvailable ?? 0;
 
                       if (quantity > maxAvailable) {
+                        const name =
+                          menuItem.translations?.find(
+                            (t) => t.languageCode === "vi"
+                          )?.name ||
+                          menuItem.translations?.[0]?.name ||
+                          "";
                         toast.error(
-                          `${menuItem.name}: Chỉ còn ${maxAvailable} khả dụng`,
+                          `${name}: Chỉ còn ${maxAvailable} khả dụng`,
                           { description: "Vui lòng giảm số lượng." }
                         );
                         hasError = true;

@@ -95,8 +95,7 @@ export default function Component() {
   const { data: OTAList } = useOTAInfo({ selection: true });
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
-    bookingDetail?.id || "",
-    bookingCode
+    bookingDetail?.id || ""
   );
 
   const form = useForm<StaffUpdateBookingRequestDto>({

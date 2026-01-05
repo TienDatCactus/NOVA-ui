@@ -21,16 +21,17 @@ export default function MenuItemCard({
   addToOrder,
   menuItem,
 }: MenuItemCardProps) {
-  const {
-    active,
-    code,
-    name,
-    description,
-    imageUrls,
-    unitName,
-    price,
-    maxQuantityAvailable,
-  } = menuItem;
+  const { active, code, imageUrls, unitName, price, maxQuantityAvailable } =
+    menuItem;
+
+  const name =
+    menuItem.translations?.find((t) => t.languageCode === "vi")?.name ||
+    menuItem.translations?.[0]?.name ||
+    "";
+  const description =
+    menuItem.translations?.find((t) => t.languageCode === "vi")?.description ||
+    menuItem.translations?.[0]?.description ||
+    "";
 
   const isOutOfStock = maxQuantityAvailable === 0;
   const isDisabled = !active || isOutOfStock;

@@ -652,8 +652,20 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                             {menuItems.map((item) => (
                               <TagItemButton
                                 key={item.itemId}
-                                name={item.name}
-                                description={item.description ?? ""}
+                                name={
+                                  item.translations?.find(
+                                    (t) => t.languageCode === "vi"
+                                  )?.name ||
+                                  item.translations?.[0]?.name ||
+                                  ""
+                                }
+                                description={
+                                  item.translations?.find(
+                                    (t) => t.languageCode === "vi"
+                                  )?.description ||
+                                  item.translations?.[0]?.description ||
+                                  ""
+                                }
                                 price={item.price}
                                 onClick={() => handleTagItem(item, "menu")}
                               />
@@ -673,8 +685,8 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                             {serviceItems.map((item) => (
                               <TagItemButton
                                 key={item.serviceItemId}
-                                name={item.name}
-                                description={item.description}
+                                name={item.translations?.find(t => t.languageCode === 'vi')?.name || item.translations?.[0]?.name || ''}
+                                description={item.translations?.find(t => t.languageCode === 'vi')?.description || item.translations?.[0]?.description || ''}
                                 price={item.basePrice}
                                 onClick={() => handleTagItem(item, "service")}
                               />

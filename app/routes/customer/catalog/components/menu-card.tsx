@@ -21,7 +21,11 @@ export default function MenuCard({ item }: MenuCardProps) {
         {item.imageUrls && item.imageUrls.length > 0 ? (
           <img
             src={item.imageUrls[0]}
-            alt={item.name}
+            alt={
+              item.translations?.find((t) => t.languageCode === "vi")?.name ||
+              item.translations?.[0]?.name ||
+              ""
+            }
             className={cn(
               "h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105",
               !item.active && "grayscale filter opacity-80" // Desaturate unavailable items
@@ -52,18 +56,22 @@ export default function MenuCard({ item }: MenuCardProps) {
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 transition-colors">
-              {item.name}
+              {item.translations?.find((t) => t.languageCode === "vi")?.name ||
+                item.translations?.[0]?.name ||
+                ""}
             </h3>
 
             {/* Price Tag */}
           </div>
 
           {/* Description */}
-          {item.description && (
+          {item.translations?.find((t) => t.languageCode === "vi")
+            ?.description || item.translations?.[0]?.description ? (
             <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground font-sans">
-              {item.description}
+              {item.translations?.find((t) => t.languageCode === "vi")
+                ?.description || item.translations?.[0]?.description}
             </p>
-          )}
+          ) : null}
         </div>
       </CardContent>
     </Card>

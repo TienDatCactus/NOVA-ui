@@ -4,8 +4,15 @@ import z from "zod";
 const ServiceListItemSchema = z.object({
   serviceItemId: z.string(),
   code: z.string().min(2),
-  name: z.string().min(2),
-  description: z.string(),
+  translations: z
+    .array(
+      z.object({
+        languageCode: z.string(),
+        name: z.string(),
+        description: z.string().optional().nullable(),
+      })
+    )
+    .optional(),
   unitName: z.string().max(100),
   basePrice: z.number().min(0),
   active: z.boolean().default(true),
@@ -19,8 +26,15 @@ const ServiceItemSchema = z.object({
   unitId: z.string(),
   unitName: z.string(),
   code: z.string().min(2),
-  name: z.string().min(2),
-  description: z.string().max(500),
+  translations: z
+    .array(
+      z.object({
+        languageCode: z.string(),
+        name: z.string(),
+        description: z.string().optional().nullable(),
+      })
+    )
+    .optional(),
   basePrice: z.number().min(0),
   active: z.boolean().default(true),
   createdAt: z.string().nullable().optional(),
@@ -46,8 +60,15 @@ const EditServiceItemRequestSchema = z.object({
   serviceTypeId: z.string("Phải chọn loại dịch vụ"),
   unitId: z.string("Phải chọn đơn vị tính"),
   code: z.string("Phải nhập mã dịch vụ").min(2),
-  name: z.string("Phải nhập tên dịch vụ").min(2),
-  description: z.string("Phải nhập mô tả dịch vụ").max(500),
+  translations: z
+    .array(
+      z.object({
+        languageCode: z.string(),
+        name: z.string("Phải nhập tên dịch vụ").min(2),
+        description: z.string("Phải nhập mô tả dịch vụ").max(500),
+      })
+    )
+    .optional(),
   basePrice: z.number("Phải nhập giá cơ bản").min(0),
   active: z.boolean(),
 });

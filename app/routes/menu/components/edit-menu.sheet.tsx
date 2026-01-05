@@ -54,8 +54,7 @@ export default function EditMenuSheet({
     defaultValues: {
       CategoryId: "",
       Code: "",
-      Name: "",
-      Description: "",
+      translations: [{ languageCode: "vi", name: "", description: "" }],
       UnitId: "",
       Price: 0,
       Active: true,
@@ -68,6 +67,15 @@ export default function EditMenuSheet({
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "Components",
+  });
+
+  const {
+    fields: translationFields,
+    append: appendTranslation,
+    remove: removeTranslation,
+  } = useFieldArray({
+    control: form.control,
+    name: "translations",
   });
 
   // --- Queries ---
@@ -86,8 +94,9 @@ export default function EditMenuSheet({
       form.reset({
         CategoryId: menuItemDetail.categoryId || "",
         Code: menuItemDetail.code,
-        Name: menuItemDetail.name,
-        Description: menuItemDetail.description || "",
+        translations: menuItemDetail.translations || [
+          { languageCode: "vi", name: "", description: "" },
+        ],
         UnitId: menuItemDetail.unitId || "",
         Price: menuItemDetail.price,
         Active: menuItemDetail.active,
@@ -115,6 +124,16 @@ export default function EditMenuSheet({
     setNewPreviews(urls);
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, [newFiles]);
+
+  const handleAddTranslation = () => {
+    appendTranslation({ languageCode: "en", name: "", description: "" });
+  };
+
+  const handleRemoveTranslation = (index: number) => {
+    if (translationFields.length > 1) {
+      removeTranslation(index);
+    }
+  };
 
   const handleSubmit = (data: UpdateMenuFormData) => {
     updateMenuItem(
@@ -192,7 +211,10 @@ export default function EditMenuSheet({
             <SheetDescription>
               Cập nhật thông tin chi tiết cho{" "}
               <span className="font-semibold text-foreground">
-                {menuItem.name}
+                {menuItem.translations?.find((t) => t.languageCode === "vi")
+                  ?.name ||
+                  menuItem.translations?.[0]?.name ||
+                  ""}
               </span>
             </SheetDescription>
           </div>
@@ -243,6 +265,9 @@ export default function EditMenuSheet({
                   form={form}
                   menuCategories={menuCategories}
                   units={units}
+                  translationFields={translationFields}
+                  handleAddTranslation={handleAddTranslation}
+                  handleRemoveTranslation={handleRemoveTranslation}
                 />
 
                 <MediaTab
