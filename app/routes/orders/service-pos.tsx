@@ -48,6 +48,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { DASHBOARD } from "~/lib/fe-url";
 import { formatMoney } from "~/lib/utils";
 import { useServicePosOrderStore } from "~/store/service-pos-order.store";
+import CurrencyView from "~/components/currency-view";
 import useServiceFilters from "../services/container/services/filter.hooks";
 import OrderConfirmDialog from "./components/order-confirm.dialog";
 import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
@@ -358,111 +359,125 @@ export default function Component({}: Route.ComponentProps) {
 
         {/* Cart Sidebar - Single Service Selection */}
         <aside className="w-md shadow-md h-full border p-4  overflow-y-auto flex flex-col">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Dịch vụ đã chọn</h2>
-          </div>
-          <Separator className="my-2" />
-
-          {/* Empty State */}
-          {isEmpty && (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant={"icon"}>
-                  <ImageIcon />
-                </EmptyMedia>
-                <EmptyTitle>Giỏ hàng trống</EmptyTitle>
-                <EmptyDescription>
-                  Lựa chọn 1 dịch vụ để bắt đầu
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          )}
-
-          {/* Selected Service */}
-          {selectedService && (
-            <div className="flex-1 flex flex-col justify-between space-y-4">
-              {/* Service Info Card */}
-              <Card className="border-none bg-transparent ">
-                {selectedService.imageUrl && (
-                  <Image
-                    src={selectedService.imageUrl}
-                    alt={selectedService.name}
-                    className="w-full h-32 object-cover rounded-md"
-                  />
-                )}
-                <div>
-                  <h3 className="font-semibold text-sm">
-                    {selectedService.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedService.code}
-                  </p>
-                  <p className="text-sm font-mono font-bold text-primary mt-1">
-                    {formatMoney(selectedService.unitPrice).vndFormatted}
-                  </p>
-                </div>
-
-                {/* Quantity Input */}
-                <div className="space-y-2">
-                  <Label htmlFor="quantity" className="text-xs">
-                    Số lượng
-                  </Label>
-                  <Counter
-                    value={selectedService.quantity}
-                    onChange={(e) => updateServiceQuantity(e || 1)}
-                  />
-                </div>
-
-                {/* Notes Input */}
-                <div className="space-y-2">
-                  <Label htmlFor="note" className="text-xs">
-                    Ghi chú
-                  </Label>
-                  <Textarea
-                    id="note"
-                    placeholder="Ghi chú cho dịch vụ..."
-                    value={selectedService.note || ""}
-                    onChange={(e) => updateServiceNote(e.target.value)}
-                    rows={3}
-                    className="text-sm resize-none"
-                  />
-                </div>
-
-                {/* Subtotal */}
-                <div className="pt-2 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Tổng cộng</span>
-                    <span className="text-lg font-bold text-primary font-mono">
-                      {formatMoney(subtotal).vndFormatted}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Action Buttons */}
-              <div className="space-y-2">
-                <Button
-                  onClick={handleConfirm}
-                  className="w-full"
-                  size="lg"
-                  disabled={
-                    isEmpty ||
-                    !hasRole(AuthLoader.getUser(), UserRole.Receptionist)
-                  }
-                >
-                  Xác nhận đơn
-                </Button>
-                <Button
-                  onClick={clearService}
-                  variant="outline"
-                  className="w-full"
-                  size="sm"
-                >
-                  Xóa dịch vụ
-                </Button>
-              </div>
+          <CurrencyView amount={subtotal}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Dịch vụ đã chọn</h2>
             </div>
-          )}
+            <Separator className="my-2" />
+
+            {/* Empty State */}
+            {isEmpty && (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant={"icon"}>
+                    <ImageIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Giỏ hàng trống</EmptyTitle>
+                  <EmptyDescription>
+                    Lựa chọn 1 dịch vụ để bắt đầu
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+
+            {/* Selected Service */}
+            {selectedService && (
+              <div className="flex-1 flex flex-col justify-between space-y-4">
+                {/* Service Info Card */}
+                <Card className="border-none bg-transparent ">
+                  {selectedService.imageUrl && (
+                    <Image
+                      src={selectedService.imageUrl}
+                      alt={selectedService.name}
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-sm">
+                      {selectedService.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedService.code}
+                    </p>
+                    <p className="text-sm font-mono font-bold text-primary mt-1">
+                      {formatMoney(selectedService.unitPrice).vndFormatted}
+                    </p>
+                  </div>
+
+                  {/* Quantity Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity" className="text-xs">
+                      Số lượng
+                    </Label>
+                    <Counter
+                      value={selectedService.quantity}
+                      onChange={(e) => updateServiceQuantity(e || 1)}
+                    />
+                  </div>
+
+                  {/* Notes Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="note" className="text-xs">
+                      Ghi chú
+                    </Label>
+                    <Textarea
+                      id="note"
+                      placeholder="Ghi chú cho dịch vụ..."
+                      value={selectedService.note || ""}
+                      onChange={(e) => updateServiceNote(e.target.value)}
+                      rows={3}
+                      className="text-sm resize-none"
+                    />
+                  </div>
+
+                  {/* Subtotal */}
+                  <div className="pt-2 border-t space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Tổng cộng</span>
+                      <span className="text-lg font-bold text-primary font-mono">
+                        {formatMoney(subtotal).vndFormatted}
+                      </span>
+                    </div>
+
+                    {/* Currency Conversion */}
+                    <Separator />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <Label className="text-sm text-muted-foreground">
+                          Chọn tiền tệ
+                        </Label>
+                        <CurrencyView.Select />
+                      </div>
+                      <CurrencyView.Display />
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  <Button
+                    onClick={handleConfirm}
+                    className="w-full"
+                    size="lg"
+                    disabled={
+                      isEmpty ||
+                      !hasRole(AuthLoader.getUser(), UserRole.Receptionist)
+                    }
+                  >
+                    Xác nhận đơn
+                  </Button>
+                  <Button
+                    onClick={clearService}
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                  >
+                    Xóa dịch vụ
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CurrencyView>
         </aside>
       </div>
 

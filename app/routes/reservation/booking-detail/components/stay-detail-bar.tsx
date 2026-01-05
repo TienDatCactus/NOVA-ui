@@ -71,6 +71,7 @@ import {
   UserRole,
 } from "~/lib/auth/auth.loader";
 import { formatMoney } from "~/lib/utils";
+import CurrencyView from "~/components/currency-view";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type {
@@ -293,65 +294,80 @@ export default function StayDetailBar({
                       </DialogHeader>
 
                       <div className="p-6 space-y-6">
-                        {/* SUMMARY CARD - Styled like a receipt */}
-                        <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-                          <div className="p-4 space-y-3 bg-muted/30">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground flex items-center gap-2">
-                                <Toilet className="w-4 h-4" /> Chi phí Phòng
-                              </span>
-                              <span className="font-mono font-medium">
-                                {
-                                  formatMoney(bookingDetail.totalRoomCharge)
-                                    .vndFormatted
-                                }
-                              </span>
+                        <CurrencyView amount={paymentSummary.totalAmount}>
+                          {/* SUMMARY CARD - Styled like a receipt */}
+                          <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+                            <div className="p-4 space-y-3 bg-muted/30">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground flex items-center gap-2">
+                                  <Toilet className="w-4 h-4" /> Chi phí Phòng
+                                </span>
+                                <span className="font-mono font-medium">
+                                  {
+                                    formatMoney(bookingDetail.totalRoomCharge)
+                                      .vndFormatted
+                                  }
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground flex items-center gap-2">
+                                  <Soup className="w-4 h-4" /> Ăn sáng
+                                </span>
+                                <span className="font-mono font-medium">
+                                  {
+                                    formatMoney(bookingDetail.totalBreakfast)
+                                      .vndFormatted
+                                  }
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground flex items-center gap-2">
+                                  <CreditCard className="w-4 h-4" /> Đã thanh
+                                  toán
+                                </span>
+                                <span className="font-mono font-medium text-muted-foreground">
+                                  {
+                                    formatMoney(paymentSummary.previouslyPaid)
+                                      .vndFormatted
+                                  }
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground flex items-center gap-2">
-                                <Soup className="w-4 h-4" /> Ăn sáng
+
+                            <Separator />
+
+                            <div className="p-4 flex justify-between items-center bg-card">
+                              <span className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                                Tổng
                               </span>
-                              <span className="font-mono font-medium">
-                                {
-                                  formatMoney(bookingDetail.totalBreakfast)
-                                    .vndFormatted
-                                }
-                              </span>
+                              <div className="text-right">
+                                <span
+                                  className={`font-mono font-bold text-xl ${paymentSummary.totalAmount < 0 ? "text-orange-600" : "text-primary"}`}
+                                >
+                                  {
+                                    formatMoney(paymentSummary.totalAmount)
+                                      .vndFormatted
+                                  }
+                                </span>
+                                <span className="text-xs text-muted-foreground ml-1">
+                                  VND
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground flex items-center gap-2">
-                                <CreditCard className="w-4 h-4" /> Đã thanh toán
-                              </span>
-                              <span className="font-mono font-medium text-muted-foreground">
-                                {
-                                  formatMoney(paymentSummary.previouslyPaid)
-                                    .vndFormatted
-                                }
-                              </span>
+
+                            {/* Currency Conversion */}
+                            <Separator className="bg-border/50" />
+                            <div className="p-4 space-y-2 bg-muted/10">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-sm text-muted-foreground">
+                                  Quy đổi tiền tệ
+                                </span>
+                                <CurrencyView.Select />
+                              </div>
+                              <CurrencyView.Display showLabel={false} />
                             </div>
                           </div>
-
-                          <Separator />
-
-                          <div className="p-4 flex justify-between items-center bg-card">
-                            <span className="text-sm font-semibold text-foreground uppercase tracking-wide">
-                              Tổng
-                            </span>
-                            <div className="text-right">
-                              <span
-                                className={`font-mono font-bold text-xl ${paymentSummary.totalAmount < 0 ? "text-orange-600" : "text-primary"}`}
-                              >
-                                {
-                                  formatMoney(paymentSummary.totalAmount)
-                                    .vndFormatted
-                                }
-                              </span>
-                              <span className="text-xs text-muted-foreground ml-1">
-                                VND
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                        </CurrencyView>
 
                         {/* FORM */}
                         <Form {...paymentForm}>

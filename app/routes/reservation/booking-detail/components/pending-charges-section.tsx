@@ -15,6 +15,7 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { AuthLoader, hasAnyRole, UserRole } from "~/lib/auth/auth.loader";
 import { cn, formatMoney } from "~/lib/utils";
+import CurrencyView from "~/components/currency-view";
 import { useBookingPendingCharges } from "../container/use-booking-checkout.hooks";
 
 interface PendingChargesSectionProps {
@@ -80,32 +81,43 @@ export default function PendingChargesSection({
             )}
         </div>
 
-        <div className="bg-card border rounded-2xl p-5 shadow-sm flex justify-between items-end relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-            <Receipt className="w-24 h-24" />
+        <CurrencyView amount={totalPending}>
+          <div className="bg-card border rounded-2xl p-5 shadow-sm flex justify-between items-end relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+              <Receipt className="w-24 h-24" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">
+                Tổng dư nợ
+              </p>
+              <p
+                className={cn(
+                  "text-3xl font-bold tracking-tight",
+                  totalPending > 0 ? "text-primary" : "text-emerald-600"
+                )}
+              >
+                {formatMoney(totalPending).vndFormatted}
+              </p>
+
+              {/* Currency Conversion */}
+              <div className="mt-3 pt-3 border-t flex items-center justify-between w-full">
+                <span className="text-xs text-muted-foreground">Quy đổi:</span>
+                <CurrencyView.Select />
+              </div>
+              <div className="mt-1">
+                <CurrencyView.Display showLabel={false} />
+              </div>
+            </div>
+            {totalPending === 0 && (
+              <Badge
+                variant="outline"
+                className="bg-emerald-50 text-emerald-700 border-emerald-200"
+              >
+                Đã thanh toán
+              </Badge>
+            )}
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">
-              Tổng dư nợ
-            </p>
-            <p
-              className={cn(
-                "text-3xl font-bold tracking-tight",
-                totalPending > 0 ? "text-primary" : "text-emerald-600"
-              )}
-            >
-              {formatMoney(totalPending).vndFormatted}
-            </p>
-          </div>
-          {totalPending === 0 && (
-            <Badge
-              variant="outline"
-              className="bg-emerald-50 text-emerald-700 border-emerald-200"
-            >
-              Đã thanh toán
-            </Badge>
-          )}
-        </div>
+        </CurrencyView>
       </CardHeader>
 
       <div className="space-y-5 pb-4">

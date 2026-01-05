@@ -13,6 +13,7 @@ import { Alert, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { formatMoney } from "~/lib/utils";
+import CurrencyView from "~/components/currency-view";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import CheckoutSheet from "../components/checkout/checkout-sheet";
@@ -154,22 +155,29 @@ export function BookingActionsBar({
               {/* Post-Checkout Collection */}
               {bookingDetail?.status === "CheckedOut" &&
                 bookingState.financial.totalBalance > 0 && (
-                  <Button
-                    onClick={() => setCheckoutOpen(true)}
-                    className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm"
-                  >
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Thu nợ sau checkout
-                    <Badge
-                      variant="secondary"
-                      className="ml-2 bg-background/20 text-white hover:bg-background/30 border-0"
-                    >
-                      {
-                        formatMoney(bookingState.financial.totalBalance)
-                          .vndFormatted
-                      }
-                    </Badge>
-                  </Button>
+                  <CurrencyView amount={bookingState.financial.totalBalance}>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => setCheckoutOpen(true)}
+                        className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm"
+                      >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Thu nợ sau checkout
+                        <Badge
+                          variant="secondary"
+                          className="ml-2 bg-background/20 text-white hover:bg-background/30 border-0"
+                        >
+                          {
+                            formatMoney(bookingState.financial.totalBalance)
+                              .vndFormatted
+                          }
+                        </Badge>
+                      </Button>
+                      <div className="text-xs text-muted-foreground">
+                        <CurrencyView.Select />
+                      </div>
+                    </div>
+                  </CurrencyView>
                 )}
 
               {bookingDetail?.status === "CheckedOut" &&

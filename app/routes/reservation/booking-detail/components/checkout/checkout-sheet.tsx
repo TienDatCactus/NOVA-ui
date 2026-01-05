@@ -49,6 +49,7 @@ import { toast } from "sonner";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 import { hasAnyRole } from "~/lib/auth/bouncer";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
+import CurrencyView from "~/components/currency-view";
 
 interface CheckoutSheetProps {
   open: boolean;
@@ -215,190 +216,207 @@ export default function CheckoutSheet({
               <div className="h-full flex flex-col lg:flex-row">
                 {/* LEFT COL: INVOICE PREVIEW (DRAFT BILL) */}
                 <ScrollArea className="flex-1 border-r bg-background">
-                  <div className="p-6 space-y-6">
-                    {/* Section: Room Info Quick View (ReadOnly) */}
+                  <CurrencyView amount={invoicePreview?.totalAmount || 0}>
+                    <div className="p-6 space-y-6">
+                      {/* Section: Room Info Quick View (ReadOnly) */}
 
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <h2 className="text-lg font-semibold flex items-center gap-2">
-                            Phí phát sinh & Dịch vụ
-                            <Badge
-                              variant="secondary"
-                              className="text-xs font-normal"
-                            >
-                              Chưa lên hóa đơn
-                            </Badge>
-                          </h2>
-                          <p className="text-sm text-muted-foreground">
-                            Các khoản này sẽ được gộp vào Invoice Checkout
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Bill Metaphor Container */}
-                      <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
-                        {invoicePreview &&
-                        (invoicePreview.posOrderItems?.length > 0 ||
-                          invoicePreview.serviceOrderItems?.length > 0) ? (
-                          <>
-                            <Table>
-                              <TableHeader className="bg-muted/30">
-                                <TableRow>
-                                  <TableHead className="w-[50%] text-xs font-semibold uppercase text-muted-foreground">
-                                    Hạng mục
-                                  </TableHead>
-                                  <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
-                                    SL
-                                  </TableHead>
-                                  <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
-                                    Đơn giá
-                                  </TableHead>
-                                  <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
-                                    Thành tiền
-                                  </TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {/* POS Items */}
-                                {invoicePreview.posOrderItems?.map(
-                                  (item, idx) => (
-                                    <TableRow
-                                      key={`pos-${idx}`}
-                                      className="group hover:bg-muted/10"
-                                    >
-                                      <TableCell className="font-medium group-hover:text-primary transition-colors py-3">
-                                        {item.itemName}
-                                        <span className="block text-xs text-muted-foreground font-normal">
-                                          Minibar / Restaurant
-                                        </span>
-                                      </TableCell>
-                                      <TableCell className="text-right py-3">
-                                        {item.quantity}
-                                      </TableCell>
-                                      <TableCell className="text-right font-mono text-xs py-3">
-                                        {
-                                          formatMoney(item.unitPrice)
-                                            .vndFormatted
-                                        }
-                                      </TableCell>
-                                      <TableCell className="text-right font-mono font-medium py-3">
-                                        {formatMoney(item.amount).vndFormatted}
-                                      </TableCell>
-                                    </TableRow>
-                                  )
-                                )}
-
-                                {/* Service Items */}
-                                {invoicePreview.serviceOrderItems?.map(
-                                  (item, idx) => (
-                                    <TableRow
-                                      key={`svc-${idx}`}
-                                      className="group hover:bg-muted/10"
-                                    >
-                                      <TableCell className="font-medium group-hover:text-primary transition-colors py-3">
-                                        {item.itemName}
-                                        <span className="block text-xs text-muted-foreground font-normal">
-                                          Spa / Laundry / Other
-                                        </span>
-                                      </TableCell>
-                                      <TableCell className="text-right py-3">
-                                        {item.quantity}
-                                      </TableCell>
-                                      <TableCell className="text-right font-mono text-xs py-3">
-                                        {
-                                          formatMoney(item.unitPrice)
-                                            .vndFormatted
-                                        }
-                                      </TableCell>
-                                      <TableCell className="text-right font-mono font-medium py-3">
-                                        {formatMoney(item.amount).vndFormatted}
-                                      </TableCell>
-                                    </TableRow>
-                                  )
-                                )}
-                              </TableBody>
-                            </Table>
-
-                            {/* Bill Footer Summary */}
-                            <div className="bg-muted/10 p-4 border-t space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                  Tạm tính (F&B & Dịch vụ):
-                                </span>
-                                <span className="font-mono">
-                                  {
-                                    formatMoney(invoicePreview.subTotal)
-                                      .vndFormatted
-                                  }
-                                </span>
-                              </div>
-                              {(invoicePreview.vatAmount > 0 ||
-                                invoicePreview.serviceChargeAmount > 0) && (
-                                <div className="bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-md p-2 space-y-1">
-                                  <p className="text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400 font-semibold mb-1 flex items-center gap-1">
-                                    <Info className="w-3 h-3" />
-                                    Phí bổ sung (chỉ F&B & Dịch vụ)
-                                  </p>
-                                  <div className="text-xs text-muted-foreground space-y-1">
-                                    {invoicePreview.vatAmount > 0 && (
-                                      <div className="flex justify-between">
-                                        <span>VAT:</span>
-                                        <span className="font-mono">
-                                          {
-                                            formatMoney(
-                                              invoicePreview.vatAmount
-                                            ).vndFormatted
-                                          }
-                                        </span>
-                                      </div>
-                                    )}
-                                    {invoicePreview.serviceChargeAmount > 0 && (
-                                      <div className="flex justify-between">
-                                        <span>Service Charge:</span>
-                                        <span className="font-mono">
-                                          {
-                                            formatMoney(
-                                              invoicePreview.serviceChargeAmount
-                                            ).vndFormatted
-                                          }
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                              <Separator className="bg-slate-300" />
-                              <div className="flex justify-between items-center pt-1">
-                                <span className="font-semibold text-foreground">
-                                  Tổng phát sinh:
-                                </span>
-                                <span className="font-bold text-xl text-primary font-mono">
-                                  {
-                                    formatMoney(invoicePreview.totalAmount)
-                                      .vndFormatted
-                                  }
-                                </span>
-                              </div>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="py-12 flex flex-col items-center text-center p-4">
-                            <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-3">
-                              <Receipt className="w-8 h-8 text-muted-foreground/40" />
-                            </div>
-                            <h3 className="text-base font-semibold text-muted-foreground">
-                              Không có phí phát sinh
-                            </h3>
-                            <p className="text-sm text-muted-foreground/60 max-w-xs mt-1">
-                              Booking này không có các khoản charge từ POS hoặc
-                              Dịch vụ chưa thanh toán.
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <h2 className="text-lg font-semibold flex items-center gap-2">
+                              Phí phát sinh & Dịch vụ
+                              <Badge
+                                variant="secondary"
+                                className="text-xs font-normal"
+                              >
+                                Chưa lên hóa đơn
+                              </Badge>
+                            </h2>
+                            <p className="text-sm text-muted-foreground">
+                              Các khoản này sẽ được gộp vào Invoice Checkout
                             </p>
                           </div>
-                        )}
+                        </div>
+
+                        {/* Bill Metaphor Container */}
+                        <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
+                          {invoicePreview &&
+                          (invoicePreview.posOrderItems?.length > 0 ||
+                            invoicePreview.serviceOrderItems?.length > 0) ? (
+                            <>
+                              <Table>
+                                <TableHeader className="bg-muted/30">
+                                  <TableRow>
+                                    <TableHead className="w-[50%] text-xs font-semibold uppercase text-muted-foreground">
+                                      Hạng mục
+                                    </TableHead>
+                                    <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
+                                      SL
+                                    </TableHead>
+                                    <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
+                                      Đơn giá
+                                    </TableHead>
+                                    <TableHead className="text-right text-xs font-semibold uppercase text-muted-foreground">
+                                      Thành tiền
+                                    </TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {/* POS Items */}
+                                  {invoicePreview.posOrderItems?.map(
+                                    (item, idx) => (
+                                      <TableRow
+                                        key={`pos-${idx}`}
+                                        className="group hover:bg-muted/10"
+                                      >
+                                        <TableCell className="font-medium group-hover:text-primary transition-colors py-3">
+                                          {item.itemName}
+                                          <span className="block text-xs text-muted-foreground font-normal">
+                                            Minibar / Restaurant
+                                          </span>
+                                        </TableCell>
+                                        <TableCell className="text-right py-3">
+                                          {item.quantity}
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono text-xs py-3">
+                                          {
+                                            formatMoney(item.unitPrice)
+                                              .vndFormatted
+                                          }
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono font-medium py-3">
+                                          {
+                                            formatMoney(item.amount)
+                                              .vndFormatted
+                                          }
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                  )}
+
+                                  {/* Service Items */}
+                                  {invoicePreview.serviceOrderItems?.map(
+                                    (item, idx) => (
+                                      <TableRow
+                                        key={`svc-${idx}`}
+                                        className="group hover:bg-muted/10"
+                                      >
+                                        <TableCell className="font-medium group-hover:text-primary transition-colors py-3">
+                                          {item.itemName}
+                                          <span className="block text-xs text-muted-foreground font-normal">
+                                            Spa / Laundry / Other
+                                          </span>
+                                        </TableCell>
+                                        <TableCell className="text-right py-3">
+                                          {item.quantity}
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono text-xs py-3">
+                                          {
+                                            formatMoney(item.unitPrice)
+                                              .vndFormatted
+                                          }
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono font-medium py-3">
+                                          {
+                                            formatMoney(item.amount)
+                                              .vndFormatted
+                                          }
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                  )}
+                                </TableBody>
+                              </Table>
+
+                              {/* Bill Footer Summary */}
+                              <div className="bg-muted/10 p-4 border-t space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    Tạm tính (F&B & Dịch vụ):
+                                  </span>
+                                  <span className="font-mono">
+                                    {
+                                      formatMoney(invoicePreview.subTotal)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+                                {(invoicePreview.vatAmount > 0 ||
+                                  invoicePreview.serviceChargeAmount > 0) && (
+                                  <div className="bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-md p-2 space-y-1">
+                                    <p className="text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400 font-semibold mb-1 flex items-center gap-1">
+                                      <Info className="w-3 h-3" />
+                                      Phí bổ sung (chỉ F&B & Dịch vụ)
+                                    </p>
+                                    <div className="text-xs text-muted-foreground space-y-1">
+                                      {invoicePreview.vatAmount > 0 && (
+                                        <div className="flex justify-between">
+                                          <span>VAT:</span>
+                                          <span className="font-mono">
+                                            {
+                                              formatMoney(
+                                                invoicePreview.vatAmount
+                                              ).vndFormatted
+                                            }
+                                          </span>
+                                        </div>
+                                      )}
+                                      {invoicePreview.serviceChargeAmount >
+                                        0 && (
+                                        <div className="flex justify-between">
+                                          <span>Service Charge:</span>
+                                          <span className="font-mono">
+                                            {
+                                              formatMoney(
+                                                invoicePreview.serviceChargeAmount
+                                              ).vndFormatted
+                                            }
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                                <Separator className="bg-slate-300" />
+                                <div className="flex justify-between items-center pt-1">
+                                  <span className="font-semibold text-foreground">
+                                    Tổng phát sinh:
+                                  </span>
+                                  <span className="font-bold text-xl text-primary font-mono">
+                                    {
+                                      formatMoney(invoicePreview.totalAmount)
+                                        .vndFormatted
+                                    }
+                                  </span>
+                                </div>
+
+                                {/* Currency Conversion */}
+                                <div className="pt-3 border-t space-y-3">
+                                  <div className="flex items-center gap-2">
+                                    <CurrencyView.Select />
+                                  </div>
+                                  <CurrencyView.Display />
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="py-12 flex flex-col items-center text-center p-4">
+                              <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-3">
+                                <Receipt className="w-8 h-8 text-muted-foreground/40" />
+                              </div>
+                              <h3 className="text-base font-semibold text-muted-foreground">
+                                Không có phí phát sinh
+                              </h3>
+                              <p className="text-sm text-muted-foreground/60 max-w-xs mt-1">
+                                Booking này không có các khoản charge từ POS
+                                hoặc Dịch vụ chưa thanh toán.
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </CurrencyView>
                 </ScrollArea>
 
                 {/* RIGHT COL: INVOICE LIST & PAYMENT */}

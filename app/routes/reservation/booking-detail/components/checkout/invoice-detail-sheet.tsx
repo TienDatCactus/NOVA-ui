@@ -53,6 +53,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { cn, formatMoney } from "~/lib/utils";
+import CurrencyView from "~/components/currency-view";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import {
   INVOICE_STATUSES,
@@ -535,274 +536,299 @@ export default function InvoiceDetailSheet({
             </ScrollArea>
 
             {/* RIGHT: PAYMENT & CALCULATIONS (ACTIONABLE) */}
-            <div className="w-full lg:w-[420px] bg-muted/5 border-l flex flex-col h-full">
-              <div className="p-8 flex-1 overflow-y-auto">
-                {/* 1. Calculation Block */}
-                <div className="space-y-3 mb-8">
-                  {/* Room Charges (No Fees) */}
-                  {roomItems.length > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Tiền phòng</span>
-                      <span className="font-mono">
-                        {formatMoney(roomSubtotal).vndFormatted}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Service/Menu Charges with Fees */}
-                  {hasServiceItems && (
-                    <>
+            <CurrencyView
+              amount={
+                roomSubtotal + (calculatedFees?.totalAmount || serviceSubtotal)
+              }
+            >
+              <div className="w-full lg:w-[420px] bg-muted/5 border-l flex flex-col h-full">
+                <div className="p-8 flex-1 overflow-y-auto">
+                  {/* 1. Calculation Block */}
+                  <div className="space-y-3 mb-8">
+                    {/* Room Charges (No Fees) */}
+                    {roomItems.length > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">
-                          Dịch vụ & Nhà hàng
+                          Tiền phòng
                         </span>
                         <span className="font-mono">
-                          {formatMoney(serviceSubtotal).vndFormatted}
+                          {formatMoney(roomSubtotal).vndFormatted}
                         </span>
                       </div>
+                    )}
 
-                      {/* Visual separator for fee section */}
-                      <div className="ml-4 pl-4 border-l-2 border-blue-200 dark:border-blue-800 space-y-2 py-2">
-                        {/* Smart Toggles inside Calculation */}
-                        <div className="flex justify-between items-center h-8">
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              id="vat"
-                              checked={applyVat}
-                              onCheckedChange={setApplyVat}
-                              className="scale-75 origin-left"
-                              disabled={!paymentEligibility.canProceed}
-                            />
-                            <Label
-                              htmlFor="vat"
-                              className="text-xs cursor-pointer text-muted-foreground"
-                            >
-                              VAT (GTGT)
-                            </Label>
-                          </div>
-                          <span className="font-mono text-sm text-muted-foreground">
-                            {
-                              formatMoney(calculatedFees?.vatAmount || 0)
-                                .vndFormatted
-                            }
+                    {/* Service/Menu Charges with Fees */}
+                    {hasServiceItems && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Dịch vụ & Nhà hàng
+                          </span>
+                          <span className="font-mono">
+                            {formatMoney(serviceSubtotal).vndFormatted}
                           </span>
                         </div>
 
-                        <div className="flex justify-between items-center h-8">
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              id="svc"
-                              checked={applyServiceCharge}
-                              onCheckedChange={setApplyServiceCharge}
-                              className="scale-75 origin-left"
-                              disabled={!paymentEligibility.canProceed}
-                            />
-                            <Label
-                              htmlFor="svc"
-                              className="text-xs cursor-pointer text-muted-foreground"
-                            >
-                              Phí dịch vụ
-                            </Label>
-                          </div>
-                          <span className="font-mono text-sm text-muted-foreground">
-                            {
-                              formatMoney(
-                                calculatedFees?.serviceChargeAmount || 0
-                              ).vndFormatted
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Visual cue when only room items */}
-                  {hasOnlyRoomItems && (
-                    <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-md">
-                      <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                      <p className="text-xs text-blue-700 dark:text-blue-300">
-                        Tiền phòng không áp dụng VAT và phí dịch vụ
-                      </p>
-                    </div>
-                  )}
-
-                  <Separator />
-
-                  <div className="flex justify-between items-baseline pt-2">
-                    <span className="font-semibold">Tổng cộng</span>
-                    <span className="font-mono text-xl font-bold">
-                      {
-                        formatMoney(
-                          roomSubtotal +
-                            (calculatedFees?.totalAmount || serviceSubtotal)
-                        ).vndFormatted
-                      }
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between text-sm pt-1">
-                    <span className="text-muted-foreground">Đã thanh toán</span>
-                    <span className="font-mono text-muted-foreground">
-                      {formatMoney(invoiceDetail.paidAmount || 0).vndFormatted}
-                    </span>
-                  </div>
-
-                  {/* Balance with visual distinction */}
-                  {invoiceDetail.balance! > 0 && (
-                    <div className="flex justify-between text-sm pt-2 border-t">
-                      <span className="font-medium text-foreground">
-                        Còn phải thu
-                      </span>
-                      <span className="font-mono font-bold text-destructive">
-                        {formatMoney(invoiceDetail.balance || 0).vndFormatted}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* 2. Payment Form */}
-                {paymentEligibility.canProceed &&
-                  invoiceDetail.status !== "Paid" && (
-                    <div className="space-y-6 animate-in slide-in-from-bottom-2 fade-in duration-500">
-                      <div className="bg-background border rounded-lg p-4 shadow-sm">
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-xs font-bold uppercase text-muted-foreground">
-                            Cần thanh toán
-                          </span>
-                          <span className="font-mono text-lg font-bold text-primary">
-                            {
-                              formatMoney(invoiceDetail.balance || 0)
-                                .vndFormatted
-                            }
-                          </span>
-                        </div>
-
-                        <Form {...paymentForm}>
-                          <form className="space-y-4">
-                            <FormField
-                              control={paymentForm.control}
-                              name="amount"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      {...field}
-                                      value={field.value || ""}
-                                      onChange={(e) => {
-                                        // ... (Giữ nguyên logic validation cũ)
-                                        const val =
-                                          parseFloat(e.target.value) || 0;
-                                        field.onChange(val);
-                                      }}
-                                      endAddon={
-                                        <span className="text-xs font-bold text-muted-foreground">
-                                          VND
-                                        </span>
-                                      }
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <FormField
-                                control={paymentForm.control}
-                                name="method"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger className="h-10 w-40">
-                                          <SelectValue placeholder="Phương thức" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {PAYMENT_METHODS.filter(
-                                          (pm) => !pm.disabled
-                                        ).map((pm) => (
-                                          <SelectItem
-                                            key={pm.value}
-                                            value={pm.value}
-                                          >
-                                            <div className="flex items-center gap-2">
-                                              <pm.icon className="w-3.5 h-3.5" />{" "}
-                                              {pm.label}
-                                            </div>
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                        {/* Visual separator for fee section */}
+                        <div className="ml-4 pl-4 border-l-2 border-blue-200 dark:border-blue-800 space-y-2 py-2">
+                          {/* Smart Toggles inside Calculation */}
+                          <div className="flex justify-between items-center h-8">
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                id="vat"
+                                checked={applyVat}
+                                onCheckedChange={setApplyVat}
+                                className="scale-75 origin-left"
+                                disabled={!paymentEligibility.canProceed}
                               />
+                              <Label
+                                htmlFor="vat"
+                                className="text-xs cursor-pointer text-muted-foreground"
+                              >
+                                VAT (GTGT)
+                              </Label>
+                            </div>
+                            <span className="font-mono text-sm text-muted-foreground">
+                              {
+                                formatMoney(calculatedFees?.vatAmount || 0)
+                                  .vndFormatted
+                              }
+                            </span>
+                          </div>
 
+                          <div className="flex justify-between items-center h-8">
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                id="svc"
+                                checked={applyServiceCharge}
+                                onCheckedChange={setApplyServiceCharge}
+                                className="scale-75 origin-left"
+                                disabled={!paymentEligibility.canProceed}
+                              />
+                              <Label
+                                htmlFor="svc"
+                                className="text-xs cursor-pointer text-muted-foreground"
+                              >
+                                Phí dịch vụ
+                              </Label>
+                            </div>
+                            <span className="font-mono text-sm text-muted-foreground">
+                              {
+                                formatMoney(
+                                  calculatedFees?.serviceChargeAmount || 0
+                                ).vndFormatted
+                              }
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Visual cue when only room items */}
+                    {hasOnlyRoomItems && (
+                      <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-md">
+                        <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                          Tiền phòng không áp dụng VAT và phí dịch vụ
+                        </p>
+                      </div>
+                    )}
+
+                    <Separator />
+
+                    <div className="flex justify-between items-baseline pt-2">
+                      <span className="font-semibold">Tổng cộng</span>
+                      <span className="font-mono text-xl font-bold">
+                        {
+                          formatMoney(
+                            roomSubtotal +
+                              (calculatedFees?.totalAmount || serviceSubtotal)
+                          ).vndFormatted
+                        }
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-sm pt-1">
+                      <span className="text-muted-foreground">
+                        Đã thanh toán
+                      </span>
+                      <span className="font-mono text-muted-foreground">
+                        {
+                          formatMoney(invoiceDetail.paidAmount || 0)
+                            .vndFormatted
+                        }
+                      </span>
+                    </div>
+
+                    {/* Balance with visual distinction */}
+                    {invoiceDetail.balance! > 0 && (
+                      <div className="flex justify-between text-sm pt-2 border-t">
+                        <span className="font-medium text-foreground">
+                          Còn phải thu
+                        </span>
+                        <span className="font-mono font-bold text-destructive">
+                          {formatMoney(invoiceDetail.balance || 0).vndFormatted}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Currency Conversion */}
+                    <Separator className="my-3" />
+                    <div className="space-y-2 bg-muted/20 p-3 rounded-lg">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Quy đổi tiền tệ
+                        </span>
+                        <CurrencyView.Select />
+                      </div>
+                      <CurrencyView.Display showLabel={false} />
+                    </div>
+                  </div>
+
+                  {/* 2. Payment Form */}
+                  {paymentEligibility.canProceed &&
+                    invoiceDetail.status !== "Paid" && (
+                      <div className="space-y-6 animate-in slide-in-from-bottom-2 fade-in duration-500">
+                        <div className="bg-background border rounded-lg p-4 shadow-sm">
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="text-xs font-bold uppercase text-muted-foreground">
+                              Cần thanh toán
+                            </span>
+                            <span className="font-mono text-lg font-bold text-primary">
+                              {
+                                formatMoney(invoiceDetail.balance || 0)
+                                  .vndFormatted
+                              }
+                            </span>
+                          </div>
+
+                          <Form {...paymentForm}>
+                            <form className="space-y-4">
                               <FormField
                                 control={paymentForm.control}
-                                name="transactionReference"
+                                name="amount"
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
                                       <Input
-                                        placeholder="Mã GD / Ghi chú"
+                                        type="number"
                                         {...field}
                                         value={field.value || ""}
-                                        className="h-10"
+                                        onChange={(e) => {
+                                          // ... (Giữ nguyên logic validation cũ)
+                                          const val =
+                                            parseFloat(e.target.value) || 0;
+                                          field.onChange(val);
+                                        }}
+                                        endAddon={
+                                          <span className="text-xs font-bold text-muted-foreground">
+                                            VND
+                                          </span>
+                                        }
                                       />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
                                 )}
                               />
-                            </div>
 
-                            {changeAmount > 0 && (
-                              <div className="flex justify-between items-center p-2 bg-green-50 text-green-700 rounded text-sm">
-                                <span className="font-medium">
-                                  Tiền thừa trả khách:
-                                </span>
-                                <span className="font-mono font-bold">
-                                  {formatMoney(changeAmount).vndFormatted}
-                                </span>
+                              <div className="grid grid-cols-2 gap-3">
+                                <FormField
+                                  control={paymentForm.control}
+                                  name="method"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger className="h-10 w-40">
+                                            <SelectValue placeholder="Phương thức" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {PAYMENT_METHODS.filter(
+                                            (pm) => !pm.disabled
+                                          ).map((pm) => (
+                                            <SelectItem
+                                              key={pm.value}
+                                              value={pm.value}
+                                            >
+                                              <div className="flex items-center gap-2">
+                                                <pm.icon className="w-3.5 h-3.5" />{" "}
+                                                {pm.label}
+                                              </div>
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={paymentForm.control}
+                                  name="transactionReference"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          placeholder="Mã GD / Ghi chú"
+                                          {...field}
+                                          value={field.value || ""}
+                                          className="h-10"
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
                               </div>
-                            )}
-                          </form>
-                        </Form>
+
+                              {changeAmount > 0 && (
+                                <div className="flex justify-between items-center p-2 bg-green-50 text-green-700 rounded text-sm">
+                                  <span className="font-medium">
+                                    Tiền thừa trả khách:
+                                  </span>
+                                  <span className="font-mono font-bold">
+                                    {formatMoney(changeAmount).vndFormatted}
+                                  </span>
+                                </div>
+                              )}
+                            </form>
+                          </Form>
+                        </div>
                       </div>
+                    )}
+                </div>
+
+                {/* 3. Footer Actions */}
+                <div className="p-6 border-t bg-background">
+                  {paymentEligibility.canProceed ? (
+                    <Button
+                      className="w-full h-12 text-base font-medium shadow-md transition-all hover:scale-[1.01]"
+                      onClick={paymentForm.handleSubmit(handlePayment)}
+                      disabled={!paymentValidation.isValid || isProcessing}
+                    >
+                      {isProcessing ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          Xác nhận thanh toán{" "}
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <div className="flex items-center justify-center h-12 text-muted-foreground text-sm italic bg-muted/10 rounded-md">
+                      Hóa đơn này không thể thanh toán thêm.
                     </div>
                   )}
+                </div>
               </div>
-
-              {/* 3. Footer Actions */}
-              <div className="p-6 border-t bg-background">
-                {paymentEligibility.canProceed ? (
-                  <Button
-                    className="w-full h-12 text-base font-medium shadow-md transition-all hover:scale-[1.01]"
-                    onClick={paymentForm.handleSubmit(handlePayment)}
-                    disabled={!paymentValidation.isValid || isProcessing}
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        Xác nhận thanh toán{" "}
-                        <ArrowRight className="w-5 h-5 ml-2" />
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <div className="flex items-center justify-center h-12 text-muted-foreground text-sm italic bg-muted/10 rounded-md">
-                    Hóa đơn này không thể thanh toán thêm.
-                  </div>
-                )}
-              </div>
-            </div>
+            </CurrencyView>
           </div>
         ) : null}
       </SheetContent>

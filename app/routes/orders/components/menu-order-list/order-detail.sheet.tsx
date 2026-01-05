@@ -20,6 +20,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { cn, formatMoney } from "~/lib/utils";
+import CurrencyView from "~/components/currency-view";
 import type { POSOrderDetailDto } from "~/services/api/orders/dto";
 
 import InlineNoteEditor from "./inline-note-editor";
@@ -215,77 +216,91 @@ export default function OrderDetailSheet({
         </ScrollArea>
 
         {/* === 3. FOOTER: FINANCIALS === */}
-        <div className="flex-none bg-background border-t z-20">
-          <div className="p-6 space-y-4">
-            {/* Breakdown */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Tổng tiền hàng</span>
-                <span className="font-mono text-foreground">
-                  {formatMoney(orderDetail.subtotalAmount).vndFormatted}
-                </span>
-              </div>
-
-              {(orderDetail.serviceChargeAmount > 0 ||
-                orderDetail.vatAmount > 0) && (
-                <>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Phí dịch vụ & Khác</span>
-                    <span className="font-mono text-foreground">
-                      {
-                        formatMoney(orderDetail.serviceChargeAmount)
-                          .vndFormatted
-                      }
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>VAT</span>
-                    <span className="font-mono text-foreground">
-                      {formatMoney(orderDetail.vatAmount).vndFormatted}
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <Separator className="my-2" />
-
-            {/* Grand Total & Invoice */}
-            <div className="flex items-end justify-between">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Thanh toán
-                </span>
-                {orderDetail.invoiceId ? (
-                  <Badge
-                    variant="secondary"
-                    className="w-fit font-mono text-[10px] px-1.5 h-5"
-                  >
-                    INV: {orderDetail.invoiceId}
-                  </Badge>
-                ) : (
-                  <span className="text-[10px] text-muted-foreground italic">
-                    Chưa xuất hóa đơn
+        <CurrencyView amount={orderDetail.totalAmount}>
+          <div className="flex-none bg-background border-t z-20">
+            <div className="p-6 space-y-4">
+              {/* Breakdown */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Tổng tiền hàng</span>
+                  <span className="font-mono text-foreground">
+                    {formatMoney(orderDetail.subtotalAmount).vndFormatted}
                   </span>
+                </div>
+
+                {(orderDetail.serviceChargeAmount > 0 ||
+                  orderDetail.vatAmount > 0) && (
+                  <>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Phí dịch vụ & Khác</span>
+                      <span className="font-mono text-foreground">
+                        {
+                          formatMoney(orderDetail.serviceChargeAmount)
+                            .vndFormatted
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>VAT</span>
+                      <span className="font-mono text-foreground">
+                        {formatMoney(orderDetail.vatAmount).vndFormatted}
+                      </span>
+                    </div>
+                  </>
                 )}
               </div>
-              <span className="text-2xl font-bold tracking-tight text-primary font-mono">
-                {formatMoney(orderDetail.totalAmount).vndFormatted}
-              </span>
-            </div>
 
-            {/* Main Action */}
-            <div className="pt-2">
-              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) && (
-                <OrderFooterActions
-                  orderId={orderDetail.id}
-                  status={orderDetail.status}
-                  invoiceId={orderDetail.invoiceId}
-                />
-              )}
+              <Separator className="my-2" />
+
+              {/* Grand Total & Invoice */}
+              <div className="flex items-end justify-between">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Thanh toán
+                  </span>
+                  {orderDetail.invoiceId ? (
+                    <Badge
+                      variant="secondary"
+                      className="w-fit font-mono text-[10px] px-1.5 h-5"
+                    >
+                      INV: {orderDetail.invoiceId}
+                    </Badge>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground italic">
+                      Chưa xuất hóa đơn
+                    </span>
+                  )}
+                </div>
+                <span className="text-2xl font-bold tracking-tight text-primary font-mono">
+                  {formatMoney(orderDetail.totalAmount).vndFormatted}
+                </span>
+              </div>
+
+              {/* Currency Conversion */}
+              <Separator />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    Quy đổi tiền tệ
+                  </span>
+                  <CurrencyView.Select />
+                </div>
+                <CurrencyView.Display showLabel={false} />
+              </div>
+
+              {/* Main Action */}
+              <div className="pt-2">
+                {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) && (
+                  <OrderFooterActions
+                    orderId={orderDetail.id}
+                    status={orderDetail.status}
+                    invoiceId={orderDetail.invoiceId}
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </CurrencyView>
       </SheetContent>
     </Sheet>
   );

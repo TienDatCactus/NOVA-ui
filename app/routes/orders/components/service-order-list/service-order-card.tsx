@@ -108,7 +108,6 @@ export default function ServiceOrderCard({ order }: ServiceOrderCardProps) {
             {currentStatus.label}
           </Badge>
         </div>
-
         {/* Details Component (Dumb Component) */}
         <ServiceOrderDetails order={order} bookingDetail={bookingDetail} />
       </div>

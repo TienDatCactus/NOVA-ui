@@ -4,7 +4,7 @@ const ExchangeRateItemSchema = z.object({
   currencyCode: z.string(),
   rateToVND: z.number(),
   source: z.string(),
-  lastUpdated: z.string().datetime(),
+  lastUpdated: z.string(),
 });
 
 const ExchangeRatesListSchema = z.array(ExchangeRateItemSchema);

@@ -217,7 +217,7 @@ export default function ServiceOrderLayout({}: Route.ComponentProps) {
                 </Empty>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredOrders.map((order) => (
                   <div key={order.id} className="relative">
                     <ServiceOrderCard order={order} />

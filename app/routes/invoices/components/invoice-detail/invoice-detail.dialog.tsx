@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { formatMoney } from "~/lib/utils";
+import CurrencyView from "~/components/currency-view";
 import type { InvoiceDetailItemDto } from "~/services/api/invoices/dto";
 import { INVOICE_STATUSES } from "~/services/api/invoices/invoice.types";
 import { PAYMENT_METHODS } from "~/services/types/payment.types";
@@ -105,26 +106,42 @@ export function InvoiceDetailDialog({
               )?.label || "-"}
             </div>
           </div>
-          <div className="space-y-2">
-            <div className="text-xs text-muted-foreground">Tạm tính</div>
-            <div className="font-medium text-foreground">
-              {formatMoney(invoice.subTotal ?? 0).vndFormatted || 0}
+          <CurrencyView amount={invoice.total ?? 0}>
+            <div className="space-y-2">
+              <div className="text-xs text-muted-foreground">Tạm tính</div>
+              <div className="font-medium text-foreground">
+                {formatMoney(invoice.subTotal ?? 0).vndFormatted || 0}
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">VAT</div>
+              <div className="font-medium text-foreground">
+                {formatMoney(invoice.vatAmount ?? 0).vndFormatted || 0}
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">
+                Phí dịch vụ
+              </div>
+              <div className="font-medium text-foreground">
+                {formatMoney(invoice.serviceChargeAmount ?? 0).vndFormatted ||
+                  0}
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">
+                Tổng cộng
+              </div>
+              <div className="font-bold text-primary text-lg">
+                {formatMoney(invoice.total ?? 0).vndFormatted || 0}
+              </div>
+
+              {/* Currency Conversion */}
+              <div className="pt-2 mt-2 border-t">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="text-xs text-muted-foreground">
+                    Quy đổi tiền tệ
+                  </span>
+                  <CurrencyView.Select />
+                </div>
+                <CurrencyView.Display showLabel={false} />
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground mt-2">VAT</div>
-            <div className="font-medium text-foreground">
-              {formatMoney(invoice.vatAmount ?? 0).vndFormatted || 0}
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              Phí dịch vụ
-            </div>
-            <div className="font-medium text-foreground">
-              {formatMoney(invoice.serviceChargeAmount ?? 0).vndFormatted || 0}
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">Tổng cộng</div>
-            <div className="font-bold text-primary text-lg">
-              {formatMoney(invoice.total ?? 0).vndFormatted || 0}
-            </div>
-          </div>
+          </CurrencyView>
         </div>
         <div className="mt-8">
           <div className="font-semibold text-foreground mb-2">

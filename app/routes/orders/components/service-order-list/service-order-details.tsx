@@ -13,6 +13,7 @@ import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn, formatMoney } from "~/lib/utils";
+import CurrencyView from "~/components/currency-view";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import type { ServiceOrderListItemDto } from "~/services/api/orders/dto";
 import { useServiceOrderDetail } from "../../container/service-order/query.hooks";
@@ -128,59 +129,73 @@ export default function ServiceOrderDetails({
 
       <Separator className="border-dashed opacity-60" />
 
-      {/* SECTION 2: FINANCIAL BREAKDOWN (The Receipt) */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase text-accent-foreground mb-2">
-          <Receipt className="h-3.5 w-3.5" /> Chi tiết thanh toán
+      <CurrencyView amount={serviceOrderDetail.total}>
+        {/* SECTION 2: FINANCIAL BREAKDOWN (The Receipt) */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase text-accent-foreground mb-2">
+            <Receipt className="h-3.5 w-3.5" /> Chi tiết thanh toán
+          </div>
+
+          {/* Base Cost */}
+          <Row
+            label="Đơn giá"
+            value={formatMoney(serviceOrderDetail.unitPrice).vndFormatted}
+          />
+          <Row
+            label="Số lượng"
+            value={`x ${serviceOrderDetail.quantity}`}
+            valueClass="font-bold"
+          />
+
+          {/* Surcharges & Discounts */}
+          {serviceOrderDetail.discountAmount > 0 && (
+            <Row
+              label="Giảm giá"
+              value={`-${formatMoney(serviceOrderDetail.discountAmount).vndFormatted}`}
+              valueClass="text-destructive"
+            />
+          )}
+
+          {serviceOrderDetail.serviceChargeAmount > 0 && (
+            <Row
+              label="Phí dịch vụ (SVC)"
+              value={`+${formatMoney(serviceOrderDetail.serviceChargeAmount).vndFormatted}`}
+              valueClass="text-muted-foreground"
+            />
+          )}
+
+          {serviceOrderDetail.vatAmount > 0 && (
+            <Row
+              label="Thuế (VAT)"
+              value={`+${formatMoney(serviceOrderDetail.vatAmount).vndFormatted}`}
+              valueClass="text-muted-foreground"
+            />
+          )}
+
+          <Separator className="my-2 bg-muted" />
+          {/* FINAL TOTAL */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-accent-foreground">
+              Tổng cộng
+            </span>
+            <span className="text-lg font-extrabold text-primary">
+              {formatMoney(serviceOrderDetail.total).vndFormatted}
+            </span>
+          </div>
+
+          {/* Currency Conversion */}
+          <Separator className="my-2 bg-muted" />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">
+                Quy đổi tiền tệ
+              </span>
+              <CurrencyView.Select />
+            </div>
+            <CurrencyView.Display showLabel={false} />
+          </div>
         </div>
-
-        {/* Base Cost */}
-        <Row
-          label="Đơn giá"
-          value={formatMoney(serviceOrderDetail.unitPrice).vndFormatted}
-        />
-        <Row
-          label="Số lượng"
-          value={`x ${serviceOrderDetail.quantity}`}
-          valueClass="font-bold"
-        />
-
-        {/* Surcharges & Discounts */}
-        {serviceOrderDetail.discountAmount > 0 && (
-          <Row
-            label="Giảm giá"
-            value={`-${formatMoney(serviceOrderDetail.discountAmount).vndFormatted}`}
-            valueClass="text-destructive"
-          />
-        )}
-
-        {serviceOrderDetail.serviceChargeAmount > 0 && (
-          <Row
-            label="Phí dịch vụ (SVC)"
-            value={`+${formatMoney(serviceOrderDetail.serviceChargeAmount).vndFormatted}`}
-            valueClass="text-muted-foreground"
-          />
-        )}
-
-        {serviceOrderDetail.vatAmount > 0 && (
-          <Row
-            label="Thuế (VAT)"
-            value={`+${formatMoney(serviceOrderDetail.vatAmount).vndFormatted}`}
-            valueClass="text-muted-foreground"
-          />
-        )}
-
-        <Separator className="my-2 bg-muted" />
-        {/* FINAL TOTAL */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-bold text-accent-foreground">
-            Tổng cộng
-          </span>
-          <span className="text-lg font-extrabold text-primary">
-            {formatMoney(serviceOrderDetail.total).vndFormatted}
-          </span>
-        </div>
-      </div>
+      </CurrencyView>
 
       {/* SECTION 3: NOTE */}
       {serviceOrderDetail.note && (
