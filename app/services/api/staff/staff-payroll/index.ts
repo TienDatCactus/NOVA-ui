@@ -107,19 +107,6 @@ async function updatePaidAmountPayroll(
     return Promise.reject(error);
   }
 }
-async function updateBaseSalaryPayroll(
-  id: string,
-  data: UpdateBaseSalaryPayrollDto
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const validated = UpdateBaseSalaryPayrollSchema.parse(data);
-    const resp = await http.patch(StaffPayroll.updateBaseSalary(id), validated);
-    return resp.data;
-  } catch (error) {
-    console.log(error);
-    return Promise.reject(error);
-  }
-}
 
 /**
  * Apply unused leave mode (PayOut / CarryOver)
@@ -300,7 +287,6 @@ export const StaffPayrollService = {
   generateSinglePayroll,
   getPayrollDetail,
   updatePaidAmountPayroll,
-  updateBaseSalaryPayroll,
   applyUnusedLeave,
   getComponents,
   addComponent,

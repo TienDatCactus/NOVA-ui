@@ -283,6 +283,21 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
     },
     size: 60,
   },
+  {
+    accessorKey: "locked",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trạng thái" />
+    ),
+    cell: ({ row }) => {
+      const locked = row.getValue("locked");
+      return (
+        <Badge variant={locked ? "destructive" : "default"}>
+          <span>{locked ? "Đã khóa" : "Chưa khóa"}</span>
+        </Badge>
+      );
+    },
+    size: 60,
+  },
 
   {
     id: "actions",

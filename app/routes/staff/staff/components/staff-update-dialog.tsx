@@ -143,12 +143,11 @@ export default function EditStaffDialog({
     },
   });
 
-  // --- Effect: Sync Data to Form ---
   useEffect(() => {
-    if (staffDetail && open) {
+    if (staffDetail && roles) {
       form.reset({
-        fullName: staffDetail.fullName || "",
-        phoneNumber: staffDetail.phoneNumber || "",
+        fullName: staffDetail.fullName,
+        phoneNumber: staffDetail.phoneNumber,
         baseSalary: staffDetail.baseSalary || 0,
         email: staffDetail.email || "",
         gender: staffDetail.gender || "",
@@ -167,7 +166,8 @@ export default function EditStaffDialog({
           : undefined,
       });
     }
-  }, [form, staffDetail, open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staffDetail, roles]);
 
   const onSubmit = async (data: UpdateStaffDto) => {
     if (!staff?.id) return;
@@ -251,7 +251,6 @@ export default function EditStaffDialog({
                               onChange={(e) =>
                                 field.onChange(e.currentTarget.valueAsNumber)
                               }
-                              defaultValue={0}
                               type="number"
                               className="h-9 font-mono"
                             />
@@ -274,6 +273,7 @@ export default function EditStaffDialog({
                         >
                           {(field) => (
                             <Select
+                              key={`gender-${field.value}`}
                               onValueChange={field.onChange}
                               value={field.value}
                             >
@@ -368,6 +368,7 @@ export default function EditStaffDialog({
                           >
                             {(field) => (
                               <Select
+                                key={`role-${field.value}`}
                                 onValueChange={field.onChange}
                                 value={field.value}
                               >

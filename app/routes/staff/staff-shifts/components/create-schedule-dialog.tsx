@@ -1,15 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths, format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  CalendarIcon,
-  Check,
-  ChevronDown,
-  Loader2,
-  Save,
-  Search,
-  Users,
-} from "lucide-react";
+import { CalendarIcon, Check, Loader2, Save, Users } from "lucide-react";
 import { useState } from "react";
 import {
   type Control,
@@ -50,7 +42,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
@@ -139,8 +130,7 @@ export default function CreateScheduleDialog({
   const form = useForm<CreateShiftScheduleRequest>({
     resolver: zodResolver(CreateShiftScheduleRequestSchema),
     defaultValues: {
-      primaryStaffId: "",
-      additionalStaffIds: [],
+      staffIds: [],
       workShiftIds: [],
       startDate: format(new Date(), "yyyy-MM-dd"),
       endDate: format(addMonths(new Date(), 3), "yyyy-MM-dd"),
@@ -151,7 +141,6 @@ export default function CreateScheduleDialog({
     },
   });
 
-  const primaryStaffId = form.watch("primaryStaffId");
   const repeatWeekly = form.watch("repeatWeekly");
 
   // --- Handlers ---
@@ -168,10 +157,8 @@ export default function CreateScheduleDialog({
   };
 
   // Filter staff logic
-  const availableStaffForAdditional = staffList.filter(
-    (s) =>
-      s.id !== primaryStaffId &&
-      s.fullName.toLowerCase().includes(searchStaff.toLowerCase())
+  const availableStaffForAdditional = staffList.filter((s) =>
+    s.fullName.toLowerCase().includes(searchStaff.toLowerCase())
   );
 
   return (
@@ -200,78 +187,10 @@ export default function CreateScheduleDialog({
                 <div className="border rounded-md overflow-hidden">
                   <Table>
                     <TableBody>
-                      {/* Primary Staff Row */}
                       <FormRow
                         control={form.control}
-                        name="primaryStaffId"
-                        label="Nhân viên chính"
-                        required
-                      >
-                        {(field) => (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-full justify-between h-9",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? staffList.find((s) => s.id === field.value)
-                                      ?.fullName
-                                  : "Chọn nhân viên"}
-                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-[300px] p-0"
-                              align="start"
-                            >
-                              <Command>
-                                <CommandInput placeholder="Tìm nhân viên..." />
-                                <CommandList>
-                                  <CommandEmpty>Không tìm thấy.</CommandEmpty>
-                                  <CommandGroup>
-                                    {staffList
-                                      .filter((i) => i.status !== "Terminated")
-                                      .map((staff) => (
-                                        <CommandItem
-                                          value={staff.fullName}
-                                          key={staff.id}
-                                          onSelect={() => {
-                                            field.onChange(staff.id);
-                                            form.setValue(
-                                              "additionalStaffIds",
-                                              []
-                                            ); // Reset additional if primary changes
-                                          }}
-                                        >
-                                          <Check
-                                            className={cn(
-                                              "mr-2 h-4 w-4",
-                                              staff.id === field.value
-                                                ? "opacity-100"
-                                                : "opacity-0"
-                                            )}
-                                          />
-                                          {staff.fullName}
-                                        </CommandItem>
-                                      ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                        )}
-                      </FormRow>
-
-                      {/* Additional Staff Row (Multi-select via Popover) */}
-                      <FormRow
-                        control={form.control}
-                        name="additionalStaffIds"
-                        label="Nhân viên phụ"
+                        name="staffIds"
+                        label="Nhân viên "
                       >
                         {(field) => (
                           <Popover>
@@ -283,7 +202,7 @@ export default function CreateScheduleDialog({
                                 <span>
                                   {field.value?.length > 0
                                     ? `Đã chọn ${field.value.length} người`
-                                    : "Thêm nhân viên phụ (Tùy chọn)"}
+                                    : "Thêm nhân viên "}
                                 </span>
                                 <Users className="h-4 w-4 opacity-50" />
                               </Button>
@@ -292,35 +211,25 @@ export default function CreateScheduleDialog({
                               className="w-[300px] p-2"
                               align="start"
                             >
-                              <div className="space-y-2">
-                                <div className="relative">
-                                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                  <input
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pl-8 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    placeholder="Tìm tên..."
-                                    value={searchStaff}
-                                    onChange={(e) =>
-                                      setSearchStaff(e.target.value)
-                                    }
-                                  />
-                                </div>
-                                <ScrollArea className="h-[200px]">
-                                  <div className="space-y-1">
-                                    {availableStaffForAdditional.length ===
-                                      0 && (
-                                      <div className="text-xs text-muted-foreground text-center py-4">
-                                        Không tìm thấy
-                                      </div>
-                                    )}
+                              <Command className="space-y-2">
+                                <CommandInput
+                                  className="relative"
+                                  placeholder="Tìm kiếm nhân viên"
+                                />
+                                <CommandList className="h-[200px]">
+                                  <CommandEmpty className="text-xs text-muted-foreground text-center py-4">
+                                    Không tìm thấy
+                                  </CommandEmpty>
+                                  <CommandGroup>
                                     {availableStaffForAdditional.map(
                                       (staff) => {
                                         const isSelected =
                                           field.value?.includes(staff.id) ??
                                           false;
                                         return (
-                                          <div
+                                          <CommandItem
                                             key={staff.id}
-                                            onClick={() => {
+                                            onSelect={() => {
                                               const updatedValue = isSelected
                                                 ? (field.value ?? []).filter(
                                                     (id: string) =>
@@ -333,31 +242,18 @@ export default function CreateScheduleDialog({
                                               field.onChange(updatedValue);
                                             }}
                                             className={cn(
-                                              "flex items-center gap-2 p-2 rounded-sm cursor-pointer hover:bg-muted text-sm",
-                                              isSelected &&
-                                                "bg-muted font-medium"
+                                              "flex items-center gap-2 p-2 rounded-sm cursor-pointer hover:bg-muted text-sm"
                                             )}
                                           >
-                                            <div
-                                              className={cn(
-                                                "h-4 w-4 border rounded flex items-center justify-center",
-                                                isSelected
-                                                  ? "bg-primary border-primary"
-                                                  : "border-muted-foreground"
-                                              )}
-                                            >
-                                              {isSelected && (
-                                                <Check className="h-3 w-3 text-white" />
-                                              )}
-                                            </div>
+                                            {isSelected && <Check />}
                                             <span>{staff.fullName}</span>
-                                          </div>
+                                          </CommandItem>
                                         );
                                       }
                                     )}
-                                  </div>
-                                </ScrollArea>
-                              </div>
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
                             </PopoverContent>
                           </Popover>
                         )}

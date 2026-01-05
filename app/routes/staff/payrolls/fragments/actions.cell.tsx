@@ -1,4 +1,4 @@
-import { DollarSign, Edit, FileText, MoreHorizontal } from "lucide-react";
+import { DollarSign, FileText, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -11,7 +11,6 @@ import {
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
 import CreateSalaryExpenseDialog from "../components/create-salary-expense-dialog";
-import UpdateBaseSalaryPayrollDialog from "../components/update-base-salary-payroll-dialog";
 import UpdatePaidAmountPayrollDialog from "../components/update-paid-payroll-dialog";
 
 interface ActionsMenuCellProps {
@@ -23,7 +22,6 @@ export default function ActionsMenuCell({
   payroll,
   onSuccess,
 }: ActionsMenuCellProps) {
-  const [updateBaseSalaryOpen, setUpdateBaseSalaryOpen] = useState(false);
   const [updatePaidAmountOpen, setUpdatePaidAmountOpen] = useState(false);
   const [applyLeaveOpen, setApplyLeaveOpen] = useState(false);
   const [createExpenseOpen, setCreateExpenseOpen] = useState(false);
@@ -38,10 +36,6 @@ export default function ActionsMenuCell({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setUpdateBaseSalaryOpen(true)}>
-            <Edit className="mr-2 h-4 w-4" />
-            <span>Cập nhật lương cơ bản</span>
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setUpdatePaidAmountOpen(true)}>
             <DollarSign className="mr-2 h-4 w-4" />
             <span>Cập nhật số tiền đã trả</span>
@@ -55,27 +49,13 @@ export default function ActionsMenuCell({
             <FileText className="mr-2 h-4 w-4" />
             <span>Áp dụng chế độ xử lý phép dư</span>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setCreateExpenseOpen(true)}
-            disabled={!payroll.locked || payroll.hasExpense}
-            className={
-              !payroll.locked || payroll.hasExpense
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-            }
-          >
+          <DropdownMenuItem onClick={() => setCreateExpenseOpen(true)}>
             <DollarSign className="mr-2 h-4 w-4" />
             <span>Tạo phiếu chi lương</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <UpdateBaseSalaryPayrollDialog
-        payroll={payroll}
-        open={updateBaseSalaryOpen}
-        onOpenChange={setUpdateBaseSalaryOpen}
-        onSuccess={onSuccess}
-      />
       <UpdatePaidAmountPayrollDialog
         payroll={payroll}
         open={updatePaidAmountOpen}

@@ -52,6 +52,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useOTAInfo } from "~/features/create-booking-wizard/container/create-booking-query.hooks";
+import GuestDocumentsSection from "~/features/guest-documents/components/guest-documents-section";
 import { onError, toYMD, useCalculateNights } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type { StaffUpdateBookingRequestDto } from "~/services/api/booking/dto";
@@ -245,6 +246,16 @@ export default function Component() {
                     setCompletedChargesDialogOpen(true)
                   }
                   canAddCharges={
+                    bookingDetail.status !== "CheckedOut" &&
+                    bookingDetail.status !== "Cancelled"
+                  }
+                />
+
+                <GuestDocumentsSection
+                  bookingId={bookingDetail.id}
+                  customerId={bookingDetail.customer.id}
+                  adultsAmount={bookingDetail.adults}
+                  canEdit={
                     bookingDetail.status !== "CheckedOut" &&
                     bookingDetail.status !== "Cancelled"
                   }

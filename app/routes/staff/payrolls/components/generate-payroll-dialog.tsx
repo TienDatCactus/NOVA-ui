@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -35,7 +36,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -56,7 +56,6 @@ import {
   useGeneratePayroll,
   useGenerateSinglePayroll,
 } from "../container/query.hooks";
-import { Badge } from "~/components/ui/badge";
 
 const generatePayrollSchema = z
   .object({
@@ -428,37 +427,6 @@ export default function GeneratePayrollDialog({
                             </Command>
                           </PopoverContent>
                         </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="baseSalaryFullMonth"
-                    render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <FormLabel className="text-xs">
-                            Lương cơ bản (Tháng đủ)
-                          </FormLabel>
-                          <span className="text-[10px] text-muted-foreground italic">
-                            Không bắt buộc
-                          </span>
-                        </div>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              {...field}
-                              className="pr-12 font-mono"
-                            />
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
-                              VNĐ
-                            </div>
-                          </div>
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

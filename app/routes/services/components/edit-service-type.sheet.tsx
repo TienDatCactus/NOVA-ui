@@ -86,7 +86,6 @@ export default function EditServiceTypeSheet({
   const { mutate: updateServiceType, isPending: isUpdating } =
     useUpdateServiceType(type?.id || "");
 
-  // --- Effects ---
   useEffect(() => {
     if (type && serviceTypeDetails) {
       form.reset({

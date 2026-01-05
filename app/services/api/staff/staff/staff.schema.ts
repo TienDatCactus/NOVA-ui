@@ -33,8 +33,8 @@ const StaffDetailSchema = z.object({
   citizenId: z.string().optional().nullable(),
   startDate: z.string().optional().nullable(),
   note: z.string().optional().nullable(),
-  staffRoleId: z.string().optional().nullable(),
-  staffRoleName: z.string().optional().nullable(),
+  staffRoleId: z.string(),
+  staffRoleName: z.string(),
 });
 
 //?---------------------------------- REQUEST SCHEMAS (API Input)

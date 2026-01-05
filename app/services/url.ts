@@ -388,6 +388,18 @@ const ExchangeRates = {
   convertCurrency: "ExchangeRates/convert",
 };
 
+const GuestDocuments = {
+  scanPassport: "GuestDocuments/scan-only-passport",
+  scanNationalId: "GuestDocuments/scan-only-national-id",
+  savePassport: "GuestDocuments/passport",
+  saveNationalId: "GuestDocuments/national-id",
+  getDocumentByBooking: (bookingId: string) =>
+    `GuestDocuments/booking/${bookingId}`,
+  getDocumentDetail: (documentId: string) => `GuestDocuments/${documentId}`,
+  updateDocument: (documentId: string) => `GuestDocuments/${documentId}`,
+  deleteDocument: (documentId: string) => `GuestDocuments/${documentId}`,
+};
+
 export {
   Auth,
   User,
@@ -420,4 +432,5 @@ export {
   AuditLogs,
   Configs,
   ExchangeRates,
+  GuestDocuments,
 };

@@ -32,8 +32,7 @@ const StaffShiftDetailResponseSchema = StaffShiftDetailItemSchema;
 
 // POST /api/StaffShifts/schedule - Create schedule request
 const CreateShiftScheduleRequestSchema = z.object({
-  primaryStaffId: z.string().min(1, "Nhân viên chính là bắt buộc"),
-  additionalStaffIds: z.array(z.string()).optional(),
+  staffIds: z.array(z.string()).optional(),
   workShiftIds: z.array(z.string()).min(1, "Chọn ít nhất 1 ca làm việc"),
   startDate: z.string().min(1, "Ngày bắt đầu là bắt buộc"), // "yyyy-MM-dd"
   endDate: z.string().optional().nullable(),
