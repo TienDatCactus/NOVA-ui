@@ -1,10 +1,4 @@
-import {
-  DollarSign,
-  Edit,
-  FileText,
-  MoreHorizontal,
-  RefreshCw,
-} from "lucide-react";
+import { DollarSign, Edit, FileText, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -17,7 +11,6 @@ import {
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ApplyUnusedLeaveDialog from "../components/apply-unused-leave-dialog";
 import CreateSalaryExpenseDialog from "../components/create-salary-expense-dialog";
-import { useRefreshSinglePayroll } from "../container/query.hooks";
 import UpdateBaseSalaryPayrollDialog from "../components/update-base-salary-payroll-dialog";
 import UpdatePaidAmountPayrollDialog from "../components/update-paid-payroll-dialog";
 

@@ -9,13 +9,13 @@ import type {
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
 
-function useUpdateBooking(bookingId: string, bookingCode?: string) {
+function useUpdateBooking(bookingId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: StaffUpdateBookingRequestDto) =>
       await BookingService.staffUpdateBookingDetail(bookingId, data),
-    onSuccess: async (response) => {
+    onSuccess: async (_) => {
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["bookings-detail"],
@@ -97,7 +97,7 @@ function useCancelBooking(bookingId: string) {
     mutationFn: async () => {
       return await BookingService.staffCancelBooking(bookingId);
     },
-    onSuccess: async (data) => {
+    onSuccess: async (_) => {
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["bookings-detail"],

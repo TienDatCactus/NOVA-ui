@@ -26,12 +26,16 @@ function useRoomTypeFilter() {
     if (!roomTypes) return [];
 
     return roomTypes.filter((roomType) => {
+      const name =
+        roomType.translations.find((t) => t.languageCode === "vi")?.name ||
+        roomType.translations[0]?.name ||
+        "";
       const matchesSearch =
         filters.searchText === "" ||
         roomType.code
           .toLowerCase()
           .includes(filters.searchText.toLowerCase()) ||
-        roomType.name.toLowerCase().includes(filters.searchText.toLowerCase());
+        name.toLowerCase().includes(filters.searchText.toLowerCase());
 
       return matchesSearch;
     });

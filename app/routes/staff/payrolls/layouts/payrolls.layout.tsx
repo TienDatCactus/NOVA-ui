@@ -1,4 +1,4 @@
-import { CalendarDays, Download, Loader2, RefreshCw } from "lucide-react";
+import { CalendarDays, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
@@ -8,13 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Separator } from "~/components/ui/separator";
 import { AuthLoader, hasRole, UserRole } from "~/lib/auth/auth.loader";
 import type { PayrollFilterState } from "../container/filter.hooks";
-import {
-  useExportMonthlyPayroll,
-  useRefreshPayrollDays,
-} from "../container/query.hooks";
+import { useExportMonthlyPayroll } from "../container/query.hooks";
 
 interface HeaderLayoutProps {
   filterState: PayrollFilterState;
@@ -26,7 +22,6 @@ interface HeaderLayoutProps {
 export default function PayrollsLayout({
   filterState,
   updateFilter,
-  onRefresh,
 }: HeaderLayoutProps) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();

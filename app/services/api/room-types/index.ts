@@ -52,12 +52,25 @@ async function updateRoomTypesDetail(
     const validatedData = UpdateRoomTypesDetailRequestSchema.parse(data);
     const formData = new FormData();
     formData.append("code", validatedData.code);
-    formData.append("name", validatedData.name);
     formData.append("baseRate", validatedData.baseRate.toString());
     formData.append("active", validatedData.active.toString());
-    if (validatedData.description) {
-      formData.append("description", validatedData.description);
+
+    if (validatedData.translations && validatedData.translations.length > 0) {
+      validatedData.translations.forEach((translation, index) => {
+        formData.append(
+          `translations[${index}].languageCode`,
+          translation.languageCode
+        );
+        formData.append(`translations[${index}].name`, translation.name);
+        if (translation.description) {
+          formData.append(
+            `translations[${index}].description`,
+            translation.description
+          );
+        }
+      });
     }
+
     if (validatedData.maxOccupancy !== undefined) {
       formData.append("maxOccupancy", validatedData.maxOccupancy.toString());
     }
@@ -97,12 +110,23 @@ async function createRoomTypes(
 
     const formData = new FormData();
     formData.append("code", validatedData.code);
-    formData.append("name", validatedData.name);
     formData.append("baseRate", validatedData.baseRate.toString());
     formData.append("active", validatedData.active.toString());
 
-    if (validatedData.description) {
-      formData.append("description", validatedData.description);
+    if (validatedData.translations && validatedData.translations.length > 0) {
+      validatedData.translations.forEach((translation, index) => {
+        formData.append(
+          `translations[${index}].languageCode`,
+          translation.languageCode
+        );
+        formData.append(`translations[${index}].name`, translation.name);
+        if (translation.description) {
+          formData.append(
+            `translations[${index}].description`,
+            translation.description
+          );
+        }
+      });
     }
     if (validatedData.maxOccupancy !== undefined) {
       formData.append("maxOccupancy", validatedData.maxOccupancy.toString());

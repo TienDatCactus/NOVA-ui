@@ -82,8 +82,7 @@ export function UpgradeRoomDialog({
   const isFreeChange = form.watch("isFreeChange");
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
-    bookingDetail?.id || "",
-    bookingDetail?.bookingCode
+    bookingDetail?.id || ""
   );
 
   // Thêm isLoading từ hook để xử lý UI

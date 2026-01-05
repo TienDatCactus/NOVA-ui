@@ -148,18 +148,24 @@ function CreateRoomDialog({ open, onClose }: CreateRoomDialogProps) {
                         <SelectContent>
                           <SelectGroup>
                             <SelectLabel>Danh mục</SelectLabel>
-                            {roomTypes?.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
-                                <div className="flex flex-col items-start gap-0.5">
-                                  <span className="font-medium">
-                                    {type.name}
-                                  </span>
-                                  <span className="text-[10px] text-muted-foreground font-mono">
-                                    {type.code}
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            ))}
+                            {roomTypes?.map((type) => {
+                              const name =
+                                type.translations.find(
+                                  (t) => t.languageCode === "vi"
+                                )?.name ||
+                                type.translations[0]?.name ||
+                                "";
+                              return (
+                                <SelectItem key={type.id} value={type.id}>
+                                  <div className="flex flex-col items-start gap-0.5">
+                                    <span className="font-medium">{name}</span>
+                                    <span className="text-[10px] text-muted-foreground font-mono">
+                                      {type.code}
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
                           </SelectGroup>
                         </SelectContent>
                       </Select>

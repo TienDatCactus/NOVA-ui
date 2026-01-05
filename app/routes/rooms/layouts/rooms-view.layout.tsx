@@ -75,13 +75,20 @@ function RoomsViewLayout({
                 <SelectValue placeholder="Hạng phòng" />
               </SelectTrigger>
               <SelectContent>
-                {roomTypes?.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2">
-                    <SelectItem id={`status-${item.id}`} value={item.id}>
-                      {item.name}
-                    </SelectItem>
-                  </div>
-                ))}
+                {roomTypes?.map((item) => {
+                  const name =
+                    item.translations.find((t) => t.languageCode === "vi")
+                      ?.name ||
+                    item.translations[0]?.name ||
+                    "";
+                  return (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <SelectItem id={`status-${item.id}`} value={item.id}>
+                        {name}
+                      </SelectItem>
+                    </div>
+                  );
+                })}
               </SelectContent>
             </Select>
             <div>

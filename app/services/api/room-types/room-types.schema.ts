@@ -7,7 +7,7 @@ const RoomTypesListItem = z.object({
     z.object({
       languageCode: z.string(),
       name: z.string(),
-      description: z.string(),
+      description: z.string().nullable(),
     })
   ),
   imageUrls: z.array(z.url()),
@@ -22,8 +22,13 @@ const RoomTypesListResponseSchema = z.array(RoomTypesListItem);
 const RoomTypesDetailResponseSchema = z.object({
   id: z.string(),
   code: z.string(),
-  name: z.string(),
-  description: z.string().optional().nullable(),
+  translations: z.array(
+    z.object({
+      languageCode: z.string(),
+      name: z.string(),
+      description: z.string().nullable(),
+    })
+  ),
   baseRate: z.number(),
   active: z.boolean(),
   maxOccupancy: z.number(),
@@ -44,11 +49,15 @@ const EditRoomTypesRequestSchema = z.object({
     .string()
     .min(1, "Mã hạng phòng là bắt buộc")
     .max(100, "Mã hạng phòng tối đa 100 ký tự"),
-  name: z
-    .string()
-    .min(1, "Tên hạng phòng là bắt buộc")
-    .max(100, "Tên hạng phòng tối đa 100 ký tự"),
-  description: z.string().optional(),
+  translations: z
+    .array(
+      z.object({
+        languageCode: z.string(),
+        name: z.string().min(1, "Tên hạng phòng là bắt buộc"),
+        description: z.string().optional().nullable(),
+      })
+    )
+    .optional(),
   baseRate: z
     .number("Giá cơ bản là bắt buộc")
     .min(1, "Giá cơ bản phải lớn hơn 0"),
@@ -68,8 +77,15 @@ const CreateRoomTypesRequestSchema = EditRoomTypesRequestSchema;
 const EditRoomTypesResponseSchema = z.object({
   id: z.string("ID phòng không hợp lệ"),
   code: z.string("Mã phòng không hợp lệ"),
-  name: z.string("Tên phòng không hợp lệ"),
-  description: z.string("Mô tả không hợp lệ").optional().nullable(),
+  translations: z
+    .array(
+      z.object({
+        languageCode: z.string(),
+        name: z.string().min(1, "Tên hạng phòng là bắt buộc"),
+        description: z.string().optional().nullable(),
+      })
+    )
+    .optional(),
   baseRate: z.number("Giá cơ bản không hợp lệ"),
   active: z.boolean("Trạng thái không hợp lệ"),
   maxOccupancy: z

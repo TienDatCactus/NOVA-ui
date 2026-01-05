@@ -51,7 +51,13 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Tên hạng phòng" />
     ),
-    cell: ({ row }) => <div>{row.original.name}</div>,
+    cell: ({ row }) => {
+      const name =
+        row.original.translations.find((t) => t.languageCode === "vi")?.name ||
+        row.original.translations[0]?.name ||
+        "";
+      return <div>{name}</div>;
+    },
   },
   {
     accessorKey: "baseRate",

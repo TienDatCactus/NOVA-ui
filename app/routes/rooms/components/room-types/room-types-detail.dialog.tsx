@@ -92,7 +92,11 @@ function RoomTypesDetailDialog({
               </div>
               <div className="space-y-1">
                 <DialogTitle className="text-lg leading-none">
-                  {roomTypeDetail.name}
+                  {roomTypeDetail.translations.find(
+                    (t) => t.languageCode === "vi"
+                  )?.name ||
+                    roomTypeDetail.translations[0]?.name ||
+                    ""}
                 </DialogTitle>
                 <DialogDescription className="flex items-center gap-2">
                   <span className="font-mono text-xs bg-muted px-1.5 rounded border text-foreground">
@@ -228,7 +232,10 @@ function RoomTypesDetailDialog({
                   className="text-sm text-foreground/80 leading-relaxed bg-background p-4 rounded-lg border text-justify"
                   dangerouslySetInnerHTML={{
                     __html:
-                      roomTypeDetail.description ||
+                      roomTypeDetail.translations.find(
+                        (t) => t.languageCode === "vi"
+                      )?.description ||
+                      roomTypeDetail.translations[0]?.description ||
                       "<em class='text-muted-foreground text-xs'>Chưa có mô tả chi tiết cho loại phòng này.</em>",
                   }}
                 />

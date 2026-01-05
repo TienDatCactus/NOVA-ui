@@ -1,5 +1,5 @@
 import { ChevronDown, DoorOpen, Hash, Minus, Plus, Users } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type z from "zod";
 
 import { Badge } from "~/components/ui/badge";

@@ -41,7 +41,11 @@ export default function DeleteConfirmDialog({
           <AlertDialogTitle>Xác nhận xóa loại phòng</AlertDialogTitle>
           <AlertDialogDescription>
             Bạn có chắc chắn muốn xóa loại phòng{" "}
-            <strong>{roomType.name}</strong>?
+            <strong>
+              {roomType.translations.find((t) => t.languageCode === "vi")
+                ?.name || roomType.translations[0]?.name}
+            </strong>
+            ?
             <br />
             <span className="text-destructive font-medium">
               Hành động này không thể hoàn tác.

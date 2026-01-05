@@ -12,10 +12,9 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
 
-import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -46,8 +45,8 @@ import { RoomTypesSchema } from "~/services/api/room-types/room-types.schema";
 import { useUpdateRoomType } from "../../container/room-types/mutation.hooks";
 import { useRoomTypeDetail } from "../../container/room-types/query.hooks";
 
-import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 import { DialogClose } from "~/components/ui/dialog";
+import type { RoomTypesListItemDto } from "~/services/api/room-types/dto";
 
 const { UpdateRoomTypesDetailRequestSchema } = RoomTypesSchema;
 type UpdateRoomTypeFormData = z.infer<
@@ -85,8 +84,7 @@ export function UpdateRoomTypeSheet({
     resolver: zodResolver(UpdateRoomTypesDetailRequestSchema),
     defaultValues: {
       code: "",
-      name: "",
-      description: "",
+      translations: [{ languageCode: "vi", name: "", description: "" }],
       baseRate: 0,
       maxOccupancy: 2,
       active: true,
@@ -95,12 +93,30 @@ export function UpdateRoomTypeSheet({
     },
   });
 
+  const {
+    fields: translationFields,
+    append,
+    remove,
+  } = useFieldArray({
+    control: form.control,
+    name: "translations",
+  });
+
+  const handleAddTranslation = () => {
+    append({ languageCode: "en", name: "", description: "" });
+  };
+
+  const handleRemoveTranslation = (index: number) => {
+    if (translationFields.length > 1) {
+      remove(index);
+    }
+  };
+
   const handleSubmit = (data: UpdateRoomTypeFormData) => {
     updateRoomType(
       { data: { ...data, images: newFiles, removeMediaIds } },
       {
         onSuccess: () => {
-          toast.success("Cập nhật hạng phòng thành công");
           onClose(false);
         },
       }
@@ -125,8 +141,9 @@ export function UpdateRoomTypeSheet({
     if (roomTypeDetail && roomType) {
       form.reset({
         code: roomTypeDetail.code,
-        name: roomTypeDetail.name,
-        description: roomTypeDetail.description || "",
+        translations: roomTypeDetail.translations || [
+          { languageCode: "vi", name: "", description: "" },
+        ],
         baseRate: roomTypeDetail.baseRate,
         maxOccupancy: roomTypeDetail.maxOccupancy,
         active: roomTypeDetail.active,
@@ -191,6 +208,11 @@ export function UpdateRoomTypeSheet({
             </SheetTitle>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Mã: {roomType.code}</span>
+              <span>•</span>
+              <span>
+                {roomType.translations.find((t) => t.languageCode === "vi")
+                  ?.name || roomType.translations[0]?.name}
+              </span>
               <Badge
                 variant="secondary"
                 className="h-5 px-1.5 text-[10px] font-normal"
@@ -248,28 +270,98 @@ export function UpdateRoomTypeSheet({
                   >
                     <div className="space-y-6">
                       {/* Identity */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem className="col-span-2">
-                              <FormLabel>
-                                Tên hạng phòng{" "}
-                                <span className="text-destructive">*</span>
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="text-lg font-medium"
-                                  placeholder="VD: Deluxe Ocean View"
-                                  {...field}
+                      <div className="space-y-4">
+                        {translationFields.map((field, index) => (
+                          <div
+                            key={field.id}
+                            className="space-y-4 p-4 border rounded-lg bg-muted/10"
+                          >
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-semibold flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                                  {index + 1}
+                                </span>
+                                Ngôn ngữ:{" "}
+                                {translationFields[index].languageCode === "vi"
+                                  ? "Tiếng Việt"
+                                  : translationFields[index].languageCode ===
+                                      "en"
+                                    ? "English"
+                                    : translationFields[
+                                        index
+                                      ].languageCode.toUpperCase()}
+                              </h4>
+                              {translationFields.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRemoveTranslation(index)}
                                   disabled={isPending}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                                  className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+
+                            <FormField
+                              control={form.control}
+                              name={`translations.${index}.languageCode`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Mã ngôn ngữ</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="vi, en, fr, de..."
+                                      className="font-mono uppercase"
+                                      maxLength={5}
+                                      {...field}
+                                      disabled={isPending || index === 0}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name={`translations.${index}.name`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Tên hạng phòng{" "}
+                                    <span className="text-destructive">*</span>
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      className="text-lg font-medium"
+                                      placeholder="VD: Deluxe Ocean View"
+                                      {...field}
+                                      disabled={isPending}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        ))}
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleAddTranslation}
+                          disabled={isPending}
+                          className="w-full"
+                        >
+                          <Package className="w-4 h-4 mr-2" />
+                          Thêm ngôn ngữ khác
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
                           name="code"
@@ -389,27 +481,50 @@ export function UpdateRoomTypeSheet({
                   {/* --- TAB 2: DESCRIPTION --- */}
                   <TabsContent
                     value="description"
-                    className="mt-0 h-full outline-none"
+                    className="mt-0 space-y-6 outline-none"
                   >
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem className="h-full">
-                          <FormControl>
-                            <div className="border rounded-md overflow-hidden min-h-[300px]">
-                              <MinimalTiptap
-                                content={field.value || ""}
-                                onChange={field.onChange}
-                                placeholder="Nhập mô tả chi tiết về tiện nghi, view, diện tích..."
-                                className="min-h-[300px] border-none shadow-none"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {translationFields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="space-y-3 p-4 border rounded-lg bg-muted/10"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                            {index + 1}
+                          </span>
+                          <FormLabel className="text-sm font-semibold mb-0">
+                            Mô tả (
+                            {translationFields[index].languageCode === "vi"
+                              ? "Tiếng Việt"
+                              : translationFields[index].languageCode === "en"
+                                ? "English"
+                                : translationFields[
+                                    index
+                                  ].languageCode.toUpperCase()}
+                            )
+                          </FormLabel>
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name={`translations.${index}.description`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <div className="border rounded-md overflow-hidden min-h-[250px]">
+                                  <MinimalTiptap
+                                    content={field.value || ""}
+                                    onChange={field.onChange}
+                                    placeholder="Nhập mô tả chi tiết về tiện nghi, view, diện tích..."
+                                    className="min-h-[250px] border-none shadow-none"
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    ))}
                   </TabsContent>
 
                   {/* --- TAB 3: MEDIA --- */}

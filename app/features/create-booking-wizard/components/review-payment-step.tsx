@@ -109,7 +109,6 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
   const { data: roomsDetails, isLoading: isLoadingRooms } =
     useRoomsDetailsByIds(roomIds);
 
-  // Fetch room types for quantity mode preview
   const { data: allRoomTypes } = useRoomTypes();
   const selectedRoomTypesData = useMemo(() => {
     if (selectionMode !== "quantity" || !allRoomTypes) return [];
