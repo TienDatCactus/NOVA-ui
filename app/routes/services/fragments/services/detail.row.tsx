@@ -57,7 +57,12 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
                 <ImageZoom>
                   <Image
                     src={mainImage}
-                    alt={service.name}
+                    alt={
+                      service.translations?.find((t) => t.languageCode === "vi")
+                        ?.name ||
+                      service.translations?.[0]?.name ||
+                      ""
+                    }
                     className="h-full  aspect-square w-full object-contain transition-transform hover:scale-105 duration-500"
                   />
                 </ImageZoom>
@@ -170,11 +175,13 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
               </h4>
               <ScrollArea className="h-[120px] w-full rounded-md border bg-background/50 p-3">
                 <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {service.description || (
-                    <span className="italic opacity-50">
-                      Chưa có mô tả chi tiết cho dịch vụ này.
-                    </span>
-                  )}
+                  {service.translations?.find((t) => t.languageCode === "vi")
+                    ?.description ||
+                    service.translations?.[0]?.description || (
+                      <span className="italic opacity-50">
+                        Chưa có mô tả chi tiết cho dịch vụ này.
+                      </span>
+                    )}
                 </p>
               </ScrollArea>
             </div>

@@ -22,7 +22,12 @@ export default function ServiceCard({ service }: ServiceCardProps) {
         {service.imageUrls && service.imageUrls.length > 0 ? (
           <Image
             src={service.imageUrls[0]}
-            alt={service.translations?.find(t => t.languageCode === 'vi')?.name || service.translations?.[0]?.name || ''}
+            alt={
+              service.translations?.find((t) => t.languageCode === "vi")
+                ?.name ||
+              service.translations?.[0]?.name ||
+              ""
+            }
             className={cn(
               "h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105",
               !service.active && "grayscale filter opacity-80" // Desaturate if inactive
@@ -53,14 +58,20 @@ export default function ServiceCard({ service }: ServiceCardProps) {
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3">
             <h3 className=" text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 ">
-              {service.translations?.find(t => t.languageCode === 'vi')?.name || service.translations?.[0]?.name || ''}
+              {service.translations?.find((t) => t.languageCode === "vi")
+                ?.name ||
+                service.translations?.[0]?.name ||
+                ""}
             </h3>
           </div>
 
           {/* Description */}
-          {(service.translations?.find(t => t.languageCode === 'vi')?.description || service.translations?.[0]?.description) && (
+          {(service.translations?.find((t) => t.languageCode === "vi")
+            ?.description ||
+            service.translations?.[0]?.description) && (
             <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground font-sans">
-              {service.translations?.find(t => t.languageCode === 'vi')?.description || service.translations?.[0]?.description}
+              {service.translations?.find((t) => t.languageCode === "vi")
+                ?.description || service.translations?.[0]?.description}
             </p>
           )}
         </div>

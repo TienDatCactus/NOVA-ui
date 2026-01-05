@@ -36,7 +36,10 @@ export default function DeleteConfirmDialog({
           <AlertDialogDescription>
             Bạn có chắc chắn muốn xóa dịch vụ{" "}
             <span className="font-semibold text-foreground">
-              {service.name}
+              {service.translations?.find((t) => t.languageCode === "vi")
+                ?.name ||
+                service.translations?.[0]?.name ||
+                ""}
             </span>
             ? Hành động này không thể hoàn tác.
           </AlertDialogDescription>

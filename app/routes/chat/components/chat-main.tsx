@@ -685,8 +685,20 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                             {serviceItems.map((item) => (
                               <TagItemButton
                                 key={item.serviceItemId}
-                                name={item.translations?.find(t => t.languageCode === 'vi')?.name || item.translations?.[0]?.name || ''}
-                                description={item.translations?.find(t => t.languageCode === 'vi')?.description || item.translations?.[0]?.description || ''}
+                                name={
+                                  item.translations?.find(
+                                    (t) => t.languageCode === "vi"
+                                  )?.name ||
+                                  item.translations?.[0]?.name ||
+                                  ""
+                                }
+                                description={
+                                  item.translations?.find(
+                                    (t) => t.languageCode === "vi"
+                                  )?.description ||
+                                  item.translations?.[0]?.description ||
+                                  ""
+                                }
                                 price={item.basePrice}
                                 onClick={() => handleTagItem(item, "service")}
                               />

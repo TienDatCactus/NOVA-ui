@@ -65,7 +65,11 @@ const EditServiceItemRequestSchema = z.object({
       z.object({
         languageCode: z.string(),
         name: z.string("Phải nhập tên dịch vụ").min(2),
-        description: z.string("Phải nhập mô tả dịch vụ").max(500),
+        description: z
+          .string("Phải nhập mô tả dịch vụ")
+          .max(500)
+          .trim()
+          .nullish(),
       })
     )
     .optional(),

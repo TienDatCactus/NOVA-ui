@@ -23,8 +23,16 @@ export default function ServiceItemCard({
   serviceItem,
   isSelected = false,
 }: ServiceItemCardProps) {
-  const { active, code, name, description, imageUrls, unitName, basePrice } =
-    serviceItem;
+  const { active, code, imageUrls, unitName, basePrice } = serviceItem;
+  const name =
+    serviceItem.translations?.find((t) => t.languageCode === "vi")?.name ||
+    serviceItem.translations?.[0]?.name ||
+    "";
+  const description =
+    serviceItem.translations?.find((t) => t.languageCode === "vi")
+      ?.description ||
+    serviceItem.translations?.[0]?.description ||
+    "";
 
   const isDisabled = !active;
 

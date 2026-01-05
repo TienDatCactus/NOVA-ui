@@ -70,12 +70,13 @@ export default function CustomerGuidesPage({}: Route.ComponentProps) {
   const filteredServices = useMemo(() => {
     if (!services) return [];
     const lowerQuery = debouncedSearch.toLowerCase();
-    return services.filter(
-      (service) => {
-        const name = service.translations?.find(t => t.languageCode === 'vi')?.name || service.translations?.[0]?.name || '';
-        return service.active && name.toLowerCase().includes(lowerQuery);
-      }
-    );
+    return services.filter((service) => {
+      const name =
+        service.translations?.find((t) => t.languageCode === "vi")?.name ||
+        service.translations?.[0]?.name ||
+        "";
+      return service.active && name.toLowerCase().includes(lowerQuery);
+    });
   }, [services, debouncedSearch]);
 
   return (

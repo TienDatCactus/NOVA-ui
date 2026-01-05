@@ -1,6 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleDollarSign, FileText, Layers, Power, Tag } from "lucide-react";
-import { useForm } from "react-hook-form";
+import {
+  CircleDollarSign,
+  FileText,
+  Layers,
+  Plus,
+  Power,
+  Tag,
+  X,
+} from "lucide-react";
+import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
 import {
@@ -51,8 +59,7 @@ export default function CreateServiceDialog({
     resolver: zodResolver(CreateServiceItemRequestSchema),
     defaultValues: {
       code: "",
-      name: "",
-      description: "",
+      translations: [{ languageCode: "vi", name: "", description: "" }],
       serviceTypeId: "",
       unitId: "",
       basePrice: 0,
@@ -60,9 +67,28 @@ export default function CreateServiceDialog({
     },
   });
 
+  const {
+    fields: translationFields,
+    append: appendTranslation,
+    remove: removeTranslation,
+  } = useFieldArray({
+    control: form.control,
+    name: "translations",
+  });
+
   const { mutate, isPending } = useCreateService();
   const { data: units } = useUnits();
   const { data: servicesTypesData } = useServiceTypes();
+
+  const handleAddTranslation = () => {
+    appendTranslation({ languageCode: "en", name: "", description: "" });
+  };
+
+  const handleRemoveTranslation = (index: number) => {
+    if (translationFields.length > 1) {
+      removeTranslation(index);
+    }
+  };
 
   const handleSubmit = (data: CreateServiceFormData) => {
     mutate(data, {
@@ -153,25 +179,121 @@ export default function CreateServiceDialog({
                 />
               </div>
 
-              {/* Group 2: Basic Info */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Tên hiển thị <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="VD: Massage Thụy Điển 60p"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Translations Section */}
+              <div className="space-y-4">
+                {translationFields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="space-y-4 p-4 border rounded-lg bg-muted/10"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                          {index + 1}
+                        </span>
+                        Ngôn ngữ:{" "}
+                        {(translationFields[index] as any).languageCode === "vi"
+                          ? "Tiếng Việt"
+                          : (translationFields[index] as any).languageCode ===
+                              "en"
+                            ? "English"
+                            : (
+                                (translationFields[index] as any)
+                                  .languageCode || ""
+                              ).toUpperCase()}
+                      </h4>
+                      {translationFields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveTranslation(index)}
+                          disabled={isPending}
+                          className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name={`translations.${index}.languageCode`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mã ngôn ngữ</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="vi, en, fr, de..."
+                              className="font-mono uppercase"
+                              maxLength={5}
+                              {...field}
+                              disabled={isPending || index === 0}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`translations.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Tên dịch vụ{" "}
+                            <span className="text-destructive">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="VD: Massage Thụy Điển 60p"
+                              {...field}
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`translations.${index}.description`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                            Mô tả
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Thông tin chi tiết về dịch vụ..."
+                              className="resize-none min-h-[80px]"
+                              {...field}
+                              value={field.value || ""}
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddTranslation}
+                  disabled={isPending}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Thêm ngôn ngữ khác
+                </Button>
+              </div>
 
               {/* Group 3: Pricing & Unit */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -238,28 +360,6 @@ export default function CreateServiceDialog({
                   )}
                 />
               </div>
-
-              {/* Description */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                      Mô tả
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Thông tin chi tiết về dịch vụ..."
-                        className="resize-none min-h-[80px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               {/* Status Switch (Card Style) */}
               <FormField

@@ -156,7 +156,6 @@ export default function AddServiceDialog({
                     const isSelected = selectedServiceIds.includes(
                       service.serviceItemId
                     );
-
                     return (
                       <button
                         key={service.serviceItemId}
@@ -180,7 +179,12 @@ export default function AddServiceDialog({
                                 isSelected ? "text-primary" : "text-foreground"
                               )}
                             >
-                            {service.translations?.find(t => t.languageCode === 'vi')?.name || service.translations?.[0]?.name || ''}
+                              {service.translations?.find(
+                                (t) => t.languageCode === "vi"
+                              )?.name ||
+                                service.translations?.[0]?.name ||
+                                ""}
+                            </h4>
                             {isSelected && (
                               <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm animate-in zoom-in-50">
                                 <Check className="h-3 w-3" />
@@ -189,8 +193,12 @@ export default function AddServiceDialog({
                           </div>
 
                           <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">
-                          {service.translations?.find(t => t.languageCode === 'vi')?.description || service.translations?.[0]?.description || "Không có mô tả chi tiết."}
-
+                            {service.translations?.find(
+                              (t) => t.languageCode === "vi"
+                            )?.description ||
+                              service.translations?.[0]?.description ||
+                              "Không có mô tả chi tiết."}
+                          </p>
                           <div className="flex items-center gap-2 pt-1">
                             <span className="text-sm font-bold font-mono text-foreground">
                               {formatMoney(service.basePrice).vndFormatted}

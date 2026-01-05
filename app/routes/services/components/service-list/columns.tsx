@@ -1,6 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
+import { TranslationDisplay } from "~/components/translation-display";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/lib/auth/components";
@@ -31,7 +32,11 @@ export const columns: ColumnDef<ServiceItem>[] = [
         <div className="flex items-center gap-3">
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-semibold truncate">{service.name}</span>
+              <TranslationDisplay
+                translations={service.translations}
+                field="name"
+                className="font-semibold truncate"
+              />
               {!service.active && (
                 <Badge variant="secondary" className="text-xs">
                   Ngưng hoạt động
@@ -66,14 +71,13 @@ export const columns: ColumnDef<ServiceItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Mô tả" />
     ),
-    cell: ({ row }) => {
-      const description = row.original.description || "—";
-      return (
-        <p className="text-sm text-muted-foreground truncate max-w-xs">
-          {description}
-        </p>
-      );
-    },
+    cell: ({ row }) => (
+      <TranslationDisplay
+        translations={row.original.translations}
+        field="description"
+        className="text-sm text-muted-foreground truncate max-w-xs"
+      />
+    ),
   },
   {
     accessorKey: "basePrice",

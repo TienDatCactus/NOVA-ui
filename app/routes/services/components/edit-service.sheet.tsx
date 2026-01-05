@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlignLeft, DollarSign, Hash, Save, Tag } from "lucide-react";
+import { AlignLeft, DollarSign, Hash, Plus, Save, Tag, X } from "lucide-react";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import type z from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -68,11 +68,29 @@ export default function EditServiceSheet({
       serviceTypeId: "",
       unitId: "",
       code: "",
-      name: "",
-      description: "",
+      translations: [{ languageCode: "vi", name: "", description: "" }],
       basePrice: 0,
     },
   });
+
+  const {
+    fields: translationFields,
+    append: appendTranslation,
+    remove: removeTranslation,
+  } = useFieldArray({
+    control: form.control,
+    name: "translations",
+  });
+
+  const handleAddTranslation = () => {
+    appendTranslation({ languageCode: "en", name: "", description: "" });
+  };
+
+  const handleRemoveTranslation = (index: number) => {
+    if (translationFields.length > 1) {
+      removeTranslation(index);
+    }
+  };
 
   useEffect(() => {
     if (serviceItemDetail) {
@@ -80,8 +98,7 @@ export default function EditServiceSheet({
         serviceTypeId: serviceItemDetail.serviceTypeId,
         unitId: serviceItemDetail.unitId,
         code: serviceItemDetail.code,
-        name: serviceItemDetail.name,
-        description: serviceItemDetail.description,
+        translations: serviceItemDetail.translations,
         basePrice: serviceItemDetail.basePrice,
         active: serviceItemDetail.active,
       });
@@ -118,7 +135,10 @@ export default function EditServiceSheet({
               <SheetDescription>
                 Cập nhật thông tin cho{" "}
                 <span className="font-semibold text-foreground">
-                  {service?.name}
+                  {service?.translations?.find((t) => t.languageCode === "vi")
+                    ?.name ||
+                    service?.translations?.[0]?.name ||
+                    ""}
                 </span>
                 .
               </SheetDescription>
@@ -132,28 +152,125 @@ export default function EditServiceSheet({
                   <Tag className="w-3.5 h-3.5" /> Định danh
                 </div>
 
-                <div className="grid gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Tên dịch vụ{" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="text-lg font-medium"
-                            placeholder="VD: Massage Body 60p"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                {/* Translations Section */}
+                <div className="space-y-4">
+                  {translationFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="space-y-4 p-4 border rounded-lg bg-muted/10"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                            {index + 1}
+                          </span>
+                          Ngôn ngữ:{" "}
+                          {(translationFields[index] as any).languageCode ===
+                          "vi"
+                            ? "Tiếng Việt"
+                            : (translationFields[index] as any).languageCode ===
+                                "en"
+                              ? "English"
+                              : (
+                                  (translationFields[index] as any)
+                                    .languageCode || ""
+                                ).toUpperCase()}
+                        </h4>
+                        {translationFields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveTranslation(index)}
+                            disabled={isPending}
+                            className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
 
+                      <FormField
+                        control={form.control}
+                        name={`translations.${index}.languageCode`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Mã ngôn ngữ</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="vi, en, fr, de..."
+                                className="font-mono uppercase"
+                                maxLength={5}
+                                {...field}
+                                disabled={isPending || index === 0}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`translations.${index}.name`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Tên dịch vụ{" "}
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="text-lg font-medium"
+                                placeholder="VD: Massage Body 60p"
+                                {...field}
+                                disabled={isPending}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`translations.${index}.description`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-1.5">
+                              <AlignLeft className="w-3.5 h-3.5 text-muted-foreground" />
+                              Mô tả
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                {...field}
+                                value={field.value ?? ""}
+                                placeholder="Mô tả chi tiết về dịch vụ (quy trình, lưu ý...)"
+                                className="resize-none min-h-[120px]"
+                                disabled={isPending}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddTranslation}
+                    disabled={isPending}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Thêm ngôn ngữ khác
+                  </Button>
+                </div>
+
+                <div className="grid gap-4">
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -281,29 +398,6 @@ export default function EditServiceSheet({
 
               <Separator />
 
-              {/* Section 3: Details */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  <AlignLeft className="w-3.5 h-3.5" /> Chi tiết
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Mô tả chi tiết về dịch vụ (quy trình, lưu ý...)"
-                          className="resize-none min-h-[120px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
               <FormField
                 control={form.control}
                 name="active"

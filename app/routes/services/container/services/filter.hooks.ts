@@ -25,16 +25,23 @@ export default function useServiceFilters() {
   const filterServices = useMemo(
     () => (services: ServiceListResponseDto) => {
       return services.filter((service) => {
+        const name =
+          service.translations?.find((t) => t.languageCode === "vi")?.name ||
+          service.translations?.[0]?.name ||
+          "";
+        const description =
+          service.translations?.find((t) => t.languageCode === "vi")
+            ?.description ||
+          service.translations?.[0]?.description ||
+          "";
         const matchesSearch =
           filters.searchText === "" ||
-          service.name
-            .toLowerCase()
-            .includes(filters.searchText.toLowerCase()) ||
+          name.toLowerCase().includes(filters.searchText.toLowerCase()) ||
           service.code
             .toLowerCase()
             .includes(filters.searchText.toLowerCase()) ||
-          (service.description &&
-            service.description
+          (description &&
+            description
               .toLowerCase()
               .includes(filters.searchText.toLowerCase()));
 

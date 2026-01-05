@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
+import { TranslationDisplay } from "~/components/translation-display";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/lib/auth/components";
@@ -51,13 +52,12 @@ export const columns: ColumnDef<RoomTypesListItemDto>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Tên hạng phòng" />
     ),
-    cell: ({ row }) => {
-      const name =
-        row.original.translations.find((t) => t.languageCode === "vi")?.name ||
-        row.original.translations[0]?.name ||
-        "";
-      return <div>{name}</div>;
-    },
+    cell: ({ row }) => (
+      <TranslationDisplay
+        translations={row.original.translations}
+        field="name"
+      />
+    ),
   },
   {
     accessorKey: "baseRate",

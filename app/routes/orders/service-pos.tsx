@@ -136,15 +136,19 @@ export default function Component({}: Route.ComponentProps) {
 
   // Handlers
   const handleSelectService = (item: ServiceItem) => {
+    const name =
+      item.translations?.find((t) => t.languageCode === "vi")?.name ||
+      item.translations?.[0]?.name ||
+      "";
     selectService({
       id: item.serviceItemId,
       serviceItemId: item.serviceItemId,
       code: item.code,
-      name: item.name,
+      name: name,
       unitPrice: item.basePrice,
       imageUrl: item.imageUrls?.[0],
     });
-    toast.success(`Đã chọn ${item.name}`);
+    toast.success(`Đã chọn ${name}`);
   };
 
   const handleAddCustomService = (service: {

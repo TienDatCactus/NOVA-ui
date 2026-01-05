@@ -1,6 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 import { DataTableColumnHeader } from "~/components/table/table-header";
+import { TranslationDisplay } from "~/components/translation-display";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/lib/auth/components";
@@ -32,12 +33,11 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
         <div className="flex items-center gap-3">
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-semibold truncate">
-                {item.translations?.find((t) => t.languageCode === "vi")
-                  ?.name ||
-                  item.translations?.[0]?.name ||
-                  ""}
-              </span>
+              <TranslationDisplay
+                translations={item.translations}
+                field="name"
+                className="font-semibold truncate"
+              />
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {item.code}
