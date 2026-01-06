@@ -1,5 +1,5 @@
 import z from "zod";
-import { PaymentSchema } from "../../schema/payment.schema";
+import { PaymentSchema } from "../payments/payments.schema";
 import { InvoiceSchema } from "../invoices/invoice.schema";
 import { OrderSchema } from "../orders/order.schema";
 import { RoomSchema } from "../rooms/room.schema";
@@ -449,6 +449,9 @@ const CheckoutPaymentItemSchema = z.object({
 
   method: z.string().min(1, "Vui lòng chọn phương thức thanh toán"),
   transactionReference: z.string().optional().nullable(),
+  successUrl: z.string().optional(),
+  cancelUrl: z.string().optional(),
+  description: z.string().optional(),
 });
 
 const StaffCreateCheckoutInvoiceResponseSchema = z.object({
@@ -555,17 +558,24 @@ const UpdateBookingStatusResponseSchema = z.object({
 const ConfirmBookingPaymentRequestSchema = z.object({
   paymentMethod: PaymentSchema.PaymentMethodEnum,
   paidAmount: z.number().min(0, "Số tiền thanh toán không hợp lệ"),
+  successUrl: z.string().optional(),
+  cancelUrl: z.string().optional(),
+  description: z.string().optional(),
 });
 const ConfirmBookingPaymentResponseSchema = z.object({
   bookingId: z.string().optional(),
   invoiceId: z.string().optional(),
   invoiceNo: z.string().optional(),
-  paymentId: z.string().optional(),
+  paymentId: z.string().optional().nullable(),
   paidAmount: z.number().optional(),
   invoiceTotal: z.number().optional(),
   remainingAmount: z.number().optional(),
   invoiceStatus: z.string().optional(),
   message: z.string().optional(),
+  // Payment redirect fields
+  paymentUrl: z.string().optional().nullable(),
+  requiresPaymentAction: z.boolean().default(false),
+  paymentProvider: z.string().optional().nullable(),
 });
 
 const OrderableBookingResponseSchema = z.object({

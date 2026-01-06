@@ -18,6 +18,7 @@ import type { BookingDocumentItemDto } from "~/services/api/guest-documents/dto"
 import { useDeleteDocumentMutation } from "../container/container";
 import { useGetBookingDocumentsQuery } from "../container/query";
 import DocumentCard from "./document-card";
+import DocumentEditDialog from "./document-edit-dialog";
 import DocumentScanDialog from "./document-scan-dialog";
 
 interface GuestDocumentsSectionProps {
@@ -34,6 +35,8 @@ export default function GuestDocumentsSection({
   canEdit = true,
 }: GuestDocumentsSectionProps) {
   const [viewDocument, setViewDocument] =
+    useState<BookingDocumentItemDto | null>(null);
+  const [editDocument, setEditDocument] =
     useState<BookingDocumentItemDto | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
@@ -133,10 +136,7 @@ export default function GuestDocumentsSection({
                     key={doc.id}
                     document={doc}
                     onView={setViewDocument}
-                    onEdit={() => {
-                      // TODO: Phase 2 - Open edit dialog
-                      toast.info("Chức năng chỉnh sửa đang phát triển");
-                    }}
+                    onEdit={setEditDocument}
                     onDelete={canEdit ? handleDeleteClick : undefined}
                   />
                 ))}
@@ -291,6 +291,16 @@ export default function GuestDocumentsSection({
         onOpenChange={setScanDialogOpen}
         bookingId={bookingId}
         customerId={customerId}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
+
+      {/* Document Edit Dialog */}
+      <DocumentEditDialog
+        open={!!editDocument}
+        onOpenChange={(open) => !open && setEditDocument(null)}
+        document={editDocument}
         onSuccess={() => {
           refetch();
         }}

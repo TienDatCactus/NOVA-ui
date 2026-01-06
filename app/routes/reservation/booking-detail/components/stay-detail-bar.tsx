@@ -12,7 +12,6 @@ import {
   Receipt,
   Soup,
   Toilet,
-  Wallet,
   XCircle,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -64,6 +63,9 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
+import CurrencyView from "~/components/currency-view";
+import CheckInDocumentWarning from "~/features/guest-documents/components/check-in-document-warning";
+import { useDocumentsValidation } from "~/features/guest-documents/hooks/use-documents-validation";
 import {
   AuthLoader,
   hasAnyRole,
@@ -71,9 +73,6 @@ import {
   UserRole,
 } from "~/lib/auth/auth.loader";
 import { formatMoney } from "~/lib/utils";
-import CurrencyView from "~/components/currency-view";
-import CheckInDocumentWarning from "~/features/guest-documents/components/check-in-document-warning";
-import { useDocumentsValidation } from "~/features/guest-documents/hooks/use-documents-validation";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type {
@@ -125,13 +124,12 @@ export default function StayDetailBar({
     adultsAmount: bookingDetail.adults || 1,
   });
 
-  // --- Calculations ---
   const paidAmount = paymentForm.watch("paidAmount");
 
   const paymentSummary = useMemo(() => {
     const totalAmount =
       (bookingDetail?.totalBreakfast || 0) +
-      (bookingDetail?.totalRoomCharge || 0);
+        (bookingDetail?.totalRoomCharge || 0) || bookingDetail.totalAmount;
     const previouslyPaid = bookingDetail?.paidAmount || 0;
     const currentPaid = paidAmount || 0;
 
@@ -299,9 +297,6 @@ export default function StayDetailBar({
                       {/* HEADER */}
                       <DialogHeader className="px-6 py-4 border-b bg-muted/5">
                         <DialogTitle className="flex items-center gap-2">
-                          <div className="p-2 bg-primary/10 rounded-full">
-                            <Wallet className="w-5 h-5 text-primary" />
-                          </div>
                           Thanh toán đặt cọc
                         </DialogTitle>
                         <DialogDescription>

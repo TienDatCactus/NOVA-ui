@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentSchema } from "~/services/schema/payment.schema";
+import { PaymentSchema } from "~/services/api/payments/payments.schema";
 
 const CreateRefundForBookingRequestSchema = z.object({
   refundAmount: z

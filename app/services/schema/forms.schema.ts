@@ -1,6 +1,6 @@
 import z from "zod";
 import { BookingSchema } from "../api/booking/booking.schema";
-import { PaymentSchema } from "./payment.schema";
+import { PaymentSchema } from "../api/payments/payments.schema";
 import { OrderSchema } from "../api/orders/order.schema";
 import { StaffPayrollSchema } from "../api/staff/staff-payroll/staff-payroll.schema";
 

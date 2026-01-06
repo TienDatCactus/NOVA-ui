@@ -1,5 +1,5 @@
 import z from "zod";
-import { PaymentSchema } from "../../schema/payment.schema";
+import { PaymentSchema } from "../payments/payments.schema";
 
 const InvoiceStatusEnum = z.enum([
   "Unpaid",

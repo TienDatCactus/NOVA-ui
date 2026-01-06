@@ -40,9 +40,13 @@ export default function CheckInDocumentWarning({
             <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
               <FileText className="w-4 h-4 text-amber-600" />
               <AlertDescription className="text-amber-800 dark:text-amber-200">
-                Booking này có <strong>{adultsAmount} khách</strong> nhưng chỉ
-                có <strong>{documentsCount} giấy tờ</strong>. Thiếu{" "}
-                <strong>{missingCount}</strong> giấy tờ.
+                <span>
+                  Booking này có <strong>{adultsAmount} khách</strong> nhưng chỉ
+                  có <strong>{documentsCount} giấy tờ</strong>.
+                </span>
+                <span>
+                  Thiếu <strong>{missingCount}</strong> giấy tờ.
+                </span>
               </AlertDescription>
             </Alert>
 

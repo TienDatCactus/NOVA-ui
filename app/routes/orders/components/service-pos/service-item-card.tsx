@@ -11,6 +11,7 @@ import {
 import Image from "~/components/ui/image";
 import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
+import { TranslationDisplay } from "~/components/translation-display";
 
 type ServiceItemCardProps = {
   serviceItem: ServiceItem;
@@ -107,7 +108,7 @@ export default function ServiceItemCard({
               )}
               title={name}
             >
-              {name}
+              <TranslationDisplay translations={serviceItem.translations} />
             </h3>
             {description && (
               <p className="text-[10px] text-muted-foreground line-clamp-1">

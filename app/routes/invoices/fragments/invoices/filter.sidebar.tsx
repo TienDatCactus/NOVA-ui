@@ -45,7 +45,7 @@ import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useBookings } from "~/routes/reservation/bookings/container/booking-query.hooks";
 import type { InvoiceSchema } from "~/services/api/invoices/invoice.schema";
 import type z from "zod";
-import type { PaymentSchema } from "~/services/schema/payment.schema";
+import type { PaymentSchema } from "~/services/api/payments/payments.schema";
 import type { BookingListResponseDto } from "~/services/api/booking/dto";
 
 type InvoiceStatus = z.infer<typeof InvoiceSchema.InvoiceStatusEnum>;

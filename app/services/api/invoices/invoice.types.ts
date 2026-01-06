@@ -2,7 +2,7 @@
 
 import type z from "zod";
 import type { InvoiceSchema } from "./invoice.schema";
-import type { PaymentSchema } from "~/services/schema/payment.schema";
+import type { PaymentSchema } from "~/services/api/payments/payments.schema";
 
 // 0 Unpaid, 1 DepositOnly, 2 PartiallyPaid, 3 Paid, 4 Overpaid, 5 Refunded, 6 Chargeback, 7 Voided
 export const INVOICE_STATUSES = [

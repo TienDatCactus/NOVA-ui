@@ -16,7 +16,7 @@ import type {
   InvoiceCalculateFeesRequestDto,
   UpdateInvoiceRequestDto,
 } from "~/services/api/invoices/dto";
-import type { PaymentSchema } from "~/services/schema/payment.schema";
+import type { PaymentSchema } from "~/services/api/payments/payments.schema";
 
 /**
  * Hook to fetch pending charges for a booking

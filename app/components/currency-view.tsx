@@ -106,7 +106,7 @@ const CurrencySelect = () => {
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0">
         <Command>
-          <CommandInput placeholder="Tìm kiếm tiền tệ..." />
+          <CommandInput placeholder="Tìm kiếm tỉ giá..." />
           <CommandList>
             <CommandEmpty>Không tìm thấy kết quả.</CommandEmpty>
             {isLoading && (

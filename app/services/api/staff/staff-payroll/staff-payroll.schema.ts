@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentSchema } from "~/services/schema/payment.schema";
+import { PaymentSchema } from "~/services/api/payments/payments.schema";
 
 // Enum for UnusedLeaveMode (chỉ 2 options: PayOut và CarryOver)
 export const UnusedLeaveModeEnum = z.enum(["PayOut", "CarryOver"]);

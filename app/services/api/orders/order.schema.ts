@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentSchema } from "~/services/schema/payment.schema";
+import { PaymentSchema } from "~/services/api/payments/payments.schema";
 
 ///* booking related orders
 const PosOrderStatusEnum = z.enum(["Open", "Completed", "Cancelled"]);
@@ -236,6 +236,9 @@ const OrderPayNowRequestSchema = z.object({
   paymentMethod: PaymentSchema.PaymentMethodEnum,
   paidAmount: z.number().min(0),
   transactionReference: z.string().optional().nullable(),
+  successUrl: z.string().optional(),
+  cancelUrl: z.string().optional(),
+  description: z.string().optional(),
 });
 
 const POSOrderPayNowResponseSchema = z.object({
@@ -243,6 +246,12 @@ const POSOrderPayNowResponseSchema = z.object({
   invoiceNo: z.string(),
   total: z.number().min(0),
   status: z.string(),
+  // Payment redirect fields
+  paymentId: z.string().optional().nullable(),
+  paymentUrl: z.string().optional().nullable(),
+  requiresPaymentAction: z.boolean().default(false),
+  paymentProvider: z.string().optional().nullable(),
+  message: z.string().optional(),
 });
 
 const SetScheduledServiceOrderRequestSchema = z.object({

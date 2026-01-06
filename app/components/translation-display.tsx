@@ -74,7 +74,7 @@ export function TranslationDisplay({
 
   // Hiển thị với language selector
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col items-start gap-2">
       <span className={className}>{displayValue}</span>
       {translations.length > 1 && (
         <Select value={selectedLang} onValueChange={setSelectedLang}>
