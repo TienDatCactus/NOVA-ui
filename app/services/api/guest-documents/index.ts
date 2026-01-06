@@ -18,14 +18,12 @@ const {
   BookingDocumentItemSchema,
 } = GuestDocumentsSchema;
 
-async function scanPassport(image: Blob): Promise<PassportScanResponseDto> {
+async function scanPassport(image: File): Promise<PassportScanResponseDto> {
   try {
     const formData = new FormData();
     formData.append("image", image);
 
-    const resp = await http.post(GuestDocuments.scanPassport, {
-      body: formData,
-    });
+    const resp = await http.post(GuestDocuments.scanPassport, formData);
     return resp.data;
   } catch (error) {
     console.error(error);
@@ -33,14 +31,12 @@ async function scanPassport(image: Blob): Promise<PassportScanResponseDto> {
   }
 }
 
-async function scanNationalId(image: Blob): Promise<NationalIdScanResponseDto> {
+async function scanNationalId(image: File): Promise<NationalIdScanResponseDto> {
   try {
     const formData = new FormData();
     formData.append("image", image);
 
-    const resp = await http.post(GuestDocuments.scanNationalId, {
-      body: formData,
-    });
+    const resp = await http.post(GuestDocuments.scanNationalId, formData);
     return resp.data;
   } catch (error) {
     console.error(error);

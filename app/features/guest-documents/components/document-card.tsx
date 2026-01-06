@@ -46,8 +46,8 @@ export default function DocumentCard({
     document.dateOfExpire && parseISO(document.dateOfExpire) < new Date();
 
   return (
-    <Card className="overflow-hidden hover:border-primary transition-all shadow-sm">
-      <CardContent className="p-4">
+    <Card className="overflow-hidden hover:border-green-500 transition-all shadow-sm">
+      <CardContent className="px-4">
         <div className="flex items-start gap-4">
           {/* Document Icon */}
           <div

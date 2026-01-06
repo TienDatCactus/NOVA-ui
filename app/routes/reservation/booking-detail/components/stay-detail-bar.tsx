@@ -72,6 +72,8 @@ import {
 } from "~/lib/auth/auth.loader";
 import { formatMoney } from "~/lib/utils";
 import CurrencyView from "~/components/currency-view";
+import CheckInDocumentWarning from "~/features/guest-documents/components/check-in-document-warning";
+import { useDocumentsValidation } from "~/features/guest-documents/hooks/use-documents-validation";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
 import type {
@@ -102,6 +104,7 @@ export default function StayDetailBar({
   setNoteModalOpen,
 }: StayDetailBarProps) {
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
+  const [documentWarningOpen, setDocumentWarningOpen] = useState(false);
   const { mutateAsync: updateBookingStatus, isPending: isUpdatingStatus } =
     useUpdateBookingStatus(bookingDetail.id!);
 
@@ -115,6 +118,11 @@ export default function StayDetailBar({
       paymentMethod: "Cash",
       paidAmount: 0,
     },
+  });
+
+  const documentsValidation = useDocumentsValidation({
+    bookingId: bookingDetail.id || "",
+    adultsAmount: bookingDetail.adults || 1,
   });
 
   // --- Calculations ---
@@ -171,12 +179,23 @@ export default function StayDetailBar({
   const handleUpdateBookingStatus = async (
     status: z.infer<typeof BookingSchema.BookingStatusEnum>
   ) => {
+    // Check documents before check-in
+    if (status === "CheckedIn" && !documentsValidation.hasAllDocuments) {
+      setDocumentWarningOpen(true);
+      return;
+    }
+
     if (status === "CheckedIn") {
       await updateBookingStatus("CheckedIn");
       await updateBookingStatus("InHouse");
     } else {
       updateBookingStatus(status);
     }
+  };
+
+  const performCheckIn = async () => {
+    await updateBookingStatus("CheckedIn");
+    await updateBookingStatus("InHouse");
   };
 
   return (
@@ -588,6 +607,19 @@ export default function StayDetailBar({
           {/* Notes Trigger */}
         </CardContent>
       </Card>
+
+      {/* Document Warning Dialog */}
+      <CheckInDocumentWarning
+        open={documentWarningOpen}
+        onOpenChange={setDocumentWarningOpen}
+        missingCount={documentsValidation.missingCount}
+        documentsCount={documentsValidation.documentsCount}
+        adultsAmount={bookingDetail.adults || 1}
+        onConfirm={() => {
+          setDocumentWarningOpen(false);
+          performCheckIn();
+        }}
+      />
     </div>
   );
 }

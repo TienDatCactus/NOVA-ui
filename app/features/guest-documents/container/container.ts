@@ -9,7 +9,7 @@ import type {
 export function useScanPassportMutation() {
   return useMutation({
     mutationKey: ["scan-passport"],
-    mutationFn: async (image: Blob) =>
+    mutationFn: async (image: File) =>
       await GuestDocumentsService.scanPassport(image),
   });
 }
@@ -17,7 +17,7 @@ export function useScanPassportMutation() {
 export function useScanNationalIdMutation() {
   return useMutation({
     mutationKey: ["scan-national-id"],
-    mutationFn: async (image: Blob) =>
+    mutationFn: async (image: File) =>
       await GuestDocumentsService.scanNationalId(image),
   });
 }

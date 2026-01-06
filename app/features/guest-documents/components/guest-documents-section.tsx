@@ -2,6 +2,7 @@ import { FileText, Loader2, Plus, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
@@ -69,16 +70,30 @@ export default function GuestDocumentsSection({
   return (
     <>
       <Card className="bg-background hover:border-primary border shadow-sm">
-        <div className="p-5">
+        <div className="px-5">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="space-y-1">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5" />
-                Giấy tờ tùy thân
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5" />
+                  Giấy tờ tùy thân
+                </h3>
+                <Badge
+                  variant={isDocumentsIncomplete ? "outline" : "default"}
+                  className={
+                    isDocumentsIncomplete
+                      ? "text-amber-600 border-amber-300"
+                      : "bg-green-600"
+                  }
+                >
+                  {documents?.length || 0} / {adultsAmount}
+                </Badge>
+              </div>
               <p className="text-sm text-muted-foreground">
-                {documents?.length || 0} / {adultsAmount} khách
+                {isDocumentsIncomplete
+                  ? `Thiếu ${adultsAmount - (documents?.length || 0)} giấy tờ`
+                  : "Đầy đủ giấy tờ cho tất cả khách"}
               </p>
             </div>
 
