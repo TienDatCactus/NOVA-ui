@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import type z from "zod";
+import { usePaymentRedirect } from "~/hooks/use-payment-redirect";
 import { BookingService } from "~/services/api/booking";
 import type {
   BookingPayForRoomRequestDto,
@@ -132,11 +133,22 @@ export function useCreateCheckoutInvoice(bookingId: string) {
  */
 export function useCheckoutPayment(bookingId: string) {
   const queryClient = useQueryClient();
+  const { handlePaymentResponse } = usePaymentRedirect();
 
   return useMutation({
     mutationFn: (data: StaffCheckoutPaymentRequestDto) =>
       BookingService.staffCheckoutPayment(bookingId, data),
-    onSuccess: async () => {
+    onSuccess: async (response) => {
+      // Check if payment requires redirect (Card/BankTransfer)
+      const redirected = handlePaymentResponse(response);
+
+      if (redirected) {
+        // User will be redirected to payment gateway
+        // Success toast will be shown after callback
+        return;
+      }
+
+      // Cash payment completed - invalidate queries and show success
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["bookings-detail"],
@@ -169,15 +181,36 @@ export function useCheckoutPayment(bookingId: string) {
  */
 export function useInvoicePayment(invoiceId: string, bookingId: string) {
   const queryClient = useQueryClient();
+  const { handlePaymentResponse } = usePaymentRedirect();
 
   return useMutation({
-    mutationFn: (data: { method: string; amount: number; note?: string }) =>
+    mutationFn: (data: {
+      method: string;
+      amount: number;
+      note?: string;
+      successUrl?: string;
+      cancelUrl?: string;
+      description?: string;
+    }) =>
       InvoicesService.proceedInvoicePayment(invoiceId, {
         method: data.method as z.infer<typeof PaymentSchema.PaymentMethodEnum>,
         amount: data.amount,
         note: data.note || "",
+        successUrl: data.successUrl,
+        cancelUrl: data.cancelUrl,
+        description: data.description,
       }),
-    onSuccess: async () => {
+    onSuccess: async (response) => {
+      // Check if payment requires redirect (Card/BankTransfer)
+      const redirected = handlePaymentResponse(response);
+
+      if (redirected) {
+        // User will be redirected to payment gateway
+        // Success toast will be shown after callback
+        return;
+      }
+
+      // Cash payment completed - invalidate queries and show success
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["bookings-detail"],
@@ -323,10 +356,22 @@ export function useUpdateInvoice(invoiceId: string) {
 
 export function useConfirmBookingPayment(bookingId: string) {
   const queryClient = useQueryClient();
+  const { handlePaymentResponse } = usePaymentRedirect();
+
   return useMutation({
     mutationFn: (data: ConfirmBookingPaymentRequestDto) =>
       BookingService.staffConfirmBookingPayment(bookingId || "", data),
     onSuccess: async (response) => {
+      // Check if payment requires redirect (Card/BankTransfer)
+      const redirected = handlePaymentResponse(response);
+
+      if (redirected) {
+        // User will be redirected to payment gateway
+        // Success toast will be shown after callback
+        return;
+      }
+
+      // Cash payment completed - invalidate queries and show success
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["bookings-detail"],

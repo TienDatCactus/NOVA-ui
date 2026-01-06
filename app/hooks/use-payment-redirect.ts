@@ -15,7 +15,7 @@
  */
 
 export interface PaymentRedirectResult {
-  requiresPaymentAction: boolean;
+  requiresPaymentAction?: boolean;
   paymentUrl?: string | null;
   paymentProvider?: string | null;
 }

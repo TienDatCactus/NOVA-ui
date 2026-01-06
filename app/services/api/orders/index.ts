@@ -16,6 +16,7 @@ import type {
   ServiceOrderDetailDto,
   ServiceOrderListDto,
   ServiceOrderPayNowRequestDto,
+  ServiceOrderPayNowResponseDto,
   SetScheduledServiceOrderRequestDto,
   UpdateServiceOrderRequestDto,
 } from "./dto";
@@ -27,6 +28,7 @@ const {
   POSOrderPrintDataSchema,
   POSOrderPayNowResponseSchema,
   ServiceOrderDetailSchema,
+  ServiceOrderPayNowResponseSchema,
   CreateServiceOrderRequestSchema,
   AddSingleItemToPOSOrderRequestSchema,
   AddBatchItemsToPOSOrderRequestSchema,
@@ -357,10 +359,10 @@ async function getServiceOrderList(
 async function payServiceOrderNow(
   orderId: string,
   data: ServiceOrderPayNowRequestDto
-): Promise<void> {
+): Promise<ServiceOrderPayNowResponseDto> {
   try {
     const resp = await http.post(Orders.payServiceOrderNow(orderId), data);
-    return resp.data;
+    return ServiceOrderPayNowResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

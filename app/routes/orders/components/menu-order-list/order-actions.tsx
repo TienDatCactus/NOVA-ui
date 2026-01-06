@@ -30,6 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { buildPaymentCallbackUrls } from "~/lib/payment-url-builder";
 import { InvoiceDetailDialog } from "~/routes/invoices/components/invoice-detail/invoice-detail.dialog";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 import {
@@ -94,12 +95,21 @@ function useOrderLogic({ orderId }: { orderId: string }) {
       }),
     handleCancel: () => onCancel(orderId),
     handlePay: (data: PaymentFormData) => {
+      // Build payment callback URLs for gateway redirects
+      const { successUrl, cancelUrl } = buildPaymentCallbackUrls({
+        type: "pos-order",
+        id: orderId,
+      });
+
       onPayNow(
         {
           orderId,
           data: {
             ...data,
             transactionReference: data.transactionReference || "",
+            successUrl,
+            cancelUrl,
+            description: `Thanh toán POS order ${orderId.slice(0, 8)}`,
           },
         },
         {

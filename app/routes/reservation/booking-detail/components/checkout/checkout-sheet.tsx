@@ -611,6 +611,8 @@ export default function CheckoutSheet({
           open={showInvoiceDetail}
           onOpenChange={setShowInvoiceDetail}
           bookingId={bookingDetail?.id!}
+          bookingCode={bookingDetail?.bookingCode!}
+          bookingSource={bookingDetail?.source!}
           invoiceId={activeInvoiceId}
           onBack={handleBackFromDetail}
           isNewlyCreatedInvoice={!!createdInvoiceId}

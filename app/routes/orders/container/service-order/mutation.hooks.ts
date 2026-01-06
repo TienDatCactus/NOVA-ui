@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
+import { usePaymentRedirect } from "~/hooks/use-payment-redirect";
 import { OrderService } from "~/services/api/orders";
 import type {
   CreateServiceOrderRequestDto,
@@ -142,6 +143,7 @@ export function useCancelServiceOrder() {
  */
 export function usePayServiceOrderNow() {
   const queryClient = useQueryClient();
+  const { handlePaymentResponse } = usePaymentRedirect();
 
   return useMutation({
     mutationFn: ({
@@ -151,7 +153,17 @@ export function usePayServiceOrderNow() {
       orderId: string;
       data: ServiceOrderPayNowRequestDto;
     }) => OrderService.payServiceOrderNow(orderId, data),
-    onSuccess: (_, variables) => {
+    onSuccess: (response, variables) => {
+      // Check if payment requires redirect (Card/BankTransfer)
+      const redirected = handlePaymentResponse(response);
+
+      if (redirected) {
+        // User will be redirected to payment gateway
+        // Success toast will be shown after callback
+        return;
+      }
+
+      // Cash payment completed - invalidate queries and show success
       queryClient.invalidateQueries({
         queryKey: ["service-order-detail", variables.orderId],
       });

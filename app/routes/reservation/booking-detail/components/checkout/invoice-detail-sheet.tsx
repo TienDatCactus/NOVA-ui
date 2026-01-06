@@ -28,13 +28,6 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
@@ -54,6 +47,8 @@ import {
 } from "~/components/ui/table";
 import { cn, formatMoney } from "~/lib/utils";
 import CurrencyView from "~/components/currency-view";
+import { PaymentMethodSelector } from "~/components/payment-method-selector";
+import { buildPaymentCallbackUrls } from "~/lib/payment-url-builder";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import {
   INVOICE_STATUSES,
@@ -75,6 +70,7 @@ import {
 } from "../../container/use-booking-state.hooks";
 import { InvoicesService } from "~/services/api/invoices";
 import { AxiosError } from "axios";
+import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
 const { StaffCheckoutPaymentRequestSchema } = BookingSchema;
 
@@ -86,6 +82,8 @@ interface InvoiceDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   bookingId: string;
+  bookingCode: string;
+  bookingSource: BookingDetailResponseDto["source"];
   invoiceId: string;
   onBack: () => void;
   isNewlyCreatedInvoice?: boolean;
@@ -95,6 +93,8 @@ export default function InvoiceDetailSheet({
   open,
   onOpenChange,
   bookingId,
+  bookingCode,
+  bookingSource,
   invoiceId,
   onBack,
   isNewlyCreatedInvoice = false,
@@ -270,12 +270,22 @@ export default function InvoiceDetailSheet({
       return;
     }
 
+    // Build payment callback URLs for gateway redirects
+    const { successUrl, cancelUrl } = buildPaymentCallbackUrls({
+      type: "invoice",
+      id: invoiceId,
+      bookingCode,
+    });
+
     if (isCheckoutInvoice) {
       checkoutPayment(
         {
           method: data.method,
           amount: data.amount,
           transactionReference: data.transactionReference || undefined,
+          successUrl,
+          cancelUrl,
+          description: `Thanh toán checkout ${bookingCode}`,
         },
         { onSuccess: () => onBack() }
       );
@@ -285,6 +295,9 @@ export default function InvoiceDetailSheet({
           method: data.method,
           amount: data.amount,
           note: data.transactionReference || "",
+          successUrl,
+          cancelUrl,
+          description: `Thanh toán hóa đơn ${invoiceDetail?.invoiceNo || invoiceId}`,
         },
         { onSuccess: () => onBack() }
       );
@@ -738,31 +751,14 @@ export default function InvoiceDetailSheet({
                                   name="method"
                                   render={({ field }) => (
                                     <FormItem>
-                                      <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                      >
-                                        <FormControl>
-                                          <SelectTrigger className="h-10 w-40">
-                                            <SelectValue placeholder="Phương thức" />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          {PAYMENT_METHODS.filter(
-                                            (pm) => !pm.disabled
-                                          ).map((pm) => (
-                                            <SelectItem
-                                              key={pm.value}
-                                              value={pm.value}
-                                            >
-                                              <div className="flex items-center gap-2">
-                                                <pm.icon className="w-3.5 h-3.5" />{" "}
-                                                {pm.label}
-                                              </div>
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
+                                      <FormControl>
+                                        <PaymentMethodSelector
+                                          value={field.value}
+                                          onValueChange={field.onChange}
+                                          bookingSource={bookingSource}
+                                          className="h-10 w-40"
+                                        />
+                                      </FormControl>
                                       <FormMessage />
                                     </FormItem>
                                   )}

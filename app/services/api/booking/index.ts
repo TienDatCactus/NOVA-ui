@@ -23,6 +23,7 @@ import type {
   StaffChangeRoomResponseDto,
   StaffCheckoutMultipleRequestDto,
   StaffCheckoutPaymentRequestDto,
+  StaffCheckoutPaymentResponseDto,
   StaffCheckoutRequestDto,
   StaffCreateBookingDto,
   StaffCreateBookingResponseDto,
@@ -61,6 +62,7 @@ const {
   UpdateBookingStatusRequestSchema,
   UpdateBookingStatusResponseSchema,
   UnpaidRoomsForBookingSchema,
+  StaffCheckoutPaymentResponseSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -327,7 +329,7 @@ async function staffCreateCheckoutInvoice(
 async function staffCheckoutPayment(
   bookingId: string,
   data: StaffCheckoutPaymentRequestDto
-): Promise<void> {
+): Promise<StaffCheckoutPaymentResponseDto> {
   const idempotencyKey = crypto.randomUUID();
   try {
     const resp = await http.post(
@@ -339,7 +341,7 @@ async function staffCheckoutPayment(
         },
       }
     );
-    return resp.data;
+    return StaffCheckoutPaymentResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

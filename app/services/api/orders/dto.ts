@@ -19,6 +19,7 @@ const {
   UpdateServiceOrderRequestSchema,
   ServiceOrderDetailSchema,
   OrderPayNowRequestSchema,
+  ServiceOrderPayNowResponseSchema,
   SetScheduledServiceOrderRequestSchema,
   ServiceOrderListByBookingDetailSchema,
   CreatePOSOrderResponseSchema,
@@ -95,6 +96,10 @@ export type ServiceOrderDetailDto = z.infer<typeof ServiceOrderDetailSchema>;
 
 export type ServiceOrderPayNowRequestDto = z.infer<
   typeof OrderPayNowRequestSchema
+>;
+
+export type ServiceOrderPayNowResponseDto = z.infer<
+  typeof ServiceOrderPayNowResponseSchema
 >;
 
 export type SetScheduledServiceOrderRequestDto = z.infer<

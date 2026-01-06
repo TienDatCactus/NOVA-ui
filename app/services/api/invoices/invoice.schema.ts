@@ -109,6 +109,10 @@ const InvoicePaymentRequestSchema = z.object({
     .min(0, "Số tiền phải lớn hơn hoặc bằng 0"),
   method: PaymentSchema.PaymentMethodEnum,
   note: z.string("Ghi chú không hợp lệ").optional(),
+  // Payment gateway redirect support
+  successUrl: z.string().optional(),
+  cancelUrl: z.string().optional(),
+  description: z.string().optional(),
 });
 
 const InvoicePaymentResponseSchema = z.object({
@@ -118,6 +122,7 @@ const InvoicePaymentResponseSchema = z.object({
   method: z.string(),
   status: z.string(),
   createdAt: z.string(),
+  // Payment gateway redirect fields
   invoiceSummary: z.object({
     invoiceNo: z.string(),
     subTotal: z.number(),
@@ -128,6 +133,9 @@ const InvoicePaymentResponseSchema = z.object({
     balance: z.number(),
     status: z.string(),
   }),
+  paymentUrl: z.string().optional(),
+  requiresPaymentAction: z.boolean().optional(),
+  paymentProvider: z.string().optional(),
 });
 
 const PaymentsFromInvoiceResponseSchema = z.array(

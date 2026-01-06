@@ -258,6 +258,19 @@ const SetScheduledServiceOrderRequestSchema = z.object({
   scheduledAt: z.string(),
 });
 
+const ServiceOrderPayNowResponseSchema = z.object({
+  invoiceId: z.string(),
+  invoiceNo: z.string(),
+  total: z.number().min(0),
+  status: z.string(),
+  // Payment redirect fields
+  paymentId: z.string().optional().nullable(),
+  paymentUrl: z.string().optional().nullable(),
+  requiresPaymentAction: z.boolean().default(false),
+  paymentProvider: z.string().optional().nullable(),
+  message: z.string().optional(),
+});
+
 const CreatePOSOrderWithItemsRequestSchema = CreatePOSOrderRequestSchema.extend(
   {
     items: AddBatchItemsToPOSOrderRequestSchema,
@@ -292,6 +305,7 @@ export const OrderSchema = {
   UpdateServiceOrderRequestSchema,
   ServiceOrderDetailSchema,
   OrderPayNowRequestSchema,
+  ServiceOrderPayNowResponseSchema,
   SetScheduledServiceOrderRequestSchema,
   CreatePOSOrderResponseSchema,
   CreateServiceOrderResponseSchema,

@@ -48,13 +48,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import {
   Tooltip,
@@ -64,6 +57,7 @@ import {
 } from "~/components/ui/tooltip";
 
 import CurrencyView from "~/components/currency-view";
+import { PaymentMethodSelector } from "~/components/payment-method-selector";
 import CheckInDocumentWarning from "~/features/guest-documents/components/check-in-document-warning";
 import { useDocumentsValidation } from "~/features/guest-documents/hooks/use-documents-validation";
 import {
@@ -72,6 +66,7 @@ import {
   hasRole,
   UserRole,
 } from "~/lib/auth/auth.loader";
+import { buildPaymentCallbackUrls } from "~/lib/payment-url-builder";
 import { formatMoney } from "~/lib/utils";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import { BOOKING_STATUSES } from "~/services/api/booking/booking.types";
@@ -80,7 +75,6 @@ import type {
   ConfirmBookingPaymentRequestDto,
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
 import type { BookingState } from "../container/use-booking-state.hooks";
@@ -393,11 +387,30 @@ export default function StayDetailBar({
                                 });
                                 return;
                               }
-                              confirmPayment(data, {
-                                onSuccess: () => {
-                                  setDepositDialogOpen(false);
+
+                              // Build payment callback URLs for gateway redirects
+                              const { successUrl, cancelUrl } =
+                                buildPaymentCallbackUrls({
+                                  type: "booking",
+                                  id: bookingDetail.id,
+                                  bookingCode: bookingDetail.bookingCode,
+                                });
+
+                              confirmPayment(
+                                {
+                                  ...data,
+                                  successUrl,
+                                  cancelUrl,
+                                  description: `Xác nhận thanh toán booking ${bookingDetail.bookingCode}`,
                                 },
-                              });
+                                {
+                                  onSuccess: () => {
+                                    // Dialog will stay open if redirecting to gateway
+                                    // Close only for direct payments (Cash)
+                                    setDepositDialogOpen(false);
+                                  },
+                                }
+                              );
                             })}
                             className="space-y-5"
                           >
@@ -411,31 +424,13 @@ export default function StayDetailBar({
                                     <FormLabel>
                                       Phương thức thanh toán
                                     </FormLabel>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger className="h-11">
-                                          <SelectValue placeholder="Chọn phương thức" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {PAYMENT_METHODS.filter(
-                                          (pm) => !pm.disabled
-                                        ).map((pm) => (
-                                          <SelectItem
-                                            key={pm.value}
-                                            value={pm.value}
-                                          >
-                                            <div className="flex items-center gap-2">
-                                              <pm.icon className="w-4 h-4 text-muted-foreground" />
-                                              <span>{pm.label}</span>
-                                            </div>
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
+                                    <FormControl>
+                                      <PaymentMethodSelector
+                                        value={field.value}
+                                        onValueChange={field.onChange}
+                                        bookingSource={bookingDetail.source}
+                                      />
+                                    </FormControl>
                                   </FormItem>
                                 )}
                               />

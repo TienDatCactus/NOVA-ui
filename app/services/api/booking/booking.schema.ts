@@ -470,6 +470,16 @@ const StaffCreateCheckoutInvoiceResponseSchema = z.object({
 // Yêu cầu thanh toán khi checkout (phòng + tổng thể)
 const StaffCheckoutPaymentRequestSchema = CheckoutPaymentItemSchema;
 
+// Response for checkout payment (with gateway redirect support)
+const StaffCheckoutPaymentResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string().optional(),
+  // Payment gateway redirect fields
+  paymentUrl: z.string().optional(),
+  requiresPaymentAction: z.boolean().optional(),
+  paymentProvider: z.string().optional(),
+});
+
 // Yêu cầu checkout 1 booking
 const StaffCheckoutRequestSchema = z.object({
   actualCheckoutTime: z
@@ -687,6 +697,7 @@ export const BookingSchema = {
   StaffAddCompletedChargesRequestSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
   StaffCheckoutPaymentRequestSchema,
+  StaffCheckoutPaymentResponseSchema,
 
   //! update booking status
   UpdateBookingStatusRequestSchema,

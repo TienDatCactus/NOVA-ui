@@ -5,7 +5,6 @@ import {
   Banknote,
   CalendarClock,
   CheckCircle2,
-  CreditCard,
   FileText,
   Hash,
   Loader2,
@@ -27,13 +26,6 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
@@ -53,11 +45,11 @@ import {
 } from "~/components/ui/table";
 import { cn, formatMoney } from "~/lib/utils";
 import CurrencyView from "~/components/currency-view";
+import { PaymentMethodSelector } from "~/components/payment-method-selector";
 
 import { useCalculateInvoiceFees } from "~/routes/reservation/booking-detail/container/use-booking-checkout.hooks";
 import type { POSOrderItemDto } from "~/services/api/orders/dto";
 import { OrderSchema } from "~/services/api/orders/order.schema";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
 import { usePOSOrderDetailByOrder } from "../container/pos-orders/query.hooks";
 import { useServiceOrderDetail } from "../container/service-order/query.hooks";
 import { hasAnyRole } from "~/lib/auth/bouncer";
@@ -537,31 +529,14 @@ export default function PaymentOrderSheet({
                             name="paymentMethod"
                             render={({ field }) => (
                               <FormItem>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="h-11">
-                                      <div className="flex items-center gap-2">
-                                        <CreditCard className="w-4 h-4 text-muted-foreground" />
-                                        <SelectValue placeholder="Phương thức" />
-                                      </div>
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {PAYMENT_METHODS.filter(
-                                      (pm) => !pm.disabled
-                                    ).map((pm) => (
-                                      <SelectItem
-                                        key={pm.value}
-                                        value={pm.value}
-                                      >
-                                        {pm.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormControl>
+                                  <PaymentMethodSelector
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    bookingSource="DirectStaff"
+                                    className="h-11"
+                                  />
+                                </FormControl>
                               </FormItem>
                             )}
                           />

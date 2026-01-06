@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { buildPaymentCallbackUrls } from "~/lib/payment-url-builder";
 import type { ServiceOrderPayNowRequestDto } from "~/services/api/orders/dto";
 import {
   useCancelServiceOrder,
@@ -60,8 +61,22 @@ function useServiceOrderLogic({ orderId }: { orderId: string }) {
         onSuccess: () => toast.success("Đã hủy dịch vụ"),
       }),
     handlePay: (data: ServiceOrderPayNowRequestDto) => {
+      // Build payment callback URLs for gateway redirects
+      const { successUrl, cancelUrl } = buildPaymentCallbackUrls({
+        type: "service-order",
+        id: orderId,
+      });
+
       payNow.mutate(
-        { orderId, data },
+        {
+          orderId,
+          data: {
+            ...data,
+            successUrl,
+            cancelUrl,
+            description: `Thanh toán service order ${orderId.slice(0, 8)}`,
+          },
+        },
         {
           onSuccess: () => {
             toggle("pay", false);

@@ -23,6 +23,7 @@ const {
   StaffAddCompletedChargesRequestSchema,
   StaffCreateCheckoutInvoiceResponseSchema,
   StaffCheckoutPaymentRequestSchema,
+  StaffCheckoutPaymentResponseSchema,
   UpdateBookingStatusRequestSchema,
   UpdateBookingStatusResponseSchema,
   ConfirmBookingPaymentRequestSchema,
@@ -92,6 +93,10 @@ export type StaffCreateCheckoutInvoiceResponseDto = z.infer<
 
 export type StaffCheckoutPaymentRequestDto = z.infer<
   typeof StaffCheckoutPaymentRequestSchema
+>;
+
+export type StaffCheckoutPaymentResponseDto = z.infer<
+  typeof StaffCheckoutPaymentResponseSchema
 >;
 
 export type UpdateBookingStatusRequestDto = z.infer<
