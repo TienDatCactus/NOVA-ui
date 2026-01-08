@@ -7,6 +7,11 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
+  ...prefix("payment", [
+    route("success", "routes/payment/success.tsx"),
+    route("failure", "routes/payment/failure.tsx"),
+    route("cancel", "routes/payment/cancel.tsx"),
+  ]),
   layout("layouts/auth.layout.tsx", [
     ...prefix("auth", [
       route("login", "routes/auth/login.tsx"),

@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, ArrowRight, Banknote } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -151,9 +150,9 @@ export function InvoicePaymentDialog({
                   <FormItem>
                     <div className="flex justify-between items-center">
                       <FormLabel>Số tiền thu</FormLabel>
-                      <Badge
+                      <Button
+                        size="sm"
                         variant="secondary"
-                        className="cursor-pointer hover:bg-emerald-100 hover:text-emerald-700 font-normal transition-colors"
                         onClick={() =>
                           form.setValue("amount", remaining, {
                             shouldValidate: true,
@@ -161,7 +160,7 @@ export function InvoicePaymentDialog({
                         }
                       >
                         Thu đủ: {formatCurrency(remaining)}
-                      </Badge>
+                      </Button>
                     </div>
                     <FormControl>
                       <Input
@@ -172,15 +171,15 @@ export function InvoicePaymentDialog({
                           </span>
                         }
                         type="number"
-                        min={1}
-                        placeholder="0"
                         className={cn(
                           "font-mono text-lg font-semibold",
                           isOverPay &&
                             "border-destructive text-destructive focus-visible:ring-destructive"
                         )}
                         {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onChange={(e) =>
+                          field.onChange(e.currentTarget.valueAsNumber)
+                        }
                       />
                     </FormControl>
                     {isOverPay && (

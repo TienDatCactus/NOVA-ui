@@ -388,7 +388,6 @@ export default function StayDetailBar({
                                 return;
                               }
 
-                              // Build payment callback URLs for gateway redirects
                               const { successUrl, cancelUrl } =
                                 buildPaymentCallbackUrls({
                                   type: "booking",

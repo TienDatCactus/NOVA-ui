@@ -37,7 +37,6 @@ const useInvoicePayment = (invoiceId: string, bookingId?: string) => {
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["invoice-detail", invoiceId] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
-      // If bookingId provided, invalidate booking-specific queries
       if (bookingId) {
         qc.invalidateQueries({ queryKey: ["booking-invoices", bookingId] });
         qc.invalidateQueries({ queryKey: ["bookings-detail"] });
