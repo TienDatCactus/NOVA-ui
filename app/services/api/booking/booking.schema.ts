@@ -355,6 +355,9 @@ const StaffCreateBookingResponseSchema = z.object({
   totalAmount: z.number().min(0, "Tổng tiền không hợp lệ").optional(),
   roomInvoice: InvoiceSchema.RoomInvoiceSchema.optional().nullable(),
   serviceInvoice: InvoiceSchema.ServiceInvoiceSchema.optional().nullable(),
+  paymentUrl: z.string().optional().nullable(),
+  paymentProvider: z.string().optional().nullable(),
+  requiresPaymentAction: z.boolean().optional().nullable(),
 });
 const BookingListItemSchema = z.object({
   bookingId: z.string().optional(),

@@ -40,13 +40,6 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 
@@ -57,7 +50,7 @@ import { cn } from "~/lib/utils";
 import { useRoomTypes } from "~/routes/rooms/container/room-types/query.hooks";
 import { useRoomsDetailsByIds } from "~/routes/rooms/container/rooms/query.hooks";
 import { OrderSchema } from "~/services/api/orders/order.schema";
-import { PAYMENT_METHODS } from "~/services/types/payment.types";
+import { PaymentMethodSelector } from "~/components/payment-method-selector";
 import { useCreateBookingStore } from "~/store/create-booking.store";
 import { usePreviewBookingPrice } from "../container/create-booking-query.hooks";
 
@@ -230,8 +223,8 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
   );
 
   const handleAbortDeposit = useCallback(() => {
-    form.unregister("roomPayment");
-    form.clearErrors("roomPayment");
+    form.unregister("payment");
+    form.clearErrors("payment");
     setData({
       roomPayment: undefined,
     });
@@ -682,25 +675,14 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                         <FormLabel className="text-sm font-semibold text-foreground">
                           Hình thức thanh toán
                         </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full h-11 bg-background">
-                              <SelectValue placeholder="Chọn phương thức..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PAYMENT_METHODS.map((m: any) => (
-                              <SelectItem key={m.value} value={m.value}>
-                                <div className="flex items-center gap-2 font-medium">
-                                  <span>{m.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <PaymentMethodSelector
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            bookingSource="DirectStaff"
+                            placeholder="Chọn phương thức..."
+                          />
+                        </FormControl>
                       </FormItem>
                     )}
                   />
@@ -723,13 +705,10 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                   Số tiền thực thu
                                 </FormLabel>
                                 <Button
-                                  variant="ghost"
+                                  variant="outline"
                                   type="button"
                                   size="sm"
-                                  className="h-6 text-xs text-primary font-medium hover:bg-primary/10"
-                                  onClick={() =>
-                                    field.onChange(Math.round(finalTotal))
-                                  }
+                                  onClick={() => field.onChange(finalTotal)}
                                 >
                                   Thu đủ 100%
                                 </Button>
