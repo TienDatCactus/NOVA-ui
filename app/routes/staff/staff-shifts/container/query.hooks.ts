@@ -7,6 +7,7 @@ import type { StaffAttendanceListParams } from "~/services/api/staff/staff-atten
 import type {
   CreateShiftScheduleRequest,
   UpdateShiftScheduleRequest,
+  TransferStaffShiftRequest,
 } from "~/services/api/staff/staff-shift/dto";
 import type { MarkAbsentRequest } from "~/services/api/staff/staff-attendance/dto";
 import { DeleteScope } from "~/services/api/staff/staff-shift/staff-shift.type";
@@ -191,6 +192,29 @@ export function useMarkPresent() {
     onError: (error) => {
       if (error instanceof AxiosError)
         toast.error(error.response?.data.message);
+    },
+  });
+}
+
+export function useTransferStaffShift() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: TransferStaffShiftRequest) =>
+      await StaffShiftService.transferStaffShift(data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["staff-shifts"],
+        refetchType: "active",
+      });
+      qc.invalidateQueries({
+        queryKey: ["staff-attendance"],
+        refetchType: "active",
+      });
+      toast.success("Chuyển ca làm việc thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data.message || "Chuyển ca thất bại");
     },
   });
 }

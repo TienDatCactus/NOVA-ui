@@ -207,6 +207,8 @@ const Staff = {
   update: (id: string) => `Staffs/${id}`,
   delete: (id: string) => `Staffs/${id}`,
   terminate: (id: string) => `Staffs/${id}/terminate`,
+  payrollMonth: (year: number, month: number) =>
+    `Staffs/payroll-month?year=${year}&month=${month}`,
 };
 
 //! hotel manager
@@ -245,6 +247,7 @@ const StaffShift = {
   delete: (id: string) => `StaffShifts/${id}`,
   exportWeeklyMatrix: "StaffShifts/export-weekly-matrix",
   exportWeeklyForm2: "StaffShifts/export-weekly-form2",
+  transfer: (id: string) => `StaffShifts/${id}/transfer`,
 };
 
 //! hotel manager
@@ -399,7 +402,6 @@ const GuestDocuments = {
   updateDocument: (documentId: string) => `GuestDocuments/${documentId}`,
   deleteDocument: (documentId: string) => `GuestDocuments/${documentId}`,
 };
-
 
 export {
   AuditLogs,

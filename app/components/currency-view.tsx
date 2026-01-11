@@ -11,7 +11,7 @@ import {
 import { Button } from "./ui/button";
 import { useConvertCurrency } from "~/features/exchange-rates/container/mutation";
 import { Label } from "./ui/label";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Eye, EyeOff } from "lucide-react";
 
 type CurrencyViewContextType = {
   targetCurrency?: string;
@@ -19,6 +19,8 @@ type CurrencyViewContextType = {
   amountVND: number;
   setAmountVND: (amount: number) => void;
   convertedAmount?: number;
+  showConverter: boolean;
+  toggleConverter: () => void;
 };
 export const CurrencyViewContext =
   createContext<CurrencyViewContextType | null>(null);
@@ -42,8 +44,11 @@ function CurrencyView({ children, amount: externalAmount }: CurrencyViewProps) {
   const [targetCurrency, setTargetCurrency] = useState<string>("USD");
   const [amountVND, setAmountVND] = useState<number>(0);
   const [convertedAmount, setConvertedAmount] = useState<number>();
+  const [showConverter, setShowConverter] = useState<boolean>(false);
 
   const { mutate: convert } = useConvertCurrency();
+
+  const toggleConverter = () => setShowConverter((prev) => !prev);
 
   // Sync external amount to internal state
   useEffect(() => {
@@ -84,6 +89,8 @@ function CurrencyView({ children, amount: externalAmount }: CurrencyViewProps) {
         setAmountVND,
         handleSelectCurrency,
         convertedAmount,
+        showConverter,
+        toggleConverter,
       }}
     >
       {children}
@@ -178,6 +185,32 @@ const MoneyDisplay: React.FC<MoneyDisplayProps> = ({ showLabel = true }) => {
   );
 };
 
+const Toggle = () => {
+  const { showConverter, toggleConverter } = useCurrencyView();
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={toggleConverter}
+      className="gap-2"
+    >
+      {showConverter ? (
+        <>
+          <EyeOff className="h-4 w-4" />
+          Ẩn quy đổi tiền tệ
+        </>
+      ) : (
+        <>
+          <Eye className="h-4 w-4" />
+          Hiện quy đổi tiền tệ
+        </>
+      )}
+    </Button>
+  );
+};
+
+CurrencyView.Toggle = Toggle;
 CurrencyView.Select = CurrencySelect;
 CurrencyView.Display = MoneyDisplay;
 

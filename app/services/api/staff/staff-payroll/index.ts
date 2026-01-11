@@ -1,18 +1,17 @@
 import http from "~/lib/http";
-import { StaffPayroll } from "~/services/url";
 import { StaffPayrollSchema } from "~/services/api/staff/staff-payroll/staff-payroll.schema";
+import { StaffPayroll } from "~/services/url";
 import type {
-  PayrollListDto,
-  PayrollGridParams,
-  GeneratePayrollDto,
-  PayrollDetailDto,
-  GenerateSinglePayrollDto,
   ApplyUnusedLeaveDto,
+  CreateSalaryExpenseRequestDto,
+  GeneratePayrollDto,
+  GenerateSinglePayrollDto,
   PayrollComponentInputDto,
   PayrollComponentListDto,
-  CreateSalaryExpenseRequestDto,
+  PayrollDetailDto,
+  PayrollGridParams,
+  PayrollListDto,
   UpdatePaidAmountPayrollDto,
-  UpdateBaseSalaryPayrollDto,
 } from "./dto";
 
 const {
@@ -23,7 +22,6 @@ const {
   GenerateSinglePayrollSchema,
   ApplyUnusedLeaveSchema,
   UpdatePaidAmountPayrollSchema,
-  UpdateBaseSalaryPayrollSchema,
   PayrollComponentInputSchema,
 } = StaffPayrollSchema;
 
@@ -281,6 +279,7 @@ async function createSalaryExpense(
     return Promise.reject(error);
   }
 }
+
 export const StaffPayrollService = {
   getPayrollGrid,
   generatePayroll,

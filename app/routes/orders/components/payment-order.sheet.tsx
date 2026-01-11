@@ -44,7 +44,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { cn, formatMoney } from "~/lib/utils";
-import CurrencyView from "~/components/currency-view";
+import CurrencyView, { useCurrencyView } from "~/components/currency-view";
 import { PaymentMethodSelector } from "~/components/payment-method-selector";
 
 import { useCalculateInvoiceFees } from "~/routes/reservation/booking-detail/container/use-booking-checkout.hooks";
@@ -97,6 +97,27 @@ export default function PaymentOrderSheet({
       ? posOrderDetail?.totalAmount || 0
       : (serviceOrderDetail?.unitPrice || 0) *
         (serviceOrderDetail?.quantity || 0);
+
+function PaymentCurrencySection() {
+  const { showConverter } = useCurrencyView();
+  
+  return (
+    <div className="space-y-2">
+      <CurrencyView.Toggle />
+      {showConverter && (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-muted-foreground">
+              Quy đổi tiền tệ
+            </span>
+            <CurrencyView.Select />
+          </div>
+          <CurrencyView.Display showLabel={false} />
+        </>
+      )}
+    </div>
+  );
+}
 
   const { data: calculatedFees, isPending: isCalculatingFees } =
     useCalculateInvoiceFees(
@@ -459,15 +480,7 @@ export default function PaymentOrderSheet({
 
                       {/* Currency Conversion */}
                       <Separator />
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-sm text-muted-foreground">
-                            Quy đổi tiền tệ
-                          </span>
-                          <CurrencyView.Select />
-                        </div>
-                        <CurrencyView.Display showLabel={false} />
-                      </div>
+                      <PaymentCurrencySection />
                     </div>
                   </div>
 

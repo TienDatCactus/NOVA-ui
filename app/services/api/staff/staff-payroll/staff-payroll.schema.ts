@@ -32,6 +32,8 @@ const PayrollItemSchema = z.object({
   staffId: z.uuid(),
   staffCode: z.string(),
   staffName: z.string(),
+  normalWorkDays: z.number().optional(),
+  holidayWorkDays: z.number().optional(),
   daysInMonth: z.number().optional(),
   assignedDays: z.number().optional(),
   workDays: z.number().optional(),

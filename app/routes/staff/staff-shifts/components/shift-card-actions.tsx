@@ -1,4 +1,4 @@
-import { CheckCircle2, Trash2, UserX } from "lucide-react";
+import { CheckCircle2, Trash2, UserCog, UserX } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Tooltip,
@@ -13,6 +13,7 @@ interface ShiftCardActionsProps {
   onMarkPresent: () => void;
   onMarkAbsent: () => void;
   onDelete: () => void;
+  onTransfer: () => void;
 }
 
 export function ShiftCardActions({
@@ -20,11 +21,34 @@ export function ShiftCardActions({
   onMarkPresent,
   onMarkAbsent,
   onDelete,
+  onTransfer,
 }: ShiftCardActionsProps) {
   const status = attendance?.status?.toLowerCase();
 
   return (
     <div className="flex gap-1">
+      {/* Transfer Button - Always show */}
+      <TooltipProvider>
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 hover:bg-blue-500/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onTransfer();
+              }}
+            >
+              <UserCog className="h-3.5 w-3.5 text-blue-500" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p className="text-xs">Chuyển ca</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
       {/* Mark Present Button - Show for assigned and absent */}
       {(!attendance ||
         status === "assigned" ||

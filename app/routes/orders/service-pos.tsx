@@ -48,7 +48,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { DASHBOARD } from "~/lib/fe-url";
 import { formatMoney } from "~/lib/utils";
 import { useServicePosOrderStore } from "~/store/service-pos-order.store";
-import CurrencyView from "~/components/currency-view";
+import CurrencyView, { useCurrencyView } from "~/components/currency-view";
 import useServiceFilters from "../services/container/services/filter.hooks";
 import OrderConfirmDialog from "./components/order-confirm.dialog";
 import { useCreateServiceOrder } from "./container/service-order/mutation.hooks";
@@ -62,6 +62,28 @@ export function meta({}: Route.MetaArgs) {
 
 export const clientLoader = () =>
   AuthLoader.guard(RouteModule.Orders, Permission.Read);
+
+function ServicePosCurrencySection() {
+  const { showConverter } = useCurrencyView();
+  
+  return (
+    <div className="space-y-2">
+      <CurrencyView.Toggle />
+      {showConverter && (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm text-muted-foreground">
+              Chọn tiền tệ
+            </Label>
+            <CurrencyView.Select />
+          </div>
+          <CurrencyView.Display />
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function Component({}: Route.ComponentProps) {
   // Data fetching
   const { data: serviceTypes } = useServiceTypes();
@@ -441,15 +463,7 @@ export default function Component({}: Route.ComponentProps) {
 
                     {/* Currency Conversion */}
                     <Separator />
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <Label className="text-sm text-muted-foreground">
-                          Chọn tiền tệ
-                        </Label>
-                        <CurrencyView.Select />
-                      </div>
-                      <CurrencyView.Display />
-                    </div>
+                    <ServicePosCurrencySection />
                   </div>
                 </Card>
 

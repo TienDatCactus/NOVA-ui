@@ -6,6 +6,7 @@ import type {
   StaffShiftDetailResponseDto,
   CreateShiftScheduleRequest,
   UpdateShiftScheduleRequest,
+  TransferStaffShiftRequest,
 } from "./dto";
 import type { StaffShiftListParams } from "./staff-shift.type";
 import { DeleteScope } from "./staff-shift.type";
@@ -132,6 +133,15 @@ async function exportWeeklyForm2(params: {
     return Promise.reject(error);
   }
 }
+async function transferStaffShift(data: TransferStaffShiftRequest) {
+  try {
+    const resp = await http.post(StaffShift.transfer(data.id), data);
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 
 export const StaffShiftService = {
   getStaffShiftList,
@@ -141,4 +151,5 @@ export const StaffShiftService = {
   updateShiftSchedule,
   exportWeeklyMatrix,
   exportWeeklyForm2,
+  transferStaffShift,
 };

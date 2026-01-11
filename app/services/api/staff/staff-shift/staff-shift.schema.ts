@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ApplyScope } from "./staff-shift.type";
 
 // StaffShift List Item Schema
 const StaffShiftListItemSchema = z.object({
@@ -67,6 +68,12 @@ const UpdateShiftScheduleRequestSchema = z
     }
   );
 
+const TransferStaffShiftRequestSchema = z.object({
+  id: z.string().min(1, "Phải chọn nhân sự nhận ca"),
+  targetStaffId: z.string().min(1, "Phải chọn nhân sự nhận ca"),
+  scope: z.enum([ApplyScope.ThisOnly, ApplyScope.Forward, ApplyScope.All]),
+});
+
 export const StaffShiftSchema = {
   StaffShiftListItemSchema,
   StaffShiftDetailItemSchema,
@@ -74,4 +81,5 @@ export const StaffShiftSchema = {
   StaffShiftDetailResponseSchema,
   CreateShiftScheduleRequestSchema,
   UpdateShiftScheduleRequestSchema,
+  TransferStaffShiftRequestSchema,
 };

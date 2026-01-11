@@ -9,6 +9,7 @@ import type {
   TerminateStaffDto,
 } from "./dto";
 import type { StaffListParams } from "./staff.types";
+import { data } from "react-router";
 
 const {
   StaffListSchema,
@@ -99,6 +100,18 @@ async function terminateStaff(
   }
 }
 
+async function getStaffsHasPayrollinMonth(
+  year: number,
+  month: number
+): Promise<StaffListDto> {
+  try {
+    const resp = await http.get(Staff.payrollMonth(year, month));
+    return resp.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 export const StaffService = {
   getStaffList,
   createStaff,
@@ -106,4 +119,5 @@ export const StaffService = {
   updateStaff,
   deleteStaff,
   terminateStaff,
+  getStaffsHasPayrollinMonth,
 };

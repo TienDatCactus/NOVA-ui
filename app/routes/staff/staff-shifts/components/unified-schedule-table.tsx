@@ -25,6 +25,7 @@ import DeleteScheduleDialog from "./delete-schedule-dialog";
 import MarkAbsentDialog from "./mark-absent-dialog";
 import { ShiftCard } from "./shift-card";
 import UpdateScheduleDialog from "./update-schedule-dialog";
+import TransferShiftDialog from "./transfer-shift-dialog";
 import { Popover, PopoverContent } from "~/components/ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 
@@ -50,6 +51,7 @@ export default function UnifiedScheduleTable({
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [markAbsentDialogOpen, setMarkAbsentDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
 
   // Selected data for dialogs
   const [selectedShift, setSelectedShift] = useState<StaffShiftListItem | null>(
@@ -236,6 +238,10 @@ export default function UnifiedScheduleTable({
                                       setSelectedAttendance(attendance);
                                       setMarkAbsentDialogOpen(true);
                                     }}
+                                    onTransfer={(shift) => {
+                                      setSelectedShift(shift);
+                                      setTransferDialogOpen(true);
+                                    }}
                                   />
                                 );
                               })}
@@ -289,6 +295,10 @@ export default function UnifiedScheduleTable({
                                             onMarkAbsent={(attendance) => {
                                               setSelectedAttendance(attendance);
                                               setMarkAbsentDialogOpen(true);
+                                            }}
+                                            onTransfer={(shift) => {
+                                              setSelectedShift(shift);
+                                              setTransferDialogOpen(true);
                                             }}
                                           />
                                         );
@@ -353,6 +363,15 @@ export default function UnifiedScheduleTable({
       <DeleteScheduleDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
+        shift={selectedShift}
+        onSuccess={() => {
+          setSelectedShift(null);
+        }}
+      />
+
+      <TransferShiftDialog
+        open={transferDialogOpen}
+        onOpenChange={setTransferDialogOpen}
         shift={selectedShift}
         onSuccess={() => {
           setSelectedShift(null);

@@ -148,3 +148,12 @@ export function useTerminateStaff() {
     },
   });
 }
+
+export function useStaffsHasPayrollinMonth(year: number, month: number) {
+  return useQuery({
+    queryKey: ["staffs-has-payroll", year, month],
+    queryFn: async () =>
+      await StaffService.getStaffsHasPayrollinMonth(year, month),
+    enabled: !!year && !!month,
+  });
+}

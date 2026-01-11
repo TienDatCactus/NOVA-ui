@@ -7,7 +7,7 @@ import { AuthLoader } from "~/lib/auth/auth.loader";
 import { hasRole } from "~/lib/auth/bouncer";
 import { UserRole } from "~/lib/auth/roles";
 import { formatMoney } from "~/lib/utils";
-import CurrencyView from "~/components/currency-view";
+import CurrencyView, { useCurrencyView } from "~/components/currency-view";
 
 type CartSummaryProps = {
   itemCount: number;
@@ -18,6 +18,27 @@ type CartSummaryProps = {
   onClearCart: () => void;
   isInvalid?: boolean;
 };
+
+function CurrencyViewSection() {
+  const { showConverter } = useCurrencyView();
+  
+  return (
+    <div className="space-y-2">
+      <CurrencyView.Toggle />
+      {showConverter && (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm text-muted-foreground">
+              Chọn tiền tệ
+            </Label>
+            <CurrencyView.Select />
+          </div>
+          <CurrencyView.Display />
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function CartSummary({
   itemCount,
@@ -77,16 +98,7 @@ export default function CartSummary({
             {/* Currency conversion section */}
             <Separator />
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <Label className="text-sm text-muted-foreground">
-                  Chọn tiền tệ
-                </Label>
-                <CurrencyView.Select />
-              </div>
-
-              <CurrencyView.Display />
-            </div>
+            <CurrencyViewSection />
           </CardContent>
         </Card>
         <div className="space-y-2">

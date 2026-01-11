@@ -22,6 +22,7 @@ interface ShiftCardProps {
   onDelete: (shiftId: string) => void;
   onMarkPresent: (attendance: StaffAttendanceListItem | null) => void;
   onMarkAbsent: (attendance: StaffAttendanceListItem | null) => void;
+  onTransfer: (shift: StaffShiftListItem) => void;
 }
 
 export function ShiftCard({
@@ -33,6 +34,7 @@ export function ShiftCard({
   onDelete,
   onMarkPresent,
   onMarkAbsent,
+  onTransfer,
 }: ShiftCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -92,6 +94,7 @@ export function ShiftCard({
             onMarkPresent={() => onMarkPresent(attendance)}
             onMarkAbsent={() => onMarkAbsent(attendance)}
             onDelete={() => onDelete(shift.id)}
+            onTransfer={() => onTransfer(shift)}
           />
         </div>
       )}

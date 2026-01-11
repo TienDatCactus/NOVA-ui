@@ -51,7 +51,7 @@ const CreateStaffSchema = z.object({
   email: z.email("Email không hợp lệ").optional().nullable(),
   gender: z.string().optional(),
   dateOfBirth: z
-    .date()
+    .date("Ngày sinh không hợp lệ")
     .refine((date) => date <= new Date(), "Ngày sinh không được ở tương lai")
     .refine((date) => {
       const minDate = new Date();
@@ -64,12 +64,12 @@ const CreateStaffSchema = z.object({
       minAgeDate.setFullYear(minAgeDate.getFullYear() - 18);
       return date <= minAgeDate;
     }, "Ngày sinh phải đảm bảo nhân sự đủ 18 tuổi")
-    .optional(),
+   ,
 
   citizenId: z
     .string("CCCD không hợp lệ")
     .regex(/^(\d{9}|\d{12})$/, "CCCD phải gồm 9 hoặc 12 chữ số"),
-  startDate: z.date("Ngày bắt đầu không hợp lệ").optional(),
+  startDate: z.date("Ngày bắt đầu không hợp lệ"),
   note: z.string().optional(),
   staffRoleId: z.string().min(1, "Chức vụ là bắt buộc"),
 });

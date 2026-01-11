@@ -13,7 +13,7 @@ import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn, formatMoney } from "~/lib/utils";
-import CurrencyView from "~/components/currency-view";
+import CurrencyView, { useCurrencyView } from "~/components/currency-view";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import type { ServiceOrderListItemDto } from "~/services/api/orders/dto";
 import { useServiceOrderDetail } from "../../container/service-order/query.hooks";
@@ -21,6 +21,27 @@ import { useServiceOrderDetail } from "../../container/service-order/query.hooks
 interface ServiceOrderDetailsProps {
   order: ServiceOrderListItemDto;
   bookingDetail?: BookingDetailResponseDto;
+}
+
+function ServiceOrderCurrencySection() {
+  const { showConverter } = useCurrencyView();
+  
+  return (
+    <div className="space-y-2">
+      <CurrencyView.Toggle />
+      {showConverter && (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground">
+              Quy đổi tiền tệ
+            </span>
+            <CurrencyView.Select />
+          </div>
+          <CurrencyView.Display showLabel={false} />
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function ServiceOrderDetails({
@@ -185,15 +206,7 @@ export default function ServiceOrderDetails({
 
           {/* Currency Conversion */}
           <Separator className="my-2 bg-muted" />
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-muted-foreground">
-                Quy đổi tiền tệ
-              </span>
-              <CurrencyView.Select />
-            </div>
-            <CurrencyView.Display showLabel={false} />
-          </div>
+          <ServiceOrderCurrencySection />
         </div>
       </CurrencyView>
 

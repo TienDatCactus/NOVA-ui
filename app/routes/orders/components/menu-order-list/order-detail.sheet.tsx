@@ -20,7 +20,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { cn, formatMoney } from "~/lib/utils";
-import CurrencyView from "~/components/currency-view";
+import CurrencyView, { useCurrencyView } from "~/components/currency-view";
 import type { POSOrderDetailDto } from "~/services/api/orders/dto";
 
 import InlineNoteEditor from "./inline-note-editor";
@@ -49,6 +49,27 @@ const statusStyles: Record<string, string> = {
     "bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100",
   Cancelled: "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100",
 };
+
+function MenuOrderCurrencySection() {
+  const { showConverter } = useCurrencyView();
+  
+  return (
+    <div className="space-y-2">
+      <CurrencyView.Toggle />
+      {showConverter && (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground">
+              Quy đổi tiền tệ
+            </span>
+            <CurrencyView.Select />
+          </div>
+          <CurrencyView.Display showLabel={false} />
+        </>
+      )}
+    </div>
+  );
+}
 
 const statusLabels: Record<string, string> = {
   Open: "Mới",
@@ -278,15 +299,7 @@ export default function OrderDetailSheet({
 
               {/* Currency Conversion */}
               <Separator />
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-muted-foreground">
-                    Quy đổi tiền tệ
-                  </span>
-                  <CurrencyView.Select />
-                </div>
-                <CurrencyView.Display showLabel={false} />
-              </div>
+              <MenuOrderCurrencySection />
 
               {/* Main Action */}
               <div className="pt-2">
