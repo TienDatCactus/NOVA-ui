@@ -669,6 +669,12 @@ const UnpaidRoomsForBookingSchema = z.object({
   totalUnpaidAmount: z.number().min(0),
 });
 
+const CheckinBookingRequestSchema = z.object({
+  actualCheckinTime: z.date("Thời gian nhận phòng thực tế không hợp lệ"),
+  roomAssignments: z.record(z.string(), z.string()).optional(), // { roomId: assignedRoomId }
+  autoAssignRooms: z.boolean(),
+});
+
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -715,4 +721,5 @@ export const BookingSchema = {
 
   UnpaidRoomsForBookingSchema,
   UnpaidRoomSchema,
+  CheckinBookingRequestSchema,
 };

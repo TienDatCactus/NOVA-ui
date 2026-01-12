@@ -108,7 +108,7 @@ const AddBatchItemsToPOSOrderRequestSchema = z.array(
 
 //* print hien tai chua lam duoc
 const POSOrderPrintItemSchema = z.object({
-  itemName: z.string().min(1),
+  itemName: z.string().optional(),
   quantity: z.number().int().min(0),
   notes: z.string().max(500).optional().nullable(),
 });

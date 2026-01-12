@@ -1,4 +1,4 @@
-import { AlertTriangle, Filter, TrendingDown } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -6,17 +6,11 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
 import type { FinancialReportsListParams } from "~/services/api/finances/finances.types";
 import type { Route } from "./+types/dashboard";
-import { BookingMetricsGrid } from "./components/booking-metrics-grid";
-import { FinancialHealthIndicators } from "./components/financial-health-indicators";
-import { PaymentMethodsTable } from "./components/payment-methods-table";
-import {
-  ChannelRevenueChart,
-  RevenueBreakdownDonut,
-} from "./components/revenue-breakdown-charts";
 import { RevenueTrendChart } from "./components/revenue-trend-chart";
+import { RevenueStructureChart } from "./components/revenue-structure-chart";
 import { useFinancialDashboard } from "./container/query.hooks";
 import { DashboardToolbar } from "./fragments/dashboard-toolbar";
-import { KpiRow } from "./fragments/kpi-row";
+import { StatCards } from "./fragments/stat-cards";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -34,9 +28,8 @@ export const clientLoader = () =>
 export default function FinancialDashboard({}: Route.ComponentProps) {
   const [filters, setFilters] = useState<FinancialReportsListParams>({
     PeriodType: "ThisMonth",
-    ComparisonType: "PreviousPeriod",
     IncludeTrend: true,
-    TrendDays: 14,
+    TrendDays: 7,
   });
 
   const { data, isPending, refetch, isError } = useFinancialDashboard(filters);
@@ -47,13 +40,6 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
     await refetch();
     setIsRefreshing(false);
   };
-
-  // --- Alert Logic ---
-  const hasLowCollectionRate =
-    (data?.financialHealth.collectionRate ?? 0) <
-    (data?.financialHealth.collectionRateTarget ?? 95);
-  const hasNegativeProfit = (data?.thisMonthKpis.netProfit ?? 0) < 0;
-  const hasSmallSample = (data?.bookingMetrics.totalBookings ?? 0) < 10;
 
   return (
     <div className="flex flex-col h-full bg-muted/10 min-h-screen">
@@ -88,82 +74,31 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
           </Alert>
         )}
 
-        {/* Main Content */}
+        {/* SME Simplified Dashboard */}
         {!isPending && !isError && data && (
-          <div className="space-y-8 ">
-            {(hasLowCollectionRate || hasNegativeProfit || hasSmallSample) && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {hasLowCollectionRate && (
-                  <Alert variant={"destructive"}>
-                    <AlertTriangle className="h-4 w-4 " />
-                    <AlertTitle>Tỷ lệ thu tiền thấp</AlertTitle>
-                    <AlertDescription className="text-xs mt-1">
-                      Hiện tại {data.financialHealth.collectionRate.toFixed(1)}%
-                      (Mục tiêu {data.financialHealth.collectionRateTarget}%)
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {hasNegativeProfit && (
-                  <Alert variant={"warning"}>
-                    <TrendingDown className="h-4 w-4 " />
-                    <AlertTitle>Lợi nhuận âm</AlertTitle>
-                    <AlertDescription className="text-xs mt-1">
-                      Cần xem lại chi phí vận hành.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {hasSmallSample && (
-                  <Alert variant={"info"}>
-                    <Filter className="h-4 w-4 " />
-                    <AlertTitle>Mẫu dữ liệu nhỏ</AlertTitle>
-                    <AlertDescription className="text-xs mt-1">
-                      Chỉ có {data.bookingMetrics.totalBookings} booking. Xu
-                      hướng có thể chưa chính xác.
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            )}
-
+          <div className="space-y-6">
+            {/* 4 Stat Cards */}
             <section>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 pl-1">
-                Hiệu suất tổng quan ({data.periodDescription})
+                Tổng quan ({data.periodDescription})
               </h2>
-              <KpiRow
-                data={
-                  filters.PeriodType === "Today"
-                    ? data.todayKpis
-                    : data.thisMonthKpis
-                }
-              />
+              <StatCards data={data} />
             </section>
 
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Revenue Trend Chart */}
+            <section>
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 pl-1">
+                Xu hướng doanh thu
+              </h2>
               <RevenueTrendChart data={data.revenueTrend} />
-              <BookingMetricsGrid metrics={data.bookingMetrics} />
             </section>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <RevenueBreakdownDonut
-                data={data.revenueBreakdown}
-                totalRevenue={data.thisMonthKpis.totalRevenue}
-              />
-              <ChannelRevenueChart data={data.revenueByChannel} />
-            </section>
-
-            <section className="grid grid-cols-1 pb-10">
-              <div className="space-y-6">
-                <FinancialHealthIndicators
-                  health={data.financialHealth}
-                  collectionTarget={data.financialHealth.collectionRateTarget}
-                />
-                {data.paymentCollection.length > 0 && (
-                  <PaymentMethodsTable
-                    data={data.paymentCollection}
-                    otaReceivable={data.otaReceivable}
-                  />
-                )}
-              </div>
+            {/* Revenue Structure Chart */}
+            <section className="pb-10">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 pl-1">
+                Cơ cấu doanh thu
+              </h2>
+              <RevenueStructureChart data={data.revenueStructure} />
             </section>
           </div>
         )}
@@ -174,24 +109,17 @@ export default function FinancialDashboard({}: Route.ComponentProps) {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-8  px-4 md:px-6 py-8">
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-32 w-full rounded-xl" />
+    <div className="space-y-6">
+      {/* Stat Cards Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-40 w-full rounded-xl" />
         ))}
       </div>
 
-      {/* Main Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Skeleton className="h-[400px] lg:col-span-2 rounded-xl" />
-        <Skeleton className="h-[400px] lg:col-span-1 rounded-xl" />
-      </div>
-
-      {/* Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Skeleton className="h-[350px] rounded-xl" />
-        <Skeleton className="h-[350px] rounded-xl" />
-      </div>
+      {/* Charts Skeleton */}
+      <Skeleton className="h-[350px] w-full rounded-xl" />
+      <Skeleton className="h-[350px] w-full rounded-xl" />
     </div>
   );
 }

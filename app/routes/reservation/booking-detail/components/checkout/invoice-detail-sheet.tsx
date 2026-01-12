@@ -688,6 +688,7 @@ export default function InvoiceDetailSheet({
                     {/* Currency Conversion */}
                     <Separator className="my-3" />
                     <div className="space-y-2 bg-muted/20 p-3 rounded-lg">
+                      <CurrencyView.Toggle />
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs font-medium text-muted-foreground">
                           Quy đổi tiền tệ

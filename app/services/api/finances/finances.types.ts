@@ -1,6 +1,9 @@
+// SME Simplified Request Parameters (2026-01-12)
+// Removed: ComparisonType, TimeZone
+// Changed: TrendDays default from 14 to 7
 export type FinancialReportsListParams = {
   IncludeTrend?: boolean;
-  TrendDays?: number;
+  TrendDays?: number; // Default: 7 (max)
   StartDate?: string; // ISO date string
   EndDate?: string; // ISO date string
   PeriodType?:
@@ -10,6 +13,4 @@ export type FinancialReportsListParams = {
     | "ThisQuarter"
     | "ThisYear"
     | "CustomRange";
-  ComparisonType?: "None" | "PreviousPeriod" | "SamePeriodLastYear" | "Budget";
-  TimeZone?: string;
 };

@@ -116,9 +116,7 @@ export default function OrderConfirmationDialog({
                 </p>
               </div>
 
-              {/* Receipt Card */}
               <div className="w-full bg-card border rounded-xl shadow-sm overflow-hidden">
-                {/* Header */}
                 <div className="bg-muted/30 px-4 py-3 border-b flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Receipt className="h-4 w-4 text-muted-foreground" />

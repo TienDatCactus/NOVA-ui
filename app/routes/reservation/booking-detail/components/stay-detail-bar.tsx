@@ -76,6 +76,7 @@ import type {
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
 import { useUpdateBookingStatus } from "../../bookings/container/booking-mutation.hooks";
+import { CheckinDialog } from "./operations/checkin-dialog";
 import { useConfirmBookingPayment } from "../container/use-booking-checkout.hooks";
 import type { BookingState } from "../container/use-booking-state.hooks";
 
@@ -98,6 +99,7 @@ export default function StayDetailBar({
 }: StayDetailBarProps) {
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [documentWarningOpen, setDocumentWarningOpen] = useState(false);
+  const [checkinDialogOpen, setCheckinDialogOpen] = useState(false);
   const { mutateAsync: updateBookingStatus, isPending: isUpdatingStatus } =
     useUpdateBookingStatus(bookingDetail.id!);
 
@@ -168,26 +170,19 @@ export default function StayDetailBar({
   }, [bookingDetail.checkinDate]);
 
   // --- Handlers ---
-  const handleUpdateBookingStatus = async (
-    status: z.infer<typeof BookingSchema.BookingStatusEnum>
-  ) => {
-    // Check documents before check-in
-    if (status === "CheckedIn" && !documentsValidation.hasAllDocuments) {
+  const handleOpenCheckinDialog = () => {
+    // Check documents before opening checkin dialog
+    if (!documentsValidation.hasAllDocuments) {
       setDocumentWarningOpen(true);
       return;
     }
-
-    if (status === "CheckedIn") {
-      await updateBookingStatus("CheckedIn");
-      await updateBookingStatus("InHouse");
-    } else {
-      updateBookingStatus(status);
-    }
+    setCheckinDialogOpen(true);
   };
 
-  const performCheckIn = async () => {
-    await updateBookingStatus("CheckedIn");
-    await updateBookingStatus("InHouse");
+  const handleUpdateBookingStatus = async (
+    status: z.infer<typeof BookingSchema.BookingStatusEnum>
+  ) => {
+    updateBookingStatus(status);
   };
 
   return (
@@ -195,7 +190,7 @@ export default function StayDetailBar({
       <Card className="shadow-sm  hover:border-primary bg-background h-full gap-0  flex flex-col">
         {/* === HEADER === */}
         <CardHeader className="bg-muted/10 py-0 px-6 border-b shrink-0">
-          <div className="flex justify-between items-center">
+          <div className="flex  xl:flex-row flex-col xl:justify-between items-center lg:items-start gap-4">
             {/* Identity */}
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
@@ -243,10 +238,9 @@ export default function StayDetailBar({
                 buttonStates.canCheckIn &&
                 bookingDetail.status === "Confirmed" && (
                   <Button
-                    disabled={isUpdatingStatus}
                     size="sm"
                     className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
-                    onClick={() => handleUpdateBookingStatus("CheckedIn")}
+                    onClick={handleOpenCheckinDialog}
                     type="button"
                   >
                     <DoorOpen className="w-4 h-4 mr-2" /> Nhận phòng
@@ -366,6 +360,7 @@ export default function StayDetailBar({
                             {/* Currency Conversion */}
                             <Separator className="bg-border/50" />
                             <div className="p-4 space-y-2 bg-muted/10">
+                              <CurrencyView.Toggle />
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-sm text-muted-foreground">
                                   Quy đổi tiền tệ
@@ -606,8 +601,15 @@ export default function StayDetailBar({
         adultsAmount={bookingDetail.adults || 1}
         onConfirm={() => {
           setDocumentWarningOpen(false);
-          performCheckIn();
+          setCheckinDialogOpen(true);
         }}
+      />
+
+      {/* Checkin Dialog */}
+      <CheckinDialog
+        open={checkinDialogOpen}
+        onOpenChange={setCheckinDialogOpen}
+        bookingDetail={bookingDetail}
       />
     </div>
   );

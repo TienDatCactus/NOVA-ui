@@ -12,6 +12,7 @@ import type {
   BookingOTAResponseDto,
   BookingPayForRoomRequestDto,
   BookingPendingChargesResponseDto,
+  CheckinBookingRequestDto,
   ConfirmBookingPaymentRequestDto,
   ConfirmBookingPaymentResponseDto,
   OrderableBookingResponseDto,
@@ -63,6 +64,7 @@ const {
   UpdateBookingStatusResponseSchema,
   UnpaidRoomsForBookingSchema,
   StaffCheckoutPaymentResponseSchema,
+  CheckinBookingRequestSchema,
 } = BookingSchema;
 
 async function getBookingList(
@@ -453,6 +455,29 @@ async function unpaidRooms(
     return Promise.reject(error);
   }
 }
+
+async function checkingBooking(
+  id: string,
+  data: CheckinBookingRequestDto
+): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
+  await http.post(
+    Booking.checkin(id),
+    CheckinBookingRequestSchema.parse(data),
+    {
+      headers: {
+        "Idempotency-Key": idempotencyKey,
+      },
+    }
+  );
+
+  try {
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
 export const BookingService = {
   getBookingList,
   staffCreateBooking,
@@ -478,4 +503,5 @@ export const BookingService = {
 
   payForRooms,
   unpaidRooms,
+  checkingBooking,
 };

@@ -3,7 +3,7 @@
  *
  * Business Rules:
  * - Direct bookings (DirectStaff, DirectCustomer): Cash, Card, BankTransfer
- * - OTA/Agency bookings: OTAPrepaid, OTACollect, OnAccount
+ * - OTA/Agency bookings: OTAPrepaid only (no Cash, Card, or BankTransfer)
  */
 
 export type BookingSourceType =
@@ -15,11 +15,7 @@ export type BookingSourceType =
 
 export const DIRECT_PAYMENT_METHODS = ["Cash", "Card", "BankTransfer"] as const;
 
-export const OTA_PAYMENT_METHODS = [
-  "OTAPrepaid",
-  "OTACollect",
-  "OnAccount",
-] as const;
+export const OTA_PAYMENT_METHODS = ["OTAPrepaid"] as const;
 
 export type DirectPaymentMethod = (typeof DIRECT_PAYMENT_METHODS)[number];
 export type OTAPaymentMethod = (typeof OTA_PAYMENT_METHODS)[number];
@@ -41,7 +37,7 @@ export function getAvailablePaymentMethods(
     return DIRECT_PAYMENT_METHODS;
   }
 
-  // OTA/Agency bookings → OTAPrepaid, OTACollect, OnAccount
+  // OTA/Agency bookings → OTAPrepaid only
   if (source === "OTA" || source === "Agency") {
     return OTA_PAYMENT_METHODS;
   }

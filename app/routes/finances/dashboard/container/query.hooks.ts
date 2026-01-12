@@ -7,13 +7,17 @@ export function useFinancialDashboard(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: ["financial-dashboard", params],
+    queryKey: [
+      "financial-dashboard",
+      params?.PeriodType,
+      params?.StartDate,
+      params?.EndDate,
+    ],
     queryFn: async () => {
       const queryParams: FinancialReportsListParams = params || {
-        PeriodType: "Today",
-        ComparisonType: "PreviousPeriod",
+        PeriodType: "ThisMonth", // Most common for SME
         IncludeTrend: true,
-        TrendDays: 14,
+        TrendDays: 7, // Changed from 14 to 7
       };
       return await FinancesService.getFinancialReport(queryParams);
     },

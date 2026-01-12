@@ -368,7 +368,7 @@ export default function DocumentScanDialog({
                         <FormLabel>Giới tính *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -376,9 +376,8 @@ export default function DocumentScanDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Male">Nam</SelectItem>
-                            <SelectItem value="Female">Nữ</SelectItem>
-                            <SelectItem value="Other">Khác</SelectItem>
+                            <SelectItem value="NAM">Nam</SelectItem>
+                            <SelectItem value="NU">Nữ</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -606,7 +605,7 @@ export default function DocumentScanDialog({
                         <FormLabel>Giới tính *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -614,9 +613,8 @@ export default function DocumentScanDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Male">Nam</SelectItem>
-                            <SelectItem value="Female">Nữ</SelectItem>
-                            <SelectItem value="Other">Khác</SelectItem>
+                            <SelectItem value="NAM">Nam</SelectItem>
+                            <SelectItem value="NU">Nữ</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

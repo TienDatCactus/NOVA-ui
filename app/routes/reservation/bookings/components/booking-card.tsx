@@ -42,8 +42,6 @@ import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 import { hasAnyRole } from "~/lib/auth/bouncer";
 import { DASHBOARD } from "~/lib/fe-url";
 import { cn, formatMoney, useCalculateNights } from "~/lib/utils";
-import CheckInDocumentWarning from "~/features/guest-documents/components/check-in-document-warning";
-import { useDocumentsValidation } from "~/features/guest-documents/hooks/use-documents-validation";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import {
   BOOKING_SOURCES,
@@ -68,7 +66,6 @@ interface BookingCardProps {
 export function BookingCard({ booking, refetch }: BookingCardProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
-  const [documentWarningOpen, setDocumentWarningOpen] = useState(false);
 
   const { data: bookingDetail } = useBookingDetail({
     bookingId: booking.bookingId,
@@ -76,10 +73,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
   });
 
   const bookingState = useBookingState(bookingDetail);
-  const documentsValidation = useDocumentsValidation({
-    bookingId: booking.bookingId || "",
-    adultsAmount: bookingDetail?.adults || 1,
-  });
+
   const { mutateAsync: updateStatus, isPending: isProcessing } =
     useUpdateBookingStatus(booking.bookingId || "");
   const { mutateAsync: cancelBooking } = useCancelBooking(
@@ -119,24 +113,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
     !bookingState.permissions.blockReason;
 
   const handleCheckIn = async () => {
-    if (!canCheckIn && !isRoomBlock) {
-      toast.error("Không thể check-in booking này");
-      return;
-    }
-
-    // Check documents first (skip for room blocks)
-    if (!isRoomBlock && !documentsValidation.hasAllDocuments) {
-      setDocumentWarningOpen(true);
-      return;
-    }
-
-    await performCheckIn();
-  };
-
-  const performCheckIn = async () => {
-    await updateStatus("CheckedIn");
-    if (!isRoomBlock) await updateStatus("InHouse");
-    refetch?.();
+    navigate(DASHBOARD.bookings.bookingDetail(booking.bookingCode!));
   };
 
   const handleCheckOut = async () => {
@@ -369,7 +346,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "font-mono text-xs font-bold",
+                "font-mono text-xs font-bold truncate max-w-[50px]",
                 isRoomBlock
                   ? "text-orange-700 dark:text-orange-400"
                   : "text-muted-foreground dark:text-muted-foreground"
@@ -402,7 +379,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               ) : (
                 <User className="h-3 w-3" />
               )}
-              <span className="truncate max-w-[80px]">
+              <span>
                 {isRoomBlock
                   ? "Bảo trì"
                   : booking.source === "OTA"
@@ -452,7 +429,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
         {/* BODY SECTION */}
         <div className="flex-1 px-4 py-4">
           <div className="mb-4 flex items-start justify-between">
-            <div className="flex items-start gap-2">
+            <div className="flex items-start flex-wrap gap-2">
               <Button
                 variant="link"
                 onClick={() => setDetailSheetOpen(true)}
@@ -460,7 +437,7 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
               >
                 <span
                   className={cn(
-                    "line-clamp-1 text-left truncate w-20",
+                    "line-clamp-1 text-left",
                     isRoomBlock &&
                       "text-orange-900 dark:text-orange-200 uppercase tracking-tight"
                   )}
@@ -606,19 +583,6 @@ export function BookingCard({ booking, refetch }: BookingCardProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Document Warning Dialog */}
-      <CheckInDocumentWarning
-        open={documentWarningOpen}
-        onOpenChange={setDocumentWarningOpen}
-        missingCount={documentsValidation.missingCount}
-        documentsCount={documentsValidation.documentsCount}
-        adultsAmount={bookingDetail?.adults || 1}
-        onConfirm={() => {
-          setDocumentWarningOpen(false);
-          performCheckIn();
-        }}
-      />
     </>
   );
 }

@@ -60,28 +60,31 @@ export default function PendingChargesSection({
   const hasItems = totalPending > 0;
 
   return (
-    <Card className="h-full   hover:border-primary flex flex-col bg-background p-4 shadow-sm">
-      {/* 1. HERO TOTAL (Sticky Top) */}
-      <CardHeader className=" pt-0 px-0 space-y-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
-            <Wallet className="w-4 h-4" />
-            Cần thanh toán
-          </CardTitle>
-          {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
-            canAddCharges && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onAddCompletedCharges}
-                className="h-8 text-xs gap-1.5 rounded-full border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary"
-              >
-                <Plus className="w-3.5 h-3.5" /> Thêm phí
-              </Button>
-            )}
-        </div>
+    <CurrencyView amount={totalPending}>
+      <Card className="h-full   hover:border-primary flex flex-col bg-background p-4 shadow-sm">
+        {/* 1. HERO TOTAL (Sticky Top) */}
+        <CardHeader className=" pt-0 px-0 space-y-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
+              <Wallet className="w-4 h-4" />
+              Cần thanh toán
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <CurrencyView.Toggle />
+              {hasAnyRole(AuthLoader.getUser(), [UserRole.Receptionist]) &&
+                canAddCharges && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onAddCompletedCharges}
+                    className="h-8 text-xs gap-1.5 rounded-full border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Thêm phí
+                  </Button>
+                )}
+            </div>
+          </div>
 
-        <CurrencyView amount={totalPending}>
           <div className="bg-card border rounded-2xl p-5 shadow-sm flex justify-between items-end relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
               <Receipt className="w-24 h-24" />
@@ -117,129 +120,131 @@ export default function PendingChargesSection({
               </Badge>
             )}
           </div>
-        </CurrencyView>
-      </CardHeader>
+        </CardHeader>
 
-      <div className="space-y-5 pb-4">
-        {roomInvoice && roomInvoice.balance > 0 && (
-          <section className="space-y-2">
-            <SectionHeader icon={BedDouble} title="Tiền phòng còn thiếu" />
-            <div className="bg-background rounded-xl border p-4 space-y-3 shadow-sm">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Mã hóa đơn</span>
-                <Badge
-                  variant="secondary"
-                  className="font-mono text-[10px] h-5"
-                >
-                  {roomInvoice.invoiceNo}
-                </Badge>
+        <div className="space-y-5 pb-4">
+          {roomInvoice && roomInvoice.balance > 0 && (
+            <section className="space-y-2">
+              <SectionHeader icon={BedDouble} title="Tiền phòng còn thiếu" />
+              <div className="bg-background rounded-xl border p-4 space-y-3 shadow-sm">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Mã hóa đơn</span>
+                  <Badge
+                    variant="secondary"
+                    className="font-mono text-[10px] h-5"
+                  >
+                    {roomInvoice.invoiceNo}
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <ReceiptRow label="Tổng giá trị" value={roomInvoice.total} />
+                  <ReceiptRow
+                    label="Đã thanh toán"
+                    value={-roomInvoice.paid}
+                    className="text-emerald-600"
+                  />
+                  <Separator className="my-2 border-dashed" />
+                  <ReceiptRow
+                    label="Còn lại"
+                    value={roomInvoice.balance}
+                    className="font-bold text-base"
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <ReceiptRow label="Tổng giá trị" value={roomInvoice.total} />
-                <ReceiptRow
-                  label="Đã thanh toán"
-                  value={-roomInvoice.paid}
-                  className="text-emerald-600"
-                />
-                <Separator className="my-2 border-dashed" />
-                <ReceiptRow
-                  label="Còn lại"
-                  value={roomInvoice.balance}
-                  className="font-bold text-base"
-                />
-              </div>
-            </div>
-          </section>
-        )}
-        {pendingOrders.posOrders.length > 0 && (
-          <section className="space-y-2">
-            <SectionHeader
-              icon={Utensils}
-              title="Đồ ăn & Uống"
-              count={pendingOrders.posOrders.length}
-            />
-            <div className="bg-background rounded-xl border divide-y shadow-sm">
-              {pendingOrders.posOrders.map((order) => (
-                <div key={order.id} className="p-4 space-y-2">
-                  {order.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex justify-between items-start text-sm"
-                    >
-                      <div className="flex gap-2">
-                        <span className="font-mono text-muted-foreground w-6 text-right pt-0.5">
-                          {item.quantity}x
-                        </span>
-                        <span className="font-medium text-foreground/90">
-                          {item.itemName}
+            </section>
+          )}
+          {pendingOrders.posOrders.length > 0 && (
+            <section className="space-y-2">
+              <SectionHeader
+                icon={Utensils}
+                title="Đồ ăn & Uống"
+                count={pendingOrders.posOrders.length}
+              />
+              <div className="bg-background rounded-xl border divide-y shadow-sm">
+                {pendingOrders.posOrders.map((order) => (
+                  <div key={order.id} className="p-4 space-y-2">
+                    {order.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex justify-between items-start text-sm"
+                      >
+                        <div className="flex gap-2">
+                          <span className="font-mono text-muted-foreground w-6 text-right pt-0.5">
+                            {item.quantity}x
+                          </span>
+                          <span className="font-medium text-foreground/90">
+                            {item.itemName}
+                          </span>
+                        </div>
+                        <span className="font-mono text-muted-foreground">
+                          {formatMoney(item.subtotal).vndFormatted}
                         </span>
                       </div>
-                      <span className="font-mono text-muted-foreground">
-                        {formatMoney(item.subtotal).vndFormatted}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-              <div className="p-3 bg-muted/20 flex justify-between items-center text-sm font-medium">
-                <span>Tổng mục</span>
-                <span>{formatMoney(posTotal).vndFormatted}</span>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* C. Services Section */}
-        {pendingOrders.serviceOrders.length > 0 && (
-          <section className="space-y-2">
-            <SectionHeader
-              icon={Sparkles}
-              title="Dịch vụ"
-              count={pendingOrders.serviceOrders.length}
-            />
-            <div className="bg-background rounded-xl border divide-y shadow-sm">
-              {pendingOrders.serviceOrders.map((service) => (
-                <div
-                  key={service.id}
-                  className="p-4 flex justify-between items-start text-sm"
-                >
-                  <div className="space-y-0.5">
-                    <div className="flex gap-2">
-                      <span className="font-mono text-muted-foreground">
-                        {service.quantity}x
-                      </span>
-                      <span className="font-medium">{service.serviceName}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground pl-6">
-                      Lên lịch: {service.scheduledAt?.split("T")[0]}
-                    </p>
+                    ))}
                   </div>
-                  <span className="font-mono text-muted-foreground">
-                    {formatMoney(service.subtotal).vndFormatted}
-                  </span>
+                ))}
+                <div className="p-3 bg-muted/20 flex justify-between items-center text-sm font-medium">
+                  <span>Tổng mục</span>
+                  <span>{formatMoney(posTotal).vndFormatted}</span>
                 </div>
-              ))}
-              <div className="p-3 bg-muted/20 flex justify-between items-center text-sm font-medium">
-                <span>Tổng mục</span>
-                <span>{formatMoney(serviceTotal).vndFormatted}</span>
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* Empty State */}
-        {!hasItems && (
-          <div className="h-40 flex flex-col items-center justify-center text-center space-y-3 opacity-60">
-            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-              <Receipt className="w-6 h-6 text-muted-foreground" />
+          {/* C. Services Section */}
+          {pendingOrders.serviceOrders.length > 0 && (
+            <section className="space-y-2">
+              <SectionHeader
+                icon={Sparkles}
+                title="Dịch vụ"
+                count={pendingOrders.serviceOrders.length}
+              />
+              <div className="bg-background rounded-xl border divide-y shadow-sm">
+                {pendingOrders.serviceOrders.map((service) => (
+                  <div
+                    key={service.id}
+                    className="p-4 flex justify-between items-start text-sm"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex gap-2">
+                        <span className="font-mono text-muted-foreground">
+                          {service.quantity}x
+                        </span>
+                        <span className="font-medium">
+                          {service.serviceName}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground pl-6">
+                        Lên lịch: {service.scheduledAt?.split("T")[0]}
+                      </p>
+                    </div>
+                    <span className="font-mono text-muted-foreground">
+                      {formatMoney(service.subtotal).vndFormatted}
+                    </span>
+                  </div>
+                ))}
+                <div className="p-3 bg-muted/20 flex justify-between items-center text-sm font-medium">
+                  <span>Tổng mục</span>
+                  <span>{formatMoney(serviceTotal).vndFormatted}</span>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Empty State */}
+          {!hasItems && (
+            <div className="h-40 flex flex-col items-center justify-center text-center space-y-3 opacity-60">
+              <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                <Receipt className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Không có khoản phí nào chờ thanh toán
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Không có khoản phí nào chờ thanh toán
-            </p>
-          </div>
-        )}
-      </div>
-    </Card>
+          )}
+        </div>
+      </Card>
+    </CurrencyView>
   );
 }
 

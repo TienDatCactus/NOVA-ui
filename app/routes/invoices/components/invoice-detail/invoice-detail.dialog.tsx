@@ -132,6 +132,7 @@ export function InvoiceDetailDialog({
 
               {/* Currency Conversion */}
               <div className="pt-2 mt-2 border-t">
+                <CurrencyView.Toggle />
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <span className="text-xs text-muted-foreground">
                     Quy đổi tiền tệ

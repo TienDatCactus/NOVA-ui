@@ -142,6 +142,7 @@ export default function Component({}: Route.ComponentProps) {
     mutate: createOrder,
     isError,
     isPending,
+    data,
   } = useCreatePOSOrderWithItems();
 
   const handleAddToCart = useCallback(
@@ -207,12 +208,12 @@ export default function Component({}: Route.ComponentProps) {
     [addItem]
   );
 
-  const handleConfirm = () => {
+  const handleConfirm = useCallback(() => {
     if (isEmpty) return;
     setCheckoutDialog(true);
-  };
+  }, [isEmpty]);
 
-  const handleCheckoutConfirm = (mode: "walk-in" | "booking") => {
+  const handleCheckoutConfirm = useCallback((mode: "walk-in" | "booking") => {
     setCheckoutDialog(false);
 
     if (mode === "walk-in") {
@@ -220,56 +221,58 @@ export default function Component({}: Route.ComponentProps) {
     } else {
       setBookingDialog(true);
     }
-  };
+  }, []);
 
-  const handleSelectBooking = (
-    bookingId: string,
-    bookingRoomId: string,
-    bookingCode?: string
-  ) => {
-    setBookingInfo(bookingId, bookingRoomId || null);
-    setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
-    setBookingDialog(false);
-    setScheduledTimeDialog(true);
-  };
+  const handleSelectBooking = useCallback(
+    (bookingId: string, bookingRoomId: string, bookingCode?: string) => {
+      setBookingInfo(bookingId, bookingRoomId || null);
+      setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
+      setBookingDialog(false);
+      setScheduledTimeDialog(true);
+    },
+    [setBookingInfo]
+  );
 
-  const handleScheduledTimeConfirm = (scheduledAt: string) => {
+  const handleScheduledTimeConfirm = useCallback((scheduledAt: string) => {
     setScheduledAt(scheduledAt);
     setScheduledTimeDialog(false);
     handleCreateOrder(scheduledAt);
-  };
-  const handleCreateOrder = (scheduledAtParam?: string) => {
-    const finalScheduledAt = scheduledAtParam || scheduledAt;
+  }, []);
+  const handleCreateOrder = useCallback(
+    (scheduledAtParam?: string) => {
+      const finalScheduledAt = scheduledAtParam || scheduledAt;
 
-    if (!finalScheduledAt) {
-      toast.error("Vui lòng chọn thời gian phục vụ");
-      return;
-    }
-
-    createOrder(
-      {
-        bookingId,
-        bookingRoomId,
-        scheduledAt: finalScheduledAt,
-        note: notes || "",
-        items,
-      },
-      {
-        onSuccess: () => {
-          const wasBooking = !!bookingId;
-          setConfirmationDialog({
-            open: true,
-            customerType: wasBooking ? "In-House" : "Walk-In",
-          });
-          setSelectedBookingInfo(null);
-          setBookingInfo(null, null);
-          setScheduledAt("");
-          setNotes("");
-          clearOrder();
-        },
+      if (!finalScheduledAt) {
+        toast.error("Vui lòng chọn thời gian phục vụ");
+        return;
       }
-    );
-  };
+
+      createOrder(
+        {
+          bookingId,
+          bookingRoomId,
+          scheduledAt: finalScheduledAt,
+          note: notes || "",
+          items,
+        },
+        {
+          onSuccess: () => {
+            const wasBooking = !!bookingId;
+            setConfirmationDialog({
+              open: true,
+              customerType: wasBooking ? "In-House" : "Walk-In",
+            });
+            setSelectedBookingInfo(null);
+            setBookingInfo(null, null);
+            setScheduledAt("");
+            setNotes("");
+            clearOrder();
+          },
+        }
+      );
+    },
+    [bookingId, bookingRoomId, scheduledAt, notes, items]
+  );
 
   const handleNewOrder = () => {
     clearOrder();
@@ -533,8 +536,8 @@ export default function Component({}: Route.ComponentProps) {
           setConfirmationDialog({ open, orderId: undefined })
         }
         orderId={confirmationDialog.orderId || ""}
-        orderTotal={subtotal}
-        itemCount={itemCount}
+        orderTotal={subtotal == 0 ? data?.totalAmount || 0 : subtotal}
+        itemCount={itemCount == 0 ? data?.itemCount || 0 : itemCount}
         customerInfo={
           confirmationDialog.customerType === "In-House"
             ? "Khách đặt phòng"

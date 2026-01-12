@@ -100,8 +100,13 @@ function CurrencyView({ children, amount: externalAmount }: CurrencyViewProps) {
 
 const CurrencySelect = () => {
   const { data: exchangeRates, isLoading, error } = useGetExchangeRates();
-  const { targetCurrency, handleSelectCurrency } = useCurrencyView();
+  const { targetCurrency, handleSelectCurrency, showConverter } =
+    useCurrencyView();
   const [open, setOpen] = useState(false);
+
+  if (!showConverter) {
+    return null;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -156,9 +161,10 @@ type MoneyDisplayProps = {
 };
 
 const MoneyDisplay: React.FC<MoneyDisplayProps> = ({ showLabel = true }) => {
-  const { targetCurrency, convertedAmount, amountVND } = useCurrencyView();
+  const { targetCurrency, convertedAmount, amountVND, showConverter } =
+    useCurrencyView();
 
-  if (!targetCurrency || amountVND === 0) {
+  if (!showConverter || !targetCurrency || amountVND === 0) {
     return null;
   }
 

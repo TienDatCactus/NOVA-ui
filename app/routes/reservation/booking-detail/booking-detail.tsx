@@ -37,6 +37,7 @@ import {
 } from "~/components/ui/dialog";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -390,10 +391,7 @@ function BookingDetailError({
     <div className="flex h-full min-h-[400px] items-center justify-center p-6">
       <Empty>
         <EmptyHeader>
-          <EmptyMedia
-            variant="icon"
-            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500"
-          >
+          <EmptyMedia variant="icon">
             <FileWarning className="h-8 w-8" />
           </EmptyMedia>
           <EmptyTitle className="text-xl font-semibold text-gray-900">
@@ -405,14 +403,13 @@ function BookingDetailError({
           </EmptyDescription>
         </EmptyHeader>
 
-        {/* Actionable UX: Nút thử lại */}
         {onRetry && (
-          <div className="mt-6 flex justify-center">
+          <EmptyContent >
             <Button variant="outline" onClick={onRetry} className="gap-2">
               <RotateCcw className="h-4 w-4" />
               Thử lại
             </Button>
-          </div>
+          </EmptyContent>
         )}
       </Empty>
     </div>

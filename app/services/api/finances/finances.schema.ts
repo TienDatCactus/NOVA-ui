@@ -1,110 +1,50 @@
 import z from "zod";
-import { PaymentSchema } from "~/services/api/payments/payments.schema";
 
-const KpisBaseSchema = z.object({
-  periodLabel: z.string(),
-  totalRevenue: z.number(),
-  revenueComparison: z.number(),
-  revenueVariancePercent: z.number(),
-  netProfit: z.number(),
-  profitComparison: z.number(),
-  profitVariancePercent: z.number(),
-  occupancyPercent: z.number(),
-  occupancyComparison: z.number(),
-  occupancyVariancePoints: z.number(),
-  adr: z.number(),
-  adrComparison: z.number(),
-  adrVariancePercent: z.number(),
-  revPAR: z.number(),
-  revPARComparison: z.number(),
-  revPARVariancePercent: z.number(),
-  totalBookings: z.number(),
-  bookingsComparison: z.number(),
-  bookingsVariancePercent: z.number(),
-});
+// SME Simplified Schemas (2026-01-12)
+// Reduced from 50+ fields to 12 fields for SME hotel owners
 
-const RevenueBreakItemTypeEnum = z.enum(["Room", "FnB", "Service", "Other"]);
-
-const RevenueBreakdownItemSchema = z.object({
-  type: RevenueBreakItemTypeEnum,
-  name: z.string(),
-  amount: z.number(),
-  percentage: z.number(),
-});
-
-const ChannelRevenueSchema = z.object({
-  channelName: z.string(),
-  amount: z.number(),
-  percentage: z.number(),
-  bookingCount: z.number(),
-});
-
-const BookingMetricsSchema = z.object({
-  totalBookings: z.number(),
-  roomNights: z.number(),
-  averageStay: z.number(),
-  checkIns: z.number(),
-  checkOuts: z.number(),
-  inHouse: z.number(),
-  noShows: z.number(),
-  cancellations: z.number(),
-  cancellationRate: z.number(),
-  newBookings: z.number(),
-  walkIns: z.number(),
-});
-
-const RevenueTrendSchema = z.object({
+const SimpleTrendPointSchema = z.object({
   date: z.string(),
-  totalRevenue: z.number(),
-  roomRevenue: z.number(),
-  fnBRevenue: z.number(),
-  serviceRevenue: z.number(),
-  otherRevenue: z.number(),
+  revenue: z.number(),
+  expense: z.number(),
 });
 
-const FinancialHealthSchema = z.object({
-  discountRate: z.number(),
-  discountRateTarget: z.number(),
-  discountRateVariance: z.number(),
-  refundRate: z.number(),
-  refundRateTarget: z.number(),
-  refundRateVariance: z.number(),
-  collectionRate: z.number(),
-  collectionRateTarget: z.number(),
-  collectionRateVariance: z.number(),
-});
-
-const PaymentCollectionItemSchema = z.object({
-  method: PaymentSchema.PaymentMethodEnum,
-  methodName: z.string(),
+const RevenueStructureSchema = z.object({
+  category: z.string(), // "Room Revenue" or "F&B & Services"
   amount: z.number(),
   percentage: z.number(),
-  transactionCount: z.number(),
 });
 
-const FinancesDashboardSchema = z.object({
-  todayKpis: KpisBaseSchema,
-  thisMonthKpis: KpisBaseSchema,
-  thisYearKpis: KpisBaseSchema,
-  revenueBreakdown: z.array(RevenueBreakdownItemSchema),
-  revenueByChannel: z.array(ChannelRevenueSchema),
-  bookingMetrics: BookingMetricsSchema,
-  revenueTrend: z.array(RevenueTrendSchema),
-  financialHealth: FinancialHealthSchema,
-  paymentCollection: z.array(PaymentCollectionItemSchema),
+const FinancialDashboardSmeSchema = z.object({
+  // CARD 1: Cash Flow (3 fields)
+  totalCollected: z.number(),
+  totalSpent: z.number(),
+  netCash: z.number(),
+
+  // CARD 2: Debts (1 field)
   otaReceivable: z.number(),
+
+  // CARD 3: Operations (2 fields)
+  occupancyPercent: z.number(),
+  averageDailyRate: z.number(),
+
+  // CARD 4: Alerts (2 fields)
+  lowStockItems: z.array(z.string()),
+  arrivalsToday: z.number(),
+
+  // CHART 1: Trend (1 field)
+  revenueTrend: z.array(SimpleTrendPointSchema),
+
+  // CHART 2: Structure (1 field)
+  revenueStructure: z.array(RevenueStructureSchema),
+
+  // Metadata (2 fields)
   generatedAt: z.string(),
   periodDescription: z.string(),
 });
 
 export const FinancesSchema = {
-  KpisBaseSchema,
-  RevenueBreakItemTypeEnum,
-  RevenueBreakdownItemSchema,
-  ChannelRevenueSchema,
-  BookingMetricsSchema,
-  RevenueTrendSchema,
-  FinancialHealthSchema,
-  PaymentCollectionItemSchema,
-  FinancesDashboardSchema,
+  SimpleTrendPointSchema,
+  RevenueStructureSchema,
+  FinancialDashboardSmeSchema,
 };

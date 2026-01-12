@@ -51,6 +51,7 @@ const Booking = {
   orderableBookings: "StaffBookings/orderable",
   payForRoom: (id: string) => `StaffBookings/${id}/pay-now-rooms`,
   unpaidRooms: (bookingId: string) => `StaffBookings/${bookingId}/unpaid-rooms`,
+  checkin: (id: string) => `StaffBookings/${id}/checkin`,
 };
 
 const OTAInformation = {

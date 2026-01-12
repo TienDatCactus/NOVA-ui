@@ -1,10 +1,6 @@
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  ArrowRightLeft,
-  Calendar as CalendarIcon,
-  RefreshCw,
-} from "lucide-react";
+import { Calendar as CalendarIcon, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { DateRangePicker } from "~/components/ui/date-range-picker";
@@ -62,7 +58,7 @@ export function DashboardToolbar({
     if (range?.from) {
       onFiltersChange({
         ...filters,
-        PeriodType: "CustomRange", // Ensure type is set
+        PeriodType: "CustomRange",
         StartDate: format(range.from, "yyyy-MM-dd"),
         EndDate: range.to ? format(range.to, "yyyy-MM-dd") : undefined,
       });
@@ -92,10 +88,10 @@ export function DashboardToolbar({
 
           {/* RIGHT: Toolbar Controls */}
           <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3">
-            {/* Filter Group: Time */}
+            {/* Period Selector */}
             <div className="flex items-center gap-2 w-full sm:w-auto p-1 bg-muted/30 rounded-lg border">
               <Select
-                value={filters.PeriodType || "Today"}
+                value={filters.PeriodType || "ThisMonth"}
                 onValueChange={handlePeriodChange}
               >
                 <SelectTrigger className="w-[140px] h-9 border-none bg-transparent shadow-none focus:ring-0">
@@ -135,34 +131,9 @@ export function DashboardToolbar({
               )}
             </div>
 
-            {/* Filter Group: Comparison */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Select
-                value={filters.ComparisonType || "PreviousPeriod"}
-                onValueChange={(value) =>
-                  onFiltersChange({ ...filters, ComparisonType: value as any })
-                }
-              >
-                <SelectTrigger className="w-full sm:w-[160px] h-10">
-                  <div className="flex items-center gap-2">
-                    <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="So sánh" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="None">Không so sánh</SelectItem>
-                  <SelectItem value="PreviousPeriod">Kỳ trước</SelectItem>
-                  <SelectItem value="SamePeriodLastYear">
-                    Cùng kỳ năm ngoái
-                  </SelectItem>
-                  <SelectItem value="Budget">Ngân sách</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             <Separator orientation="vertical" className="h-8 hidden xl:block" />
 
-            {/* Action Buttons */}
+            {/* Refresh Button */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Button
                 variant="outline"

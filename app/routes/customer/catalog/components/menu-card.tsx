@@ -16,7 +16,6 @@ export default function MenuCard({ item }: MenuCardProps) {
         "hover:bg-background/80 hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-1"
       )}
     >
-      {/* === 1. VISUAL FRAME === */}
       <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-xl bg-card/50 shadow-inner ring-1 ring-foreground/5">
         {item.imageUrls && item.imageUrls.length > 0 ? (
           <img

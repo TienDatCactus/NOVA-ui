@@ -5,6 +5,7 @@ import type z from "zod";
 import { BookingService } from "~/services/api/booking";
 import type { BookingSchema } from "~/services/api/booking/booking.schema";
 import type {
+  CheckinBookingRequestDto,
   StaffChangeRoomRequestDto,
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
@@ -189,9 +190,44 @@ function useExportBookings(date?: string) {
     },
   });
 }
+
+function useCheckinBooking(bookingId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CheckinBookingRequestDto) =>
+      await BookingService.checkingBooking(bookingId, data),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+      ]);
+      toast.success("Checkin thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Checkin thất bại");
+      }
+    },
+  });
+}
+
 export {
   useCancelBooking,
   useChangeRoom,
+  useCheckinBooking,
   useExportBookings,
   useUpdateBooking,
   useUpdateBookingStatus,
