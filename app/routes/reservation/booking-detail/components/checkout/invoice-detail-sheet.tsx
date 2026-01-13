@@ -461,7 +461,10 @@ export default function InvoiceDetailSheet({
                               className="border-b hover:bg-muted/5"
                             >
                               <TableCell className="py-3 font-medium text-sm">
-                                {item.customItemName || item.description}
+                                {item.customItemName ||
+                                  item.description ||
+                                  item.itemName ||
+                                  item.itemNameEn}
                               </TableCell>
                               <TableCell className="py-3 text-right text-sm">
                                 {item.quantity}
@@ -518,7 +521,10 @@ export default function InvoiceDetailSheet({
                               className="border-b hover:bg-muted/5"
                             >
                               <TableCell className="py-3 font-medium text-sm">
-                                {item.customItemName || item.description}
+                                {item.customItemName ||
+                                  item.description ||
+                                  item.itemName ||
+                                  item.itemNameEn}
                               </TableCell>
                               <TableCell className="py-3 text-right text-sm">
                                 {item.quantity}

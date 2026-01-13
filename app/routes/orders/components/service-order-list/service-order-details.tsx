@@ -25,7 +25,7 @@ interface ServiceOrderDetailsProps {
 
 function ServiceOrderCurrencySection() {
   const { showConverter } = useCurrencyView();
-  
+
   return (
     <div className="space-y-2">
       <CurrencyView.Toggle />
@@ -126,7 +126,12 @@ export default function ServiceOrderDetails({
               <MapPin className="h-3.5 w-3.5 text-accent-foreground" />
               <span>
                 Phòng:{" "}
-                {bookingDetail.rooms.map((room) => room.roomName).join(", ")}
+                {bookingDetail?.rooms
+                  ? bookingDetail?.rooms.map((room) => room.roomName).join(", ")
+                  : bookingDetail?.roomsByType &&
+                    bookingDetail?.roomsByType
+                      .map((room) => room.roomTypeName)
+                      .join(", ")}
               </span>{" "}
             </div>
           ) : (

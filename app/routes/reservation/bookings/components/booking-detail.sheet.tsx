@@ -316,40 +316,110 @@ export default function BookingDetailSheet({
                     </h3>
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    {data.rooms.length} phòng
+                    {data.rooms?.length || 0} phòng
                   </Badge>
                 </div>
 
-                <div className="grid gap-3">
-                  {data.rooms.map((room, index) => (
-                    <div
-                      key={room.roomId}
-                      className="group flex flex-col sm:flex-row sm:items-center justify-between bg-background p-3 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-blue-950/30 transition-all"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-bold shrink-0 mt-0.5">
-                          {index + 1}
+                {/* Display rooms grouped by type if available, otherwise flat list */}
+                {data.roomsByType && data.roomsByType.length > 0 ? (
+                  <div className="space-y-4">
+                    {data.roomsByType.map((roomTypeGroup) => (
+                      <div key={roomTypeGroup.roomTypeId} className="space-y-2">
+                        {/* Room Type Header */}
+                        <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-md border">
+                          <div className="flex items-center gap-2">
+                            <BedDouble className="h-3.5 w-3.5 text-primary" />
+                            <span className="font-semibold text-sm text-foreground">
+                              {roomTypeGroup.roomTypeName}
+                            </span>
+                            {roomTypeGroup.roomTypeNameEn && (
+                              <span className="text-xs text-muted-foreground">
+                                ({roomTypeGroup.roomTypeNameEn})
+                              </span>
+                            )}
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {roomTypeGroup.roomCount ||
+                              roomTypeGroup.rooms?.length ||
+                              0}{" "}
+                            phòng
+                          </Badge>
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
-                            {room.roomName}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                            {room.roomTypeName}
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-2 sm:mt-0 pl-11 sm:pl-0">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>
-                          {format(parseISO(room.fromDate), "dd/MM")} -{" "}
-                          {format(parseISO(room.toDate), "dd/MM")}
-                        </span>
+                        {/* Rooms in this type */}
+                        {roomTypeGroup.rooms &&
+                          roomTypeGroup.rooms.length > 0 && (
+                            <div className="grid gap-2 pl-4">
+                              {roomTypeGroup.rooms.map((room) => (
+                                <div
+                                  key={room.bookingRoomId}
+                                  className="group flex flex-col sm:flex-row sm:items-center justify-between bg-background p-3 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-blue-950/30 transition-all"
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                                      <BedDouble className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                      <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                                        {room.roomName}
+                                      </p>
+                                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-0.5">
+                                        {
+                                          formatMoney(room.baseRate)
+                                            .vndFormatted
+                                        }
+                                        /đêm
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-2 sm:mt-0 pl-11 sm:pl-0">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    <span>
+                                      {format(parseISO(room.fromDate), "dd/MM")}{" "}
+                                      - {format(parseISO(room.toDate), "dd/MM")}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* Fallback to flat room list */
+                  <div className="grid gap-3">
+                    {data.rooms?.map((room, index) => (
+                      <div
+                        key={room.roomId}
+                        className="group flex flex-col sm:flex-row sm:items-center justify-between bg-background p-3 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-blue-950/30 transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-bold shrink-0 mt-0.5">
+                            {index + 1}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
+                              {room.roomName}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                              {room.roomTypeName}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-2 sm:mt-0 pl-11 sm:pl-0">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>
+                            {format(parseISO(room.fromDate), "dd/MM")} -{" "}
+                            {format(parseISO(room.toDate), "dd/MM")}
+                          </span>
+                        </div>
+                      </div>
+                    )) || []}
+                  </div>
+                )}
               </section>
 
               {/* 4. PAYMENT */}

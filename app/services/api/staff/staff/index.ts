@@ -1,15 +1,14 @@
 import http from "~/lib/http";
 import { Staff } from "~/services/url";
-import { StaffSchema } from "./staff.schema";
 import type {
-  StaffListDto,
-  StaffDetailDto,
   CreateStaffDto,
-  UpdateStaffDto,
+  StaffDetailDto,
+  StaffListDto,
   TerminateStaffDto,
+  UpdateStaffDto,
 } from "./dto";
+import { StaffSchema } from "./staff.schema";
 import type { StaffListParams } from "./staff.types";
-import { data } from "react-router";
 
 const {
   StaffListSchema,

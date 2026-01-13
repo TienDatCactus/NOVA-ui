@@ -66,19 +66,7 @@ export const columns: ColumnDef<ServiceItem>[] = [
       );
     },
   },
-  {
-    accessorKey: "description",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Mô tả" />
-    ),
-    cell: ({ row }) => (
-      <TranslationDisplay
-        translations={row.original.translations}
-        field="description"
-        className="text-sm text-muted-foreground truncate max-w-xs"
-      />
-    ),
-  },
+
   {
     accessorKey: "basePrice",
     header: ({ column }) => (

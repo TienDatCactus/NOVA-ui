@@ -174,7 +174,7 @@ export default function DocumentScanDialog({
         passportForm.setValue("dateOfIssue", result.dateOfIssue || "");
         passportForm.setValue("dateOfExpiry", result.dateOfExpiry || "");
         passportForm.setValue("scannedImageUrl", result.scannedImageUrl || "");
-
+        
         toast.success("Đã quét passport thành công");
       } else {
         const result = await scanNationalIdMutation.mutateAsync(file);

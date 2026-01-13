@@ -10,6 +10,8 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { useMenuItemDetail } from "../../container/menu/query.hooks";
+import { Trans } from "react-i18next";
+import { TranslationDisplay } from "~/components/translation-display";
 
 interface MenuDetailRowProps {
   menuItem: MenuListItemDto;
@@ -90,37 +92,32 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className="rounded-md font-mono text-xs text-muted-foreground px-1.5 py-0 h-5"
-                    >
-                      {detailData.code}
-                    </Badge>
-                    <h3 className="text-xl font-bold text-foreground  truncate">
-                      {detailData.translations?.find(
-                        (t) => t.languageCode === "vi"
-                      )?.name ||
-                        detailData.translations?.[0]?.name ||
-                        ""}
+                    <h3 className="text-xl font-bold text-foreground ">
+                      <TranslationDisplay
+                        translations={detailData.translations}
+                        field="name"
+                      />
                     </h3>
                   </div>
+                </div>
+                <div>
                   <div className="grid gap-2 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
+                    <span className="flex justify-end items-center gap-1">
                       <LayoutGrid className="w-3.5 h-3.5" />{" "}
                       {detailData.categoryName}
                     </span>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-primary font-mono tracking-tight">
-                    {formatMoney(detailData.price).vndFormatted}
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-primary font-mono tracking-tight">
+                      {formatMoney(detailData.price).vndFormatted}
+                    </div>
+                    <Badge
+                      variant={detailData.active ? "default" : "secondary"}
+                      className="mt-1"
+                    >
+                      {detailData.active ? "Đang bán" : "Ngừng bán"}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant={detailData.active ? "default" : "secondary"}
-                    className="mt-1"
-                  >
-                    {detailData.active ? "Đang bán" : "Ngừng bán"}
-                  </Badge>
                 </div>
               </div>
 
@@ -132,10 +129,10 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                   <Tag className="w-4 h-4 text-primary" /> Mô tả chi tiết
                 </h4>
                 <p className="text-sm text-muted-foreground leading-relaxed bg-background/50 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
-                  {detailData.translations?.find((t) => t.languageCode === "vi")
-                    ?.description ||
-                    detailData.translations?.[0]?.description ||
-                    "Chưa có mô tả cho món ăn này."}
+                  <TranslationDisplay
+                    translations={detailData.translations}
+                    field="description"
+                  />
                 </p>
               </div>
 

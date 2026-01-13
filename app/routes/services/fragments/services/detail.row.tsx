@@ -16,6 +16,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
 import { useServiceDetail } from "../../container/services/query.hooks";
+import { TranslationDisplay } from "~/components/translation-display";
 
 interface ServiceDetailRowProps {
   service: ServiceItem;
@@ -173,17 +174,14 @@ export default function ServiceDetailRow({ service }: ServiceDetailRowProps) {
               <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <AlignLeft className="w-3.5 h-3.5" /> Mô tả
               </h4>
-              <ScrollArea className="h-[120px] w-full rounded-md border bg-background/50 p-3">
+              <div className="w-full max-h-50 overflow-y-auto rounded-md border bg-background/50 p-3">
                 <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {service.translations?.find((t) => t.languageCode === "vi")
-                    ?.description ||
-                    service.translations?.[0]?.description || (
-                      <span className="italic opacity-50">
-                        Chưa có mô tả chi tiết cho dịch vụ này.
-                      </span>
-                    )}
+                  <TranslationDisplay
+                    translations={service.translations}
+                    field="description"
+                  />
                 </p>
-              </ScrollArea>
+              </div>
             </div>
           </div>
         </div>

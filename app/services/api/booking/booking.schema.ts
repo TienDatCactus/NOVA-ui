@@ -417,7 +417,29 @@ const BookingDetailItemSchema = z.object({
     phoneNumber: z.string().optional().nullable(),
     email: z.email().optional().nullable(),
   }),
-  rooms: z.array(RoomSchema.BookingDetailRoomItemSchema),
+  rooms: z.array(RoomSchema.BookingDetailRoomItemSchema).optional().nullable(),
+  roomsByType: z
+    .array(
+      z.object({
+        roomTypeId: z.string().optional(),
+        roomTypeName: z.string().optional(),
+        roomTypeNameEn: z.string().optional().nullable(),
+        rooms: z
+          .array(
+            z.object({
+              bookingRoomId: z.string(),
+              roomId: z.string(),
+              roomName: z.string(),
+              fromDate: z.string(),
+              toDate: z.string(),
+              baseRate: z.number(),
+            })
+          )
+          .optional(),
+        roomCount: z.number().optional(),
+      })
+    )
+    .optional(),
   invoices: InvoiceSchema.InvoiceListResponseSchema.optional(),
   serviceOrders:
     OrderSchema.ServiceOrderListByBookingDetailSchema.optional().nullable(),

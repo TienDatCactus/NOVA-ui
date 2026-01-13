@@ -87,15 +87,36 @@ export function CheckinDialog({
 
   // Initialize assignments when dialog opens
   useEffect(() => {
-    if (bookingDetail && open) {
+    if (
+      bookingDetail &&
+      ((bookingDetail.rooms && bookingDetail.rooms.length > 0) ||
+        (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0)) &&
+      open
+    ) {
       setAutoAssign(false);
-      setAssignments(
-        bookingDetail.rooms.map((room) => ({
+
+      // Prefer roomsByType for structured data, fallback to flat rooms
+      let roomAssignments: RoomAssignment[] = [];
+
+      if (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0) {
+        // Build from grouped structure
+        roomAssignments = bookingDetail.roomsByType.flatMap((typeGroup) =>
+          (typeGroup.rooms || []).map((room) => ({
+            bookingRoomId: room.bookingRoomId,
+            roomTypeId: typeGroup.roomTypeId || "",
+            assignedRoomId: room.roomId || "",
+          }))
+        );
+      } else if (bookingDetail.rooms) {
+        // Fallback to flat list
+        roomAssignments = bookingDetail.rooms.map((room) => ({
           bookingRoomId: room.bookingRoomId,
           roomTypeId: room.roomTypeId,
           assignedRoomId: room.roomId || "",
-        }))
-      );
+        }));
+      }
+
+      setAssignments(roomAssignments);
       form.reset({
         actualCheckinTime: new Date(),
         autoAssignRooms: false,
@@ -250,8 +271,8 @@ export function CheckinDialog({
                     </h3>
                     <p className="text-sm text-blue-700 max-w-sm mt-1">
                       Hệ thống sẽ tự động tìm{" "}
-                      <strong>{bookingDetail.rooms.length} phòng</strong> trống
-                      phù hợp nhất khi bạn nhấn xác nhận.
+                      <strong>{assignments.length} phòng</strong> trống phù hợp
+                      nhất khi bạn nhấn xác nhận.
                     </p>
                   </div>
                 ) : (
@@ -259,147 +280,351 @@ export function CheckinDialog({
                     <div className="flex items-center gap-2 pb-2 border-b">
                       <BedDouble className="h-4 w-4 text-primary" />
                       <Label className="text-sm font-bold text-foreground">
-                        Danh sách phòng ({bookingDetail.rooms.length})
+                        Danh sách phòng ({assignments.length})
                       </Label>
                     </div>
 
-                    <div className="grid gap-3">
-                      {bookingDetail.rooms.map((bookingRoom, index) => (
-                        <div
-                          key={bookingRoom.bookingRoomId}
-                          className="group relative flex flex-col md:flex-row items-stretch border rounded-xl overflow-hidden bg-background shadow-sm hover:shadow-md transition-all duration-200"
-                        >
-                          {/* Left: Info Section */}
-                          <div className="flex-1 p-4 bg-muted/20 border-b md:border-b-0 md:border-r flex flex-col justify-center gap-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-sm text-foreground">
-                                    {bookingRoom.roomTypeName}
-                                  </span>
-                                  {/* Using a subtle visual cue for guest count if available, simplified here */}
-                                </div>
-                                <div className="flex items-center gap-3 mt-1.5">
-                                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-background px-2 py-1 rounded border">
-                                    <CalendarDays className="h-3 w-3" />
-                                    <span>
-                                      {format(
-                                        new Date(bookingRoom.fromDate),
-                                        "dd/MM"
-                                      )}{" "}
-                                      -{" "}
-                                      {format(
-                                        new Date(bookingRoom.toDate),
-                                        "dd/MM"
-                                      )}
-                                    </span>
-                                  </div>
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-[10px] font-normal px-1.5 h-6 bg-green-100 text-green-700 hover:bg-green-100 border-green-200"
+                    {/* Display rooms grouped by type if available */}
+                    {bookingDetail.roomsByType &&
+                    bookingDetail.roomsByType.length > 0 ? (
+                      <div className="space-y-6">
+                        {bookingDetail.roomsByType.map((typeGroup) => (
+                          <div key={typeGroup.roomTypeId} className="space-y-3">
+                            {/* Room Type Header */}
+                            <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-lg border border-primary/20">
+                              <BedDouble className="h-4 w-4 text-primary" />
+                              <span className="font-bold text-sm text-primary">
+                                {typeGroup.roomTypeName}
+                              </span>
+                              {typeGroup.roomTypeNameEn && (
+                                <span className="text-xs text-muted-foreground">
+                                  ({typeGroup.roomTypeNameEn})
+                                </span>
+                              )}
+                              <Badge
+                                variant="secondary"
+                                className="ml-auto text-xs"
+                              >
+                                {typeGroup.roomCount ||
+                                  typeGroup.rooms?.length ||
+                                  0}{" "}
+                                phòng
+                              </Badge>
+                            </div>
+
+                            {/* Rooms in this type */}
+                            <div className="grid gap-3 pl-2">
+                              {typeGroup.rooms?.map((bookingRoom) => {
+                                const assignmentIndex = assignments.findIndex(
+                                  (a) =>
+                                    a.bookingRoomId ===
+                                    bookingRoom.bookingRoomId
+                                );
+                                if (assignmentIndex === -1) return null;
+
+                                return (
+                                  <div
+                                    key={bookingRoom.bookingRoomId}
+                                    className="group relative flex flex-col md:flex-row items-stretch border rounded-xl overflow-hidden bg-background shadow-sm hover:shadow-md transition-all duration-200"
                                   >
-                                    {
-                                      formatMoney(bookingRoom.baseRate)
-                                        .vndFormatted
-                                    }
-                                  </Badge>
+                                    {/* Left: Info Section */}
+                                    <div className="flex-1 p-4 bg-muted/20 border-b md:border-b-0 md:border-r flex flex-col justify-center gap-2">
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div>
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-bold text-sm text-foreground">
+                                              {bookingRoom.roomName ||
+                                                "Chưa gán phòng"}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-3 mt-1.5">
+                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-background px-2 py-1 rounded border">
+                                              <CalendarDays className="h-3 w-3" />
+                                              <span>
+                                                {format(
+                                                  new Date(
+                                                    bookingRoom.fromDate
+                                                  ),
+                                                  "dd/MM"
+                                                )}{" "}
+                                                -{" "}
+                                                {format(
+                                                  new Date(bookingRoom.toDate),
+                                                  "dd/MM"
+                                                )}
+                                              </span>
+                                            </div>
+                                            <Badge
+                                              variant="secondary"
+                                              className="text-[10px] font-normal px-1.5 h-6 bg-green-100 text-green-700 hover:bg-green-100 border-green-200"
+                                            >
+                                              {
+                                                formatMoney(
+                                                  bookingRoom.baseRate
+                                                ).vndFormatted
+                                              }
+                                            </Badge>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Center: Connector Arrow (Desktop only) */}
+                                    <div className="hidden md:flex items-center justify-center w-8 bg-muted/5 -ml-[1px] z-10">
+                                      <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
+                                    </div>
+
+                                    {/* Right: Action Section */}
+                                    <div className="w-full md:w-[320px] p-4 bg-card flex items-center">
+                                      <div className="w-full space-y-1.5">
+                                        <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                                          Gán số phòng
+                                        </Label>
+                                        {(() => {
+                                          const validRooms =
+                                            availableRooms.filter(
+                                              (r) =>
+                                                r.roomTypeId ===
+                                                typeGroup.roomTypeId
+                                            );
+                                          const currentValue =
+                                            assignments[assignmentIndex]
+                                              ?.assignedRoomId || "";
+
+                                          return (
+                                            <Select
+                                              value={currentValue}
+                                              onValueChange={(value) => {
+                                                const newAssignments = [
+                                                  ...assignments,
+                                                ];
+                                                newAssignments[
+                                                  assignmentIndex
+                                                ] = {
+                                                  ...newAssignments[
+                                                    assignmentIndex
+                                                  ],
+                                                  assignedRoomId: value,
+                                                };
+                                                setAssignments(newAssignments);
+                                              }}
+                                            >
+                                              <SelectTrigger
+                                                className={cn(
+                                                  "h-10 transition-colors",
+                                                  !currentValue
+                                                    ? "text-muted-foreground border-dashed bg-muted/10 hover:bg-muted/20"
+                                                    : "text-foreground font-medium border-primary/50 bg-primary/5"
+                                                )}
+                                              >
+                                                <div className="flex items-center gap-2 truncate">
+                                                  {currentValue ? (
+                                                    <BedDouble className="h-4 w-4 text-primary" />
+                                                  ) : null}
+                                                  <SelectValue placeholder="-- Chọn phòng trống --" />
+                                                </div>
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                {validRooms.length === 0 ? (
+                                                  <div className="p-4 text-sm text-center text-muted-foreground flex flex-col items-center gap-2">
+                                                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                                                      <BedDouble className="h-4 w-4 opacity-50" />
+                                                    </div>
+                                                    <span>
+                                                      Hết phòng loại này
+                                                    </span>
+                                                  </div>
+                                                ) : (
+                                                  validRooms.map((room) => {
+                                                    const isSelected =
+                                                      selectedRoomIds.has(
+                                                        room.roomId
+                                                      ) &&
+                                                      currentValue !==
+                                                        room.roomId;
+                                                    return (
+                                                      <SelectItem
+                                                        key={room.roomId}
+                                                        value={room.roomId}
+                                                        disabled={isSelected}
+                                                        className="cursor-pointer"
+                                                      >
+                                                        <div className="flex items-center justify-between w-full min-w-[200px]">
+                                                          <span className="font-medium">
+                                                            {room.roomName}
+                                                          </span>
+                                                          {isSelected && (
+                                                            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                                              Đang chọn
+                                                            </span>
+                                                          )}
+                                                          {!isSelected && (
+                                                            <span className="h-2 w-2 rounded-full bg-green-500 block" />
+                                                          )}
+                                                        </div>
+                                                      </SelectItem>
+                                                    );
+                                                  })
+                                                )}
+                                              </SelectContent>
+                                            </Select>
+                                          );
+                                        })()}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Fallback: flat room list (legacy support) */
+                      <div className="grid gap-3">
+                        {bookingDetail.rooms &&
+                          bookingDetail.rooms.map((bookingRoom, index) => (
+                            <div
+                              key={bookingRoom.bookingRoomId}
+                              className="group relative flex flex-col md:flex-row items-stretch border rounded-xl overflow-hidden bg-background shadow-sm hover:shadow-md transition-all duration-200"
+                            >
+                              {/* Left: Info Section */}
+                              <div className="flex-1 p-4 bg-muted/20 border-b md:border-b-0 md:border-r flex flex-col justify-center gap-2">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-bold text-sm text-foreground">
+                                        {bookingRoom.roomTypeName}
+                                      </span>
+                                      {/* Using a subtle visual cue for guest count if available, simplified here */}
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-1.5">
+                                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-background px-2 py-1 rounded border">
+                                        <CalendarDays className="h-3 w-3" />
+                                        <span>
+                                          {format(
+                                            new Date(bookingRoom.fromDate),
+                                            "dd/MM"
+                                          )}{" "}
+                                          -{" "}
+                                          {format(
+                                            new Date(bookingRoom.toDate),
+                                            "dd/MM"
+                                          )}
+                                        </span>
+                                      </div>
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-[10px] font-normal px-1.5 h-6 bg-green-100 text-green-700 hover:bg-green-100 border-green-200"
+                                      >
+                                        {
+                                          formatMoney(bookingRoom.baseRate)
+                                            .vndFormatted
+                                        }
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Center: Connector Arrow (Desktop only) */}
+                              <div className="hidden md:flex items-center justify-center w-8 bg-muted/5 -ml-[1px] z-10">
+                                <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
+                              </div>
+
+                              {/* Right: Action Section */}
+                              <div className="w-full md:w-[320px] p-4 bg-card flex items-center">
+                                <div className="w-full space-y-1.5">
+                                  <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                                    Gán số phòng
+                                  </Label>
+                                  {(() => {
+                                    const validRooms = availableRooms.filter(
+                                      (r) =>
+                                        r.roomTypeId === bookingRoom.roomTypeId
+                                    );
+                                    const currentValue =
+                                      assignments[index]?.assignedRoomId || "";
+
+                                    return (
+                                      <Select
+                                        value={currentValue}
+                                        onValueChange={(value) => {
+                                          const newAssignments = [
+                                            ...assignments,
+                                          ];
+                                          newAssignments[index] = {
+                                            ...newAssignments[index],
+                                            assignedRoomId: value,
+                                          };
+                                          setAssignments(newAssignments);
+                                        }}
+                                      >
+                                        <SelectTrigger
+                                          className={cn(
+                                            "h-10 transition-colors",
+                                            !currentValue
+                                              ? "text-muted-foreground border-dashed bg-muted/10 hover:bg-muted/20"
+                                              : "text-foreground font-medium border-primary/50 bg-primary/5"
+                                          )}
+                                        >
+                                          <div className="flex items-center gap-2 truncate">
+                                            {currentValue ? (
+                                              <BedDouble className="h-4 w-4 text-primary" />
+                                            ) : null}
+                                            <SelectValue placeholder="-- Chọn phòng trống --" />
+                                          </div>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {validRooms.length === 0 ? (
+                                            <div className="p-4 text-sm text-center text-muted-foreground flex flex-col items-center gap-2">
+                                              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                                                <BedDouble className="h-4 w-4 opacity-50" />
+                                              </div>
+                                              <span>Hết phòng loại này</span>
+                                            </div>
+                                          ) : (
+                                            validRooms.map((room) => {
+                                              const isSelected =
+                                                selectedRoomIds.has(
+                                                  room.roomId
+                                                ) &&
+                                                currentValue !== room.roomId;
+                                              return (
+                                                <SelectItem
+                                                  key={room.roomId}
+                                                  value={room.roomId}
+                                                  disabled={isSelected}
+                                                  className="cursor-pointer"
+                                                >
+                                                  <div className="flex items-center justify-between w-full min-w-[200px]">
+                                                    <span className="font-medium">
+                                                      {room.roomName}
+                                                    </span>
+                                                    {isSelected && (
+                                                      <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                                        Đang chọn
+                                                      </span>
+                                                    )}
+                                                    {/* Visual sugar: Status dot */}
+                                                    {!isSelected && (
+                                                      <span className="h-2 w-2 rounded-full bg-green-500 block" />
+                                                    )}
+                                                  </div>
+                                                </SelectItem>
+                                              );
+                                            })
+                                          )}
+                                        </SelectContent>
+                                      </Select>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </div>
-                          </div>
-
-                          {/* Center: Connector Arrow (Desktop only) */}
-                          <div className="hidden md:flex items-center justify-center w-8 bg-muted/5 -ml-[1px] z-10">
-                            <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
-                          </div>
-
-                          {/* Right: Action Section */}
-                          <div className="w-full md:w-[320px] p-4 bg-card flex items-center">
-                            <div className="w-full space-y-1.5">
-                              <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                                Gán số phòng
-                              </Label>
-                              {(() => {
-                                const validRooms = availableRooms.filter(
-                                  (r) => r.roomTypeId === bookingRoom.roomTypeId
-                                );
-                                const currentValue =
-                                  assignments[index]?.assignedRoomId || "";
-
-                                return (
-                                  <Select
-                                    value={currentValue}
-                                    onValueChange={(value) => {
-                                      const newAssignments = [...assignments];
-                                      newAssignments[index] = {
-                                        ...newAssignments[index],
-                                        assignedRoomId: value,
-                                      };
-                                      setAssignments(newAssignments);
-                                    }}
-                                  >
-                                    <SelectTrigger
-                                      className={cn(
-                                        "h-10 transition-colors",
-                                        !currentValue
-                                          ? "text-muted-foreground border-dashed bg-muted/10 hover:bg-muted/20"
-                                          : "text-foreground font-medium border-primary/50 bg-primary/5"
-                                      )}
-                                    >
-                                      <div className="flex items-center gap-2 truncate">
-                                        {currentValue ? (
-                                          <BedDouble className="h-4 w-4 text-primary" />
-                                        ) : null}
-                                        <SelectValue placeholder="-- Chọn phòng trống --" />
-                                      </div>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {validRooms.length === 0 ? (
-                                        <div className="p-4 text-sm text-center text-muted-foreground flex flex-col items-center gap-2">
-                                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                                            <BedDouble className="h-4 w-4 opacity-50" />
-                                          </div>
-                                          <span>Hết phòng loại này</span>
-                                        </div>
-                                      ) : (
-                                        validRooms.map((room) => {
-                                          const isSelected =
-                                            selectedRoomIds.has(room.roomId) &&
-                                            currentValue !== room.roomId;
-                                          return (
-                                            <SelectItem
-                                              key={room.roomId}
-                                              value={room.roomId}
-                                              disabled={isSelected}
-                                              className="cursor-pointer"
-                                            >
-                                              <div className="flex items-center justify-between w-full min-w-[200px]">
-                                                <span className="font-medium">
-                                                  {room.roomName}
-                                                </span>
-                                                {isSelected && (
-                                                  <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                                    Đang chọn
-                                                  </span>
-                                                )}
-                                                {/* Visual sugar: Status dot */}
-                                                {!isSelected && (
-                                                  <span className="h-2 w-2 rounded-full bg-green-500 block" />
-                                                )}
-                                              </div>
-                                            </SelectItem>
-                                          );
-                                        })
-                                      )}
-                                    </SelectContent>
-                                  </Select>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

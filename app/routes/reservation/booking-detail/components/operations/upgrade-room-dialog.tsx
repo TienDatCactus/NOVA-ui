@@ -95,6 +95,7 @@ export function UpgradeRoomDialog({
 
   const selectedBookingRoom = useMemo(
     () =>
+      bookingDetail.rooms &&
       bookingDetail.rooms.find(
         (r) => r.bookingRoomId === selectedBookingRoomId
       ),
@@ -232,27 +233,31 @@ export function UpgradeRoomDialog({
                         <SelectValue placeholder="Chọn phòng cần nâng cấp..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {bookingDetail.rooms.map((room) => (
-                          <SelectItem
-                            key={room.bookingRoomId}
-                            value={room.bookingRoomId}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="p-1 bg-muted rounded">
-                                <BedDouble className="h-4 w-4 text-muted-foreground" />
-                              </div>
-                              <div className="text-left">
-                                <div className="font-semibold">
-                                  {room.roomName}
+                        {bookingDetail.rooms &&
+                          bookingDetail.rooms.map((room) => (
+                            <SelectItem
+                              key={room.bookingRoomId}
+                              value={room.bookingRoomId}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="p-1 bg-muted rounded">
+                                  <BedDouble className="h-4 w-4 text-muted-foreground" />
                                 </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {room.roomTypeName} •{" "}
-                                  {formatMoney(room.baseRate || 0).vndFormatted}
+                                <div className="text-left">
+                                  <div className="font-semibold">
+                                    {room.roomName}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {room.roomTypeName} •{" "}
+                                    {
+                                      formatMoney(room.baseRate || 0)
+                                        .vndFormatted
+                                    }
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </SelectItem>
-                        ))}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   )}

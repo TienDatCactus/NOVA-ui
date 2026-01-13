@@ -3,12 +3,14 @@ import { UtensilsCrossed } from "lucide-react";
 import { Card, CardContent } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
+import { useChatTranslationStore } from "~/store/chat-translation.store";
 
 interface MenuCardProps {
   item: MenuListItemDto;
 }
 
 export default function MenuCard({ item }: MenuCardProps) {
+  const { userLanguage } = useChatTranslationStore();
   return (
     <Card
       className={cn(
@@ -19,10 +21,11 @@ export default function MenuCard({ item }: MenuCardProps) {
       <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-xl bg-card/50 shadow-inner ring-1 ring-foreground/5">
         {item.imageUrls && item.imageUrls.length > 0 ? (
           <img
-            src={item.imageUrls[0]}
+            src={item.imageUrls[1]}
             alt={
-              item.translations?.find((t) => t.languageCode === "vi")?.name ||
-              item.translations?.[0]?.name ||
+              item.translations?.find((t) => t.languageCode === userLanguage)
+                ?.name ||
+              item.translations?.[1]?.name ||
               ""
             }
             className={cn(
@@ -55,8 +58,9 @@ export default function MenuCard({ item }: MenuCardProps) {
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-emerald-800 dark:group-hover:text-emerald-400 transition-colors">
-              {item.translations?.find((t) => t.languageCode === "vi")?.name ||
-                item.translations?.[0]?.name ||
+              {item.translations?.find((t) => t.languageCode === userLanguage)
+                ?.name ||
+                item.translations?.[1]?.name ||
                 ""}
             </h3>
 
@@ -64,11 +68,11 @@ export default function MenuCard({ item }: MenuCardProps) {
           </div>
 
           {/* Description */}
-          {item.translations?.find((t) => t.languageCode === "vi")
-            ?.description || item.translations?.[0]?.description ? (
+          {item.translations?.find((t) => t.languageCode === userLanguage)
+            ?.description || item.translations?.[1]?.description ? (
             <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground font-sans">
-              {item.translations?.find((t) => t.languageCode === "vi")
-                ?.description || item.translations?.[0]?.description}
+              {item.translations?.find((t) => t.languageCode === userLanguage)
+                ?.description || item.translations?.[1]?.description}
             </p>
           ) : null}
         </div>

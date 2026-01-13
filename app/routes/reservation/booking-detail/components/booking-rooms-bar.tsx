@@ -112,9 +112,9 @@ export default function BookingRoomsBar({
   const handleAddRoom = (roomId: string) => {
     try {
       // Check if room already exists in booking
-      const roomAlreadyInBooking = bookingDetail.rooms.some(
-        (room) => room.roomId === roomId
-      );
+      const roomAlreadyInBooking =
+        bookingDetail.rooms &&
+        bookingDetail.rooms.some((room) => room.roomId === roomId);
       if (roomAlreadyInBooking) {
         toast.warning("Phòng này đã có trong booking");
         return;
@@ -218,36 +218,37 @@ export default function BookingRoomsBar({
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Thêm phòng
-                </DropdownMenuItem>
+                </DropdownMenuItem> 
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
-          {bookingDetail.rooms.map((room) => (
-            <ExistingRoomItemWrapper
-              key={room.roomId}
-              room={room}
-              isSelected={false}
-              isExpanded={expandedRooms.has(room.roomId)}
-              onSelect={() => toggleRoomExpand(room.roomId)}
-              onToggleExpand={() => toggleRoomExpand(room.roomId)}
-              onRemove={() =>
-                handleRemoveRoom(room.bookingRoomId, room.roomName)
-              }
-              canRemove={
-                (bookingDetail.status == "Pending" ||
-                  bookingDetail.status == "InHouse") &&
-                bookingState.permissions.canEditRooms
-              }
-              removeTooltip={
-                !bookingState.permissions.canEditRooms
-                  ? bookingState.permissions.blockReason ||
-                    "Không thể xóa phòng"
-                  : undefined
-              }
-            />
-          ))}
+          {bookingDetail.rooms &&
+            bookingDetail.rooms.map((room) => (
+              <ExistingRoomItemWrapper
+                key={room.roomId}
+                room={room}
+                isSelected={false}
+                isExpanded={expandedRooms.has(room.roomId)}
+                onSelect={() => toggleRoomExpand(room.roomId)}
+                onToggleExpand={() => toggleRoomExpand(room.roomId)}
+                onRemove={() =>
+                  handleRemoveRoom(room.bookingRoomId, room.roomName)
+                }
+                canRemove={
+                  (bookingDetail.status == "Pending" ||
+                    bookingDetail.status == "InHouse") &&
+                  bookingState.permissions.canEditRooms
+                }
+                removeTooltip={
+                  !bookingState.permissions.canEditRooms
+                    ? bookingState.permissions.blockReason ||
+                      "Không thể xóa phòng"
+                    : undefined
+                }
+              />
+            ))}
           {/* New Rooms Being Added */}
           {fields.filter(
             (_, index) => form.watch(`rooms.${index}.action`) === "Add"
@@ -315,9 +316,11 @@ export default function BookingRoomsBar({
                   );
                   if (!bookingRoomId) return null;
 
-                  const existingRoom = bookingDetail.rooms.find(
-                    (r) => r.bookingRoomId === bookingRoomId
-                  );
+                  const existingRoom =
+                    bookingDetail.rooms &&
+                    bookingDetail.rooms.find(
+                      (r) => r.bookingRoomId === bookingRoomId
+                    );
                   if (!existingRoom) return null;
 
                   return (

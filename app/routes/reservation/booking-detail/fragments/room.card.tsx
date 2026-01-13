@@ -1,4 +1,4 @@
-import { ArrowRight, Currency, Tag } from "lucide-react";
+import { ArrowRight, Tag } from "lucide-react";
 import { Link } from "react-router";
 import CurrencyView from "~/components/currency-view";
 import { Badge } from "~/components/ui/badge";

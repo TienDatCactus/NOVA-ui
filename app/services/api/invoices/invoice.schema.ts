@@ -80,6 +80,8 @@ const InvoiceDetailItemSchema = z.object({
   quantity: z.number().optional().nullable(),
   unitPrice: z.number().optional().nullable(),
   subtotal: z.number().optional().nullable(),
+  itemName: z.string().optional().nullable(),
+  itemNameEn: z.string().optional().nullable(),
 });
 
 // Invoice Detail Schema (from GET /api/Invoices/{invoiceId})
@@ -90,6 +92,7 @@ const InvoiceDetailSchema = z.object({
   invoiceType: InvoiceTypeEnum,
   subTotal: z.number().optional().nullable(),
   vatAmount: z.number().optional().nullable(),
+
   serviceChargeAmount: z.number().optional().nullable(),
   total: z.number().optional().nullable(),
   paidAmount: z.number().optional().nullable(),
