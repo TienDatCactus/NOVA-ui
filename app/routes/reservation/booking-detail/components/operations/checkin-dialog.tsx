@@ -69,7 +69,6 @@ export function CheckinDialog({
   onOpenChange,
   bookingDetail,
 }: CheckinDialogProps) {
-  const [autoAssign, setAutoAssign] = useState(false);
   const [assignments, setAssignments] = useState<RoomAssignment[]>([]);
   const { data: availableRooms = [] } = useRooms();
 
@@ -93,8 +92,6 @@ export function CheckinDialog({
         (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0)) &&
       open
     ) {
-      setAutoAssign(false);
-
       // Prefer roomsByType for structured data, fallback to flat rooms
       let roomAssignments: RoomAssignment[] = [];
 
@@ -127,7 +124,7 @@ export function CheckinDialog({
   const handleSubmit = (data: CheckinBookingRequestDto) => {
     let payload: CheckinBookingRequestDto;
 
-    if (autoAssign) {
+    if (data.autoAssignRooms) {
       // Auto-assign: backend will assign rooms
       payload = {
         actualCheckinTime: data.actualCheckinTime,
@@ -152,19 +149,19 @@ export function CheckinDialog({
     checkin(payload, {
       onSuccess: () => {
         onOpenChange(false);
-        setAutoAssign(false);
         setAssignments([]);
       },
     });
   };
 
   // Memoize used rooms to prevent double booking in the same form
+  const autoAssignRooms = form.watch("autoAssignRooms");
   const selectedRoomIds = useMemo(() => {
-    if (autoAssign) return new Set<string>();
+    if (autoAssignRooms) return new Set<string>();
     return new Set(
       assignments.map((a) => a.assignedRoomId).filter(Boolean) as string[]
     );
-  }, [assignments, autoAssign]);
+  }, [assignments, autoAssignRooms]);
 
   if (!bookingDetail) return null;
 
@@ -261,7 +258,7 @@ export function CheckinDialog({
                 </div>
 
                 {/* 2. Room Assignment List */}
-                {autoAssign ? (
+                {autoAssignRooms ? (
                   <div className="py-8 flex flex-col items-center justify-center text-center border-2 border-dashed rounded-xl bg-blue-50/50 border-blue-200">
                     <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mb-3 text-blue-600">
                       <Sparkles className="h-6 w-6" />

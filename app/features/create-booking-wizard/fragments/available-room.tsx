@@ -24,6 +24,7 @@ interface AvailableRoomRowProps {
   // Data props
   selectedRoomIds: string[];
   currentQuantity: number;
+  allowExactRoomSelection: boolean;
 
   // Handlers
   onToggleRoom: (roomId: string) => void;
@@ -35,6 +36,7 @@ export function AvailableRoomRow({
   nights,
   selectedRoomIds,
   currentQuantity,
+  allowExactRoomSelection,
   onToggleRoom,
   onQuantityChange,
 }: AvailableRoomRowProps) {
@@ -172,37 +174,52 @@ export function AvailableRoomRow({
 
         {/* === EXPANDED CONTENT: 2 COLS === */}
         <CollapsibleContent>
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_250px] divide-y md:divide-y-0 md:divide-x border-t bg-background/50">
-            <div className="p-4 pl-9 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                <DoorOpen className="h-3.5 w-3.5" />
-                <span>Chọn phòng cụ thể</span>
-              </div>
+          <div
+            className={cn(
+              "grid divide-y md:divide-y-0 md:divide-x border-t bg-background/50",
+              allowExactRoomSelection
+                ? "grid-cols-1 md:grid-cols-[1fr_250px]"
+                : "grid-cols-1"
+            )}
+          >
+            {allowExactRoomSelection && (
+              <div className="p-4 pl-9 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <DoorOpen className="h-3.5 w-3.5" />
+                  <span>Chọn phòng cụ thể</span>
+                </div>
 
-              <ul className="grid ">
-                {roomType.availableRooms.length > 0 ? (
-                  roomType.availableRooms.map((room) => {
-                    const isSelected = selectedRoomIds.includes(room.roomId);
-                    return (
-                      <li key={room.roomId} className="flex items-center gap-2">
-                        <Checkbox
-                          id={room.roomId}
-                          checked={isSelected}
-                          onCheckedChange={() => onToggleRoom(room.roomId)}
-                        />
-                        <Label htmlFor={room.roomId} className="cursor-pointer">
-                          {room.roomName}
-                        </Label>
-                      </li>
-                    );
-                  })
-                ) : (
-                  <p className="col-span-full text-xs text-muted-foreground italic py-2">
-                    Không có phòng trống.
-                  </p>
-                )}
-              </ul>
-            </div>
+                <ul className="grid ">
+                  {roomType.availableRooms.length > 0 ? (
+                    roomType.availableRooms.map((room) => {
+                      const isSelected = selectedRoomIds.includes(room.roomId);
+                      return (
+                        <li
+                          key={room.roomId}
+                          className="flex items-center gap-2"
+                        >
+                          <Checkbox
+                            id={room.roomId}
+                            checked={isSelected}
+                            onCheckedChange={() => onToggleRoom(room.roomId)}
+                          />
+                          <Label
+                            htmlFor={room.roomId}
+                            className="cursor-pointer"
+                          >
+                            {room.roomName}
+                          </Label>
+                        </li>
+                      );
+                    })
+                  ) : (
+                    <p className="col-span-full text-xs text-muted-foreground italic py-2">
+                      Không có phòng trống.
+                    </p>
+                  )}
+                </ul>
+              </div>
+            )}
 
             {/* COL 2: Quantity Adjustment */}
             <div className="p-4 bg-muted/10 flex flex-col justify-center space-y-4">

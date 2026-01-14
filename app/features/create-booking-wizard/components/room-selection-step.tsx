@@ -22,6 +22,7 @@ import {
 import { Progress } from "~/components/ui/progress";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
+import { Switch } from "~/components/ui/switch";
 
 import {
   Empty,
@@ -46,6 +47,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
   const childrenAmount = form.watch("childrenAmount") || 0;
 
   const [shouldFetch, setShouldFetch] = useState(false);
+  const [allowExactRoomSelection, setAllowExactRoomSelection] = useState(false);
 
   const nights = useMemo(
     () =>
@@ -293,6 +295,35 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
               <RotateCcw className={cn("h-4 w-4")} />
             </Button>
           </div>
+
+          {/* Exact Room Selection Toggle */}
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <div className="flex-1">
+              <label
+                htmlFor="exact-room-toggle"
+                className="text-xs font-medium text-foreground"
+              >
+                Chọn phòng cụ thể
+              </label>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Cho phép chọn số phòng chính xác thay vì chỉ định số lượng
+              </p>
+            </div>
+            <Switch
+              id="exact-room-toggle"
+              checked={allowExactRoomSelection}
+              onCheckedChange={(checked) => {
+                setAllowExactRoomSelection(checked);
+                if (!checked) {
+                  // Clear specific room selections when disabling
+                  form.setValue("roomIds", [], {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                }
+              }}
+            />
+          </div>
         </div>
 
         <div className=" ">
@@ -353,6 +384,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                           handleQuantityChange(roomType.roomTypeId, qty)
                         }
                         nights={nights}
+                        allowExactRoomSelection={allowExactRoomSelection}
                       />
                     );
                   })}
