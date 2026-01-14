@@ -67,6 +67,24 @@ export default function AddCompletedChargesDialog({
     booking.id
   );
 
+  // Extract rooms safely from booking (handles both flat rooms and roomsByType)
+  const bookingRooms = useMemo(() => {
+    if (booking.rooms && booking.rooms.length > 0) {
+      return booking.rooms;
+    }
+    if (booking.roomsByType && booking.roomsByType.length > 0) {
+      return booking.roomsByType.flatMap((rt) =>
+        (rt.rooms || []).map((r) => ({
+          bookingRoomId: r.bookingRoomId,
+          roomId: r.roomId,
+          roomName: r.roomName,
+          roomTypeName: rt.roomTypeName || "",
+        }))
+      );
+    }
+    return [];
+  }, [booking]);
+
   // Filter Logic
   const filteredItems = useMemo(() => {
     const items = activeTab === "pos" ? menuItems : serviceItems;
@@ -256,7 +274,7 @@ export default function AddCompletedChargesDialog({
               totalAmount={totalAmount}
               posItems={selectedPOSItems}
               serviceItems={selectedServiceItems}
-              rooms={booking.rooms}
+              rooms={bookingRooms}
               selectedRoom={selectedBookingRoom}
               onRoomChange={setSelectedBookingRoom}
               onUpdatePos={(id: string, d: number) => {
@@ -382,7 +400,7 @@ function CartContent({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="booking">Chung (Booking)</SelectItem>
-              {rooms.map((r: any) => (
+              {(rooms || []).map((r: any) => (
                 <SelectItem key={r.bookingRoomId} value={r.bookingRoomId}>
                   {r.roomName} - {r.roomTypeName}
                 </SelectItem>
