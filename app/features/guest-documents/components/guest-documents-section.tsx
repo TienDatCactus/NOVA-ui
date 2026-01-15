@@ -148,7 +148,7 @@ export default function GuestDocumentsSection({
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                Export XML
+                Tải về giấy tờ (XML)
               </Button>
               {canEdit && (
                 <Button
