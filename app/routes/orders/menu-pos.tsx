@@ -238,41 +238,38 @@ export default function Component({}: Route.ComponentProps) {
     setScheduledTimeDialog(false);
     handleCreateOrder(scheduledAt);
   }, []);
-  const handleCreateOrder = useCallback(
-    (scheduledAtParam?: string) => {
-      const finalScheduledAt = scheduledAtParam || scheduledAt;
+  const handleCreateOrder = (scheduledAtParam?: string) => {
+    const finalScheduledAt = scheduledAtParam || scheduledAt;
 
-      if (!finalScheduledAt) {
-        toast.error("Vui lòng chọn thời gian phục vụ");
-        return;
-      }
+    if (!finalScheduledAt) {
+      toast.error("Vui lòng chọn thời gian phục vụ");
+      return;
+    }
 
-      createOrder(
-        {
-          bookingId,
-          bookingRoomId,
-          scheduledAt: finalScheduledAt,
-          note: notes || "",
-          items,
+    createOrder(
+      {
+        bookingId,
+        bookingRoomId,
+        scheduledAt: finalScheduledAt,
+        note: notes || "",
+        items,
+      },
+      {
+        onSuccess: () => {
+          const wasBooking = !!bookingId;
+          setConfirmationDialog({
+            open: true,
+            customerType: wasBooking ? "In-House" : "Walk-In",
+          });
+          setSelectedBookingInfo(null);
+          setBookingInfo(null, null);
+          setScheduledAt("");
+          setNotes("");
+          clearOrder();
         },
-        {
-          onSuccess: () => {
-            const wasBooking = !!bookingId;
-            setConfirmationDialog({
-              open: true,
-              customerType: wasBooking ? "In-House" : "Walk-In",
-            });
-            setSelectedBookingInfo(null);
-            setBookingInfo(null, null);
-            setScheduledAt("");
-            setNotes("");
-            clearOrder();
-          },
-        }
-      );
-    },
-    [bookingId, bookingRoomId, scheduledAt, notes, items]
-  );
+      }
+    );
+  };
 
   const handleNewOrder = () => {
     clearOrder();

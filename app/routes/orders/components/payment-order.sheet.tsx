@@ -98,26 +98,26 @@ export default function PaymentOrderSheet({
       : (serviceOrderDetail?.unitPrice || 0) *
         (serviceOrderDetail?.quantity || 0);
 
-function PaymentCurrencySection() {
-  const { showConverter } = useCurrencyView();
-  
-  return (
-    <div className="space-y-2">
-      <CurrencyView.Toggle />
-      {showConverter && (
-        <>
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm text-muted-foreground">
-              Quy đổi tiền tệ
-            </span>
-            <CurrencyView.Select />
-          </div>
-          <CurrencyView.Display showLabel={false} />
-        </>
-      )}
-    </div>
-  );
-}
+  function PaymentCurrencySection() {
+    const { showConverter } = useCurrencyView();
+
+    return (
+      <div className="space-y-2">
+        <CurrencyView.Toggle />
+        {showConverter && (
+          <>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground">
+                Quy đổi tiền tệ
+              </span>
+              <CurrencyView.Select />
+            </div>
+            <CurrencyView.Display showLabel={false} />
+          </>
+        )}
+      </div>
+    );
+  }
 
   const { data: calculatedFees, isPending: isCalculatingFees } =
     useCalculateInvoiceFees(
@@ -489,6 +489,25 @@ function PaymentCurrencySection() {
                     <Form {...paymentForm}>
                       <form className="space-y-5">
                         {/* Amount Input */}
+                        {/* Method & Ref */}
+                        <div className="flex items-center gap-4">
+                          <FormField
+                            control={paymentForm.control}
+                            name="paymentMethod"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <PaymentMethodSelector
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    bookingSource="DirectStaff"
+                                    className="h-11"
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                         <FormField
                           control={paymentForm.control}
                           name="paidAmount"
@@ -534,46 +553,6 @@ function PaymentCurrencySection() {
                             </FormItem>
                           )}
                         />
-
-                        {/* Method & Ref */}
-                        <div className="flex items-center gap-4">
-                          <FormField
-                            control={paymentForm.control}
-                            name="paymentMethod"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <PaymentMethodSelector
-                                    value={field.value}
-                                    onValueChange={field.onChange}
-                                    bookingSource="DirectStaff"
-                                    className="h-11"
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={paymentForm.control}
-                            name="transactionReference"
-                            render={({ field }) => (
-                              <FormItem className="flex-1">
-                                <FormControl>
-                                  <div className="relative">
-                                    <Input
-                                      startAddon={
-                                        <Hash className="h-4 w-4 text-muted-foreground" />
-                                      }
-                                      placeholder="Mã giao dịch (Optional)"
-                                      {...field}
-                                      value={field.value || ""}
-                                    />
-                                  </div>
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
 
                         {/* Change Display */}
                         <div

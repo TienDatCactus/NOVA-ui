@@ -56,9 +56,9 @@ const DASHBOARD = {
   configs: "/dashboard/configs",
   help: "/help",
   payment: {
-    success: "/dashboard/payment/success",
-    failure: "/dashboard/payment/failure",
-    cancel: "/dashboard/payment/cancel",
+    success: "/payment/success",
+    failure: "/payment/failure",
+    cancel: "/payment/cancel",
   },
 };
 const CUSTOMER = {
