@@ -98,6 +98,7 @@ async function updateDocument(
 ): Promise<void> {
   try {
     const resp = await http.put(GuestDocuments.updateDocument(id), data);
+
     return resp.data;
   } catch (error) {
     console.error(error);
@@ -115,6 +116,28 @@ async function deleteDocuments(id: string): Promise<void> {
   }
 }
 
+async function exportGuestDocuments(
+  checkInFrom: string,
+  checkInTo: string
+): Promise<Blob> {
+  try {
+    const resp = await http.get(
+      GuestDocuments.exportXML(checkInFrom, checkInTo),
+      { responseType: "blob" }
+    );
+
+    let blobData = resp;
+    if (blobData instanceof Blob) {
+      return blobData;
+    }
+    const blobContent =
+      typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
+    return new Blob([blobContent as BlobPart]);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
 export const GuestDocumentsService = {
   scanPassport,
   scanNationalId,
@@ -124,4 +147,5 @@ export const GuestDocumentsService = {
   getDocumentsDetail,
   updateDocument,
   deleteDocuments,
+  exportGuestDocuments,
 };

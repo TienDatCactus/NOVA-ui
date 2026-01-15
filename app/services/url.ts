@@ -52,6 +52,7 @@ const Booking = {
   payForRoom: (id: string) => `StaffBookings/${id}/pay-now-rooms`,
   unpaidRooms: (bookingId: string) => `StaffBookings/${bookingId}/unpaid-rooms`,
   checkin: (id: string) => `StaffBookings/${id}/checkin`,
+  preAssign: (id: string) => `StaffBookings/${id}/pre-assign-rooms`,
 };
 
 const OTAInformation = {
@@ -402,6 +403,9 @@ const GuestDocuments = {
   getDocumentDetail: (documentId: string) => `GuestDocuments/${documentId}`,
   updateDocument: (documentId: string) => `GuestDocuments/${documentId}`,
   deleteDocument: (documentId: string) => `GuestDocuments/${documentId}`,
+  exportXML: (checkInFrom: string, checkInTo: string) =>
+    `GuestDocuments/export-xml?checkInFrom=${checkInFrom}&checkInTo=${checkInTo}`,
+  // checkinfrom - to : yyyy-MM-dd
 };
 
 export {

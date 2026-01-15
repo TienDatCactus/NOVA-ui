@@ -67,6 +67,7 @@ import AddCompletedChargesDialog from "./components/operations/add-completed-cha
 import PendingChargesSection from "./components/pending-charges-section";
 import RefundHistory from "./components/refunds/refund-history";
 import StayDetailBar from "./components/stay-detail-bar";
+import PreAssignRoomsDialog from "./components/pre-assign-rooms-dialog";
 
 import { useParams } from "react-router";
 import { useBookingState } from "./container/use-booking-state.hooks";
@@ -92,6 +93,7 @@ export default function Component() {
   const [completedChargesDialogOpen, setCompletedChargesDialogOpen] =
     useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [preAssignRoomsOpen, setPreAssignRoomsOpen] = useState(false);
 
   const bookingState = useBookingState(bookingDetail);
   const { data: OTAList } = useOTAInfo({ selection: true });
@@ -221,6 +223,7 @@ export default function Component() {
                   form={form}
                   roomsFieldArray={roomsFieldArray}
                   bookingState={bookingState}
+                  onPreAssignRooms={() => setPreAssignRoomsOpen(true)}
                 />{" "}
                 <CustomerInfoBar
                   bookingDetail={bookingDetail}
@@ -256,6 +259,8 @@ export default function Component() {
                   bookingId={bookingDetail.id}
                   customerId={bookingDetail.customer.id}
                   adultsAmount={bookingDetail.adults}
+                  checkinDate={bookingDetail.checkinDate}
+                  checkoutDate={bookingDetail.checkoutDate}
                   canEdit={
                     bookingDetail.status !== "CheckedOut" &&
                     bookingDetail.status !== "Cancelled"
@@ -269,6 +274,12 @@ export default function Component() {
               open={completedChargesDialogOpen}
               onOpenChange={setCompletedChargesDialogOpen}
               booking={bookingDetail}
+            />
+
+            <PreAssignRoomsDialog
+              open={preAssignRoomsOpen}
+              onOpenChange={setPreAssignRoomsOpen}
+              bookingDetail={bookingDetail}
             />
 
             <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
@@ -404,7 +415,7 @@ function BookingDetailError({
         </EmptyHeader>
 
         {onRetry && (
-          <EmptyContent >
+          <EmptyContent>
             <Button variant="outline" onClick={onRetry} className="gap-2">
               <RotateCcw className="h-4 w-4" />
               Thử lại

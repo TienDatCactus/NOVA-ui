@@ -1,4 +1,4 @@
-import { FileText, Loader2, Plus, ShieldAlert } from "lucide-react";
+import { Download, FileText, Loader2, Plus, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -15,7 +15,10 @@ import {
 } from "~/components/ui/dialog";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import type { BookingDocumentItemDto } from "~/services/api/guest-documents/dto";
-import { useDeleteDocumentMutation } from "../container/container";
+import {
+  useDeleteDocumentMutation,
+  useExportGuestDocumentsMutation,
+} from "../container/container";
 import { useGetBookingDocumentsQuery } from "../container/query";
 import DocumentCard from "./document-card";
 import DocumentEditDialog from "./document-edit-dialog";
@@ -25,6 +28,8 @@ interface GuestDocumentsSectionProps {
   bookingId: string;
   customerId: string;
   adultsAmount: number;
+  checkinDate: string;
+  checkoutDate: string;
   canEdit?: boolean;
 }
 
@@ -32,6 +37,8 @@ export default function GuestDocumentsSection({
   bookingId,
   customerId,
   adultsAmount,
+  checkinDate,
+  checkoutDate,
   canEdit = true,
 }: GuestDocumentsSectionProps) {
   const [viewDocument, setViewDocument] =
@@ -49,6 +56,30 @@ export default function GuestDocumentsSection({
     refetch,
   } = useGetBookingDocumentsQuery(bookingId);
   const deleteMutation = useDeleteDocumentMutation();
+  const exportMutation = useExportGuestDocumentsMutation();
+
+  const handleExportXML = async () => {
+    try {
+      const blob = await exportMutation.mutateAsync({
+        checkInFrom: checkinDate,
+        checkInTo: checkoutDate,
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `guest-documents-${checkinDate}-${checkoutDate}.xml`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Xuất file XML thành công");
+    } catch (error) {
+      toast.error("Xuất file XML thất bại");
+    }
+  };
 
   const handleDelete = async () => {
     if (!documentToDelete) return;
@@ -100,16 +131,36 @@ export default function GuestDocumentsSection({
               </p>
             </div>
 
-            {canEdit && (
+            <div className="flex gap-2">
               <Button
                 size="sm"
+                variant="outline"
                 className="gap-2"
-                onClick={() => setScanDialogOpen(true)}
+                onClick={handleExportXML}
+                disabled={
+                  exportMutation.isPending ||
+                  !documents ||
+                  documents.length === 0
+                }
               >
-                <Plus className="w-4 h-4" />
-                Thêm giấy tờ
+                {exportMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                Export XML
               </Button>
-            )}
+              {canEdit && (
+                <Button
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setScanDialogOpen(true)}
+                >
+                  <Plus className="w-4 h-4" />
+                  Thêm giấy tờ
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Warning if incomplete */}

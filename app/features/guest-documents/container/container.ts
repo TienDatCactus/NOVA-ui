@@ -79,3 +79,17 @@ export function useDeleteDocumentMutation() {
     },
   });
 }
+
+export function useExportGuestDocumentsMutation() {
+  return useMutation({
+    mutationKey: ["export-guest-documents"],
+    mutationFn: async ({
+      checkInFrom,
+      checkInTo,
+    }: {
+      checkInFrom: string;
+      checkInTo: string;
+    }) =>
+      await GuestDocumentsService.exportGuestDocuments(checkInFrom, checkInTo),
+  });
+}

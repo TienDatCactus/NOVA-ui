@@ -6,6 +6,7 @@ import { BookingService } from "~/services/api/booking";
 import type { BookingSchema } from "~/services/api/booking/booking.schema";
 import type {
   CheckinBookingRequestDto,
+  PreAssignRoomsRequestDto,
   StaffChangeRoomRequestDto,
   StaffUpdateBookingRequestDto,
 } from "~/services/api/booking/dto";
@@ -196,7 +197,7 @@ function useCheckinBooking(bookingId: string) {
 
   return useMutation({
     mutationFn: async (data: CheckinBookingRequestDto) =>
-      await BookingService.checkingBooking(bookingId, data),
+      await BookingService.checkinBooking(bookingId, data),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({
@@ -224,6 +225,38 @@ function useCheckinBooking(bookingId: string) {
   });
 }
 
+function usePreAssignRooms(bookingId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: PreAssignRoomsRequestDto) =>
+      await BookingService.preAssignRooms(bookingId, data),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+      ]);
+      toast.success("Gán phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Gán phòng thất bại");
+      }
+    },
+  });
+}
 export {
   useCancelBooking,
   useChangeRoom,
@@ -231,4 +264,5 @@ export {
   useExportBookings,
   useUpdateBooking,
   useUpdateBookingStatus,
+  usePreAssignRooms,
 };

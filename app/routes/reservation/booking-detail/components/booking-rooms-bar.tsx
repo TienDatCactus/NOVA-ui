@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns";
-import { ArrowUpCircle, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowUpCircle, DoorOpen, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -50,6 +50,7 @@ interface BookingRoomsBarProps {
     "id"
   >;
   bookingState: BookingState;
+  onPreAssignRooms: () => void;
 }
 
 export default function BookingRoomsBar({
@@ -57,6 +58,7 @@ export default function BookingRoomsBar({
   form,
   roomsFieldArray,
   bookingState,
+  onPreAssignRooms,
 }: BookingRoomsBarProps) {
   const { fields, remove, append } = roomsFieldArray;
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
@@ -206,6 +208,15 @@ export default function BookingRoomsBar({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                {" "}
+                {/* Pre-assign rooms - only for Pending/Confirmed status */}
+                {(bookingDetail.status === "Pending" ||
+                  bookingDetail.status === "Confirmed") && (
+                  <DropdownMenuItem onClick={onPreAssignRooms}>
+                    <DoorOpen className="w-4 h-4 mr-1" />
+                    Pre-assign phòng
+                  </DropdownMenuItem>
+                )}
                 {canUpgradeRoom(bookingDetail?.status) && (
                   <DropdownMenuItem onClick={() => setUpgradeRoomOpen(true)}>
                     <ArrowUpCircle className="w-4 h-4 " />
@@ -218,7 +229,7 @@ export default function BookingRoomsBar({
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Thêm phòng
-                </DropdownMenuItem> 
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

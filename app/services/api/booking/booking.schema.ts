@@ -697,6 +697,31 @@ const CheckinBookingRequestSchema = z.object({
   autoAssignRooms: z.boolean(),
 });
 
+const PreAssignRoomsRequestSchema = z.object({
+  roomAssignments: z.array(
+    z.object({
+      bookingRoomId: z.string(),
+      roomId: z.string(),
+    })
+  ),
+});
+
+const PreAssignRoomsResponseSchema = z.object({
+  bookingId: z.string(),
+  bookingCode: z.string(),
+  assignments: z.array(
+    z.object({
+      bookingRoomId: z.string(),
+      roomId: z.string(),
+      roomName: z.string(),
+      roomTypeName: z.string(),
+      wasChange: z.boolean(),
+      previousRoomName: z.string(),
+    })
+  ),
+  message: z.string().optional(),
+});
+
 export const BookingSchema = {
   BookingListResponseSchema,
   BookingDetailItemSchema,
@@ -744,4 +769,6 @@ export const BookingSchema = {
   UnpaidRoomsForBookingSchema,
   UnpaidRoomSchema,
   CheckinBookingRequestSchema,
+  PreAssignRoomsRequestSchema,
+  PreAssignRoomsResponseSchema,
 };
