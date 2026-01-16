@@ -8,15 +8,14 @@ import {
   Tag,
   XCircle,
 } from "lucide-react";
+import { TranslationDisplay } from "~/components/translation-display";
 import { Badge } from "~/components/ui/badge";
 import Image from "~/components/ui/image";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { ImageZoom } from "~/components/ui/shadcn-io/image-zoom";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn, formatMoney } from "~/lib/utils";
 import type { ServiceItem } from "~/services/api/services/dto";
 import { useServiceDetail } from "../../container/services/query.hooks";
-import { TranslationDisplay } from "~/components/translation-display";
 
 interface ServiceDetailRowProps {
   service: ServiceItem;

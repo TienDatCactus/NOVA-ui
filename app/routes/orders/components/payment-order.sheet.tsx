@@ -6,7 +6,6 @@ import {
   CalendarClock,
   CheckCircle2,
   FileText,
-  Hash,
   Loader2,
   Receipt,
   XCircle,
@@ -15,6 +14,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
+import CurrencyView, { useCurrencyView } from "~/components/currency-view";
+import { PaymentMethodSelector } from "~/components/payment-method-selector";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -44,16 +45,14 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { cn, formatMoney } from "~/lib/utils";
-import CurrencyView, { useCurrencyView } from "~/components/currency-view";
-import { PaymentMethodSelector } from "~/components/payment-method-selector";
 
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import { useCalculateInvoiceFees } from "~/routes/reservation/booking-detail/container/use-booking-checkout.hooks";
 import type { POSOrderItemDto } from "~/services/api/orders/dto";
 import { OrderSchema } from "~/services/api/orders/order.schema";
 import { usePOSOrderDetailByOrder } from "../container/pos-orders/query.hooks";
 import { useServiceOrderDetail } from "../container/service-order/query.hooks";
-import { hasAnyRole } from "~/lib/auth/bouncer";
-import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 const { OrderPayNowRequestSchema } = OrderSchema;
 type PaymentFormData = z.infer<typeof OrderPayNowRequestSchema>;

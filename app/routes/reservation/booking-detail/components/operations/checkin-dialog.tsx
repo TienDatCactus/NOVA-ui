@@ -99,16 +99,16 @@ export function CheckinDialog({
         // Build from grouped structure
         roomAssignments = bookingDetail.roomsByType.flatMap((typeGroup) =>
           (typeGroup.rooms || []).map((room) => ({
-            bookingRoomId: room.bookingRoomId,
+            bookingRoomId: room.bookingRoomId || "",
             roomTypeId: typeGroup.roomTypeId || "",
             assignedRoomId: room.roomId || "",
           }))
         );
       } else if (bookingDetail.rooms) {
         // Fallback to flat list
-        roomAssignments = bookingDetail.rooms.map((room) => ({
-          bookingRoomId: room.bookingRoomId,
-          roomTypeId: room.roomTypeId,
+        roomAssignments = bookingDetail?.rooms?.map((room) => ({
+          bookingRoomId: room.bookingRoomId || "",
+          roomTypeId: room.roomTypeId || "",
           assignedRoomId: room.roomId || "",
         }));
       }

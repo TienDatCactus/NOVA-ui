@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { CalendarDays, Layers, LayoutGrid, Package, Tag } from "lucide-react";
+import { TranslationDisplay } from "~/components/translation-display";
 import { Badge } from "~/components/ui/badge";
 import Image from "~/components/ui/image";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -10,8 +11,6 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
 import type { MenuListItemDto } from "~/services/api/menu/dto";
 import { useMenuItemDetail } from "../../container/menu/query.hooks";
-import { Trans } from "react-i18next";
-import { TranslationDisplay } from "~/components/translation-display";
 
 interface MenuDetailRowProps {
   menuItem: MenuListItemDto;

@@ -51,7 +51,7 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
-import { useStaffList, useStaffsHasPayrollinMonth } from "../../staff/container/query.hooks";
+import { useStaffsHasPayrollinMonth } from "../../staff/container/query.hooks";
 import {
   useGeneratePayroll,
   useGenerateSinglePayroll,
@@ -107,9 +107,8 @@ export default function GeneratePayrollDialog({
   const scope = form.watch("scope");
   const selectedStaffId = form.watch("selectedStaffId");
 
-  const { data: staffList, isPending: isLoadingStaffs } = useStaffsHasPayrollinMonth(
-    form.watch("year"), form.watch("month")
-  ) 
+  const { data: staffList, isPending: isLoadingStaffs } =
+    useStaffsHasPayrollinMonth(form.watch("year"), form.watch("month"));
   const selectedStaff = staffList?.find((s: any) => s.id === selectedStaffId);
 
   const { mutate: generateAll, isPending: isGeneratingAll } =

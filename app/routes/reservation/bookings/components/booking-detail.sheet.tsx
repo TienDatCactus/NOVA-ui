@@ -365,7 +365,7 @@ export default function BookingDetailSheet({
                                       </p>
                                       <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-0.5">
                                         {
-                                          formatMoney(room.baseRate)
+                                          formatMoney(room?.baseRate ?? 0)
                                             .vndFormatted
                                         }
                                         /đêm
@@ -376,8 +376,15 @@ export default function BookingDetailSheet({
                                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-2 sm:mt-0 pl-11 sm:pl-0">
                                     <Clock className="h-3.5 w-3.5" />
                                     <span>
-                                      {format(parseISO(room.fromDate), "dd/MM")}{" "}
-                                      - {format(parseISO(room.toDate), "dd/MM")}
+                                      {format(
+                                        parseISO(room?.fromDate ?? ""),
+                                        "dd/MM"
+                                      )}{" "}
+                                      -{" "}
+                                      {format(
+                                        parseISO(room?.toDate ?? ""),
+                                        "dd/MM"
+                                      )}
                                     </span>
                                   </div>
                                 </div>
