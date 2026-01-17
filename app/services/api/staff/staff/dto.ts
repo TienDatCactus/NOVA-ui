@@ -14,3 +14,5 @@ export type UpdateStaffDto = z.infer<typeof StaffSchema.UpdateStaffSchema>;
 export type TerminateStaffDto = z.infer<
   typeof StaffSchema.TerminateStaffSchema
 >;
+
+export type RehireStaffDto = z.infer<typeof StaffSchema.RehireStaffSchema>;

@@ -5,6 +5,7 @@ import type {
   CreateStaffDto,
   UpdateStaffDto,
   TerminateStaffDto,
+  RehireStaffDto,
 } from "~/services/api/staff/staff/dto";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
@@ -142,7 +143,7 @@ export function useTerminateStaff() {
     onError: (error) => {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data.message || "Lỗi khi Cho nghỉ việc nhân sự"
+          error.response?.data.message || "Lỗi khi Cho nghỉ việc nhân sự",
         );
       }
     },
@@ -155,5 +156,41 @@ export function useStaffsHasPayrollinMonth(year: number, month: number) {
     queryFn: async () =>
       await StaffService.getStaffsHasPayrollinMonth(year, month),
     enabled: !!year && !!month,
+  });
+}
+
+/**
+ * Hook to rehire staff
+ */
+export function useRehireStaff() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: RehireStaffDto }) =>
+      await StaffService.rehireStaff(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["staffs"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["staff", variables.id.toString()],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["staff-attendance"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["staff-shifts"],
+      });
+      toast.success("Tái tuyển dụng nhân sự thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(
+          error.response?.data.message || "Lỗi khi tái tuyển dụng nhân sự",
+        );
+      }
+    },
   });
 }

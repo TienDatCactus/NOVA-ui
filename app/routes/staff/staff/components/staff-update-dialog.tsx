@@ -122,7 +122,7 @@ export default function EditStaffDialog({
 
   const { data: staffDetail, isLoading: isLoadingDetail } = useStaffDetail(
     staff?.id || "",
-    { enabled: open }
+    { enabled: open },
   );
 
   const { mutateAsync: updateStaff, isPending } = useUpdateStaff();
@@ -301,7 +301,7 @@ export default function EditStaffDialog({
                                   variant="outline"
                                   className={cn(
                                     "w-[240px] pl-3 text-left font-normal h-9",
-                                    !field.value && "text-muted-foreground"
+                                    !field.value && "text-muted-foreground",
                                   )}
                                 >
                                   {field.value ? (
@@ -398,7 +398,7 @@ export default function EditStaffDialog({
                                     variant="ghost"
                                     className={cn(
                                       "w-full justify-start text-left font-normal h-9 px-3 hover:bg-transparent",
-                                      !field.value && "text-muted-foreground"
+                                      !field.value && "text-muted-foreground",
                                     )}
                                   >
                                     {field.value ? (

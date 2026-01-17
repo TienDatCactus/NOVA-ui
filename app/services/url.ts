@@ -211,6 +211,7 @@ const Staff = {
   terminate: (id: string) => `Staffs/${id}/terminate`,
   payrollMonth: (year: number, month: number) =>
     `Staffs/payroll-month?year=${year}&month=${month}`,
+  rehire: (id: string) => `Staffs/${id}/rehire`,
 };
 
 //! hotel manager

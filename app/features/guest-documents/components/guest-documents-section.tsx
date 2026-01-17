@@ -1,18 +1,10 @@
-import {
-  Calendar,
-  Download,
-  FileText,
-  Loader2,
-  Plus,
-  ShieldAlert,
-} from "lucide-react";
+import { Download, FileText, Loader2, Plus, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -21,15 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
-import { hasAnyRole } from "~/lib/auth/bouncer";
 import type { BookingDocumentItemDto } from "~/services/api/guest-documents/dto";
 import {
   useDeleteDocumentMutation,
   useExportGuestDocumentsByBookingMutation,
-  useExportGuestDocumentsMutation,
 } from "../container/container";
 import { useGetBookingDocumentsQuery } from "../container/query";
 import DocumentCard from "./document-card";
@@ -61,11 +49,6 @@ export default function GuestDocumentsSection({
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
 
-  const [exportDateFrom, setExportDateFrom] = useState<Date | undefined>(
-    undefined,
-  );
-  const [exportDateTo, setExportDateTo] = useState<Date | undefined>(undefined);
-
   // Queries & Mutations
   const {
     data: documents,
@@ -74,12 +57,11 @@ export default function GuestDocumentsSection({
   } = useGetBookingDocumentsQuery(bookingId);
   const deleteMutation = useDeleteDocumentMutation();
   const exportByBookingMutation = useExportGuestDocumentsByBookingMutation();
-  const exportByDateRangeMutation = useExportGuestDocumentsMutation();
 
   const handleExportByBooking = async () => {
     try {
       const blob = await exportByBookingMutation.mutateAsync(bookingId);
-
+      console.log(blob);
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -92,6 +74,7 @@ export default function GuestDocumentsSection({
 
       toast.success("Xuất file XML thành công");
     } catch (error) {
+      console.log(error);
       toast.error("Xuất file XML thất bại");
     }
   };
@@ -196,7 +179,7 @@ export default function GuestDocumentsSection({
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           ) : documents && documents.length > 0 ? (
-            <ScrollArea className="max-h-[400px]">
+            <div className="max-h-[400px] overflow-y-auto">
               <div className="space-y-3">
                 {documents.map((doc) => (
                   <DocumentCard
@@ -208,7 +191,7 @@ export default function GuestDocumentsSection({
                   />
                 ))}
               </div>
-            </ScrollArea>
+            </div>
           ) : (
             <div className="py-8 flex flex-col items-center text-center">
               <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mb-3">

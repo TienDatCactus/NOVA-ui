@@ -31,7 +31,7 @@ http.interceptors.request.use(
     if (
       idempotencyKey &&
       ["post", "put", "patch", "delete"].includes(
-        config.method?.toLowerCase() || ""
+        config.method?.toLowerCase() || "",
       )
     ) {
       config.headers["Idempotency-Key"] = idempotencyKey;
@@ -39,7 +39,7 @@ http.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 let isRefreshing = false;
@@ -53,7 +53,16 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 http.interceptors.response.use(
-  (response) => parseBody(response),
+  (response) => {
+    // Skip parseBody for blob/arraybuffer responses
+    if (
+      response.config.responseType === "blob" ||
+      response.config.responseType === "arraybuffer"
+    ) {
+      return response.data;
+    }
+    return parseBody(response);
+  },
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
@@ -136,6 +145,6 @@ http.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 export default http;

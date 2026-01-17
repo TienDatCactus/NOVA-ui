@@ -63,9 +63,7 @@ const CreateStaffSchema = z.object({
       const minAgeDate = new Date();
       minAgeDate.setFullYear(minAgeDate.getFullYear() - 18);
       return date <= minAgeDate;
-    }, "Ngày sinh phải đảm bảo nhân sự đủ 18 tuổi")
-   ,
-
+    }, "Ngày sinh phải đảm bảo nhân sự đủ 18 tuổi"),
   citizenId: z
     .string("CCCD không hợp lệ")
     .regex(/^(\d{9}|\d{12})$/, "CCCD phải gồm 9 hoặc 12 chữ số"),
@@ -82,6 +80,10 @@ const TerminateStaffSchema = z.object({
   note: z.string().optional(),
 });
 
+const RehireStaffSchema = z.object({
+  rehireDate: z.string(),
+  note: z.string().optional(),
+});
 export const StaffSchema = {
   StaffListItemSchema,
   StaffListSchema,
@@ -89,4 +91,5 @@ export const StaffSchema = {
   CreateStaffSchema,
   UpdateStaffSchema,
   TerminateStaffSchema,
+  RehireStaffSchema,
 };

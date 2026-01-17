@@ -1,4 +1,4 @@
-import { MoreHorizontal, Pencil, Trash2, UserX } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, UserCheck, UserX } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import type { StaffListItemDto } from "~/services/api/staff/staff/dto";
 import StaffDeleteDialog from "../components/staff-delete-dialog";
+import StaffRehireDialog from "../components/staff-rehire-dialog";
 import StaffTerminateDialog from "../components/staff-terminate-dialog";
 import StaffUpdateDialog from "../components/staff-update-dialog";
 
@@ -21,6 +22,7 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [terminateDialogOpen, setTerminateDialogOpen] = useState(false);
+  const [rehireDialogOpen, setRehireDialogOpen] = useState(false);
   const canDelete = staff.status === "Terminated";
   return (
     <DropdownMenu>
@@ -37,6 +39,12 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
           <Pencil className="mr-2 h-4 w-4" />
           Chỉnh sửa
         </DropdownMenuItem>
+        {staff.status === "Terminated" && (
+          <DropdownMenuItem onClick={() => setRehireDialogOpen(true)}>
+            <UserCheck className="mr-2 h-4 w-4" />
+            Tái tuyển dụng
+          </DropdownMenuItem>
+        )}
         {!canDelete && (
           <DropdownMenuItem
             variant="destructive"
@@ -73,6 +81,11 @@ export default function StaffActionsCell({ staff }: StaffActionsCellProps) {
         staff={staff}
         open={terminateDialogOpen}
         onOpenChange={setTerminateDialogOpen}
+      />
+      <StaffRehireDialog
+        staff={staff}
+        open={rehireDialogOpen}
+        onOpenChange={setRehireDialogOpen}
       />
     </DropdownMenu>
   );

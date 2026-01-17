@@ -116,41 +116,28 @@ async function deleteDocuments(id: string): Promise<void> {
   }
 }
 
-async function exportGuestDocuments(
-  checkInFrom: string,
-  checkInTo: string,
-): Promise<Blob> {
+async function exportGuestDocuments(checkInFrom: string, checkInTo: string) {
   try {
     const resp = await http.get(
       GuestDocuments.exportXML(checkInFrom, checkInTo),
-      { responseType: "blob" },
+      {
+        responseType: "blob",
+      },
     );
-
-    let blobData = resp.data;
-    if (blobData instanceof Blob) {
-      return blobData;
-    }
-    const blobContent =
-      typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
-    return new Blob([blobContent as BlobPart]);
+    // Backend already returns blob with correct encoding
+    return resp;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }
 }
-async function exportGuestDocumentsByBooking(bookingId: string): Promise<Blob> {
+async function exportGuestDocumentsByBooking(bookingId: string) {
   try {
     const resp = await http.get(GuestDocuments.exportXMLByBooking(bookingId), {
       responseType: "blob",
     });
-
-    let blobData = resp.data;
-    if (blobData instanceof Blob) {
-      return blobData;
-    }
-    const blobContent =
-      typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
-    return new Blob([blobContent as BlobPart]);
+    // Backend already returns blob with correct encoding
+    return resp;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);

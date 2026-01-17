@@ -88,6 +88,8 @@ export default function DocumentScanDialog({
       dateOfExpiry: "",
       scannedImageUrl: "",
       note: "",
+      rawOcrResponse: "",
+      nationalCode: "",
     },
   });
 
@@ -104,6 +106,7 @@ export default function DocumentScanDialog({
       address: "",
       scannedImageUrl: "",
       note: "",
+      rawOcrResponse: "",
       nationalCode: "",
     },
   });
@@ -148,6 +151,7 @@ export default function DocumentScanDialog({
         passportForm.setValue("dateOfExpiry", result.dateOfExpiry || "");
         passportForm.setValue("scannedImageUrl", result.scannedImageUrl || "");
         passportForm.setValue("nationalCode", result.nationalCode || "");
+        passportForm.setValue("rawOcrResponse", result.rawOcrResponse || "");
 
         toast.success("Đã quét passport thành công");
       } else {
@@ -164,7 +168,7 @@ export default function DocumentScanDialog({
           "scannedImageUrl",
           result.scannedImageUrl || "",
         );
-
+        passportForm.setValue("rawOcrResponse", result.rawOcrResponse || "");
         toast.success("Đã quét CMND/CCCD thành công");
       }
     } catch (error) {
@@ -648,6 +652,7 @@ export default function DocumentScanDialog({
                         <FormControl>
                           <Input
                             {...field}
+                            value={field.value ?? ""}
                             placeholder="Số nhà, Đường, Phường/Xã, Quận/Huyện, Tỉnh/TP"
                           />
                         </FormControl>

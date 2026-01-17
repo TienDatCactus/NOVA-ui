@@ -69,7 +69,7 @@ const DashboardLayout: React.FC = () => {
         checkInFrom: fromDate,
         checkInTo: toDate,
       });
-
+      console.log(blob);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;

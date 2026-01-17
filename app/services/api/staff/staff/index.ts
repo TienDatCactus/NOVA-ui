@@ -2,6 +2,7 @@ import http from "~/lib/http";
 import { Staff } from "~/services/url";
 import type {
   CreateStaffDto,
+  RehireStaffDto,
   StaffDetailDto,
   StaffListDto,
   TerminateStaffDto,
@@ -61,7 +62,7 @@ async function getStaffById(id: string): Promise<StaffDetailDto> {
  */
 async function updateStaff(
   id: string,
-  data: UpdateStaffDto
+  data: UpdateStaffDto,
 ): Promise<StaffDetailDto> {
   try {
     const validatedData = UpdateStaffSchema.parse(data);
@@ -88,7 +89,7 @@ async function deleteStaff(id: string): Promise<void> {
 
 async function terminateStaff(
   id: string,
-  data: TerminateStaffDto
+  data: TerminateStaffDto,
 ): Promise<void> {
   try {
     const resp = await http.post(Staff.terminate(id), data);
@@ -101,10 +102,21 @@ async function terminateStaff(
 
 async function getStaffsHasPayrollinMonth(
   year: number,
-  month: number
+  month: number,
 ): Promise<StaffListDto> {
   try {
     const resp = await http.get(Staff.payrollMonth(year, month));
+    return resp.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+async function rehireStaff(
+  id: string,
+  data: RehireStaffDto,
+): Promise<StaffListDto> {
+  try {
+    const resp = await http.post(Staff.rehire(id), data);
     return resp.data;
   } catch (error) {
     return Promise.reject(error);
@@ -119,4 +131,5 @@ export const StaffService = {
   deleteStaff,
   terminateStaff,
   getStaffsHasPayrollinMonth,
+  rehireStaff,
 };
