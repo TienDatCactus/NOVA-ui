@@ -1,10 +1,18 @@
-import { Download, FileText, Loader2, Plus, ShieldAlert } from "lucide-react";
+import {
+  Calendar,
+  Download,
+  FileText,
+  Loader2,
+  Plus,
+  ShieldAlert,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -13,10 +21,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
+import { hasAnyRole } from "~/lib/auth/bouncer";
 import type { BookingDocumentItemDto } from "~/services/api/guest-documents/dto";
 import {
   useDeleteDocumentMutation,
+  useExportGuestDocumentsByBookingMutation,
   useExportGuestDocumentsMutation,
 } from "../container/container";
 import { useGetBookingDocumentsQuery } from "../container/query";
@@ -49,6 +61,11 @@ export default function GuestDocumentsSection({
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
 
+  const [exportDateFrom, setExportDateFrom] = useState<Date | undefined>(
+    undefined,
+  );
+  const [exportDateTo, setExportDateTo] = useState<Date | undefined>(undefined);
+
   // Queries & Mutations
   const {
     data: documents,
@@ -56,20 +73,18 @@ export default function GuestDocumentsSection({
     refetch,
   } = useGetBookingDocumentsQuery(bookingId);
   const deleteMutation = useDeleteDocumentMutation();
-  const exportMutation = useExportGuestDocumentsMutation();
+  const exportByBookingMutation = useExportGuestDocumentsByBookingMutation();
+  const exportByDateRangeMutation = useExportGuestDocumentsMutation();
 
-  const handleExportXML = async () => {
+  const handleExportByBooking = async () => {
     try {
-      const blob = await exportMutation.mutateAsync({
-        checkInFrom: checkinDate,
-        checkInTo: checkoutDate,
-      });
+      const blob = await exportByBookingMutation.mutateAsync(bookingId);
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `guest-documents-${checkinDate}-${checkoutDate}.xml`;
+      link.download = `guest-documents-booking-${bookingId}.xml`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -136,20 +151,21 @@ export default function GuestDocumentsSection({
                 size="sm"
                 variant="outline"
                 className="gap-2"
-                onClick={handleExportXML}
+                onClick={handleExportByBooking}
                 disabled={
-                  exportMutation.isPending ||
+                  exportByBookingMutation.isPending ||
                   !documents ||
                   documents.length === 0
                 }
               >
-                {exportMutation.isPending ? (
+                {exportByBookingMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                Tải về giấy tờ (XML)
+                Tải về XML (Booking)
               </Button>
+
               {canEdit && (
                 <Button
                   size="sm"

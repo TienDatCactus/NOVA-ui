@@ -311,7 +311,7 @@ export function CheckinDialog({
 
                             {/* Rooms in this type */}
                             <div className="grid gap-3 pl-2">
-                              {typeGroup.rooms?.map((bookingRoom) => {
+                              {typeGroup.rooms?.map((bookingRoom: any) => {
                                 const assignmentIndex = assignments.findIndex(
                                   (a) =>
                                     a.bookingRoomId ===
@@ -340,13 +340,15 @@ export function CheckinDialog({
                                               <span>
                                                 {format(
                                                   new Date(
-                                                    bookingRoom.fromDate
+                                                    bookingRoom?.fromDate || ""
                                                   ),
                                                   "dd/MM"
                                                 )}{" "}
                                                 -{" "}
                                                 {format(
-                                                  new Date(bookingRoom.toDate),
+                                                  new Date(
+                                                    bookingRoom?.toDate || ""
+                                                  ),
                                                   "dd/MM"
                                                 )}
                                               </span>

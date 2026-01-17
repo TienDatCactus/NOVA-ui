@@ -87,7 +87,7 @@ export default function BookingRoomsBar({
     const alreadyMarkedForRemoval = currentRooms.some(
       (room) =>
         room.action === "Remove" &&
-        room.bookingRoomId === roomToRemove.bookingRoomId
+        room.bookingRoomId === roomToRemove.bookingRoomId,
     );
 
     if (alreadyMarkedForRemoval) {
@@ -98,7 +98,7 @@ export default function BookingRoomsBar({
     }
 
     const removeOperation = createRemoveRoomOperation(
-      roomToRemove.bookingRoomId
+      roomToRemove.bookingRoomId,
     );
     append(removeOperation);
 
@@ -125,7 +125,7 @@ export default function BookingRoomsBar({
       // Check if room is already being added (in pending operations)
       const currentRooms = form.getValues("rooms") || [];
       const roomAlreadyBeingAdded = currentRooms.some(
-        (room) => room.action === "Add" && room.roomId === roomId
+        (room) => room.action === "Add" && room.roomId === roomId,
       );
       if (roomAlreadyBeingAdded) {
         toast.warning("Phòng này đã được thêm vào danh sách chờ");
@@ -170,7 +170,7 @@ export default function BookingRoomsBar({
           checkoutDate instanceof Date ? checkoutDate : parseISO(checkoutDate);
         if (today >= checkout) {
           toast.error(
-            "Không thể thêm phòng: Booking sắp checkout (không còn đêm nào)"
+            "Không thể thêm phòng: Booking sắp checkout (không còn đêm nào)",
           );
           return;
         }
@@ -181,7 +181,7 @@ export default function BookingRoomsBar({
       toast.success("Đã thêm phòng mới");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Thêm phòng thất bại"
+        error instanceof Error ? error.message : "Thêm phòng thất bại",
       );
     }
   };
@@ -235,7 +235,133 @@ export default function BookingRoomsBar({
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
-          {bookingDetail.rooms &&
+          {/* Display rooms grouped by type if available */}
+          {bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0 ? (
+            <>
+              {bookingDetail.roomsByType.map((roomType) => (
+                <div key={roomType.roomTypeId} className="space-y-2">
+                  {/* Room Type Header */}
+                  <div className="flex items-center gap-2 px-1 pt-2 first:pt-0">
+                    <div className="h-1 w-1 rounded-full bg-primary" />
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {roomType.roomTypeName}
+                      {roomType.roomCount && roomType.roomCount > 0 && (
+                        <span className="ml-1">({roomType.roomCount})</span>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Rooms in this type */}
+                  {roomType.rooms &&
+                    roomType.rooms.map((room) => {
+                      if (!room.roomId || !room.bookingRoomId) return null;
+
+                      const isExpanded = expandedRooms.has(room.roomId);
+                      const canRemove =
+                        (bookingDetail.status === "Pending" ||
+                          bookingDetail.status === "InHouse") &&
+                        bookingState.permissions.canEditRooms;
+
+                      return (
+                        <div
+                          key={room.bookingRoomId}
+                          className="group relative rounded-lg border border-border bg-card transition-all hover:border-primary/50 hover:shadow-sm"
+                        >
+                          {/* Main Content */}
+                          <div
+                            className="flex items-center justify-between p-3 cursor-pointer"
+                            onClick={() => toggleRoomExpand(room.roomId!)}
+                          >
+                            {/* Left: Room Info */}
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                                <DoorOpen className="h-4 w-4" />
+                              </div>
+
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-sm font-medium text-foreground">
+                                  {room.roomName}
+                                </span>
+                                {room.baseRate && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {room.baseRate.toLocaleString("vi-VN")}{" "}
+                                    ₫/đêm
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Right: Actions */}
+                            <div className="flex items-center gap-2">
+                              {canRemove && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveRoom(
+                                      room.bookingRoomId!,
+                                      room.roomName!,
+                                    );
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Expanded Details */}
+                          {isExpanded && (
+                            <div className="border-t border-border bg-muted/30 px-3 py-3 space-y-2">
+                              {room.fromDate && (
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="text-muted-foreground">
+                                    Check-in:
+                                  </span>
+                                  <span className="font-medium text-foreground">
+                                    {format(
+                                      parseISO(room.fromDate),
+                                      "dd/MM/yyyy",
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+
+                              {room.toDate && (
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="text-muted-foreground">
+                                    Check-out:
+                                  </span>
+                                  <span className="font-medium text-foreground">
+                                    {format(
+                                      parseISO(room.toDate),
+                                      "dd/MM/yyyy",
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground">
+                                  ID phòng:
+                                </span>
+                                <span className="font-mono text-[10px] text-muted-foreground">
+                                  {room.roomId}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              ))}
+            </>
+          ) : (
+            /* Fallback to flat rooms array if roomsByType not available */
+            bookingDetail.rooms &&
             bookingDetail.rooms.map((room) => (
               <ExistingRoomItemWrapper
                 key={room.roomId}
@@ -259,10 +385,11 @@ export default function BookingRoomsBar({
                     : undefined
                 }
               />
-            ))}
+            ))
+          )}
           {/* New Rooms Being Added */}
           {fields.filter(
-            (_, index) => form.watch(`rooms.${index}.action`) === "Add"
+            (_, index) => form.watch(`rooms.${index}.action`) === "Add",
           ).length > 0 && (
             <>
               <Separator className="my-3" />
@@ -270,7 +397,7 @@ export default function BookingRoomsBar({
                 Phòng đang được thêm (
                 {
                   fields.filter(
-                    (_, index) => form.watch(`rooms.${index}.action`) === "Add"
+                    (_, index) => form.watch(`rooms.${index}.action`) === "Add",
                   ).length
                 }
                 )
@@ -300,7 +427,7 @@ export default function BookingRoomsBar({
             </>
           )}
           {fields.filter(
-            (_, index) => form.watch(`rooms.${index}.action`) === "Remove"
+            (_, index) => form.watch(`rooms.${index}.action`) === "Remove",
           ).length > 0 && (
             <div className="mt-4 space-y-3">
               <div className="flex items-center gap-2 px-1">
@@ -310,7 +437,7 @@ export default function BookingRoomsBar({
                   {
                     fields.filter(
                       (_, index) =>
-                        form.watch(`rooms.${index}.action`) === "Remove"
+                        form.watch(`rooms.${index}.action`) === "Remove",
                     ).length
                   }
                   )
@@ -323,14 +450,14 @@ export default function BookingRoomsBar({
                   if (action !== "Remove") return null;
 
                   const bookingRoomId = form.watch(
-                    `rooms.${index}.bookingRoomId`
+                    `rooms.${index}.bookingRoomId`,
                   );
                   if (!bookingRoomId) return null;
 
                   const existingRoom =
                     bookingDetail.rooms &&
                     bookingDetail.rooms.find(
-                      (r) => r.bookingRoomId === bookingRoomId
+                      (r) => r.bookingRoomId === bookingRoomId,
                     );
                   if (!existingRoom) return null;
 

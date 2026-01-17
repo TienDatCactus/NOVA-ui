@@ -404,8 +404,10 @@ const GuestDocuments = {
   updateDocument: (documentId: string) => `GuestDocuments/${documentId}`,
   deleteDocument: (documentId: string) => `GuestDocuments/${documentId}`,
   exportXML: (checkInFrom: string, checkInTo: string) =>
-    `GuestDocuments/export-xml?checkInFrom=${checkInFrom}&checkInTo=${checkInTo}`,
+    `GuestDocuments/export-temporary-residence-xml?checkInFrom=${checkInFrom}&checkInTo=${checkInTo}`,
   // checkinfrom - to : yyyy-MM-dd
+  exportXMLByBooking: (bookingId: string) =>
+    `GuestDocuments/export-temporary-residence-xml-by-booking/${bookingId}`,
 };
 
 export {

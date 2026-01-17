@@ -14,6 +14,7 @@ const PassportScanResponseSchema = z.object({
   dateOfExpiry: z.string().nullable(),
   scannedImageUrl: z.string(),
   rawOcrResponse: z.string(),
+  nationalCode: z.string(),
 });
 
 const NationalIdScanResponseSchema = z.object({
@@ -25,6 +26,7 @@ const NationalIdScanResponseSchema = z.object({
   address: z.string(),
   scannedImageUrl: z.string(),
   rawOcrResponse: z.string(),
+  nationalCode: z.string(),
 });
 
 const SavePassportRequestSchema = z.object({
@@ -34,6 +36,7 @@ const SavePassportRequestSchema = z.object({
   passportNumber: z.string(),
   dateOfBirth: z.string(),
   nationality: z.string(),
+  nationalCode: z.string(),
   placeOfBirth: z.string(),
   sex: z.string(),
   idNumber: z.string(),
@@ -52,6 +55,7 @@ const SaveNationalIdRequestSchema = z.object({
   sex: z.string(),
   home: z.string(),
   address: z.string(),
+  nationalCode: z.string(),
   scannedImageUrl: z.string(),
   note: z.string(),
 });

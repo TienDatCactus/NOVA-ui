@@ -47,7 +47,7 @@ async function savePassport(data: SavePassportRequestDto): Promise<void> {
   try {
     const resp = await http.post(
       GuestDocuments.savePassport,
-      SavePassportRequestSchema.parse(data)
+      SavePassportRequestSchema.parse(data),
     );
     return resp.data;
   } catch (error) {
@@ -56,12 +56,12 @@ async function savePassport(data: SavePassportRequestDto): Promise<void> {
   }
 }
 async function saveNationalId(
-  data: SaveNationalIdRequestDto
+  data: SaveNationalIdRequestDto,
 ): Promise<NationalIdScanResponseDto> {
   try {
     const resp = await http.post(
       GuestDocuments.saveNationalId,
-      SaveNationalIdRequestSchema.parse(data)
+      SaveNationalIdRequestSchema.parse(data),
     );
     return resp.data;
   } catch (error) {
@@ -71,7 +71,7 @@ async function saveNationalId(
 }
 
 async function getBookingDocuments(
-  bookingId: string
+  bookingId: string,
 ): Promise<BookingDocumentsResponseDto> {
   try {
     const resp = await http.get(GuestDocuments.getDocumentByBooking(bookingId));
@@ -94,7 +94,7 @@ async function getDocumentsDetail(id: string): Promise<BookingDocumentItemDto> {
 
 async function updateDocument(
   id: string,
-  data: UpdateGuestDocumentRequestDto
+  data: UpdateGuestDocumentRequestDto,
 ): Promise<void> {
   try {
     const resp = await http.put(GuestDocuments.updateDocument(id), data);
@@ -118,15 +118,33 @@ async function deleteDocuments(id: string): Promise<void> {
 
 async function exportGuestDocuments(
   checkInFrom: string,
-  checkInTo: string
+  checkInTo: string,
 ): Promise<Blob> {
   try {
     const resp = await http.get(
       GuestDocuments.exportXML(checkInFrom, checkInTo),
-      { responseType: "blob" }
+      { responseType: "blob" },
     );
 
-    let blobData = resp;
+    let blobData = resp.data;
+    if (blobData instanceof Blob) {
+      return blobData;
+    }
+    const blobContent =
+      typeof blobData === "object" ? JSON.stringify(blobData) : blobData;
+    return new Blob([blobContent as BlobPart]);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+async function exportGuestDocumentsByBooking(bookingId: string): Promise<Blob> {
+  try {
+    const resp = await http.get(GuestDocuments.exportXMLByBooking(bookingId), {
+      responseType: "blob",
+    });
+
+    let blobData = resp.data;
     if (blobData instanceof Blob) {
       return blobData;
     }
@@ -148,4 +166,5 @@ export const GuestDocumentsService = {
   updateDocument,
   deleteDocuments,
   exportGuestDocuments,
+  exportGuestDocumentsByBooking,
 };

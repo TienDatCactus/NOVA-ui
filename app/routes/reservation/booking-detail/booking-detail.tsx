@@ -99,7 +99,7 @@ export default function Component() {
   const { data: OTAList } = useOTAInfo({ selection: true });
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
-    bookingDetail?.id || ""
+    bookingDetail?.id || "",
   );
 
   const form = useForm<StaffUpdateBookingRequestDto>({
@@ -138,14 +138,14 @@ export default function Component() {
     if (hasDatesChanged && !bookingState.permissions.canEditDates) {
       toast.error(
         bookingState.permissions.dateChangeBlockReason ||
-          "Không thể thay đổi ngày check-in/check-out"
+          "Không thể thay đổi ngày check-in/check-out",
       );
       return;
     }
 
     if (hasRoomChanges && !bookingState.permissions.canEditRooms) {
       toast.error(
-        "Không thể thay đổi phòng khi đã có thanh toán hoặc booking đã kết thúc"
+        "Không thể thay đổi phòng khi đã có thanh toán hoặc booking đã kết thúc",
       );
       return;
     }
@@ -195,7 +195,7 @@ export default function Component() {
         {
           keepDirty: false, // Don't preserve dirty state on data refresh
           keepValues: false,
-        }
+        },
       );
     }
   }, [bookingDetail]);
@@ -255,17 +255,19 @@ export default function Component() {
                   }
                 />
 
-                <GuestDocumentsSection
-                  bookingId={bookingDetail.id}
-                  customerId={bookingDetail.customer.id}
-                  adultsAmount={bookingDetail.adults}
-                  checkinDate={bookingDetail.checkinDate}
-                  checkoutDate={bookingDetail.checkoutDate}
-                  canEdit={
-                    bookingDetail.status !== "CheckedOut" &&
-                    bookingDetail.status !== "Cancelled"
-                  }
-                />
+                {bookingDetail.status !== "Pending" && (
+                  <GuestDocumentsSection
+                    bookingId={bookingDetail.id}
+                    customerId={bookingDetail.customer.id}
+                    adultsAmount={bookingDetail.adults}
+                    checkinDate={bookingDetail.checkinDate}
+                    checkoutDate={bookingDetail.checkoutDate}
+                    canEdit={
+                      bookingDetail.status !== "CheckedOut" &&
+                      bookingDetail.status !== "Cancelled"
+                    }
+                  />
+                )}
               </div>
             </div>
 

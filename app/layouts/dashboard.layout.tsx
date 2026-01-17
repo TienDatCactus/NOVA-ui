@@ -1,6 +1,14 @@
-import { BookDown, SearchIcon, Undo2 } from "lucide-react";
+import {
+  BookDown,
+  Calendar,
+  Download,
+  Loader2,
+  SearchIcon,
+  Undo2,
+} from "lucide-react";
 import React from "react";
 import { Link, Outlet, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { AppSidebar } from "~/components/layouts/side-bar/dashboard/side-bar.dashboard";
 import { Button } from "~/components/ui/button";
 import {
@@ -11,13 +19,24 @@ import {
   CommandItem,
   CommandList,
 } from "~/components/ui/command";
+import { DatePicker } from "~/components/ui/date-picker";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Kbd } from "~/components/ui/kbd";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "~/components/ui/sidebar";
+import { useExportGuestDocumentsMutation } from "~/features/guest-documents/container/container";
 import { ModeToggle } from "~/features/theme/toggler";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 import { hasAnyRole } from "~/lib/auth/bouncer";
@@ -26,7 +45,48 @@ import { DASHBOARD } from "~/lib/fe-url";
 import { cn } from "~/lib/utils";
 const DashboardLayout: React.FC = () => {
   const [open, setOpen] = React.useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = React.useState(false);
+  const [exportDateFrom, setExportDateFrom] = React.useState<Date | undefined>(
+    undefined,
+  );
+  const [exportDateTo, setExportDateTo] = React.useState<Date | undefined>(
+    undefined,
+  );
   const navigate = useNavigate();
+  const exportMutation = useExportGuestDocumentsMutation();
+
+  const handleExportGuestDocuments = async () => {
+    if (!exportDateFrom || !exportDateTo) {
+      toast.error("Vui lòng chọn ngày bắt đầu và kết thúc");
+      return;
+    }
+
+    try {
+      const fromDate = exportDateFrom.toISOString().split("T")[0];
+      const toDate = exportDateTo.toISOString().split("T")[0];
+
+      const blob = await exportMutation.mutateAsync({
+        checkInFrom: fromDate,
+        checkInTo: toDate,
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `guest-documents-${fromDate}-${toDate}.xml`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Xuất file XML thành công");
+      setExportDialogOpen(false);
+      setExportDateFrom(undefined);
+      setExportDateTo(undefined);
+    } catch (error) {
+      toast.error("Xuất file XML thất bại");
+    }
+  };
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "k") {
@@ -57,6 +117,19 @@ const DashboardLayout: React.FC = () => {
                   </Link>
                 </Button>
               )}
+              {hasAnyRole(AuthLoader.getUser(), [
+                UserRole.Receptionist,
+                UserRole.HotelManager,
+              ]) && (
+                <Button
+                  size={"sm"}
+                  variant={"outline"}
+                  onClick={() => setExportDialogOpen(true)}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Xuất giấy tờ (XML)
+                </Button>
+              )}
               <ModeToggle />
               <Input
                 placeholder="Tìm kiếm..."
@@ -73,7 +146,7 @@ const DashboardLayout: React.FC = () => {
           </header>
           <div
             className={cn(
-              "rounded-md w-full mx-auto bg-background flex-1 overflow-y-auto min-h-0 container"
+              "rounded-md w-full mx-auto bg-background flex-1 overflow-y-auto min-h-0 container",
             )}
           >
             <Outlet />
@@ -96,6 +169,71 @@ const DashboardLayout: React.FC = () => {
           </CommandGroup>
         </CommandList>
       </CommandDialog>
+
+      {/* Export Guest Documents Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Xuất giấy tờ khách hàng (XML)</DialogTitle>
+            <DialogDescription>
+              Chọn khoảng thời gian check-in để xuất file XML giấy tờ tùy thân
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="export-date-from">Từ ngày</Label>
+              <DatePicker
+                id="export-date-from"
+                value={exportDateFrom}
+                onChange={setExportDateFrom}
+                placeholder="Chọn ngày bắt đầu"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="export-date-to">Đến ngày</Label>
+              <DatePicker
+                id="export-date-to"
+                value={exportDateTo}
+                onChange={setExportDateTo}
+                placeholder="Chọn ngày kết thúc"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setExportDialogOpen(false);
+                setExportDateFrom(undefined);
+                setExportDateTo(undefined);
+              }}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleExportGuestDocuments}
+              disabled={
+                !exportDateFrom || !exportDateTo || exportMutation.isPending
+              }
+            >
+              {exportMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Đang xuất...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Xuất XML
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

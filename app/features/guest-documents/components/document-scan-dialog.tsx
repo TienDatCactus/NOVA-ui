@@ -38,39 +38,11 @@ import {
   useSaveNationalIdMutation,
   useSavePassportMutation,
 } from "../container/container";
-
-const PassportFormSchema = z.object({
-  bookingId: z.string(),
-  customerId: z.string(),
-  name: z.string().min(1, "Vui lòng nhập họ tên"),
-  passportNumber: z.string().min(1, "Vui lòng nhập số passport"),
-  dateOfBirth: z.string().min(1, "Vui lòng nhập ngày sinh"),
-  nationality: z.string().min(1, "Vui lòng nhập quốc tịch"),
-  placeOfBirth: z.string(),
-  sex: z.string().min(1, "Vui lòng chọn giới tính"),
-  idNumber: z.string(),
-  dateOfIssue: z.string(),
-  dateOfExpiry: z.string(),
-  scannedImageUrl: z.string(),
-  note: z.string(),
-});
-
-// National ID Form Schema
-const NationalIdFormSchema = z.object({
-  bookingId: z.string(),
-  customerId: z.string(),
-  name: z.string().min(1, "Vui lòng nhập họ tên"),
-  idNumber: z.string().min(1, "Vui lòng nhập số CMND/CCCD"),
-  dateOfBirth: z.string().min(1, "Vui lòng nhập ngày sinh"),
-  sex: z.string().min(1, "Vui lòng chọn giới tính"),
-  home: z.string(),
-  address: z.string(),
-  scannedImageUrl: z.string(),
-  note: z.string(),
-});
-
-type PassportFormData = z.infer<typeof PassportFormSchema>;
-type NationalIdFormData = z.infer<typeof NationalIdFormSchema>;
+import type {
+  SaveNationalIdRequestDto,
+  SavePassportRequestDto,
+} from "~/services/api/guest-documents/dto";
+import { GuestDocumentsSchema } from "~/services/api/guest-documents/guest-documents.schema";
 
 interface DocumentScanDialogProps {
   open: boolean;
@@ -88,7 +60,7 @@ export default function DocumentScanDialog({
   onSuccess,
 }: DocumentScanDialogProps) {
   const [activeTab, setActiveTab] = useState<"passport" | "national-id">(
-    "passport"
+    "passport",
   );
   const [isScanning, setIsScanning] = useState(false);
   const [scannedImage, setScannedImage] = useState<string | null>(null);
@@ -100,8 +72,8 @@ export default function DocumentScanDialog({
   const saveNationalIdMutation = useSaveNationalIdMutation();
 
   // Forms
-  const passportForm = useForm<PassportFormData>({
-    resolver: zodResolver(PassportFormSchema),
+  const passportForm = useForm<SavePassportRequestDto>({
+    resolver: zodResolver(GuestDocumentsSchema.SavePassportRequestSchema),
     defaultValues: {
       bookingId,
       customerId,
@@ -119,8 +91,8 @@ export default function DocumentScanDialog({
     },
   });
 
-  const nationalIdForm = useForm<NationalIdFormData>({
-    resolver: zodResolver(NationalIdFormSchema),
+  const nationalIdForm = useForm<SaveNationalIdRequestDto>({
+    resolver: zodResolver(GuestDocumentsSchema.SaveNationalIdRequestSchema),
     defaultValues: {
       bookingId,
       customerId,
@@ -132,6 +104,7 @@ export default function DocumentScanDialog({
       address: "",
       scannedImageUrl: "",
       note: "",
+      nationalCode: "",
     },
   });
 
@@ -174,7 +147,8 @@ export default function DocumentScanDialog({
         passportForm.setValue("dateOfIssue", result.dateOfIssue || "");
         passportForm.setValue("dateOfExpiry", result.dateOfExpiry || "");
         passportForm.setValue("scannedImageUrl", result.scannedImageUrl || "");
-        
+        passportForm.setValue("nationalCode", result.nationalCode || "");
+
         toast.success("Đã quét passport thành công");
       } else {
         const result = await scanNationalIdMutation.mutateAsync(file);
@@ -185,9 +159,10 @@ export default function DocumentScanDialog({
         nationalIdForm.setValue("sex", result.sex || "");
         nationalIdForm.setValue("home", result.home || "");
         nationalIdForm.setValue("address", result.address || "");
+        nationalIdForm.setValue("nationalCode", result.nationalCode || "");
         nationalIdForm.setValue(
           "scannedImageUrl",
-          result.scannedImageUrl || ""
+          result.scannedImageUrl || "",
         );
 
         toast.success("Đã quét CMND/CCCD thành công");
@@ -200,7 +175,7 @@ export default function DocumentScanDialog({
     }
   };
 
-  const handlePassportSubmit = async (data: PassportFormData) => {
+  const handlePassportSubmit = async (data: SavePassportRequestDto) => {
     try {
       await savePassportMutation.mutateAsync(data);
       toast.success("Đã lưu thông tin passport thành công");
@@ -213,7 +188,7 @@ export default function DocumentScanDialog({
     }
   };
 
-  const handleNationalIdSubmit = async (data: NationalIdFormData) => {
+  const handleNationalIdSubmit = async (data: SaveNationalIdRequestDto) => {
     try {
       await saveNationalIdMutation.mutateAsync(data);
       toast.success("Đã lưu thông tin CMND/CCCD thành công");
@@ -341,6 +316,19 @@ export default function DocumentScanDialog({
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={passportForm.control}
+                    name="nationalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mã quốc gia *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="VN" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={passportForm.control}
@@ -376,8 +364,8 @@ export default function DocumentScanDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="NAM">Nam</SelectItem>
-                            <SelectItem value="NU">Nữ</SelectItem>
+                            <SelectItem value="M">Nam</SelectItem>
+                            <SelectItem value="F">Nữ</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -578,7 +566,19 @@ export default function DocumentScanDialog({
                       </FormItem>
                     )}
                   />
-
+                  <FormField
+                    control={nationalIdForm.control}
+                    name="nationalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mã quốc gia *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="A12345678" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={nationalIdForm.control}
                     name="dateOfBirth"
@@ -613,8 +613,8 @@ export default function DocumentScanDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="NAM">Nam</SelectItem>
-                            <SelectItem value="NU">Nữ</SelectItem>
+                            <SelectItem value="M">Nam</SelectItem>
+                            <SelectItem value="F">Nữ</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
