@@ -4,7 +4,6 @@ import { FileUp, Loader2, Scan } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -32,17 +31,17 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import {
-  useScanNationalIdMutation,
-  useScanPassportMutation,
-  useSaveNationalIdMutation,
-  useSavePassportMutation,
-} from "../container/container";
 import type {
   SaveNationalIdRequestDto,
   SavePassportRequestDto,
 } from "~/services/api/guest-documents/dto";
 import { GuestDocumentsSchema } from "~/services/api/guest-documents/guest-documents.schema";
+import {
+  useSaveNationalIdMutation,
+  useSavePassportMutation,
+  useScanNationalIdMutation,
+  useScanPassportMutation,
+} from "../container/container";
 
 interface DocumentScanDialogProps {
   open: boolean;
@@ -152,8 +151,6 @@ export default function DocumentScanDialog({
         passportForm.setValue("scannedImageUrl", result.scannedImageUrl || "");
         passportForm.setValue("nationalCode", result.nationalCode || "");
         passportForm.setValue("rawOcrResponse", result.rawOcrResponse || "");
-
-        toast.success("Đã quét passport thành công");
       } else {
         const result = await scanNationalIdMutation.mutateAsync(file);
 
@@ -169,10 +166,8 @@ export default function DocumentScanDialog({
           result.scannedImageUrl || "",
         );
         passportForm.setValue("rawOcrResponse", result.rawOcrResponse || "");
-        toast.success("Đã quét CMND/CCCD thành công");
       }
     } catch (error) {
-      toast.error("Quét giấy tờ thất bại. Vui lòng thử lại hoặc nhập thủ công");
       console.error(error);
     } finally {
       setIsScanning(false);

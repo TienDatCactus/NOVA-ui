@@ -91,7 +91,7 @@ export default function Component({}: Route.ComponentProps) {
     customerType?: "In-House" | "Walk-In";
   }>({ open: false });
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
+    null,
   );
 
   const filteredItems = useMemo(() => {
@@ -145,44 +145,41 @@ export default function Component({}: Route.ComponentProps) {
     data,
   } = useCreatePOSOrderWithItems();
 
-  const handleAddToCart = useCallback(
-    (item: MenuItem) => {
-      const name =
-        item.translations?.find((t) => t.languageCode === "vi")?.name ||
-        item.translations?.[0]?.name ||
-        "";
-      if (item.maxQuantityAvailable === 0) {
-        toast.error(`${name} hiện đã hết hàng`);
+  const handleAddToCart = (item: MenuItem) => {
+    const name =
+      item.translations?.find((t) => t.languageCode === "vi")?.name ||
+      item.translations?.[0]?.name ||
+      "";
+    if (item.maxQuantityAvailable === 0) {
+      toast.error(`${name} hiện đã hết hàng`);
+      return;
+    }
+
+    const existingItem = items.find((i) => i.id === item.itemId);
+    if (existingItem) {
+      const newQuantity = existingItem.quantity + 1;
+      if (
+        item.maxQuantityAvailable !== undefined &&
+        newQuantity > (item?.maxQuantityAvailable ?? 0)
+      ) {
+        toast.error(
+          `Số lượng tối đa cho ${name} là ${item.maxQuantityAvailable}`,
+        );
         return;
       }
+    }
 
-      const existingItem = items.find((i) => i.id === item.itemId);
-      if (existingItem) {
-        const newQuantity = existingItem.quantity + 1;
-        if (
-          item.maxQuantityAvailable !== undefined &&
-          newQuantity > (item?.maxQuantityAvailable ?? 0)
-        ) {
-          toast.error(
-            `Số lượng tối đa cho ${name} là ${item.maxQuantityAvailable}`
-          );
-          return;
-        }
-      }
-
-      addItem({
-        id: item.itemId,
-        menuItemId: item.itemId,
-        code: item.code,
-        name: name,
-        unitPrice: item.price,
-        imageUrl: item.imageUrls?.[0],
-        maxQuantityAvailable: item.maxQuantityAvailable || undefined,
-      });
-      toast.success(`Đã thêm ${name} vào đơn`);
-    },
-    [addItem, items]
-  );
+    addItem({
+      id: item.itemId,
+      menuItemId: item.itemId,
+      code: item.code,
+      name: name,
+      unitPrice: item.price,
+      imageUrl: item.imageUrls?.[0],
+      maxQuantityAvailable: item.maxQuantityAvailable || undefined,
+    });
+    toast.success(`Đã thêm ${name} vào đơn`);
+  };
 
   const handleAddCustomItem = useCallback(
     (item: {
@@ -205,7 +202,7 @@ export default function Component({}: Route.ComponentProps) {
       });
       toast.success(`Đã thêm "${item.name}" vào giỏ`);
     },
-    [addItem]
+    [addItem],
   );
 
   const handleConfirm = useCallback(() => {
@@ -223,21 +220,22 @@ export default function Component({}: Route.ComponentProps) {
     }
   }, []);
 
-  const handleSelectBooking = useCallback(
-    (bookingId: string, bookingRoomId: string, bookingCode?: string) => {
-      setBookingInfo(bookingId, bookingRoomId || null);
-      setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
-      setBookingDialog(false);
-      setScheduledTimeDialog(true);
-    },
-    [setBookingInfo]
-  );
+  const handleSelectBooking = (
+    bookingId: string,
+    bookingRoomId: string,
+    bookingCode?: string,
+  ) => {
+    setBookingInfo(bookingId, bookingRoomId || null);
+    setSelectedBookingInfo({ bookingId, bookingRoomId, bookingCode });
+    setBookingDialog(false);
+    setScheduledTimeDialog(true);
+  };
 
-  const handleScheduledTimeConfirm = useCallback((scheduledAt: string) => {
+  const handleScheduledTimeConfirm = (scheduledAt: string) => {
     setScheduledAt(scheduledAt);
     setScheduledTimeDialog(false);
     handleCreateOrder(scheduledAt);
-  }, []);
+  };
   const handleCreateOrder = (scheduledAtParam?: string) => {
     const finalScheduledAt = scheduledAtParam || scheduledAt;
 
@@ -267,7 +265,7 @@ export default function Component({}: Route.ComponentProps) {
           setNotes("");
           clearOrder();
         },
-      }
+      },
     );
   };
 
@@ -284,7 +282,7 @@ export default function Component({}: Route.ComponentProps) {
           cartItem.quantity > (item?.maxQuantityAvailable || 0)
         );
       }),
-    [items, menuItems]
+    [items, menuItems],
   );
   return (
     <div className="flex flex-col h-screen relative bg-background">

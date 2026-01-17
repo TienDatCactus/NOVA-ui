@@ -20,9 +20,14 @@ const {
 
 /**
  */
-async function getStaffList(params?: StaffListParams): Promise<StaffListDto> {
+async function getStaffList(
+  params?: StaffListParams,
+  isActive?: boolean,
+): Promise<StaffListDto> {
   try {
-    const response = await http.get(Staff.list, { params });
+    const response = await http.get(isActive ? Staff.active : Staff.list, {
+      params,
+    });
     return StaffListSchema.parse(response.data);
   } catch (error) {
     console.error(error);

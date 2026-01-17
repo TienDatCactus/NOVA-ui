@@ -9,6 +9,7 @@ import {
   YAxis,
 } from "recharts";
 import { Inbox } from "lucide-react";
+import { formatMoney } from "~/lib/utils";
 
 interface AvailabilityLineChartProps {
   data: Array<Record<string, string | number>>;
@@ -49,7 +50,7 @@ export function AvailabilityLineChart({ data }: AvailabilityLineChartProps) {
 
   // Get the data key (assuming single series for available rooms trend)
   const dataKeys = Object.keys(chartData[0] || {}).filter(
-    (key) => key !== "date"
+    (key) => key !== "date",
   );
   const primaryKey = dataKeys[0] || "value";
 
@@ -95,7 +96,7 @@ export function AvailabilityLineChart({ data }: AvailabilityLineChartProps) {
                 tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => value.toLocaleString("vi-VN")}
+                tickFormatter={(value) => formatMoney(value).vndFormatted}
               />
 
               <Tooltip content={<CustomTooltip />} cursor={false} />

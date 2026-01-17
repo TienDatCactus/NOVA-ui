@@ -136,7 +136,7 @@ export default function UpdateScheduleDialog({
   const { data: workShifts } = useActiveWorkShiftList();
   const { data: shiftDetail, isLoading: isLoadingDetail } = useStaffShiftById(
     shift?.id || "",
-    { enabled: open && !!shift?.id }
+    { enabled: open && !!shift?.id },
   );
 
   const updateShiftSchedule = useUpdateShiftSchedule();
@@ -214,7 +214,7 @@ export default function UpdateScheduleDialog({
             form.reset();
             onOpenChange(false);
           },
-        }
+        },
       );
     } catch (error) {
       console.error(error);
@@ -315,13 +315,13 @@ export default function UpdateScheduleDialog({
                                     variant="outline"
                                     className={cn(
                                       "w-[200px] justify-start text-left font-normal h-9 border-0 shadow-none hover:bg-transparent px-3",
-                                      !field.value && "text-muted-foreground"
+                                      !field.value && "text-muted-foreground",
                                     )}
                                   >
                                     {field.value ? (
                                       format(
                                         new Date(field.value),
-                                        "dd/MM/yyyy"
+                                        "dd/MM/yyyy",
                                       )
                                     ) : (
                                       <span>Giữ nguyên ngày cũ</span>
@@ -339,7 +339,9 @@ export default function UpdateScheduleDialog({
                                     }
                                     onSelect={(date) =>
                                       field.onChange(
-                                        date ? format(date, "yyyy-MM-dd") : null
+                                        date
+                                          ? format(date, "yyyy-MM-dd")
+                                          : null,
                                       )
                                     }
                                     initialFocus
@@ -390,7 +392,7 @@ export default function UpdateScheduleDialog({
                             "flex items-center space-x-3 space-y-0 rounded-md border p-3 cursor-pointer transition-colors bg-background",
                             field.value === "ThisOnly"
                               ? "border-primary bg-primary/5"
-                              : "hover:bg-muted"
+                              : "hover:bg-muted",
                           )}
                         >
                           <RadioGroupItem value="ThisOnly" id="scope-this" />
@@ -409,7 +411,7 @@ export default function UpdateScheduleDialog({
                             "flex items-center space-x-3 space-y-0 rounded-md border p-3 cursor-pointer transition-colors bg-background",
                             field.value === "Forward"
                               ? "border-primary bg-primary/5"
-                              : "hover:bg-muted"
+                              : "hover:bg-muted",
                           )}
                         >
                           <RadioGroupItem value="Forward" id="scope-forward" />
@@ -430,7 +432,7 @@ export default function UpdateScheduleDialog({
                             "flex items-center space-x-3 space-y-0 rounded-md border p-3 cursor-pointer transition-colors bg-background",
                             field.value === "All"
                               ? "border-primary bg-primary/5"
-                              : "hover:bg-muted"
+                              : "hover:bg-muted",
                           )}
                         >
                           <RadioGroupItem value="All" id="scope-all" />
@@ -484,7 +486,7 @@ export default function UpdateScheduleDialog({
                               <div className="flex flex-wrap gap-1 justify-center pt-1">
                                 {WEEKDAYS.map((day) => {
                                   const isSelected = field.value?.includes(
-                                    day.value
+                                    day.value,
                                   );
                                   return (
                                     <div
@@ -494,16 +496,16 @@ export default function UpdateScheduleDialog({
                                         field.onChange(
                                           isSelected
                                             ? current.filter(
-                                                (v) => v !== day.value
+                                                (v) => v !== day.value,
                                               )
-                                            : [...current, day.value]
+                                            : [...current, day.value],
                                         );
                                       }}
                                       className={cn(
                                         "h-7 w-7 rounded-full flex items-center justify-center text-xs border cursor-pointer select-none transition-all",
                                         isSelected
                                           ? "bg-primary text-primary-foreground border-primary"
-                                          : "bg-muted/30 hover:bg-muted text-muted-foreground"
+                                          : "bg-muted/30 hover:bg-muted text-muted-foreground",
                                       )}
                                     >
                                       {day.label
@@ -526,7 +528,7 @@ export default function UpdateScheduleDialog({
                                   onCheckedChange={field.onChange}
                                 />
                                 <span className="text-xs text-muted-foreground">
-                                  Trừ ngày Lễ/Tết
+                                  Trừ ngày nghỉ
                                 </span>
                               </div>
                             )}

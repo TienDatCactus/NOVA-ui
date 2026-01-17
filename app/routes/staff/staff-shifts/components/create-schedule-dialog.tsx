@@ -123,7 +123,7 @@ export default function CreateScheduleDialog({
   const [searchStaff, setSearchStaff] = useState("");
 
   // --- Queries ---
-  const { data: staffList = [] } = useStaffList({});
+  const { data: staffList = [] } = useStaffList({}, true);
   const { data: workShifts = [] } = useActiveWorkShiftList();
   const createShiftSchedule = useCreateShiftSchedule();
 
@@ -158,7 +158,7 @@ export default function CreateScheduleDialog({
 
   // Filter staff logic
   const availableStaffForAdditional = staffList.filter((s) =>
-    s.fullName.toLowerCase().includes(searchStaff.toLowerCase())
+    s.fullName.toLowerCase().includes(searchStaff.toLowerCase()),
   );
 
   return (
@@ -233,7 +233,7 @@ export default function CreateScheduleDialog({
                                               const updatedValue = isSelected
                                                 ? (field.value ?? []).filter(
                                                     (id: string) =>
-                                                      id !== staff.id
+                                                      id !== staff.id,
                                                   )
                                                 : [
                                                     ...(field.value ?? []),
@@ -242,14 +242,14 @@ export default function CreateScheduleDialog({
                                               field.onChange(updatedValue);
                                             }}
                                             className={cn(
-                                              "flex items-center gap-2 p-2 rounded-sm cursor-pointer hover:bg-muted text-sm"
+                                              "flex items-center gap-2 p-2 rounded-sm cursor-pointer hover:bg-muted text-sm",
                                             )}
                                           >
                                             {isSelected && <Check />}
                                             <span>{staff.fullName}</span>
                                           </CommandItem>
                                         );
-                                      }
+                                      },
                                     )}
                                   </CommandGroup>
                                 </CommandList>
@@ -273,7 +273,7 @@ export default function CreateScheduleDialog({
                                 variant="outline"
                                 className={cn(
                                   "w-[240px] pl-3 text-left font-normal h-9",
-                                  !field.value && "text-muted-foreground"
+                                  !field.value && "text-muted-foreground",
                                 )}
                               >
                                 {field.value ? (
@@ -299,7 +299,7 @@ export default function CreateScheduleDialog({
                                 }
                                 onSelect={(date) =>
                                   field.onChange(
-                                    date ? format(date, "yyyy-MM-dd") : ""
+                                    date ? format(date, "yyyy-MM-dd") : "",
                                   )
                                 }
                                 initialFocus
@@ -323,7 +323,7 @@ export default function CreateScheduleDialog({
                                 variant="outline"
                                 className={cn(
                                   "w-[240px] pl-3 text-left font-normal h-9",
-                                  !field.value && "text-muted-foreground"
+                                  !field.value && "text-muted-foreground",
                                 )}
                               >
                                 {field.value ? (
@@ -349,7 +349,7 @@ export default function CreateScheduleDialog({
                                 }
                                 onSelect={(date) =>
                                   field.onChange(
-                                    date ? format(date, "yyyy-MM-dd") : ""
+                                    date ? format(date, "yyyy-MM-dd") : "",
                                   )
                                 }
                                 initialFocus
@@ -393,7 +393,7 @@ export default function CreateScheduleDialog({
                                       "flex items-center space-x-3 space-y-0 rounded-md border p-2 cursor-pointer transition-colors",
                                       isChecked
                                         ? "border-primary bg-primary/5"
-                                        : "hover:bg-muted"
+                                        : "hover:bg-muted",
                                     )}
                                   >
                                     <FormControl>
@@ -404,7 +404,7 @@ export default function CreateScheduleDialog({
                                           const updated = checked
                                             ? [...(field.value ?? []), shift.id]
                                             : (field.value ?? []).filter(
-                                                (v) => v !== shift.id
+                                                (v) => v !== shift.id,
                                               );
                                           field.onChange(updated);
                                         }}
@@ -486,7 +486,7 @@ export default function CreateScheduleDialog({
                                           onClick={() => {
                                             const updated = isChecked
                                               ? (field.value ?? []).filter(
-                                                  (v) => v !== day.value
+                                                  (v) => v !== day.value,
                                                 )
                                               : [
                                                   ...(field.value ?? []),
@@ -498,7 +498,7 @@ export default function CreateScheduleDialog({
                                             "h-8 w-8 rounded-full flex items-center justify-center text-xs border cursor-pointer select-none transition-all",
                                             isChecked
                                               ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
-                                              : "bg-muted/30 hover:bg-muted text-muted-foreground"
+                                              : "bg-muted/30 hover:bg-muted text-muted-foreground",
                                           )}
                                         >
                                           {day.label
@@ -518,7 +518,7 @@ export default function CreateScheduleDialog({
                                 onClick={() =>
                                   form.setValue(
                                     "weekDays",
-                                    WEEKDAYS.map((d) => d.value)
+                                    WEEKDAYS.map((d) => d.value),
                                   )
                                 }
                               >
@@ -541,7 +541,7 @@ export default function CreateScheduleDialog({
                                 />
                               </FormControl>
                               <FormLabel className="font-normal text-xs text-muted-foreground">
-                                Bỏ qua ngày Lễ/Tết
+                                Bỏ qua ngày nghỉ
                               </FormLabel>
                             </FormItem>
                           )}

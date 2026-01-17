@@ -13,10 +13,10 @@ import { AxiosError } from "axios";
 /**
  * Hook to fetch staff list
  */
-export function useStaffList(params?: StaffListParams) {
+export function useStaffList(params?: StaffListParams, isActive = false) {
   return useQuery({
     queryKey: ["staffs", params],
-    queryFn: async () => await StaffService.getStaffList(params),
+    queryFn: async () => await StaffService.getStaffList(params, isActive),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

@@ -13,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import type { BookingDocumentItemDto } from "~/services/api/guest-documents/dto";
 import {
   useDeleteDocumentMutation,
@@ -37,8 +36,6 @@ export default function GuestDocumentsSection({
   bookingId,
   customerId,
   adultsAmount,
-  checkinDate,
-  checkoutDate,
   canEdit = true,
 }: GuestDocumentsSectionProps) {
   const [viewDocument, setViewDocument] =
@@ -60,8 +57,7 @@ export default function GuestDocumentsSection({
 
   const handleExportByBooking = async () => {
     try {
-      const blob = await exportByBookingMutation.mutateAsync(bookingId);
-      console.log(blob);
+      const blob: any = await exportByBookingMutation.mutateAsync(bookingId);
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -71,11 +67,8 @@ export default function GuestDocumentsSection({
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
-      toast.success("Xuất file XML thành công");
     } catch (error) {
       console.log(error);
-      toast.error("Xuất file XML thất bại");
     }
   };
 

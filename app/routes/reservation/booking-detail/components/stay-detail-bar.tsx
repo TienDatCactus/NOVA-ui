@@ -180,7 +180,7 @@ export default function StayDetailBar({
   };
 
   const handleUpdateBookingStatus = async (
-    status: z.infer<typeof BookingSchema.BookingStatusEnum>
+    status: z.infer<typeof BookingSchema.BookingStatusEnum>,
   ) => {
     updateBookingStatus(status);
   };
@@ -281,7 +281,7 @@ export default function StayDetailBar({
                         Xác nhận cọc
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
+                    <DialogContent className="max-w-md p-0 gap-0 overflow-y-auto max-h-[90vh]">
                       {/* HEADER */}
                       <DialogHeader className="px-6 py-4 border-b bg-muted/5">
                         <DialogTitle className="flex items-center gap-2">
@@ -403,7 +403,7 @@ export default function StayDetailBar({
                                     // Close only for direct payments (Cash)
                                     setDepositDialogOpen(false);
                                   },
-                                }
+                                },
                               );
                             })}
                             className="space-y-5"
@@ -445,7 +445,7 @@ export default function StayDetailBar({
                                         onClick={() =>
                                           paymentForm.setValue(
                                             "paidAmount",
-                                            paymentSummary.totalAmount
+                                            paymentSummary.totalAmount,
                                           )
                                         }
                                       >
@@ -460,7 +460,7 @@ export default function StayDetailBar({
                                         className="font-mono font-bold text-lg"
                                         onChange={(e) =>
                                           field.onChange(
-                                            parseFloat(e.target.value) || 0
+                                            parseFloat(e.target.value) || 0,
                                           )
                                         }
                                         endAddon={

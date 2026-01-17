@@ -1,5 +1,5 @@
 import { Card, CardContent } from "~/components/ui/card";
-import { cn } from "~/lib/utils";
+import { cn, formatMoney } from "~/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
 interface KpiCardProps {
@@ -23,7 +23,7 @@ export function KpiCard({
     format === "percent"
       ? `${typeof value === "number" ? value.toFixed(1) : value}%`
       : typeof value === "number"
-        ? value.toLocaleString("vi-VN")
+        ? formatMoney(value).vndFormatted
         : value;
 
   return (

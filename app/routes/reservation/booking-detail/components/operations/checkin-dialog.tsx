@@ -3,7 +3,6 @@ import { format } from "date-fns"; // Standardize date formatting
 import {
   ArrowRight,
   BedDouble,
-  CalendarClock,
   CalendarDays,
   CheckCircle2,
   Loader2,
@@ -22,16 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
+import { Form, FormField, FormLabel } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -43,13 +34,13 @@ import { Switch } from "~/components/ui/switch";
 import { cn, formatMoney } from "~/lib/utils";
 
 // Types
-import { useRooms } from "~/routes/rooms/container/rooms/query.hooks";
 import { BookingSchema } from "~/services/api/booking/booking.schema";
 import type {
   BookingDetailResponseDto,
   CheckinBookingRequestDto,
 } from "~/services/api/booking/dto";
 import { useCheckinBooking } from "../../../bookings/container/booking-mutation.hooks";
+import { useAvailableRooms } from "~/routes/reservation/bookings/container/booking-query.hooks";
 
 interface CheckinDialogProps {
   open: boolean;
@@ -70,10 +61,18 @@ export function CheckinDialog({
   bookingDetail,
 }: CheckinDialogProps) {
   const [assignments, setAssignments] = useState<RoomAssignment[]>([]);
-  const { data: availableRooms = [] } = useRooms();
+  const { data: availableRooms = [] } = useAvailableRooms({
+    params: {
+      CheckInDate: bookingDetail?.checkinDate || "",
+      CheckOutDate: bookingDetail?.checkoutDate || "",
+      Guests: bookingDetail?.adults || 0,
+    },
+    enabled:
+      open && !!bookingDetail?.checkinDate && !!bookingDetail?.checkoutDate,
+  });
 
   const { mutate: checkin, isPending: isCheckingIn } = useCheckinBooking(
-    bookingDetail?.id || ""
+    bookingDetail?.id || "",
   );
 
   const form = useForm<CheckinBookingRequestDto>({
@@ -84,42 +83,37 @@ export function CheckinDialog({
     },
   });
 
-  // Initialize assignments when dialog opens
+  // Initialize assignments when dialog opens or booking data changes
   useEffect(() => {
-    if (
-      bookingDetail &&
-      ((bookingDetail.rooms && bookingDetail.rooms.length > 0) ||
-        (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0)) &&
-      open
-    ) {
-      // Prefer roomsByType for structured data, fallback to flat rooms
-      let roomAssignments: RoomAssignment[] = [];
+    if (!open || !bookingDetail) {
+      return;
+    }
 
-      if (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0) {
-        // Build from grouped structure
-        roomAssignments = bookingDetail.roomsByType.flatMap((typeGroup) =>
-          (typeGroup.rooms || []).map((room) => ({
-            bookingRoomId: room.bookingRoomId || "",
+    // Build assignments from roomsByType if available, otherwise from rooms
+    const newAssignments: RoomAssignment[] = [];
+
+    if (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0) {
+      bookingDetail.roomsByType.forEach((typeGroup) => {
+        typeGroup.rooms?.forEach((bookingRoom: any) => {
+          newAssignments.push({
+            bookingRoomId: bookingRoom.bookingRoomId,
             roomTypeId: typeGroup.roomTypeId || "",
-            assignedRoomId: room.roomId || "",
-          }))
-        );
-      } else if (bookingDetail.rooms) {
-        // Fallback to flat list
-        roomAssignments = bookingDetail?.rooms?.map((room) => ({
-          bookingRoomId: room.bookingRoomId || "",
-          roomTypeId: room.roomTypeId || "",
-          assignedRoomId: room.roomId || "",
-        }));
-      }
-
-      setAssignments(roomAssignments);
-      form.reset({
-        actualCheckinTime: new Date(),
-        autoAssignRooms: false,
+            assignedRoomId: bookingRoom.roomId || "",
+          });
+        });
+      });
+    } else if (bookingDetail.rooms) {
+      bookingDetail.rooms.forEach((bookingRoom) => {
+        newAssignments.push({
+          bookingRoomId: bookingRoom.bookingRoomId,
+          roomTypeId: bookingRoom.roomTypeId,
+          assignedRoomId: bookingRoom.roomId || "",
+        });
       });
     }
-  }, [bookingDetail, open, form]);
+
+    setAssignments(newAssignments);
+  }, [open, bookingDetail]);
 
   const handleSubmit = (data: CheckinBookingRequestDto) => {
     let payload: CheckinBookingRequestDto;
@@ -156,12 +150,10 @@ export function CheckinDialog({
 
   // Memoize used rooms to prevent double booking in the same form
   const autoAssignRooms = form.watch("autoAssignRooms");
+
   const selectedRoomIds = useMemo(() => {
-    if (autoAssignRooms) return new Set<string>();
-    return new Set(
-      assignments.map((a) => a.assignedRoomId).filter(Boolean) as string[]
-    );
-  }, [assignments, autoAssignRooms]);
+    return new Set(assignments.map((a) => a.assignedRoomId).filter(Boolean));
+  }, [assignments]);
 
   if (!bookingDetail) return null;
 
@@ -194,12 +186,10 @@ export function CheckinDialog({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="flex flex-col flex-1 overflow-hidden"
           >
-            <ScrollArea className="flex-1">
+            <div className="flex-1">
               <div className="p-6 space-y-6">
-                {/* 1. Configuration Toolbar - Grouped for better UX */}
                 <div className="rounded-xl border bg-muted/30 p-4 flex flex-col md:flex-row gap-6 md:items-end justify-between">
-                  {/* Checkin Time */}
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="actualCheckinTime"
                     render={({ field }) => (
@@ -228,7 +218,7 @@ export function CheckinDialog({
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
 
                   {/* Divider for desktop */}
                   <div className="hidden md:block w-px h-10 bg-border/60 self-center" />
@@ -315,7 +305,7 @@ export function CheckinDialog({
                                 const assignmentIndex = assignments.findIndex(
                                   (a) =>
                                     a.bookingRoomId ===
-                                    bookingRoom.bookingRoomId
+                                    bookingRoom.bookingRoomId,
                                 );
                                 if (assignmentIndex === -1) return null;
 
@@ -340,16 +330,16 @@ export function CheckinDialog({
                                               <span>
                                                 {format(
                                                   new Date(
-                                                    bookingRoom?.fromDate || ""
+                                                    bookingRoom?.fromDate || "",
                                                   ),
-                                                  "dd/MM"
+                                                  "dd/MM",
                                                 )}{" "}
                                                 -{" "}
                                                 {format(
                                                   new Date(
-                                                    bookingRoom?.toDate || ""
+                                                    bookingRoom?.toDate || "",
                                                   ),
-                                                  "dd/MM"
+                                                  "dd/MM",
                                                 )}
                                               </span>
                                             </div>
@@ -359,7 +349,7 @@ export function CheckinDialog({
                                             >
                                               {
                                                 formatMoney(
-                                                  bookingRoom.baseRate
+                                                  bookingRoom.baseRate,
                                                 ).vndFormatted
                                               }
                                             </Badge>
@@ -380,12 +370,15 @@ export function CheckinDialog({
                                           Gán số phòng
                                         </Label>
                                         {(() => {
-                                          const validRooms =
-                                            availableRooms.filter(
-                                              (r) =>
-                                                r.roomTypeId ===
-                                                typeGroup.roomTypeId
+                                          // Find the matching room type in available rooms
+                                          const roomTypeData =
+                                            availableRooms.find(
+                                              (rt) =>
+                                                rt.roomTypeId ===
+                                                typeGroup.roomTypeId,
                                             );
+                                          const validRooms =
+                                            roomTypeData?.availableRooms || [];
                                           const currentValue =
                                             assignments[assignmentIndex]
                                               ?.assignedRoomId || "";
@@ -413,15 +406,30 @@ export function CheckinDialog({
                                                   "h-10 transition-colors",
                                                   !currentValue
                                                     ? "text-muted-foreground border-dashed bg-muted/10 hover:bg-muted/20"
-                                                    : "text-foreground font-medium border-primary/50 bg-primary/5"
+                                                    : "text-foreground font-medium border-primary/50 bg-primary/5",
                                                 )}
                                               >
-                                                <div className="flex items-center gap-2 truncate">
-                                                  {currentValue ? (
-                                                    <BedDouble className="h-4 w-4 text-primary" />
-                                                  ) : null}
-                                                  <SelectValue placeholder="-- Chọn phòng trống --" />
-                                                </div>
+                                                <SelectValue placeholder="-- Chọn phòng trống --">
+                                                  <div className="flex items-center gap-2 truncate">
+                                                    {currentValue ? (
+                                                      <>
+                                                        <BedDouble className="h-4 w-4 text-primary" />
+                                                        <span>
+                                                          {validRooms.find(
+                                                            (r) =>
+                                                              r.roomId ===
+                                                              currentValue,
+                                                          )?.roomName ||
+                                                            currentValue}
+                                                        </span>
+                                                      </>
+                                                    ) : (
+                                                      <span>
+                                                        -- Chọn phòng trống --
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                </SelectValue>
                                               </SelectTrigger>
                                               <SelectContent>
                                                 {validRooms.length === 0 ? (
@@ -437,7 +445,7 @@ export function CheckinDialog({
                                                   validRooms.map((room) => {
                                                     const isSelected =
                                                       selectedRoomIds.has(
-                                                        room.roomId
+                                                        room.roomId,
                                                       ) &&
                                                       currentValue !==
                                                         room.roomId;
@@ -452,14 +460,36 @@ export function CheckinDialog({
                                                           <span className="font-medium">
                                                             {room.roomName}
                                                           </span>
-                                                          {isSelected && (
-                                                            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                                              Đang chọn
-                                                            </span>
-                                                          )}
-                                                          {!isSelected && (
-                                                            <span className="h-2 w-2 rounded-full bg-green-500 block" />
-                                                          )}
+                                                          <div className="flex items-center gap-2">
+                                                            {room.status && (
+                                                              <Badge
+                                                                variant="outline"
+                                                                className={cn(
+                                                                  "text-[10px] px-1.5 h-5",
+                                                                  room.status ===
+                                                                    "Ready" &&
+                                                                    "bg-green-50 text-green-700 border-green-200",
+                                                                  room.status ===
+                                                                    "Dirty" &&
+                                                                    "bg-orange-50 text-orange-700 border-orange-200",
+                                                                  room.status ===
+                                                                    "Cleaning" &&
+                                                                    "bg-blue-50 text-blue-700 border-blue-200",
+                                                                )}
+                                                              >
+                                                                {room.status}
+                                                              </Badge>
+                                                            )}
+                                                            {isSelected && (
+                                                              <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                                                Đang chọn
+                                                              </span>
+                                                            )}
+                                                            {!isSelected &&
+                                                              !room.status && (
+                                                                <span className="h-2 w-2 rounded-full bg-green-500 block" />
+                                                              )}
+                                                          </div>
                                                         </div>
                                                       </SelectItem>
                                                     );
@@ -503,12 +533,12 @@ export function CheckinDialog({
                                         <span>
                                           {format(
                                             new Date(bookingRoom.fromDate),
-                                            "dd/MM"
+                                            "dd/MM",
                                           )}{" "}
                                           -{" "}
                                           {format(
                                             new Date(bookingRoom.toDate),
-                                            "dd/MM"
+                                            "dd/MM",
                                           )}
                                         </span>
                                       </div>
@@ -538,10 +568,14 @@ export function CheckinDialog({
                                     Gán số phòng
                                   </Label>
                                   {(() => {
-                                    const validRooms = availableRooms.filter(
-                                      (r) =>
-                                        r.roomTypeId === bookingRoom.roomTypeId
+                                    // Find the matching room type in available rooms
+                                    const roomTypeData = availableRooms.find(
+                                      (rt) =>
+                                        rt.roomTypeId ===
+                                        bookingRoom.roomTypeId,
                                     );
+                                    const validRooms =
+                                      roomTypeData?.availableRooms || [];
                                     const currentValue =
                                       assignments[index]?.assignedRoomId || "";
 
@@ -564,7 +598,7 @@ export function CheckinDialog({
                                             "h-10 transition-colors",
                                             !currentValue
                                               ? "text-muted-foreground border-dashed bg-muted/10 hover:bg-muted/20"
-                                              : "text-foreground font-medium border-primary/50 bg-primary/5"
+                                              : "text-foreground font-medium border-primary/50 bg-primary/5",
                                           )}
                                         >
                                           <div className="flex items-center gap-2 truncate">
@@ -586,7 +620,7 @@ export function CheckinDialog({
                                             validRooms.map((room) => {
                                               const isSelected =
                                                 selectedRoomIds.has(
-                                                  room.roomId
+                                                  room.roomId,
                                                 ) &&
                                                 currentValue !== room.roomId;
                                               return (
@@ -627,7 +661,7 @@ export function CheckinDialog({
                   </div>
                 )}
               </div>
-            </ScrollArea>
+            </div>
 
             <div className="flex items-center justify-between px-6 py-4 border-t bg-muted/10">
               <Button

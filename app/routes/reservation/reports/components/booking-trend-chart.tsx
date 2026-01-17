@@ -8,6 +8,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { formatMoney } from "~/lib/utils";
 
 interface BookingDataItem {
   date: string;
@@ -50,7 +51,7 @@ export function BookingTrendChart({ data }: BookingTrendChartProps) {
       d.booked > 0 ||
       d.checkin > 0 ||
       d.checkout > 0 ||
-      d.inhouse > 0
+      d.inhouse > 0,
   );
 
   return (
@@ -195,7 +196,7 @@ export function BookingTrendChart({ data }: BookingTrendChartProps) {
                   tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => value.toLocaleString("vi-VN")}
+                  tickFormatter={(value) => formatMoney(value).vndFormatted}
                 />
 
                 <Tooltip content={<CustomTooltip />} cursor={false} />
@@ -258,7 +259,7 @@ function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload || !payload.length) return null;
   const total = payload.reduce(
     (sum: number, item: any) => sum + (item.value || 0),
-    0
+    0,
   );
 
   return (

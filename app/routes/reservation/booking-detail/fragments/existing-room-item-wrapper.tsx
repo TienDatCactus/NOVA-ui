@@ -8,9 +8,6 @@ import ExistingRoomItemCard from "./existing-room-item.card";
 interface ExistingRoomItemWrapperProps {
   room: z.infer<typeof RoomSchema.BookingDetailRoomItemSchema>;
   isSelected: boolean;
-  isExpanded: boolean;
-  onSelect: () => void;
-  onToggleExpand: () => void;
   onRemove?: () => void;
   canRemove?: boolean;
   removeTooltip?: string;
@@ -19,9 +16,6 @@ interface ExistingRoomItemWrapperProps {
 export default function ExistingRoomItemWrapper({
   room,
   isSelected,
-  isExpanded,
-  onSelect,
-  onToggleExpand,
   onRemove,
   canRemove,
   removeTooltip,
@@ -31,7 +25,7 @@ export default function ExistingRoomItemWrapper({
     params: {},
   });
 
-  if (isExpanded && isPending) {
+  if (isPending) {
     return (
       <Card className="cursor-pointer">
         <div className="p-3">
@@ -49,9 +43,6 @@ export default function ExistingRoomItemWrapper({
       room={room}
       roomDetail={roomDetail}
       isSelected={isSelected}
-      isExpanded={isExpanded}
-      onSelect={onSelect}
-      onToggleExpand={onToggleExpand}
       onRemove={onRemove}
       canRemove={canRemove}
       removeTooltip={removeTooltip}

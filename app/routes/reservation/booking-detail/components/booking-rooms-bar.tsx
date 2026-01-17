@@ -40,6 +40,12 @@ import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
 import { AddRoomModal } from "./operations/add-room-modal";
 import { UpgradeRoomDialog } from "./operations/upgrade-room-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
+import { formatMoney } from "~/lib/utils";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -68,18 +74,7 @@ export default function BookingRoomsBar({
     bookingRoomId: string;
     roomName: string;
   } | null>(null);
-  const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
-  const toggleRoomExpand = (roomId: string) => {
-    setExpandedRooms((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(roomId)) {
-        newSet.delete(roomId);
-      } else {
-        newSet.add(roomId);
-      }
-      return newSet;
-    });
-  };
+
   const confirmRemoveRoom = () => {
     if (!roomToRemove) return;
 
@@ -235,12 +230,10 @@ export default function BookingRoomsBar({
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
-          {/* Display rooms grouped by type if available */}
           {bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0 ? (
             <>
               {bookingDetail.roomsByType.map((roomType) => (
                 <div key={roomType.roomTypeId} className="space-y-2">
-                  {/* Room Type Header */}
                   <div className="flex items-center gap-2 px-1 pt-2 first:pt-0">
                     <div className="h-1 w-1 rounded-full bg-primary" />
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -256,22 +249,14 @@ export default function BookingRoomsBar({
                     roomType.rooms.map((room) => {
                       if (!room.roomId || !room.bookingRoomId) return null;
 
-                      const isExpanded = expandedRooms.has(room.roomId);
                       const canRemove =
                         (bookingDetail.status === "Pending" ||
                           bookingDetail.status === "InHouse") &&
                         bookingState.permissions.canEditRooms;
 
                       return (
-                        <div
-                          key={room.bookingRoomId}
-                          className="group relative rounded-lg border border-border bg-card transition-all hover:border-primary/50 hover:shadow-sm"
-                        >
-                          {/* Main Content */}
-                          <div
-                            className="flex items-center justify-between p-3 cursor-pointer"
-                            onClick={() => toggleRoomExpand(room.roomId!)}
-                          >
+                        <Collapsible key={room.bookingRoomId}>
+                          <CollapsibleTrigger>
                             {/* Left: Room Info */}
                             <div className="flex items-center gap-3 flex-1">
                               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -279,12 +264,12 @@ export default function BookingRoomsBar({
                               </div>
 
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-sm font-medium text-foreground">
-                                  {room.roomName}
-                                </span>
+                                <div className="text-sm font-medium ">
+                                  <span>{room.roomName}</span>
+                                </div>
                                 {room.baseRate && (
                                   <span className="text-xs text-muted-foreground">
-                                    {room.baseRate.toLocaleString("vi-VN")}{" "}
+                                    {formatMoney(room.baseRate).vndFormatted}{" "}
                                     ₫/đêm
                                   </span>
                                 )}
@@ -310,50 +295,45 @@ export default function BookingRoomsBar({
                                 </Button>
                               )}
                             </div>
-                          </div>
+                          </CollapsibleTrigger>
 
                           {/* Expanded Details */}
-                          {isExpanded && (
-                            <div className="border-t border-border bg-muted/30 px-3 py-3 space-y-2">
-                              {room.fromDate && (
-                                <div className="flex items-center justify-between text-xs">
-                                  <span className="text-muted-foreground">
-                                    Check-in:
-                                  </span>
-                                  <span className="font-medium text-foreground">
-                                    {format(
-                                      parseISO(room.fromDate),
-                                      "dd/MM/yyyy",
-                                    )}
-                                  </span>
-                                </div>
-                              )}
-
-                              {room.toDate && (
-                                <div className="flex items-center justify-between text-xs">
-                                  <span className="text-muted-foreground">
-                                    Check-out:
-                                  </span>
-                                  <span className="font-medium text-foreground">
-                                    {format(
-                                      parseISO(room.toDate),
-                                      "dd/MM/yyyy",
-                                    )}
-                                  </span>
-                                </div>
-                              )}
-
+                          <CollapsibleContent className="border-t border-border bg-muted/30 px-3 py-3 space-y-2">
+                            {room.fromDate && (
                               <div className="flex items-center justify-between text-xs">
                                 <span className="text-muted-foreground">
-                                  ID phòng:
+                                  Check-in:
                                 </span>
-                                <span className="font-mono text-[10px] text-muted-foreground">
-                                  {room.roomId}
+                                <span className="font-medium text-foreground">
+                                  {format(
+                                    parseISO(room.fromDate),
+                                    "dd/MM/yyyy",
+                                  )}
                                 </span>
                               </div>
+                            )}
+
+                            {room.toDate && (
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground">
+                                  Check-out:
+                                </span>
+                                <span className="font-medium text-foreground">
+                                  {format(parseISO(room.toDate), "dd/MM/yyyy")}
+                                </span>
+                              </div>
+                            )}
+
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-muted-foreground">
+                                ID phòng:
+                              </span>
+                              <span className="font-mono text-[10px] text-muted-foreground">
+                                {room.roomId}
+                              </span>
                             </div>
-                          )}
-                        </div>
+                          </CollapsibleContent>
+                        </Collapsible>
                       );
                     })}
                 </div>
@@ -367,9 +347,6 @@ export default function BookingRoomsBar({
                 key={room.roomId}
                 room={room}
                 isSelected={false}
-                isExpanded={expandedRooms.has(room.roomId)}
-                onSelect={() => toggleRoomExpand(room.roomId)}
-                onToggleExpand={() => toggleRoomExpand(room.roomId)}
                 onRemove={() =>
                   handleRemoveRoom(room.bookingRoomId, room.roomName)
                 }

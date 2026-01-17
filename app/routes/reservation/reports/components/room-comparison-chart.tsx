@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { Inbox } from "lucide-react";
+import { formatMoney } from "~/lib/utils";
 
 interface RoomComparisonItem {
   type: string;
@@ -134,7 +135,7 @@ export function RoomComparisonChart({ data }: RoomComparisonChartProps) {
                 tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => value.toLocaleString("vi-VN")}
+                tickFormatter={(value) => formatMoney(value).vndFormatted}
               />
 
               <Tooltip content={<CustomTooltip />} cursor={false} />

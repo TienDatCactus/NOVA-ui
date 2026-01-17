@@ -204,6 +204,7 @@ const Chat = {
 //! hotel manager
 const Staff = {
   list: "Staffs", //! accountant
+  active: "Staffs/active",
   create: "Staffs",
   detail: (id: string) => `Staffs/${id}`,
   update: (id: string) => `Staffs/${id}`,

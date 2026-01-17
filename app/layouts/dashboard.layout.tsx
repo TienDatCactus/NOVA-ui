@@ -65,11 +65,10 @@ const DashboardLayout: React.FC = () => {
       const fromDate = exportDateFrom.toISOString().split("T")[0];
       const toDate = exportDateTo.toISOString().split("T")[0];
 
-      const blob = await exportMutation.mutateAsync({
+      const blob: any = await exportMutation.mutateAsync({
         checkInFrom: fromDate,
         checkInTo: toDate,
       });
-      console.log(blob);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -79,7 +78,6 @@ const DashboardLayout: React.FC = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.success("Xuất file XML thành công");
       setExportDialogOpen(false);
       setExportDateFrom(undefined);
       setExportDateTo(undefined);

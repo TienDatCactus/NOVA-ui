@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { formatMoney } from "~/lib/utils";
 
 interface DailyAvailabilityItem {
   date: string;
@@ -103,7 +104,7 @@ export function DailyBreakdownTabs({ data }: DailyBreakdownTabsProps) {
             tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => value.toLocaleString("vi-VN")}
+            tickFormatter={(value) => formatMoney(value).vndFormatted}
           />
 
           <Tooltip content={<CustomTooltip />} cursor={false} />

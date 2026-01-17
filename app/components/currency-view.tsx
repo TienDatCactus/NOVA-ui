@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 import { useConvertCurrency } from "~/features/exchange-rates/container/mutation";
 import { Label } from "./ui/label";
 import { ChevronDown, Eye, EyeOff } from "lucide-react";
+import { formatMoney } from "~/lib/utils";
 
 type CurrencyViewContextType = {
   targetCurrency?: string;
@@ -29,7 +30,7 @@ export const useCurrencyView = () => {
   const context = useContext(CurrencyViewContext);
   if (!context) {
     throw new Error(
-      "useCurrencyView must be used within a CurrencyViewProvider"
+      "useCurrencyView must be used within a CurrencyViewProvider",
     );
   }
   return context;
@@ -70,7 +71,7 @@ function CurrencyView({ children, amount: externalAmount }: CurrencyViewProps) {
           onSuccess: (data) => {
             setConvertedAmount(data.convertedAmount);
           },
-        }
+        },
       );
     } else {
       setConvertedAmount(0);
@@ -143,7 +144,7 @@ const CurrencySelect = () => {
                 <div className="flex flex-col">
                   <span className="font-medium">{rate.currencyCode}</span>
                   <span className="text-xs text-muted-foreground">
-                    Tỷ giá: {rate.rateToVND.toLocaleString("vi-VN")}
+                    Tỷ giá: {formatMoney(rate.rateToVND).vndFormatted}
                   </span>
                 </div>
               </CommandItem>
