@@ -52,13 +52,29 @@ export const columns: ColumnDef<MenuListItemDto>[] = [
               <ChevronDown
                 className={cn(
                   "h-4 w-4 transition-transform duration-200",
-                  row.getIsExpanded() && "rotate-180"
+                  row.getIsExpanded() && "rotate-180",
                 )}
               />
             </Button>
           )}
         </div>
       );
+    },
+    filterFn: (row, columnId, filterValue) => {
+      const searchValue = filterValue.toLowerCase();
+      const translations = row.original.translations;
+
+      // Search in all translations
+      const matchesTranslation = translations?.some((t) =>
+        t.name?.toLowerCase().includes(searchValue),
+      );
+
+      // Also search in code
+      const matchesCode = row.original.code
+        ?.toLowerCase()
+        .includes(searchValue);
+
+      return matchesTranslation || matchesCode;
     },
   },
   {

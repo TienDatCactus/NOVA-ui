@@ -41,7 +41,7 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
 
@@ -78,7 +78,7 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
           }
           className="max-w-sm"
         />
-        {hasAnyRole(AuthLoader.getUser(), [UserRole.ServiceStaff]) && (
+        {hasAnyRole(AuthLoader.getUser(), [UserRole.HotelManager]) && (
           <Button size={"sm"} onClick={() => setOpenCreateDialog(true)}>
             <Plus />
             Tạo hàng hóa
@@ -97,7 +97,7 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -115,7 +115,7 @@ export function DataTable<TData extends StockItemsListItemDto, TValue>({
                         <TableCell key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </TableCell>
                       ))}

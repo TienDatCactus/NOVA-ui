@@ -531,8 +531,8 @@ export default function Component({}: Route.ComponentProps) {
           setConfirmationDialog({ open, orderId: undefined })
         }
         orderId={confirmationDialog.orderId || ""}
-        orderTotal={subtotal == 0 ? data?.totalAmount || 0 : subtotal}
-        itemCount={itemCount == 0 ? data?.itemCount || 0 : itemCount}
+        orderTotal={subtotal == 0 ? data?.totalAmount : subtotal}
+        itemCount={itemCount == 0 ? data?.itemCount : itemCount}
         customerInfo={
           confirmationDialog.customerType === "In-House"
             ? "Khách đặt phòng"

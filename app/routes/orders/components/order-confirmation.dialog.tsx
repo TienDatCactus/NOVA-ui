@@ -137,12 +137,16 @@ export default function OrderConfirmationDialog({
                       {customerInfo}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Số lượng món</span>
-                    <span className="font-medium flex items-center gap-1">
-                      <ShoppingBag className="h-3.5 w-3.5" /> {itemCount}
-                    </span>
-                  </div>
+                  {itemCount >= 0 && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">
+                        Số lượng món
+                      </span>
+                      <span className="font-medium flex items-center gap-1">
+                        <ShoppingBag className="h-3.5 w-3.5" /> {itemCount}
+                      </span>
+                    </div>
+                  )}
                   <Separator className="border-dashed" />
                   <div className="flex justify-between items-end">
                     <span className="text-sm font-medium text-muted-foreground">

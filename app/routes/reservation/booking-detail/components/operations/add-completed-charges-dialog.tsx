@@ -26,6 +26,7 @@ import { useServiceTypes } from "~/routes/services/container/service-types/query
 import { useServices } from "~/routes/services/container/services/query.hooks";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import { useAddCompletedCharges } from "../../container/use-booking-checkout.hooks";
+import { TranslationDisplay } from "~/components/translation-display";
 
 interface AddCompletedChargesDialogProps {
   open: boolean;
@@ -43,11 +44,11 @@ export default function AddCompletedChargesDialog({
     string | null
   >(null);
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
-    null
+    null,
   );
   const [searchText, setSearchText] = useState("");
   const [selectedBookingRoom, setSelectedBookingRoom] = useState<string | null>(
-    null
+    null,
   );
 
   // Cart State
@@ -64,7 +65,7 @@ export default function AddCompletedChargesDialog({
     typeCode: selectedServiceType || undefined,
   });
   const { mutate: addCompletedCharges, isPending } = useAddCompletedCharges(
-    booking.id
+    booking.id,
   );
 
   // Extract rooms safely from booking (handles both flat rooms and roomsByType)
@@ -79,7 +80,7 @@ export default function AddCompletedChargesDialog({
           roomId: r.roomId,
           roomName: r.roomName,
           roomTypeName: rt.roomTypeName || "",
-        }))
+        })),
       );
     }
     return [];
@@ -97,11 +98,11 @@ export default function AddCompletedChargesDialog({
   const totalAmount = useMemo(() => {
     const pos = Array.from(selectedPOSItems.values()).reduce(
       (sum: number, { item, quantity }: any) => sum + item.price * quantity,
-      0
+      0,
     );
     const svc = Array.from(selectedServiceItems.values()).reduce(
       (sum: number, { item, quantity }: any) => sum + item.basePrice * quantity,
-      0
+      0,
     );
     return pos + svc;
   }, [selectedPOSItems, selectedServiceItems]);
@@ -113,7 +114,7 @@ export default function AddCompletedChargesDialog({
     id: string,
     delta: number,
     item: any,
-    isMenu: boolean
+    isMenu: boolean,
   ) => {
     const map = isMenu ? selectedPOSItems : selectedServiceItems;
     const setMap = isMenu ? setSelectedPOSItems : setSelectedServiceItems;
@@ -144,13 +145,13 @@ export default function AddCompletedChargesDialog({
     addCompletedCharges(
       {
         posItems: Array.from(selectedPOSItems.values()).map(
-          ({ item, quantity }: any) => ({ menuItemId: item.itemId, quantity })
+          ({ item, quantity }: any) => ({ menuItemId: item.itemId, quantity }),
         ),
         serviceItems: Array.from(selectedServiceItems.values()).map(
           ({ item, quantity }: any) => ({
             serviceItemId: item.serviceItemId,
             quantity,
-          })
+          }),
         ),
         bookingRoomId:
           selectedBookingRoom === "booking" ? "" : selectedBookingRoom || "",
@@ -160,7 +161,7 @@ export default function AddCompletedChargesDialog({
         onSuccess: () => {
           handleClose();
         },
-      }
+      },
     );
   };
 
@@ -230,7 +231,7 @@ export default function AddCompletedChargesDialog({
                         <SelectItem key={c.code || c.id} value={c.code || c.id}>
                           {c.name}
                         </SelectItem>
-                      )
+                      ),
                     )}
                   </SelectContent>
                 </Select>
@@ -248,11 +249,10 @@ export default function AddCompletedChargesDialog({
                   const qty = map.get(id)?.quantity || 0;
                   const maxQty = isMenu ? item.maxQuantityAvailable : null;
                   const isSoldOut = isMenu && maxQty === 0;
-
                   return (
                     <ItemCard
                       key={id}
-                      name={item.name}
+                      translations={item.translations}
                       price={price}
                       quantity={qty}
                       isSoldOut={isSoldOut}
@@ -297,7 +297,14 @@ export default function AddCompletedChargesDialog({
 
 // --- Sub-components ---
 
-function ItemCard({ name, price, quantity, isSoldOut, onAdd, onRemove }: any) {
+function ItemCard({
+  translations,
+  price,
+  quantity,
+  isSoldOut,
+  onAdd,
+  onRemove,
+}: any) {
   return (
     <div
       className={cn(
@@ -305,15 +312,13 @@ function ItemCard({ name, price, quantity, isSoldOut, onAdd, onRemove }: any) {
         isSoldOut
           ? "opacity-60 bg-muted cursor-not-allowed"
           : "hover:border-primary/50 hover:shadow-md cursor-pointer",
-        quantity > 0 ? "ring-2 ring-primary border-primary bg-primary/5" : ""
+        quantity > 0 ? "ring-2 ring-primary border-primary bg-primary/5" : "",
       )}
       onClick={!isSoldOut ? onAdd : undefined}
     >
       <div className="space-y-1.5 mb-8">
         <div className="flex justify-between gap-2">
-          <h4 className="font-medium text-sm leading-snug line-clamp-2">
-            {name}
-          </h4>
+          <TranslationDisplay translations={translations} />
           {isSoldOut && (
             <Badge variant="destructive" className="h-5 px-1 text-[10px]">
               Hết
@@ -433,7 +438,7 @@ function CartContent({
                       onUp={() => onUpdatePos(item.itemId, 1)}
                       onDown={() => onUpdatePos(item.itemId, -1)}
                     />
-                  )
+                  ),
                 )}
               </div>
             )}
@@ -453,7 +458,7 @@ function CartContent({
                       onUp={() => onUpdateService(item.serviceItemId, 1)}
                       onDown={() => onUpdateService(item.serviceItemId, -1)}
                     />
-                  )
+                  ),
                 )}
               </div>
             )}

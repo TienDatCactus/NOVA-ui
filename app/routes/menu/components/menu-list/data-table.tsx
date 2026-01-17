@@ -64,7 +64,7 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
       <div className="flex items-center justify-between py-4">
         <Input
           startAddon={<Search />}
-          placeholder="Tìm theo tên món..."
+          placeholder="Tìm theo tên món hoặc mã..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
@@ -89,7 +89,7 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -108,7 +108,7 @@ export function DataTable<TData extends MenuListItemDto, TValue>({
                       <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
