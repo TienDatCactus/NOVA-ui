@@ -37,8 +37,8 @@ export function AvailableRoomRow({
     [roomType.baseRatePerNight, nights],
   );
   const hasAvailableRooms = useMemo(
-    () => roomType.availableCount > 0,
-    [roomType.availableCount],
+    () => roomType.availableRooms > 0,
+    [roomType.availableRooms],
   );
 
   // Status visual
@@ -53,10 +53,10 @@ export function AvailableRoomRow({
   );
 
   const handleIncrement = useCallback(() => {
-    if (currentQuantity < roomType.availableCount) {
+    if (currentQuantity < roomType.availableRooms) {
       onQuantityChange(currentQuantity + 1);
     }
-  }, [currentQuantity, roomType.availableCount, onQuantityChange]);
+  }, [currentQuantity, roomType.availableRooms, onQuantityChange]);
 
   const handleDecrement = useCallback(() => {
     if (currentQuantity > 0) {
@@ -119,7 +119,7 @@ export function AvailableRoomRow({
                     )}
                   >
                     {hasAvailableRooms
-                      ? `${roomType.availableCount} phòng trống`
+                      ? `${roomType.availableRooms} phòng trống`
                       : "Hết phòng"}
                   </span>
                 </div>
@@ -191,7 +191,7 @@ export function AvailableRoomRow({
                   size="icon"
                   className="h-8 w-8 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
                   onClick={handleIncrement}
-                  disabled={currentQuantity >= roomType.availableCount}
+                  disabled={currentQuantity >= roomType.availableRooms}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
