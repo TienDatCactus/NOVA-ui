@@ -92,6 +92,20 @@ const UpdateRoomDetailResponseSchema = z.object({
 const AvailableRoomItemSchema = z.object({
   roomTypeId: z.string(),
   roomTypeCode: z.string(),
+  roomTypeName: z.string().optional().nullable(),
+  baseRatePerNight: z.number().min(0),
+  totalRooms: z.number().min(0),
+  availableRooms: z.number().min(0),
+  totalPrice: z.number().min(0),
+  nights: z.number().min(0),
+  maxOccupancy: z.number().min(0),
+  canAccommodate: z.boolean(),
+  restrictionReason: z.string().optional().nullable(),
+});
+
+const AvailableRoomWithDetailItemSchema = z.object({
+  roomTypeId: z.string(),
+  roomTypeCode: z.string(),
   roomTypeName: z.string(),
   baseRatePerNight: z.number().min(0),
   maxOccupancy: z.number().min(0),
@@ -102,10 +116,15 @@ const AvailableRoomItemSchema = z.object({
       roomId: z.string(),
       roomName: z.string(),
       status: z.string(),
-    })
+    }),
   ),
 });
-const AvailableRoomsInternalResponseSchema = z.array(AvailableRoomItemSchema);
+
+const AvailableRoomsResponseSchema = z.array(AvailableRoomItemSchema);
+
+const AvailableRoomsWithDetailResponseSchema = z.array(
+  AvailableRoomWithDetailItemSchema,
+);
 
 const BookingDetailRoomItemSchema = z.object({
   bookingRoomId: z.string(),
@@ -140,7 +159,8 @@ export const RoomSchema = {
   EditRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
   CreateRoomRequestSchema,
-  AvailableRoomsInternalResponseSchema,
+  AvailableRoomsResponseSchema,
+  AvailableRoomsWithDetailResponseSchema,
   AvailableRoomItemSchema,
   RoomListResponseSchema,
   BookingDetailRoomItemSchema,

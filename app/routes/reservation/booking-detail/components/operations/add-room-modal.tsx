@@ -23,7 +23,7 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn, formatMoney } from "~/lib/utils";
-import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
+import { useAvailableRoomsWithDetail } from "~/routes/rooms/container/rooms/query.hooks";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 
 interface AddRoomModalProps {
@@ -53,13 +53,13 @@ export function AddRoomModal({
       : "";
 
   const { data: availableRooms, isPending: isLoading } =
-    useAvailableRoomsInternal(
+    useAvailableRoomsWithDetail(
       {
         CheckInDate: checkInStr,
         CheckOutDate: checkOutStr,
         Guests: (bookingDetail?.adults || 1) + (bookingDetail?.children || 0),
       },
-      open
+      open,
     );
 
   const handleAddRoom = async (roomId: string) => {
@@ -97,7 +97,7 @@ export function AddRoomModal({
                 Tổng{" "}
                 {availableRooms.reduce(
                   (acc, curr) => acc + curr.availableCount,
-                  0
+                  0,
                 )}{" "}
                 phòng trống
               </Badge>
@@ -170,7 +170,7 @@ export function AddRoomModal({
                           "hover:border-primary hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary/20",
                           isAdding
                             ? "bg-primary/5 border-primary/50 cursor-wait"
-                            : "bg-card border-border"
+                            : "bg-card border-border",
                         )}
                       >
                         {/* Room Number */}

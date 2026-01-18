@@ -88,7 +88,7 @@ export function InvoicePaymentDialog({
                 method: values.method,
                 amount: values.amount,
                 note: values.note ?? "",
-              })
+              }),
             )}
           >
             <div className="p-6 space-y-6">
@@ -154,27 +154,27 @@ export function InvoicePaymentDialog({
                         size="sm"
                         variant="secondary"
                         onClick={() =>
-                          form.setValue("amount", remaining, {
+                          form.setValue("amount", Math.round(remaining), {
                             shouldValidate: true,
                           })
                         }
                       >
-                        Thu đủ: {formatCurrency(remaining)}
+                        Thu đủ: {formatCurrency(Math.round(remaining))}
                       </Button>
                     </div>
                     <FormControl>
                       <Input
                         startAddon={<Banknote />}
+                        max={remaining}
                         endAddon={
                           <span className="text-sm text-muted-foreground font-medium">
                             VND
                           </span>
                         }
-                        type="number"
                         className={cn(
                           "font-mono text-lg font-semibold",
                           isOverPay &&
-                            "border-destructive text-destructive focus-visible:ring-destructive"
+                            "border-destructive text-destructive focus-visible:ring-destructive",
                         )}
                         {...field}
                         onChange={(e) =>

@@ -22,7 +22,6 @@ import {
 import { Progress } from "~/components/ui/progress";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Switch } from "~/components/ui/switch";
 
 import {
   Empty,
@@ -32,8 +31,8 @@ import {
   EmptyTitle,
 } from "~/components/ui/empty";
 import { cn, useCalculateNights } from "~/lib/utils";
-import { useAvailableRoomsInternal } from "~/routes/rooms/container/rooms/query.hooks";
 import { AvailableRoomRow } from "../fragments/available-room";
+import { useAvailableRooms } from "~/routes/rooms/container/rooms/query.hooks";
 
 interface RoomSelectionSectionProps {
   form: UseFormReturn<any>;
@@ -41,13 +40,11 @@ interface RoomSelectionSectionProps {
 
 export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
   const dateRange = form.watch("dateRange");
-  const selectedRoomIds = form.watch("roomIds") || [];
   const roomTypeRequests = form.watch("roomTypeRequests") || [];
   const adultsAmount = form.watch("adultsAmount") || 1;
   const childrenAmount = form.watch("childrenAmount") || 0;
 
   const [shouldFetch, setShouldFetch] = useState(false);
-  const [allowExactRoomSelection, setAllowExactRoomSelection] = useState(false);
 
   const nights = useMemo(
     () =>
@@ -55,24 +52,26 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
         checkinDate: dateRange?.from,
         checkoutDate: dateRange?.to,
       }),
-    [dateRange]
+    [dateRange],
   );
   const totalGuestsTarget = useMemo(
     () => Number(adultsAmount) + Number(childrenAmount),
-    [adultsAmount, childrenAmount]
+    [adultsAmount, childrenAmount],
   );
 
   const {
     data: availableRooms,
     isPending,
     refetch,
-  } = useAvailableRoomsInternal(
+  } = useAvailableRooms(
     {
       CheckInDate: dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "",
       CheckOutDate: dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "",
-      Guests: totalGuestsTarget,
+      Adults: adultsAmount,
+      ChildrenUnder6: childrenAmount,
+      RoomCount: form.watch("roomCount"),
     },
-    shouldFetch
+    shouldFetch,
   );
 
   const selectionStatus = useMemo(() => {
@@ -89,19 +88,10 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
     let currentCapacity = 0;
     let roomCount = 0;
 
-    // Count from specific room selections
-    availableRooms.forEach((roomType) => {
-      const selectedRoomsInType = roomType.availableRooms.filter((room) =>
-        selectedRoomIds.includes(room.roomId)
-      );
-      currentCapacity += selectedRoomsInType.length * roomType.maxOccupancy;
-      roomCount += selectedRoomsInType.length;
-    });
-
     // Count from room type quantity requests
     roomTypeRequests.forEach((request: any) => {
       const roomType = availableRooms.find(
-        (rt) => rt.roomTypeId === request.roomTypeId
+        (rt) => rt.roomTypeId === request.roomTypeId,
       );
       if (roomType && request.quantity > 0) {
         currentCapacity += request.quantity * roomType.maxOccupancy;
@@ -119,52 +109,16 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
       roomCount,
       progress,
     };
-  }, [availableRooms, selectedRoomIds, roomTypeRequests, totalGuestsTarget]);
+  }, [availableRooms, roomTypeRequests, totalGuestsTarget]);
 
   // --- HANDLERS ---
-  const handleToggleRoom = useCallback(
-    (roomId: string) => {
-      const room = availableRooms
-        ?.flatMap((rt) => rt.availableRooms)
-        .find((r) => r.roomId === roomId);
-
-      if (!room) return;
-
-      // Clear room type requests when selecting specific rooms
-      if (roomTypeRequests.length > 0) {
-        form.setValue("roomTypeRequests", [], {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-      }
-
-      const current = form.getValues("roomIds") || [];
-      const set = new Set(current as string[]);
-      if (set.has(roomId)) set.delete(roomId);
-      else set.add(roomId);
-
-      form.setValue("roomIds", Array.from(set), {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [availableRooms, roomTypeRequests.length, form]
-  );
-
   const handleQuantityChange = useCallback(
     (roomTypeId: string, quantity: number) => {
-      if (selectedRoomIds.length > 0) {
-        form.setValue("roomIds", [], {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-      }
-
       const currentRequests = form.getValues("roomTypeRequests") || [];
 
       if (quantity === 0) {
         const filtered = currentRequests.filter(
-          (req: any) => req.roomTypeId !== roomTypeId
+          (req: any) => req.roomTypeId !== roomTypeId,
         );
         form.setValue("roomTypeRequests", filtered, {
           shouldValidate: true,
@@ -172,7 +126,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
         });
       } else {
         const existingIndex = currentRequests.findIndex(
-          (req: any) => req.roomTypeId === roomTypeId
+          (req: any) => req.roomTypeId === roomTypeId,
         );
 
         if (existingIndex >= 0) {
@@ -188,12 +142,12 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
             {
               shouldValidate: true,
               shouldDirty: true,
-            }
+            },
           );
         }
       }
     },
-    [form]
+    [form],
   );
   return (
     <div className="flex flex-col max-h-svh overflow-y-auto justify-between rounded-md bg-background flex-1">
@@ -214,7 +168,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                           className={cn(
                             "w-full justify-between h-auto py-2 px-3 text-left font-normal bg-background hover:bg-accent/50 transition-colors",
                             !field.value &&
-                              "text-muted-foreground border-dashed"
+                              "text-muted-foreground border-dashed",
                           )}
                         >
                           <div className="flex flex-col gap-0.5 overflow-hidden">
@@ -295,35 +249,6 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
               <RotateCcw className={cn("h-4 w-4")} />
             </Button>
           </div>
-
-          {/* Exact Room Selection Toggle */}
-          <div className="flex items-center justify-between gap-3 pt-2">
-            <div className="flex-1">
-              <label
-                htmlFor="exact-room-toggle"
-                className="text-xs font-medium text-foreground"
-              >
-                Chọn phòng cụ thể
-              </label>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                Cho phép chọn số phòng chính xác thay vì chỉ định số lượng
-              </p>
-            </div>
-            <Switch
-              id="exact-room-toggle"
-              checked={allowExactRoomSelection}
-              onCheckedChange={(checked) => {
-                setAllowExactRoomSelection(checked);
-                if (!checked) {
-                  // Clear specific room selections when disabling
-                  form.setValue("roomIds", [], {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
-                }
-              }}
-            />
-          </div>
         </div>
 
         <div className=" ">
@@ -370,21 +295,18 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                   {availableRooms.map((roomType) => {
                     const currentQuantity =
                       roomTypeRequests.find(
-                        (req: any) => req.roomTypeId === roomType.roomTypeId
+                        (req: any) => req.roomTypeId === roomType.roomTypeId,
                       )?.quantity || 0;
 
                     return (
                       <AvailableRoomRow
                         key={roomType.roomTypeId}
                         roomType={roomType}
-                        selectedRoomIds={selectedRoomIds}
-                        onToggleRoom={handleToggleRoom}
                         currentQuantity={currentQuantity}
                         onQuantityChange={(qty) =>
                           handleQuantityChange(roomType.roomTypeId, qty)
                         }
                         nights={nights}
-                        allowExactRoomSelection={allowExactRoomSelection}
                       />
                     );
                   })}
@@ -395,7 +317,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
         </div>
       </div>
 
-      {(selectedRoomIds.length > 0 || roomTypeRequests.length > 0) && (
+      {roomTypeRequests.length > 0 && (
         <div className="shrink-0 border-t sticky bottom-0 bg-background p-3 shadow-md z-20 ">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="text-xs font-medium text-foreground">
@@ -411,7 +333,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
                 "text-xs font-semibold flex items-center gap-1.5 transition-colors duration-300",
                 selectionStatus.isSufficient
                   ? "text-green-600 dark:text-green-500"
-                  : "text-orange-600 dark:text-orange-500"
+                  : "text-orange-600 dark:text-orange-500",
               )}
             >
               {selectionStatus.isSufficient ? (
@@ -435,7 +357,7 @@ export function RoomSelectionSection({ form }: RoomSelectionSectionProps) {
             value={selectionStatus.progress}
             className={cn(
               "transition-all duration-500 h-1.5 w-full bg-muted",
-              selectionStatus.isSufficient ? "bg-green-500" : "bg-orange-500"
+              selectionStatus.isSufficient ? "bg-green-500" : "bg-orange-500",
             )}
           />
 

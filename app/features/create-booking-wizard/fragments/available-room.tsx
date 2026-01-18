@@ -1,16 +1,14 @@
-import { ChevronDown, DoorOpen, Hash, Minus, Plus, Users } from "lucide-react";
+import { ChevronDown, Hash, Minus, Plus, Users } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type z from "zod";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import { Label } from "~/components/ui/label";
 import { cn, formatMoney } from "~/lib/utils";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
 
@@ -20,40 +18,27 @@ type AvailableRoomItem = z.infer<typeof AvailableRoomItemSchema>;
 interface AvailableRoomRowProps {
   roomType: AvailableRoomItem;
   nights: number;
-
-  // Data props
-  selectedRoomIds: string[];
   currentQuantity: number;
-  allowExactRoomSelection: boolean;
-
-  // Handlers
-  onToggleRoom: (roomId: string) => void;
   onQuantityChange: (quantity: number) => void;
 }
 
 export function AvailableRoomRow({
   roomType,
   nights,
-  selectedRoomIds,
   currentQuantity,
-  allowExactRoomSelection,
-  onToggleRoom,
   onQuantityChange,
 }: AvailableRoomRowProps) {
-  const hasSelection = useMemo(
-    () => currentQuantity > 0 || selectedRoomIds.length > 0,
-    [currentQuantity, selectedRoomIds.length]
-  );
+  const hasSelection = useMemo(() => currentQuantity > 0, [currentQuantity]);
 
   const [isExpanded, setIsExpanded] = useState(hasSelection);
 
   const totalPrice = useMemo(
     () => roomType.baseRatePerNight * nights,
-    [roomType.baseRatePerNight, nights]
+    [roomType.baseRatePerNight, nights],
   );
   const hasAvailableRooms = useMemo(
     () => roomType.availableCount > 0,
-    [roomType.availableCount]
+    [roomType.availableCount],
   );
 
   // Status visual
@@ -64,7 +49,7 @@ export function AvailableRoomRow({
         : hasAvailableRooms
           ? "bg-emerald-500/70"
           : "bg-muted-foreground/20",
-    [hasSelection, hasAvailableRooms]
+    [hasSelection, hasAvailableRooms],
   );
 
   const handleIncrement = useCallback(() => {
@@ -90,7 +75,7 @@ export function AvailableRoomRow({
               <div
                 className={cn(
                   "w-1 self-stretch rounded-full shrink-0 transition-colors duration-300",
-                  statusColor
+                  statusColor,
                 )}
               />
 
@@ -100,7 +85,7 @@ export function AvailableRoomRow({
                   <h3
                     className={cn(
                       "text-sm font-bold truncate",
-                      !hasAvailableRooms && "text-muted-foreground"
+                      !hasAvailableRooms && "text-muted-foreground",
                     )}
                   >
                     {roomType.roomTypeName}
@@ -130,7 +115,7 @@ export function AvailableRoomRow({
                       "font-medium",
                       hasAvailableRooms
                         ? "text-emerald-600"
-                        : "text-destructive"
+                        : "text-destructive",
                     )}
                   >
                     {hasAvailableRooms
@@ -158,13 +143,13 @@ export function AvailableRoomRow({
                   "h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200",
                   isExpanded
                     ? "bg-background shadow-sm text-foreground ring-1 ring-border"
-                    : "text-muted-foreground/50"
+                    : "text-muted-foreground/50",
                 )}
               >
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 transition-transform duration-300",
-                    isExpanded && "rotate-180"
+                    isExpanded && "rotate-180",
                   )}
                 />
               </div>
@@ -172,57 +157,11 @@ export function AvailableRoomRow({
           </div>
         </CollapsibleTrigger>
 
-        {/* === EXPANDED CONTENT: 2 COLS === */}
+        {/* === EXPANDED CONTENT === */}
         <CollapsibleContent>
-          <div
-            className={cn(
-              "grid divide-y md:divide-y-0 md:divide-x border-t bg-background/50",
-              allowExactRoomSelection
-                ? "grid-cols-1 md:grid-cols-[1fr_250px]"
-                : "grid-cols-1"
-            )}
-          >
-            {allowExactRoomSelection && (
-              <div className="p-4 pl-9 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  <DoorOpen className="h-3.5 w-3.5" />
-                  <span>Chọn phòng cụ thể</span>
-                </div>
-
-                <ul className="grid ">
-                  {roomType.availableRooms.length > 0 ? (
-                    roomType.availableRooms.map((room) => {
-                      const isSelected = selectedRoomIds.includes(room.roomId);
-                      return (
-                        <li
-                          key={room.roomId}
-                          className="flex items-center gap-2"
-                        >
-                          <Checkbox
-                            id={room.roomId}
-                            checked={isSelected}
-                            onCheckedChange={() => onToggleRoom(room.roomId)}
-                          />
-                          <Label
-                            htmlFor={room.roomId}
-                            className="cursor-pointer"
-                          >
-                            {room.roomName}
-                          </Label>
-                        </li>
-                      );
-                    })
-                  ) : (
-                    <p className="col-span-full text-xs text-muted-foreground italic py-2">
-                      Không có phòng trống.
-                    </p>
-                  )}
-                </ul>
-              </div>
-            )}
-
-            {/* COL 2: Quantity Adjustment */}
-            <div className="p-4 bg-muted/10 flex flex-col justify-center space-y-4">
+          <div className="border-t bg-background/50">
+            {/* Quantity Adjustment */}
+            <div className="p-4 pl-9 bg-muted/10 flex flex-col justify-center space-y-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <Hash className="h-3.5 w-3.5" />
                 <span>Số lượng</span>

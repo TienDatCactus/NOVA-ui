@@ -25,15 +25,15 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
   const [dialog, setDialog] = useState<DialogType>(null);
   const canAddItem = ["Unpaid", "DepositOnly"].includes(invoice.status);
   const { mutate: addCustomItem, isPending: isAddingItem } = useAddCustomItem(
-    invoice?.invoiceId || ""
+    invoice?.invoiceId || "",
   );
   const { mutate: invoicePayment, isPending: isPayingInvoice } =
     useInvoicePayment(invoice?.invoiceId || "");
   const { mutate: refund, isPending: isRefunding } = useRefund(
-    invoice?.invoiceId || ""
+    invoice?.invoiceId || "",
   );
   const { mutate: voidInvoice, isPending: isVoidingInvoice } = useVoidInvoice(
-    invoice?.invoiceId || ""
+    invoice?.invoiceId || "",
   );
 
   const remainingBalance =
@@ -55,7 +55,7 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
           setDialog(null);
         },
       }),
-    []
+    [],
   );
   const handleInvoicePayment = useCallback(
     (data: InvoicePaymentRequestDto) =>
@@ -64,7 +64,7 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
           setDialog(null);
         },
       }),
-    []
+    [],
   );
   const handleRefund = useCallback(
     (data: RefundInvoiceRequestDto) =>
@@ -73,7 +73,7 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
           setDialog(null);
         },
       }),
-    []
+    [],
   );
   const handleVoid = useCallback(
     () =>
@@ -82,7 +82,7 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
           setDialog(null);
         },
       }),
-    []
+    [],
   );
 
   return (
@@ -153,7 +153,7 @@ export function InvoiceActions({ invoice }: { invoice: InvoiceListItemDto }) {
         open={dialog === "add-payment"}
         onClose={() => setDialog(null)}
         onSubmit={handleInvoicePayment}
-        remaining={remainingBalance}
+        remaining={Math.round(remainingBalance)}
       />
 
       <RefundDialog

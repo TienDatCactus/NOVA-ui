@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { RoomsService } from "~/services/api/rooms";
 import type { RoomDetailResponseDto } from "~/services/api/rooms/dto";
 import type {
+  AvailableRoomListParams,
   InternalAvailableRoomListParams,
   RoomBookingHistoryParams,
   RoomDetailParams,
@@ -50,14 +51,27 @@ function useRoomBookingHistory({
   });
 }
 
-function useAvailableRoomsInternal(
+function useAvailableRoomsWithDetail(
   params: InternalAvailableRoomListParams,
-  enabled: boolean = true
+  enabled: boolean = true,
 ) {
   return useQuery({
-    queryKey: ["available-rooms-internal", params],
-    queryFn: async () => await RoomsService.getAvailableRoomsInternal(params),
-    staleTime: 5 * 60,
+    queryKey: ["available-rooms-with-detail", params],
+    queryFn: async () => await RoomsService.getAvailableRoomsWithDetail(params),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!enabled && !!params.CheckInDate && !!params.CheckOutDate,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
+
+function useAvailableRooms(
+  params: AvailableRoomListParams,
+  enabled: boolean = true,
+) {
+  return useQuery({
+    queryKey: ["available-rooms", params],
+    queryFn: async () => RoomsService.getAvailableRooms(params),
     enabled: !!enabled && !!params.CheckInDate && !!params.CheckOutDate,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -99,10 +113,11 @@ function useGetRoomQrCode(roomId: string, options?: { enabled?: boolean }) {
   });
 }
 export {
-  useAvailableRoomsInternal,
   useGetRoomQrCode,
   useRoomBookingHistory,
   useRoomDetail,
   useRooms,
   useRoomsDetailsByIds,
+  useAvailableRooms,
+  useAvailableRoomsWithDetail,
 };

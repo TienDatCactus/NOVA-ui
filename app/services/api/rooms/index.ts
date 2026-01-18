@@ -1,6 +1,7 @@
 import http from "~/lib/http";
 import { RoomSchema } from "~/services/api/rooms/room.schema";
 import type {
+  AvailableRoomListParams,
   InternalAvailableRoomListParams,
   RoomBookingHistoryParams,
   RoomDetailParams,
@@ -8,7 +9,8 @@ import type {
 } from "~/services/api/rooms/room.types";
 import { Rooms } from "~/services/url";
 import type {
-  AvailableRoomsInternalResponseDto,
+  AvailableRoomsResponseDto,
+  AvailableRoomsWithDetailResponseDto,
   CreateRoomRequestDto,
   CreateRoomResponseDto,
   RoomBookingHistoryResponseDto,
@@ -26,13 +28,14 @@ const {
   RoomBookingHistoryResponseSchema,
   CreateRoomResponseSchema,
   UpdateRoomDetailResponseSchema,
-  AvailableRoomsInternalResponseSchema,
+  AvailableRoomsResponseSchema,
+  AvailableRoomsWithDetailResponseSchema,
   CreateRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
 } = RoomSchema;
 
 async function getRoomList(
-  params: RoomListParams
+  params: RoomListParams,
 ): Promise<RoomListResponseDto> {
   try {
     const resp = await http.get(Rooms.list, { params });
@@ -45,7 +48,7 @@ async function getRoomList(
 
 async function getRoomDetails(
   id: string,
-  params: RoomDetailParams
+  params: RoomDetailParams,
 ): Promise<RoomDetailResponseDto> {
   try {
     const resp = await http.get(Rooms.detail(id), {
@@ -60,7 +63,7 @@ async function getRoomDetails(
 
 async function getRoomBookingHistory(
   id: string,
-  params: RoomBookingHistoryParams
+  params: RoomBookingHistoryParams,
 ): Promise<RoomBookingHistoryResponseDto> {
   try {
     const resp = await http.get(Rooms.bookingHistory(id), {
@@ -86,12 +89,12 @@ async function updateRoomStatus(data: {
   }
 }
 async function createRoom(
-  data: CreateRoomRequestDto
+  data: CreateRoomRequestDto,
 ): Promise<CreateRoomResponseDto> {
   try {
     const resp = await http.post(
       Rooms.create,
-      CreateRoomRequestSchema.parse(data)
+      CreateRoomRequestSchema.parse(data),
     );
     return CreateRoomResponseSchema.parse(resp.data);
   } catch (error) {
@@ -102,12 +105,12 @@ async function createRoom(
 
 async function updateRoomDetail(
   id: string,
-  data: UpdateRoomDetailRequestDto
+  data: UpdateRoomDetailRequestDto,
 ): Promise<UpdateRoomDetailResponseDto> {
   try {
     const resp = await http.patch(
       Rooms.update(id),
-      UpdateRoomDetailRequestSchema.parse(data)
+      UpdateRoomDetailRequestSchema.parse(data),
     );
     return UpdateRoomDetailResponseSchema.parse(resp.data);
   } catch (error) {
@@ -116,12 +119,24 @@ async function updateRoomDetail(
   }
 }
 
-async function getAvailableRoomsInternal(
-  params: InternalAvailableRoomListParams
-): Promise<AvailableRoomsInternalResponseDto> {
+async function getAvailableRooms(
+  params: AvailableRoomListParams,
+): Promise<AvailableRoomsResponseDto> {
+  try {
+    const resp = await http.get(Rooms.availables, { params });
+    return AvailableRoomsResponseSchema.parse(resp.data);
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function getAvailableRoomsWithDetail(
+  params: InternalAvailableRoomListParams,
+): Promise<AvailableRoomsWithDetailResponseDto> {
   try {
     const resp = await http.get(Rooms.getAvailableRoomsInternal, { params });
-    return AvailableRoomsInternalResponseSchema.parse(resp.data);
+    return AvailableRoomsWithDetailResponseSchema.parse(resp.data);
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -143,11 +158,11 @@ async function generateQRCode(roomId: string, baseUrl?: string) {
     const resp = await http.get(
       Rooms.generateQRCode(
         roomId,
-        baseUrl || import.meta.env.VITE_APP_BASE_URL
+        baseUrl || import.meta.env.VITE_APP_BASE_URL,
       ),
       {
         responseType: "blob",
-      }
+      },
     );
     return resp;
   } catch (error) {
@@ -161,11 +176,11 @@ async function regenerateQRCode(roomId: string, baseUrl?: string) {
     const resp = await http.post(
       Rooms.regenerateQRCode(
         roomId,
-        baseUrl || import.meta.env.VITE_APP_BASE_URL
+        baseUrl || import.meta.env.VITE_APP_BASE_URL,
       ),
       {
         responseType: "blob",
-      }
+      },
     );
     return resp;
   } catch (error) {
@@ -180,7 +195,8 @@ export const RoomsService = {
   getRoomBookingHistory,
   createRoom,
   updateRoomDetail,
-  getAvailableRoomsInternal,
+  getAvailableRooms,
+  getAvailableRoomsWithDetail,
   deleteRoom,
   generateQRCode,
   regenerateQRCode,

@@ -5,7 +5,6 @@ import { Separator } from "react-aria-components";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
-import { ButtonGroup } from "~/components/ui/button-group";
 import {
   Dialog,
   DialogContent,
@@ -84,7 +83,7 @@ export default function UpdatePaidAmountPayrollDialog({
           onSuccess?.();
           onOpenChange(false);
         },
-      }
+      },
     );
   });
 
@@ -130,48 +129,25 @@ export default function UpdatePaidAmountPayrollDialog({
                     <FormLabel className="text-xs font-semibold uppercase text-muted-foreground">
                       Số tiền thanh toán
                     </FormLabel>
-                    <ButtonGroup>
-                      <Button
-                        type="button" // Quan trọng: type button để không submit form
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs px-2"
-                        onClick={() =>
-                          form.setValue(
-                            "paidAmount",
-                            Math.round(
-                              ((payroll?.totalAmount || 0) * 50) / 100
-                            ),
-                            {
-                              shouldValidate: true,
-                              shouldDirty: true,
-                            }
-                          )
-                        }
-                      >
-                        50%
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs px-2"
-                        onClick={() =>
-                          form.setValue(
-                            "paidAmount",
-                            Math.round(
-                              ((payroll?.totalAmount || 0) * 100) / 100
-                            ),
-                            {
-                              shouldValidate: true,
-                              shouldDirty: true,
-                            }
-                          )
-                        }
-                      >
-                        100%
-                      </Button>
-                    </ButtonGroup>
+
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs px-2"
+                      onClick={() =>
+                        form.setValue(
+                          "paidAmount",
+                          Math.round(((payroll?.totalAmount || 0) * 100) / 100),
+                          {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          },
+                        )
+                      }
+                    >
+                      100%
+                    </Button>
                   </div>
                   <FormControl>
                     <div className="relative">
@@ -228,7 +204,7 @@ export default function UpdatePaidAmountPayrollDialog({
                     projectedRemaining < 0
                       ? "text-red-500"
                       : "text-slate-700 dark:text-slate-200",
-                    projectedRemaining === 0 && "text-emerald-600" // Hết nợ thì xanh
+                    projectedRemaining === 0 && "text-emerald-600", // Hết nợ thì xanh
                   )}
                 >
                   {formatMoney(projectedRemaining).vndFormatted}

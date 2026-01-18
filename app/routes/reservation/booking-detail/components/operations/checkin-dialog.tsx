@@ -40,7 +40,7 @@ import type {
   CheckinBookingRequestDto,
 } from "~/services/api/booking/dto";
 import { useCheckinBooking } from "../../../bookings/container/booking-mutation.hooks";
-import { useAvailableRooms } from "~/routes/reservation/bookings/container/booking-query.hooks";
+import { useAvailableRoomsWithDetail } from "~/routes/rooms/container/rooms/query.hooks";
 
 interface CheckinDialogProps {
   open: boolean;
@@ -61,15 +61,14 @@ export function CheckinDialog({
   bookingDetail,
 }: CheckinDialogProps) {
   const [assignments, setAssignments] = useState<RoomAssignment[]>([]);
-  const { data: availableRooms = [] } = useAvailableRooms({
-    params: {
+  const { data: availableRooms = [] } = useAvailableRoomsWithDetail(
+    {
       CheckInDate: bookingDetail?.checkinDate || "",
       CheckOutDate: bookingDetail?.checkoutDate || "",
       Guests: bookingDetail?.adults || 0,
     },
-    enabled:
-      open && !!bookingDetail?.checkinDate && !!bookingDetail?.checkoutDate,
-  });
+    open && !!bookingDetail?.checkinDate && !!bookingDetail?.checkoutDate,
+  );
 
   const { mutate: checkin, isPending: isCheckingIn } = useCheckinBooking(
     bookingDetail?.id || "",

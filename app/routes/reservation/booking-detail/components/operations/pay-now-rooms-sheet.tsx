@@ -54,7 +54,6 @@ import {
   usePayNowRooms,
   useUnpaidRooms,
 } from "../../container/use-booking-checkout.hooks";
-import { ButtonGroup } from "~/components/ui/button-group";
 
 interface PayNowRoomsSheetProps {
   open: boolean;
@@ -68,7 +67,7 @@ export function PayNowRoomsSheet({
   bookingDetail,
 }: PayNowRoomsSheetProps) {
   const { mutate: payNowRooms, isPending: isPaying } = usePayNowRooms(
-    bookingDetail?.id || ""
+    bookingDetail?.id || "",
   );
   const { data: unpaidRoomsData } = useUnpaidRooms(bookingDetail?.id || "", {
     enabled: open,
@@ -96,7 +95,7 @@ export function PayNowRoomsSheet({
       return 1;
     const totalChargeAllRooms = unpaidRoomsData.unpaidRooms.reduce(
       (sum, room) => sum + room.totalCharge,
-      0
+      0,
     );
     if (totalChargeAllRooms === 0) return 1;
     return (unpaidRoomsData.totalUnpaidAmount || 0) / totalChargeAllRooms;
@@ -133,7 +132,7 @@ export function PayNowRoomsSheet({
     } else {
       form.setValue(
         "bookingRoomIds",
-        unpaidRoomsData?.unpaidRooms.map((room) => room.bookingRoomId) || []
+        unpaidRoomsData?.unpaidRooms.map((room) => room.bookingRoomId) || [],
       );
     }
   };
@@ -150,7 +149,7 @@ export function PayNowRoomsSheet({
   const handleSubmit = form.handleSubmit((data) => {
     if (!paymentValidation.isValid) {
       toast.error(
-        paymentValidation.error || "Thông tin thanh toán không hợp lệ"
+        paymentValidation.error || "Thông tin thanh toán không hợp lệ",
       );
       return;
     }
@@ -161,7 +160,7 @@ export function PayNowRoomsSheet({
           toast.success("Thanh toán phòng thành công");
           onOpenChange(false);
         },
-      }
+      },
     );
   });
 
@@ -171,7 +170,12 @@ export function PayNowRoomsSheet({
       paymentMethod &&
       paymentValidation.isValid &&
       !isPaying,
-    [selectedRoomIds.length, paymentMethod, paymentValidation.isValid, isPaying]
+    [
+      selectedRoomIds.length,
+      paymentMethod,
+      paymentValidation.isValid,
+      isPaying,
+    ],
   );
 
   return (
@@ -235,7 +239,7 @@ export function PayNowRoomsSheet({
                 <div className="grid gap-3">
                   {unpaidRoomsData?.unpaidRooms.map((room) => {
                     const isSelected = selectedRoomIds.includes(
-                      room.bookingRoomId
+                      room.bookingRoomId,
                     );
                     return (
                       <div
@@ -245,13 +249,13 @@ export function PayNowRoomsSheet({
                           "relative group flex items-start gap-4 p-4 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-md",
                           isSelected
                             ? "border-emerald-500 ring-1 ring-emerald-500 shadow-sm"
-                            : "border-stone-200 hover:border-emerald-300"
+                            : "border-stone-200 hover:border-emerald-300",
                         )}
                       >
                         <Checkbox
                           checked={isSelected}
                           className={cn(
-                            "mt-1 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                            "mt-1 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600",
                           )}
                         />
 
@@ -269,7 +273,7 @@ export function PayNowRoomsSheet({
                               <p className="font-mono font-bold text-emerald-700">
                                 {
                                   formatMoney(
-                                    room.roomCharge + room.breakfastCharge
+                                    room.roomCharge + room.breakfastCharge,
                                   ).vndFormatted
                                 }
                               </p>
@@ -415,20 +419,12 @@ export function PayNowRoomsSheet({
                                 Số tiền trả{" "}
                                 <span className="text-red-500">*</span>
                               </span>
-                              <ButtonGroup>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => handleQuickAmount(0.5)}
-                                >
-                                  50%
-                                </Button>
-                                <Badge
-                                  variant="outline"
-                                  onClick={() => handleQuickAmount(1)}
-                                >
-                                  100%
-                                </Badge>
-                              </ButtonGroup>
+                              <Badge
+                                variant="outline"
+                                onClick={() => handleQuickAmount(1)}
+                              >
+                                100%
+                              </Badge>
                             </FormLabel>
                             <div className="relative">
                               <FormControl>
@@ -449,7 +445,7 @@ export function PayNowRoomsSheet({
                                 Còn thiếu:{" "}
                                 {
                                   formatMoney(
-                                    (selectedRoomsSubtotal ?? 0) - field.value
+                                    (selectedRoomsSubtotal ?? 0) - field.value,
                                   ).vndFormatted
                                 }
                               </p>
@@ -490,7 +486,7 @@ export function PayNowRoomsSheet({
                     "w-full h-12 text-base shadow-lg transition-all",
                     canSubmit
                       ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
-                      : ""
+                      : "",
                   )}
                 >
                   {isPaying ? (

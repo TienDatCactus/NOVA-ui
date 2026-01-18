@@ -3,8 +3,8 @@ import { AuthLoader, Permission, RouteModule } from "~/lib/auth/auth.loader";
 import type { Route } from "./+types/grid";
 import BookingGrid from "./components/booking-grid";
 import { useAvailableRoomsFilter } from "./container/available-booking-filter.hooks";
-import { useAvailableRooms } from "./container/booking-query.hooks";
 import BookingGridFilters from "./fragments/booking-grid.filters";
+import { useAvailableRoomsWithDetail } from "~/routes/rooms/container/rooms/query.hooks";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -23,14 +23,14 @@ export default function Component({}: Route.ComponentProps) {
     data: rooms,
     refetch,
     isLoading,
-  } = useAvailableRooms({
-    params: {
+  } = useAvailableRoomsWithDetail(
+    {
       CheckInDate: format(filters.CheckInDate ?? new Date(), "yyyy-MM-dd"),
       CheckOutDate: format(filters.CheckOutDate ?? new Date(), "yyyy-MM-dd"),
       Guests: filters.Guests ?? 1,
     },
-    enabled: true,
-  });
+    true,
+  );
 
   return (
     <div className="flex p-4  flex-col space-y-4 h-full">

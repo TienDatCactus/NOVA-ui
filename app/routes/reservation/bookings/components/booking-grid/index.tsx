@@ -12,11 +12,11 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatMoney } from "~/lib/utils";
-import type { AvailableRoomsInternalResponseDto } from "~/services/api/rooms/dto";
 import RoomCardGrid from "../../../booking-detail/fragments/room.card";
+import type { AvailableRoomsWithDetailResponseDto } from "~/services/api/rooms/dto";
 
 interface BookingGridProps {
-  rooms?: AvailableRoomsInternalResponseDto;
+  rooms?: AvailableRoomsWithDetailResponseDto;
   isLoading?: boolean;
   refetch: () => void;
 }

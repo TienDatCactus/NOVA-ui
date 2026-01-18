@@ -2,8 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { BookingService } from "~/services/api/booking";
 import type { BookingListParams } from "~/services/api/booking/booking.types";
-import { RoomsService } from "~/services/api/rooms";
-import type { InternalAvailableRoomListParams } from "~/services/api/rooms/room.types";
 
 function useBookingDetail({
   bookingCode,
@@ -52,21 +50,6 @@ function useBookings(params?: BookingListParams) {
   });
 }
 
-function useAvailableRooms({
-  params,
-  enabled = false,
-}: {
-  params: InternalAvailableRoomListParams;
-  enabled?: boolean;
-}) {
-  return useQuery({
-    queryKey: ["available-rooms", params],
-    queryFn: async () => await RoomsService.getAvailableRoomsInternal(params),
-    staleTime: 2 * 60 * 1000,
-    enabled: enabled,
-  });
-}
-
 function useAvailableRoomsForChange({
   bookingId,
   bookingRoomId,
@@ -97,10 +80,10 @@ function useOrderableBookings() {
 }
 
 export {
-  useAvailableRooms,
   useAvailableRoomsForChange,
   useBookingDetail,
   useBookingRoomsWeek,
   useBookings,
   useOrderableBookings,
+  
 };

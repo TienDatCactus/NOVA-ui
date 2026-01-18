@@ -65,7 +65,7 @@ export const columns: ColumnDef<ServiceItem>[] = [
         </div>
       );
     },
-    filterFn: (row, columnId, filterValue) => {
+    filterFn: (row, _, filterValue) => {
       const searchValue = filterValue.toLowerCase();
       const translations = row.original.translations;
 

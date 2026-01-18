@@ -1,5 +1,10 @@
-import { useState, useMemo } from "react";
+import { AlertCircle, Check, DoorOpen } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,10 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
-import { ScrollArea } from "~/components/ui/scroll-area";
+import { FormLabel } from "~/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -19,12 +21,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { AlertCircle, Check, DoorOpen } from "lucide-react";
-import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Separator } from "~/components/ui/separator";
+import { cn } from "~/lib/utils";
+import { useAvailableRoomsWithDetail } from "~/routes/rooms/container/rooms/query.hooks";
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import { usePreAssignRooms } from "../../bookings/container/booking-mutation.hooks";
-import { useAvailableRooms } from "../../bookings/container/booking-query.hooks";
-import { cn } from "~/lib/utils";
+
+interface RoomAssignmentForm {
+  roomAssignments: Array<{
+    bookingRoomId: string;
+    roomId: string;
+  }>;
+}
 
 interface PreAssignRoomsDialogProps {
   open: boolean;
@@ -37,75 +45,68 @@ export default function PreAssignRoomsDialog({
   onOpenChange,
   bookingDetail,
 }: PreAssignRoomsDialogProps) {
-  const [roomAssignments, setRoomAssignments] = useState<
-    Record<string, string>
-  >({});
+  const form = useForm<RoomAssignmentForm>({
+    defaultValues: {
+      roomAssignments: [],
+    },
+  });
 
   const { mutate: preAssignRooms, isPending } = usePreAssignRooms(
-    bookingDetail.id
+    bookingDetail.id,
   );
 
   // Fetch available rooms for the booking period
-  const { data: availableRoomsData, isPending: isLoadingRooms } =
-    useAvailableRooms({
-      params: {
-        Guests: bookingDetail.adults,
-        CheckInDate: bookingDetail.checkinDate,
-        CheckOutDate: bookingDetail.checkoutDate,
-      },
-      enabled: open,
-    });
-
-  const roomsByType = useMemo(() => {
-    if (!availableRoomsData) return {};
-
-    const grouped: Record<
-      string,
-      Array<{ roomId: string; roomName: string; status: string }>
-    > = {};
-
-    availableRoomsData.forEach((roomTypeGroup) => {
-      grouped[roomTypeGroup.roomTypeId] = roomTypeGroup.availableRooms;
-    });
-
-    return grouped;
-  }, [availableRoomsData]);
-
-  // Initialize assignments with current room assignments
-  useState(() => {
-    if (bookingDetail.rooms) {
-      const initialAssignments: Record<string, string> = {};
-      bookingDetail.rooms.forEach((room) => {
-        if (room.roomId) {
-          initialAssignments[room.bookingRoomId] = room.roomId;
-        }
-      });
-      setRoomAssignments(initialAssignments);
-    }
+  const { data: availableRoomsData, isLoading } = useAvailableRoomsWithDetail({
+    Guests: bookingDetail.adults,
+    CheckInDate: bookingDetail.checkinDate,
+    CheckOutDate: bookingDetail.checkoutDate,
   });
 
-  const handleAssignRoom = (bookingRoomId: string, roomId: string) => {
-    setRoomAssignments((prev) => ({
-      ...prev,
-      [bookingRoomId]: roomId,
-    }));
-  };
-
-  const handleSubmit = () => {
-    // Validate all booking rooms have assignments
-    const unassignedRooms = bookingDetail.rooms?.filter(
-      (room) => !roomAssignments[room.bookingRoomId]
+  // Flatten all booking rooms from roomsByType for easy access
+  const allBookingRooms = useMemo(() => {
+    return (bookingDetail.roomsByType || []).flatMap((roomType) =>
+      (roomType.rooms || []).map((room) => ({
+        bookingRoomId: room.bookingRoomId!,
+        roomTypeId: roomType.roomTypeId!,
+        roomTypeName: roomType.roomTypeName!,
+        currentRoomId:
+          room.roomId !== "00000000-0000-0000-0000-000000000000"
+            ? room.roomId
+            : null,
+        currentRoomName: room.roomName,
+        fromDate: room.fromDate,
+        toDate: room.toDate,
+      })),
     );
+  }, [bookingDetail.roomsByType]);
 
-    if (unassignedRooms && unassignedRooms.length > 0) {
+  // Reset form when dialog opens with pre-existing room assignments
+  useEffect(() => {
+    if (open && allBookingRooms.length > 0) {
+      const existingAssignments = allBookingRooms
+        .filter((br) => br.currentRoomId)
+        .map((br) => ({
+          bookingRoomId: br.bookingRoomId,
+          roomId: br.currentRoomId!,
+        }));
+      form.reset({ roomAssignments: existingAssignments });
+    }
+  }, [open, allBookingRooms, form]);
+
+  const handleSubmit = form.handleSubmit((data) => {
+    const assignments = data.roomAssignments;
+
+    // Validate all booking rooms have assignments
+    if (assignments.length !== allBookingRooms.length) {
+      const missingCount = allBookingRooms.length - assignments.length;
       toast.error(
-        `Vui lòng assign tất cả phòng. Còn ${unassignedRooms.length} phòng chưa được assign.`
+        `Vui lòng assign tất cả phòng. Còn ${missingCount} phòng chưa được assign.`,
       );
       return;
     }
 
     // Check for duplicate room assignments
-    const assignedRoomIds = Object.values(roomAssignments);
+    const assignedRoomIds = assignments.map((a) => a.roomId);
     const uniqueRoomIds = new Set(assignedRoomIds);
     if (assignedRoomIds.length !== uniqueRoomIds.size) {
       toast.error("Không thể assign cùng một phòng cho nhiều booking room");
@@ -113,30 +114,37 @@ export default function PreAssignRoomsDialog({
     }
 
     const payload = {
-      roomAssignments: Object.entries(roomAssignments).map(
-        ([bookingRoomId, roomId]) => ({
-          bookingRoomId,
-          roomId,
-        })
-      ),
+      roomAssignments: assignments,
     };
 
     preAssignRooms(payload, {
       onSuccess: () => {
         onOpenChange(false);
-        setRoomAssignments({});
+        form.reset({ roomAssignments: [] });
       },
     });
+  });
+
+  const roomAssignments = form.watch("roomAssignments");
+  const assignedCount = roomAssignments.length;
+
+  // Helper to get current assignment for a bookingRoomId
+  const getAssignmentForRoom = (bookingRoomId: string) => {
+    return roomAssignments.find((a) => a.bookingRoomId === bookingRoomId)
+      ?.roomId;
   };
 
-  const isFormValid = useMemo(() => {
-    if (!bookingDetail.rooms) return false;
-    return bookingDetail.rooms.every(
-      (room) => roomAssignments[room.bookingRoomId]
+  // Helper to update assignment
+  const updateAssignment = (bookingRoomId: string, roomId: string) => {
+    const current = roomAssignments.filter(
+      (a) => a.bookingRoomId !== bookingRoomId,
     );
-  }, [bookingDetail.rooms, roomAssignments]);
-
-  // Check if booking is eligible for pre-assignment
+    if (roomId) {
+      form.setValue("roomAssignments", [...current, { bookingRoomId, roomId }]);
+    } else {
+      form.setValue("roomAssignments", current);
+    }
+  };
   const canPreAssign =
     bookingDetail.status === "Pending" || bookingDetail.status === "Confirmed";
 
@@ -171,7 +179,7 @@ export default function PreAssignRoomsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh]">
+      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Pre-assign phòng cụ thể</DialogTitle>
           <DialogDescription>
@@ -180,174 +188,235 @@ export default function PreAssignRoomsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {isLoadingRooms ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-sm text-muted-foreground">
               Đang tải danh sách phòng trống...
             </div>
           </div>
         ) : (
-          <ScrollArea className="max-h-[50vh] pr-4">
-            <div className="space-y-4">
-              {bookingDetail.rooms?.map((bookingRoom, index) => {
-                const currentRoomTypeId = bookingRoom.roomTypeId;
-                const availableRoomsForType =
-                  roomsByType[currentRoomTypeId] || [];
-                const currentAssignment =
-                  roomAssignments[bookingRoom.bookingRoomId];
-                const isCurrentlyAssigned = !!bookingRoom.roomId;
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              {(bookingDetail.roomsByType || []).map(
+                (roomTypeGroup, typeIndex) => {
+                  const bookingRoomsForType = allBookingRooms.filter(
+                    (br) => br.roomTypeId === roomTypeGroup.roomTypeId,
+                  );
 
-                return (
-                  <div key={bookingRoom.bookingRoomId}>
-                    {index > 0 && <Separator className="my-4" />}
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-semibold">
-                              {bookingRoom.roomTypeName}
-                            </h4>
-                            {isCurrentlyAssigned && (
+                  if (bookingRoomsForType.length === 0) return null;
+
+                  const availableRoomData = availableRoomsData?.find(
+                    (rt) => rt.roomTypeId === roomTypeGroup.roomTypeId,
+                  );
+                  const availableRoomsForType =
+                    availableRoomData?.availableRooms || [];
+
+                  return (
+                    <div key={roomTypeGroup.roomTypeId}>
+                      {typeIndex > 0 && <Separator className="mb-6" />}
+
+                      {/* Room Type Header */}
+                      <div className="mb-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-base font-semibold">
+                                {roomTypeGroup.roomTypeName}
+                              </h4>
                               <Badge variant="outline" className="text-xs">
                                 <DoorOpen className="h-3 w-3 mr-1" />
-                                {bookingRoom.roomName}
+                                {availableRoomData?.roomTypeCode ||
+                                  roomTypeGroup.roomTypeId?.slice(0, 8)}
                               </Badge>
-                            )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {bookingDetail.checkinDate} →{" "}
+                              {bookingDetail.checkoutDate} •{" "}
+                              <span className="font-medium">
+                                {bookingRoomsForType.length} phòng cần assign
+                              </span>
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            {bookingDetail.checkinDate} →{" "}
-                            {bookingDetail.checkoutDate}
-                          </p>
+                          <Badge
+                            variant={
+                              availableRoomsForType.length === 0
+                                ? "destructive"
+                                : "secondary"
+                            }
+                            className="text-xs"
+                          >
+                            {availableRoomsForType.length} phòng trống
+                          </Badge>
                         </div>
+
+                        {availableRoomsForType.length === 0 && (
+                          <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                              Không có phòng trống loại{" "}
+                              <span className="font-semibold">
+                                {roomTypeGroup.roomTypeName}
+                              </span>{" "}
+                              trong khoảng thời gian này
+                            </AlertDescription>
+                          </Alert>
+                        )}
                       </div>
 
-                      {availableRoomsForType.length === 0 ? (
-                        <Alert variant="destructive">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription>
-                            Không có phòng trống loại{" "}
-                            <span className="font-semibold">
-                              {bookingRoom.roomTypeName}
-                            </span>{" "}
-                            trong khoảng thời gian này
-                          </AlertDescription>
-                        </Alert>
-                      ) : (
-                        <div className="space-y-2">
-                          <label className="text-xs font-medium text-muted-foreground">
-                            Chọn phòng cụ thể
-                          </label>
-                          <Select
-                            value={currentAssignment || ""}
-                            onValueChange={(value) =>
-                              handleAssignRoom(bookingRoom.bookingRoomId, value)
-                            }
-                          >
-                            <SelectTrigger
-                              className={cn(
-                                "w-full",
-                                currentAssignment && "border-primary"
-                              )}
+                      {/* Individual Booking Room Assignments */}
+                      <div className="space-y-3 pl-4 border-l-2 border-muted">
+                        {bookingRoomsForType.map((bookingRoom, roomIndex) => {
+                          const currentAssignment = getAssignmentForRoom(
+                            bookingRoom.bookingRoomId,
+                          );
+
+                          return (
+                            <div
+                              key={bookingRoom.bookingRoomId}
+                              className="space-y-2"
                             >
-                              <SelectValue placeholder="Chọn phòng..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableRoomsForType.map((room) => {
-                                // Check if this room is already assigned to another booking room
-                                const isAssignedToOther = Object.entries(
-                                  roomAssignments
-                                ).some(
-                                  ([bRoomId, rId]) =>
-                                    rId === room.roomId &&
-                                    bRoomId !== bookingRoom.bookingRoomId
-                                );
+                              <div className="flex items-center justify-between">
+                                <FormLabel className="text-sm font-medium">
+                                  Phòng #{roomIndex + 1}
+                                  {bookingRoom.currentRoomName && (
+                                    <span className="text-xs text-muted-foreground font-normal ml-2">
+                                      (Hiện tại: {bookingRoom.currentRoomName})
+                                    </span>
+                                  )}
+                                </FormLabel>
+                                {currentAssignment && (
+                                  <Badge variant="outline" className="text-xs">
+                                    <Check className="h-3 w-3 mr-1 text-green-600" />
+                                    Đã chọn
+                                  </Badge>
+                                )}
+                              </div>
 
-                                return (
-                                  <SelectItem
-                                    key={room.roomId}
-                                    value={room.roomId}
-                                    disabled={isAssignedToOther}
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <span>{room.roomName}</span>
-                                      {room.roomId === bookingRoom.roomId && (
-                                        <Badge
-                                          variant="outline"
-                                          className="text-xs"
-                                        >
-                                          Hiện tại
-                                        </Badge>
-                                      )}
-                                      {isAssignedToOther && (
-                                        <Badge
-                                          variant="secondary"
-                                          className="text-xs"
-                                        >
-                                          Đã chọn
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectContent>
-                          </Select>
+                              <Select
+                                onValueChange={(value) =>
+                                  updateAssignment(
+                                    bookingRoom.bookingRoomId,
+                                    value,
+                                  )
+                                }
+                                value={currentAssignment || ""}
+                                disabled={availableRoomsForType.length === 0}
+                              >
+                                <SelectTrigger
+                                  className={cn(
+                                    "w-full",
+                                    currentAssignment &&
+                                      "border-primary bg-primary/5",
+                                  )}
+                                >
+                                  <SelectValue placeholder="Chọn phòng..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {availableRoomsForType.map((room) => {
+                                    const isAssignedToOther =
+                                      roomAssignments.some(
+                                        (a) =>
+                                          a.roomId === room.roomId &&
+                                          a.bookingRoomId !==
+                                            bookingRoom.bookingRoomId,
+                                      );
 
-                          {currentAssignment && (
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Check className="h-3 w-3 text-green-600" />
-                              <span>
-                                Phòng đã được chọn:{" "}
-                                <span className="font-medium text-foreground">
-                                  {
-                                    availableRoomsForType.find(
-                                      (r) => r.roomId === currentAssignment
-                                    )?.roomName
-                                  }
-                                </span>
-                              </span>
-                              {currentAssignment !== bookingRoom.roomId && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Thay đổi
-                                </Badge>
+                                    const isCurrentRoom =
+                                      room.roomId === bookingRoom.currentRoomId;
+
+                                    return (
+                                      <SelectItem
+                                        key={room.roomId}
+                                        value={room.roomId}
+                                        disabled={isAssignedToOther}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium">
+                                            {room.roomName}
+                                          </span>
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs"
+                                          >
+                                            {room.status}
+                                          </Badge>
+                                          {isCurrentRoom && (
+                                            <Badge
+                                              variant="default"
+                                              className="text-xs"
+                                            >
+                                              Hiện tại
+                                            </Badge>
+                                          )}
+                                          {isAssignedToOther && (
+                                            <Badge
+                                              variant="secondary"
+                                              className="text-xs"
+                                            >
+                                              Đã chọn
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+
+                              {currentAssignment && (
+                                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Check className="h-3 w-3 text-green-600" />
+                                  <span>
+                                    Đã chọn:{" "}
+                                    <span className="font-medium text-foreground">
+                                      {
+                                        availableRoomsForType.find(
+                                          (r) => r.roomId === currentAssignment,
+                                        )?.roomName
+                                      }
+                                    </span>
+                                  </span>
+                                </p>
                               )}
                             </div>
-                          )}
-                        </div>
-                      )}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
-          </ScrollArea>
+            <DialogFooter className="flex-row justify-between sm:justify-between gap-2 mt-6 pt-4 border-t">
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <Badge variant="secondary">
+                  {assignedCount}/{allBookingRooms.length}
+                </Badge>
+                <span>phòng đã được assign</span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isPending}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    assignedCount !== allBookingRooms.length ||
+                    isPending ||
+                    isLoading
+                  }
+                >
+                  {isPending ? "Đang xử lý..." : "Lưu assignment"}
+                </Button>
+              </div>
+            </DialogFooter>
+          </form>
         )}
-
-        <DialogFooter className="flex-row justify-between sm:justify-between gap-2">
-          <div className="text-xs text-muted-foreground flex-1">
-            {bookingDetail.rooms && (
-              <>
-                {Object.keys(roomAssignments).length}/
-                {bookingDetail.rooms.length} phòng đã được assign
-              </>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isPending}
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={!isFormValid || isPending || isLoadingRooms}
-            >
-              {isPending ? "Đang xử lý..." : "Lưu assignment"}
-            </Button>
-          </div>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

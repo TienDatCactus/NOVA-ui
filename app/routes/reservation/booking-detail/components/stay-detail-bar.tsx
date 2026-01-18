@@ -144,10 +144,10 @@ export default function StayDetailBar({
       return { isValid: false, error: "Số tiền phải lớn hơn 0" };
     }
 
-    if (paidAmount > maxAllowed) {
+    if (paidAmount > Math.round(maxAllowed)) {
       return {
         isValid: false,
-        error: `Số tiền không được vượt quá số tiền còn lại (${formatMoney(maxAllowed).vndFormatted})`,
+        error: `Số tiền không được vượt quá số tiền còn lại (${formatMoney(Math.round(maxAllowed)).vndFormatted})`,
       };
     }
 
@@ -445,7 +445,9 @@ export default function StayDetailBar({
                                         onClick={() =>
                                           paymentForm.setValue(
                                             "paidAmount",
-                                            paymentSummary.totalAmount,
+                                            Math.round(
+                                              paymentSummary.totalAmount,
+                                            ),
                                           )
                                         }
                                       >

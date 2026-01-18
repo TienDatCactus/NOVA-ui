@@ -24,6 +24,7 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 import { hasAnyRole } from "~/lib/auth/bouncer";
+import { formatMoney } from "~/lib/utils";
 import {
   createAddRoomOperation,
   createRemoveRoomOperation,
@@ -40,12 +41,6 @@ import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
 import { AddRoomModal } from "./operations/add-room-modal";
 import { UpgradeRoomDialog } from "./operations/upgrade-room-dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "~/components/ui/collapsible";
-import { formatMoney } from "~/lib/utils";
 
 interface BookingRoomsBarProps {
   bookingDetail: BookingDetailResponseDto;
@@ -74,6 +69,21 @@ export default function BookingRoomsBar({
     bookingRoomId: string;
     roomName: string;
   } | null>(null);
+
+  // Helper function to find room by bookingRoomId from either roomsByType or rooms
+  const findRoomByBookingRoomId = (bookingRoomId: string) => {
+    // First try roomsByType
+    if (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0) {
+      for (const roomType of bookingDetail.roomsByType) {
+        const room = roomType.rooms?.find(
+          (r) => r.bookingRoomId === bookingRoomId,
+        );
+        if (room) return room;
+      }
+    }
+    // Fallback to flat rooms array
+    return bookingDetail.rooms?.find((r) => r.bookingRoomId === bookingRoomId);
+  };
 
   const confirmRemoveRoom = () => {
     if (!roomToRemove) return;
@@ -255,85 +265,50 @@ export default function BookingRoomsBar({
                         bookingState.permissions.canEditRooms;
 
                       return (
-                        <Collapsible key={room.bookingRoomId}>
-                          <CollapsibleTrigger>
-                            {/* Left: Room Info */}
-                            <div className="flex items-center gap-3 flex-1">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                                <DoorOpen className="h-4 w-4" />
-                              </div>
+                        <div
+                          key={room.bookingRoomId}
+                          className="group flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
+                        >
+                          {/* Left: Room Info */}
+                          <div className="flex items-center gap-3 flex-1">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                              <DoorOpen className="h-4 w-4" />
+                            </div>
 
-                              <div className="flex flex-col gap-0.5">
-                                <div className="text-sm font-medium ">
-                                  <span>{room.roomName}</span>
-                                </div>
+                            <div className="flex flex-col gap-0.5">
+                              <div className="text-sm font-medium">
+                                <span>
+                                  {room.roomName || "Chưa có phòng cụ thể"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 {room.baseRate && (
-                                  <span className="text-xs text-muted-foreground">
+                                  <span>
                                     {formatMoney(room.baseRate).vndFormatted}{" "}
                                     ₫/đêm
                                   </span>
                                 )}
                               </div>
                             </div>
+                          </div>
 
-                            {/* Right: Actions */}
-                            <div className="flex items-center gap-2">
-                              {canRemove && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveRoom(
-                                      room.bookingRoomId!,
-                                      room.roomName!,
-                                    );
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </CollapsibleTrigger>
-
-                          {/* Expanded Details */}
-                          <CollapsibleContent className="border-t border-border bg-muted/30 px-3 py-3 space-y-2">
-                            {room.fromDate && (
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">
-                                  Check-in:
-                                </span>
-                                <span className="font-medium text-foreground">
-                                  {format(
-                                    parseISO(room.fromDate),
-                                    "dd/MM/yyyy",
-                                  )}
-                                </span>
-                              </div>
-                            )}
-
-                            {room.toDate && (
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">
-                                  Check-out:
-                                </span>
-                                <span className="font-medium text-foreground">
-                                  {format(parseISO(room.toDate), "dd/MM/yyyy")}
-                                </span>
-                              </div>
-                            )}
-
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-muted-foreground">
-                                ID phòng:
-                              </span>
-                              <span className="font-mono text-[10px] text-muted-foreground">
-                                {room.roomId}
-                              </span>
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
+                          {/* Right: Actions */}
+                          {canRemove && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() =>
+                                handleRemoveRoom(
+                                  room.bookingRoomId!,
+                                  room.roomName!,
+                                )
+                              }
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       );
                     })}
                 </div>
@@ -431,11 +406,7 @@ export default function BookingRoomsBar({
                   );
                   if (!bookingRoomId) return null;
 
-                  const existingRoom =
-                    bookingDetail.rooms &&
-                    bookingDetail.rooms.find(
-                      (r) => r.bookingRoomId === bookingRoomId,
-                    );
+                  const existingRoom = findRoomByBookingRoomId(bookingRoomId);
                   if (!existingRoom) return null;
 
                   return (
@@ -455,7 +426,15 @@ export default function BookingRoomsBar({
                             {existingRoom.roomName}
                           </span>
                           <span className="text-[10px] text-destructive/70 uppercase tracking-wide">
-                            {existingRoom.roomTypeName}
+                            {existingRoom.baseRate && (
+                              <>
+                                {
+                                  formatMoney(existingRoom.baseRate)
+                                    .vndFormatted
+                                }{" "}
+                                ₫/đêm
+                              </>
+                            )}
                           </span>
                         </div>
                       </div>

@@ -11,8 +11,9 @@ const {
   UpdateRoomDetailResponseSchema,
   CreateRoomRequestSchema,
   UpdateRoomDetailRequestSchema,
-  AvailableRoomsInternalResponseSchema,
   QRCodeResponseSchema,
+  AvailableRoomsResponseSchema,
+  AvailableRoomsWithDetailResponseSchema,
 } = RoomSchema;
 
 export type RoomDetailResponseDto = z.infer<typeof RoomDetailSchema>;
@@ -28,9 +29,6 @@ export type CreateRoomResponseDto = z.infer<typeof CreateRoomResponseSchema>;
 export type UpdateRoomDetailResponseDto = z.infer<
   typeof UpdateRoomDetailResponseSchema
 >;
-export type AvailableRoomsInternalResponseDto = z.infer<
-  typeof AvailableRoomsInternalResponseSchema
->;
 
 export type CreateRoomRequestDto = z.infer<typeof CreateRoomRequestSchema>;
 export type UpdateRoomDetailRequestDto = z.infer<
@@ -38,3 +36,10 @@ export type UpdateRoomDetailRequestDto = z.infer<
 >;
 
 export type QRCodeResponseDto = z.infer<typeof QRCodeResponseSchema>;
+
+export type AvailableRoomsResponseDto = z.infer<
+  typeof AvailableRoomsResponseSchema
+>;
+export type AvailableRoomsWithDetailResponseDto = z.infer<
+  typeof AvailableRoomsWithDetailResponseSchema
+>;
