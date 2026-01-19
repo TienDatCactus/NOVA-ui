@@ -6,12 +6,12 @@ import { RoomSchema } from "../rooms/room.schema";
 
 const BookingSourceEnum = z.enum(
   ["DirectStaff", "DirectCustomer", "OTA", "Agency", "RoomBlock"],
-  "Nguồn đặt phòng không hợp lệ"
+  "Nguồn đặt phòng không hợp lệ",
 );
 
 const BookingOperationTypeEnum = z.enum(
   ["Add", "Change", "Remove"],
-  "Loại thao tác đặt phòng không hợp lệ"
+  "Loại thao tác đặt phòng không hợp lệ",
 );
 const BookingStatusEnum = z.enum([
   "Pending",
@@ -33,7 +33,7 @@ const StaffCreateBookingSchema = z
         z.object({
           roomTypeId: z.string("Mã loại phòng không hợp lệ"),
           quantity: z.number("Số lượng không hợp lệ").int().min(0),
-        })
+        }),
       )
       .optional(),
     checkinDate: z.union([
@@ -101,7 +101,7 @@ const StaffCreateBookingSchema = z
     {
       message: "Ngày thực hiện dịch vụ phải nằm trong khoảng thời gian lưu trú",
       path: ["serviceOrder"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -114,7 +114,7 @@ const StaffCreateBookingSchema = z
     {
       message: "Booking OTA phải có kênh OTA và mã booking OTA",
       path: ["otaInformationId"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -126,7 +126,7 @@ const StaffCreateBookingSchema = z
     {
       message: "Booking OTA phải có email khách hàng để xác nhận",
       path: ["guestEmail"],
-    }
+    },
   );
 
 const StaffBookingPricePreviewRequestSchema = z.object({
@@ -148,7 +148,7 @@ const StaffBookingPricePreviewRequestSchema = z.object({
     z.object({
       roomTypeId: z.string(),
       quantity: z.number(),
-    })
+    }),
   ),
   includeBreakfast: z.boolean().default(false),
   services: z.array(
@@ -158,7 +158,7 @@ const StaffBookingPricePreviewRequestSchema = z.object({
       quantity: z.number(),
       scheduledDate: z.string(),
       note: z.string(),
-    })
+    }),
   ),
 });
 
@@ -177,7 +177,7 @@ const StaffBookingPricePreviewResponseSchema = z.object({
       ratePerNight: z.number(),
       nights: z.number(),
       subtotal: z.number(),
-    })
+    }),
   ),
   breakfast: z
     .object({
@@ -223,7 +223,7 @@ const UpdateBookingRoomRequestSchema = z
     {
       message:
         "Invalid room operation: ADD requires roomId+fromDate+toDate, CHANGE requires bookingRoomId+newRoomId, REMOVE requires bookingRoomId",
-    }
+    },
   );
 
 const StaffUpdateBookingRequestSchema = z.object({
@@ -302,9 +302,9 @@ const BookingPendingChargesResponseSchema = z.object({
             unitPrice: z.number(),
             servedAt: z.string().optional().nullable(),
             subtotal: z.number(),
-          })
+          }),
         ),
-      })
+      }),
     ),
     serviceOrders: z.array(
       z.object({
@@ -318,7 +318,7 @@ const BookingPendingChargesResponseSchema = z.object({
         performedAt: z.string().optional().nullable(),
         status: z.string(),
         subtotal: z.number(),
-      })
+      }),
     ),
   }),
   paidOrders: z.array(
@@ -329,7 +329,7 @@ const BookingPendingChargesResponseSchema = z.object({
       orderId: z.string(),
       total: z.number(),
       paidAt: z.string(),
-    })
+    }),
   ),
   summary: z.object({
     roomBalance: z.number(),
@@ -386,7 +386,7 @@ const BookingItemByWeekSchema = z.object({
         checkoutDate: z.string(),
         segmentFrom: z.string(),
         segmentTo: z.string(),
-      })
+      }),
     )
     .default([])
     .describe("Danh sách các booking thuộc phòng này"),
@@ -433,12 +433,12 @@ const BookingDetailItemSchema = z.object({
               fromDate: z.string().optional().nullable(),
               toDate: z.string().optional().nullable(),
               baseRate: z.number().optional().nullable(),
-            })
+            }),
           )
           .optional()
           .nullable(),
         roomCount: z.number().optional().nullable(),
-      })
+      }),
     )
     .optional()
     .nullable(),
@@ -461,7 +461,7 @@ const StaffChangeRoomRequestSchema = z.object({
     z.object({
       bookingRoomId: z.string("Booking Room ID không hợp lệ"),
       newRoomId: z.string("New Room ID không hợp lệ"),
-    })
+    }),
   ),
 });
 
@@ -541,7 +541,7 @@ const StaffAddCompletedChargesRequestSchema = z.object({
       z.object({
         menuItemId: z.string(),
         quantity: z.number().min(0),
-      })
+      }),
     )
     .optional(),
   serviceItems: z
@@ -549,7 +549,7 @@ const StaffAddCompletedChargesRequestSchema = z.object({
       z.object({
         serviceItemId: z.string(),
         quantity: z.number().min(0),
-      })
+      }),
     )
     .optional(),
   bookingRoomId: z.string().optional(),
@@ -577,7 +577,7 @@ const AvailableRoomForChangeSchema = z.object({
 });
 
 const AvailableRoomsForChangeResponseSchema = z.array(
-  AvailableRoomForChangeSchema
+  AvailableRoomForChangeSchema,
 );
 
 const UpdateBookingStatusRequestSchema = z.object({
@@ -634,11 +634,11 @@ const OrderableBookingResponseSchema = z.object({
           roomId: z.string(),
           roomName: z.string(),
           roomTypeName: z.string(),
-        })
+        }),
       ),
       hasUnpaidCheckoutInvoice: z.boolean(),
       checkoutInvoiceBalance: z.number().optional().nullable(),
-    })
+    }),
   ),
 
   confirmedBookings: z.array(
@@ -658,9 +658,9 @@ const OrderableBookingResponseSchema = z.object({
           roomId: z.string(),
           roomName: z.string(),
           roomTypeName: z.string(),
-        })
+        }),
       ),
-    })
+    }),
   ),
 });
 
@@ -704,7 +704,7 @@ const PreAssignRoomsRequestSchema = z.object({
     z.object({
       bookingRoomId: z.string(),
       roomId: z.string(),
-    })
+    }),
   ),
 });
 
@@ -719,9 +719,14 @@ const PreAssignRoomsResponseSchema = z.object({
       roomTypeName: z.string(),
       wasChange: z.boolean(),
       previousRoomName: z.string(),
-    })
+    }),
   ),
   message: z.string().optional(),
+});
+
+const ChangeRoomTypeRequestSchema = z.object({
+  bookingRoomId: z.string("Booking Room ID không hợp lệ"),
+  newRoomTypeId: z.string("New Room Type ID không hợp lệ"),
 });
 
 export const BookingSchema = {
@@ -773,4 +778,5 @@ export const BookingSchema = {
   CheckinBookingRequestSchema,
   PreAssignRoomsRequestSchema,
   PreAssignRoomsResponseSchema,
+  ChangeRoomTypeRequestSchema,
 };

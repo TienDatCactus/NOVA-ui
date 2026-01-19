@@ -1,5 +1,12 @@
 import { format, parseISO } from "date-fns";
-import { ArrowUpCircle, DoorOpen, Plus, RotateCcw, Trash2 } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ArrowUpCircle,
+  DoorOpen,
+  Plus,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -40,6 +47,7 @@ import {
 import ExistingRoomItemWrapper from "../fragments/existing-room-item-wrapper";
 import NewRoomItemWrapper from "../fragments/new-room-item-wrapper";
 import { AddRoomModal } from "./operations/add-room-modal";
+import { ChangeRoomTypeDialog } from "./operations/change-room-type-dialog";
 import { UpgradeRoomDialog } from "./operations/upgrade-room-dialog";
 
 interface BookingRoomsBarProps {
@@ -64,6 +72,7 @@ export default function BookingRoomsBar({
   const { fields, remove, append } = roomsFieldArray;
   const [addRoomModalOpen, setAddRoomModalOpen] = useState(false);
   const [upgradeRoomOpen, setUpgradeRoomOpen] = useState(false);
+  const [changeRoomTypeOpen, setChangeRoomTypeOpen] = useState(false);
   const [removeRoomConfirmOpen, setRemoveRoomConfirmOpen] = useState(false);
   const [roomToRemove, setRoomToRemove] = useState<{
     bookingRoomId: string;
@@ -190,7 +199,6 @@ export default function BookingRoomsBar({
       );
     }
   };
-
   return (
     <>
       <Card className="shadow-sm hover:border-primary bg-background flex flex-col w-96">
@@ -213,7 +221,6 @@ export default function BookingRoomsBar({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {" "}
                 {/* Pre-assign rooms - only for Pending/Confirmed status */}
                 {(bookingDetail.status === "Pending" ||
                   bookingDetail.status === "Confirmed") && (
@@ -228,13 +235,23 @@ export default function BookingRoomsBar({
                     Upgrade phòng
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem
-                  onClick={() => setAddRoomModalOpen(true)}
-                  disabled={!bookingState.permissions.canEditRooms}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Thêm phòng
-                </DropdownMenuItem>
+                {/* Change room type - Confirmed or CheckedIn */}
+                {(bookingDetail.status === "Confirmed" ||
+                  bookingDetail.status === "CheckedIn") && (
+                  <DropdownMenuItem onClick={() => setChangeRoomTypeOpen(true)}>
+                    <ArrowLeftRight className="w-4 h-4 mr-1" />
+                    Đổi loại phòng
+                  </DropdownMenuItem>
+                )}
+                {bookingDetail.status === "CheckedIn" && (
+                  <DropdownMenuItem
+                    onClick={() => setAddRoomModalOpen(true)}
+                    disabled={!bookingState.permissions.canEditRooms}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Thêm phòng
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -467,6 +484,11 @@ export default function BookingRoomsBar({
       <UpgradeRoomDialog
         open={upgradeRoomOpen}
         onOpenChange={setUpgradeRoomOpen}
+        bookingDetail={bookingDetail}
+      />
+      <ChangeRoomTypeDialog
+        open={changeRoomTypeOpen}
+        onOpenChange={setChangeRoomTypeOpen}
         bookingDetail={bookingDetail}
       />
       <AlertDialog

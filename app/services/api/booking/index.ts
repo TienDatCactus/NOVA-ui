@@ -12,6 +12,7 @@ import type {
   BookingOTAResponseDto,
   BookingPayForRoomRequestDto,
   BookingPendingChargesResponseDto,
+  ChangeRoomTypeRequestDto,
   CheckinBookingRequestDto,
   ConfirmBookingPaymentRequestDto,
   ConfirmBookingPaymentResponseDto,
@@ -68,10 +69,11 @@ const {
   StaffCheckoutPaymentResponseSchema,
   CheckinBookingRequestSchema,
   PreAssignRoomsRequestSchema,
+  ChangeRoomTypeRequestSchema,
 } = BookingSchema;
 
 async function getBookingList(
-  params: BookingListParams
+  params: BookingListParams,
 ): Promise<BookingListResponseDto> {
   try {
     const resp = await http.get(Booking.list, { params });
@@ -83,7 +85,7 @@ async function getBookingList(
 }
 
 async function getBookingListByWeek(
-  params: BookingListParams
+  params: BookingListParams,
 ): Promise<BookingListByWeekResponseDto> {
   try {
     const resp = await http.get(Booking.listByWeek, { params });
@@ -95,7 +97,7 @@ async function getBookingListByWeek(
 }
 
 async function getBookingDetail(
-  params: BookingListParams
+  params: BookingListParams,
 ): Promise<BookingDetailResponseDto> {
   try {
     const code = params.code?.trim();
@@ -144,12 +146,12 @@ async function exportBookings(date?: string): Promise<Blob> {
 }
 
 async function updateBookingStatus(
-  data: UpdateBookingStatusRequestDto
+  data: UpdateBookingStatusRequestDto,
 ): Promise<UpdateBookingStatusResponseDto> {
   try {
     const resp = await http.post(
       Booking.updateStatus,
-      UpdateBookingStatusRequestSchema.parse(data)
+      UpdateBookingStatusRequestSchema.parse(data),
     );
     return UpdateBookingStatusResponseSchema.parse(resp.data);
   } catch (error) {
@@ -164,7 +166,7 @@ async function updateBookingStatus(
 
 async function staffCreateBooking(
   idempotencyKey: string,
-  data: StaffCreateBookingDto
+  data: StaffCreateBookingDto,
 ): Promise<StaffCreateBookingResponseDto> {
   try {
     const parsed = StaffCreateBookingSchema.parse(data);
@@ -189,7 +191,7 @@ async function staffCreateBooking(
 
 async function staffBookingPricePreview(
   idempotencyKey: string,
-  data: StaffBookingPricePreviewRequestDto
+  data: StaffBookingPricePreviewRequestDto,
 ): Promise<StaffBookingPricePreviewResponseDto> {
   try {
     const resp = await http.post(
@@ -199,7 +201,7 @@ async function staffBookingPricePreview(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
     return StaffBookingPricePreviewResponseSchema.parse(resp.data);
   } catch (error) {
@@ -210,12 +212,12 @@ async function staffBookingPricePreview(
 
 async function staffUpdateBookingDetail(
   id: string,
-  data: StaffUpdateBookingRequestDto
+  data: StaffUpdateBookingRequestDto,
 ): Promise<StaffUpdateBookingResponseDto> {
   try {
     const resp = await http.put(
       Booking.update(id),
-      StaffUpdateBookingRequestSchema.parse(data)
+      StaffUpdateBookingRequestSchema.parse(data),
     );
     return StaffUpdateBookingResponseSchema.parse(resp.data);
   } catch (error) {
@@ -226,11 +228,11 @@ async function staffUpdateBookingDetail(
 
 async function getAvailableRoomsForChange(
   bookingId: string,
-  bookingRoomId?: string
+  bookingRoomId?: string,
 ): Promise<AvailableRoomsForChangeResponseDto> {
   try {
     const resp = await http.get(
-      Booking.changeRoom(bookingId, bookingRoomId || "")
+      Booking.changeRoom(bookingId, bookingRoomId || ""),
     );
     return AvailableRoomsForChangeResponseSchema.parse(resp.data);
   } catch (error) {
@@ -240,12 +242,12 @@ async function getAvailableRoomsForChange(
 
 async function staffChangeRoom(
   id: string,
-  data: StaffChangeRoomRequestDto
+  data: StaffChangeRoomRequestDto,
 ): Promise<StaffChangeRoomResponseDto> {
   try {
     const resp = await http.put(
       Booking.update(id),
-      StaffChangeRoomRequestSchema.parse(data)
+      StaffChangeRoomRequestSchema.parse(data),
     );
     return StaffChangeRoomResponseSchema.parse(resp.data);
   } catch (error) {
@@ -255,7 +257,7 @@ async function staffChangeRoom(
 }
 
 async function staffCancelBooking(
-  id: string
+  id: string,
 ): Promise<StaffCancelBookingResponseDto> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -266,7 +268,7 @@ async function staffCancelBooking(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
 
     return StaffCancelBookingResponseSchema.parse(resp.data);
@@ -277,7 +279,7 @@ async function staffCancelBooking(
 }
 
 async function getBookingPendingCharges(
-  bookingId: string
+  bookingId: string,
 ): Promise<BookingPendingChargesResponseDto> {
   try {
     const resp = await http.get(Booking.pendingCharges(bookingId));
@@ -290,7 +292,7 @@ async function getBookingPendingCharges(
 
 async function staffAddCompletedCharges(
   bookingId: string,
-  data: StaffAddCompletedChargesRequestDto
+  data: StaffAddCompletedChargesRequestDto,
 ): Promise<void> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -301,7 +303,7 @@ async function staffAddCompletedCharges(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
     return resp.data;
   } catch (error) {
@@ -311,7 +313,7 @@ async function staffAddCompletedCharges(
 }
 
 async function staffCreateCheckoutInvoice(
-  bookingId: string
+  bookingId: string,
 ): Promise<StaffCreateCheckoutInvoiceResponseDto> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -322,7 +324,7 @@ async function staffCreateCheckoutInvoice(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
     return StaffCreateCheckoutInvoiceResponseSchema.parse(resp.data);
   } catch (error) {
@@ -333,7 +335,7 @@ async function staffCreateCheckoutInvoice(
 
 async function staffCheckoutPayment(
   bookingId: string,
-  data: StaffCheckoutPaymentRequestDto
+  data: StaffCheckoutPaymentRequestDto,
 ): Promise<StaffCheckoutPaymentResponseDto> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -344,7 +346,7 @@ async function staffCheckoutPayment(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
     return StaffCheckoutPaymentResponseSchema.parse(resp.data);
   } catch (error) {
@@ -355,7 +357,7 @@ async function staffCheckoutPayment(
 
 async function staffCheckout(
   bookingId: string,
-  data: StaffCheckoutRequestDto
+  data: StaffCheckoutRequestDto,
 ): Promise<void> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -366,7 +368,7 @@ async function staffCheckout(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
     return resp.data;
   } catch (error) {
@@ -376,12 +378,12 @@ async function staffCheckout(
 }
 
 async function staffCheckoutMultiple(
-  data: StaffCheckoutMultipleRequestDto
+  data: StaffCheckoutMultipleRequestDto,
 ): Promise<void> {
   try {
     const resp = await http.post(
       Booking.checkoutMultiple,
-      StaffCheckoutMultipleRequestSchema.parse(data)
+      StaffCheckoutMultipleRequestSchema.parse(data),
     );
     return resp.data;
   } catch (error) {
@@ -392,7 +394,7 @@ async function staffCheckoutMultiple(
 
 async function staffConfirmBookingPayment(
   bookingId: string,
-  data: ConfirmBookingPaymentRequestDto
+  data: ConfirmBookingPaymentRequestDto,
 ): Promise<ConfirmBookingPaymentResponseDto> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -403,7 +405,7 @@ async function staffConfirmBookingPayment(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
     return ConfirmBookingPaymentResponseSchema.parse(resp.data);
   } catch (error) {
@@ -427,7 +429,7 @@ async function getOrderableBookings(): Promise<OrderableBookingResponseDto> {
 
 async function payForRooms(
   id: string,
-  data: BookingPayForRoomRequestDto
+  data: BookingPayForRoomRequestDto,
 ): Promise<void> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -438,7 +440,7 @@ async function payForRooms(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
     return resp.data;
   } catch (error) {
@@ -448,7 +450,7 @@ async function payForRooms(
 }
 
 async function unpaidRooms(
-  bookingId: string
+  bookingId: string,
 ): Promise<UnpaidRoomsForBookingDto> {
   try {
     const resp = await http.get(Booking.unpaidRooms(bookingId));
@@ -461,7 +463,7 @@ async function unpaidRooms(
 
 async function checkinBooking(
   id: string,
-  data: CheckinBookingRequestDto
+  data: CheckinBookingRequestDto,
 ): Promise<void> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -472,7 +474,7 @@ async function checkinBooking(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
     );
   } catch (error) {
     console.error(error);
@@ -482,7 +484,7 @@ async function checkinBooking(
 
 async function preAssignRooms(
   id: string,
-  data: PreAssignRoomsRequestDto
+  data: PreAssignRoomsRequestDto,
 ): Promise<PreAssignRoomsResponseDto> {
   const idempotencyKey = crypto.randomUUID();
   try {
@@ -493,7 +495,29 @@ async function preAssignRooms(
         headers: {
           "Idempotency-Key": idempotencyKey,
         },
-      }
+      },
+    );
+    return resp.data;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function changeRoomType(
+  id: string,
+  data: ChangeRoomTypeRequestDto,
+): Promise<void> {
+  const idempotencyKey = crypto.randomUUID();
+  try {
+    const resp = await http.post(
+      Booking.changeRoomType(id),
+      ChangeRoomTypeRequestSchema.parse(data),
+      {
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      },
     );
     return resp.data;
   } catch (error) {
@@ -529,4 +553,5 @@ export const BookingService = {
   unpaidRooms,
   checkinBooking,
   preAssignRooms,
+  changeRoomType,
 };

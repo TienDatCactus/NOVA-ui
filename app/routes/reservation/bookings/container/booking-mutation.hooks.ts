@@ -5,6 +5,7 @@ import type z from "zod";
 import { BookingService } from "~/services/api/booking";
 import type { BookingSchema } from "~/services/api/booking/booking.schema";
 import type {
+  ChangeRoomTypeRequestDto,
   CheckinBookingRequestDto,
   PreAssignRoomsRequestDto,
   StaffChangeRoomRequestDto,
@@ -46,7 +47,7 @@ function useUpdateBooking(bookingId: string) {
     onError: (error) => {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data.message || "Cập nhật đặt phòng thất bại"
+          error.response?.data.message || "Cập nhật đặt phòng thất bại",
         );
       }
     },
@@ -136,7 +137,7 @@ function useUpdateBookingStatus(bookingId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (
-      status: z.infer<typeof BookingSchema.BookingStatusEnum>
+      status: z.infer<typeof BookingSchema.BookingStatusEnum>,
     ) => {
       return await BookingService.updateBookingStatus({
         bookingId: bookingId,
@@ -172,7 +173,7 @@ function useUpdateBookingStatus(bookingId: string) {
     onError: (error) => {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data.message || "Cập nhật trạng thái thất bại"
+          error.response?.data.message || "Cập nhật trạng thái thất bại",
         );
       }
     },
@@ -185,7 +186,7 @@ function useExportBookings(date?: string) {
     onError: (error) => {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data.message || "Xuất báo cáo đặt phòng thất bại"
+          error.response?.data.message || "Xuất báo cáo đặt phòng thất bại",
         );
       }
     },
@@ -257,6 +258,39 @@ function usePreAssignRooms(bookingId: string) {
     },
   });
 }
+
+function useChangeRoomType(bookingId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: ChangeRoomTypeRequestDto) =>
+      await BookingService.changeRoomType(bookingId, data),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-detail"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings"],
+          exact: false,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings-rooms-week"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderable-bookings"],
+        }),
+      ]);
+      toast.success("Gán phòng thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message || "Gán phòng thất bại");
+      }
+    },
+  });
+}
+
 export {
   useCancelBooking,
   useChangeRoom,
@@ -265,4 +299,5 @@ export {
   useUpdateBooking,
   useUpdateBookingStatus,
   usePreAssignRooms,
+  useChangeRoomType,
 };

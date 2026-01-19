@@ -419,7 +419,8 @@ export function CheckinDialog({
                                                               r.roomId ===
                                                               currentValue,
                                                           )?.roomName ||
-                                                            currentValue}
+                                                            bookingRoom.roomName ||
+                                                            "Phòng đã chọn"}
                                                         </span>
                                                       </>
                                                     ) : (
@@ -600,12 +601,28 @@ export function CheckinDialog({
                                               : "text-foreground font-medium border-primary/50 bg-primary/5",
                                           )}
                                         >
-                                          <div className="flex items-center gap-2 truncate">
-                                            {currentValue ? (
-                                              <BedDouble className="h-4 w-4 text-primary" />
-                                            ) : null}
-                                            <SelectValue placeholder="-- Chọn phòng trống --" />
-                                          </div>
+                                          <SelectValue placeholder="-- Chọn phòng trống --">
+                                            <div className="flex items-center gap-2 truncate">
+                                              {currentValue ? (
+                                                <>
+                                                  <BedDouble className="h-4 w-4 text-primary" />
+                                                  <span>
+                                                    {validRooms.find(
+                                                      (r) =>
+                                                        r.roomId ===
+                                                        currentValue,
+                                                    )?.roomName ||
+                                                      bookingRoom.roomName ||
+                                                      "Phòng đã chọn"}
+                                                  </span>
+                                                </>
+                                              ) : (
+                                                <span>
+                                                  -- Chọn phòng trống --
+                                                </span>
+                                              )}
+                                            </div>
+                                          </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
                                           {validRooms.length === 0 ? (

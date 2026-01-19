@@ -10,6 +10,7 @@ import { cn, formatMoney } from "~/lib/utils";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
 import ActionsMenuCell from "../../fragments/actions.cell";
 import PayrollDetailDialog from "../payroll-detail-dialog";
+import { useLockPayroll } from "../../container/query.hooks";
 
 export const columns: ColumnDef<PayrollItemDto>[] = [
   {
@@ -112,7 +113,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
         <div
           className={cn(
             "text-center font-mono",
-            val === 0 && "text-muted-foreground/50"
+            val === 0 && "text-muted-foreground/50",
           )}
         >
           {val}
@@ -131,7 +132,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
         <div
           className={cn(
             "text-center font-mono",
-            val > 0 ? "text-destructive" : "text-muted-foreground/50"
+            val > 0 ? "text-destructive" : "text-muted-foreground/50",
           )}
         >
           {val}
@@ -174,7 +175,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
           className={cn(
             "text-right font-mono",
             amount < 0 ? "text-destructive" : "text-foreground",
-            amount === 0 && "text-muted-foreground/50"
+            amount === 0 && "text-muted-foreground/50",
           )}
         >
           {amount > 0 ? "+" : ""}
@@ -217,7 +218,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
         <div
           className={cn(
             "text-right font-mono",
-            paid === 0 && "text-muted-foreground/50"
+            paid === 0 && "text-muted-foreground/50",
           )}
         >
           {formatMoney(paid).vndFormatted}
@@ -248,7 +249,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
             className={cn(
               "font-mono font-medium",
               remaining < 0 ? "text-destructive" : "text-foreground",
-              remaining === 0 && "text-muted-foreground/50"
+              remaining === 0 && "text-muted-foreground/50",
             )}
           >
             {formatMoney(remaining).vndFormatted}
@@ -265,7 +266,7 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
     ),
     cell: ({ row }) => {
       const hasUnusedLeavePending = row.getValue(
-        "hasUnusedLeavePending"
+        "hasUnusedLeavePending",
       ) as boolean;
 
       if (!hasUnusedLeavePending) return null;
@@ -290,10 +291,14 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
     ),
     cell: ({ row }) => {
       const locked = row.getValue("locked");
+      const { mutate } = useLockPayroll();
+      const handleLockPayroll = () => {
+        if (!locked) mutate(row.original.payrollId);
+      };
       return (
-        <Badge variant={locked ? "destructive" : "default"}>
+        <Button variant="outline" size="sm" onClick={handleLockPayroll}>
           <span>{locked ? "Đã khóa" : "Chưa khóa"}</span>
-        </Badge>
+        </Button>
       );
     },
     size: 60,

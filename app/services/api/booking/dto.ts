@@ -139,3 +139,6 @@ export type PreAssignRoomsRequestDto = z.infer<
 export type PreAssignRoomsResponseDto = z.infer<
   typeof PreAssignRoomsResponseSchema
 >;
+export type ChangeRoomTypeRequestDto = z.infer<
+  typeof BookingSchema.ChangeRoomTypeRequestSchema
+>;

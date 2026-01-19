@@ -29,7 +29,7 @@ const {
  * Get payroll grid list
  */
 async function getPayrollGrid(
-  params?: PayrollGridParams
+  params?: PayrollGridParams,
 ): Promise<PayrollListDto> {
   try {
     const resp = await http.get(StaffPayroll.grid, { params });
@@ -44,7 +44,7 @@ async function getPayrollGrid(
  * Generate payroll for all staff (bulk)
  */
 async function generatePayroll(
-  data: GeneratePayrollDto
+  data: GeneratePayrollDto,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const validated = GeneratePayrollSchema.parse(data);
@@ -61,13 +61,13 @@ async function generatePayroll(
  */
 async function generateSinglePayroll(
   staffId: string,
-  data: GenerateSinglePayrollDto
+  data: GenerateSinglePayrollDto,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const validated = GenerateSinglePayrollSchema.parse(data);
     const resp = await http.post(
       StaffPayroll.generateSingle(staffId),
-      validated
+      validated,
     );
     return resp.data;
   } catch (error) {
@@ -94,7 +94,7 @@ async function getPayrollDetail(id: string): Promise<PayrollDetailDto> {
  */
 async function updatePaidAmountPayroll(
   id: string,
-  data: UpdatePaidAmountPayrollDto
+  data: UpdatePaidAmountPayrollDto,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const validated = UpdatePaidAmountPayrollSchema.parse(data);
@@ -111,7 +111,7 @@ async function updatePaidAmountPayroll(
  */
 async function applyUnusedLeave(
   id: string,
-  data: ApplyUnusedLeaveDto
+  data: ApplyUnusedLeaveDto,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const validated = ApplyUnusedLeaveSchema.parse(data);
@@ -141,7 +141,7 @@ async function getComponents(id: string): Promise<PayrollComponentListDto> {
  */
 async function addComponent(
   id: string,
-  data: PayrollComponentInputDto
+  data: PayrollComponentInputDto,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const validated = PayrollComponentInputSchema.parse(data);
@@ -158,13 +158,13 @@ async function addComponent(
  */
 async function updateComponent(
   componentId: string,
-  data: PayrollComponentInputDto
+  data: PayrollComponentInputDto,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const validated = PayrollComponentInputSchema.parse(data);
     const resp = await http.put(
       StaffPayroll.updateComponent(componentId),
-      validated
+      validated,
     );
     return resp.data;
   } catch (error) {
@@ -177,7 +177,7 @@ async function updateComponent(
  * Delete component
  */
 async function deleteComponent(
-  componentId: string
+  componentId: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const resp = await http.delete(StaffPayroll.deleteComponent(componentId));
@@ -254,7 +254,7 @@ async function refreshDays(params: {
  * Refresh days for single payroll (1 nhân viên)
  */
 async function refreshSinglePayroll(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const resp = await http.post(StaffPayroll.refreshSinglePayroll(id));
@@ -267,19 +267,29 @@ async function refreshSinglePayroll(
 
 async function createSalaryExpense(
   payrollId: string,
-  data: CreateSalaryExpenseRequestDto
+  data: CreateSalaryExpenseRequestDto,
 ): Promise<void> {
   try {
     const resp = await http.post(
       StaffPayroll.createSalaryExpense(payrollId),
-      data
+      data,
     );
     return resp.data;
   } catch (error) {
     return Promise.reject(error);
   }
 }
-
+async function lockPayroll(
+  id: string,
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const resp = await http.post(StaffPayroll.lock(id));
+    return resp.data;
+  } catch (error) {
+    console.log(error);
+    return Promise.reject(error);
+  }
+}
 export const StaffPayrollService = {
   getPayrollGrid,
   generatePayroll,
@@ -296,4 +306,5 @@ export const StaffPayrollService = {
   refreshDays,
   refreshSinglePayroll,
   createSalaryExpense,
+  lockPayroll,
 };

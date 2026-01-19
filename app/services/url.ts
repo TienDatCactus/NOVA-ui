@@ -53,6 +53,7 @@ const Booking = {
   unpaidRooms: (bookingId: string) => `StaffBookings/${bookingId}/unpaid-rooms`,
   checkin: (id: string) => `StaffBookings/${id}/checkin`,
   preAssign: (id: string) => `StaffBookings/${id}/pre-assign-rooms`,
+  changeRoomType: (id: string) => `StaffBookings/${id}/change-room-type`,
 };
 
 const OTAInformation = {

@@ -54,7 +54,7 @@ const LOCKED_STATUSES: BookingStatus[] = ["CheckedOut", "Cancelled"];
 
 function hasAnyInvoiceWithPayment(invoices: InvoiceListItemDto[]): boolean {
   return invoices.some(
-    (inv) => inv.status !== "Voided" && (inv.paidAmount || 0) > 0
+    (inv) => inv.status !== "Voided" && (inv.paidAmount || 0) > 0,
   );
 }
 
@@ -64,7 +64,7 @@ function canEditBasicInfo(status: BookingStatus): boolean {
 
 function canEditDates(
   status: BookingStatus,
-  invoices: InvoiceListItemDto[]
+  invoices: InvoiceListItemDto[],
 ): boolean {
   if (LOCKED_STATUSES.includes(status)) return false;
   return !hasAnyInvoiceWithPayment(invoices);
@@ -78,7 +78,7 @@ function canEditRooms(status: BookingStatus): boolean {
 
 function canEditGuests(
   status: BookingStatus,
-  invoices: InvoiceListItemDto[]
+  invoices: InvoiceListItemDto[],
 ): boolean {
   if (!PRE_STAY_STATUSES.includes(status)) return false;
   return !hasAnyInvoiceWithPayment(invoices);
@@ -86,7 +86,7 @@ function canEditGuests(
 
 function getDateBlockReason(
   status: BookingStatus,
-  invoices: InvoiceListItemDto[]
+  invoices: InvoiceListItemDto[],
 ): string | null {
   if (LOCKED_STATUSES.includes(status)) {
     return "Không thể thay đổi ngày cho booking đã kết thúc";
@@ -99,7 +99,7 @@ function getDateBlockReason(
 
 function getGeneralBlockReason(
   status: BookingStatus,
-  invoices: InvoiceListItemDto[]
+  invoices: InvoiceListItemDto[],
 ): string | null {
   if (status === "Cancelled") {
     return "Booking đã bị hủy";
@@ -121,10 +121,10 @@ function getGeneralBlockReason(
 // ============================================
 
 function calculateFinancialStatus(
-  invoices: InvoiceListItemDto[] | undefined
+  invoices: InvoiceListItemDto[] | undefined,
 ): BookingFinancialSummary {
   const activeInvoices = (invoices || []).filter(
-    (inv) => inv.status !== "Voided"
+    (inv) => inv.status !== "Voided",
   );
 
   if (activeInvoices.length === 0) {
@@ -140,22 +140,22 @@ function calculateFinancialStatus(
 
   const totalInvoiced = activeInvoices.reduce(
     (sum, inv) => sum + (inv.total || 0),
-    0
+    0,
   );
   const totalPaid = activeInvoices.reduce(
     (sum, inv) => sum + (inv.paidAmount || 0),
-    0
+    0,
   );
   const totalBalance = activeInvoices.reduce(
     (sum, inv) => sum + (inv.balance || 0),
-    0
+    0,
   );
 
   const unpaidInvoiceCount = activeInvoices.filter(
-    (inv) => (inv.balance || 0) > 0
+    (inv) => (inv.balance || 0) > 0,
   ).length;
   const paidInvoiceCount = activeInvoices.filter(
-    (inv) => inv.status === "Paid"
+    (inv) => inv.status === "Paid",
   ).length;
 
   let financialStatus: BookingFinancialStatus;
@@ -189,7 +189,7 @@ function calculateFinancialStatus(
  * Reduces 5 files (~600 lines) to 1 file (~180 lines)
  */
 export function useBookingState(
-  bookingDetail: BookingDetailResponseDto | undefined
+  bookingDetail: BookingDetailResponseDto | undefined,
 ): BookingState {
   return useMemo(() => {
     if (!bookingDetail) {
@@ -267,7 +267,7 @@ export function canInvoiceAcceptPayment(status: string): {
 export function validatePaymentAmount(
   paidAmount: number,
   balance: number,
-  status: string
+  status: string,
 ): { isValid: boolean; error?: string } {
   if (paidAmount <= 0) {
     return { isValid: false, error: "Số tiền phải lớn hơn 0" };
@@ -329,7 +329,7 @@ export function canCheckoutBooking(
   pendingOrders?: {
     posOrders?: any[];
     serviceOrders?: any[];
-  }
+  },
 ): CheckoutEligibility {
   const reasons: string[] = [];
   const warnings: string[] = [];
@@ -349,13 +349,13 @@ export function canCheckoutBooking(
 
   if (totalPendingOrders > 0) {
     reasons.push(
-      `Còn ${totalPendingOrders} order chưa được tạo invoice. Vui lòng tạo checkout invoice trước.`
+      `Còn ${totalPendingOrders} order chưa được tạo invoice. Vui lòng tạo checkout invoice trước.`,
     );
   }
 
   // Rule 3: All invoices must be paid
   const activeInvoices = (invoices || []).filter(
-    (inv) => inv.status !== "Voided"
+    (inv) => inv.status !== "Voided",
   );
 
   const unpaidInvoices = activeInvoices.filter((inv) => (inv.balance || 0) > 0);
@@ -363,27 +363,27 @@ export function canCheckoutBooking(
   if (unpaidInvoices.length > 0) {
     const totalUnpaid = unpaidInvoices.reduce(
       (sum, inv) => sum + (inv.balance || 0),
-      0
+      0,
     );
     reasons.push(
-      `Còn ${unpaidInvoices.length} hóa đơn chưa thanh toán (tổng: ${formatMoney(totalUnpaid).vndFormatted})`
+      `Còn ${unpaidInvoices.length} hóa đơn chưa thanh toán (tổng: ${formatMoney(totalUnpaid).vndFormatted})`,
     );
   }
 
   // Rule 4: Check for overpaid invoices (warning only)
   const overpaidInvoices = activeInvoices.filter(
-    (inv) => inv.status === "Overpaid"
+    (inv) => inv.status === "Overpaid",
   );
 
   if (overpaidInvoices.length > 0) {
     const totalOverpaid = overpaidInvoices.reduce(
       (sum, inv) => sum + Math.abs(inv.balance || 0),
-      0
+      0,
     );
     warnings.push(
       `Có ${overpaidInvoices.length} hóa đơn thanh toán thừa (${
         formatMoney(totalOverpaid).vndFormatted
-      }). Khách hàng cần được hoàn trả trước khi checkout.`
+      }). Khách hàng cần được hoàn trả trước khi checkout.`,
     );
   }
 
@@ -401,7 +401,7 @@ export function useCheckoutEligibility(
       posOrders?: any[];
       serviceOrders?: any[];
     };
-  }
+  },
 ): CheckoutEligibility {
   return useMemo(() => {
     if (!bookingDetail) {
@@ -415,7 +415,7 @@ export function useCheckoutEligibility(
     return canCheckoutBooking(
       bookingDetail.status || "",
       bookingDetail.invoices,
-      pendingCharges?.pendingOrders
+      pendingCharges?.pendingOrders,
     );
   }, [bookingDetail, pendingCharges]);
 }

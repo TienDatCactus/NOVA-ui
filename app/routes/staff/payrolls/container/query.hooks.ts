@@ -33,7 +33,7 @@ export function usePayrollDetail(
   id: string,
   options: {
     enabled?: boolean;
-  }
+  },
 ) {
   return useQuery({
     queryKey: ["payroll-detail", id],
@@ -134,7 +134,7 @@ export function useUpdatePaidAmountPayroll() {
     onError: (error) => {
       if (error instanceof AxiosError)
         toast.error(
-          error.response?.data?.message || "Lỗi khi cập nhật bảng lương"
+          error.response?.data?.message || "Lỗi khi cập nhật bảng lương",
         );
     },
   });
@@ -165,7 +165,7 @@ export function useApplyUnusedLeave() {
       if (error instanceof AxiosError)
         toast.error(
           error.response?.data?.message ||
-            "Lỗi khi áp dụng chế độ nghỉ phép chưa sử dụng"
+            "Lỗi khi áp dụng chế độ nghỉ phép chưa sử dụng",
         );
     },
   });
@@ -199,7 +199,7 @@ export function useAddPayrollComponent() {
       if (error instanceof AxiosError)
         toast.error(
           error.response?.data?.message ||
-            "Lỗi khi thêm component vào bảng lương"
+            "Lỗi khi thêm component vào bảng lương",
         );
     },
   });
@@ -236,7 +236,7 @@ export function useUpdatePayrollComponent() {
       if (error instanceof AxiosError)
         toast.error(
           error.response?.data?.message ||
-            "Lỗi khi cập nhật component bảng lương"
+            "Lỗi khi cập nhật component bảng lương",
         );
     },
   });
@@ -270,7 +270,7 @@ export function useDeletePayrollComponent() {
     onError: (error) => {
       if (error instanceof AxiosError)
         toast.error(
-          error.response?.data?.message || "Lỗi khi xóa component bảng lương"
+          error.response?.data?.message || "Lỗi khi xóa component bảng lương",
         );
     },
   });
@@ -294,7 +294,7 @@ export function useRefreshPayrollDays() {
     onError: (error) => {
       if (error instanceof AxiosError)
         toast.error(
-          error.response?.data?.message || "Lỗi khi làm mới số ngày công"
+          error.response?.data?.message || "Lỗi khi làm mới số ngày công",
         );
     },
   });
@@ -318,7 +318,7 @@ export function useRefreshSinglePayroll() {
       if (error instanceof AxiosError)
         toast.error(
           error.response?.data?.message ||
-            "Lỗi khi làm mới số ngày công bảng lương"
+            "Lỗi khi làm mới số ngày công bảng lương",
         );
     },
   });
@@ -352,7 +352,7 @@ export function useCreateSalaryExpense() {
       if (error instanceof AxiosError)
         toast.error(
           error.response?.data?.message ||
-            "Không thể tạo phiếu chi lương. Vui lòng thử lại."
+            "Không thể tạo phiếu chi lương. Vui lòng thử lại.",
         );
     },
   });
@@ -365,7 +365,7 @@ export function useExportPayslips(payrollId: string) {
       if (error instanceof AxiosError)
         toast.error(
           error.response?.data?.message ||
-            "Không thể tạo phiếu chi lương. Vui lòng thử lại."
+            "Không thể tạo phiếu chi lương. Vui lòng thử lại.",
         );
     },
   });
@@ -382,8 +382,25 @@ export function useExportMonthlyPayroll(year: number, month: number) {
       if (error instanceof AxiosError)
         toast.error(
           error.response?.data?.message ||
-            "Không thể xuất phiếu chi lương. Vui lòng thử lại."
+            "Không thể xuất phiếu chi lương. Vui lòng thử lại.",
         );
+    },
+  });
+}
+export function useLockPayroll() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => await StaffPayrollService.lockPayroll(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["payrolls"] });
+      queryClient.invalidateQueries({ queryKey: ["payroll-detail", id] });
+
+      toast.success("Khóa bảng lương thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError)
+        toast.error(error.response?.data?.message || "Lỗi khi khóa bảng lương");
     },
   });
 }
