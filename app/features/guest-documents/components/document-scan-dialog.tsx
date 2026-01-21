@@ -175,16 +175,11 @@ export default function DocumentScanDialog({
   };
 
   const handlePassportSubmit = async (data: SavePassportRequestDto) => {
-    try {
-      await savePassportMutation.mutateAsync(data);
-      toast.success("Đã lưu thông tin passport thành công");
-      onSuccess?.();
-      onOpenChange(false);
-      passportForm.reset();
-      setScannedImage(null);
-    } catch (error) {
-      toast.error("Lưu thông tin thất bại");
-    }
+    await savePassportMutation.mutateAsync(data);
+    onSuccess?.();
+    onOpenChange(false);
+    passportForm.reset();
+    setScannedImage(null);
   };
 
   const handleNationalIdSubmit = async (data: SaveNationalIdRequestDto) => {

@@ -301,7 +301,7 @@ export default function UpdateScheduleDialog({
                       </FormRow>
 
                       {/* Optional: Change Date (Only visible for 'ThisOnly') */}
-                      {applyScope === "ThisOnly" && !repeatWeekly && (
+                      {applyScope === "ThisOnly" && (
                         <FormRow
                           control={form.control}
                           name="newDate"
@@ -384,7 +384,7 @@ export default function UpdateScheduleDialog({
                     render={({ field }) => (
                       <RadioGroup
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                         className="grid grid-cols-1 gap-2"
                       >
                         <label

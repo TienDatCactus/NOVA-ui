@@ -158,6 +158,7 @@ export default function UpdatePaidAmountPayrollDialog({
                       <Input
                         {...field}
                         type="number"
+                        disabled
                         min={0}
                         className="font-mono font-medium text-emerald-600 text-base"
                         endAddon={

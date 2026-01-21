@@ -69,7 +69,7 @@ export default function CreateSalaryExpenseDialog({
           form.reset();
           onOpenChange(false);
         },
-      }
+      },
     );
   };
 
@@ -131,7 +131,11 @@ export default function CreateSalaryExpenseDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {PAYMENT_METHODS.map((method) => (
+                      {PAYMENT_METHODS.filter(
+                        (method) =>
+                          method.value == "Cash" ||
+                          method.value == "BankTransfer",
+                      ).map((method) => (
                         <SelectItem key={method.value} value={method.value}>
                           {method.label}
                         </SelectItem>

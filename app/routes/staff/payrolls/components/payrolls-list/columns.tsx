@@ -4,7 +4,7 @@ import { DataTableColumnHeader } from "~/components/table/table-header";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { AuthLoader } from "~/lib/auth/auth.loader";
-import { hasAnyRole } from "~/lib/auth/bouncer";
+import { hasAnyRole, hasRole } from "~/lib/auth/bouncer";
 import { UserRole } from "~/lib/auth/roles";
 import { cn, formatMoney } from "~/lib/utils";
 import type { PayrollItemDto } from "~/services/api/staff/staff-payroll/dto";
@@ -258,6 +258,25 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
       );
     },
   },
+  {
+    accessorKey: "holidayWorkDays",
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title="Ngày công lễ"
+        className="justify-center"
+      />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="text-center">
+          <span className={cn("font-mono font-medium")}>
+            {row.getValue("holidayWorkDays")}
+          </span>
+        </div>
+      );
+    },
+  },
   // --- Status Group ---
   {
     accessorKey: "hasUnusedLeavePending",
@@ -296,7 +315,12 @@ export const columns: ColumnDef<PayrollItemDto>[] = [
         if (!locked) mutate(row.original.payrollId);
       };
       return (
-        <Button variant="outline" size="sm" onClick={handleLockPayroll}>
+        <Button
+          variant={locked ? "warning" : "success"}
+          size="sm"
+          onClick={handleLockPayroll}
+          disabled={!hasRole(AuthLoader.getUser(), UserRole.Accountant)}
+        >
           <span>{locked ? "Đã khóa" : "Chưa khóa"}</span>
         </Button>
       );

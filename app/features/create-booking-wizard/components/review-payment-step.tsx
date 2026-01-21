@@ -120,7 +120,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
         roomTypeMap.set(room.roomTypeId, count + 1);
       });
       roomTypes = Array.from(roomTypeMap.entries()).map(
-        ([roomTypeId, quantity]) => ({ roomTypeId, quantity })
+        ([roomTypeId, quantity]) => ({ roomTypeId, quantity }),
       );
     } else if (selectionMode === "quantity") {
       // Use room type requests directly
@@ -198,19 +198,21 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
   ]);
 
   const serverTotal = useMemo(
-    () => pricePreview?.total ?? 0,
-    [pricePreview?.total]
+    () =>
+      (pricePreview?.roomsSubtotal ?? 0) +
+      (pricePreview?.breakfastSubtotal ?? 0),
+    [pricePreview?.total],
   );
   const finalTotal = useMemo(
     () =>
       overridePrice && Number(overridePrice) > 0
         ? Number(overridePrice)
         : serverTotal,
-    [overridePrice, serverTotal]
+    [overridePrice, serverTotal],
   );
   const hasNotes = useMemo(
     () => !!specialRequest || !!internalNote,
-    [specialRequest, internalNote]
+    [specialRequest, internalNote],
   );
 
   const handleRemoveRoom = useCallback(
@@ -221,7 +223,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
         shouldDirty: true,
       });
     },
-    [roomIds, form]
+    [roomIds, form],
   );
 
   const handleAbortDeposit = useCallback(() => {
@@ -256,7 +258,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                       "h-8 px-3 text-xs gap-2 transition-all border-dashed rounded-full",
                       hasNotes
                         ? "border-primary/50 text-primary bg-primary/5 hover:bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground hover:border-border"
+                        : "text-muted-foreground hover:text-foreground hover:border-border",
                     )}
                   >
                     {hasNotes ? (
@@ -348,9 +350,9 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                         ? roomIds.length
                         : roomTypeRequests.reduce(
                             (sum: number, req: any) => sum + req.quantity,
-                            0
+                            0,
                           ),
-                    [selectionMode, roomIds.length, roomTypeRequests]
+                    [selectionMode, roomIds.length, roomTypeRequests],
                   )}
                   )
                 </span>
@@ -406,7 +408,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                 <div className="space-y-2">
                   {roomTypeRequests?.map((req: any) => {
                     const roomTypeInfo = selectedRoomTypesData.find(
-                      (rt: any) => rt.id === req.roomTypeId
+                      (rt: any) => rt.id === req.roomTypeId,
                     );
                     if (!roomTypeInfo) return null;
 
@@ -424,7 +426,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                           <span className="font-medium truncate line-clamp-1 max-w-32 text-sm text-foreground">
                             {
                               roomTypeInfo.translations.find(
-                                (t) => t.languageCode === "vi"
+                                (t) => t.languageCode === "vi",
                               )?.name
                             }
                           </span>
@@ -596,7 +598,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                           onChange={(e) =>
                             form.setValue(
                               "overridePrice",
-                              e.target.value ? Number(e.target.value) : null
+                              e.target.value ? Number(e.target.value) : null,
                             )
                           }
                           className="h-9 text-sm font-mono"
@@ -645,7 +647,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                   className={cn(
                     "w-full font-semibold shadow-md transition-all hover:translate-y-[-1px]",
                     // If you have a success variant in your theme, use it. Otherwise simulating green here:
-                    "bg-emerald-600 hover:bg-emerald-700 text-white"
+                    "bg-emerald-600 hover:bg-emerald-700 text-white",
                   )}
                   disabled={finalTotal <= 0}
                 >
@@ -671,7 +673,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                       {
                         formatMoney(
                           (pricePreview?.roomsSubtotal ?? 0) +
-                            (pricePreview?.breakfastSubtotal ?? 0)
+                            (pricePreview?.breakfastSubtotal ?? 0),
                         ).vndFormatted
                       }
                     </span>
@@ -744,7 +746,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                         field.onChange(
                                           e.target.value
                                             ? Number(e.target.value)
-                                            : null
+                                            : null,
                                         )
                                       }
                                     />
@@ -765,7 +767,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                     "font-mono font-bold text-sm",
                                     balance > 0
                                       ? "text-orange-600"
-                                      : "text-emerald-600"
+                                      : "text-emerald-600",
                                   )}
                                 >
                                   {balance > 0

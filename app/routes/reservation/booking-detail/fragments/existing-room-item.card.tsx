@@ -48,20 +48,36 @@ export default function ExistingRoomItemCard({
           {/* Top Line: Name & Price */}
           <div className="flex items-center justify-between pr-2">
             <div className="font-semibold text-sm flex items-center gap-2">
-              {room.roomName}
+              {room.roomName || room.roomTypeName}
+              {!room.roomId && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                  Chưa assign
+                </Badge>
+              )}
               {isSelected && (
                 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
               )}
             </div>
             <div className="font-mono text-sm font-medium text-primary">
-              {formatMoney(roomDetail?.dailyPrice || 0).vndFormatted}
+              {
+                formatMoney(room.baseRate || roomDetail?.dailyPrice || 0)
+                  .vndFormatted
+              }
             </div>
           </div>
 
-          {/* Middle Line: Type */}
+          {/* Middle Line: Type or Room ID info */}
           <div className="text-xs text-muted-foreground flex items-center gap-1">
             <BedDouble className="h-3 w-3" />
-            <span className="truncate max-w-[150px]">{room.roomTypeName}</span>
+            {room.roomId ? (
+              <span className="truncate max-w-[150px]">
+                {room.roomTypeName}
+              </span>
+            ) : (
+              <span className="truncate max-w-[150px] italic">
+                Loại: {room.roomTypeName}
+              </span>
+            )}
           </div>
 
           {/* Bottom Line: Date Range */}
@@ -96,7 +112,10 @@ export default function ExistingRoomItemCard({
           {/* Detail: Full Type Name */}
           <div className="space-y-1">
             <span className="text-muted-foreground">Hạng phòng chi tiết</span>
-            <div className="font-medium truncate" title={room.roomTypeName}>
+            <div
+              className="font-medium truncate"
+              title={room.roomTypeName || ""}
+            >
               {room.roomTypeName || "N/A"}
             </div>
           </div>

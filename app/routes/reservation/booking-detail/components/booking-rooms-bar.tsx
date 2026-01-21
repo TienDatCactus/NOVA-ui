@@ -226,7 +226,8 @@ export default function BookingRoomsBar({
                   </DropdownMenuItem>
                 )}
                 {/* Change room type - Confirmed or CheckedIn */}
-                {(bookingDetail.status === "Confirmed" ||
+                {(bookingDetail.status === "Pending" ||
+                  bookingDetail.status === "Confirmed" ||
                   bookingDetail.status === "CheckedIn") && (
                   <DropdownMenuItem onClick={() => setChangeRoomTypeOpen(true)}>
                     <ArrowLeftRight className="w-4 h-4 mr-1" />
@@ -247,29 +248,55 @@ export default function BookingRoomsBar({
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
-          {bookingDetail.rooms && bookingDetail.rooms.length > 0 ? (
-            bookingDetail.rooms.map((room) => (
-              <ExistingRoomItemWrapper
-                key={room.bookingRoomId || room.roomId}
-                room={room}
-                isSelected={false}
-                onRemove={() =>
-                  handleRemoveRoom(room.bookingRoomId!, room.roomName!)
-                }
-                canRemove={
-                  (bookingDetail.status === "Pending" ||
-                    bookingDetail.status === "InHouse") &&
-                  bookingState.permissions.canEditRooms
-                }
-                removeTooltip={
-                  !bookingState.permissions.canEditRooms
-                    ? bookingState.permissions.blockReason ||
-                      "Không thể xóa phòng"
-                    : undefined
-                }
-              />
-            ))
-          ) : null}
+          {bookingDetail.rooms && bookingDetail.rooms.length > 0
+            ? bookingDetail.rooms.map((room) =>
+                room.roomId !== null ? (
+                  <ExistingRoomItemWrapper
+                    key={room.bookingRoomId || room.roomId}
+                    room={room}
+                    isSelected={false}
+                    onRemove={() =>
+                      handleRemoveRoom(room.bookingRoomId!, room.roomName!)
+                    }
+                    canRemove={
+                      (bookingDetail.status === "Pending" ||
+                        bookingDetail.status === "InHouse") &&
+                      bookingState.permissions.canEditRooms
+                    }
+                    removeTooltip={
+                      !bookingState.permissions.canEditRooms
+                        ? bookingState.permissions.blockReason ||
+                          "Không thể xóa phòng"
+                        : undefined
+                    }
+                  />
+                ) : (
+                  <div
+                    key={room.bookingRoomId}
+                    className="group flex items-center justify-between p-3 rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 transition-all hover:bg-muted/40"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-muted-foreground/20">
+                        <DoorOpen className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {room.roomTypeName}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/70 uppercase tracking-wide">
+                          Chưa chỉ định phòng cụ thể
+                        </span>
+                        {room.baseRate && (
+                          <span className="text-[10px] text-muted-foreground/70">
+                            {formatMoney(room.baseRate).vndFormatted} ₫/đêm
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ),
+              )
+            : null}
           {fields.filter(
             (_, index) => form.watch(`rooms.${index}.action`) === "Add",
           ).length > 0 && (

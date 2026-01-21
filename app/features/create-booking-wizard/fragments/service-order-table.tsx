@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { Counter } from "~/components/ui/shadcn-io/button-group/advanced/counter";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
   Tooltip,
@@ -62,12 +63,12 @@ function ServiceOrderItemRow({
   const [note, setNote] = useState(service.note || "");
   const { data: serviceDetail, isLoading: isLoadingService } = useServiceDetail(
     service.itemId,
-    { enabled: service.itemType === "ServiceItem" }
+    { enabled: service.itemType === "ServiceItem" },
   );
 
   const { data: menuDetail, isLoading: isLoadingMenu } = useMenuItemDetail(
     service.itemId,
-    { enabled: service.itemType === "MenuItem" }
+    { enabled: service.itemType === "MenuItem" },
   );
 
   const isLoading = isLoadingService || isLoadingMenu;
@@ -142,7 +143,7 @@ function ServiceOrderItemRow({
     <div
       className={cn(
         "group flex flex-col gap-3 py-3 px-4 border-b border-border/50 transition-colors last:border-0 hover:bg-muted/30",
-        isInvalid && "bg-destructive/5 border-destructive/20"
+        isInvalid && "bg-destructive/5 border-destructive/20",
       )}
     >
       {/* Top Row: Icon, Name, Delete */}
@@ -154,7 +155,7 @@ function ServiceOrderItemRow({
               "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border shadow-sm",
               isInvalid
                 ? "bg-red-50 text-red-600 border-red-100"
-                : "bg-background text-muted-foreground"
+                : "bg-background text-muted-foreground",
             )}
           >
             <ItemIcon className="h-4 w-4" />
@@ -165,25 +166,11 @@ function ServiceOrderItemRow({
               <p
                 className={cn(
                   "text-sm font-medium truncate",
-                  isInvalid && "text-destructive"
+                  isInvalid && "text-destructive",
                 )}
               >
                 {displayName}
               </p>
-              {service.itemType === "MenuItem" && service.quantity > 1 && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="shrink-0 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
-                        ×{service.quantity}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Số lượng: {service.quantity}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
             </div>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
               {service.itemType === "ServiceItem" ? "Service" : "F&B"}
@@ -222,7 +209,7 @@ function ServiceOrderItemRow({
               className={cn(
                 "h-7 gap-2 rounded-full border-dashed px-3 text-xs font-normal shadow-none hover:border-solid hover:bg-secondary/50",
                 !scheduledDate && "text-muted-foreground",
-                isInvalid && "border-destructive/50 text-destructive"
+                isInvalid && "border-destructive/50 text-destructive",
               )}
             >
               <CalendarIcon className="h-3 w-3" />
@@ -251,6 +238,19 @@ function ServiceOrderItemRow({
             />
           </PopoverContent>
         </Popover>
+
+        {/* Quantity Counter for Menu Items */}
+        {service.itemType === "MenuItem" && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">SL:</span>
+            <Counter
+              value={service.quantity || 1}
+              onChange={(value) => onUpdate({ quantity: value })}
+              minValue={1}
+              className="h-7"
+            />
+          </div>
+        )}
 
         {/* Note Input (Minimal) */}
         <Input

@@ -23,9 +23,11 @@ export default function ExistingRoomItemWrapper({
   const { data: roomDetail, isPending } = useRoomDetail({
     id: room.roomId!,
     params: {},
+    enabled: !!room.roomId,
   });
 
-  if (isPending) {
+  // Only show skeleton if we're actually fetching room details (roomId exists and loading)
+  if (isPending && room.roomId) {
     return (
       <Card className="cursor-pointer">
         <div className="p-3">

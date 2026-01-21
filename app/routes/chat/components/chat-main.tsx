@@ -138,13 +138,13 @@ export function ChatMain({ sessionId }: ChatMainProps) {
       sessionId
         ? sessionLanguageOverrides[sessionId] || userLanguage
         : userLanguage,
-    [sessionId, sessionLanguageOverrides, userLanguage]
+    [sessionId, sessionLanguageOverrides, userLanguage],
   );
 
   // --- Data Fetching ---
   const { data: session, isLoading: isLoadingSession } = useChatSession(
     sessionId || "",
-    !!sessionId
+    !!sessionId,
   );
   const { data: messageHistory, isLoading: isLoadingMessages } =
     useChatMessages(sessionId || "", !!sessionId);
@@ -194,7 +194,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     const processGuestMessage = async () => {
       try {
         const detection = await TranslationService.detectLanguage(
-          lastMessage.message
+          lastMessage.message,
         );
         const detectedLang = detection?.language;
 
@@ -241,7 +241,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
     (message: ChatMessage) => {
       translateMessage(message, updateMessage);
     },
-    [translateMessage, updateMessage]
+    [translateMessage, updateMessage],
   );
 
   const handleMarkAllRead = useCallback(() => {
@@ -257,11 +257,15 @@ export function ChatMain({ sessionId }: ChatMainProps) {
       if (!sessionId) return;
       assignStaffMutation.mutate({ sessionId, staffUserId: staffId });
     },
-    [sessionId, assignStaffMutation]
+    [sessionId, assignStaffMutation],
   );
 
   const handleTagItem = useCallback((item: any, type: "menu" | "service") => {
-    const tag = type === "menu" ? `${item.name}` : `${item.name}`;
+    const name =
+      item.translations?.find((t: any) => t.languageCode === "vi")?.name ||
+      item.translations?.[0]?.name ||
+      "";
+    const tag = name;
     setInputMessage((prev) => `${prev} ${tag}`.trim());
     setIsItemPopoverOpen(false);
     const input = document.getElementById("chat-input");
@@ -442,7 +446,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                         className={cn(
                           "cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-950/50 focus:text-emerald-800 dark:focus:text-emerald-300",
                           userLanguage === lang.code &&
-                            "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-medium"
+                            "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-medium",
                         )}
                       >
                         <span className="mr-2">{lang.flag}</span>
@@ -488,7 +492,7 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                           className={cn(
                             "cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-950/50",
                             session.assignedStaffUserId === staff.id &&
-                              "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300"
+                              "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300",
                           )}
                         >
                           <div className="flex flex-col flex-1">
@@ -654,14 +658,14 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                                 key={item.itemId}
                                 name={
                                   item.translations?.find(
-                                    (t) => t.languageCode === "vi"
+                                    (t) => t.languageCode === "vi",
                                   )?.name ||
                                   item.translations?.[0]?.name ||
                                   ""
                                 }
                                 description={
                                   item.translations?.find(
-                                    (t) => t.languageCode === "vi"
+                                    (t) => t.languageCode === "vi",
                                   )?.description ||
                                   item.translations?.[0]?.description ||
                                   ""
@@ -687,14 +691,14 @@ export function ChatMain({ sessionId }: ChatMainProps) {
                                 key={item.serviceItemId}
                                 name={
                                   item.translations?.find(
-                                    (t) => t.languageCode === "vi"
+                                    (t) => t.languageCode === "vi",
                                   )?.name ||
                                   item.translations?.[0]?.name ||
                                   ""
                                 }
                                 description={
                                   item.translations?.find(
-                                    (t) => t.languageCode === "vi"
+                                    (t) => t.languageCode === "vi",
                                   )?.description ||
                                   item.translations?.[0]?.description ||
                                   ""

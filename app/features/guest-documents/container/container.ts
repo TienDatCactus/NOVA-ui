@@ -34,7 +34,7 @@ export function useScanNationalIdMutation() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(`${error.response?.data?.message || error.message}`);
+        toast.error(`${error.response?.data?.error || error.message}`);
       }
     },
   });
@@ -53,7 +53,7 @@ export function useSavePassportMutation() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(`${error.response?.data?.message || error.message}`);
+        toast.error(`${error.response?.data?.error || error.message}`);
       }
     },
   });
@@ -72,7 +72,7 @@ export function useSaveNationalIdMutation() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(`${error.response?.data?.message || error.message}`);
+        toast.error(`${error.response?.data?.error || error.message}`);
       }
     },
   });
@@ -97,7 +97,7 @@ export function useUpdateDocumentMutation() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(`${error.response?.data?.message || error.message}`);
+        toast.error(`${error.response?.data?.error || error.message}`);
       }
     },
   });
@@ -117,7 +117,7 @@ export function useDeleteDocumentMutation() {
 
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(`${error.response?.data?.message || error.message}`);
+        toast.error(`${error.response?.data?.error || error.message}`);
       }
     },
   });
@@ -139,7 +139,7 @@ export function useExportGuestDocumentsMutation() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(`${error.response?.data?.message || error.message}`);
+        toast.error(`${error.response?.data?.error || error.message}`);
       }
     },
   });
@@ -154,7 +154,7 @@ export function useExportGuestDocumentsByBookingMutation() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        toast.error(`${error.response?.data?.message || error.message}`);
+        toast.error(`${error.response?.data?.error || error.message}`);
       }
     },
   });
