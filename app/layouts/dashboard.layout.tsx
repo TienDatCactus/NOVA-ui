@@ -1,11 +1,4 @@
-import {
-  BookDown,
-  Calendar,
-  Download,
-  Loader2,
-  SearchIcon,
-  Undo2,
-} from "lucide-react";
+import { BookDown, Download, Loader2, SearchIcon, Undo2 } from "lucide-react";
 import React from "react";
 import { Link, Outlet, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -29,8 +22,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { Kbd } from "~/components/ui/kbd";
+import { Label } from "~/components/ui/label";
 import {
   SidebarInset,
   SidebarProvider,

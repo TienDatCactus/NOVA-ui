@@ -70,7 +70,7 @@ export default function ServiceOrderDetails({
                 "HH:mm - dd/MM/yyyy",
                 {
                   locale: vi,
-                }
+                },
               )}
             </span>
           </div>
@@ -87,7 +87,7 @@ export default function ServiceOrderDetails({
                 "HH:mm - dd/MM/yyyy",
                 {
                   locale: vi,
-                }
+                },
               )}
             </span>
           </div>
@@ -104,7 +104,7 @@ export default function ServiceOrderDetails({
                 "HH:mm - dd/MM/yyyy",
                 {
                   locale: vi,
-                }
+                },
               )}
             </span>
           </div>
@@ -128,8 +128,8 @@ export default function ServiceOrderDetails({
                 Phòng:{" "}
                 {bookingDetail?.rooms
                   ? bookingDetail?.rooms.map((room) => room.roomName).join(", ")
-                  : bookingDetail?.roomsByType &&
-                    bookingDetail?.roomsByType
+                  : bookingDetail?.rooms &&
+                    bookingDetail?.rooms
                       .map((room) => room.roomTypeName)
                       .join(", ")}
               </span>{" "}

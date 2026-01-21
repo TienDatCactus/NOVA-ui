@@ -36,10 +36,12 @@ export default function ActionsMenuCell({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setUpdatePaidAmountOpen(true)}>
-            <DollarSign className="mr-2 h-4 w-4" />
-            <span>Cập nhật số tiền đã trả</span>
-          </DropdownMenuItem>
+          {payroll.locked && (
+            <DropdownMenuItem onClick={() => setUpdatePaidAmountOpen(true)}>
+              <DollarSign className="mr-2 h-4 w-4" />
+              <span>Cập nhật số tiền đã trả</span>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setApplyLeaveOpen(true)}

@@ -21,7 +21,7 @@ export default function ExistingRoomItemWrapper({
   removeTooltip,
 }: ExistingRoomItemWrapperProps) {
   const { data: roomDetail, isPending } = useRoomDetail({
-    id: room.roomId,
+    id: room.roomId!,
     params: {},
   });
 

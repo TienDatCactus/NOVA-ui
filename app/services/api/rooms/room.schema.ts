@@ -127,14 +127,23 @@ const AvailableRoomsWithDetailResponseSchema = z.array(
 );
 
 const BookingDetailRoomItemSchema = z.object({
-  bookingRoomId: z.string(),
-  roomId: z.string(),
-  roomName: z.string(),
-  roomTypeId: z.string(),
-  roomTypeName: z.string(),
-  fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
-  toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
-  baseRate: z.number().min(0),
+  bookingRoomId: z.string().optional().nullable(),
+  roomId: z.string().optional().nullable(),
+  roomName: z.string().optional().nullable(),
+  roomTypeId: z.string().optional().nullable(),
+  roomTypeName: z.string().optional().nullable(),
+  roomTypeNameEn: z.string().optional().nullable(),
+  checkinDate: z.string().optional().nullable(),
+  checkoutDate: z.string().optional().nullable(),
+  nights: z.number().optional().nullable(),
+  baseRate: z.number().optional().nullable(),
+  roomCharge: z.number().optional().nullable(),
+  breakfastCharge: z.number().optional().nullable(),
+  discountAmount: z.number().optional().nullable(),
+  totalCharge: z.number().optional().nullable(),
+  paidAmount: z.number().optional().nullable(),
+  paymentStatus: z.string().optional().nullable(),
+  note: z.string().optional().nullable(),
 });
 
 // QR Code Response (base64 image or URL)

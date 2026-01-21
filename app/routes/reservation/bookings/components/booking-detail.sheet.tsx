@@ -320,86 +320,12 @@ export default function BookingDetailSheet({
                   </Badge>
                 </div>
 
-                {/* Display rooms grouped by type if available, otherwise flat list */}
-                {data.roomsByType && data.roomsByType.length > 0 ? (
-                  <div className="space-y-4">
-                    {data.roomsByType.map((roomTypeGroup) => (
-                      <div key={roomTypeGroup.roomTypeId} className="space-y-2">
-                        {/* Room Type Header */}
-                        <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-md border">
-                          <div className="flex items-center gap-2">
-                            <BedDouble className="h-3.5 w-3.5 text-primary" />
-                            <span className="font-semibold text-sm text-foreground">
-                              {roomTypeGroup.roomTypeName}
-                            </span>
-                            {roomTypeGroup.roomTypeNameEn && (
-                              <span className="text-xs text-muted-foreground">
-                                ({roomTypeGroup.roomTypeNameEn})
-                              </span>
-                            )}
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            {roomTypeGroup.roomCount ||
-                              roomTypeGroup.rooms?.length ||
-                              0}{" "}
-                            phòng
-                          </Badge>
-                        </div>
-
-                        {/* Rooms in this type */}
-                        {roomTypeGroup.rooms &&
-                          roomTypeGroup.rooms.length > 0 && (
-                            <div className="grid gap-2 pl-4">
-                              {roomTypeGroup.rooms.map((room) => (
-                                <div
-                                  key={room.bookingRoomId}
-                                  className="group flex flex-col sm:flex-row sm:items-center justify-between bg-background p-3 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-blue-950/30 transition-all"
-                                >
-                                  <div className="flex items-start gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
-                                      <BedDouble className="h-4 w-4" />
-                                    </div>
-                                    <div>
-                                      <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                                        {room.roomName}
-                                      </p>
-                                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-0.5">
-                                        {
-                                          formatMoney(room?.baseRate ?? 0)
-                                            .vndFormatted
-                                        }
-                                        /đêm
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-2 sm:mt-0 pl-11 sm:pl-0">
-                                    <Clock className="h-3.5 w-3.5" />
-                                    <span>
-                                      {format(
-                                        parseISO(room?.fromDate ?? ""),
-                                        "dd/MM"
-                                      )}{" "}
-                                      -{" "}
-                                      {format(
-                                        parseISO(room?.toDate ?? ""),
-                                        "dd/MM"
-                                      )}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  /* Fallback to flat room list */
+                {/* Display flat room list */}
+                {data.rooms && data.rooms.length > 0 ? (
                   <div className="grid gap-3">
-                    {data.rooms?.map((room, index) => (
+                    {data.rooms.map((room, index) => (
                       <div
-                        key={room.roomId}
+                        key={room.bookingRoomId || room.roomId || index}
                         className="group flex flex-col sm:flex-row sm:items-center justify-between bg-background p-3 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-blue-950/30 transition-all"
                       >
                         <div className="flex items-start gap-3">
@@ -419,12 +345,21 @@ export default function BookingDetailSheet({
                         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-2 sm:mt-0 pl-11 sm:pl-0">
                           <Clock className="h-3.5 w-3.5" />
                           <span>
-                            {format(parseISO(room.fromDate), "dd/MM")} -{" "}
-                            {format(parseISO(room.toDate), "dd/MM")}
+                            {room.checkinDate &&
+                              format(parseISO(room.checkinDate), "dd/MM")}{" "}
+                            -{" "}
+                            {room.checkoutDate &&
+                              format(parseISO(room.checkoutDate), "dd/MM")}
                           </span>
                         </div>
                       </div>
-                    )) || []}
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 border border-dashed rounded-xl text-center bg-muted/20">
+                    <p className="text-sm text-muted-foreground">
+                      Chưa có phòng nào được đặt
+                    </p>
                   </div>
                 )}
               </section>
@@ -465,7 +400,7 @@ export default function BookingDetailSheet({
                         "text-xl font-bold",
                         remainingAmount > 0
                           ? "text-orange-600 dark:text-orange-400"
-                          : "text-gray-900 dark:text-gray-100"
+                          : "text-gray-900 dark:text-gray-100",
                       )}
                     >
                       {formatMoney(remainingAmount).vndFormatted}

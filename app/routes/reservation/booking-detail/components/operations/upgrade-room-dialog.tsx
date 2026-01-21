@@ -82,7 +82,7 @@ export function UpgradeRoomDialog({
   const isFreeChange = form.watch("isFreeChange");
 
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking(
-    bookingDetail?.id || ""
+    bookingDetail?.id || "",
   );
 
   // Thêm isLoading từ hook để xử lý UI
@@ -97,22 +97,24 @@ export function UpgradeRoomDialog({
     () =>
       bookingDetail.rooms &&
       bookingDetail.rooms.find(
-        (r) => r.bookingRoomId === selectedBookingRoomId
+        (r) => r.bookingRoomId === selectedBookingRoomId,
       ),
-    [bookingDetail.rooms, selectedBookingRoomId]
+    [bookingDetail.rooms, selectedBookingRoomId],
   );
 
   const selectedNewRoom = useMemo(
     () => availableRooms?.find((r) => r.roomId === selectedNewRoomId),
-    [availableRooms, selectedNewRoomId]
+    [availableRooms, selectedNewRoomId],
   );
 
   const remainingNights = useMemo(() => {
-    return selectedBookingRoom && selectedNewRoom
+    return selectedBookingRoom?.checkinDate &&
+      selectedBookingRoom.checkoutDate &&
+      selectedNewRoom
       ? calculateRemainingNights(
           bookingDetail.status,
-          selectedBookingRoom.fromDate,
-          selectedBookingRoom.toDate
+          selectedBookingRoom.checkinDate,
+          selectedBookingRoom.checkoutDate,
         )
       : 0;
   }, [selectedBookingRoom, selectedNewRoom, bookingDetail.status]);
@@ -122,7 +124,7 @@ export function UpgradeRoomDialog({
       ? calculateUpgradeSurcharge(
           selectedBookingRoom.baseRate || 0,
           selectedNewRoom.baseRate || 0,
-          remainingNights
+          remainingNights,
         )
       : 0;
   }, [selectedBookingRoom, selectedNewRoom, isFreeChange, remainingNights]);
@@ -163,7 +165,7 @@ export function UpgradeRoomDialog({
         data.newRoomId,
         undefined,
         undefined,
-        data.isFreeChange
+        data.isFreeChange,
       );
 
       updateBooking(
@@ -178,7 +180,7 @@ export function UpgradeRoomDialog({
           onSuccess: () => {
             onOpenChange(false);
           },
-        }
+        },
       );
     } catch (error) {
       if (error instanceof Error) {
@@ -237,7 +239,7 @@ export function UpgradeRoomDialog({
                           bookingDetail.rooms.map((room) => (
                             <SelectItem
                               key={room.bookingRoomId}
-                              value={room.bookingRoomId}
+                              value={room.bookingRoomId || ""}
                             >
                               <div className="flex items-center gap-3">
                                 <div className="p-1 bg-muted rounded">
@@ -309,7 +311,7 @@ export function UpgradeRoomDialog({
                                     "cursor-pointer rounded-xl border-2 p-4 transition-all hover:shadow-md relative overflow-hidden",
                                     isSelected
                                       ? "border-primary bg-primary/5 ring-1 ring-primary"
-                                      : "border-muted bg-card hover:border-primary/50"
+                                      : "border-muted bg-card hover:border-primary/50",
                                   )}
                                 >
                                   {isSelected && (
@@ -335,7 +337,7 @@ export function UpgradeRoomDialog({
                                         "ml-2 font-mono",
                                         priceDiff > 0
                                           ? "bg-emerald-600 hover:bg-emerald-700"
-                                          : ""
+                                          : "",
                                       )}
                                     >
                                       {priceDiff > 0 ? "+" : ""}
@@ -392,7 +394,7 @@ export function UpgradeRoomDialog({
                             "flex flex-col gap-2 p-4 border-2 rounded-xl cursor-pointer hover:bg-muted/50 transition-all",
                             !field.value
                               ? "border-primary bg-primary/5"
-                              : "border-muted"
+                              : "border-muted",
                           )}
                         >
                           <RadioGroupItem
@@ -419,7 +421,7 @@ export function UpgradeRoomDialog({
                             "flex flex-col gap-2 p-4 border-2 rounded-xl cursor-pointer hover:bg-muted/50 transition-all",
                             field.value
                               ? "border-emerald-500 bg-emerald-50/30"
-                              : "border-muted"
+                              : "border-muted",
                           )}
                         >
                           <RadioGroupItem

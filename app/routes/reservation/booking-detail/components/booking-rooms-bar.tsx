@@ -79,18 +79,8 @@ export default function BookingRoomsBar({
     roomName: string;
   } | null>(null);
 
-  // Helper function to find room by bookingRoomId from either roomsByType or rooms
+  // Helper function to find room by bookingRoomId
   const findRoomByBookingRoomId = (bookingRoomId: string) => {
-    // First try roomsByType
-    if (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0) {
-      for (const roomType of bookingDetail.roomsByType) {
-        const room = roomType.rooms?.find(
-          (r) => r.bookingRoomId === bookingRoomId,
-        );
-        if (room) return room;
-      }
-    }
-    // Fallback to flat rooms array
     return bookingDetail.rooms?.find((r) => r.bookingRoomId === bookingRoomId);
   };
 
@@ -257,94 +247,18 @@ export default function BookingRoomsBar({
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto space-y-2 px-4 pb-2">
-          {bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0 ? (
-            <>
-              {bookingDetail.roomsByType.map((roomType) => (
-                <div key={roomType.roomTypeId} className="space-y-2">
-                  <div className="flex items-center gap-2 px-1 pt-2 first:pt-0">
-                    <div className="h-1 w-1 rounded-full bg-primary" />
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {roomType.roomTypeName}
-                      {roomType.roomCount && roomType.roomCount > 0 && (
-                        <span className="ml-1">({roomType.roomCount})</span>
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Rooms in this type */}
-                  {roomType.rooms &&
-                    roomType.rooms.map((room) => {
-                      if (!room.roomId || !room.bookingRoomId) return null;
-
-                      const canRemove =
-                        (bookingDetail.status === "Pending" ||
-                          bookingDetail.status === "InHouse") &&
-                        bookingState.permissions.canEditRooms;
-
-                      return (
-                        <div
-                          key={room.bookingRoomId}
-                          className="group flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
-                        >
-                          {/* Left: Room Info */}
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                              <DoorOpen className="h-4 w-4" />
-                            </div>
-
-                            <div className="flex flex-col gap-0.5">
-                              <div className="text-sm font-medium">
-                                <span>
-                                  {room.roomName || "Chưa có phòng cụ thể"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                {room.baseRate && (
-                                  <span>
-                                    {formatMoney(room.baseRate).vndFormatted}{" "}
-                                    ₫/đêm
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Right: Actions */}
-                          {canRemove && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() =>
-                                handleRemoveRoom(
-                                  room.bookingRoomId!,
-                                  room.roomName!,
-                                )
-                              }
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })}
-                </div>
-              ))}
-            </>
-          ) : (
-            /* Fallback to flat rooms array if roomsByType not available */
-            bookingDetail.rooms &&
+          {bookingDetail.rooms && bookingDetail.rooms.length > 0 ? (
             bookingDetail.rooms.map((room) => (
               <ExistingRoomItemWrapper
-                key={room.roomId}
+                key={room.bookingRoomId || room.roomId}
                 room={room}
                 isSelected={false}
                 onRemove={() =>
-                  handleRemoveRoom(room.bookingRoomId, room.roomName)
+                  handleRemoveRoom(room.bookingRoomId!, room.roomName!)
                 }
                 canRemove={
-                  (bookingDetail.status == "Pending" ||
-                    bookingDetail.status == "InHouse") &&
+                  (bookingDetail.status === "Pending" ||
+                    bookingDetail.status === "InHouse") &&
                   bookingState.permissions.canEditRooms
                 }
                 removeTooltip={
@@ -355,8 +269,7 @@ export default function BookingRoomsBar({
                 }
               />
             ))
-          )}
-          {/* New Rooms Being Added */}
+          ) : null}
           {fields.filter(
             (_, index) => form.watch(`rooms.${index}.action`) === "Add",
           ).length > 0 && (

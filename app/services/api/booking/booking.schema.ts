@@ -418,30 +418,30 @@ const BookingDetailItemSchema = z.object({
     email: z.email().optional().nullable(),
   }),
   rooms: z.array(RoomSchema.BookingDetailRoomItemSchema).optional().nullable(),
-  roomsByType: z
-    .array(
-      z.object({
-        roomTypeId: z.string().optional(),
-        roomTypeName: z.string().optional(),
-        roomTypeNameEn: z.string().optional().nullable(),
-        rooms: z
-          .array(
-            z.object({
-              bookingRoomId: z.string().optional().nullable(),
-              roomId: z.string().optional().nullable(),
-              roomName: z.string().optional().nullable(),
-              fromDate: z.string().optional().nullable(),
-              toDate: z.string().optional().nullable(),
-              baseRate: z.number().optional().nullable(),
-            }),
-          )
-          .optional()
-          .nullable(),
-        roomCount: z.number().optional().nullable(),
-      }),
-    )
-    .optional()
-    .nullable(),
+  // roomsByType: z
+  //   .array(
+  //     z.object({
+  //       roomTypeId: z.string().optional(),
+  //       roomTypeName: z.string().optional(),
+  //       roomTypeNameEn: z.string().optional().nullable(),
+  //       rooms: z
+  //         .array(
+  //           z.object({
+  //             bookingRoomId: z.string().optional().nullable(),
+  //             roomId: z.string().optional().nullable(),
+  //             roomName: z.string().optional().nullable(),
+  //             fromDate: z.string().optional().nullable(),
+  //             toDate: z.string().optional().nullable(),
+  //             baseRate: z.number().optional().nullable(),
+  //           }),
+  //         )
+  //         .optional()
+  //         .nullable(),
+  //       roomCount: z.number().optional().nullable(),
+  //     }),
+  //   )
+  //   .optional()
+  //   .nullable(),
   invoices: InvoiceSchema.InvoiceListResponseSchema.optional(),
   serviceOrders:
     OrderSchema.ServiceOrderListByBookingDetailSchema.optional().nullable(),

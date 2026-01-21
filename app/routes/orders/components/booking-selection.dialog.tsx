@@ -40,7 +40,7 @@ type BookingSelectionDialogProps = {
   onSelect: (
     bookingId: string,
     bookingRoomId: string,
-    bookingCode?: string
+    bookingCode?: string,
   ) => void;
 };
 
@@ -68,13 +68,13 @@ export default function BookingSelectionDialog({
     return list.filter(
       (b) =>
         b.bookingCode?.toLowerCase().includes(query) ||
-        b.customerName?.toLowerCase().includes(query)
+        b.customerName?.toLowerCase().includes(query),
     );
   };
 
   const filteredActive = filterBookings(orderableBookings?.activeBookings);
   const filteredConfirmed = filterBookings(
-    orderableBookings?.confirmedBookings
+    orderableBookings?.confirmedBookings,
   );
 
   const handleToggleBooking = async (bookingCode: string) => {
@@ -167,7 +167,7 @@ export default function BookingSelectionDialog({
                   "rounded-xl border bg-card m-0",
                   isExpanded
                     ? "ring-2 ring-primary/20 border-primary shadow-md"
-                    : "hover:border-primary/50"
+                    : "hover:border-primary/50",
                 )}
               >
                 <div className="flex cursor-pointer items-center justify-between p-4 group">
@@ -177,7 +177,7 @@ export default function BookingSelectionDialog({
                         "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
                         isExpanded
                           ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                          : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary",
                       )}
                     >
                       <User className="h-5 w-5" />
@@ -209,7 +209,7 @@ export default function BookingSelectionDialog({
                   <ChevronDown
                     className={cn(
                       "h-4 w-4 text-muted-foreground transition-transform duration-200",
-                      isExpanded && "rotate-180"
+                      isExpanded && "rotate-180",
                     )}
                   />
                 </div>
@@ -266,10 +266,11 @@ export default function BookingSelectionDialog({
                             <button
                               key={room.bookingRoomId}
                               onClick={() =>
+                                room.bookingRoomId &&
                                 handleSelect(
                                   detail.id,
-                                  room.bookingRoomId,
-                                  detail.bookingCode
+                                  room?.bookingRoomId,
+                                  detail.bookingCode,
                                 )
                               }
                               className="flex items-center justify-between rounded-lg border bg-background p-3 text-left hover:border-primary hover:shadow-sm transition-all group/room"
@@ -288,8 +289,15 @@ export default function BookingSelectionDialog({
                                     </span>
                                   </div>
                                   <p className="text-[10px] text-muted-foreground mt-0.5">
-                                    {format(parseISO(room.fromDate), "dd/MM")} -{" "}
-                                    {format(parseISO(room.toDate), "dd/MM")}
+                                    {format(
+                                      parseISO(room?.checkinDate || ""),
+                                      "dd/MM",
+                                    )}{" "}
+                                    -{" "}
+                                    {format(
+                                      parseISO(room?.checkoutDate || ""),
+                                      "dd/MM",
+                                    )}
                                   </p>
                                 </div>
                               </div>

@@ -88,24 +88,14 @@ export function CheckinDialog({
       return;
     }
 
-    // Build assignments from roomsByType if available, otherwise from rooms
+    // Build assignments from rooms
     const newAssignments: RoomAssignment[] = [];
 
-    if (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0) {
-      bookingDetail.roomsByType.forEach((typeGroup) => {
-        typeGroup.rooms?.forEach((bookingRoom: any) => {
-          newAssignments.push({
-            bookingRoomId: bookingRoom.bookingRoomId,
-            roomTypeId: typeGroup.roomTypeId || "",
-            assignedRoomId: bookingRoom.roomId || "",
-          });
-        });
-      });
-    } else if (bookingDetail.rooms) {
+    if (bookingDetail.rooms) {
       bookingDetail.rooms.forEach((bookingRoom) => {
         newAssignments.push({
-          bookingRoomId: bookingRoom.bookingRoomId,
-          roomTypeId: bookingRoom.roomTypeId,
+          bookingRoomId: bookingRoom.bookingRoomId!,
+          roomTypeId: bookingRoom.roomTypeId!,
           assignedRoomId: bookingRoom.roomId || "",
         });
       });
@@ -269,279 +259,44 @@ export function CheckinDialog({
                         Danh sách phòng ({assignments.length})
                       </Label>
                     </div>
-
-                    {/* Display rooms grouped by type if available */}
-                    {bookingDetail.roomsByType &&
-                    bookingDetail.roomsByType.length > 0 ? (
-                      <div className="space-y-6">
-                        {bookingDetail.roomsByType.map((typeGroup) => (
-                          <div key={typeGroup.roomTypeId} className="space-y-3">
-                            {/* Room Type Header */}
-                            <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-lg border border-primary/20">
-                              <BedDouble className="h-4 w-4 text-primary" />
-                              <span className="font-bold text-sm text-primary">
-                                {typeGroup.roomTypeName}
-                              </span>
-                              {typeGroup.roomTypeNameEn && (
-                                <span className="text-xs text-muted-foreground">
-                                  ({typeGroup.roomTypeNameEn})
-                                </span>
-                              )}
-                              <Badge
-                                variant="secondary"
-                                className="ml-auto text-xs"
-                              >
-                                {typeGroup.roomCount ||
-                                  typeGroup.rooms?.length ||
-                                  0}{" "}
-                                phòng
-                              </Badge>
-                            </div>
-
-                            {/* Rooms in this type */}
-                            <div className="grid gap-3 pl-2">
-                              {typeGroup.rooms?.map((bookingRoom: any) => {
-                                const assignmentIndex = assignments.findIndex(
-                                  (a) =>
-                                    a.bookingRoomId ===
-                                    bookingRoom.bookingRoomId,
-                                );
-                                if (assignmentIndex === -1) return null;
-
-                                return (
-                                  <div
-                                    key={bookingRoom.bookingRoomId}
-                                    className="group relative flex flex-col md:flex-row items-stretch border rounded-xl overflow-hidden bg-background shadow-sm hover:shadow-md transition-all duration-200"
-                                  >
-                                    {/* Left: Info Section */}
-                                    <div className="flex-1 p-4 bg-muted/20 border-b md:border-b-0 md:border-r flex flex-col justify-center gap-2">
-                                      <div className="flex items-start justify-between gap-2">
-                                        <div>
-                                          <div className="flex items-center gap-2">
-                                            <span className="font-bold text-sm text-foreground">
-                                              {bookingRoom.roomName ||
-                                                "Chưa gán phòng"}
-                                            </span>
-                                          </div>
-                                          <div className="flex items-center gap-3 mt-1.5">
-                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-background px-2 py-1 rounded border">
-                                              <CalendarDays className="h-3 w-3" />
-                                              <span>
-                                                {format(
-                                                  new Date(
-                                                    bookingRoom?.fromDate || "",
-                                                  ),
-                                                  "dd/MM",
-                                                )}{" "}
-                                                -{" "}
-                                                {format(
-                                                  new Date(
-                                                    bookingRoom?.toDate || "",
-                                                  ),
-                                                  "dd/MM",
-                                                )}
-                                              </span>
-                                            </div>
-                                            <Badge
-                                              variant="secondary"
-                                              className="text-[10px] font-normal px-1.5 h-6 bg-green-100 text-green-700 hover:bg-green-100 border-green-200"
-                                            >
-                                              {
-                                                formatMoney(
-                                                  bookingRoom.baseRate,
-                                                ).vndFormatted
-                                              }
-                                            </Badge>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    {/* Center: Connector Arrow (Desktop only) */}
-                                    <div className="hidden md:flex items-center justify-center w-8 bg-muted/5 -ml-[1px] z-10">
-                                      <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
-                                    </div>
-
-                                    {/* Right: Action Section */}
-                                    <div className="w-full md:w-[320px] p-4 bg-card flex items-center">
-                                      <div className="w-full space-y-1.5">
-                                        <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                                          Gán số phòng
-                                        </Label>
-                                        {(() => {
-                                          // Find the matching room type in available rooms
-                                          const roomTypeData =
-                                            availableRooms.find(
-                                              (rt) =>
-                                                rt.roomTypeId ===
-                                                typeGroup.roomTypeId,
-                                            );
-                                          const validRooms =
-                                            roomTypeData?.availableRooms || [];
-                                          const currentValue =
-                                            assignments[assignmentIndex]
-                                              ?.assignedRoomId || "";
-
-                                          return (
-                                            <Select
-                                              value={currentValue}
-                                              onValueChange={(value) => {
-                                                const newAssignments = [
-                                                  ...assignments,
-                                                ];
-                                                newAssignments[
-                                                  assignmentIndex
-                                                ] = {
-                                                  ...newAssignments[
-                                                    assignmentIndex
-                                                  ],
-                                                  assignedRoomId: value,
-                                                };
-                                                setAssignments(newAssignments);
-                                              }}
-                                            >
-                                              <SelectTrigger
-                                                className={cn(
-                                                  "h-10 transition-colors",
-                                                  !currentValue
-                                                    ? "text-muted-foreground border-dashed bg-muted/10 hover:bg-muted/20"
-                                                    : "text-foreground font-medium border-primary/50 bg-primary/5",
-                                                )}
-                                              >
-                                                <SelectValue placeholder="-- Chọn phòng trống --">
-                                                  <div className="flex items-center gap-2 truncate">
-                                                    {currentValue ? (
-                                                      <>
-                                                        <BedDouble className="h-4 w-4 text-primary" />
-                                                        <span>
-                                                          {validRooms.find(
-                                                            (r) =>
-                                                              r.roomId ===
-                                                              currentValue,
-                                                          )?.roomName ||
-                                                            bookingRoom.roomName ||
-                                                            "Phòng đã chọn"}
-                                                        </span>
-                                                      </>
-                                                    ) : (
-                                                      <span>
-                                                        -- Chọn phòng trống --
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                </SelectValue>
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                {validRooms.length === 0 ? (
-                                                  <div className="p-4 text-sm text-center text-muted-foreground flex flex-col items-center gap-2">
-                                                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                                                      <BedDouble className="h-4 w-4 opacity-50" />
-                                                    </div>
-                                                    <span>
-                                                      Hết phòng loại này
-                                                    </span>
-                                                  </div>
-                                                ) : (
-                                                  validRooms.map((room) => {
-                                                    const isSelected =
-                                                      selectedRoomIds.has(
-                                                        room.roomId,
-                                                      ) &&
-                                                      currentValue !==
-                                                        room.roomId;
-                                                    return (
-                                                      <SelectItem
-                                                        key={room.roomId}
-                                                        value={room.roomId}
-                                                        disabled={isSelected}
-                                                        className="cursor-pointer"
-                                                      >
-                                                        <div className="flex items-center justify-between w-full min-w-[200px]">
-                                                          <span className="font-medium">
-                                                            {room.roomName}
-                                                          </span>
-                                                          <div className="flex items-center gap-2">
-                                                            {room.status && (
-                                                              <Badge
-                                                                variant="outline"
-                                                                className={cn(
-                                                                  "text-[10px] px-1.5 h-5",
-                                                                  room.status ===
-                                                                    "Ready" &&
-                                                                    "bg-green-50 text-green-700 border-green-200",
-                                                                  room.status ===
-                                                                    "Dirty" &&
-                                                                    "bg-orange-50 text-orange-700 border-orange-200",
-                                                                  room.status ===
-                                                                    "Cleaning" &&
-                                                                    "bg-blue-50 text-blue-700 border-blue-200",
-                                                                )}
-                                                              >
-                                                                {room.status}
-                                                              </Badge>
-                                                            )}
-                                                            {isSelected && (
-                                                              <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                                                Đang chọn
-                                                              </span>
-                                                            )}
-                                                            {!isSelected &&
-                                                              !room.status && (
-                                                                <span className="h-2 w-2 rounded-full bg-green-500 block" />
-                                                              )}
-                                                          </div>
-                                                        </div>
-                                                      </SelectItem>
-                                                    );
-                                                  })
-                                                )}
-                                              </SelectContent>
-                                            </Select>
-                                          );
-                                        })()}
-                                      </div>
-                                    </div>
+                    {/* Room list */}
+                    <div className="grid gap-3">
+                      {bookingDetail.rooms &&
+                        bookingDetail.rooms.map((bookingRoom, index) => (
+                          <div
+                            key={bookingRoom.bookingRoomId}
+                            className="group relative flex flex-col md:flex-row items-stretch border rounded-xl overflow-hidden bg-background shadow-sm hover:shadow-md transition-all duration-200"
+                          >
+                            {/* Left: Info Section */}
+                            <div className="flex-1 p-4 bg-muted/20 border-b md:border-b-0 md:border-r flex flex-col justify-center gap-2">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-sm text-foreground">
+                                      {bookingRoom.roomName || "Chưa gán phòng"}
+                                    </span>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      /* Fallback: flat room list (legacy support) */
-                      <div className="grid gap-3">
-                        {bookingDetail.rooms &&
-                          bookingDetail.rooms.map((bookingRoom, index) => (
-                            <div
-                              key={bookingRoom.bookingRoomId}
-                              className="group relative flex flex-col md:flex-row items-stretch border rounded-xl overflow-hidden bg-background shadow-sm hover:shadow-md transition-all duration-200"
-                            >
-                              {/* Left: Info Section */}
-                              <div className="flex-1 p-4 bg-muted/20 border-b md:border-b-0 md:border-r flex flex-col justify-center gap-2">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-bold text-sm text-foreground">
-                                        {bookingRoom.roomTypeName}
-                                      </span>
-                                      {/* Using a subtle visual cue for guest count if available, simplified here */}
-                                    </div>
-                                    <div className="flex items-center gap-3 mt-1.5">
-                                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-background px-2 py-1 rounded border">
-                                        <CalendarDays className="h-3 w-3" />
-                                        <span>
-                                          {format(
-                                            new Date(bookingRoom.fromDate),
+                                  <div className="text-xs text-muted-foreground mt-0.5">
+                                    {bookingRoom.roomTypeName}
+                                  </div>
+                                  <div className="flex items-center gap-3 mt-1.5">
+                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-background px-2 py-1 rounded border">
+                                      <CalendarDays className="h-3 w-3" />
+                                      <span>
+                                        {bookingRoom.checkinDate &&
+                                          format(
+                                            new Date(bookingRoom.checkinDate),
                                             "dd/MM",
                                           )}{" "}
-                                          -{" "}
-                                          {format(
-                                            new Date(bookingRoom.toDate),
+                                        -{" "}
+                                        {bookingRoom.checkoutDate &&
+                                          format(
+                                            new Date(bookingRoom.checkoutDate),
                                             "dd/MM",
                                           )}
-                                        </span>
-                                      </div>
+                                      </span>
+                                    </div>
+                                    {bookingRoom.baseRate && (
                                       <Badge
                                         variant="secondary"
                                         className="text-[10px] font-normal px-1.5 h-6 bg-green-100 text-green-700 hover:bg-green-100 border-green-200"
@@ -551,129 +306,145 @@ export function CheckinDialog({
                                             .vndFormatted
                                         }
                                       </Badge>
-                                    </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>
+                            </div>
 
-                              {/* Center: Connector Arrow (Desktop only) */}
-                              <div className="hidden md:flex items-center justify-center w-8 bg-muted/5 -ml-[1px] z-10">
-                                <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
-                              </div>
+                            {/* Center: Connector Arrow (Desktop only) */}
+                            <div className="hidden md:flex items-center justify-center w-8 bg-muted/5 -ml-[1px] z-10">
+                              <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
+                            </div>
 
-                              {/* Right: Action Section */}
-                              <div className="w-full md:w-[320px] p-4 bg-card flex items-center">
-                                <div className="w-full space-y-1.5">
-                                  <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                                    Gán số phòng
-                                  </Label>
-                                  {(() => {
-                                    // Find the matching room type in available rooms
-                                    const roomTypeData = availableRooms.find(
-                                      (rt) =>
-                                        rt.roomTypeId ===
-                                        bookingRoom.roomTypeId,
-                                    );
-                                    const validRooms =
-                                      roomTypeData?.availableRooms || [];
-                                    const currentValue =
-                                      assignments[index]?.assignedRoomId || "";
+                            {/* Right: Action Section */}
+                            <div className="w-full md:w-[320px] p-4 bg-card flex items-center">
+                              <div className="w-full space-y-1.5">
+                                <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                                  Gán số phòng
+                                </Label>
+                                {(() => {
+                                  // Find the matching room type in available rooms
+                                  const roomTypeData = availableRooms.find(
+                                    (rt) =>
+                                      rt.roomTypeId === bookingRoom.roomTypeId,
+                                  );
+                                  const validRooms =
+                                    roomTypeData?.availableRooms || [];
+                                  const currentValue =
+                                    assignments[index]?.assignedRoomId || "";
 
-                                    return (
-                                      <Select
-                                        value={currentValue}
-                                        onValueChange={(value) => {
-                                          const newAssignments = [
-                                            ...assignments,
-                                          ];
-                                          newAssignments[index] = {
-                                            ...newAssignments[index],
-                                            assignedRoomId: value,
-                                          };
-                                          setAssignments(newAssignments);
-                                        }}
+                                  return (
+                                    <Select
+                                      value={currentValue}
+                                      onValueChange={(value) => {
+                                        const newAssignments = [...assignments];
+                                        newAssignments[index] = {
+                                          ...newAssignments[index],
+                                          assignedRoomId: value,
+                                        };
+                                        setAssignments(newAssignments);
+                                      }}
+                                    >
+                                      <SelectTrigger
+                                        className={cn(
+                                          "h-10 transition-colors",
+                                          !currentValue
+                                            ? "text-muted-foreground border-dashed bg-muted/10 hover:bg-muted/20"
+                                            : "text-foreground font-medium border-primary/50 bg-primary/5",
+                                        )}
                                       >
-                                        <SelectTrigger
-                                          className={cn(
-                                            "h-10 transition-colors",
-                                            !currentValue
-                                              ? "text-muted-foreground border-dashed bg-muted/10 hover:bg-muted/20"
-                                              : "text-foreground font-medium border-primary/50 bg-primary/5",
-                                          )}
-                                        >
-                                          <SelectValue placeholder="-- Chọn phòng trống --">
-                                            <div className="flex items-center gap-2 truncate">
-                                              {currentValue ? (
-                                                <>
-                                                  <BedDouble className="h-4 w-4 text-primary" />
-                                                  <span>
-                                                    {validRooms.find(
-                                                      (r) =>
-                                                        r.roomId ===
-                                                        currentValue,
-                                                    )?.roomName ||
-                                                      bookingRoom.roomName ||
-                                                      "Phòng đã chọn"}
-                                                  </span>
-                                                </>
-                                              ) : (
+                                        <SelectValue placeholder="-- Chọn phòng trống --">
+                                          <div className="flex items-center gap-2 truncate">
+                                            {currentValue ? (
+                                              <>
+                                                <BedDouble className="h-4 w-4 text-primary" />
                                                 <span>
-                                                  -- Chọn phòng trống --
+                                                  {validRooms.find(
+                                                    (r) =>
+                                                      r.roomId === currentValue,
+                                                  )?.roomName ||
+                                                    bookingRoom.roomName ||
+                                                    "Phòng đã chọn"}
                                                 </span>
-                                              )}
+                                              </>
+                                            ) : (
+                                              <span>
+                                                -- Chọn phòng trống --
+                                              </span>
+                                            )}
+                                          </div>
+                                        </SelectValue>
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {validRooms.length === 0 ? (
+                                          <div className="p-4 text-sm text-center text-muted-foreground flex flex-col items-center gap-2">
+                                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                                              <BedDouble className="h-4 w-4 opacity-50" />
                                             </div>
-                                          </SelectValue>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {validRooms.length === 0 ? (
-                                            <div className="p-4 text-sm text-center text-muted-foreground flex flex-col items-center gap-2">
-                                              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                                                <BedDouble className="h-4 w-4 opacity-50" />
-                                              </div>
-                                              <span>Hết phòng loại này</span>
-                                            </div>
-                                          ) : (
-                                            validRooms.map((room) => {
-                                              const isSelected =
-                                                selectedRoomIds.has(
-                                                  room.roomId,
-                                                ) &&
-                                                currentValue !== room.roomId;
-                                              return (
-                                                <SelectItem
-                                                  key={room.roomId}
-                                                  value={room.roomId}
-                                                  disabled={isSelected}
-                                                  className="cursor-pointer"
-                                                >
-                                                  <div className="flex items-center justify-between w-full min-w-[200px]">
-                                                    <span className="font-medium">
-                                                      {room.roomName}
-                                                    </span>
+                                            <span>Hết phòng loại này</span>
+                                          </div>
+                                        ) : (
+                                          validRooms.map((room) => {
+                                            const isSelected =
+                                              selectedRoomIds.has(
+                                                room.roomId,
+                                              ) && currentValue !== room.roomId;
+                                            return (
+                                              <SelectItem
+                                                key={room.roomId}
+                                                value={room.roomId}
+                                                disabled={isSelected}
+                                                className="cursor-pointer"
+                                              >
+                                                <div className="flex items-center justify-between w-full min-w-[200px]">
+                                                  <span className="font-medium">
+                                                    {room.roomName}
+                                                  </span>
+                                                  <div className="flex items-center gap-2">
+                                                    {room.status && (
+                                                      <Badge
+                                                        variant="outline"
+                                                        className={cn(
+                                                          "text-[10px] px-1.5 h-5",
+                                                          room.status ===
+                                                            "Ready" &&
+                                                            "bg-green-50 text-green-700 border-green-200",
+                                                          room.status ===
+                                                            "Dirty" &&
+                                                            "bg-orange-50 text-orange-700 border-orange-200",
+                                                          room.status ===
+                                                            "Cleaning" &&
+                                                            "bg-blue-50 text-blue-700 border-blue-200",
+                                                        )}
+                                                      >
+                                                        {room.status}
+                                                      </Badge>
+                                                    )}
                                                     {isSelected && (
                                                       <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                                                         Đang chọn
                                                       </span>
                                                     )}
-                                                    {/* Visual sugar: Status dot */}
-                                                    {!isSelected && (
-                                                      <span className="h-2 w-2 rounded-full bg-green-500 block" />
-                                                    )}
+                                                    {!isSelected &&
+                                                      !room.status && (
+                                                        <span className="h-2 w-2 rounded-full bg-green-500 block" />
+                                                      )}
                                                   </div>
-                                                </SelectItem>
-                                              );
-                                            })
-                                          )}
-                                        </SelectContent>
-                                      </Select>
-                                    );
-                                  })()}
-                                </div>
+                                                </div>
+                                              </SelectItem>
+                                            );
+                                          })
+                                        )}
+                                      </SelectContent>
+                                    </Select>
+                                  );
+                                })()}
                               </div>
                             </div>
-                          ))}
-                      </div>
-                    )}
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 )}
               </div>

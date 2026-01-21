@@ -68,11 +68,11 @@ export default function ExistingRoomItemCard({
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground ">
             <Clock className="h-3 w-3" />
             <span className="font-medium text-foreground/80">
-              {format(room.fromDate, "dd/MM")}
+              {format(room.checkinDate || "", "dd/MM")}
             </span>
             <span className="text-muted-foreground/50">→</span>
             <span className="font-medium text-foreground/80">
-              {format(room.toDate, "dd/MM")}
+              {format(room.checkoutDate || "", "dd/MM")}
             </span>
           </div>
         </div>

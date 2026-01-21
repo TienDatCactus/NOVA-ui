@@ -68,22 +68,9 @@ export default function AddCompletedChargesDialog({
     booking.id,
   );
 
-  // Extract rooms safely from booking (handles both flat rooms and roomsByType)
+  // Extract rooms from booking
   const bookingRooms = useMemo(() => {
-    if (booking.rooms && booking.rooms.length > 0) {
-      return booking.rooms;
-    }
-    if (booking.roomsByType && booking.roomsByType.length > 0) {
-      return booking.roomsByType.flatMap((rt) =>
-        (rt.rooms || []).map((r) => ({
-          bookingRoomId: r.bookingRoomId,
-          roomId: r.roomId,
-          roomName: r.roomName,
-          roomTypeName: rt.roomTypeName || "",
-        })),
-      );
-    }
-    return [];
+    return booking.rooms || [];
   }, [booking]);
 
   // Filter Logic

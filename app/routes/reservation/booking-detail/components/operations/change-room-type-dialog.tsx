@@ -1,9 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftRight, BedDouble, Loader2, RefreshCw } from "lucide-react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { TranslationDisplay } from "~/components/translation-display";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -76,16 +74,6 @@ export function ChangeRoomTypeDialog({
   // Get current room info
   const getSelectedRoom = () => {
     if (!selectedBookingRoomId) return null;
-
-    if (bookingDetail.roomsByType && bookingDetail.roomsByType.length > 0) {
-      for (const typeGroup of bookingDetail.roomsByType) {
-        const room = typeGroup.rooms?.find(
-          (r) => r.bookingRoomId === selectedBookingRoomId,
-        );
-        if (room) return { ...room, currentRoomTypeId: typeGroup.roomTypeId };
-      }
-    }
-
     const room = bookingDetail.rooms?.find(
       (r) => r.bookingRoomId === selectedBookingRoomId,
     );
@@ -168,108 +156,51 @@ export function ChangeRoomTypeDialog({
                         >
                           <SelectTrigger
                             className={cn(
-                              "h-12 transition-colors",
+                              "h-fit transition-colors",
                               !field.value
                                 ? "text-muted-foreground border-dashed"
                                 : "border-primary/50 bg-primary/5",
                             )}
                           >
-                            <SelectValue placeholder="-- Chọn phòng --">
-                              {field.value && selectedRoom && (
-                                <div className="flex items-center gap-3">
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                                    <BedDouble className="h-4 w-4" />
-                                  </div>
-                                  <div className="flex flex-col items-start">
-                                    <span className="font-medium">
-                                      {selectedRoom.roomName}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      <TranslationDisplay
-                                        translations={
-                                          roomTypes.find(
-                                            (rt) =>
-                                              rt.id ===
-                                              selectedRoom.currentRoomTypeId,
-                                          )?.translations
-                                        }
-                                      />
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
-                            </SelectValue>
+                            <SelectValue placeholder="-- Chọn phòng --"></SelectValue>
                           </SelectTrigger>
                           <SelectContent>
-                            {bookingDetail.roomsByType &&
-                            bookingDetail.roomsByType.length > 0
-                              ? bookingDetail.roomsByType.map((typeGroup) => (
-                                  <div key={typeGroup.roomTypeId}>
-                                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                      {typeGroup.roomTypeName}
-                                    </div>
-                                    {typeGroup.rooms?.map((room) => (
-                                      <SelectItem
-                                        key={room.bookingRoomId}
-                                        value={room.bookingRoomId!}
-                                        className="cursor-pointer pl-6"
-                                      >
-                                        <div className="flex items-center justify-between w-full min-w-[250px]">
-                                          <span className="font-medium">
-                                            {room.roomName || "Chưa gán phòng"}
-                                          </span>
-                                          {room.baseRate && (
-                                            <Badge
-                                              variant="secondary"
-                                              className="text-[10px] px-1.5 h-5"
-                                            >
-                                              {
-                                                formatMoney(room.baseRate)
-                                                  .vndFormatted
-                                              }
-                                            </Badge>
-                                          )}
-                                        </div>
-                                      </SelectItem>
-                                    ))}
-                                  </div>
-                                ))
-                              : bookingDetail.rooms?.map((room) => (
-                                  <SelectItem
-                                    key={room.bookingRoomId}
-                                    value={room.bookingRoomId}
-                                    className="cursor-pointer"
-                                  >
-                                    <div className="flex items-center justify-between w-full min-w-[250px]">
-                                      <div>
-                                        <div className="font-medium">
-                                          {room.roomName}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                          <TranslationDisplay
-                                            translations={
-                                              roomTypes.find(
-                                                (rt) =>
-                                                  rt.id === room.roomTypeId,
-                                              )?.translations
-                                            }
-                                          />
-                                        </div>
+                            {bookingDetail.rooms &&
+                            bookingDetail.rooms.length > 0 ? (
+                              bookingDetail.rooms.map((room) => (
+                                <SelectItem
+                                  key={room.bookingRoomId}
+                                  value={room.bookingRoomId!}
+                                  className="cursor-pointer h-fit"
+                                >
+                                  <div className="flex items-center justify-between w-full min-w-[250px]">
+                                    <div>
+                                      <div className="font-medium">
+                                        {room.roomName || "Chưa gán phòng"}
                                       </div>
-                                      {room.baseRate && (
-                                        <Badge
-                                          variant="secondary"
-                                          className="text-[10px] px-1.5 h-5"
-                                        >
-                                          {
-                                            formatMoney(room.baseRate)
-                                              .vndFormatted
-                                          }
-                                        </Badge>
-                                      )}
+                                      <div className="text-xs text-muted-foreground">
+                                        {room.roomTypeName}
+                                      </div>
                                     </div>
-                                  </SelectItem>
-                                ))}
+                                    {room.baseRate && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-[10px] px-1.5 h-5"
+                                      >
+                                        {
+                                          formatMoney(room.baseRate)
+                                            .vndFormatted
+                                        }
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <div className="p-4 text-sm text-center text-muted-foreground">
+                                Không có phòng nào
+                              </div>
+                            )}
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -296,46 +227,13 @@ export function ChangeRoomTypeDialog({
                         >
                           <SelectTrigger
                             className={cn(
-                              "h-12 transition-colors",
+                              "h-40 transition-colors",
                               !field.value
                                 ? "text-muted-foreground border-dashed"
                                 : "border-primary/50 bg-primary/5",
                             )}
                           >
-                            <SelectValue placeholder="-- Chọn loại phòng mới --">
-                              {field.value && (
-                                <div className="flex items-center gap-3">
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                                    <BedDouble className="h-4 w-4" />
-                                  </div>
-                                  <div className="flex flex-col items-start">
-                                    <span className="font-medium">
-                                      <TranslationDisplay
-                                        translations={
-                                          roomTypes.find(
-                                            (rt) => rt.id === field.value,
-                                          )?.translations
-                                        }
-                                      />
-                                    </span>
-                                    {roomTypes.find(
-                                      (rt) => rt.id === field.value,
-                                    )?.baseRate && (
-                                      <span className="text-xs text-muted-foreground">
-                                        {
-                                          formatMoney(
-                                            roomTypes.find(
-                                              (rt) => rt.id === field.value,
-                                            )!.baseRate,
-                                          ).vndFormatted
-                                        }{" "}
-                                        / đêm
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </SelectValue>
+                            <SelectValue placeholder="-- Chọn loại phòng mới --" />
                           </SelectTrigger>
                           <SelectContent>
                             {roomTypes.length === 0 ? (
@@ -356,9 +254,11 @@ export function ChangeRoomTypeDialog({
                                   >
                                     <div className="flex items-center justify-between w-full min-w-[250px]">
                                       <div>
-                                        <TranslationDisplay
-                                          translations={roomType.translations}
-                                        />
+                                        {
+                                          roomTypes.find(
+                                            (rt) => rt.id === roomType.id,
+                                          )?.translations[0]?.name
+                                        }
                                       </div>
                                       {roomType.baseRate && (
                                         <Badge
@@ -397,13 +297,11 @@ export function ChangeRoomTypeDialog({
                           <strong>{selectedRoom?.roomName}</strong> sẽ được đổi
                           sang loại{" "}
                           <strong>
-                            <TranslationDisplay
-                              translations={
-                                roomTypes.find(
-                                  (rt) => rt.id === selectedNewRoomTypeId,
-                                )?.translations
-                              }
-                            />
+                            {
+                              roomTypes.find(
+                                (rt) => rt.id === selectedNewRoomTypeId,
+                              )?.translations[0]?.name
+                            }
                           </strong>
                         </p>
                       </div>
