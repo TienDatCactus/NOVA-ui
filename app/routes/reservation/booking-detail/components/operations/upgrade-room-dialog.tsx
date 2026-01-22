@@ -302,21 +302,37 @@ export function UpgradeRoomDialog({
                               const priceDiff =
                                 room.baseRate -
                                 (selectedBookingRoom?.baseRate || 0);
+                              const hasConflict = !!room.conflictInfo;
 
                               return (
                                 <div
                                   key={room.roomId}
-                                  onClick={() => field.onChange(room.roomId)}
+                                  onClick={() => {
+                                    if (!hasConflict) {
+                                      field.onChange(room.roomId);
+                                    }
+                                  }}
                                   className={cn(
-                                    "cursor-pointer rounded-xl border-2 p-4 transition-all hover:shadow-md relative overflow-hidden",
-                                    isSelected
+                                    "rounded-xl border-2 p-4 transition-all relative overflow-hidden",
+                                    hasConflict
+                                      ? "cursor-not-allowed opacity-60 bg-muted/50 border-muted"
+                                      : "cursor-pointer hover:shadow-md",
+                                    !hasConflict && isSelected
                                       ? "border-primary bg-primary/5 ring-1 ring-primary"
-                                      : "border-muted bg-card hover:border-primary/50",
+                                      : !hasConflict
+                                        ? "border-muted bg-card hover:border-primary/50"
+                                        : "",
                                   )}
                                 >
-                                  {isSelected && (
+                                  {isSelected && !hasConflict && (
                                     <div className="absolute top-0 right-0 bg-primary text-primary-foreground p-1 rounded-bl-xl">
                                       <Check className="h-3 w-3" />
+                                    </div>
+                                  )}
+
+                                  {hasConflict && (
+                                    <div className="absolute top-0 right-0 bg-destructive text-destructive-foreground p-1 rounded-bl-xl">
+                                      <AlertCircle className="h-3 w-3" />
                                     </div>
                                   )}
 
@@ -356,6 +372,15 @@ export function UpgradeRoomDialog({
                                         : "Đang giữ"}
                                     </span>
                                   </div>
+
+                                  {hasConflict && room.conflictInfo && (
+                                    <div className="mt-2 pt-2 border-t border-destructive/30 flex items-start gap-2 text-xs text-destructive">
+                                      <AlertCircle className="h-3 w-3 shrink-0 mt-0.5" />
+                                      <span className="line-clamp-2">
+                                        {room.conflictInfo.message}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}

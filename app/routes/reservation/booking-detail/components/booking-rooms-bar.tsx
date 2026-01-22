@@ -234,15 +234,16 @@ export default function BookingRoomsBar({
                     Đổi loại phòng
                   </DropdownMenuItem>
                 )}
-                {bookingDetail.status === "CheckedIn" && (
-                  <DropdownMenuItem
-                    onClick={() => setAddRoomModalOpen(true)}
-                    disabled={!bookingState.permissions.canEditRooms}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Thêm phòng
-                  </DropdownMenuItem>
-                )}
+                {bookingDetail.status === "CheckedIn" ||
+                  (bookingDetail.status === "InHouse" && (
+                    <DropdownMenuItem
+                      onClick={() => setAddRoomModalOpen(true)}
+                      disabled={!bookingState.permissions.canEditRooms}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Thêm phòng
+                    </DropdownMenuItem>
+                  ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
