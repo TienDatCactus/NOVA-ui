@@ -22,9 +22,7 @@ export function KpiCard({
   const displayValue =
     format === "percent"
       ? `${typeof value === "number" ? value.toFixed(1) : value}%`
-      : typeof value === "number"
-        ? formatMoney(value).vndFormatted
-        : value;
+      : value;
 
   return (
     <Card className={cn("shadow-none border-border/60 p-0", className)}>
