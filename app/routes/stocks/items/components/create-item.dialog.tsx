@@ -135,12 +135,18 @@ export default function CreateItemDialog({
   });
 
   const handleSubmit = (data: CreateItemFormData) => {
-    onSubmit(data, {
-      onSuccess: () => {
-        form.reset();
-        onOpenChange(false);
+    onSubmit(
+      {
+        ...data,
+        unitPrice: data.unitCost,
       },
-    });
+      {
+        onSuccess: () => {
+          form.reset();
+          onOpenChange(false);
+        },
+      },
+    );
   };
 
   return (
@@ -180,7 +186,7 @@ export default function CreateItemDialog({
                     >
                       {(field) => (
                         <Input
-                          placeholder="Mã tự động"
+                          placeholder="Mã hàng"
                           className="uppercase font-mono h-9"
                           {...field}
                         />
@@ -340,7 +346,7 @@ export default function CreateItemDialog({
                           </div>
                         )}
                       </FormRow>
-                      <FormRow
+                      {/* <FormRow
                         control={form.control}
                         name="unitPrice"
                         label="Giá bán"
@@ -363,7 +369,7 @@ export default function CreateItemDialog({
                             />
                           </div>
                         )}
-                      </FormRow>
+                      </FormRow> */}
                     </TableBody>
                   </Table>
                 </div>

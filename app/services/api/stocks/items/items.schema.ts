@@ -71,7 +71,7 @@ const StockTransactionsItemSchema = z.object({
   itemName: z.string(),
   transactionType: TransactionTypesEnum,
   quantity: z.number(),
-  costPrice: z.number(),
+  costPrice: z.number().optional().nullable(),
   transactionDate: z.string(),
   reference: z.string(),
   note: z.string(),

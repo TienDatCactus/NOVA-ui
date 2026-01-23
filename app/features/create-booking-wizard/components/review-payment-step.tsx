@@ -736,6 +736,7 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                     <Input
                                       type="number"
                                       placeholder="0"
+                                      disabled
                                       className="h-11 pl-4 pr-12 font-mono text-lg font-bold"
                                       max={
                                         pricePreview?.roomsSubtotal ??
@@ -755,25 +756,6 @@ export function BookingCartWidget({ form }: BookingCartWidgetProps) {
                                     </div>
                                   </div>
                                 </FormControl>
-                              </div>
-
-                              {/* BALANCE INDICATOR */}
-                              <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg border border-border/50">
-                                <span className="text-xs text-muted-foreground font-medium">
-                                  Công nợ còn lại
-                                </span>
-                                <span
-                                  className={cn(
-                                    "font-mono font-bold text-sm",
-                                    balance > 0
-                                      ? "text-orange-600"
-                                      : "text-emerald-600",
-                                  )}
-                                >
-                                  {balance > 0
-                                    ? formatMoney(balance).vndFormatted
-                                    : "Đã thanh toán đủ"}
-                                </span>
                               </div>
                             </FormItem>
                           );

@@ -62,7 +62,7 @@ export default function GuestDocumentsSection({
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `guest-documents-booking-${bookingId}.xml`;
+      link.download = `Khai-bao-tam-tru-${bookingId}.xml`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

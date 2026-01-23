@@ -124,10 +124,10 @@ function useOrderLogic({ orderId }: { orderId: string }) {
                       onClick: () => toggle("invoice", res.invoiceId),
                     },
                   }
-                : undefined
+                : undefined,
             );
           },
-        }
+        },
       );
     },
     handleAddItem: (itemId: string, qty: number, price: number) => {
@@ -136,13 +136,13 @@ function useOrderLogic({ orderId }: { orderId: string }) {
           orderId,
           data: { menuItemId: itemId, quantity: qty, unitPrice: price },
         },
-        { onSuccess: () => toggle("add", false) }
+        { onSuccess: () => toggle("add", false) },
       );
     },
     handleUpdateSchedule: (date: string) => {
       onUpdateSchedule(
         { orderId, scheduledAt: date },
-        { onSuccess: () => toggle("schedule", false) }
+        { onSuccess: () => toggle("schedule", false) },
       );
     },
   };
@@ -272,8 +272,25 @@ export function OrderFooterActions({
     );
   if (status === "Completed")
     return (
-      <div className="flex items-center justify-center p-3 text-sm font-medium text-green-600 bg-green-50">
-        <CheckCircle2 className="mr-2 h-4 w-4" /> Đã hoàn thành
+      <div className="space-y-2">
+        <div className="flex items-center justify-center p-3 text-sm font-medium text-green-600 bg-green-50">
+          <CheckCircle2 className="mr-2 h-4 w-4" /> Đã hoàn thành
+        </div>
+        <Button
+          size="default"
+          className="w-full bg-blue-600 hover:bg-blue-700 font-bold"
+          onClick={() => toggle("pay", true)}
+        >
+          <Banknote className="mr-2 h-4 w-4" /> Thanh toán
+        </Button>
+        <PaymentOrderSheet
+          open={dialogs.pay}
+          onOpenChange={(v) => toggle("pay", v)}
+          orderId={orderId}
+          onPayNow={handlers.handlePay}
+          isPaying={loading.isPayingNow}
+          orderType="menu"
+        />
       </div>
     );
 

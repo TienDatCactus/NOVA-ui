@@ -213,9 +213,7 @@ export default function CreatePurchaseRequestDialog({
                       <TableHead className="w-[140px]">
                         Đơn giá dự kiến
                       </TableHead>
-                      <TableHead className="w-[140px] text-right">
-                        Thành tiền
-                      </TableHead>
+
                       <TableHead className="min-w-[200px]">Ghi chú</TableHead>
                       <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
@@ -229,7 +227,7 @@ export default function CreatePurchaseRequestDialog({
                         form.watch(`items.${index}.unitCost`) || 0;
                       const subtotal = quantity * unitCost;
                       const selectedItemId = form.watch(
-                        `items.${index}.itemId`
+                        `items.${index}.itemId`,
                       );
 
                       return (
@@ -328,7 +326,7 @@ export default function CreatePurchaseRequestDialog({
                                       {...qtyField}
                                       onChange={(e) =>
                                         qtyField.onChange(
-                                          parseFloat(e.target.value) || 0
+                                          parseFloat(e.target.value) || 0,
                                         )
                                       }
                                       className="h-9 text-center"
@@ -354,7 +352,7 @@ export default function CreatePurchaseRequestDialog({
                                       {...costField}
                                       onChange={(e) =>
                                         costField.onChange(
-                                          parseFloat(e.target.value) || 0
+                                          parseFloat(e.target.value) || 0,
                                         )
                                       }
                                       className="h-9 text-right"
@@ -367,11 +365,11 @@ export default function CreatePurchaseRequestDialog({
                           </TableCell>
 
                           {/* Subtotal (Read-only) */}
-                          <TableCell className="p-2 text-right font-medium">
+                          {/* <TableCell className="p-2 text-right font-medium">
                             <div className="h-9 flex items-center justify-end font-mono text-sm">
                               {formatMoney(subtotal).vndFormatted}
                             </div>
-                          </TableCell>
+                          </TableCell> */}
 
                           {/* Note */}
                           <TableCell className="p-2">
@@ -438,14 +436,14 @@ export default function CreatePurchaseRequestDialog({
                     </span>{" "}
                     mục
                   </div>
-                  <div className="flex flex-col">
+                  {/* <div className="flex flex-col">
                     <span className="text-xs text-muted-foreground">
                       Giá trị dự kiến
                     </span>
                     <span className="text-lg font-bold text-primary">
                       {formatMoney(totalCost).vndFormatted}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="flex gap-3">
                   <Button

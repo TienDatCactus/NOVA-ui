@@ -29,6 +29,8 @@ import {
 import { useDeletePayrollComponent } from "../../container/query.hooks";
 import AddComponentDialog from "./add-component-dialog";
 import EditComponentDialog from "./edit-component-dialog";
+import { hasRole } from "~/lib/auth/bouncer";
+import { AuthLoader, UserRole } from "~/lib/auth/auth.loader";
 
 interface ComponentsListProps {
   payrollId: string;
@@ -80,7 +82,7 @@ export default function ComponentsList({
           onError: () => {
             toast.error("Không thể xóa component");
           },
-        }
+        },
       );
     }
   };
@@ -101,14 +103,16 @@ export default function ComponentsList({
             Quản lý các khoản thưởng, phạt, phụ cấp
           </p>
         </div>
-        <Button
-          size="sm"
-          onClick={() => setAddDialogOpen(true)}
-          disabled={hasExpense}
-        >
-          <Plus className="h-4 w-4 mr-1.5" />
-          Thêm mới
-        </Button>
+        {hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
+          <Button
+            size="sm"
+            onClick={() => setAddDialogOpen(true)}
+            disabled={hasExpense}
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            Thêm mới
+          </Button>
+        )}
       </div>
 
       {components && components.length > 0 ? (
@@ -256,14 +260,16 @@ export default function ComponentsList({
           <p className="text-xs text-muted-foreground mt-1 mb-4">
             Nhấn "Thêm mới" để thêm các khoản thưởng, phạt, phụ cấp
           </p>
-          <Button
-            size="sm"
-            onClick={() => setAddDialogOpen(true)}
-            variant="outline"
-          >
-            <Plus className="h-4 w-4 mr-1.5" />
-            Thêm phụ cấp/khấu trừ đầu tiên
-          </Button>
+          {hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
+            <Button
+              size="sm"
+              onClick={() => setAddDialogOpen(true)}
+              variant="outline"
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Thêm phụ cấp/khấu trừ đầu tiên
+            </Button>
+          )}
         </div>
       )}
 

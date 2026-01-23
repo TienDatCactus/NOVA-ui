@@ -8,7 +8,7 @@ import { parsePaymentCallbackParams } from "~/lib/payment-url-builder";
 
 export default function PaymentSuccessPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
+    "loading",
   );
   const navigate = useNavigate();
   const context = parsePaymentCallbackParams();
@@ -25,7 +25,7 @@ export default function PaymentSuccessPage() {
 
   const handleNavigate = () => {
     if (!context) {
-      navigate(DASHBOARD.fall);
+      navigate(-1);
       return;
     }
 

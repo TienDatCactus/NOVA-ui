@@ -24,6 +24,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { formatMoney } from "~/lib/utils";
 import { useExportPayslips, usePayrollDetail } from "../container/query.hooks";
 import ComponentsList from "./payroll-detail-dialog/components-list";
+import { AuthLoader } from "~/lib/auth/auth.loader";
+import { hasRole } from "~/lib/auth/bouncer";
+import { UserRole } from "~/lib/auth/roles";
 
 interface PayrollDetailDialogProps {
   payrollId: string;
@@ -264,7 +267,7 @@ export default function PayrollDetailDialog({
             * Dữ liệu được cập nhật lần cuối lúc{" "}
             {new Date().toLocaleTimeString()}
           </p>
-          {payroll && (
+          {payroll && hasRole(AuthLoader.getUser(), UserRole.Accountant) && (
             <Button
               variant="success"
               size="sm"
