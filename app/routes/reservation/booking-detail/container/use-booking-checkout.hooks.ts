@@ -36,7 +36,7 @@ export function useBookingPendingCharges(bookingId: string, enabled = true) {
  */
 export function useInvoicePreview(
   data: InvoicePreviewRequestDto,
-  enabled = false
+  enabled = false,
 ) {
   return useQuery({
     queryKey: ["invoice-preview", data],
@@ -54,7 +54,7 @@ export function useInvoicePreview(
  */
 export function useCalculateInvoiceFees(
   data: InvoiceCalculateFeesRequestDto,
-  enabled = false
+  enabled = false,
 ) {
   return useQuery({
     queryKey: [
@@ -140,7 +140,7 @@ export function useCheckoutPayment(bookingId: string) {
       BookingService.staffCheckoutPayment(bookingId, data),
     onSuccess: async (response) => {
       // Check if payment requires redirect (Card/BankTransfer)
-      const redirected = handlePaymentResponse(response);
+      const redirected = handlePaymentResponse(response as any);
 
       if (redirected) {
         // User will be redirected to payment gateway
@@ -385,6 +385,9 @@ export function useConfirmBookingPayment(bookingId: string) {
           queryKey: ["booking-invoices"],
           exact: false,
         }),
+        queryClient.invalidateQueries({
+          queryKey: ["checkout", "pending-charges", bookingId],
+        }),
       ]);
 
       toast.success(response.message || "Xác nhận thanh toán thành công");
@@ -466,7 +469,7 @@ export function usePayNowRooms(bookingId: string) {
 
 export function useUnpaidRooms(
   bookingId: string,
-  options?: { enabled: boolean }
+  options?: { enabled: boolean },
 ) {
   return useQuery({
     queryKey: ["unpaid-rooms", bookingId],

@@ -85,5 +85,4 @@ export {
   useBookingRoomsWeek,
   useBookings,
   useOrderableBookings,
-  
 };
