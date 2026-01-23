@@ -420,7 +420,7 @@ export default function BookingDetailSheet({
                     <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-3 py-2 rounded">
                       <Receipt className="h-3.5 w-3.5" />
                       <span className="font-medium">
-                        {data.invoices.length} hóa đơn điện tử đã xuất
+                        Đã có {data.invoices.length} hóa đơn
                       </span>
                     </div>
                   )}

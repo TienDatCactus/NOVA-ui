@@ -200,15 +200,26 @@ export default function UpdateScheduleDialog({
     }
 
     try {
-      const formattedData = {
-        ...data,
-        newDate: data.newDate
-          ? format(new Date(data.newDate), "yyyy-MM-dd")
-          : data.newDate,
-      };
+      let formattedData;
+      if (data.applyScope === "ThisOnly") {
+        formattedData = {
+          workShiftIds: data.workShiftIds,
+          endDate: data.endDate,
+          applyScope: data.applyScope,
+          excludeHolidays: data.excludeHolidays,
+          newDate: data.newDate,
+        };
+      } else {
+        formattedData = {
+          ...data,
+          newDate: data.newDate
+            ? format(new Date(data.newDate), "yyyy-MM-dd")
+            : undefined,
+        };
+      }
 
       await updateShiftSchedule.mutateAsync(
-        { id: shift.id, data: formattedData },
+        { id: shift.id, data: formattedData as any },
         {
           onSuccess: () => {
             form.reset();

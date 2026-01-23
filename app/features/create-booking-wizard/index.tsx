@@ -20,12 +20,7 @@ import { useCreateBookingStore } from "~/store/create-booking.store";
 import useCreateBookingMutation from "./container/create-booking-mutation.hooks";
 
 import z from "zod";
-import { BookingSchema } from "~/services/api/booking/booking.schema";
-import { CustomerInfoSection } from "./components/customer-info-step";
-import { BookingCartWidget } from "./components/review-payment-step";
-import { RoomSelectionSection } from "./components/room-selection-step";
-import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
-import { cn, onError } from "~/lib/utils";
+import { isDirty } from "zod/v3";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,7 +32,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { isDirty } from "zod/v3";
+import { cn, onError } from "~/lib/utils";
+import { BookingSchema } from "~/services/api/booking/booking.schema";
+import { BOOKING_SOURCES } from "~/services/api/booking/booking.types";
+import { CustomerInfoSection } from "./components/customer-info-step";
+import { BookingCartWidget } from "./components/review-payment-step";
+import { RoomSelectionSection } from "./components/room-selection-step";
 
 export const BookingMasterSchema = z
   .object({
@@ -59,7 +59,7 @@ export const BookingMasterSchema = z
     {
       message: "Ngày trả phòng phải sau ngày nhận phòng",
       path: ["checkoutDate"],
-    }
+    },
   );
 
 //*------------------------------------------------------------
@@ -130,7 +130,7 @@ export default function CreateBookingPage() {
           "Ngày lưu trú đã thay đổi. Vui lòng chọn lại phòng và dịch vụ.",
           {
             duration: 4000,
-          }
+          },
         );
 
         form.setValue("roomIds", []);
@@ -150,7 +150,7 @@ export default function CreateBookingPage() {
           "Ngày lưu trú đã thay đổi. Vui lòng chọn lại phòng và dịch vụ.",
           {
             duration: 4000,
-          }
+          },
         );
 
         form.setValue("roomIds", []);
@@ -178,10 +178,10 @@ export default function CreateBookingPage() {
   };
 
   const onSubmit = async (data: z.infer<typeof BookingMasterSchema>) => {
-    const isRoomBlock = data.bookingType === "RoomBlock";
+    // const isRoomBlock = data.bookingType === "RoomBlock";
 
     if (
-      !isRoomBlock &&
+      // !isRoomBlock &&
       data.serviceOrder?.services &&
       data.serviceOrder.services.length > 0
     ) {
@@ -206,31 +206,24 @@ export default function CreateBookingPage() {
         ...apiPayload,
         checkinDate: format(data.checkinDate, "yyyy-MM-dd"),
         checkoutDate: format(data.checkoutDate, "yyyy-MM-dd"),
-        serviceOrder: isRoomBlock
-          ? undefined
-          : {
-              services: (data.serviceOrder?.services || []).map((s) => ({
-                itemType: s.itemType,
-                itemId: s.itemId,
-                quantity: s.quantity,
-                scheduledDate: s.scheduledDate,
-                note: s.note,
-              })),
-            },
+        serviceOrder: {
+          services: (data.serviceOrder?.services || []).map((s) => ({
+            itemType: s.itemType,
+            itemId: s.itemId,
+            quantity: s.quantity,
+            scheduledDate: s.scheduledDate,
+            note: s.note,
+          })),
+        },
 
-        overridePrice: isRoomBlock ? 0 : data.overridePrice || null,
-        roomPayment: isRoomBlock ? undefined : data.roomPayment,
-        internalNote: isRoomBlock
-          ? `ROOM BLOCK - ${data.guestFullName}`
-          : data.internalNote || null,
-
+        overridePrice: data.overridePrice || null,
+        roomPayment: data.roomPayment,
+        internalNote: data.internalNote || null,
         source:
-          (isRoomBlock
-            ? BOOKING_SOURCES.find((bs) => bs.key === "RoomBlock")?.key
-            : data.bookingType === "OTA"
-              ? BOOKING_SOURCES.find((bs) => bs.key === "OTA")?.key
-              : data.source ||
-                BOOKING_SOURCES.find((bs) => bs.key === "DirectStaff")?.key) ||
+          (data.bookingType === "OTA"
+            ? BOOKING_SOURCES.find((bs) => bs.key === "OTA")?.key
+            : data.source ||
+              BOOKING_SOURCES.find((bs) => bs.key === "DirectStaff")?.key) ||
           "DirectStaff",
       };
       await createBooking(finalPayload, {
@@ -291,7 +284,7 @@ export default function CreateBookingPage() {
                   onClick={handleReset}
                   className={cn(
                     buttonVariants({ variant: "destructive", size: "default" }),
-                    "h-9"
+                    "h-9",
                   )}
                 >
                   <Eraser className="w-4 h-4 mr-2" />

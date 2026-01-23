@@ -457,6 +457,7 @@ export default function StayDetailBar({
                                     <FormControl>
                                       <Input
                                         type="number"
+                                        disabled
                                         min={0}
                                         {...field}
                                         className="font-mono font-bold text-lg"

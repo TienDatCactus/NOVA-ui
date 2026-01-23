@@ -62,7 +62,7 @@ export default function ScheduledTimeDialog({
 
     // Create UTC timestamp
     const finalDateTime = new Date(
-      Date.UTC(year, month, day, hours, minutes, 0, 0)
+      Date.UTC(year, month, day, hours, minutes, 0, 0),
     );
 
     onConfirm(finalDateTime.toISOString());
@@ -157,7 +157,7 @@ export default function ScheduledTimeDialog({
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal bg-background h-10 px-3",
-                        !selectedDate && "text-muted-foreground"
+                        !selectedDate && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />

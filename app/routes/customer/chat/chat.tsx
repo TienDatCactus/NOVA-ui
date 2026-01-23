@@ -135,15 +135,15 @@ export default function GuestChat({}: Route.ComponentProps) {
       setAllMessages((prev) => {
         const existingIds = new Set(prev.map((m) => m.id));
         const newMessages = messagesData.filter(
-          (m) => !existingIds.has(m.id)
+          (m) => !existingIds.has(m.id),
         ) as ChatMessage[];
         // Filter out messages without createdAt before sorting
         const validMessages = [...newMessages, ...prev].filter(
-          (m) => m.createdAt
+          (m) => m.createdAt,
         );
         return validMessages.sort(
           (a, b) =>
-            new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
+            new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime(),
         );
       });
     }
@@ -173,7 +173,11 @@ export default function GuestChat({}: Route.ComponentProps) {
   };
 
   const handleTagItem = (item: any, type: "menu" | "service") => {
-    const tag = type === "menu" ? `${item.name}` : `${item.name}`;
+    const itemName =
+      item.translations?.find((t: any) => t.languageCode === "vi")?.name ||
+      item.translations?.[0]?.name ||
+      "";
+    const tag = `${itemName}`;
     setInputMessage((prev) => `${prev} ${tag} `.trim());
     setIsItemPopoverOpen(false);
     const input = document.getElementById("chat-input");
@@ -338,7 +342,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                     ? "bg-amber-400 animate-pulse"
                     : isConnected
                       ? "bg-emerald-500 shadow-emerald-200"
-                      : "bg-stone-300"
+                      : "bg-stone-300",
                 )}
               />
               <p className="text-xs text-stone-500">
@@ -497,7 +501,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                                 >
                                   <div className="font-medium text-sm text-stone-700 group-hover:text-emerald-800 transition-colors">
                                     {item.translations?.find(
-                                      (t) => t.languageCode === "vi"
+                                      (t) => t.languageCode === "vi",
                                     )?.name ||
                                       item.translations?.[0]?.name ||
                                       ""}
@@ -505,7 +509,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                                   <div className="flex justify-between items-center mt-0.5">
                                     <span className="text-xs text-stone-500 line-clamp-1 max-w-[180px]">
                                       {item.translations?.find(
-                                        (t) => t.languageCode === "vi"
+                                        (t) => t.languageCode === "vi",
                                       )?.description ||
                                         item.translations?.[0]?.description ||
                                         "Không có mô tả"}
@@ -541,7 +545,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                               >
                                 <div className="font-medium text-sm text-stone-700 group-hover:text-emerald-800 transition-colors">
                                   {item.translations?.find(
-                                    (t) => t.languageCode === "vi"
+                                    (t) => t.languageCode === "vi",
                                   )?.name ||
                                     item.translations?.[0]?.name ||
                                     ""}
@@ -549,7 +553,7 @@ export default function GuestChat({}: Route.ComponentProps) {
                                 <div className="flex justify-between items-center mt-0.5">
                                   <span className="text-xs text-stone-500 line-clamp-1 max-w-[180px]">
                                     {item.translations?.find(
-                                      (t) => t.languageCode === "vi"
+                                      (t) => t.languageCode === "vi",
                                     )?.description ||
                                       item.translations?.[0]?.description ||
                                       "Không có mô tả"}

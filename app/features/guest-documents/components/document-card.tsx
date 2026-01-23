@@ -54,7 +54,7 @@ export default function DocumentCard({
               "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0",
               isPassport
                 ? "bg-blue-50 dark:bg-blue-950/30"
-                : "bg-green-50 dark:bg-green-950/30"
+                : "bg-green-50 dark:bg-green-950/30",
             )}
           >
             {isPassport ? (
@@ -114,7 +114,7 @@ export default function DocumentCard({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => onDelete?.(document.id)}
+                    onClick={() => onDelete?.(document.id ?? "")}
                     className="text-destructive focus:text-destructive"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
@@ -157,7 +157,7 @@ export default function DocumentCard({
                       ? "text-destructive"
                       : isExpiringSoon
                         ? "text-amber-600"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground",
                   )}
                 >
                   <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
