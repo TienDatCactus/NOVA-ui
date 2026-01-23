@@ -499,12 +499,13 @@ const StaffCheckoutPaymentRequestSchema = CheckoutPaymentItemSchema;
 
 // Response for checkout payment (with gateway redirect support)
 const StaffCheckoutPaymentResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string().optional(),
-  // Payment gateway redirect fields
-  paymentUrl: z.string().optional(),
-  requiresPaymentAction: z.boolean().optional(),
-  paymentProvider: z.string().optional(),
+  paymentId: z.string().optional().nullable(),
+  invoiceId: z.string().optional().nullable(),
+  invoiceNo: z.string().optional().nullable(),
+  paymentUrl: z.url().optional().nullable(),
+  requiresPaymentAction: z.boolean().optional().nullable(),
+  paymentProvider: z.string().optional().nullable(),
+  message: z.string().optional().nullable(),
 });
 
 // Yêu cầu checkout 1 booking

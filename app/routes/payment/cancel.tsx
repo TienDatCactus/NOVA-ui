@@ -11,7 +11,7 @@ export default function PaymentCancelPage() {
 
   const handleNavigate = () => {
     if (!context) {
-      navigate(DASHBOARD.fall);
+      navigate(-1);
       return;
     }
 

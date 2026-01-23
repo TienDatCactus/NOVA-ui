@@ -63,9 +63,9 @@ const PaginationMetaSchema = z.object({
 const InvoiceListResponseSchema = z.array(InvoiceListItemSchema);
 
 const InvoiceListResponseWithMetaSchema = z.object({
-  success: z.boolean(),
-  statusCode: z.number(),
-  message: z.string(),
+  success: z.boolean().optional().nullable(),
+  statusCode: z.number().optional().nullable(),
+  message: z.string().optional().nullable(),
   data: z.array(InvoiceListItemSchema),
   meta: PaginationMetaSchema,
 });
@@ -136,9 +136,9 @@ const InvoicePaymentResponseSchema = z.object({
     balance: z.number(),
     status: z.string(),
   }),
-  paymentUrl: z.string().optional(),
+  paymentUrl: z.string().optional().nullable(),
   requiresPaymentAction: z.boolean().optional(),
-  paymentProvider: z.string().optional(),
+  paymentProvider: z.string().optional().nullable(),
 });
 
 const PaymentsFromInvoiceResponseSchema = z.array(
@@ -149,7 +149,7 @@ const PaymentsFromInvoiceResponseSchema = z.array(
     status: z.string().nullable(),
     createdAt: z.string().nullable(),
     note: z.string().nullable(),
-  })
+  }),
 );
 
 //! Booking related invoices
@@ -182,7 +182,7 @@ const InvoicePreviewResponseSchema = z.object({
       quantity: z.number(),
       unitPrice: z.number(),
       amount: z.number(),
-    })
+    }),
   ),
   serviceOrderItems: z.array(
     z.object({
@@ -191,7 +191,7 @@ const InvoicePreviewResponseSchema = z.object({
       quantity: z.number(),
       unitPrice: z.number(),
       amount: z.number(),
-    })
+    }),
   ),
   subTotal: z.number(),
   vatAmount: z.number(),
