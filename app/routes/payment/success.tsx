@@ -25,7 +25,7 @@ export default function PaymentSuccessPage() {
 
   const handleNavigate = () => {
     if (!context) {
-      navigate(-1);
+      navigate(DASHBOARD.fall);
       return;
     }
 

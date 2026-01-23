@@ -140,7 +140,7 @@ export function useCheckoutPayment(bookingId: string) {
       BookingService.staffCheckoutPayment(bookingId, data),
     onSuccess: async (response) => {
       // Check if payment requires redirect (Card/BankTransfer)
-      const redirected = handlePaymentResponse(response as any);
+      const redirected = handlePaymentResponse(response);
 
       if (redirected) {
         // User will be redirected to payment gateway

@@ -214,6 +214,9 @@ export default function Component({}: Route.ComponentProps) {
     setCheckoutDialog(false);
 
     if (mode === "walk-in") {
+      // Clear any persisted booking linkage before creating a walk-in order
+      setBookingInfo(null, null);
+      setSelectedBookingInfo(null);
       setScheduledTimeDialog(true);
     } else {
       setBookingDialog(true);
@@ -243,11 +246,10 @@ export default function Component({}: Route.ComponentProps) {
       toast.error("Vui lòng chọn thời gian phục vụ");
       return;
     }
-
     createOrder(
       {
-        bookingId,
-        bookingRoomId,
+        bookingId: bookingId || undefined,
+        bookingRoomId: bookingRoomId || undefined,
         scheduledAt: finalScheduledAt,
         note: notes || "",
         items,
