@@ -77,7 +77,7 @@ export default function PaymentFailurePage() {
 
           <div className="space-y-2">
             <Button onClick={handleNavigate} className="w-full">
-              Thử lại thanh toán
+              Quay lại
             </Button>
             <Button
               variant="outline"

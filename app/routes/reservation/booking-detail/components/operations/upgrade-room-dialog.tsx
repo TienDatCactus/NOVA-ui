@@ -3,8 +3,6 @@ import {
   ArrowUpCircle,
   BedDouble,
   Check,
-  CreditCard,
-  Gift,
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
@@ -28,8 +26,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Label } from "~/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -47,7 +43,6 @@ import { createChangeRoomOperation } from "~/services/api/booking/booking.helper
 import type { BookingDetailResponseDto } from "~/services/api/booking/dto";
 import {
   calculateRemainingNights,
-  calculateUpgradeSurcharge,
   getUpgradeValidationMessage,
 } from "../../container/upgrade-room-calculator";
 
@@ -119,16 +114,6 @@ export function UpgradeRoomDialog({
       : 0;
   }, [selectedBookingRoom, selectedNewRoom, bookingDetail.status]);
 
-  const surcharge = useMemo(() => {
-    return selectedBookingRoom && selectedNewRoom && !isFreeChange
-      ? calculateUpgradeSurcharge(
-          selectedBookingRoom.baseRate || 0,
-          selectedNewRoom.baseRate || 0,
-          remainingNights,
-        )
-      : 0;
-  }, [selectedBookingRoom, selectedNewRoom, isFreeChange, remainingNights]);
-
   const validationMessage = useMemo(() => {
     return selectedBookingRoom && selectedNewRoom
       ? getUpgradeValidationMessage(selectedBookingRoom.baseRate || 0)
@@ -147,14 +132,11 @@ export function UpgradeRoomDialog({
       return;
     }
 
-    // Validate free upgrade requires reason
-    if (
-      data.isFreeChange &&
-      (!data.reason || data.reason.trim().length === 0)
-    ) {
+    // Luôn là miễn phí, luôn yêu cầu lý do
+    if (!data.reason || data.reason.trim().length === 0) {
       form.setError("reason", {
         type: "manual",
-        message: "Vui lòng nhập lý do upgrade miễn phí",
+        message: "Vui lòng nhập lý do nâng cấp miễn phí",
       });
       return;
     }
@@ -165,16 +147,13 @@ export function UpgradeRoomDialog({
         data.newRoomId,
         undefined,
         undefined,
-        data.isFreeChange,
+        true,
       );
 
       updateBooking(
         {
           rooms: [changeOperation],
-          note:
-            data.isFreeChange && data.reason
-              ? `[Upgrade miễn phí] ${data.reason}`
-              : undefined,
+          note: `[Upgrade miễn phí] ${data.reason}`,
         },
         {
           onSuccess: () => {
@@ -493,103 +472,36 @@ export function UpgradeRoomDialog({
                 </div>
               )}
 
-              {/* 3. CONFIRMATION DETAILS */}
+              {/* 3. LÝ DO NÂNG CẤP MIỄN PHÍ */}
               {selectedNewRoomId && !validationMessage && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                   <Separator />
-
                   <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs">
                       3
                     </span>
-                    Hình thức thanh toán
+                    Lý do nâng cấp miễn phí
                   </h3>
-
                   <FormField
                     control={form.control}
-                    name="isFreeChange"
+                    name="reason"
                     render={({ field }) => (
-                      <RadioGroup
-                        onValueChange={(val) => field.onChange(val === "free")}
-                        value={field.value ? "free" : "paid"}
-                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                      >
-                        <Label
-                          htmlFor="paid"
-                          className={cn(
-                            "flex flex-col gap-2 p-4 border-2 rounded-xl cursor-pointer hover:bg-muted/50 transition-all",
-                            !field.value
-                              ? "border-primary bg-primary/5"
-                              : "border-muted",
-                          )}
-                        >
-                          <RadioGroupItem
-                            value="paid"
-                            id="paid"
-                            className="sr-only"
+                      <FormItem className="pl-1">
+                        <FormLabel>
+                          Lý do nâng cấp miễn phí{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder="VD: Khách VIP, Sự cố phòng cũ..."
+                            className="resize-none bg-muted/20"
                           />
-                          <div className="flex items-center gap-2 font-bold text-base">
-                            <CreditCard className="h-5 w-5 text-primary" />
-                            Thu phí chênh lệch
-                          </div>
-                          <div className="text-sm text-muted-foreground pl-7">
-                            Khách sẽ trả thêm{" "}
-                            <span className="font-mono font-bold text-foreground">
-                              {formatMoney(surcharge).vndFormatted}
-                            </span>
-                            . Khoản này sẽ được thêm vào hóa đơn.
-                          </div>
-                        </Label>
-
-                        <Label
-                          htmlFor="free"
-                          className={cn(
-                            "flex flex-col gap-2 p-4 border-2 rounded-xl cursor-pointer hover:bg-muted/50 transition-all",
-                            field.value
-                              ? "border-emerald-500 bg-emerald-50/30"
-                              : "border-muted",
-                          )}
-                        >
-                          <RadioGroupItem
-                            value="free"
-                            id="free"
-                            className="sr-only"
-                          />
-                          <div className="flex items-center gap-2 font-bold text-base text-emerald-700">
-                            <Gift className="h-5 w-5" />
-                            Miễn phí (Complimentary)
-                          </div>
-                          <div className="text-sm text-muted-foreground pl-7">
-                            Nâng cấp miễn phí. Không phát sinh chi phí cho
-                            khách.
-                          </div>
-                        </Label>
-                      </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
-
-                  {isFreeChange && (
-                    <FormField
-                      control={form.control}
-                      name="reason"
-                      render={({ field }) => (
-                        <FormItem className="pl-1">
-                          <FormLabel>
-                            Lý do miễn phí{" "}
-                            <span className="text-destructive">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              placeholder="VD: Khách VIP, Sự cố phòng cũ..."
-                              className="resize-none bg-muted/20"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
               )}
 

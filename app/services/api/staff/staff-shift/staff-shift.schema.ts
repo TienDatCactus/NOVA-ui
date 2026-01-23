@@ -47,7 +47,7 @@ const CreateShiftScheduleRequestSchema = z.object({
 const UpdateShiftScheduleRequestSchema = z
   .object({
     workShiftIds: z.array(z.string()).min(1, "Chọn ít nhất 1 ca làm việc"),
-    repeatWeekly: z.boolean(),
+    repeatWeekly: z.boolean().optional().nullable(),
     weekDays: z.array(z.number()).optional().nullable(), // 1=Monday, 7=Sunday
     endDate: z.string().optional().nullable(), // "yyyy-MM-dd", null = mặc định +1 tháng
     excludeHolidays: z.boolean(),
@@ -65,7 +65,7 @@ const UpdateShiftScheduleRequestSchema = z
     {
       message: "Phải chọn ít nhất 1 ngày trong tuần khi áp dụng Forward/All",
       path: ["weekDays"],
-    }
+    },
   );
 
 const TransferStaffShiftRequestSchema = z.object({

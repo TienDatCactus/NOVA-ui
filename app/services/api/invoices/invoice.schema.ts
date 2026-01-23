@@ -119,23 +119,26 @@ const InvoicePaymentRequestSchema = z.object({
 });
 
 const InvoicePaymentResponseSchema = z.object({
-  paymentId: z.string(),
+  paymentId: z.string().optional().nullable(),
   invoiceId: z.string(),
   amount: z.number(),
   method: z.string(),
   status: z.string(),
   createdAt: z.string(),
   // Payment gateway redirect fields
-  invoiceSummary: z.object({
-    invoiceNo: z.string(),
-    subTotal: z.number(),
-    vatAmount: z.number(),
-    serviceChargeAmount: z.number(),
-    total: z.number(),
-    paidAmount: z.number(),
-    balance: z.number(),
-    status: z.string(),
-  }),
+  invoiceSummary: z
+    .object({
+      invoiceNo: z.string(),
+      subTotal: z.number(),
+      vatAmount: z.number(),
+      serviceChargeAmount: z.number(),
+      total: z.number(),
+      paidAmount: z.number(),
+      balance: z.number(),
+      status: z.string(),
+    })
+    .optional()
+    .nullable(),
   paymentUrl: z.string().optional().nullable(),
   requiresPaymentAction: z.boolean().optional(),
   paymentProvider: z.string().optional().nullable(),
