@@ -63,7 +63,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
   const handleTypeChange = (val: string) => {
     form.setValue(
       "bookingType",
-      val as z.infer<typeof BookingMasterSchema>["bookingType"]
+      val as z.infer<typeof BookingMasterSchema>["bookingType"],
     );
     if (val === "RoomBlock") {
       form.setValue("source", "RoomBlock"); // Assuming key matches value for simplicity in example
@@ -86,7 +86,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
           {[
             { id: "Direct", icon: Building2, label: "Khách lẻ / Trực tiếp" },
             { id: "OTA", icon: Globe, label: "Kênh OTA" },
-            { id: "RoomBlock", icon: Ban, label: "Khóa phòng / Bảo trì" },
+            // { id: "RoomBlock", icon: Ban, label: "Khóa phòng / Bảo trì" },
           ].map((type) => (
             <SelectItem value={type.id} key={type.id}>
               <type.icon className="h-5 w-5" />
@@ -117,10 +117,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                       </FormControl>
                       <SelectContent>
                         {BOOKING_SOURCES.filter(
-                          (s) =>
-                            s.key !== "OTA" &&
-                            s.key !== "RoomBlock" &&
-                            s.key !== "DirectCustomer"
+                          (s) => s.key !== "OTA" && s.key !== "DirectCustomer",
                         ).map((bs) => (
                           <SelectItem value={bs.key} key={bs.key}>
                             {bs.label}
@@ -150,7 +147,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                               role="combobox"
                               className={cn(
                                 "w-full justify-between bg-background h-9 px-3 font-normal",
-                                !field.value && "text-muted-foreground"
+                                !field.value && "text-muted-foreground",
                               )}
                             >
                               {field.value
@@ -180,7 +177,7 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                                         "mr-2 h-4 w-4",
                                         ota.id === field.value
                                           ? "opacity-100"
-                                          : "opacity-0"
+                                          : "opacity-0",
                                       )}
                                     />
                                     {ota.name}

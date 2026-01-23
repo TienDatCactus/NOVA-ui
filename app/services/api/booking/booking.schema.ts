@@ -562,7 +562,7 @@ const AvailableRoomForChangeSchema = z.object({
   roomTypeId: z.string(),
   roomTypeName: z.string(),
   baseRate: z.number(),
-  availabilityStatus: z.string(),
+  availabilityStatus: z.enum(["Available", "SwapPossible", "Occupied"]),
   isSameRoomType: z.boolean(),
   conflictInfo: z
     .object({

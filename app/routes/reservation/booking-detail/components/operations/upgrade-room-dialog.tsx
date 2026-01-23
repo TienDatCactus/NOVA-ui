@@ -302,47 +302,98 @@ export function UpgradeRoomDialog({
                               const priceDiff =
                                 room.baseRate -
                                 (selectedBookingRoom?.baseRate || 0);
-                              const hasConflict = !!room.conflictInfo;
+
+                              // Xác định khả năng chọn dựa trên availabilityStatus
+                              const isAvailable =
+                                room.availabilityStatus === "Available";
+                              const isSwapPossible =
+                                room.availabilityStatus === "SwapPossible";
+                              const isOccupied =
+                                room.availabilityStatus === "Occupied";
+                              const isSelectable =
+                                isAvailable || isSwapPossible;
 
                               return (
                                 <div
                                   key={room.roomId}
                                   onClick={() => {
-                                    if (!hasConflict) {
+                                    if (isSelectable) {
                                       field.onChange(room.roomId);
                                     }
                                   }}
                                   className={cn(
                                     "rounded-xl border-2 p-4 transition-all relative overflow-hidden",
-                                    hasConflict
-                                      ? "cursor-not-allowed opacity-60 bg-muted/50 border-muted"
-                                      : "cursor-pointer hover:shadow-md",
-                                    !hasConflict && isSelected
+                                    // Occupied: không thể chọn
+                                    isOccupied &&
+                                      "cursor-not-allowed opacity-60 bg-muted/50 border-muted",
+                                    // SwapPossible: hiển thị cảnh báo nhưng vẫn cho chọn
+                                    isSwapPossible &&
+                                      "cursor-pointer hover:shadow-md border-amber-200 bg-amber-50/30",
+                                    // Available: bình thường
+                                    isAvailable &&
+                                      "cursor-pointer hover:shadow-md",
+                                    // Selected state
+                                    isSelectable && isSelected
                                       ? "border-primary bg-primary/5 ring-1 ring-primary"
-                                      : !hasConflict
+                                      : isSelectable && !isSelected
                                         ? "border-muted bg-card hover:border-primary/50"
                                         : "",
                                   )}
                                 >
-                                  {isSelected && !hasConflict && (
+                                  {/* Badge trạng thái - Checked/Warning/Error */}
+                                  {isSelected && isSelectable && (
                                     <div className="absolute top-0 right-0 bg-primary text-primary-foreground p-1 rounded-bl-xl">
                                       <Check className="h-3 w-3" />
                                     </div>
                                   )}
 
-                                  {hasConflict && (
+                                  {isSwapPossible && !isSelected && (
+                                    <div className="absolute top-0 right-0 bg-amber-500 text-white p-1 rounded-bl-xl">
+                                      <AlertCircle className="h-3 w-3" />
+                                    </div>
+                                  )}
+
+                                  {isOccupied && (
                                     <div className="absolute top-0 right-0 bg-destructive text-destructive-foreground p-1 rounded-bl-xl">
                                       <AlertCircle className="h-3 w-3" />
                                     </div>
                                   )}
 
                                   <div className="flex justify-between items-start mb-2">
-                                    <div>
+                                    <div className="flex-1">
                                       <div className="font-bold text-foreground">
                                         {room.roomName}
                                       </div>
                                       <div className="text-xs text-muted-foreground">
                                         {room.roomTypeName}
+                                      </div>
+
+                                      {/* Availability Status Badge */}
+                                      <div className="mt-1.5">
+                                        {isAvailable && (
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200"
+                                          >
+                                            ✓ Trống
+                                          </Badge>
+                                        )}
+                                        {isSwapPossible && (
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs bg-amber-50 text-amber-700 border-amber-300"
+                                          >
+                                            ⚠ Cần swap
+                                          </Badge>
+                                        )}
+                                        {isOccupied && (
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs bg-red-50 text-red-700 border-red-200"
+                                          >
+                                            ❌ Bị chiếm
+                                          </Badge>
+                                        )}
                                       </div>
                                     </div>
                                     <Badge
@@ -367,18 +418,68 @@ export function UpgradeRoomDialog({
                                       {formatMoney(room.baseRate).vndFormatted}
                                     </span>
                                     <span className="font-medium text-foreground">
-                                      {room.availabilityStatus === "Available"
-                                        ? "Có sẵn"
-                                        : "Đang giữ"}
+                                      {isAvailable && "✓ Có sẵn"}
+                                      {isSwapPossible && "⚠ Cần swap"}
+                                      {isOccupied && "❌ Không khả dụng"}
                                     </span>
                                   </div>
 
-                                  {hasConflict && room.conflictInfo && (
-                                    <div className="mt-2 pt-2 border-t border-destructive/30 flex items-start gap-2 text-xs text-destructive">
-                                      <AlertCircle className="h-3 w-3 shrink-0 mt-0.5" />
-                                      <span className="line-clamp-2">
-                                        {room.conflictInfo.message}
-                                      </span>
+                                  {/* Hiển thị conflict info - phân biệt giữa SwapPossible và Occupied */}
+                                  {room.conflictInfo && (
+                                    <div
+                                      className={cn(
+                                        "mt-2 pt-2 border-t flex items-start gap-2 text-xs",
+                                        isSwapPossible
+                                          ? "border-amber-200 bg-amber-50/50 -mx-4 -mb-4 px-4 pb-4 rounded-b-xl"
+                                          : "border-destructive/30 bg-red-50/50 -mx-4 -mb-4 px-4 pb-4 rounded-b-xl",
+                                      )}
+                                    >
+                                      <AlertCircle
+                                        className={cn(
+                                          "h-3 w-3 shrink-0 mt-0.5",
+                                          isSwapPossible
+                                            ? "text-amber-600"
+                                            : "text-destructive",
+                                        )}
+                                      />
+                                      <div className="flex-1">
+                                        <div
+                                          className={cn(
+                                            "font-medium",
+                                            isSwapPossible
+                                              ? "text-amber-800"
+                                              : "text-destructive",
+                                          )}
+                                        >
+                                          {isSwapPossible
+                                            ? "Cảnh báo: Cần swap booking"
+                                            : "Không thể đổi phòng"}
+                                        </div>
+                                        <div
+                                          className={cn(
+                                            "mt-0.5",
+                                            isSwapPossible
+                                              ? "text-amber-700"
+                                              : "text-destructive/90",
+                                          )}
+                                        >
+                                          Booking #
+                                          {room.conflictInfo.bookingCode} (
+                                          {room.conflictInfo.customerName ||
+                                            "Khách"}
+                                          )
+                                        </div>
+                                        <div
+                                          className={cn(
+                                            "text-[10px] opacity-80 mt-0.5",
+                                            isSwapPossible
+                                              ? "text-amber-700"
+                                              : "text-destructive/80",
+                                          )}
+                                        >
+                                          {room.conflictInfo.message}
+                                        </div>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
