@@ -287,6 +287,10 @@ export function CustomerInfoSection({ form }: CustomerInfoSectionProps) {
                           }
                           {...field}
                           value={field.value || ""}
+                          type="number"
+                          onChange={(e) =>
+                            field.onChange(e.currentTarget.value)
+                          }
                           placeholder="+84 912 345 678"
                         />
                       </FormControl>
