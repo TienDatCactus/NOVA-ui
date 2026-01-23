@@ -53,7 +53,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                       src={mainImage.url}
                       alt={
                         detailData.translations?.find(
-                          (t) => t.languageCode === "vi"
+                          (t) => t.languageCode === "vi",
                         )?.name ||
                         detailData.translations?.[0]?.name ||
                         ""
@@ -147,7 +147,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                       ? format(
                           new Date(detailData.createdAt),
                           " HH:mm dd/MM/yyyy",
-                          { locale: vi }
+                          { locale: vi },
                         )
                       : "N/A"}
                   </span>
@@ -164,7 +164,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                         {format(
                           new Date(detailData.updatedAt),
                           " HH:mm dd/MM/yyyy",
-                          { locale: vi }
+                          { locale: vi },
                         )}
                       </span>
                     </div>
@@ -214,7 +214,7 @@ export default function MenuDetailRow({ menuItem }: MenuDetailRowProps) {
                         </div>
                         <div className="text-right">
                           <span className="text-sm font-mono font-bold text-foreground bg-muted/30 px-2 py-1 rounded">
-                            x{comp.quantity}
+                            x{comp.quantity}.{comp.unitName}
                           </span>
                         </div>
                       </div>

@@ -16,6 +16,7 @@ const MenuItemComponentDetailSchema = z.object({
   menuItemId: z.string(),
   itemId: z.string(),
   itemName: z.string(),
+  unitName: z.string().optional().nullable(),
   quantity: z.number().nonnegative(),
   notes: z.string().nullish(),
 });
@@ -31,7 +32,7 @@ export const MenuItemDetailSchema = z.object({
         languageCode: z.string(),
         name: z.string(),
         description: z.string().optional().nullable(),
-      })
+      }),
     )
     .optional(),
   unitId: z.string().optional().nullable(),
@@ -48,7 +49,7 @@ export const MenuItemDetailSchema = z.object({
         caption: z.string().optional().nullable(),
         contentType: z.string(),
         displayOrder: z.number(),
-      })
+      }),
     )
     .optional(),
   components: z.array(MenuItemComponentDetailSchema),
@@ -63,7 +64,7 @@ export const MenuListItemSchema = z.object({
         languageCode: z.string(),
         name: z.string(),
         description: z.string().optional().nullable(),
-      })
+      }),
     )
     .optional(),
   imageUrls: z.array(z.string()),
@@ -78,7 +79,7 @@ export const MenuListByCategoryItemSchema = MenuItemDetailSchema;
 
 export const MenuListResponseSchema = z.array(MenuListItemSchema);
 export const MenuListByCategoryResponseSchema = z.array(
-  MenuListByCategoryItemSchema
+  MenuListByCategoryItemSchema,
 );
 
 export const CreateMenuItemRequestSchema = z.object({
@@ -89,7 +90,7 @@ export const CreateMenuItemRequestSchema = z.object({
     .max(50, "Mã SKU không được vượt quá 50 ký tự")
     .regex(
       /^[A-Z0-9-_]+$/,
-      "Mã SKU chỉ chứa chữ in hoa, số, dấu gạch ngang và gạch dưới"
+      "Mã SKU chỉ chứa chữ in hoa, số, dấu gạch ngang và gạch dưới",
     ),
   translations: z
     .array(
@@ -105,7 +106,7 @@ export const CreateMenuItemRequestSchema = z.object({
           .max(1000, "Mô tả không được vượt quá 1000 ký tự")
           .trim()
           .nullish(),
-      })
+      }),
     )
     .optional(),
   UnitId: z.string().min(1, "Vui lòng chọn đơn vị tính"),
@@ -133,7 +134,7 @@ export const CreateMenuItemRequestSchema = z.object({
           .string()
           .max(200, "Ghi chú không được vượt quá 200 ký tự")
           .nullish(),
-      })
+      }),
     )
     .max(50, "Không được thêm quá 50 nguyên liệu"),
 });
