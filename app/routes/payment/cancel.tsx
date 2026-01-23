@@ -11,7 +11,7 @@ export default function PaymentCancelPage() {
 
   const handleNavigate = () => {
     if (!context) {
-      navigate(-1);
+      navigate(-1); 
       return;
     }
 

@@ -28,7 +28,7 @@ interface AddServiceDialogProps {
   onAddService: (
     serviceId: string,
     itemType?: "ServiceItem" | "MenuItem",
-    quantity?: number
+    quantity?: number,
   ) => void;
   selectedServiceIds: string[];
   existingServices?: Array<{
@@ -45,17 +45,25 @@ export default function AddServiceDialog({
   onOpenChange,
   onAddService,
   selectedServiceIds,
+  existingServices,
 }: AddServiceDialogProps) {
   const [activeTab, setActiveTab] = useState<"services" | "menu">("services");
   const [searchText, setSearchText] = useState("");
   const [menuQuantities, setMenuQuantities] = useState<Record<string, number>>(
-    {}
+    {},
   );
   const [selectedMenuItems, setSelectedMenuItems] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
-  const getMenuQuantity = (itemId: string) => menuQuantities[itemId] ?? 1;
+  // Lấy quantity từ existingServices nếu có, nếu không thì lấy từ menuQuantities hoặc mặc định là 1
+  const getMenuQuantity = (itemId: string) => {
+    const existing = existingServices?.find(
+      (s) => s.itemId === itemId && s.itemType === "MenuItem",
+    );
+    if (existing) return existing.quantity;
+    return menuQuantities[itemId] ?? 1;
+  };
 
   const updateMenuQuantity = (itemId: string, quantity: number) => {
     setMenuQuantities((prev) => ({ ...prev, [itemId]: quantity }));
@@ -68,7 +76,7 @@ export default function AddServiceDialog({
     {
       includeInactive: filters.activeFilter !== "active",
       typeCode: filters.typeCode,
-    }
+    },
   );
 
   const { data: menuItems = [], isPending: isMenuLoading } = useMenuList();
@@ -154,7 +162,7 @@ export default function AddServiceDialog({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {filteredServices.map((service) => {
                     const isSelected = selectedServiceIds.includes(
-                      service.serviceItemId
+                      service.serviceItemId,
                     );
                     return (
                       <button
@@ -167,7 +175,7 @@ export default function AddServiceDialog({
                           "group relative flex items-start gap-4 rounded-xl border p-3 text-left transition-all duration-200 outline-none",
                           isSelected
                             ? "border-primary bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary))]"
-                            : "border-border bg-card hover:bg-muted/40 hover:border-primary/30"
+                            : "border-border bg-card hover:bg-muted/40 hover:border-primary/30",
                         )}
                       >
                         {/* Content Info */}
@@ -176,11 +184,11 @@ export default function AddServiceDialog({
                             <h4
                               className={cn(
                                 "font-semibold text-sm truncate pr-4",
-                                isSelected ? "text-primary" : "text-foreground"
+                                isSelected ? "text-primary" : "text-foreground",
                               )}
                             >
                               {service.translations?.find(
-                                (t) => t.languageCode === "vi"
+                                (t) => t.languageCode === "vi",
                               )?.name ||
                                 service.translations?.[0]?.name ||
                                 ""}
@@ -194,7 +202,7 @@ export default function AddServiceDialog({
 
                           <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">
                             {service.translations?.find(
-                              (t) => t.languageCode === "vi"
+                              (t) => t.languageCode === "vi",
                             )?.description ||
                               service.translations?.[0]?.description ||
                               "Không có mô tả chi tiết."}
@@ -257,7 +265,7 @@ export default function AddServiceDialog({
                           isSelected
                             ? "border-primary bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary))]"
                             : "border-border bg-card hover:bg-muted/40 hover:border-primary/30",
-                          !isAvailable ? "opacity-50" : ""
+                          !isAvailable ? "opacity-50" : "",
                         )}
                       >
                         <button
@@ -285,11 +293,11 @@ export default function AddServiceDialog({
                                   "font-semibold text-sm truncate pr-4",
                                   isSelected
                                     ? "text-primary"
-                                    : "text-foreground"
+                                    : "text-foreground",
                                 )}
                               >
                                 {menuItem.translations?.find(
-                                  (t) => t.languageCode === "vi"
+                                  (t) => t.languageCode === "vi",
                                 )?.name ||
                                   menuItem.translations?.[0]?.name ||
                                   ""}
@@ -305,7 +313,7 @@ export default function AddServiceDialog({
 
                             <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">
                               {menuItem.translations?.find(
-                                (t) => t.languageCode === "vi"
+                                (t) => t.languageCode === "vi",
                               )?.description ||
                                 menuItem.translations?.[0]?.description ||
                                 "Không có mô tả chi tiết."}
@@ -337,7 +345,7 @@ export default function AddServiceDialog({
                                 if (value > maxAvailable) {
                                   const name =
                                     menuItem.translations?.find(
-                                      (t) => t.languageCode === "vi"
+                                      (t) => t.languageCode === "vi",
                                     )?.name ||
                                     menuItem.translations?.[0]?.name ||
                                     "";
@@ -345,7 +353,7 @@ export default function AddServiceDialog({
                                     `Chỉ còn ${maxAvailable} ${name}`,
                                     {
                                       description: "Vượt quá số lượng khả dụng",
-                                    }
+                                    },
                                   );
                                   return;
                                 }
@@ -394,7 +402,7 @@ export default function AddServiceDialog({
                   let hasError = false;
                   selectedMenuItems.forEach((itemId) => {
                     const menuItem = filteredMenuItems.find(
-                      (m) => m.itemId === itemId
+                      (m) => m.itemId === itemId,
                     );
                     if (menuItem) {
                       const quantity = getMenuQuantity(itemId);
@@ -403,13 +411,13 @@ export default function AddServiceDialog({
                       if (quantity > maxAvailable) {
                         const name =
                           menuItem.translations?.find(
-                            (t) => t.languageCode === "vi"
+                            (t) => t.languageCode === "vi",
                           )?.name ||
                           menuItem.translations?.[0]?.name ||
                           "";
                         toast.error(
                           `${name}: Chỉ còn ${maxAvailable} khả dụng`,
-                          { description: "Vui lòng giảm số lượng." }
+                          { description: "Vui lòng giảm số lượng." },
                         );
                         hasError = true;
                       } else {
